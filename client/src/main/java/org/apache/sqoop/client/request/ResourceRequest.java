@@ -22,6 +22,7 @@ import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 import org.apache.hadoop.security.authentication.client.ConnectionConfigurator;
+import org.apache.hadoop.security.authentication.client.PseudoAuthenticator;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.log4j.Logger;
@@ -65,6 +66,8 @@ public class ResourceRequest {
     DataOutputStream wr = null;
     BufferedReader reader = null;
     try {
+//    This user name is only in simple mode. In Kerberos mode, this user name will be ignored by Sqoop server and user name in UGI which is authenticated by Kerberos server will be used instead.
+      strURL = addUsername(strURL);
       URL url = new URL(strURL);
       HttpURLConnection conn = new DelegationTokenAuthenticatedURL().openConnection(url, authToken);
 
@@ -219,5 +222,11 @@ public class ResourceRequest {
 
   public DelegationTokenAuthenticatedURL.Token getAuthToken() {
     return authToken;
+  }
+
+  private String addUsername(String strUrl) {
+    String paramSeparator = (strUrl.contains("?")) ? "&" : "?";
+    strUrl += paramSeparator + PseudoAuthenticator.USER_NAME + "=" + System.getProperty("user.name");
+    return strUrl;
   }
 }

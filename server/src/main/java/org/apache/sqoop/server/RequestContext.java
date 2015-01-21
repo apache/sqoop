@@ -18,7 +18,9 @@
 package org.apache.sqoop.server;
 
 import org.apache.hadoop.security.authentication.client.PseudoAuthenticator;
+import org.apache.hadoop.security.token.delegation.web.HttpUserGroupInformation;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.security.AuthenticationManager;
 import org.apache.sqoop.server.common.ServerError;
 
 import javax.servlet.http.HttpServletRequest;
@@ -67,7 +69,7 @@ public class RequestContext {
       return Method.valueOf(request.getMethod());
     } catch(IllegalArgumentException ex) {
       throw new SqoopException(ServerError.SERVER_0002,
-        "Unsupported HTTP method:" + request.getMethod(), ex);
+              "Unsupported HTTP method:" + request.getMethod(), ex);
     }
   }
 
@@ -119,6 +121,10 @@ public class RequestContext {
    * @return Name of user sending the request
    */
   public String getUserName() {
-    return request.getParameter(PseudoAuthenticator.USER_NAME);
+    if (AuthenticationManager.getAuthenticationHandler().isSecurityEnabled()) {
+      return HttpUserGroupInformation.get().getUserName();
+    } else {
+      return request.getParameter(PseudoAuthenticator.USER_NAME);
+    }
   }
 }
