@@ -76,12 +76,13 @@ public class AvroDataTypeUtil {
     assert type != Schema.Type.UNION;
     switch (type) {
       case INT:
+        return new FixedPoint(name, 4L, true);
       case LONG:
-        return new FixedPoint(name);
+        return new FixedPoint(name, 8L, true);
       case STRING:
         return new Text(name);
       case DOUBLE:
-        return new FloatingPoint(name);
+        return new FloatingPoint(name, 8L);
       case BOOLEAN:
         return new Bit(name);
       case BYTES:

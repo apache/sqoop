@@ -88,12 +88,12 @@ public class TestMatching {
     Schema from2 = new Schema("FROM-2");
     Schema to2 = new Schema("TO-2");
 
-    from1.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"))
+    from1.addColumn(new FixedPoint("1", 4L, true)).addColumn(new FloatingPoint("2", 8L))
         .addColumn(new org.apache.sqoop.schema.type.Text("3"));
-    to1.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"))
-      .addColumn(new org.apache.sqoop.schema.type.Text("3"));
-    from2.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"));
-    to2.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"));
+    to1.addColumn(new FixedPoint("1", 4L, true)).addColumn(new FloatingPoint("2", 8L))
+        .addColumn(new org.apache.sqoop.schema.type.Text("3"));
+    from2.addColumn(new FixedPoint("1", 4L, true)).addColumn(new FloatingPoint("2", 8L));
+    to2.addColumn(new FixedPoint("1", 4L, true)).addColumn(new FloatingPoint("2", 8L));
 
     parameters.add(new Object[]{
         emptyFrom,

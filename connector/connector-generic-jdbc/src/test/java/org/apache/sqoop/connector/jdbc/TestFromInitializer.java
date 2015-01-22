@@ -102,8 +102,8 @@ public class TestFromInitializer {
    */
   public Schema getSchema(String name) {
     return new Schema(name)
-      .addColumn(new FixedPoint("ICOL").setByteSize(4L))
-      .addColumn(new FloatingPoint("DCOL"))
+      .addColumn(new FixedPoint("ICOL", 4L, true))
+      .addColumn(new FloatingPoint("DCOL", 8L))
       .addColumn(new Text("VCOL"))
     ;
   }

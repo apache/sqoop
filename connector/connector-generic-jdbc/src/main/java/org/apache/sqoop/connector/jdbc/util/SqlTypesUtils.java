@@ -48,9 +48,13 @@ public class SqlTypesUtils {
     switch (sqlType) {
       case Types.SMALLINT:
       case Types.TINYINT:
-        return new FixedPoint(columnName).setByteSize(2L);
+        // only supports signed values
+        return new FixedPoint(columnName, 2L, true);
       case Types.INTEGER:
-        return new FixedPoint(columnName).setByteSize(4L);
+        // only supports signed values
+        return new FixedPoint(columnName, 4L, true);
+      case Types.BIGINT:
+        return new FixedPoint(columnName, 8L, true);
 
       case Types.CLOB:
       case Types.VARCHAR:
@@ -72,12 +76,13 @@ public class SqlTypesUtils {
 
       case Types.FLOAT:
       case Types.REAL:
+        return new FloatingPoint(columnName, 4L);
       case Types.DOUBLE:
-        return new FloatingPoint(columnName);
+        return new FloatingPoint(columnName, 8L);
 
+      //TODO:SQOOP-2027 The following mapping needs to be revisited
       case Types.NUMERIC:
       case Types.DECIMAL:
-      case Types.BIGINT:
         return new Decimal(columnName);
 
       case Types.BIT:

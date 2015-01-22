@@ -20,8 +20,12 @@ package org.apache.sqoop.connector.common;
 import static org.testng.Assert.*;
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.*;
 
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Array;
+import org.apache.sqoop.schema.type.Column;
+import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.testng.annotations.Test;
 
@@ -35,7 +39,8 @@ public class TestSqoopIDFUtils {
 
   public static String getByteFieldString(byte[] byteFieldData) {
     try {
-      return new StringBuilder("'").append(new String(byteFieldData, BYTE_FIELD_CHARSET)).append("'").toString();
+      return new StringBuilder("'").append(new String(byteFieldData, BYTE_FIELD_CHARSET))
+          .append("'").toString();
     } catch (UnsupportedEncodingException e) {
       // Should never get to this point because ISO-8859-1 is a standard codec.
       return null;
@@ -115,12 +120,14 @@ public class TestSqoopIDFUtils {
     assertEquals(toString, expectedString);
   }
 
+  @Test
   public void testExample5EncodeToCSVString() {
     String test = new String(new char[] { 0x0A });
     String encodedText = toCSVString(test);
     assertEquals(encodedText, "'\\n'");
   }
 
+  @Test
   public void testExample5ToString() {
     String test = "'\\n'";
     String expectedString = new String(new char[] { 0x0A });
@@ -128,10 +135,106 @@ public class TestSqoopIDFUtils {
     assertEquals(toString, expectedString);
   }
 
+  @Test
   public void testExample6EncodeToCSVString() {
     String test = new String(new char[] { 0x0D });
     String encodedText = toCSVString(test);
     assertEquals(encodedText, "'\\r'");
+  }
+
+  @Test
+  public void testToCSVFixedPointWithIntSignedAsInteger() {
+    Column col = new FixedPoint("ft", 2L, true);
+    String encodedText = toCSVFixedPoint(1, col);
+    assertTrue(Integer.valueOf(encodedText) instanceof Integer);
+  }
+
+  @Test
+  public void testToCSVFixedPointWithIntSize4SignedAsInteger() {
+    Column col = new FixedPoint("ft", 4L, true);
+    String encodedText = toCSVFixedPoint(1, col);
+    assertTrue(Integer.valueOf(encodedText) instanceof Integer);
+  }
+
+  @Test(expectedExceptions = Exception.class)
+  public void testToCSVFixedPointWithLongSignedAsInteger() {
+    Column col = new FixedPoint("ft", 4L, true);
+    Long test = 459999999444L;
+    String encodedText = toCSVFixedPoint(test, col);
+    // should be a long
+    assertTrue(Integer.valueOf(encodedText) instanceof Integer);
+  }
+
+  @Test
+  public void testToCSVFixedPointWithIntSize2UnSignedAsInteger() {
+    Column col = new FixedPoint("ft", 2L, false);
+    Integer test = 45999999;
+    String encodedText = toCSVFixedPoint(test, col);
+    assertTrue(Integer.valueOf(encodedText) instanceof Integer);
+  }
+
+  @Test
+  public void testToCSVFixedPointWithIntSize16UnSignedAsLong() {
+    Column col = new FixedPoint("ft", 16L, false);
+    Long test = 1000000000L;
+    String encodedText = toCSVFixedPoint(test, col);
+    assertTrue(Long.valueOf(encodedText) instanceof Long);
+  }
+
+  @Test
+  public void testToCSVFixedPointWithIntUnSignedAsLong() {
+    Column col = new FixedPoint("ft", 4L, false);
+    // java does not have a concept of unsigned int, so it has to be a long for
+    // testing
+    long test = 100000000900000L;
+    String encodedText = toCSVFixedPoint(test, col);
+    assertTrue(Long.valueOf(encodedText) instanceof Long);
+  }
+
+  @Test
+  public void testToFixedPointReturnsInt() {
+    Column col = new FixedPoint("fixt", 4L, true);
+    assertTrue(toFixedPoint("233", col) instanceof Integer);
+  }
+
+  @Test
+  public void testToFixedPointReturnsLong() {
+    Column col = new FixedPoint("fixt", 8L, true);
+    assertTrue(toFixedPoint("233", col) instanceof Long);
+  }
+
+  @Test
+  public void testToFixedPointUnsignedReturnsLong() {
+    Column col = new FixedPoint("fixt", 4L, false);
+    assertTrue(toFixedPoint("2333333333333333", col) instanceof Long);
+  }
+
+  @Test
+  public void testToCSVFloatingPointAsFloat() {
+    Column col = new FloatingPoint("ft", 2L);
+    Float test = 2.3F;
+    String encodedText = toCSVFloatingPoint(test, col);
+    assertTrue(Float.valueOf(encodedText) instanceof Float);
+  }
+
+  @Test
+  public void testToFloatingPointReturnsFloat() {
+    Column col = new FloatingPoint("ft", 4L);
+    assertTrue(toFloatingPoint("2.33", col) instanceof Float);
+  }
+
+  @Test
+  public void testToCSVFloatingPointAsDouble() {
+    Column col = new FloatingPoint("ft", 5L);
+    Double test = 2.3D;
+    String encodedText = toCSVFloatingPoint(test, col);
+    assertTrue(Double.valueOf(encodedText) instanceof Double);
+  }
+
+  @Test
+  public void testToFloatingPointReturnsDouble() {
+    Column col = new FloatingPoint("ft", 8L);
+    assertTrue(toFloatingPoint("2.33", col) instanceof Double);
   }
 
   @Test
@@ -170,23 +273,22 @@ public class TestSqoopIDFUtils {
     list.add("B");
     Map<Object, Object> map = new HashMap<Object, Object>();
     map.put("A", list);
-    org.apache.sqoop.schema.type.Map mapCol = new org.apache.sqoop.schema.type.Map("a", new Text("t"), new Array("r", new Text(
-        "tr")));
+    org.apache.sqoop.schema.type.Map mapCol = new org.apache.sqoop.schema.type.Map("a", new Text(
+        "t"), new Array("r", new Text("tr")));
     String encodedText = toCSVMap(map, mapCol);
     assertEquals(encodedText, "'{\"A\":[\"A\",\"B\"]}'");
   }
-  
+
   @Test
   public void testParseCSVString() {
 
-    String csv= "'hello, world','34',45";
+    String csv = "'hello, world','34',45";
     String[] arr = parseCSVString(csv);
     assertEquals(arr.length, 3);
     assertEquals(arr[0], "'hello, world'");
     assertEquals(arr[1], "'34'");
     assertEquals(arr[2], "45");
-    
-  }
 
+  }
 
 }

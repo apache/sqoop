@@ -70,7 +70,7 @@ public class MRJobTestUtil {
 
   public static Schema getTestSchema() {
     Schema schema = new Schema("Test");
-    schema.addColumn(new FixedPoint("1").setByteSize(2L)).addColumn(new FloatingPoint("2"))
+    schema.addColumn(new FixedPoint("1", 4L, true)).addColumn(new FloatingPoint("2", 8L))
         .addColumn(new Text("3"));
     return schema;
   }

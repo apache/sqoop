@@ -97,9 +97,21 @@ public class SqoopIDFUtils {
 
   // ******** Number Column Type utils***********
 
-  public static String toCSVFixedPoint(Object obj, Column column) {
+  public static boolean isInteger(Column column) {
     Long byteSize = ((FixedPoint) column).getByteSize();
-    if (byteSize != null && byteSize <= Integer.SIZE) {
+    Boolean signed = ((FixedPoint) column).isSigned();
+
+    if (byteSize == null) {
+      return false;
+    }
+    if (signed != null && !signed) {
+      byteSize *= 2;
+    }
+    return byteSize <= (Integer.SIZE / Byte.SIZE);
+  }
+
+  public static String toCSVFixedPoint(Object obj, Column column) {
+    if (isInteger(column)) {
       return ((Integer) obj).toString();
     } else {
       return ((Long) obj).toString();
@@ -108,8 +120,7 @@ public class SqoopIDFUtils {
 
   public static Object toFixedPoint(String csvString, Column column) {
     Object returnValue;
-    Long byteSize = ((FixedPoint) column).getByteSize();
-    if (byteSize != null && byteSize <= Integer.SIZE) {
+    if (isInteger(column)) {
       returnValue = Integer.valueOf(csvString);
     } else {
       returnValue = Long.valueOf(csvString);
@@ -119,7 +130,7 @@ public class SqoopIDFUtils {
 
   public static String toCSVFloatingPoint(Object obj, Column column) {
     Long byteSize = ((FloatingPoint) column).getByteSize();
-    if (byteSize != null && byteSize <= Float.SIZE) {
+    if (byteSize != null && byteSize <= (Float.SIZE/Byte.SIZE)) {
       return ((Float) obj).toString();
     } else {
       return ((Double) obj).toString();
@@ -129,7 +140,7 @@ public class SqoopIDFUtils {
   public static Object toFloatingPoint(String csvString, Column column) {
     Object returnValue;
     Long byteSize = ((FloatingPoint) column).getByteSize();
-    if (byteSize != null && byteSize <= Float.SIZE) {
+    if (byteSize != null && byteSize <= (Float.SIZE/Byte.SIZE)) {
       returnValue = Float.valueOf(csvString);
     } else {
       returnValue = Double.valueOf(csvString);

@@ -100,7 +100,7 @@ public class TestExtractor {
     Schema schema = new Schema("TestExtractor");
     // dummy columns added, all we need is the column count to match to the
     // result set
-    schema.addColumn(new FixedPoint("c1")).addColumn(new Decimal("c2")).addColumn(new Text("c3")).addColumn(new Date("c4"));
+    schema.addColumn(new FixedPoint("c1",2L, true)).addColumn(new Decimal("c2")).addColumn(new Text("c3")).addColumn(new Date("c4"));
 
     ExtractorContext extractorContext = new ExtractorContext(context, writer, schema);
 
@@ -140,7 +140,7 @@ public class TestExtractor {
     Schema schema = new Schema("TestExtractor");
     // dummy columns added, all we need is the column count to match to the
     // result set
-    schema.addColumn(new FixedPoint("c1")).addColumn(new Text("c2")).addColumn(new Date("c3"));
+    schema.addColumn(new FixedPoint("c1", 2L, true)).addColumn(new Text("c2")).addColumn(new Date("c3"));
 
     ExtractorContext extractorContext = new ExtractorContext(context, writer, schema);
 

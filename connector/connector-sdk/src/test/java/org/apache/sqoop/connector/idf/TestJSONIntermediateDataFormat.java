@@ -60,22 +60,22 @@ public class TestJSONIntermediateDataFormat {
   private void createJSONIDF() {
     Schema schema = new Schema("test");
     schema
-        .addColumn(new FixedPoint("1"))
-        .addColumn(new FixedPoint("2", 2L, false))
+        .addColumn(new FixedPoint("1", 8L, true))
+        .addColumn(new FixedPoint("2", 4L, true))
         .addColumn(new Text("3"))
         .addColumn(new Text("4"))
         .addColumn(new Binary("5"))
         .addColumn(new Text("6"))
         .addColumn(new org.apache.sqoop.schema.type.Enum("7"))
-        .addColumn(new Array("8", new Array("array", new FixedPoint("ft"))))
+        .addColumn(new Array("8", new Array("array", new FixedPoint("ft", 2L, false))))
         .addColumn(new org.apache.sqoop.schema.type.Map("9", new Text("t1"), new Text("t2")))
         .addColumn(new Bit("10"))
         .addColumn(new org.apache.sqoop.schema.type.DateTime("11", true, false))
         .addColumn(new org.apache.sqoop.schema.type.Time("12", false))
         .addColumn(new org.apache.sqoop.schema.type.Date("13"))
-        .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("14"))
+        .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("14", 4L))
         .addColumn(
-            new org.apache.sqoop.schema.type.Set("15", new Array("set", new FixedPoint("ftw"))));
+            new org.apache.sqoop.schema.type.Set("15", new Array("set", new FixedPoint("ftw", 2L, false))));
     dataFormat = new JSONIntermediateDataFormat(schema);
   }
 
@@ -151,7 +151,7 @@ public class TestJSONIntermediateDataFormat {
     assertEquals(dateTime, out[10]);
     assertEquals(time, out[11]);
     assertEquals(date, out[12]);
-    assertEquals(13.44, out[13]);
+    assertEquals(13.44f, out[13]);
     assertEquals(set.length, 2);
     assertEquals(Arrays.deepToString(set), Arrays.deepToString((Object[]) out[14]));
 
@@ -202,7 +202,7 @@ public class TestJSONIntermediateDataFormat {
     json.put("11", SqoopIDFUtils.removeQuotes(dateTime));
     json.put("12", SqoopIDFUtils.removeQuotes(time));
     json.put("13", SqoopIDFUtils.removeQuotes(date));
-    json.put("14", 13.44);
+    json.put("14", 13.44f);
 
     JSONArray givenSetOne = new JSONArray();
     givenSetOne.add(11);
@@ -282,7 +282,7 @@ public class TestJSONIntermediateDataFormat {
 
     out[12] = date;
 
-    out[13] = 13.44;
+    out[13] = 13.44f;
     Object[] set0 = new Object[2];
     set0[0] = 11;
     set0[1] = 12;

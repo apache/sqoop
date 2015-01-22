@@ -32,13 +32,10 @@ public class FloatingPoint extends AbstractNumber {
   /**
   This field will come handy in connector that might require to use the
   size information on the schema object to do additional type mappings in their source
-  Read more infomration : https://issues.apache.org/jira/secure/attachment/12589331/Sqoop2Datatypes.pdf
+  Read more information : https://issues.apache.org/jira/secure/attachment/12589331/Sqoop2Datatypes.pdf
   */
   private Long byteSize;
 
-  public FloatingPoint(String name) {
-    super(name);
-  }
   public FloatingPoint(String name, Long byteSize) {
     super(name);
     this.byteSize = byteSize;
@@ -51,11 +48,6 @@ public class FloatingPoint extends AbstractNumber {
 
   public Long getByteSize() {
     return byteSize;
-  }
-
-  public FloatingPoint setByteSize(Long byteSize) {
-    this.byteSize = byteSize;
-    return this;
   }
 
   @Override

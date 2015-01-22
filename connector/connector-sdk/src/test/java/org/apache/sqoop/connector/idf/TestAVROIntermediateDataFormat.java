@@ -79,22 +79,22 @@ public class TestAVROIntermediateDataFormat {
     options.add("NUME");
     enumCol = new org.apache.sqoop.schema.type.Enum("seven").setOptions(options);
     sqoopSchema
-        .addColumn(new FixedPoint("one"))
-        .addColumn(new FixedPoint("two", 2L, false))
+        .addColumn(new FixedPoint("one", 8L, true))
+        .addColumn(new FixedPoint("two", 2L, true))
         .addColumn(new Text("three"))
         .addColumn(new Text("four"))
         .addColumn(new Binary("five"))
         .addColumn(new Text("six"))
         .addColumn(enumCol)
-        .addColumn(new Array("eight", new Array("array", new FixedPoint("ft"))))
+        .addColumn(new Array("eight", new Array("array", new FixedPoint("ft",2L, false))))
         .addColumn(new org.apache.sqoop.schema.type.Map("nine", new Text("t1"), new Text("t2")))
         .addColumn(new Bit("ten"))
         .addColumn(new org.apache.sqoop.schema.type.DateTime("eleven", true, false))
         .addColumn(new org.apache.sqoop.schema.type.Time("twelve", false))
         .addColumn(new org.apache.sqoop.schema.type.Date("thirteen"))
-        .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("fourteen"))
+        .addColumn(new org.apache.sqoop.schema.type.FloatingPoint("fourteen", 4L))
         .addColumn(
-            new org.apache.sqoop.schema.type.Set("fifteen", new Array("set", new FixedPoint("ftw"))));
+            new org.apache.sqoop.schema.type.Set("fifteen", new Array("set", new FixedPoint("ftw", 2L, false))));
     dataFormat = new AVROIntermediateDataFormat(sqoopSchema);
     avroSchema = SqoopAvroUtils.createAvroSchema(sqoopSchema);
   }
@@ -165,7 +165,7 @@ public class TestAVROIntermediateDataFormat {
     assertEquals(dateTime, out[10]);
     assertEquals(time, out[11]);
     assertEquals(date, out[12]);
-    assertEquals(13.44, out[13]);
+    assertEquals(13.44f, out[13]);
     assertEquals(set.length, 2);
     assertEquals(Arrays.deepToString(set), Arrays.deepToString((Object[]) out[14]));
 
@@ -215,7 +215,7 @@ public class TestAVROIntermediateDataFormat {
     avroObject.put("eleven", dateTime.toDate().getTime());
     avroObject.put("twelve", time.toDateTimeToday().getMillis());
     avroObject.put("thirteen", date.toDate().getTime());
-    avroObject.put("fourteen", 13.44);
+    avroObject.put("fourteen", 13.44f);
     List<Object> givenSetOne = new ArrayList<Object>();
     givenSetOne.add(11);
     givenSetOne.add(12);
@@ -288,7 +288,7 @@ public class TestAVROIntermediateDataFormat {
     out[11] = time;
     out[12] = date;
 
-    out[13] = 13.44;
+    out[13] = 13.44f;
     Object[] set0 = new Object[2];
     set0[0] = 11;
     set0[1] = 12;

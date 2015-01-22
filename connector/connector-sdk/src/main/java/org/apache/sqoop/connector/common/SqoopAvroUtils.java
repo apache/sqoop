@@ -94,14 +94,14 @@ public class SqoopAvroUtils {
       return createEnumSchema(column);
     case FIXED_POINT:
       Long byteSize = ((FixedPoint) column).getByteSize();
-      if (byteSize != null && byteSize <= Integer.SIZE) {
+      if (SqoopIDFUtils.isInteger(column)) {
         return Schema.create(Schema.Type.INT);
       } else {
         return Schema.create(Schema.Type.LONG);
       }
     case FLOATING_POINT:
       byteSize = ((FloatingPoint) column).getByteSize();
-      if (byteSize != null && byteSize <= Float.SIZE) {
+      if (byteSize != null && byteSize <= (Float.SIZE/Byte.SIZE)) {
         return Schema.create(Schema.Type.FLOAT);
       } else {
         return Schema.create(Schema.Type.DOUBLE);

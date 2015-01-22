@@ -80,7 +80,7 @@ public class SchemaSerialization {
   private static final String TIMEZONE = "timezone";
   private static final String PRECISION = "precision";
   private static final String SCALE = "scale";
-  private static final String UNSIGNED = "unsigned";
+  private static final String SIGNED = "signed";
   private static final String JDBC_TYPE = "jdbc-type";
 
   @SuppressWarnings("unchecked")
@@ -166,7 +166,7 @@ public class SchemaSerialization {
       break;
     case FIXED_POINT:
       ret.put(BYTE_SIZE, ((FixedPoint) column).getByteSize());
-      ret.put(UNSIGNED, ((FixedPoint) column).getUnsigned());
+      ret.put(SIGNED, ((FixedPoint) column).isSigned());
       break;
     case FLOATING_POINT:
       ret.put(BYTE_SIZE, ((FloatingPoint) column).getByteSize());
@@ -251,13 +251,13 @@ public class SchemaSerialization {
       output = new Enum(name, options);
       break;
     case FIXED_POINT:
-      Boolean unsigned = (Boolean) obj.get(UNSIGNED);
+      Boolean signed = (Boolean) obj.get(SIGNED);
       Long fixedPointByteSize = (Long) obj.get(BYTE_SIZE);
-      output = new FixedPoint(name).setByteSize(fixedPointByteSize).setUnsigned(unsigned);
+      output = new FixedPoint(name, fixedPointByteSize, signed);
       break;
     case FLOATING_POINT:
       Long floatingPointByteSize = (Long) obj.get(BYTE_SIZE);
-      output = new FloatingPoint(name).setByteSize(floatingPointByteSize);
+      output = new FloatingPoint(name, floatingPointByteSize);
       break;
     case MAP:
       output = new Map(name, key, value);

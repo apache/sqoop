@@ -41,40 +41,26 @@ public class FixedPoint extends AbstractNumber {
    */
   private Long byteSize;
 
-  private Boolean unsigned;
+  private Boolean signed;
 
-  public FixedPoint(String name) {
-    super(name);
-  }
-
-  public FixedPoint(String name, Long byteSize, Boolean unsigned) {
+  public FixedPoint(String name, Long byteSize, Boolean signed) {
     super(name);
     this.byteSize = byteSize;
-    this.unsigned = unsigned;
+    this.signed = signed;
   }
 
-  public FixedPoint(String name, Boolean nullable, Long byteSize, Boolean unsigned) {
+  public FixedPoint(String name, Boolean nullable, Long byteSize, Boolean signed) {
     super(name, nullable);
     this.byteSize = byteSize;
-    this.unsigned = unsigned;
+    this.signed = signed;
   }
 
   public Long getByteSize() {
     return byteSize;
   }
 
-  public FixedPoint setByteSize(Long byteSize) {
-    this.byteSize = byteSize;
-    return this;
-  }
-
-  public Boolean getUnsigned() {
-    return unsigned;
-  }
-
-  public FixedPoint setUnsigned(Boolean unsigned) {
-    this.unsigned = unsigned;
-    return this;
+  public Boolean isSigned() {
+    return signed;
   }
 
   @Override
@@ -87,7 +73,7 @@ public class FixedPoint extends AbstractNumber {
     return new StringBuilder("FixedPoint{")
       .append(super.toString())
       .append(",byteSize=").append(byteSize)
-      .append(",unsigned=").append(unsigned)
+      .append(",signed=").append(signed)
       .append("}")
       .toString();
   }
@@ -102,7 +88,7 @@ public class FixedPoint extends AbstractNumber {
 
     if (byteSize != null ? !byteSize.equals(that.byteSize) : that.byteSize != null)
       return false;
-    if (unsigned != null ? !unsigned.equals(that.unsigned) : that.unsigned != null)
+    if (signed != null ? !signed.equals(that.signed) : that.signed != null)
       return false;
 
     return true;
@@ -112,7 +98,7 @@ public class FixedPoint extends AbstractNumber {
   public int hashCode() {
     int result = super.hashCode();
     result = 31 * result + (byteSize != null ? byteSize.hashCode() : 0);
-    result = 31 * result + (unsigned != null ? unsigned.hashCode() : 0);
+    result = 31 * result + (signed != null ? signed.hashCode() : 0);
     return result;
   }
 }
