@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import static org.testng.AssertJUnit.assertNull;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -42,6 +43,7 @@ import static org.testng.Assert.fail;
 public class TestExtractor {
 
   private final String tableName;
+  private final String nullDataTableName;
 
   private GenericJdbcExecutor executor;
 
@@ -52,6 +54,7 @@ public class TestExtractor {
 
   public TestExtractor() {
     tableName = getClass().getSimpleName().toUpperCase();
+   nullDataTableName = getClass().getSimpleName().toUpperCase() + "NULL";
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -174,14 +177,50 @@ public class TestExtractor {
         "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL FROM " + "(SELECT * FROM "
             + executor.delimitIdentifier(tableName) + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS");
 
-    GenericJdbcPartition partition;
+    GenericJdbcPartition partition = new GenericJdbcPartition();
 
     Extractor extractor = new GenericJdbcExtractor();
     DummyWriter writer = new DummyWriter();
     Schema schema = new Schema("TestIncorrectColumns");
     ExtractorContext extractorContext = new ExtractorContext(context, writer, schema);
 
-    partition = new GenericJdbcPartition();
+    partition.setConditions("-50 <= ICOL AND ICOL < -16");
+    extractor.extract(extractorContext, linkConfig, jobConfig, partition);
+
+  }
+
+  @Test
+  public void testNullValueExtracted() throws Exception {
+
+    if (!executor.existTable(nullDataTableName)) {
+      executor.executeUpdate("CREATE TABLE " + executor.delimitIdentifier(nullDataTableName)
+          + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20), DATECOL DATE)");
+
+      for (int i = 0; i < NUMBER_OF_ROWS; i++) {
+        int value = i;
+        String sql = "INSERT INTO " + executor.delimitIdentifier(nullDataTableName) + " VALUES(" + value + ",null,null,null)";
+        executor.executeUpdate(sql);
+      }
+    }
+    MutableContext context = new MutableMapContext();
+
+    LinkConfiguration linkConfig = new LinkConfiguration();
+
+    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
+
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL,
+        "SELECT * FROM " + executor.delimitIdentifier(nullDataTableName) + " WHERE ${CONDITIONS}");
+
+    Extractor extractor = new GenericJdbcExtractor();
+    DummyNullDataWriter writer = new DummyNullDataWriter();
+    Schema schema = new Schema("TestExtractor");
+    schema.addColumn(new FixedPoint("c1",2L, true)).addColumn(new Decimal("c2")).addColumn(new Text("c3")).addColumn(new Date("c4"));
+
+    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema);
+
+    GenericJdbcPartition partition = new GenericJdbcPartition();
     partition.setConditions("-50 <= ICOL AND ICOL < -16");
     extractor.extract(extractorContext, linkConfig, jobConfig, partition);
 
@@ -207,6 +246,29 @@ public class TestExtractor {
       }
       indx++;
       assertEquals(true, parsedDate);
+    }
+
+    @Override
+    public void writeStringRecord(String text) {
+      fail("This method should not be invoked.");
+    }
+
+    @Override
+    public void writeRecord(Object content) {
+      fail("This method should not be invoked.");
+    }
+  }
+
+  public class DummyNullDataWriter extends DataWriter {
+
+    @Override
+    public void writeArrayRecord(Object[] array) {
+      for (int i = 0; i < array.length; i++) {
+        // primary key cant be null
+        if (i > 0) {
+          assertNull(array[i]);
+        }
+      }
     }
 
     @Override

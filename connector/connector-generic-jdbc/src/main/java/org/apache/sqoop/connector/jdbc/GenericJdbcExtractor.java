@@ -20,7 +20,6 @@ package org.apache.sqoop.connector.jdbc;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
@@ -68,12 +67,12 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
       while (resultSet.next()) {
         Object[] array = new Object[columnCount];
         for (int i = 0; i < columnCount; i++) {
-          // check type of the column
-          Column schemaColumn = schemaColumns[i];
           if(resultSet.getObject(i + 1) == null) {
-            array[i] = GenericJdbcConnectorConstants.SQL_NULL_VALUE ;
+            array[i] = null ;
             continue;
           }
+          // check type of the column
+          Column schemaColumn = schemaColumns[i];
           switch (schemaColumn.getType()) {
           case DATE:
             // convert the sql date to JODA time as prescribed the Sqoop IDF spec
