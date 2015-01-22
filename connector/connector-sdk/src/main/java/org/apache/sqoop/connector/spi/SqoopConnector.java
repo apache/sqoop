@@ -85,7 +85,7 @@ public abstract class SqoopConnector {
   /**
    * Returns an {@linkplain ConnectorConfigurableUpgrader} object that can upgrade the
    * configs related to the link and job
-   * @return RespositoryUpgrader object
+   * @return ConnectorConfigurableUpgrader object
    */
   public abstract ConnectorConfigurableUpgrader getConfigurableUpgrader();
 

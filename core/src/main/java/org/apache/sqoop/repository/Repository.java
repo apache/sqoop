@@ -77,7 +77,7 @@ public abstract class Repository {
    *
    * @return Boolean values if internal structures are suitable for use
    */
-  public abstract boolean isRespositorySuitableForUse();
+  public abstract boolean isRepositorySuitableForUse();
 
   /**
    * Registers given connector in the repository and return registered
@@ -382,7 +382,7 @@ public abstract class Repository {
    */
   protected abstract void deleteLinkInputs(long linkId, RepositoryTransaction tx);
 
-  private void deletelinksAndJobs(List<MLink> links, List<MJob> jobs, RepositoryTransaction tx) {
+  private void deletelinksAndJobInputs(List<MLink> links, List<MJob> jobs, RepositoryTransaction tx) {
     for (MJob job : jobs) {
       deleteJobInputs(job.getPersistenceId(), tx);
     }
@@ -391,7 +391,7 @@ public abstract class Repository {
     }
   }
 
-  private void deleteJobs(List<MJob> jobs, RepositoryTransaction tx) {
+  private void deleteJobInputsOnly(List<MJob> jobs, RepositoryTransaction tx) {
     for (MJob job : jobs) {
       deleteJobInputs(job.getPersistenceId(), tx);
     }
@@ -432,7 +432,7 @@ public abstract class Repository {
       tx.begin();
       // 4. Delete the inputs for all of the jobs and links (in that order) for
       // this connector
-      deletelinksAndJobs(existingLinksByConnector, existingJobsByConnector, tx);
+      deletelinksAndJobInputs(existingLinksByConnector, existingJobsByConnector, tx);
       // 5. Delete all inputs and configs associated with the connector, and
       // insert the new configs and inputs for this connector
       upgradeConnectorAndConfigs(newConnector, tx);
@@ -563,7 +563,7 @@ public abstract class Repository {
       tx = getTransaction();
       tx.begin();
       //3. delete all jobs in the system
-      deleteJobs(existingJobs, tx);
+      deleteJobInputsOnly(existingJobs, tx);
       // 4. Delete all inputs and configs associated with the driver, and
       // insert the new configs and inputs for this driver
       upgradeDriverAndConfigs(driver, tx);

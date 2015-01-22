@@ -125,7 +125,7 @@ public class RepositoryManager implements Reconfigurable {
 
     // NOTE: There are scenarios where a repository upgrade/ changes may happen outside of the
     // server bootup lifecyle. Hence always check/ verify for the repository sanity before marking the repo manager ready
-    if(!provider.getRepository().isRespositorySuitableForUse()) {
+    if(!provider.getRepository().isRepositorySuitableForUse()) {
       throw new SqoopException(RepositoryError.REPO_0002);
     }
 

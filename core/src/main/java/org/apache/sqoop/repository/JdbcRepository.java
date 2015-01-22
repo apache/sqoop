@@ -138,7 +138,7 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public boolean isRespositorySuitableForUse() {
+  public boolean isRepositorySuitableForUse() {
     return (Boolean) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {

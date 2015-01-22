@@ -99,7 +99,7 @@ public abstract class JdbcRepositoryHandler {
    * @param conn JDBC link for querying repository
    */
 
-  public abstract void upgradeConnectorAndConfigs(MConnector mConnector, Connection conn);
+  protected abstract void upgradeConnectorAndConfigs(MConnector mConnector, Connection conn);
 
   /**
    * Upgrade the driver with the new data supplied in the
@@ -114,7 +114,7 @@ public abstract class JdbcRepositoryHandler {
    *                     the driverConfig.
    * @param conn JDBC link for querying repository
    */
-  public abstract void upgradeDriverAndConfigs(MDriver mDriver, Connection conn);
+  protected abstract void upgradeDriverAndConfigs(MDriver mDriver, Connection conn);
 
   /**
    * Search for driver in the repository.
@@ -235,7 +235,7 @@ public abstract class JdbcRepositoryHandler {
    * @param linkId Link object whose inputs should be removed from repository
    * @param conn Connection to the repository
    */
-  public abstract void deleteLinkInputs(long linkId, Connection conn);
+  protected abstract void deleteLinkInputs(long linkId, Connection conn);
 
   /**
    * Find link with given id in repository.
@@ -316,7 +316,7 @@ public abstract class JdbcRepositoryHandler {
    * @param id Job object whose inputs should be removed from repository
    * @param conn Connection to the repository
    */
-  public abstract void deleteJobInputs(long id, Connection conn);
+  protected abstract void deleteJobInputs(long id, Connection conn);
   /**
    * Delete job with given id from the repository. This method will
    * delete all inputs for this job also.

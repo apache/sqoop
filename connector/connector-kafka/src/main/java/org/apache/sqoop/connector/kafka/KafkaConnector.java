@@ -104,7 +104,7 @@ public class KafkaConnector extends SqoopConnector {
    * Returns an {@linkplain org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader} object that can upgrade the
    * configs related to the link and job
    *
-   * @return RespositoryUpgrader object
+   * @return ConnectorConfigurableUpgrader object
    */
   @Override
   public ConnectorConfigurableUpgrader getConfigurableUpgrader() {
