@@ -85,9 +85,9 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
       rsmt = rs.getMetaData();
       for (int i = 1 ; i <= rsmt.getColumnCount(); i++) {
-        String columnName = rsmt.getColumnName(i);
+        String columnName = rsmt.getColumnLabel(i);
         if (StringUtils.isEmpty(columnName)) {
-          columnName = rsmt.getColumnLabel(i);
+          columnName = rsmt.getColumnName(i);
           if (StringUtils.isEmpty(columnName)) {
             columnName = "Column " + i;
           }

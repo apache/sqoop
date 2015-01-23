@@ -74,7 +74,7 @@ Inputs associated with the Job configuration for the FROM direction include:
 |                             |         | *Optional*. See note below.                                             |                                             |
 +-----------------------------+---------+-------------------------------------------------------------------------+---------------------------------------------+
 | Table SQL statement         | String  | The SQL statement used to perform a **free form query**.                | ``SELECT COUNT(*) FROM test ${CONDITIONS}`` |
-|                             |         | *Optional*. See note below.                                             |                                             |
+|                             |         | *Optional*. See notes below.                                             |                                             |
 +-----------------------------+---------+-------------------------------------------------------------------------+---------------------------------------------+
 | Table column names          | String  | Columns to extract from the JDBC data source.                           | col1,col2                                   |
 |                             |         | *Optional* Comma separated list of columns.                             |                                             |
@@ -94,6 +94,7 @@ Inputs associated with the Job configuration for the FROM direction include:
 
 1. *Table name* and *Table SQL statement* are mutually exclusive. If *Table name* is provided, the *Table SQL statement* should not be provided. If *Table SQL statement* is provided then *Table name* should not be provided.
 2. *Table column names* should be provided only if *Table name* is provided.
+3. If there are columns with similar names, column aliases are required. For example: ``SELECT table1.id as "i", table2.id as "j" FROM table1 INNER JOIN table2 ON table1.id = table2.id``.
 
 **TO Job Configuration**
 ++++++++++++++++++++++++

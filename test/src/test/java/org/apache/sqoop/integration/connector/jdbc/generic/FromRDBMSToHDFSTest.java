@@ -122,4 +122,102 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     // Clean up testing table
     dropTable();
   }
+
+  @Test
+  public void testSql() throws Exception {
+    createAndLoadTableCities();
+
+    // RDBMS link
+    MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
+    fillRdbmsLinkConfig(rdbmsLink);
+    saveLink(rdbmsLink);
+
+    // HDFS link
+    MLink hdfsLink = getClient().createLink("hdfs-connector");
+    saveLink(hdfsLink);
+
+    // Job creation
+    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+
+    // Connector values
+    MConfigList configs = job.getJobConfig(Direction.FROM);
+    configs.getStringInput("fromJobConfig.sql").setValue("SELECT " + provider.escapeColumnName("id")
+        + " FROM " + provider.escapeTableName(getTableName()) + " WHERE ${CONDITIONS}");
+    configs.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+    saveJob(job);
+
+    MSubmission submission = getClient().startJob(job.getPersistenceId());
+    assertTrue(submission.getStatus().isRunning());
+
+    // Wait until the job finish - this active waiting will be removed once
+    // Sqoop client API will get blocking support.
+    do {
+      Thread.sleep(5000);
+      submission = getClient().getJobStatus(job.getPersistenceId());
+    } while(submission.getStatus().isRunning());
+
+    // Assert correct output
+    assertTo(
+        "1",
+        "2",
+        "3",
+        "4"
+    );
+
+    // Clean up testing table
+    dropTable();
+  }
+
+  @Test
+  public void testDuplicateColumns() throws Exception {
+    createAndLoadTableCities();
+
+    // RDBMS link
+    MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
+    fillRdbmsLinkConfig(rdbmsLink);
+    saveLink(rdbmsLink);
+
+    // HDFS link
+    MLink hdfsLink = getClient().createLink("hdfs-connector");
+    saveLink(hdfsLink);
+
+    // Job creation
+    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+
+    // Connector values
+    String partitionColumn = provider.escapeTableName(getTableName()) + "." + provider.escapeColumnName("id");
+    MConfigList configs = job.getJobConfig(Direction.FROM);
+    configs.getStringInput("fromJobConfig.sql").setValue(
+        "SELECT " + provider.escapeColumnName("id") + " as " + provider.escapeColumnName("i") + ", "
+            + provider.escapeColumnName("id") + " as " + provider.escapeColumnName("j")
+            + " FROM " + provider.escapeTableName(getTableName()) + " WHERE ${CONDITIONS}");
+    configs.getStringInput("fromJobConfig.partitionColumn").setValue(partitionColumn);
+    configs.getStringInput("fromJobConfig.boundaryQuery").setValue(
+        "SELECT MIN(" + partitionColumn + "), MAX(" + partitionColumn + ") FROM "
+            + provider.escapeTableName(getTableName()));
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+    saveJob(job);
+
+    MSubmission submission = getClient().startJob(job.getPersistenceId());
+    assertTrue(submission.getStatus().isRunning());
+
+    // Wait until the job finish - this active waiting will be removed once
+    // Sqoop client API will get blocking support.
+    do {
+      Thread.sleep(5000);
+      submission = getClient().getJobStatus(job.getPersistenceId());
+    } while(submission.getStatus().isRunning());
+
+    // Assert correct output
+    assertTo(
+        "1,1",
+        "2,2",
+        "3,3",
+        "4,4"
+    );
+
+    // Clean up testing table
+    dropTable();
+  }
 }
