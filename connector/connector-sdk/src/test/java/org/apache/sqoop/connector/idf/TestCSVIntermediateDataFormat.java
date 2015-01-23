@@ -89,7 +89,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testNullValueAsObjectArrayInAndCSVTextOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new FixedPoint("1", 2L, false)).addColumn(new Decimal("2")).addColumn(new Text("3"))
+    schema.addColumn(new FixedPoint("1", 2L, false)).addColumn(new Decimal("2", 5, 2)).addColumn(new Text("3"))
         .addColumn(new Array("4", new Text("t"))).addColumn(new Binary("5"))
         .addColumn(new org.apache.sqoop.schema.type.Map("6", new Text("t1"), new Text("t2"))).addColumn(new Bit("7"))
         .addColumn(new org.apache.sqoop.schema.type.DateTime("8", false, false))
@@ -113,7 +113,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testNullValueAsObjectArrayInAndObjectArrayOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new FixedPoint("1", 2L, true)).addColumn(new Decimal("2")).addColumn(new Text("3"))
+    schema.addColumn(new FixedPoint("1", 2L, true)).addColumn(new Decimal("2", 5, 2)).addColumn(new Text("3"))
         .addColumn(new Array("4", new Text("t"))).addColumn(new Binary("5"))
         .addColumn(new org.apache.sqoop.schema.type.Map("6", new Text("t1"), new Text("t2"))).addColumn(new Bit("7"))
         .addColumn(new org.apache.sqoop.schema.type.DateTime("8", false, false))
@@ -136,7 +136,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testNullValueAsCSVTextInAndObjectArrayOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new FixedPoint("1", 2L, true)).addColumn(new Decimal("2")).addColumn(new Text("3"))
+    schema.addColumn(new FixedPoint("1", 2L, true)).addColumn(new Decimal("2", 5, 2)).addColumn(new Text("3"))
         .addColumn(new Array("4", new Text("t"))).addColumn(new Binary("5"))
         .addColumn(new org.apache.sqoop.schema.type.Map("6", new Text("t1"), new Text("t2"))).addColumn(new Bit("7"))
         .addColumn(new org.apache.sqoop.schema.type.DateTime("8", false, false))
@@ -159,7 +159,7 @@ public class TestCSVIntermediateDataFormat {
   @Test
   public void testNullValueAsCSVTextInAndCSVTextOut() {
     Schema schema = new Schema("test");
-    schema.addColumn(new FixedPoint("1", 2L, true)).addColumn(new Decimal("2")).addColumn(new Text("3"))
+    schema.addColumn(new FixedPoint("1", 2L, true)).addColumn(new Decimal("2", 5, 2)).addColumn(new Text("3"))
         .addColumn(new Array("4", new Text("t"))).addColumn(new Binary("5"))
         .addColumn(new org.apache.sqoop.schema.type.Map("6", new Text("t1"), new Text("t2"))).addColumn(new Bit("7"))
         .addColumn(new org.apache.sqoop.schema.type.DateTime("8", false, false))
@@ -859,7 +859,7 @@ public class TestCSVIntermediateDataFormat {
   public void testArrayOfDecimals() {
     Schema schema = new Schema("test");
     schema.addColumn(new org.apache.sqoop.schema.type.Array("1",
-        new org.apache.sqoop.schema.type.Decimal("deci")));
+        new org.apache.sqoop.schema.type.Decimal("deci", 5, 2)));
     schema.addColumn(new org.apache.sqoop.schema.type.Text("2"));
     dataFormat = new CSVIntermediateDataFormat(schema);
     Object[] givenArray = { 1.22, 2.444 };

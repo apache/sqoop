@@ -449,7 +449,7 @@ public class TestSubmissionBean {
   private Schema getSchema() {
     return new Schema("schema")
       .addColumn(new Text("col1"))
-      .addColumn(new Decimal("col2"))
+      .addColumn(new Decimal("col2", 5, 2))
     ;
   }
 

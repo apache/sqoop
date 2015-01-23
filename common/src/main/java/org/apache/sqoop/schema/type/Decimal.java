@@ -30,47 +30,34 @@ import org.apache.sqoop.classification.InterfaceStability;
 public class Decimal extends AbstractNumber {
 
   /**
-   * Number of valid numbers.
+   * Numeric precision refers to the maximum number of digits that are present in the number.
+   * ie 1234567.89 has a precision of 9
+   * Numeric scale refers to the maximum number of decimal places
+   * ie 123456.789 has a scale of 3
+   * Thus the maximum allowed value for decimal(5,2) is 999.99
    */
-  private Long precision;
+  private Integer precision;
 
-  /**
-   * Number of decimal places.
-   */
-  private Long scale;
+  private Integer scale;
 
-  public Decimal(String name) {
-    super(name);
-  }
-
-  public Decimal(String name, Long precision, Long scale) {
+  public Decimal(String name, Integer precision, Integer scale) {
     super(name);
     this.precision = precision;
     this.scale = scale;
   }
 
-  public Decimal(String name, Boolean nullable, Long precision, Long scale) {
+  public Decimal(String name, Boolean nullable, Integer precision, Integer scale) {
     super(name, nullable);
     this.precision = precision;
     this.scale = scale;
   }
 
-  public Long getPrecision() {
+  public Integer getPrecision() {
     return precision;
   }
 
-  public Decimal setPrecision(Long precision) {
-    this.precision = precision;
-    return this;
-  }
-
-  public Long getScale() {
+  public Integer getScale() {
     return scale;
-  }
-
-  public Decimal setScale(Long scale) {
-    this.scale = scale;
-    return this;
   }
 
   @Override

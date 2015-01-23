@@ -243,9 +243,9 @@ public class SchemaSerialization {
       output = new DateTime(name, hasFraction, hasTimezone);
       break;
     case DECIMAL:
-      Long precision = (Long) obj.get(PRECISION);
-      Long scale = (Long) obj.get(SCALE);
-      output = new Decimal(name).setPrecision(precision).setScale(scale);
+      Integer precision = obj.get(PRECISION) != null ? ((Long) obj.get(PRECISION)).intValue() : null;
+      Integer scale = obj.get(SCALE) != null ? ((Long) obj.get(SCALE)).intValue() : null;
+      output = new Decimal(name, precision, scale);
       break;
     case ENUM:
       output = new Enum(name, options);

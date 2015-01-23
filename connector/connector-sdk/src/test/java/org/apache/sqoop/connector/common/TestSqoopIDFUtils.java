@@ -24,12 +24,14 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Array;
 import org.apache.sqoop.schema.type.Column;
+import org.apache.sqoop.schema.type.Decimal;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -273,8 +275,8 @@ public class TestSqoopIDFUtils {
     list.add("B");
     Map<Object, Object> map = new HashMap<Object, Object>();
     map.put("A", list);
-    org.apache.sqoop.schema.type.Map mapCol = new org.apache.sqoop.schema.type.Map("a", new Text(
-        "t"), new Array("r", new Text("tr")));
+    org.apache.sqoop.schema.type.Map mapCol = new org.apache.sqoop.schema.type.Map("a", new Text("t"), new Array("r", new Text(
+        "tr")));
     String encodedText = toCSVMap(map, mapCol);
     assertEquals(encodedText, "'{\"A\":[\"A\",\"B\"]}'");
   }
@@ -289,6 +291,33 @@ public class TestSqoopIDFUtils {
     assertEquals(arr[1], "'34'");
     assertEquals(arr[2], "45");
 
+  }
+
+  @Test
+  public void testToDecimaPointReturnsDecimal() {
+    String text = "23.44444444";
+    Decimal col = new Decimal("dd", 4, 2);
+    assertTrue(toDecimal(text, col) instanceof BigDecimal);
+    BigDecimal bd = (BigDecimal) toDecimal(text, col);
+    assertEquals("23.44", toCSVDecimal(bd));
+  }
+
+  @Test
+  public void testToDecimaPoint2ReturnsDecimal() {
+    String text = "23.44444444";
+    Decimal col = new Decimal("dd", 8, 2);
+    assertTrue(toDecimal(text, col) instanceof BigDecimal);
+    BigDecimal bd = (BigDecimal) toDecimal(text, col);
+    assertEquals("23.444444", toCSVDecimal(bd));
+  }
+
+  @Test
+  public void testToDecimaPointNoScaleNoPrecisionReturnsDecimal() {
+    String text = "23.44444444";
+    Decimal col = new Decimal("dd", null, null);
+    assertTrue(toDecimal(text, col) instanceof BigDecimal);
+    BigDecimal bd = (BigDecimal) toDecimal(text, col);
+    assertEquals("23.44444444", toCSVDecimal(bd));
   }
 
 }

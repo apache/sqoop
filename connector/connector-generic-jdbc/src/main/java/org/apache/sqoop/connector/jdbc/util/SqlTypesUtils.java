@@ -44,7 +44,7 @@ public class SqlTypesUtils {
    *
    * @return Concrete Column implementation
    */
-  public static Column sqlTypeToSchemaType(int sqlType, String columnName) {
+  public static Column sqlTypeToSchemaType(int sqlType, String columnName, int precision, int scale) {
     switch (sqlType) {
       case Types.SMALLINT:
       case Types.TINYINT:
@@ -80,10 +80,9 @@ public class SqlTypesUtils {
       case Types.DOUBLE:
         return new FloatingPoint(columnName, 8L);
 
-      //TODO:SQOOP-2027 The following mapping needs to be revisited
       case Types.NUMERIC:
       case Types.DECIMAL:
-        return new Decimal(columnName);
+        return new Decimal(columnName, precision, scale);
 
       case Types.BIT:
       case Types.BOOLEAN:

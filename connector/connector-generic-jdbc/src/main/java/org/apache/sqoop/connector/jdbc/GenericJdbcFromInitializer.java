@@ -92,7 +92,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
             columnName = "Column " + i;
           }
         }
-        Column column = SqlTypesUtils.sqlTypeToSchemaType(rsmt.getColumnType(i), columnName);
+        Column column = SqlTypesUtils.sqlTypeToSchemaType(rsmt.getColumnType(i), columnName, rsmt.getPrecision(i), rsmt.getScale(i));
         schema.addColumn(column);
       }
 

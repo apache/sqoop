@@ -95,7 +95,7 @@ public class TestSchemaSerialization {
   @Test
   public void testArray() {
     // create an array type containing decimals
-    Schema array = new Schema("array").addColumn(new Array("a", new Decimal("a1")).setSize(1L));
+    Schema array = new Schema("array").addColumn(new Array("a", new Decimal("a1", 5, 2)).setSize(1L));
     transferAndAssert(array);
   }
 
@@ -125,7 +125,7 @@ public class TestSchemaSerialization {
 
   @Test
   public void testDecimal() {
-    Schema decimal = new Schema("d").addColumn(new Decimal("d", 12L, 15L));
+    Schema decimal = new Schema("d").addColumn(new Decimal("d", 5, 2));
     transferAndAssert(decimal);
   }
 
@@ -150,7 +150,7 @@ public class TestSchemaSerialization {
 
   @Test
   public void testMap() {
-    Schema m = new Schema("m").addColumn(new Map("m", new Text("m1"), new Decimal("m2")));
+    Schema m = new Schema("m").addColumn(new Map("m", new Text("m1"), new Decimal("m2", 5, 2)));
     transferAndAssert(m);
   }
 
@@ -191,7 +191,7 @@ public class TestSchemaSerialization {
       .addColumn(new Bit("c"))
       .addColumn(new Date("d"))
       .addColumn(new DateTime("e", true, true))
-      .addColumn(new Decimal("f"))
+      .addColumn(new Decimal("f", 5, 2))
       .addColumn(new Enum("g", Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { "X", "Y" })))))
       .addColumn(new FixedPoint("h", 2L, false))
       .addColumn(new FloatingPoint("i", 4L))

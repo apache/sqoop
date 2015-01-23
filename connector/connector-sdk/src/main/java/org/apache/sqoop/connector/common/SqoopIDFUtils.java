@@ -37,6 +37,8 @@ import org.json.simple.parser.JSONParser;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -130,7 +132,7 @@ public class SqoopIDFUtils {
 
   public static String toCSVFloatingPoint(Object obj, Column column) {
     Long byteSize = ((FloatingPoint) column).getByteSize();
-    if (byteSize != null && byteSize <= (Float.SIZE/Byte.SIZE)) {
+    if (byteSize != null && byteSize <= (Float.SIZE / Byte.SIZE)) {
       return ((Float) obj).toString();
     } else {
       return ((Double) obj).toString();
@@ -140,7 +142,7 @@ public class SqoopIDFUtils {
   public static Object toFloatingPoint(String csvString, Column column) {
     Object returnValue;
     Long byteSize = ((FloatingPoint) column).getByteSize();
-    if (byteSize != null && byteSize <= (Float.SIZE/Byte.SIZE)) {
+    if (byteSize != null && byteSize <= (Float.SIZE / Byte.SIZE)) {
       returnValue = Float.valueOf(csvString);
     } else {
       returnValue = Double.valueOf(csvString);
@@ -153,7 +155,22 @@ public class SqoopIDFUtils {
   }
 
   public static Object toDecimal(String csvString, Column column) {
-    return new BigDecimal(csvString);
+    Integer precision = ((org.apache.sqoop.schema.type.Decimal) column).getPrecision();
+    Integer scale = ((org.apache.sqoop.schema.type.Decimal) column).getScale();
+    BigDecimal bd = null;
+    if (precision != null) {
+      MathContext mc = new MathContext(precision);
+      bd = new BigDecimal(csvString, mc);
+    } else {
+      bd = new BigDecimal(csvString);
+    }
+    if (scale != null) {
+      // we have decided to use the default MathContext DEFAULT_ROUNDINGMODE
+      // which is RoundingMode.HALF_UP,
+      // we are aware that there may be some loss
+      bd.setScale(scale, RoundingMode.HALF_UP);
+    }
+    return bd;
   }
 
   // ********** BIT Column Type utils******************
