@@ -66,15 +66,6 @@ public abstract class Matcher {
     return toSchema;
   }
 
-  protected boolean isNull(Object value) {
-    if (value == null || value.equals("NULL")
-        || value.equals("null") || value.equals("'null'")
-        || value.equals("")) {
-      return true;
-    }
-    return false;
-  }
-
   protected void tryFillNullInArrayForUnexpectedColumn(Column column,
       Object[] array, int index) throws SqoopException {
     if (!column.isNullable()) {

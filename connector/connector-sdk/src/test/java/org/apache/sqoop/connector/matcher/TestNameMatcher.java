@@ -63,22 +63,6 @@ public class TestNameMatcher {
   }
 
   /**
-   * If a field contains any "nullable" value, it should be converted to null.
-   */
-  @Test
-  public void testNullableFieldConvert() {
-    matcher = new NameMatcher(
-        SchemaFixture.createSchema("from",
-            new String[]{"text1", "text2", "text3", "text4", "text5"}),
-        SchemaFixture.createSchema("to",
-            new String[]{"text5", "text4", "text2", "text3", "text1"}));
-    Object[] fields = new Object[] {null, "NULL", "null", "'null'", ""};
-
-    Object[] actual = matcher.getMatchingData(fields);
-    assertArrayEquals(new Object[] {null, null, null, null, null}, actual);
-  }
-
-  /**
    * If TO schema has more fields than FROM schema, and all of the extra fields
    * are "nullable", their values will be set to null.
    */

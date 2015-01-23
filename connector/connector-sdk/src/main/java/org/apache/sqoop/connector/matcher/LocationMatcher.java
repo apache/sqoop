@@ -49,8 +49,7 @@ public class LocationMatcher extends Matcher {
 
     for (Column col : getToSchema().getColumnsList()) {
       if (i < fields.length) {
-        Object value = fields[i];
-        out[i] = isNull(value) ? null : value;
+        out[i] = fields[i];
       }
       // We ran out of fields before we ran out of schema
       else {

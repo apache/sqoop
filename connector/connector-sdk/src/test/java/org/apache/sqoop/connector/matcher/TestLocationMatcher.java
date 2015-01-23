@@ -63,20 +63,6 @@ public class TestLocationMatcher {
   }
 
   /**
-   * If a field contains any "nullable" value, it should be converted to null.
-   */
-  @Test
-  public void testNullableFieldConvert() {
-    matcher = new LocationMatcher(
-        SchemaFixture.createSchema("from", 5),
-        SchemaFixture.createSchema("to", 5));
-    Object[] fields = new Object[] {null, "NULL", "null", "'null'", ""};
-
-    Object[] actual = matcher.getMatchingData(fields);
-    assertArrayEquals(new Object[] {null, null, null, null, null}, actual);
-  }
-
-  /**
    * If TO schema has more fields than FROM schema, and all of the extra fields
    * are "nullable", their values will be set to null.
    */

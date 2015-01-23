@@ -59,16 +59,10 @@ public class NameMatcher extends Matcher {
     int i = 0;
 
     for (Column toCol : getToSchema().getColumnsList()) {
-      boolean assigned = false;
-      if (fromColNameIndexMap.containsKey(toCol.getName())) {
-        int fromIndex = fromColNameIndexMap.get(toCol.getName());
-        if (fromIndex < fields.length) {
-          Object value = fields[fromIndex];
-          out[i] = isNull(value) ? null : value;
-          assigned = true;
-        }
-      }
-      if (!assigned) {
+      Integer fromIndex = fromColNameIndexMap.get(toCol.getName());
+      if (fromIndex != null && fromIndex < fields.length) {
+          out[i] = fields[fromIndex];
+      } else {
         tryFillNullInArrayForUnexpectedColumn(toCol, out, i);
       }
       i++;
