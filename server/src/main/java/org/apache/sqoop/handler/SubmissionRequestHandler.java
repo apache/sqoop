@@ -48,22 +48,16 @@ public class SubmissionRequestHandler implements RequestHandler {
       throw new SqoopException(ServerError.SERVER_0002, "Unsupported HTTP method for connector:"
           + ctx.getMethod());
     }
-    String identifier = ctx.getLastURLElement();
+    String jobIdentifier = ctx.getLastURLElement();
     Repository repository = RepositoryManager.getInstance().getRepository();
-    // links by connector ordered by updated time
+    // submissions per job are ordered by update time
     // hence the latest submission is on the top
-    if (ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM) != null) {
-      identifier = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
+    if (ctx.getParameterValue(JOB_NAME_QUERY_PARAM) != null) {
+      jobIdentifier = ctx.getParameterValue(JOB_NAME_QUERY_PARAM);
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "submissionsByJob", identifier);
-      if (repository.findJob(identifier) != null) {
-        long jobId = repository.findJob(identifier).getPersistenceId();
+          ctx.getRequest().getRemoteAddr(), "get", "submissionsByJob", jobIdentifier);
+        long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
         return getSubmissionsForJob(jobId);
-      } else {
-        // this means name nor Id existed
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid job: " + identifier
-            + " name given");
-      }
     } else {
       // all submissions in the system
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),

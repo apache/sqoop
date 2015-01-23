@@ -41,9 +41,11 @@ public class SubmissionResourceRequest extends  ResourceRequest {
   public SubmissionsBean read(String serverUrl, Long jid) {
     String response;
     if (jid == null) {
+      // all submissions
       response = super.get(serverUrl + RESOURCE);
     } else {
-      response = super.get(serverUrl + RESOURCE + jid);
+      // submission per job ( name preferred, we fall back to id)
+      response = super.get(serverUrl + RESOURCE + "?jname=" + jid);
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     SubmissionsBean submissionBean = new SubmissionsBean();

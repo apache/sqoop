@@ -89,7 +89,7 @@ public class LinkRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String linkIdentifier = ctx.getLastURLElement();
     // support linkName or linkId for the api
-    long linkId = getLinkIdFromIdentifier(linkIdentifier, repository);
+    long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier, repository);
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "link", linkIdentifier);
@@ -135,7 +135,7 @@ public class LinkRequestHandler implements RequestHandler {
     if (!create) {
       String linkIdentifier = ctx.getLastURLElement();
       // support linkName or linkId for the api
-      long linkId = getLinkIdFromIdentifier(linkIdentifier, repository);
+      long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier, repository);
       if (postedLink.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
         MLink existingLink = repository.findLink(linkId);
         postedLink.setPersistenceId(existingLink.getPersistenceId());
@@ -206,31 +206,13 @@ public class LinkRequestHandler implements RequestHandler {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "link", identifier);
 
-      long linkId = getLinkIdFromIdentifier(identifier, repository);
+      long linkId = HandlerUtils.getLinkIdFromIdentifier(identifier, repository);
       List<MLink> linkList = new ArrayList<MLink>();
       // a list of single element
       linkList.add(repository.findLink(linkId));
       linkBean = createLinkBean(linkList, locale);
     }
     return linkBean;
-  }
-
-  private long getLinkIdFromIdentifier(String identifier, Repository repository) {
-    // support linkName or linkId for the api
-    // NOTE: linkId is a fallback for older sqoop clients if any, since we want to primarily use unique linkNames
-    long linkId;
-    if (repository.findLink(identifier) != null) {
-      linkId = repository.findLink(identifier).getPersistenceId();
-    } else {
-      try {
-        linkId = Long.valueOf(identifier);
-      } catch (NumberFormatException ex) {
-        // this means name nor Id existed and we want to throw a user friendly message than a number format exception
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid link: " + identifier
-            + " requested");
-      }
-    }
-    return linkId;
   }
 
   private LinkBean createLinkBean(List<MLink> links, Locale locale) {
@@ -260,7 +242,7 @@ public class LinkRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String linkIdentifier = elements[elements.length - 2];
-    long linkId = getLinkIdFromIdentifier(linkIdentifier, repository);
+    long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier, repository);
     repository.enableLink(linkId, enabled);
     return JsonBean.EMPTY_BEAN;
   }

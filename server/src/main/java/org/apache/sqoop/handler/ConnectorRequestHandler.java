@@ -72,18 +72,7 @@ public class ConnectorRequestHandler implements RequestHandler {
     } else {
       // NOTE: we now support using unique name as well as the connector id
       // NOTE: connectorId is a fallback for older sqoop clients if any, since we want to primarily use unique conenctorNames
-      boolean cIdNameIdentfierUsed = true;
-      Long cId = ConnectorManager.getInstance().getConnectorId(cIdentifier);
-      if (cId == null) {
-        // support for cId in the query
-        cIdNameIdentfierUsed = false;
-        cId = Long.parseLong(cIdentifier);
-      }
-      // Check that user is not asking for non existing connector id or non
-      // existing unique connector name
-      if (!cIdNameIdentfierUsed && !ConnectorManager.getInstance().getConnectorIds().contains(cId)) {
-        throw new SqoopException(ServerError.SERVER_0004, "Invalid connector id " + cId);
-      }
+      long cId = HandlerUtils.getConnectorIdFromIdentifier(cIdentifier);
 
       connectors = new LinkedList<MConnector>();
       configParamBundles = new HashMap<Long, ResourceBundle>();

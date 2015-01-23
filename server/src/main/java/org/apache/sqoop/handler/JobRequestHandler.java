@@ -135,7 +135,7 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     String jobIdentifier = ctx.getLastURLElement();
-    long jobId = getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "job", jobIdentifier);
@@ -192,7 +192,7 @@ public class JobRequestHandler implements RequestHandler {
     if (!create) {
       String jobIdentifier = ctx.getLastURLElement();
       // support jobName or jobId for the api
-      long jobId = getJobIdFromIdentifier(jobIdentifier, repository);
+      long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
       if (postedJob.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
         MJob existingJob = repository.findJob(jobId);
         postedJob.setPersistenceId(existingJob.getPersistenceId());
@@ -253,28 +253,21 @@ public class JobRequestHandler implements RequestHandler {
   }
 
   private JsonBean getJobs(RequestContext ctx) {
-    String identifier = ctx.getLastURLElement();
+    String connectorIdentifier = ctx.getLastURLElement();
     JobBean jobBean;
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();
-
     // jobs by connector
     if (ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM) != null) {
-      identifier = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
+      connectorIdentifier = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "jobsByConnector", identifier);
-      if (repository.findConnector(identifier) != null) {
-        long connectorId = repository.findConnector(identifier).getPersistenceId();
-        jobBean = createJobsBean(repository.findJobsForConnector(connectorId), locale);
-      } else {
-        // this means name nor Id existed
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + identifier
-            + " name for jobs given");
-      }
+          ctx.getRequest().getRemoteAddr(), "get", "jobsByConnector", connectorIdentifier);
+      long connectorId = HandlerUtils.getConnectorIdFromIdentifier(connectorIdentifier);
+      jobBean = createJobsBean(repository.findJobsForConnector(connectorId), locale);
     } else
     // all jobs in the system
     if (ctx.getPath().contains(JOBS_PATH)
-        || (ctx.getPath().contains(JOB_PATH) && identifier.equals("all"))) {
+        || (ctx.getPath().contains(JOB_PATH) && connectorIdentifier.equals("all"))) {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "jobs", "all");
       jobBean = createJobsBean(repository.findJobs(), locale);
@@ -282,33 +275,15 @@ public class JobRequestHandler implements RequestHandler {
     // job by Id
     else {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "job", identifier);
+          ctx.getRequest().getRemoteAddr(), "get", "job", connectorIdentifier);
 
-      long jobId = getJobIdFromIdentifier(identifier, repository);
+      long jobId = HandlerUtils.getJobIdFromIdentifier(connectorIdentifier, repository);
       List<MJob> jobList = new ArrayList<MJob>();
       // a list of single element
       jobList.add(repository.findJob(jobId));
       jobBean = createJobBean(jobList, locale);
     }
     return jobBean;
-  }
-
-  private long getJobIdFromIdentifier(String identifier, Repository repository) {
-    // support jobName or jobId for the api
-    // NOTE: jobId is a fallback for older sqoop clients if any, since we want to primarily use unique jobNames
-    long jobId;
-    if (repository.findJob(identifier) != null) {
-      jobId = repository.findJob(identifier).getPersistenceId();
-    } else {
-      try {
-        jobId = Long.valueOf(identifier);
-      } catch (NumberFormatException ex) {
-        // this means name nor Id existed and we want to throw a user friendly message than a number format exception
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid job: " + identifier
-            + " requested");
-      }
-    }
-    return jobId;
   }
 
   private JobBean createJobBean(List<MJob> jobs, Locale locale) {
@@ -344,7 +319,7 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
     repository.enableJob(jobId, enabled);
     return JsonBean.EMPTY_BEAN;
   }
@@ -353,7 +328,7 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "submit", "job", String.valueOf(jobId));
     // TODO(SQOOP-1638): This should be outsourced somewhere more suitable than
@@ -373,7 +348,7 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "stop", "job", String.valueOf(jobId));
     MSubmission submission = JobManager.getInstance().stop(jobId, prepareRequestEventContext(ctx));
@@ -384,7 +359,7 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "status", "job", String.valueOf(jobId));
     MSubmission submission = JobManager.getInstance().status(jobId);
