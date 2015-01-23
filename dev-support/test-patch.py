@@ -255,18 +255,26 @@ def find_all_files(top):
         for f in files:
             yield os.path.join(root, f)
 
-def mvn_test(result, output_dir):
-  run_mvn_test("test", "unit", result, output_dir)
+def mvn_test(result, output_dir, slow):
+  run_mvn_test("test", "unit", result, output_dir, slow)
 
-def mvn_integration(result, output_dir):
-  run_mvn_test("integration-test -pl test", "integration", result, output_dir)
+def mvn_integration(result, output_dir, slow):
+  run_mvn_test("integration-test -pl test", "integration", result, output_dir, slow)
 
-def run_mvn_test(command, test_type, result, output_dir):
-  rc = execute("mvn %s 1>%s/test_%s.txt 2>&1" % (command, output_dir, test_type))
+def run_mvn_test(command, test_type, result, output_dir, slow):
+  if slow:
+    command += " -Pslow,hadoop200"
+    test_file_name = "%s_slow" % test_type
+    test_type = "slow %s" % test_type
+  else:
+    test_file_name = "%s_fast" % test_type
+    test_type = "fast %s" % test_type
+
+  rc = execute("mvn %s 1>%s/test_%s.txt 2>&1" % (command, output_dir, test_file_name))
   if rc == 0:
     result.success("All %s tests passed" % test_type)
   else:
-    result.error("Some %s tests failed (%s)" % (test_type, jenkins_file_link_for_jira("report", "test_%s.txt" % test_type)))
+    result.error("Some %s tests failed (%s)" % (test_type, jenkins_file_link_for_jira("report", "test_%s.txt" % test_file_name)))
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
@@ -449,8 +457,10 @@ static_test(result, patch_file, output_dir)
 mvn_rat(result, output_dir)
 mvn_install(result, output_dir)
 if run_tests:
-  mvn_test(result, output_dir)
-  mvn_integration(result, output_dir)
+  mvn_test(result, output_dir, slow=False)
+  mvn_test(result, output_dir, slow=True)
+  mvn_integration(result, output_dir, slow=False)
+  mvn_integration(result, output_dir, slow=True)
 else:
   result.info("patch applied and built but tests did not execute")
 
