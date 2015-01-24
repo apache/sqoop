@@ -126,6 +126,10 @@ public class SqoopResourceRequests {
     return getJobResourceRequest().read(serverUrl, jobId);
   }
 
+  public JobBean readJobsByConnector(Long cId) {
+    return getJobResourceRequest().readByConnector(serverUrl, cId);
+  }
+
   public ValidationResultBean updateJob(MJob job) {
     return getJobResourceRequest().update(serverUrl, job);
   }

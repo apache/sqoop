@@ -260,6 +260,8 @@ public class Constants {
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_JOBS =
       "show.prompt_display_all_jobs";
+  public static final String RES_SHOW_PROMPT_DISPLAY_JOBS_CID =
+      "show.prompt_display_all_jobs_cid";
   public static final String RES_SHOW_PROMPT_DISPLAY_JOB_JID =
       "show.prompt_display_job_jid";
   public static final String RES_SHOW_PROMPT_JOBS_TO_SHOW =

@@ -43,7 +43,7 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
  *
  * PUT /v1/job/{jid}/enable
  *  Enable job with id jid
- * PUT /v1/job/{jname}s/disable
+ * PUT /v1/job/{jname}/disable
  *  Enable job with name jname
  *
  * PUT /v1/job/{jid}/disable

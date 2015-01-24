@@ -48,6 +48,16 @@ public class JobResourceRequest extends ResourceRequest {
     super(token);
   }
 
+  public JobBean readByConnector(String serverUrl, Long cId) {
+    JobsBean bean = new JobsBean();
+    if (cId != null) {
+      String response = super.get(serverUrl + RESOURCE + "?cname=" + cId);
+      JSONObject jsonObject = JSONUtils.parse(response);
+      bean.restore(jsonObject);
+    }
+    return bean;
+  }
+
   public JobBean read(String serverUrl, Long jobId) {
     String response;
     if (jobId == null) {

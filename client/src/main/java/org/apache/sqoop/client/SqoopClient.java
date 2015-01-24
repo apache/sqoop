@@ -401,6 +401,15 @@ public class SqoopClient {
   }
 
   /**
+   * Retrieve list of all jobs by connector
+   *
+   * @return
+   */
+  public List<MJob> getJobsByConnector(long cId) {
+    return resourceRequests.readJobsByConnector(cId).getJobs();
+  }
+
+  /**
    * Create job on server and save to the repository
    *
    * @param job Job that should be created

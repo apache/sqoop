@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Config {
   /**
-   * Optional name for the form object
+   * Optional name for the config object
    *
    * @return
    */
