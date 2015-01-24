@@ -34,6 +34,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.FileOutputCommitter;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.util.ToolRunner;
@@ -272,6 +273,9 @@ public class HiveImport {
         FileStatus[] statuses = fs.listStatus(outputPath);
         if (statuses.length == 0) {
           LOG.info("Export directory is empty, removing it.");
+          fs.delete(outputPath, true);
+        } else if (statuses.length == 1 && statuses[0].getPath().getName().equals(FileOutputCommitter.SUCCEEDED_FILE_NAME)) {
+          LOG.info("Export directory is contains the _SUCCESS file only, removing the directory.");
           fs.delete(outputPath, true);
         } else {
           LOG.info("Export directory is not empty, keeping it.");
