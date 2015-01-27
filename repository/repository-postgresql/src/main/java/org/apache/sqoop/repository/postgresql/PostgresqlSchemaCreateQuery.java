@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.repository.postgresql;
 
+import org.apache.sqoop.repository.common.CommonRepoUtils;
+
 import static org.apache.sqoop.repository.postgresql.PostgresqlSchemaConstants.*;
 
 /**
@@ -232,142 +234,142 @@ import static org.apache.sqoop.repository.postgresql.PostgresqlSchemaConstants.*
 public class PostgresqlSchemaCreateQuery {
 
   public static final String QUERY_CREATE_SCHEMA_SQOOP =
-      "CREATE SCHEMA " + SCHEMA_SQOOP;
+      "CREATE SCHEMA " + CommonRepoUtils.escapeSchemaName(SCHEMA_SQOOP);
 
   public static final String QUERY_CREATE_TABLE_SQ_SYSTEM =
-      "CREATE TABLE " + TABLE_SQ_SYSTEM + " ("
-          + COLUMN_SQM_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQM_KEY + " VARCHAR(64), "
-          + COLUMN_SQM_VALUE + " VARCHAR(64) "
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SYSTEM_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQM_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQM_KEY) + " VARCHAR(64), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQM_VALUE) + " VARCHAR(64) "
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_DIRECTION =
-      "CREATE TABLE " + TABLE_SQ_DIRECTION + " ("
-          + COLUMN_SQD_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQD_NAME + " VARCHAR(64)"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQD_NAME) + " VARCHAR(64)"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_CONFIGURABLE =
-      "CREATE TABLE " + TABLE_SQ_CONFIGURABLE + " ("
-          + COLUMN_SQC_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQC_NAME + " VARCHAR(64) UNIQUE, "
-          + COLUMN_SQC_TYPE + " VARCHAR(32), "
-          + COLUMN_SQC_CLASS + " VARCHAR(255), "
-          + COLUMN_SQC_VERSION + " VARCHAR(64) "
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + " VARCHAR(64) UNIQUE, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_TYPE) + " VARCHAR(32), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_CLASS) + " VARCHAR(255), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_VERSION) + " VARCHAR(64) "
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS =
-      "CREATE TABLE " + TABLE_SQ_CONNECTOR_DIRECTIONS + " ("
-          + COLUMN_SQCD_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQCD_CONNECTOR + " BIGINT REFERENCES " + TABLE_SQ_CONFIGURABLE + "("  + COLUMN_SQC_ID + ")" + ", "
-          + COLUMN_SQCD_DIRECTION + " BIGINT REFERENCES " + TABLE_SQ_DIRECTION + "("  + COLUMN_SQD_ID + ")"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_DIRECTIONS_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_CONNECTOR) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_DIRECTION) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID) + ")"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_CONFIG =
-      "CREATE TABLE " + TABLE_SQ_CONFIG + " ("
-          + COLUMN_SQ_CFG_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQ_CFG_CONFIGURABLE + " BIGINT REFERENCES " + TABLE_SQ_CONFIGURABLE + "("  + COLUMN_SQC_ID + ")" + ", "
-          + COLUMN_SQ_CFG_NAME + " VARCHAR(64), "
-          + COLUMN_SQ_CFG_TYPE + " VARCHAR(32), "
-          + COLUMN_SQ_CFG_INDEX + " SMALLINT, "
-          + "UNIQUE (" + COLUMN_SQ_CFG_NAME + ", " + COLUMN_SQ_CFG_TYPE + ", " + COLUMN_SQ_CFG_CONFIGURABLE + ") "
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + " VARCHAR(64), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_TYPE) + " VARCHAR(32), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_INDEX) + " SMALLINT, "
+          + "UNIQUE (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_TYPE) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + ") "
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS =
-      "CREATE TABLE " + TABLE_SQ_CONFIG_DIRECTIONS + " ("
-          + COLUMN_SQ_CFG_DIR_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQ_CFG_DIR_CONFIG + " BIGINT REFERENCES " + TABLE_SQ_CONFIG + "("  + COLUMN_SQ_CFG_ID + ")" + ", "
-          + COLUMN_SQ_CFG_DIR_DIRECTION + " BIGINT REFERENCES " + TABLE_SQ_DIRECTION + "("  + COLUMN_SQD_ID + ")"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_DIRECTIONS_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_DIRECTION) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID) + ")"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_INPUT =
-      "CREATE TABLE " + TABLE_SQ_INPUT + " ("
-          + COLUMN_SQI_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQI_NAME + " VARCHAR(64), "
-          + COLUMN_SQI_CONFIG + " BIGINT REFERENCES " + TABLE_SQ_CONFIG + "("  + COLUMN_SQ_CFG_ID + ")" + ", "
-          + COLUMN_SQI_INDEX + " SMALLINT, "
-          + COLUMN_SQI_TYPE + " VARCHAR(32), "
-          + COLUMN_SQI_STRMASK + " BOOLEAN, "
-          + COLUMN_SQI_STRLENGTH + " SMALLINT, "
-          + COLUMN_SQI_ENUMVALS + " VARCHAR(100), "
-          + " UNIQUE (" + COLUMN_SQI_NAME + ", " + COLUMN_SQI_TYPE + ", " + COLUMN_SQI_CONFIG + ") "
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + " VARCHAR(64), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX) + " SMALLINT, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + " VARCHAR(32), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRMASK) + " BOOLEAN, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + " SMALLINT, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + " VARCHAR(100), "
+          + " UNIQUE (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + ") "
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_LINK =
-      "CREATE TABLE " + TABLE_SQ_LINK + " ("
-          + COLUMN_SQ_LNK_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQ_LNK_CONFIGURABLE + " BIGINT REFERENCES " + TABLE_SQ_CONFIGURABLE + "("  + COLUMN_SQC_ID + ")" + ", "
-          + COLUMN_SQ_LNK_NAME  + " VARCHAR(32) UNIQUE, "
-          + COLUMN_SQ_LNK_CREATION_DATE + " TIMESTAMP, "
-          + COLUMN_SQ_LNK_CREATION_USER + " VARCHAR(32) DEFAULT NULL, "
-          + COLUMN_SQ_LNK_UPDATE_DATE + " TIMESTAMP, "
-          + COLUMN_SQ_LNK_UPDATE_USER + " VARCHAR(32) DEFAULT NULL, "
-          + COLUMN_SQ_LNK_ENABLED + " BOOLEAN DEFAULT TRUE"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME)  + " VARCHAR(32) UNIQUE, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_DATE) + " TIMESTAMP, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_USER) + " VARCHAR(32) DEFAULT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE) + " TIMESTAMP, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + " VARCHAR(32) DEFAULT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + " BOOLEAN DEFAULT TRUE"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_JOB =
-      "CREATE TABLE " + TABLE_SQ_JOB + " ("
-          + COLUMN_SQB_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQB_FROM_LINK + " BIGINT REFERENCES " + TABLE_SQ_LINK + "("  + COLUMN_SQ_LNK_ID + ")" + ", "
-          + COLUMN_SQB_TO_LINK + " BIGINT REFERENCES " + TABLE_SQ_LINK + "("  + COLUMN_SQ_LNK_ID + ")" + ", "
-          + COLUMN_SQB_NAME + " VARCHAR(64) UNIQUE, "
-          + COLUMN_SQB_CREATION_DATE + " TIMESTAMP, "
-          + COLUMN_SQB_CREATION_USER + " VARCHAR(32) DEFAULT NULL, "
-          + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP, "
-          + COLUMN_SQB_UPDATE_USER + " VARCHAR(32) DEFAULT NULL, "
-          + COLUMN_SQB_ENABLED + " BOOLEAN DEFAULT TRUE"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TO_LINK) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " VARCHAR(64) UNIQUE, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_DATE) + " TIMESTAMP, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_USER) + " VARCHAR(32) DEFAULT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE) + " TIMESTAMP, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_USER) + " VARCHAR(32) DEFAULT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ENABLED) + " BOOLEAN DEFAULT TRUE"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_LINK_INPUT =
-      "CREATE TABLE " + TABLE_SQ_LINK_INPUT + " ("
-          + COLUMN_SQ_LNKI_LINK + " BIGINT REFERENCES " + TABLE_SQ_LINK + "("  + COLUMN_SQ_LNK_ID + ")" + ", "
-          + COLUMN_SQ_LNKI_INPUT + " BIGINT REFERENCES " + TABLE_SQ_INPUT + "("  + COLUMN_SQI_ID + ")" + ", "
-          + COLUMN_SQ_LNKI_VALUE + " VARCHAR, "
-          + "PRIMARY KEY (" + COLUMN_SQ_LNKI_LINK + ", " + COLUMN_SQ_LNKI_INPUT + ")"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE) + " VARCHAR, "
+          + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + ")"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_JOB_INPUT =
-      "CREATE TABLE " + TABLE_SQ_JOB_INPUT + " ("
-          + COLUMN_SQBI_JOB + " BIGINT REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ")" + ", "
-          + COLUMN_SQBI_INPUT + " BIGINT REFERENCES " + TABLE_SQ_INPUT + "("  + COLUMN_SQI_ID + ")" + ", "
-          + COLUMN_SQBI_VALUE + " VARCHAR(1000), "
-          + "PRIMARY KEY (" + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + ")"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE) + " VARCHAR(1000), "
+          + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + ")"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_SUBMISSION =
-      "CREATE TABLE " + TABLE_SQ_SUBMISSION + " ("
-          + COLUMN_SQS_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQS_JOB + " BIGINT REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE, "
-          + COLUMN_SQS_STATUS + " VARCHAR(20), "
-          + COLUMN_SQS_CREATION_DATE + " TIMESTAMP, "
-          + COLUMN_SQS_CREATION_USER + " VARCHAR(32) DEFAULT NULL, "
-          + COLUMN_SQS_UPDATE_DATE + " TIMESTAMP, "
-          + COLUMN_SQS_UPDATE_USER + " VARCHAR(32) DEFAULT NULL, "
-          + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(50), "
-          + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(150), "
-          + COLUMN_SQS_ERROR_SUMMARY + " VARCHAR(150), "
-          + COLUMN_SQS_ERROR_DETAILS + " VARCHAR(750)"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + ") ON DELETE CASCADE, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + " VARCHAR(20), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_DATE) + " TIMESTAMP, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_USER) + " VARCHAR(32) DEFAULT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " TIMESTAMP, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_USER) + " VARCHAR(32) DEFAULT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + " VARCHAR(50), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + " VARCHAR(150), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + " VARCHAR(150), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS) + " VARCHAR(750)"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =
-      "CREATE TABLE " + TABLE_SQ_COUNTER_GROUP + " ("
-          + COLUMN_SQG_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQG_NAME + " VARCHAR(75) UNIQUE"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_GROUP_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQG_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQG_NAME) + " VARCHAR(75) UNIQUE"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_COUNTER =
-      "CREATE TABLE " + TABLE_SQ_COUNTER + " ("
-          + COLUMN_SQR_ID + " BIGSERIAL PRIMARY KEY NOT NULL, "
-          + COLUMN_SQR_NAME + " VARCHAR(75) UNIQUE"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQR_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQR_NAME) + " VARCHAR(75) UNIQUE"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION =
-      "CREATE TABLE " + TABLE_SQ_COUNTER_SUBMISSION + " ("
-          + COLUMN_SQRS_GROUP + " BIGINT REFERENCES " + TABLE_SQ_COUNTER_GROUP + "("  + COLUMN_SQG_ID + ")" + ", "
-          + COLUMN_SQRS_COUNTER + " BIGINT REFERENCES " + TABLE_SQ_COUNTER + "("  + COLUMN_SQR_ID + ")" + ", "
-          + COLUMN_SQRS_SUBMISSION + " BIGINT REFERENCES " + TABLE_SQ_SUBMISSION + "("  + COLUMN_SQS_ID + ") ON DELETE CASCADE" + ", "
-          + COLUMN_SQRS_VALUE + " BIGINT, "
-          + "PRIMARY KEY (" + COLUMN_SQRS_GROUP + ", " + COLUMN_SQRS_COUNTER + ", " + COLUMN_SQRS_SUBMISSION + ")"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_GROUP) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_GROUP_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQG_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_COUNTER) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQR_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + ") ON DELETE CASCADE" + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_VALUE) + " BIGINT, "
+          + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_GROUP) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_COUNTER) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + ")"
           + ")";
 
   private PostgresqlSchemaCreateQuery() {

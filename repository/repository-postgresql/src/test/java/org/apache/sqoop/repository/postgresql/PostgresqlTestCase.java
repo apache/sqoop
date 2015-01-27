@@ -53,7 +53,7 @@ abstract public class PostgresqlTestCase {
 
   @AfterMethod(alwaysRun = true)
   public void tearDown() throws Exception {
-    provider.dropSchema("sqoop");
+    provider.dropSchema("SQOOP");
     provider.stop();
   }
 }

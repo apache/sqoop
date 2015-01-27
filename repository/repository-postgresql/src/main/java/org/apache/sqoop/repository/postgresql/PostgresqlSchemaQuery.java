@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.repository.postgresql;
 
+import org.apache.sqoop.repository.common.CommonRepoUtils;
+
 import static org.apache.sqoop.repository.postgresql.PostgresqlSchemaConstants.*;
 
 /**
@@ -26,23 +28,23 @@ public class PostgresqlSchemaQuery {
 
   public static final String STMT_SELECT_SYSTEM =
       "SELECT "
-          + COLUMN_SQM_VALUE
-          + " FROM " + TABLE_SQ_SYSTEM
-          + " WHERE " + COLUMN_SQM_KEY + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQM_VALUE)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SYSTEM_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQM_KEY) + " = ?";
 
   public static final String STMT_DELETE_SYSTEM =
-      "DELETE FROM "  + TABLE_SQ_SYSTEM
-          + " WHERE " + COLUMN_SQM_KEY + " = ?";
+      "DELETE FROM "  + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SYSTEM_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQM_KEY) + " = ?";
 
   public static final String STMT_INSERT_SYSTEM =
-      "INSERT INTO " + TABLE_SQ_SYSTEM + "("
-          + COLUMN_SQM_KEY + ", "
-          + COLUMN_SQM_VALUE + ") "
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SYSTEM_NAME) + "("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQM_KEY) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQM_VALUE) + ") "
           + "VALUES(?, ?)";
 
   public static final String STMT_INSERT_DIRECTION =
-      "INSERT INTO " + TABLE_SQ_DIRECTION
-          + " (" + COLUMN_SQD_NAME+ ") VALUES (?)";
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME)
+          + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQD_NAME)+ ") VALUES (?)";
 
   private PostgresqlSchemaQuery() {
     // Disable explicit object creation

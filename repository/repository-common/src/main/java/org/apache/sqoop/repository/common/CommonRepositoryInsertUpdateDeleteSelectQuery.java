@@ -20,540 +20,794 @@ package org.apache.sqoop.repository.common;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.*;
 
 public class CommonRepositoryInsertUpdateDeleteSelectQuery {
-  /*******DIRECTION TABLE **************/
+  /**
+   * ****DIRECTION TABLE *************
+   */
   public static final String STMT_SELECT_SQD_ID_BY_SQD_NAME =
-      "SELECT " + COLUMN_SQD_ID + " FROM " + TABLE_SQ_DIRECTION
-          + " WHERE " + COLUMN_SQD_NAME + "=?";
+      "SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID)
+              + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME)
+              + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQD_NAME) + "=?";
 
   public static final String STMT_SELECT_SQD_NAME_BY_SQD_ID =
-      "SELECT " + COLUMN_SQD_NAME + " FROM " + TABLE_SQ_DIRECTION
-          + " WHERE " + COLUMN_SQD_ID + "=?";
+      "SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQD_NAME)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID) + "=?";
 
-  /*********CONFIGURABLE TABLE ***************/
+  /**
+   * ******CONFIGURABLE TABLE **************
+   */
   //DML: Get configurable by given name
   public static final String STMT_SELECT_FROM_CONFIGURABLE =
       "SELECT "
-          + COLUMN_SQC_ID + ", "
-          + COLUMN_SQC_NAME + ", "
-          + COLUMN_SQC_CLASS + ", "
-          + COLUMN_SQC_VERSION
-          + " FROM " + TABLE_SQ_CONFIGURABLE
-          + " WHERE " + COLUMN_SQC_NAME + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_CLASS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_VERSION)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + " = ?";
 
   //DML: Get all configurables for a given type
   public static final String STMT_SELECT_CONFIGURABLE_ALL_FOR_TYPE =
       "SELECT "
-          + COLUMN_SQC_ID + ", "
-          + COLUMN_SQC_NAME + ", "
-          + COLUMN_SQC_CLASS + ", "
-          + COLUMN_SQC_VERSION
-          + " FROM " + TABLE_SQ_CONFIGURABLE
-          + " WHERE " + COLUMN_SQC_TYPE + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_CLASS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_VERSION)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_TYPE) + " = ?";
 
   //DML: Insert into configurable
   public static final String STMT_INSERT_INTO_CONFIGURABLE =
-      "INSERT INTO " + TABLE_SQ_CONFIGURABLE + " ("
-          + COLUMN_SQC_NAME + ", "
-          + COLUMN_SQC_CLASS + ", "
-          + COLUMN_SQC_VERSION + ", "
-          + COLUMN_SQC_TYPE
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_CLASS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_VERSION) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_TYPE)
           + ") VALUES (?, ?, ?, ?)";
 
   //Delete all configs for a given configurable
   public static final String STMT_DELETE_CONFIGS_FOR_CONFIGURABLE =
-      "DELETE FROM " + TABLE_SQ_CONFIG
-          + " WHERE " + COLUMN_SQ_CFG_CONFIGURABLE + " = ?";
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = ?";
 
   //Delete all inputs for a given configurable
   public static final String STMT_DELETE_INPUTS_FOR_CONFIGURABLE =
-      "DELETE FROM " + TABLE_SQ_INPUT
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
           + " WHERE "
-          + COLUMN_SQI_CONFIG
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG)
           + " IN (SELECT "
-          + COLUMN_SQ_CFG_ID
-          + " FROM " + TABLE_SQ_CONFIG
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
           + " WHERE "
-          + COLUMN_SQ_CFG_CONFIGURABLE + " = ?)";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = ?)";
 
   //Update the configurable
   public static final String STMT_UPDATE_CONFIGURABLE =
-      "UPDATE " + TABLE_SQ_CONFIGURABLE
-          + " SET " + COLUMN_SQC_NAME + " = ?, "
-          + COLUMN_SQC_CLASS + " = ?, "
-          + COLUMN_SQC_VERSION + " = ?, "
-          + COLUMN_SQC_TYPE + " = ? "
-          + " WHERE " + COLUMN_SQC_ID + " = ?";
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
+          + " SET " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_CLASS) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_VERSION) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_TYPE) + " = ? "
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + " = ?";
 
-  /**********CONFIG TABLE **************/
+  /**
+   * *******CONFIG TABLE *************
+   */
   //DML: Get all configs for a given configurable
   public static final String STMT_SELECT_CONFIG_FOR_CONFIGURABLE =
       "SELECT "
-          + COLUMN_SQ_CFG_ID + ", "
-          + COLUMN_SQ_CFG_CONFIGURABLE + ", "
-          + COLUMN_SQ_CFG_NAME + ", "
-          + COLUMN_SQ_CFG_TYPE + ", "
-          + COLUMN_SQ_CFG_INDEX
-          + " FROM " + TABLE_SQ_CONFIG
-          + " WHERE " + COLUMN_SQ_CFG_CONFIGURABLE + " = ? "
-          + " ORDER BY " + COLUMN_SQ_CFG_INDEX;
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_TYPE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_INDEX)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = ? "
+          + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_INDEX);
 
 
   //DML: Insert into config
   public static final String STMT_INSERT_INTO_CONFIG =
-      "INSERT INTO " + TABLE_SQ_CONFIG + " ("
-          + COLUMN_SQ_CFG_CONFIGURABLE + ", "
-          + COLUMN_SQ_CFG_NAME + ", "
-          + COLUMN_SQ_CFG_TYPE + ", "
-          + COLUMN_SQ_CFG_INDEX
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_TYPE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_INDEX)
           + ") VALUES ( ?, ?, ?, ?)";
 
-  /********** INPUT TABLE **************/
+  /**
+   * ******* INPUT TABLE *************
+   */
   // DML: Get inputs for a given config
   public static final String STMT_SELECT_INPUT =
       "SELECT "
-          + COLUMN_SQI_ID + ", "
-          + COLUMN_SQI_NAME + ", "
-          + COLUMN_SQI_CONFIG + ", "
-          + COLUMN_SQI_INDEX + ", "
-          + COLUMN_SQI_TYPE + ", "
-          + COLUMN_SQI_STRMASK + ", "
-          + COLUMN_SQI_STRLENGTH + ", "
-          + COLUMN_SQI_ENUMVALS + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRMASK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + ", "
           + "cast(null as varchar(100))"
-          + " FROM " + TABLE_SQ_INPUT
-          + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
-          + " ORDER BY " + COLUMN_SQI_INDEX;
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = ?"
+          + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX);
 
   // DML: Insert into config input
   public static final String STMT_INSERT_INTO_INPUT =
-      "INSERT INTO " + TABLE_SQ_INPUT + " ("
-          + COLUMN_SQI_NAME + ", "
-          + COLUMN_SQI_CONFIG + ", "
-          + COLUMN_SQI_INDEX + ", "
-          + COLUMN_SQI_TYPE + ", "
-          + COLUMN_SQI_STRMASK + ", "
-          + COLUMN_SQI_STRLENGTH + ", "
-          + COLUMN_SQI_ENUMVALS
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRMASK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS)
           + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-  /**********LINK INPUT TABLE **************/
+  /**
+   * *******LINK INPUT TABLE *************
+   */
   //DML: Get inputs and values for a given link
   public static final String STMT_FETCH_LINK_INPUT =
       "SELECT "
-          + COLUMN_SQI_ID + ", "
-          + COLUMN_SQI_NAME + ", "
-          + COLUMN_SQI_CONFIG + ", "
-          + COLUMN_SQI_INDEX + ", "
-          + COLUMN_SQI_TYPE + ", "
-          + COLUMN_SQI_STRMASK + ", "
-          + COLUMN_SQI_STRLENGTH + ","
-          + COLUMN_SQI_ENUMVALS + ", "
-          + COLUMN_SQ_LNKI_VALUE
-          + " FROM " + TABLE_SQ_INPUT
-          + " LEFT OUTER JOIN " + TABLE_SQ_LINK_INPUT
-          + " ON " + COLUMN_SQ_LNKI_INPUT + " = " + COLUMN_SQI_ID
-          + " AND " + COLUMN_SQ_LNKI_LINK + " = ?"
-          + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
-          + " AND (" + COLUMN_SQ_LNKI_LINK + " = ?" + " OR " + COLUMN_SQ_LNKI_LINK + " IS NULL)"
-          + " ORDER BY " + COLUMN_SQI_INDEX;
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRMASK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + ","
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
+          + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID)
+          + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " = ?"
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = ?"
+          + " AND (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " = ?" + " OR " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " IS NULL)"
+          + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX);
 
-  /**********JOB INPUT TABLE **************/
+  /**
+   * *******JOB INPUT TABLE *************
+   */
   //DML: Fetch inputs and values for a given job
   public static final String STMT_FETCH_JOB_INPUT =
       "SELECT "
-          + COLUMN_SQI_ID + ", "
-          + COLUMN_SQI_NAME + ", "
-          + COLUMN_SQI_CONFIG + ", "
-          + COLUMN_SQI_INDEX + ", "
-          + COLUMN_SQI_TYPE + ", "
-          + COLUMN_SQI_STRMASK + ", "
-          + COLUMN_SQI_STRLENGTH + ", "
-          + COLUMN_SQI_ENUMVALS + ", "
-          + COLUMN_SQBI_VALUE
-          + " FROM " + TABLE_SQ_INPUT
-          + " LEFT OUTER JOIN " + TABLE_SQ_JOB_INPUT
-          + " ON " + COLUMN_SQBI_INPUT + " = " + COLUMN_SQI_ID
-          + " AND  " + COLUMN_SQBI_JOB + " = ?"
-          + " WHERE " + COLUMN_SQI_CONFIG + " = ?"
-          + " AND (" + COLUMN_SQBI_JOB + " = ? OR " + COLUMN_SQBI_JOB + " IS NULL)"
-          + " ORDER BY " + COLUMN_SQI_INDEX;
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRMASK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
+          + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID)
+          + " AND  " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " = ?"
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = ?"
+          + " AND (" + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " = ? OR " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " IS NULL)"
+          + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX);
 
-  /**********LINK TABLE **************/
+  /**
+   * *******LINK TABLE *************
+   */
   // DML: Insert new link
   public static final String STMT_INSERT_LINK =
-      "INSERT INTO " + TABLE_SQ_LINK + " ("
-          + COLUMN_SQ_LNK_NAME + ", "
-          + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-          + COLUMN_SQ_LNK_ENABLED + ", "
-          + COLUMN_SQ_LNK_CREATION_USER + ", "
-          + COLUMN_SQ_LNK_CREATION_DATE + ", "
-          + COLUMN_SQ_LNK_UPDATE_USER + ", "
-          + COLUMN_SQ_LNK_UPDATE_DATE
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE)
           + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new link inputs
   public static final String STMT_INSERT_LINK_INPUT =
-      "INSERT INTO " + TABLE_SQ_LINK_INPUT + " ("
-          + COLUMN_SQ_LNKI_LINK + ", "
-          + COLUMN_SQ_LNKI_INPUT + ", "
-          + COLUMN_SQ_LNKI_VALUE
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE)
           + ") VALUES (?, ?, ?)";
 
   // DML: Update link
   public static final String STMT_UPDATE_LINK =
-      "UPDATE " + TABLE_SQ_LINK + " SET "
-          + COLUMN_SQ_LNK_NAME + " = ?, "
-          + COLUMN_SQ_LNK_UPDATE_USER + " = ?, "
-          + COLUMN_SQ_LNK_UPDATE_DATE + " = ? "
-          + " WHERE " + COLUMN_SQ_LNK_ID + " = ?";
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " SET "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE) + " = ? "
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
 
   // DML: Enable or disable link
   public static final String STMT_ENABLE_LINK =
-      "UPDATE " + TABLE_SQ_LINK + " SET "
-          + COLUMN_SQ_LNK_ENABLED + " = ? "
-          + " WHERE " + COLUMN_SQ_LNK_ID + " = ?";
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " SET "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + " = ? "
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
 
   // DML: Delete rows from link input table
   public static final String STMT_DELETE_LINK_INPUT =
-      "DELETE FROM " + TABLE_SQ_LINK_INPUT
-          + " WHERE " + COLUMN_SQ_LNKI_LINK + " = ?";
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " = ?";
 
   // DML: Delete row from link table
   public static final String STMT_DELETE_LINK =
-      "DELETE FROM " + TABLE_SQ_LINK
-          + " WHERE " + COLUMN_SQ_LNK_ID + " = ?";
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
 
   // DML: Select one specific link
   public static final String STMT_SELECT_LINK_SINGLE =
       "SELECT "
-          + COLUMN_SQ_LNK_ID + ", "
-          + COLUMN_SQ_LNK_NAME + ", "
-          + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-          + COLUMN_SQ_LNK_ENABLED + ", "
-          + COLUMN_SQ_LNK_CREATION_USER + ", "
-          + COLUMN_SQ_LNK_CREATION_DATE + ", "
-          + COLUMN_SQ_LNK_UPDATE_USER + ", "
-          + COLUMN_SQ_LNK_UPDATE_DATE
-          + " FROM " + TABLE_SQ_LINK
-          + " WHERE " + COLUMN_SQ_LNK_ID + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
 
   // DML: Select one specific link by name
   public static final String STMT_SELECT_LINK_SINGLE_BY_NAME =
       "SELECT "
-          + COLUMN_SQ_LNK_ID + ", "
-          + COLUMN_SQ_LNK_NAME + ", "
-          + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-          + COLUMN_SQ_LNK_ENABLED + ", "
-          + COLUMN_SQ_LNK_CREATION_USER + ", "
-          + COLUMN_SQ_LNK_CREATION_DATE + ", "
-          + COLUMN_SQ_LNK_UPDATE_USER + ", "
-          + COLUMN_SQ_LNK_UPDATE_DATE
-          + " FROM " + TABLE_SQ_LINK
-          + " WHERE " + COLUMN_SQ_LNK_NAME + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
 
   // DML: Select all links
   public static final String STMT_SELECT_LINK_ALL =
       "SELECT "
-          + COLUMN_SQ_LNK_ID + ", "
-          + COLUMN_SQ_LNK_NAME + ", "
-          + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-          + COLUMN_SQ_LNK_ENABLED + ", "
-          + COLUMN_SQ_LNK_CREATION_USER + ", "
-          + COLUMN_SQ_LNK_CREATION_DATE + ", "
-          + COLUMN_SQ_LNK_UPDATE_USER + ", "
-          + COLUMN_SQ_LNK_UPDATE_DATE
-          + " FROM " + TABLE_SQ_LINK;
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME);
 
   // DML: Select all links for a specific connector.
   public static final String STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE =
       "SELECT "
-          + COLUMN_SQ_LNK_ID + ", "
-          + COLUMN_SQ_LNK_NAME + ", "
-          + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-          + COLUMN_SQ_LNK_ENABLED + ", "
-          + COLUMN_SQ_LNK_CREATION_USER + ", "
-          + COLUMN_SQ_LNK_CREATION_DATE + ", "
-          + COLUMN_SQ_LNK_UPDATE_USER + ", "
-          + COLUMN_SQ_LNK_UPDATE_DATE
-          + " FROM " + TABLE_SQ_LINK
-          + " WHERE " + COLUMN_SQ_LNK_CONFIGURABLE + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = ?";
 
   // DML: Check if given link exists
   public static final String STMT_SELECT_LINK_CHECK_BY_ID =
-      "SELECT count(*) FROM " + TABLE_SQ_LINK
-          + " WHERE " + COLUMN_SQ_LNK_ID + " = ?";
+      "SELECT count(*) FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
 
-  /**********JOB TABLE **************/
+  /**
+   * *******JOB TABLE *************
+   */
   // DML: Insert new job
   public static final String STMT_INSERT_JOB =
-      "INSERT INTO " + TABLE_SQ_JOB + " ("
-          + COLUMN_SQB_NAME + ", "
-          + COLUMN_SQB_FROM_LINK + ", "
-          + COLUMN_SQB_TO_LINK + ", "
-          + COLUMN_SQB_ENABLED + ", "
-          + COLUMN_SQB_CREATION_USER + ", "
-          + COLUMN_SQB_CREATION_DATE + ", "
-          + COLUMN_SQB_UPDATE_USER + ", "
-          + COLUMN_SQB_UPDATE_DATE
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TO_LINK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ENABLED) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE)
           + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
   // DML: Insert new job inputs
   public static final String STMT_INSERT_JOB_INPUT =
-      "INSERT INTO " + TABLE_SQ_JOB_INPUT + " ("
-          + COLUMN_SQBI_JOB + ", "
-          + COLUMN_SQBI_INPUT + ", "
-          + COLUMN_SQBI_VALUE
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE)
           + ") VALUES (?, ?, ?)";
 
   public static final String STMT_UPDATE_JOB =
-      "UPDATE " + TABLE_SQ_JOB + " SET "
-          + COLUMN_SQB_NAME + " = ?, "
-          + COLUMN_SQB_UPDATE_USER + " = ?, "
-          + COLUMN_SQB_UPDATE_DATE + " = ? "
-          + " WHERE " + COLUMN_SQB_ID + " = ?";
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " SET "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_USER) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE) + " = ? "
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
 
   // DML: Enable or disable job
   public static final String STMT_ENABLE_JOB =
-      "UPDATE " + TABLE_SQ_JOB + " SET "
-          + COLUMN_SQB_ENABLED + " = ? "
-          + " WHERE " + COLUMN_SQB_ID + " = ?";
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " SET "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ENABLED) + " = ? "
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
 
   // DML: Delete rows from job input table
   public static final String STMT_DELETE_JOB_INPUT =
-      "DELETE FROM " + TABLE_SQ_JOB_INPUT
-          + " WHERE " + COLUMN_SQBI_JOB + " = ?";
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " = ?";
 
   // DML: Delete row from job table
   public static final String STMT_DELETE_JOB =
-      "DELETE FROM " + TABLE_SQ_JOB
-          + " WHERE " + COLUMN_SQB_ID + " = ?";
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
 
   // DML: Check if given job exists
   public static final String STMT_SELECT_JOB_CHECK_BY_ID =
-      "SELECT count(*) FROM " + TABLE_SQ_JOB
-          + " WHERE " + COLUMN_SQB_ID + " = ?";
+      "SELECT count(*) FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
 
   // DML: Check if there are jobs for given link
   public static final String STMT_SELECT_JOBS_FOR_LINK_CHECK =
       "SELECT"
           + " count(*)"
-          + " FROM " + TABLE_SQ_JOB
-          + " JOIN " + TABLE_SQ_LINK
-          + " ON " + COLUMN_SQB_FROM_LINK + " = " + COLUMN_SQ_LNK_ID
-          + " WHERE " + COLUMN_SQ_LNK_ID + " = ? ";
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ? ";
 
   //DML: Select all jobs
   public static final String STMT_SELECT_JOB_ALL =
       "SELECT "
-          + "FROM_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-          + "TO_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + ", "
-          + "JOB." + COLUMN_SQB_ID + ", "
-          + "JOB." + COLUMN_SQB_NAME + ", "
-          + "JOB." + COLUMN_SQB_FROM_LINK + ", "
-          + "JOB." + COLUMN_SQB_TO_LINK + ", "
-          + "JOB." + COLUMN_SQB_ENABLED + ", "
-          + "JOB." + COLUMN_SQB_CREATION_USER + ", "
-          + "JOB." + COLUMN_SQB_CREATION_DATE + ", "
-          + "JOB." + COLUMN_SQB_UPDATE_USER + ", "
-          + "JOB." + COLUMN_SQB_UPDATE_DATE
-          + " FROM " + TABLE_SQ_JOB + " JOB"
-          + " LEFT JOIN " + TABLE_SQ_LINK + " FROM_CONNECTOR"
-          + " ON " + COLUMN_SQB_FROM_LINK + " = FROM_CONNECTOR." + COLUMN_SQ_LNK_ID
-          + " LEFT JOIN " + TABLE_SQ_LINK + " TO_CONNECTOR"
-          + " ON " + COLUMN_SQB_TO_LINK + " = TO_CONNECTOR." + COLUMN_SQ_LNK_ID;
+          + "FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + ", "
+          + "TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TO_LINK) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ENABLED) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_USER) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_DATE) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_USER) + ", "
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " JOB"
+          + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " FROM_CONNECTOR"
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + " = FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
+          + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " TO_CONNECTOR"
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TO_LINK) + " = TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID);
 
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE_BY_ID =
       STMT_SELECT_JOB_ALL +
-      " WHERE " + COLUMN_SQB_ID + " = ?";
+          " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
 
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE_BY_NAME =
       STMT_SELECT_JOB_ALL +
-      " WHERE " + COLUMN_SQB_NAME + " = ?";
+          " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?";
 
   // DML: Select all jobs for a Connector
   public static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE =
       STMT_SELECT_JOB_ALL +
-       " WHERE FROM_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + " = ?" +
-       " OR TO_CONNECTOR." + COLUMN_SQ_LNK_CONFIGURABLE + " = ?";
+          " WHERE FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = ?" +
+          " OR TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = ?";
 
-  /**********SUBMISSION TABLE **************/
+  /**
+   * *******SUBMISSION TABLE *************
+   */
   // DML: Insert new submission
   public static final String STMT_INSERT_SUBMISSION =
-      "INSERT INTO " + TABLE_SQ_SUBMISSION + "("
-          + COLUMN_SQS_JOB + ", "
-          + COLUMN_SQS_STATUS + ", "
-          + COLUMN_SQS_CREATION_USER + ", "
-          + COLUMN_SQS_CREATION_DATE + ", "
-          + COLUMN_SQS_UPDATE_USER + ", "
-          + COLUMN_SQS_UPDATE_DATE + ", "
-          + COLUMN_SQS_EXTERNAL_ID + ", "
-          + COLUMN_SQS_EXTERNAL_LINK + ", "
-          + COLUMN_SQS_ERROR_SUMMARY + ", "
-          + COLUMN_SQS_ERROR_DETAILS + ") "
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME) + "("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS) + ") "
           + " VALUES(?, ?, ?, ?, ?, ?, ?, substr(?, 1, 150) , substr(?, 1, 150), substr(?, 1, 750))";
 
   // DML: Update existing submission
   public static final String STMT_UPDATE_SUBMISSION =
-      "UPDATE " + TABLE_SQ_SUBMISSION + " SET "
-          + COLUMN_SQS_STATUS + " = ?, "
-          + COLUMN_SQS_UPDATE_USER + " = ?, "
-          + COLUMN_SQS_UPDATE_DATE + " = ?, "
-          + COLUMN_SQS_ERROR_SUMMARY+ " = substr(?, 1, 150), "
-          + COLUMN_SQS_ERROR_DETAILS + " = substr(?, 1, 750)"
-          + " WHERE " + COLUMN_SQS_ID + " = ?";
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME) + " SET "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_USER) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " = ?, "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + " = substr(?, 1, 150), "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS) + " = substr(?, 1, 750)"
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + " = ?";
 
   // DML: Check if given submission exists
   public static final String STMT_SELECT_SUBMISSION_CHECK =
       "SELECT"
           + " count(*)"
-          + " FROM " + TABLE_SQ_SUBMISSION
-          + " WHERE " + COLUMN_SQS_ID + " = ?";
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + " = ?";
 
   // DML: Purge old entries
   public static final String STMT_PURGE_SUBMISSIONS =
-      "DELETE FROM " + TABLE_SQ_SUBMISSION
-          + " WHERE " + COLUMN_SQS_UPDATE_DATE + " < ?";
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " < ?";
 
   // DML: Get unfinished
   public static final String STMT_SELECT_SUBMISSION_UNFINISHED =
       "SELECT "
-          + COLUMN_SQS_ID + ", "
-          + COLUMN_SQS_JOB + ", "
-          + COLUMN_SQS_STATUS + ", "
-          + COLUMN_SQS_CREATION_USER + ", "
-          + COLUMN_SQS_CREATION_DATE + ", "
-          + COLUMN_SQS_UPDATE_USER + ", "
-          + COLUMN_SQS_UPDATE_DATE + ", "
-          + COLUMN_SQS_EXTERNAL_ID + ", "
-          + COLUMN_SQS_EXTERNAL_LINK + ", "
-          + COLUMN_SQS_ERROR_SUMMARY + ", "
-          + COLUMN_SQS_ERROR_DETAILS
-          + " FROM " + TABLE_SQ_SUBMISSION
-          + " WHERE " + COLUMN_SQS_STATUS + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + " = ?";
 
   // DML : Get all submissions
   public static final String STMT_SELECT_SUBMISSIONS =
       "SELECT "
-          + COLUMN_SQS_ID + ", "
-          + COLUMN_SQS_JOB + ", "
-          + COLUMN_SQS_STATUS + ", "
-          + COLUMN_SQS_CREATION_USER + ", "
-          + COLUMN_SQS_CREATION_DATE + ", "
-          + COLUMN_SQS_UPDATE_USER + ", "
-          + COLUMN_SQS_UPDATE_DATE + ", "
-          + COLUMN_SQS_EXTERNAL_ID + ", "
-          + COLUMN_SQS_EXTERNAL_LINK + ", "
-          + COLUMN_SQS_ERROR_SUMMARY + ", "
-          + COLUMN_SQS_ERROR_DETAILS
-          + " FROM " + TABLE_SQ_SUBMISSION
-          + " ORDER BY " + COLUMN_SQS_UPDATE_DATE + " DESC";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
+          + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " DESC";
 
   // DML: Get submissions for a job
   public static final String STMT_SELECT_SUBMISSIONS_FOR_JOB =
       "SELECT "
-          + COLUMN_SQS_ID + ", "
-          + COLUMN_SQS_JOB + ", "
-          + COLUMN_SQS_STATUS + ", "
-          + COLUMN_SQS_CREATION_USER + ", "
-          + COLUMN_SQS_CREATION_DATE + ", "
-          + COLUMN_SQS_UPDATE_USER + ", "
-          + COLUMN_SQS_UPDATE_DATE + ", "
-          + COLUMN_SQS_EXTERNAL_ID + ", "
-          + COLUMN_SQS_EXTERNAL_LINK + ", "
-          + COLUMN_SQS_ERROR_SUMMARY + ", "
-          + COLUMN_SQS_ERROR_DETAILS
-          + " FROM " + TABLE_SQ_SUBMISSION
-          + " WHERE " + COLUMN_SQS_JOB + " = ?"
-          + " ORDER BY " + COLUMN_SQS_UPDATE_DATE + " DESC";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_USER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " = ?"
+          + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " DESC";
 
   // DML: Select counter group
   public static final String STMT_SELECT_COUNTER_GROUP =
       "SELECT "
-          + COLUMN_SQG_ID + ", "
-          + COLUMN_SQG_NAME + " "
-          + "FROM " + TABLE_SQ_COUNTER_GROUP + " "
-          + "WHERE " + COLUMN_SQG_NAME + " = substr(?, 1, 75)";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQG_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQG_NAME) + " "
+          + "FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_GROUP_NAME) + " "
+          + "WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQG_NAME) + " = substr(?, 1, 75)";
 
   // DML: Insert new counter group
   public static final String STMT_INSERT_COUNTER_GROUP =
-      "INSERT INTO " + TABLE_SQ_COUNTER_GROUP + " ("
-          + COLUMN_SQG_NAME + ") "
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_GROUP_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQG_NAME) + ") "
           + "VALUES (substr(?, 1, 75))";
 
   // DML: Select counter
   public static final String STMT_SELECT_COUNTER =
       "SELECT "
-          + COLUMN_SQR_ID + ", "
-          + COLUMN_SQR_NAME + " "
-          + "FROM " + TABLE_SQ_COUNTER + " "
-          + "WHERE " + COLUMN_SQR_NAME + " = substr(?, 1, 75)";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQR_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQR_NAME) + " "
+          + "FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_NAME) + " "
+          + "WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQR_NAME) + " = substr(?, 1, 75)";
 
   // DML: Insert new counter
   public static final String STMT_INSERT_COUNTER =
-      "INSERT INTO " + TABLE_SQ_COUNTER + " ("
-          + COLUMN_SQR_NAME + ") "
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQR_NAME) + ") "
           + "VALUES (substr(?, 1, 75))";
 
   // DML: Insert new counter submission
   public static final String STMT_INSERT_COUNTER_SUBMISSION =
-      "INSERT INTO " + TABLE_SQ_COUNTER_SUBMISSION + " ("
-          + COLUMN_SQRS_GROUP + ", "
-          + COLUMN_SQRS_COUNTER + ", "
-          + COLUMN_SQRS_SUBMISSION + ", "
-          + COLUMN_SQRS_VALUE + ") "
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_GROUP) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_COUNTER) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_VALUE) + ") "
           + "VALUES (?, ?, ?, ?)";
 
   // DML: Select counter submission
   public static final String STMT_SELECT_COUNTER_SUBMISSION =
       "SELECT "
-          + COLUMN_SQG_NAME + ", "
-          + COLUMN_SQR_NAME + ", "
-          + COLUMN_SQRS_VALUE + " "
-          + "FROM " + TABLE_SQ_COUNTER_SUBMISSION + " "
-          + "LEFT JOIN " + TABLE_SQ_COUNTER_GROUP
-          + " ON " + COLUMN_SQRS_GROUP + " = " + COLUMN_SQG_ID + " "
-          + "LEFT JOIN " + TABLE_SQ_COUNTER
-          + " ON " + COLUMN_SQRS_COUNTER + " = " + COLUMN_SQR_ID + " "
-          + "WHERE " + COLUMN_SQRS_SUBMISSION + " = ? ";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQG_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQR_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_VALUE) + " "
+          + "FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME) + " "
+          + "LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_GROUP_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_GROUP) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQG_ID) + " "
+          + "LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_COUNTER) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQR_ID) + " "
+          + "WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + " = ? ";
 
   // DML: Delete rows from counter submission table
   public static final String STMT_DELETE_COUNTER_SUBMISSION =
-      "DELETE FROM " + TABLE_SQ_COUNTER_SUBMISSION
-          + " WHERE " + COLUMN_SQRS_SUBMISSION + " = ?";
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + " = ?";
 
-  /******* CONFIG and CONNECTOR DIRECTIONS ****/
+  /**
+   * **** CONFIG and CONNECTOR DIRECTIONS ***
+   */
   public static final String STMT_INSERT_SQ_CONNECTOR_DIRECTIONS =
-      "INSERT INTO " + TABLE_SQ_CONNECTOR_DIRECTIONS + " "
-          + "(" + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION + ")"
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_DIRECTIONS_NAME) + " "
+          + "(" + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_CONNECTOR) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_DIRECTION) + ")"
           + " VALUES (?, ?)";
 
   public static final String STMT_INSERT_SQ_CONFIG_DIRECTIONS =
-      "INSERT INTO " + TABLE_SQ_CONFIG_DIRECTIONS + " "
-          + "(" + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION + ")"
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_DIRECTIONS_NAME) + " "
+          + "(" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_DIRECTION) + ")"
           + " VALUES (?, ?)";
 
   public static final String STMT_SELECT_SQ_CONNECTOR_DIRECTIONS_ALL =
-      "SELECT " + COLUMN_SQCD_CONNECTOR + ", " + COLUMN_SQCD_DIRECTION
-          + " FROM " + TABLE_SQ_CONNECTOR_DIRECTIONS;
+      "SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_CONNECTOR) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_DIRECTION)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_DIRECTIONS_NAME);
 
   public static final String STMT_SELECT_SQ_CONNECTOR_DIRECTIONS =
       STMT_SELECT_SQ_CONNECTOR_DIRECTIONS_ALL + " WHERE "
-          + COLUMN_SQCD_CONNECTOR + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_CONNECTOR) + " = ?";
 
   public static final String STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL =
-      "SELECT " + COLUMN_SQ_CFG_DIR_CONFIG + ", " + COLUMN_SQ_CFG_DIR_DIRECTION
-          + " FROM " + TABLE_SQ_CONFIG_DIRECTIONS;
+      "SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_DIRECTION)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_DIRECTIONS_NAME);
 
   public static final String STMT_SELECT_SQ_CONFIG_DIRECTIONS =
       STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL + " WHERE "
-          + COLUMN_SQ_CFG_DIR_CONFIG + " = ?";
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG) + " = ?";
 
   // Delete the config directions for a connector
   public static final String STMT_DELETE_DIRECTIONS_FOR_CONFIGURABLE =
-      "DELETE FROM " + TABLE_SQ_CONFIG_DIRECTIONS
-          + " WHERE " + COLUMN_SQ_CFG_DIR_CONFIG
-          + " IN (SELECT " + COLUMN_SQ_CFG_ID + " FROM " + TABLE_SQ_CONFIG
-              + " WHERE " + COLUMN_SQ_CFG_CONFIGURABLE + " = ?)";
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_DIRECTIONS_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG)
+          + " IN (SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = ?)";
+
+  public String getStmtSelectSqdIdBySqdName() {
+    return STMT_SELECT_SQD_ID_BY_SQD_NAME;
+  }
+
+  public String getStmtSelectSqConfigDirections() {
+    return STMT_SELECT_SQ_CONFIG_DIRECTIONS;
+  }
+
+  public String getStmtDeleteInputsForConfigurable() {
+    return STMT_DELETE_INPUTS_FOR_CONFIGURABLE;
+  }
+
+  public String getStmtUpdateConfigurable() {
+    return STMT_UPDATE_CONFIGURABLE;
+  }
+
+  public String getStmtSelectConfigForConfigurable() {
+    return STMT_SELECT_CONFIG_FOR_CONFIGURABLE;
+  }
+
+  public String getStmtInsertIntoConfig() {
+    return STMT_INSERT_INTO_CONFIG;
+  }
+
+  public String getStmtSelectInput() {
+    return STMT_SELECT_INPUT;
+  }
+
+  public String getStmtInsertIntoInput() {
+    return STMT_INSERT_INTO_INPUT;
+  }
+
+  public String getStmtFetchLinkInput() {
+    return STMT_FETCH_LINK_INPUT;
+  }
+
+  public String getStmtFetchJobInput() {
+    return STMT_FETCH_JOB_INPUT;
+  }
+
+  public String getStmtInsertLink() {
+    return STMT_INSERT_LINK;
+  }
+
+  public String getStmtInsertLinkInput() {
+    return STMT_INSERT_LINK_INPUT;
+  }
+
+  public String getStmtUpdateLink() {
+    return STMT_UPDATE_LINK;
+  }
+
+  public String getStmtEnableLink() {
+    return STMT_ENABLE_LINK;
+  }
+
+  public String getStmtDeleteLinkInput() {
+    return STMT_DELETE_LINK_INPUT;
+  }
+
+  public String getStmtDeleteLink() {
+    return STMT_DELETE_LINK;
+  }
+
+  public String getStmtSelectLinkSingle() {
+    return STMT_SELECT_LINK_SINGLE;
+  }
+
+  public String getStmtSelectLinkSingleByName() {
+    return STMT_SELECT_LINK_SINGLE_BY_NAME;
+  }
+
+  public String getStmtSelectLinkAll() {
+    return STMT_SELECT_LINK_ALL;
+  }
+
+  public String getStmtSelectLinkForConnectorConfigurable() {
+    return STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE;
+  }
+
+  public String getStmtSelectLinkCheckById() {
+    return STMT_SELECT_LINK_CHECK_BY_ID;
+  }
+
+  public String getStmtInsertJob() {
+    return STMT_INSERT_JOB;
+  }
+
+  public String getStmtInsertJobInput() {
+    return STMT_INSERT_JOB_INPUT;
+  }
+
+  public String getStmtUpdateJob() {
+    return STMT_UPDATE_JOB;
+  }
+
+  public String getStmtEnableJob() {
+    return STMT_ENABLE_JOB;
+  }
+
+  public String getStmtDeleteJobInput() {
+    return STMT_DELETE_JOB_INPUT;
+  }
+
+  public String getStmtDeleteJob() {
+    return STMT_DELETE_JOB;
+  }
+
+  public String getStmtSelectJobCheckById() {
+    return STMT_SELECT_JOB_CHECK_BY_ID;
+  }
+
+  public String getStmtSelectJobsForLinkCheck() {
+    return STMT_SELECT_JOBS_FOR_LINK_CHECK;
+  }
+
+  public String getStmtSelectJobAll() {
+    return STMT_SELECT_JOB_ALL;
+  }
+
+  public String getStmtSelectJobSingleById() {
+    return STMT_SELECT_JOB_SINGLE_BY_ID;
+  }
+
+  public String getStmtSelectJobSingleByName() {
+    return STMT_SELECT_JOB_SINGLE_BY_NAME;
+  }
+
+  public String getStmtSelectAllJobsForConnectorConfigurable() {
+    return STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE;
+  }
+
+  public String getStmtInsertSubmission() {
+    return STMT_INSERT_SUBMISSION;
+  }
+
+  public String getStmtUpdateSubmission() {
+    return STMT_UPDATE_SUBMISSION;
+  }
+
+  public String getStmtSelectSubmissionCheck() {
+    return STMT_SELECT_SUBMISSION_CHECK;
+  }
+
+  public String getStmtPurgeSubmissions() {
+    return STMT_PURGE_SUBMISSIONS;
+  }
+
+  public String getStmtSelectSubmissionUnfinished() {
+    return STMT_SELECT_SUBMISSION_UNFINISHED;
+  }
+
+  public String getStmtSelectSubmissions() {
+    return STMT_SELECT_SUBMISSIONS;
+  }
+
+  public String getStmtSelectSubmissionsForJob() {
+    return STMT_SELECT_SUBMISSIONS_FOR_JOB;
+  }
+
+  public String getStmtSelectCounterGroup() {
+    return STMT_SELECT_COUNTER_GROUP;
+  }
+
+  public String getStmtInsertCounterGroup() {
+    return STMT_INSERT_COUNTER_GROUP;
+  }
+
+  public String getStmtSelectCounter() {
+    return STMT_SELECT_COUNTER;
+  }
+
+  public String getStmtInsertCounter() {
+    return STMT_INSERT_COUNTER;
+  }
+
+  public String getStmtInsertCounterSubmission() {
+    return STMT_INSERT_COUNTER_SUBMISSION;
+  }
+
+  public String getStmtSelectCounterSubmission() {
+    return STMT_SELECT_COUNTER_SUBMISSION;
+  }
+
+  public String getStmtDeleteCounterSubmission() {
+    return STMT_DELETE_COUNTER_SUBMISSION;
+  }
+
+  public String getStmtInsertSqConnectorDirections() {
+    return STMT_INSERT_SQ_CONNECTOR_DIRECTIONS;
+  }
+
+  public String getStmtInsertSqConfigDirections() {
+    return STMT_INSERT_SQ_CONFIG_DIRECTIONS;
+  }
+
+  public String getStmtSelectSqConnectorDirectionsAll() {
+    return STMT_SELECT_SQ_CONNECTOR_DIRECTIONS_ALL;
+  }
+
+  public String getStmtSelectSqConnectorDirections() {
+    return STMT_SELECT_SQ_CONNECTOR_DIRECTIONS;
+  }
+
+  public String getStmtSelectSqConfigDirectionsAll() {
+    return STMT_SELECT_SQ_CONFIG_DIRECTIONS_ALL;
+  }
+
+  public String getStmtSelectSqdNameBySqdId() {
+    return STMT_SELECT_SQD_NAME_BY_SQD_ID;
+  }
+
+  public String getStmtSelectFromConfigurable() {
+    return STMT_SELECT_FROM_CONFIGURABLE;
+  }
+
+  public String getStmtSelectConfigurableAllForType() {
+    return STMT_SELECT_CONFIGURABLE_ALL_FOR_TYPE;
+  }
+
+  public String getStmtInsertIntoConfigurable() {
+    return STMT_INSERT_INTO_CONFIGURABLE;
+  }
+
+  public String getStmtDeleteConfigsForConfigurable() {
+    return STMT_DELETE_CONFIGS_FOR_CONFIGURABLE;
+  }
+
+  public String getStmtDeleteDirectionsForConfigurable() {
+    return STMT_DELETE_DIRECTIONS_FOR_CONFIGURABLE;
+  }
 }

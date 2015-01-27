@@ -18,6 +18,8 @@
 package org.apache.sqoop.repository.derby;
 
 
+import org.apache.sqoop.repository.common.CommonRepoUtils;
+
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
 
@@ -275,7 +277,7 @@ public final class DerbySchemaCreateQuery {
   /**************************** DERBY CREATE SCHEMA queries ********************************/
   // DDL: Create schema
   public static final String QUERY_CREATE_SCHEMA_SQOOP =
-   "CREATE SCHEMA " + SCHEMA_SQOOP;
+   "CREATE SCHEMA " + CommonRepoUtils.escapeSchemaName(SCHEMA_SQOOP);
 
   public static final String QUERY_SYSSCHEMA_SQOOP =
    "SELECT SCHEMAID FROM SYS.SYSSCHEMAS WHERE SCHEMANAME = '"
@@ -283,200 +285,200 @@ public final class DerbySchemaCreateQuery {
 
   // DDL: Create table SQ_SYSTEM
   public static final String QUERY_CREATE_TABLE_SQ_SYSTEM =
-    "CREATE TABLE " + TABLE_SQ_SYSTEM + " ("
-    + COLUMN_SQM_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-    + COLUMN_SQM_KEY + " VARCHAR(64), "
-    + COLUMN_SQM_VALUE + " VARCHAR(64) "
+    "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SYSTEM_NAME) + " ("
+    + CommonRepoUtils.escapeColumnName(COLUMN_SQM_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+    + CommonRepoUtils.escapeColumnName(COLUMN_SQM_KEY) + " VARCHAR(64), "
+    + CommonRepoUtils.escapeColumnName(COLUMN_SQM_VALUE) + " VARCHAR(64) "
     + ")";
 
   // DDL: Create table SQ_DIRECTION
   public static final String QUERY_CREATE_TABLE_SQ_DIRECTION =
-   "CREATE TABLE " + TABLE_SQ_DIRECTION + " ("
-   + COLUMN_SQD_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-   + COLUMN_SQD_NAME + " VARCHAR(64)"
+   "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME) + " ("
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQD_NAME) + " VARCHAR(64)"
    + ")";
 
   // DDL: Create table SQ_CONNECTOR
   @Deprecated // used only for upgrade
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR =
-      "CREATE TABLE " + TABLE_SQ_CONNECTOR + " ("
-      + COLUMN_SQC_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQC_NAME + " VARCHAR(64), "
-      + COLUMN_SQC_CLASS + " VARCHAR(255), "
-      + COLUMN_SQC_VERSION + " VARCHAR(64) "
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + " VARCHAR(64), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQC_CLASS) + " VARCHAR(255), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQC_VERSION) + " VARCHAR(64) "
       + ")";
 
   // DDL: Create table SQ_CONNECTOR_DIRECTIONS
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS =
-      "CREATE TABLE " + TABLE_SQ_CONNECTOR_DIRECTIONS + " ("
-      + COLUMN_SQCD_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQCD_CONNECTOR + " BIGINT, "
-      + COLUMN_SQCD_DIRECTION + " BIGINT, "
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_DIRECTIONS_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_CONNECTOR) + " BIGINT, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_DIRECTION) + " BIGINT, "
       + "CONSTRAINT " + CONSTRAINT_SQCD_SQC + " "
-        + "FOREIGN KEY (" + COLUMN_SQCD_CONNECTOR + ") "
-          + "REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + "), "
+        + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_CONNECTOR) + ") "
+          + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + "), "
       + "CONSTRAINT " + CONSTRAINT_SQCD_SQD + " "
-        + "FOREIGN KEY (" + COLUMN_SQCD_DIRECTION + ") "
-          + "REFERENCES " + TABLE_SQ_DIRECTION + " (" + COLUMN_SQD_ID + ")"
+        + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQCD_DIRECTION) + ") "
+          + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID) + ")"
       + ")";
 
    // DDL: Create table SQ_FORM
   public static final String QUERY_CREATE_TABLE_SQ_FORM =
-      "CREATE TABLE " + TABLE_SQ_FORM + " ("
-      + COLUMN_SQF_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQF_CONNECTOR + " BIGINT, "
-      + COLUMN_SQF_OPERATION + " VARCHAR(32), "
-      + COLUMN_SQF_NAME + " VARCHAR(64), "
-      + COLUMN_SQF_TYPE + " VARCHAR(32), "
-      + COLUMN_SQF_INDEX + " SMALLINT, "
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_FORM_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQF_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQF_CONNECTOR) + " BIGINT, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQF_OPERATION) + " VARCHAR(32), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQF_NAME) + " VARCHAR(64), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQF_TYPE) + " VARCHAR(32), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQF_INDEX) + " SMALLINT, "
       + "CONSTRAINT " + CONSTRAINT_SQF_SQC + " "
-        + "FOREIGN KEY (" + COLUMN_SQF_CONNECTOR + ") "
-          + "REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+        + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQF_CONNECTOR) + ") "
+          + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ")"
       + ")";
 
   // DDL: Create table SQ_CONFIG_DIRECTIONS ( same as SQ_FORM_DIRECTIONS)
   // Note: that the form was renamed to config at one point and this code was added after the rename
   // DDL: Create table SQ_CONFIG_DIRECTIONS
  public static final String QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS =
-     "CREATE TABLE " + TABLE_SQ_CONFIG_DIRECTIONS + " ("
-     + COLUMN_SQ_CFG_DIR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-     + COLUMN_SQ_CFG_DIR_CONFIG + " BIGINT, "
-     + COLUMN_SQ_CFG_DIR_DIRECTION + " BIGINT, "
+     "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_DIRECTIONS_NAME) + " ("
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG) + " BIGINT, "
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_DIRECTION) + " BIGINT, "
      + "CONSTRAINT " + CONSTRAINT_SQ_CFG_DIR_CONFIG + " "
-       + "FOREIGN KEY (" + COLUMN_SQ_CFG_DIR_CONFIG + ") "
-         + "REFERENCES " + TABLE_SQ_CONFIG + " (" + COLUMN_SQ_CFG_ID + "), "
+       + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG) + ") "
+         + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + "), "
      + "CONSTRAINT " + CONSTRAINT_SQ_CFG_DIR_DIRECTION + " "
-       + "FOREIGN KEY (" + COLUMN_SQ_CFG_DIR_DIRECTION + ") "
-         + "REFERENCES " + TABLE_SQ_DIRECTION + " (" + COLUMN_SQD_ID + ")"
+       + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_DIRECTION) + ") "
+         + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID) + ")"
      + ")";
 
 
   // DDL: Create table SQ_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_INPUT =
-      "CREATE TABLE " + TABLE_SQ_INPUT + " ("
-      + COLUMN_SQI_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQI_NAME + " VARCHAR(64), "
-      + COLUMN_SQI_FORM + " BIGINT, "
-      + COLUMN_SQI_INDEX + " SMALLINT, "
-      + COLUMN_SQI_TYPE + " VARCHAR(32), "
-      + COLUMN_SQI_STRMASK + " BOOLEAN, "
-      + COLUMN_SQI_STRLENGTH + " SMALLINT, "
-      + COLUMN_SQI_ENUMVALS + " VARCHAR(100),"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + " VARCHAR(64), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_FORM) + " BIGINT, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX) + " SMALLINT, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + " VARCHAR(32), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRMASK) + " BOOLEAN, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + " SMALLINT, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + " VARCHAR(100),"
       + "CONSTRAINT " + CONSTRAINT_SQI_SQF + " "
-        + "FOREIGN KEY (" + COLUMN_SQI_FORM + ") "
-          + "REFERENCES " + TABLE_SQ_FORM + " (" + COLUMN_SQF_ID + ")"
+        + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_FORM) + ") "
+          + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_FORM_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQF_ID) + ")"
       + ")";
 
   // DDL: Create table SQ_CONNECTION
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION =
-      "CREATE TABLE " + TABLE_SQ_CONNECTION + " ("
-      + COLUMN_SQN_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-      + COLUMN_SQN_CONNECTOR + " BIGINT, "
-      + COLUMN_SQN_NAME  + " VARCHAR(32),"
-      + COLUMN_SQN_CREATION_DATE + " TIMESTAMP,"
-      + COLUMN_SQN_UPDATE_DATE + " TIMESTAMP,"
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQN_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQN_CONNECTOR) + " BIGINT, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQN_NAME)  + " VARCHAR(32),"
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQN_CREATION_DATE) + " TIMESTAMP,"
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQN_UPDATE_DATE) + " TIMESTAMP,"
       + "CONSTRAINT " + CONSTRAINT_SQN_SQC + " "
-        + "FOREIGN KEY(" + COLUMN_SQN_CONNECTOR + ") "
-          + " REFERENCES " + TABLE_SQ_CONNECTOR + " (" + COLUMN_SQC_ID + ")"
+        + "FOREIGN KEY(" + CommonRepoUtils.escapeColumnName(COLUMN_SQN_CONNECTOR) + ") "
+          + " REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ")"
       + ")";
 //DDL: Create table SQ_JOB
  public static final String QUERY_CREATE_TABLE_SQ_JOB =
-     "CREATE TABLE " + TABLE_SQ_JOB + " ("
-     + COLUMN_SQB_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
-     + COLUMN_SQB_CONNECTION + " BIGINT, "
-     + COLUMN_SQB_NAME + " VARCHAR(64), "
-     + COLUMN_SQB_TYPE + " VARCHAR(64),"
-     + COLUMN_SQB_CREATION_DATE + " TIMESTAMP,"
-     + COLUMN_SQB_UPDATE_DATE + " TIMESTAMP,"
+     "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " ("
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CONNECTION) + " BIGINT, "
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " VARCHAR(64), "
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TYPE) + " VARCHAR(64),"
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_DATE) + " TIMESTAMP,"
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE) + " TIMESTAMP,"
      + "CONSTRAINT " + CONSTRAINT_SQB_SQN + " "
-       + "FOREIGN KEY(" + COLUMN_SQB_CONNECTION + ") "
-         + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + ")"
+       + "FOREIGN KEY(" + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CONNECTION) + ") "
+         + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQN_ID) + ")"
      + ")";
 
 
   // DDL: Create table SQ_CONNECTION_INPUT
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION_INPUT =
-      "CREATE TABLE " + TABLE_SQ_CONNECTION_INPUT + " ("
-      + COLUMN_SQNI_CONNECTION + " BIGINT, "
-      + COLUMN_SQNI_INPUT + " BIGINT, "
-      + COLUMN_SQNI_VALUE + " LONG VARCHAR,"
-      + "PRIMARY KEY (" + COLUMN_SQNI_CONNECTION + ", " + COLUMN_SQNI_INPUT + "), "
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_INPUT_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_CONNECTION) + " BIGINT, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_INPUT) + " BIGINT, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_VALUE) + " LONG VARCHAR,"
+      + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_CONNECTION) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_INPUT) + "), "
       + "CONSTRAINT " + CONSTRAINT_SQNI_SQN + " "
-        + "FOREIGN KEY (" + COLUMN_SQNI_CONNECTION + ") "
-          + "REFERENCES " + TABLE_SQ_CONNECTION + " (" + COLUMN_SQN_ID + "),"
+        + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_CONNECTION) + ") "
+          + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQN_ID) + "),"
       + "CONSTRAINT " + CONSTRAINT_SQNI_SQI + " "
-        + "FOREIGN KEY (" + COLUMN_SQNI_INPUT + ") "
-          + "REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
+        + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_INPUT) + ") "
+          + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")"
       + ")";
 
 // DDL: Create table SQ_JOB_INPUT
  public static final String QUERY_CREATE_TABLE_SQ_JOB_INPUT =
-     "CREATE TABLE " + TABLE_SQ_JOB_INPUT + " ("
-     + COLUMN_SQBI_JOB + " BIGINT, "
-     + COLUMN_SQBI_INPUT + " BIGINT, "
-     + COLUMN_SQBI_VALUE + " LONG VARCHAR,"
-     + " PRIMARY KEY (" + COLUMN_SQBI_JOB + ", " + COLUMN_SQBI_INPUT + "), "
+     "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME) + " ("
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " BIGINT, "
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + " BIGINT, "
+     + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE) + " LONG VARCHAR,"
+     + " PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + "), "
      + " CONSTRAINT " + CONSTRAINT_SQBI_SQB + " "
-       + "FOREIGN KEY (" + COLUMN_SQBI_JOB + ") "
-       +  "REFERENCES " + TABLE_SQ_JOB + " (" + COLUMN_SQB_ID + "), "
+       + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + ") "
+       +  "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + "), "
      + " CONSTRAINT " + CONSTRAINT_SQBI_SQI + " "
-       + "FOREIGN KEY (" + COLUMN_SQBI_INPUT + ") "
-         + "REFERENCES " + TABLE_SQ_INPUT + " (" + COLUMN_SQI_ID + ")"
+       + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + ") "
+         + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")"
      + ")";
 
  // DDL: Create table SQ_SUBMISSION
  public static final String QUERY_CREATE_TABLE_SQ_SUBMISSION =
-   "CREATE TABLE " + TABLE_SQ_SUBMISSION + " ("
-   + COLUMN_SQS_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
-   + COLUMN_SQS_JOB + " BIGINT, "
-   + COLUMN_SQS_STATUS + " VARCHAR(20), "
-   + COLUMN_SQS_CREATION_DATE + " TIMESTAMP,"
-   + COLUMN_SQS_UPDATE_DATE + " TIMESTAMP,"
-   + COLUMN_SQS_EXTERNAL_ID + " VARCHAR(50), "
-   + COLUMN_SQS_EXTERNAL_LINK + " VARCHAR(150), "
-   + COLUMN_SQS_EXCEPTION + " VARCHAR(150), "
-   + COLUMN_SQS_EXCEPTION_TRACE + " VARCHAR(750), "
-   + "PRIMARY KEY (" + COLUMN_SQS_ID + "), "
+   "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME) + " ("
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " BIGINT, "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + " VARCHAR(20), "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_CREATION_DATE) + " TIMESTAMP,"
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " TIMESTAMP,"
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + " VARCHAR(50), "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + " VARCHAR(150), "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXCEPTION) + " VARCHAR(150), "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXCEPTION_TRACE) + " VARCHAR(750), "
+   + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + "), "
    + "CONSTRAINT " + CONSTRAINT_SQS_SQB + " "
-     + "FOREIGN KEY (" + COLUMN_SQS_JOB + ") "
-       + "REFERENCES " + TABLE_SQ_JOB + "("  + COLUMN_SQB_ID + ") ON DELETE CASCADE"
+     + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + ") "
+       + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + ") ON DELETE CASCADE"
    +  ")";
 
  // DDL: Create table SQ_COUNTER_GROUP
  public static final String QUERY_CREATE_TABLE_SQ_COUNTER_GROUP =
-   "CREATE TABLE " + TABLE_SQ_COUNTER_GROUP + " ("
-   + COLUMN_SQG_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
-   + COLUMN_SQG_NAME + " VARCHAR(75), "
-   + "PRIMARY KEY (" + COLUMN_SQG_ID + "),"
-   + "UNIQUE ( " + COLUMN_SQG_NAME + ")"
+   "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_GROUP_NAME) + " ("
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQG_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQG_NAME) + " VARCHAR(75), "
+   + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQG_ID) + "),"
+   + "UNIQUE ( " + CommonRepoUtils.escapeColumnName(COLUMN_SQG_NAME) + ")"
    + ")";
 
  // DDL: Create table SQ_COUNTER
  public static final String QUERY_CREATE_TABLE_SQ_COUNTER =
-   "CREATE TABLE " + TABLE_SQ_COUNTER + " ("
-   + COLUMN_SQR_ID + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
-   + COLUMN_SQR_NAME + " VARCHAR(75), "
-   + "PRIMARY KEY (" + COLUMN_SQR_ID + "), "
-   + "UNIQUE ( " + COLUMN_SQR_NAME + ")"
+   "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_NAME) + " ("
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQR_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQR_NAME) + " VARCHAR(75), "
+   + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQR_ID) + "), "
+   + "UNIQUE ( " + CommonRepoUtils.escapeColumnName(COLUMN_SQR_NAME) + ")"
    + ")";
 
  // DDL: Create table SQ_COUNTER_SUBMISSION
  public static final String QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION =
-   "CREATE TABLE " + TABLE_SQ_COUNTER_SUBMISSION + " ("
-   + COLUMN_SQRS_GROUP + " BIGINT, "
-   + COLUMN_SQRS_COUNTER + " BIGINT, "
-   + COLUMN_SQRS_SUBMISSION + " BIGINT, "
-   + COLUMN_SQRS_VALUE + " BIGINT, "
-   + "PRIMARY KEY (" + COLUMN_SQRS_GROUP + ", " + COLUMN_SQRS_COUNTER + ", " + COLUMN_SQRS_SUBMISSION + "), "
+   "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME) + " ("
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_GROUP) + " BIGINT, "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_COUNTER) + " BIGINT, "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + " BIGINT, "
+   + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_VALUE) + " BIGINT, "
+   + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_GROUP) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_COUNTER) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + "), "
    + "CONSTRAINT " + CONSTRAINT_SQRS_SQG + " "
-     + "FOREIGN KEY (" + COLUMN_SQRS_GROUP + ") "
-       + "REFERENCES " + TABLE_SQ_COUNTER_GROUP + "(" + COLUMN_SQG_ID + "), "
+     + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_GROUP) + ") "
+       + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_GROUP_NAME) + "(" + CommonRepoUtils.escapeColumnName(COLUMN_SQG_ID) + "), "
    + "CONSTRAINT " + CONSTRAINT_SQRS_SQR + " "
-     + "FOREIGN KEY (" + COLUMN_SQRS_COUNTER + ") "
-       + "REFERENCES " + TABLE_SQ_COUNTER + "(" + COLUMN_SQR_ID + "), "
+     + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_COUNTER) + ") "
+       + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_NAME) + "(" + CommonRepoUtils.escapeColumnName(COLUMN_SQR_ID) + "), "
    + "CONSTRAINT " + CONSTRAINT_SQRS_SQS + " "
-     + "FOREIGN KEY (" + COLUMN_SQRS_SUBMISSION + ") "
-       + "REFERENCES " + TABLE_SQ_SUBMISSION + "(" + COLUMN_SQS_ID + ") ON DELETE CASCADE "
+     + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + ") "
+       + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME) + "(" + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + ") ON DELETE CASCADE "
    + ")";
 
   private DerbySchemaCreateQuery() {

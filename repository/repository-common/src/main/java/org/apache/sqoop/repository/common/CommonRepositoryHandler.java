@@ -70,6 +70,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   private static final Logger LOG =
       Logger.getLogger(CommonRepositoryHandler.class);
 
+  protected CommonRepositoryInsertUpdateDeleteSelectQuery crudQueries;
+
+  public CommonRepositoryHandler() {
+    crudQueries = new CommonRepositoryInsertUpdateDeleteSelectQuery();
+  }
+
   /**
    * Name to be used during logging
    *
@@ -88,7 +94,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     MConnector mc = null;
     PreparedStatement connectorFetchStmt = null;
     try {
-      connectorFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_FROM_CONFIGURABLE);
+      connectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable());
       connectorFetchStmt.setString(1, shortName);
 
       List<MConnector> connectors = loadConnectors(connectorFetchStmt, conn);
@@ -118,7 +124,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public List<MConnector> findConnectors(Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_CONFIGURABLE_ALL_FOR_TYPE);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectConfigurableAllForType());
       stmt.setString(1, MConfigurableType.CONNECTOR.name());
 
       return loadConnectors(stmt, conn);
@@ -150,8 +156,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public List<MJob> findJobsForConnector(long connectorId, Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn
-          .prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectAllJobsForConnectorConfigurable());
       stmt.setLong(1, connectorId);
       stmt.setLong(2, connectorId);
       return loadJobs(stmt, conn);
@@ -179,10 +184,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement deleteConfigDirection = null;
     PreparedStatement deleteInput = null;
     try {
-      updateConnectorStatement = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_UPDATE_CONFIGURABLE);
-      deleteInput = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_INPUTS_FOR_CONFIGURABLE);
-      deleteConfigDirection = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_DIRECTIONS_FOR_CONFIGURABLE);
-      deleteConfig = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_CONFIGS_FOR_CONFIGURABLE);
+      updateConnectorStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
+      deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
+      deleteConfigDirection = conn.prepareStatement(crudQueries.getStmtDeleteDirectionsForConfigurable());
+      deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());
 
       updateConnectorStatement.setString(1, mConnector.getUniqueName());
       updateConnectorStatement.setString(2, mConnector.getClassName());
@@ -222,9 +227,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteInput = null;
     try {
-      updateDriverStatement = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_UPDATE_CONFIGURABLE);
-      deleteInput = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_INPUTS_FOR_CONFIGURABLE);
-      deleteConfig = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_CONFIGS_FOR_CONFIGURABLE);
+      updateDriverStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
+      deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
+      deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());
       updateDriverStatement.setString(1, mDriver.getUniqueName());
       updateDriverStatement.setString(2, Driver.getClassName());
       updateDriverStatement.setString(3, mDriver.getVersion());
@@ -258,10 +263,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement baseConfigStmt = null;
     PreparedStatement baseInputStmt = null;
     try {
-      baseConfigStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_CONFIG,
+      baseConfigStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfig(),
           Statement.RETURN_GENERATED_KEYS);
 
-      baseInputStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_INPUT,
+      baseInputStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoInput(),
           Statement.RETURN_GENERATED_KEYS);
 
       // Register a driver config as a job type with no direction
@@ -287,7 +292,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     MDriver mDriver;
     try {
-      driverFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_FROM_CONFIGURABLE);
+      driverFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable());
       driverFetchStmt.setString(1, shortName);
 
       ResultSet rsDriverSet = driverFetchStmt.executeQuery();
@@ -297,10 +302,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       Long driverId = rsDriverSet.getLong(1);
       String driverVersion = rsDriverSet.getString(4);
 
-      driverConfigFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
+      driverConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
       driverConfigFetchStmt.setLong(1, driverId);
 
-      driverConfigInputFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_INPUT);
+      driverConfigInputFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectInput());
       List<MConfig> driverConfigs = new ArrayList<MConfig>();
       loadDriverConfigs(driverConfigs, driverConfigFetchStmt, driverConfigInputFetchStmt, 1);
 
@@ -360,7 +365,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     int result;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_LINK,
+      stmt = conn.prepareStatement(crudQueries.getStmtInsertLink(),
           Statement.RETURN_GENERATED_KEYS);
       stmt.setString(1, link.getName());
       stmt.setLong(2, link.getConnectorId());
@@ -384,7 +389,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
       long connectionId = rsetConnectionId.getLong(1);
 
-      createInputValues(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_LINK_INPUT,
+      createInputValues(
+          crudQueries.getStmtInsertLinkInput(),
           connectionId,
           link.getConnectorLinkConfig().getConfigs(),
           conn);
@@ -407,12 +413,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement updateStmt = null;
     try {
       // Firstly remove old values
-      deleteStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_LINK_INPUT);
+      deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteLinkInput());
       deleteStmt.setLong(1, link.getPersistenceId());
       deleteStmt.executeUpdate();
 
       // Update LINK_CONFIG table
-      updateStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_UPDATE_LINK);
+      updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateLink());
       updateStmt.setString(1, link.getName());
       updateStmt.setString(2, link.getLastUpdateUser());
       updateStmt.setTimestamp(3, new Timestamp(new Date().getTime()));
@@ -421,7 +427,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       updateStmt.executeUpdate();
 
       // And reinsert new values
-      createInputValues(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_LINK_INPUT,
+      createInputValues(crudQueries.getStmtInsertLinkInput(),
           link.getPersistenceId(),
           link.getConnectorLinkConfig().getConfigs(),
           conn);
@@ -442,7 +448,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_LINK_CHECK_BY_ID);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectLinkCheckById());
       stmt.setLong(1, linkId);
       rs = stmt.executeQuery();
 
@@ -468,7 +474,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     ResultSet rs = null;
 
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_JOBS_FOR_LINK_CHECK);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectJobsForLinkCheck());
       stmt.setLong(1, linkId);
       rs = stmt.executeQuery();
 
@@ -494,7 +500,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement enableConn = null;
 
     try {
-      enableConn = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_ENABLE_LINK);
+      enableConn = conn.prepareStatement(crudQueries.getStmtEnableLink());
       enableConn.setBoolean(1, enabled);
       enableConn.setLong(2, linkId);
       enableConn.executeUpdate();
@@ -515,7 +521,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     try {
       deleteLinkInputs(linkId, conn);
-      dltConn = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_LINK);
+      dltConn = conn.prepareStatement(crudQueries.getStmtDeleteLink());
       dltConn.setLong(1, linkId);
       dltConn.executeUpdate();
     } catch (SQLException ex) {
@@ -533,7 +539,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public void deleteLinkInputs(long id, Connection conn) {
     PreparedStatement dltConnInput = null;
     try {
-      dltConnInput = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_LINK_INPUT);
+      dltConnInput = conn.prepareStatement(crudQueries.getStmtDeleteLinkInput());
       dltConnInput.setLong(1, id);
       dltConnInput.executeUpdate();
     } catch (SQLException ex) {
@@ -551,7 +557,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public MLink findLink(long linkId, Connection conn) {
     PreparedStatement linkFetchStmt = null;
     try {
-      linkFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_LINK_SINGLE);
+      linkFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkSingle());
       linkFetchStmt.setLong(1, linkId);
 
       List<MLink> links = loadLinks(linkFetchStmt, conn);
@@ -579,7 +585,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public MLink findLink(String linkName, Connection conn) {
     PreparedStatement linkFetchStmt = null;
     try {
-      linkFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_LINK_SINGLE_BY_NAME);
+      linkFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkSingleByName());
       linkFetchStmt.setString(1, linkName);
 
       List<MLink> links = loadLinks(linkFetchStmt, conn);
@@ -606,7 +612,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public List<MLink> findLinks(Connection conn) {
     PreparedStatement linksFetchStmt = null;
     try {
-      linksFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_LINK_ALL);
+      linksFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkAll());
 
       return loadLinks(linksFetchStmt, conn);
 
@@ -625,7 +631,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public List<MLink> findLinksForConnector(long connectorId, Connection conn) {
     PreparedStatement linkByConnectorFetchStmt = null;
     try {
-      linkByConnectorFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE);
+      linkByConnectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkForConnectorConfigurable());
       linkByConnectorFetchStmt.setLong(1, connectorId);
       return loadLinks(linkByConnectorFetchStmt, conn);
     } catch (SQLException ex) {
@@ -643,7 +649,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     int result;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_JOB, Statement.RETURN_GENERATED_KEYS);
+      stmt = conn.prepareStatement(crudQueries.getStmtInsertJob(), Statement.RETURN_GENERATED_KEYS);
       stmt.setString(1, job.getName());
       stmt.setLong(2, job.getLinkId(Direction.FROM));
       stmt.setLong(3, job.getLinkId(Direction.TO));
@@ -668,17 +674,17 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       long jobId = rsetJobId.getLong(1);
 
       // from config for the job
-      createInputValues(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_JOB_INPUT,
+      createInputValues(crudQueries.getStmtInsertJobInput(),
           jobId,
           job.getJobConfig(Direction.FROM).getConfigs(),
           conn);
       // to config for the job
-      createInputValues(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_JOB_INPUT,
+      createInputValues(crudQueries.getStmtInsertJobInput(),
           jobId,
           job.getJobConfig(Direction.TO).getConfigs(),
           conn);
       // driver config per job
-      createInputValues(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_JOB_INPUT,
+      createInputValues(crudQueries.getStmtInsertJobInput(),
           jobId,
           job.getDriverConfig().getConfigs(),
           conn);
@@ -702,12 +708,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement updateStmt = null;
     try {
       // Firstly remove old values
-      deleteStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_JOB_INPUT);
+      deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteJobInput());
       deleteStmt.setLong(1, job.getPersistenceId());
       deleteStmt.executeUpdate();
 
       // Update job table
-      updateStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_UPDATE_JOB);
+      updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJob());
       updateStmt.setString(1, job.getName());
       updateStmt.setString(2, job.getLastUpdateUser());
       updateStmt.setTimestamp(3, new Timestamp(new Date().getTime()));
@@ -716,15 +722,15 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       updateStmt.executeUpdate();
 
       // And reinsert new values
-      createInputValues(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_JOB_INPUT,
+      createInputValues(crudQueries.getStmtInsertJobInput(),
           job.getPersistenceId(),
           job.getJobConfig(Direction.FROM).getConfigs(),
           conn);
-      createInputValues(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_JOB_INPUT,
+      createInputValues(crudQueries.getStmtInsertJobInput(),
           job.getPersistenceId(),
           job.getJobConfig(Direction.TO).getConfigs(),
           conn);
-      createInputValues(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_JOB_INPUT,
+      createInputValues(crudQueries.getStmtInsertJobInput(),
           job.getPersistenceId(),
           job.getDriverConfig().getConfigs(),
           conn);
@@ -745,7 +751,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_JOB_CHECK_BY_ID);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectJobCheckById());
       stmt.setLong(1, jobId);
       rs = stmt.executeQuery();
 
@@ -790,7 +796,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement enableConn = null;
 
     try {
-      enableConn = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_ENABLE_JOB);
+      enableConn = conn.prepareStatement(crudQueries.getStmtEnableJob());
       enableConn.setBoolean(1, enabled);
       enableConn.setLong(2, jobId);
       enableConn.executeUpdate();
@@ -809,7 +815,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public void deleteJobInputs(long id, Connection conn) {
     PreparedStatement dltInput = null;
     try {
-      dltInput = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_JOB_INPUT);
+      dltInput = conn.prepareStatement(crudQueries.getStmtDeleteJobInput());
       dltInput.setLong(1, id);
       dltInput.executeUpdate();
     } catch (SQLException ex) {
@@ -828,7 +834,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement dlt = null;
     try {
       deleteJobInputs(jobId, conn);
-      dlt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_JOB);
+      dlt = conn.prepareStatement(crudQueries.getStmtDeleteJob());
       dlt.setLong(1, jobId);
       dlt.executeUpdate();
     } catch (SQLException ex) {
@@ -846,7 +852,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public MJob findJob(long jobId, Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_JOB_SINGLE_BY_ID);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectJobSingleById());
       stmt.setLong(1, jobId);
 
       List<MJob> jobs = loadJobs(stmt, conn);
@@ -874,7 +880,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public MJob findJob(String name, Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_JOB_SINGLE_BY_NAME);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectJobSingleByName());
       stmt.setString(1, name);
 
       List<MJob> jobs = loadJobs(stmt, conn);
@@ -902,7 +908,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     try {
       stmt = conn
-          .prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_JOB_ALL);
+          .prepareStatement(crudQueries.getStmtSelectJobAll());
       return loadJobs(stmt, conn);
     } catch (SQLException ex) {
       logException(ex);
@@ -920,7 +926,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     int result;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_SUBMISSION,
+      stmt = conn.prepareStatement(crudQueries.getStmtInsertSubmission(),
           Statement.RETURN_GENERATED_KEYS);
       stmt.setLong(1, submission.getJobId());
       stmt.setString(2, submission.getStatus().name());
@@ -970,7 +976,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SUBMISSION_CHECK);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionCheck());
       stmt.setLong(1, submissionId);
       rs = stmt.executeQuery();
 
@@ -996,7 +1002,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement deleteStmt = null;
     try {
       //  Update properties in main table
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_UPDATE_SUBMISSION);
+      stmt = conn.prepareStatement(crudQueries.getStmtUpdateSubmission());
       stmt.setString(1, submission.getStatus().name());
       stmt.setString(2, submission.getLastUpdateUser());
       stmt.setTimestamp(3, new Timestamp(submission.getLastUpdateDate().getTime()));
@@ -1007,7 +1013,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       stmt.executeUpdate();
 
       // Delete previous counters
-      deleteStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_COUNTER_SUBMISSION);
+      deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteCounterSubmission());
       deleteStmt.setLong(1, submission.getPersistenceId());
       deleteStmt.executeUpdate();
 
@@ -1031,7 +1037,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public void purgeSubmissions(Date threshold, Connection conn) {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_PURGE_SUBMISSIONS);
+      stmt = conn.prepareStatement(crudQueries.getStmtPurgeSubmissions());
       stmt.setTimestamp(1, new Timestamp(threshold.getTime()));
       stmt.executeUpdate();
 
@@ -1052,7 +1058,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SUBMISSION_UNFINISHED);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionUnfinished());
 
       for(SubmissionStatus status : SubmissionStatus.unfinished()) {
         stmt.setString(1, status.name());
@@ -1085,7 +1091,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SUBMISSIONS);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissions());
       rs = stmt.executeQuery();
 
       while(rs.next()) {
@@ -1114,7 +1120,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SUBMISSIONS_FOR_JOB);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionsForJob());
       stmt.setLong(1, jobId);
       rs = stmt.executeQuery();
 
@@ -1143,7 +1149,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SUBMISSIONS_FOR_JOB);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionsForJob());
       stmt.setLong(1, jobId);
       stmt.setMaxRows(1);
       rs = stmt.executeQuery();
@@ -1167,7 +1173,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
 
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_SQ_CONNECTOR_DIRECTIONS);
+      stmt = conn.prepareStatement(crudQueries.getStmtInsertSqConnectorDirections());
       stmt.setLong(1, connectorId);
       stmt.setLong(2, getDirection(direction, conn));
 
@@ -1193,7 +1199,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   private long insertAndGetConnectorId(MConnector mc, Connection conn) {
     PreparedStatement baseConnectorStmt = null;
     try {
-      baseConnectorStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_CONFIGURABLE,
+      baseConnectorStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
           Statement.RETURN_GENERATED_KEYS);
       baseConnectorStmt.setString(1, mc.getUniqueName());
       baseConnectorStmt.setString(2, mc.getClassName());
@@ -1233,10 +1239,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement baseConfigStmt = null;
     PreparedStatement baseInputStmt = null;
     try{
-      baseConfigStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_CONFIG,
+      baseConfigStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfig(),
           Statement.RETURN_GENERATED_KEYS);
 
-      baseInputStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_INPUT,
+      baseInputStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoInput(),
           Statement.RETURN_GENERATED_KEYS);
 
       // Register link type config
@@ -1263,7 +1269,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   private long insertAndGetDriverId(MDriver mDriver, Connection conn) {
     PreparedStatement baseDriverStmt = null;
     try {
-      baseDriverStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_CONFIGURABLE,
+      baseDriverStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
           Statement.RETURN_GENERATED_KEYS);
       baseDriverStmt.setString(1, mDriver.getUniqueName());
       baseDriverStmt.setString(2, Driver.getClassName());
@@ -1292,9 +1298,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement baseConfigStmt = null;
     PreparedStatement baseInputStmt = null;
     try {
-      baseConfigStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_CONFIG,
+      baseConfigStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfig(),
           Statement.RETURN_GENERATED_KEYS);
-      baseInputStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_INPUT,
+      baseInputStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoInput(),
           Statement.RETURN_GENERATED_KEYS);
 
       // Register a driver config as a job type with no owner/connector and direction
@@ -1321,7 +1327,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
 
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_COUNTER_SUBMISSION);
+      stmt = conn.prepareStatement(crudQueries.getStmtInsertCounterSubmission());
 
       for(CounterGroup group : counters) {
         long groupId = getCounterGroupId(group, conn);
@@ -1357,7 +1363,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     ResultSet rsInsert = null;
 
     try {
-      select = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_COUNTER_GROUP);
+      select = conn.prepareStatement(crudQueries.getStmtSelectCounterGroup());
       select.setString(1, group.getName());
 
       rsSelect = select.executeQuery();
@@ -1366,7 +1372,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         return rsSelect.getLong(1);
       }
 
-      insert = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_COUNTER_GROUP, Statement.RETURN_GENERATED_KEYS);
+      insert = conn.prepareStatement(crudQueries.getStmtInsertCounterGroup(), Statement.RETURN_GENERATED_KEYS);
       insert.setString(1, group.getName());
       insert.executeUpdate();
 
@@ -1398,7 +1404,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     ResultSet rsInsert = null;
 
     try {
-      select = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_COUNTER);
+      select = conn.prepareStatement(crudQueries.getStmtSelectCounter());
       select.setString(1, counter.getName());
 
       rsSelect = select.executeQuery();
@@ -1407,7 +1413,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         return rsSelect.getLong(1);
       }
 
-      insert = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_COUNTER, Statement.RETURN_GENERATED_KEYS);
+      insert = conn.prepareStatement(crudQueries.getStmtInsertCounter(), Statement.RETURN_GENERATED_KEYS);
       insert.setString(1, counter.getName());
       insert.executeUpdate();
 
@@ -1458,7 +1464,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_COUNTER_SUBMISSION);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectCounterSubmission());
       stmt.setLong(1, submissionId);
       rs = stmt.executeQuery();
 
@@ -1494,7 +1500,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     ResultSet rs = null;
 
     try {
-      directionStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SQD_ID_BY_SQD_NAME);
+      directionStmt = conn.prepareStatement(crudQueries.getStmtSelectSqdIdBySqdName());
       directionStmt.setString(1, direction.toString());
       rs = directionStmt.executeQuery();
 
@@ -1515,7 +1521,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     ResultSet rs = null;
 
     try {
-      directionStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SQD_NAME_BY_SQD_ID);
+      directionStmt = conn.prepareStatement(crudQueries.getStmtSelectSqdNameBySqdId());
       directionStmt.setLong(1, directionId);
       rs = directionStmt.executeQuery();
 
@@ -1538,7 +1544,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     boolean from = false, to = false;
 
     try {
-      connectorDirectionsStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SQ_CONNECTOR_DIRECTIONS);
+      connectorDirectionsStmt = conn.prepareStatement(crudQueries.getStmtSelectSqConnectorDirections());
       connectorDirectionsStmt.setLong(1, connectorId);
       rs = connectorDirectionsStmt.executeQuery();
 
@@ -1573,8 +1579,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     try {
       rsConnectors = stmt.executeQuery();
-      connectorConfigFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
-      connectorConfigInputFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_INPUT);
+      connectorConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+      connectorConfigInputFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectInput());
 
       while(rsConnectors.next()) {
         long connectorId = rsConnectors.getLong(1);
@@ -1626,8 +1632,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       rsConnection = stmt.executeQuery();
 
       //
-      connectorConfigFetchStatement = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
-      connectorConfigInputStatement = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_FETCH_LINK_INPUT);
+      connectorConfigFetchStatement = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+      connectorConfigInputStatement = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());
 
       while(rsConnection.next()) {
         long id = rsConnection.getLong(1);
@@ -1684,10 +1690,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       // Note: Job does not hold a explicit reference to the driver since every
       // job has the same driver
       long driverId = this.findDriver(MDriver.DRIVER_NAME, conn).getPersistenceId();
-      fromConfigFetchStmt  = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
-      toConfigFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
-      driverConfigfetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_CONFIG_FOR_CONFIGURABLE);
-      jobInputFetchStmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_FETCH_JOB_INPUT);
+      fromConfigFetchStmt  = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+      toConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+      driverConfigfetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+      jobInputFetchStmt = conn.prepareStatement(crudQueries.getStmtFetchJobInput());
 
       while(rsJob.next()) {
         long fromConnectorId = rsJob.getLong(1);
@@ -1759,7 +1765,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       throws SQLException {
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_SQ_CONFIG_DIRECTIONS);
+      stmt = conn.prepareStatement(crudQueries.getStmtInsertSqConfigDirections());
       stmt.setLong(1, configId);
       stmt.setLong(2, getDirection(direction, conn));
       if (stmt.executeUpdate() != 1) {
@@ -2001,7 +2007,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     ResultSet rs = null;
 
     try {
-      stmt = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_SELECT_SQ_CONFIG_DIRECTIONS);
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectSqConfigDirections());
       stmt.setLong(1, configId);
       rs = stmt.executeQuery();
       rs.next();
@@ -2030,8 +2036,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @param conn Connection object that is used to find config direction.
    * @throws java.sql.SQLException In case of any failure on Derby side
    */
-  public void loadConnectorConfigTypes(List<MConfig> linkConfig, List<MConfig> fromConfig,
-                                       List<MConfig> toConfig, PreparedStatement configFetchStmt, PreparedStatement inputFetchStmt,
+  public void loadConnectorConfigTypes(List<MConfig> linkConfig, List<MConfig> fromConfig, List<MConfig> toConfig,
+                                       PreparedStatement configFetchStmt, PreparedStatement inputFetchStmt,
                                        int configPosition, Connection conn) throws SQLException {
 
     // Get list of structures from database

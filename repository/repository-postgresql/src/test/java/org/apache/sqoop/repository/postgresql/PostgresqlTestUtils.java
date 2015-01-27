@@ -18,6 +18,7 @@
 package org.apache.sqoop.repository.postgresql;
 
 import org.apache.sqoop.common.test.db.DatabaseProvider;
+import org.apache.sqoop.repository.common.CommonRepoUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -62,8 +63,13 @@ public class PostgresqlTestUtils {
   }
 
   public void assertUniqueConstraints(String schema, String table, String... columns) throws Exception {
-    Set<String> columnSet = new TreeSet<String>(Arrays.asList(columns));
+    Set<String> columnSet = new TreeSet<String>();
     Map<String, Set<String>> indexColumnMap = new HashMap<String, Set<String>>();
+
+    for (String column : columns) {
+      columnSet.add(CommonRepoUtils.escapeColumnName(column));
+    }
+
     DatabaseMetaData md = provider.getConnection().getMetaData();
     ResultSet rs = md.getIndexInfo(null, schema, table, true, false);
 

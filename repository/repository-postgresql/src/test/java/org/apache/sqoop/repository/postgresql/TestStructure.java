@@ -26,52 +26,52 @@ public class TestStructure extends PostgresqlTestCase {
 
   @Test
   public void testTables() throws Exception {
-    utils.assertTableExists("sqoop", "sq_system");
-    utils.assertTableExists("sqoop", "sq_direction");
-    utils.assertTableExists("sqoop", "sq_configurable");
-    utils.assertTableExists("sqoop", "sq_connector_directions");
-    utils.assertTableExists("sqoop", "sq_config");
-    utils.assertTableExists("sqoop", "sq_connector_directions");
-    utils.assertTableExists("sqoop", "sq_input");
-    utils.assertTableExists("sqoop", "sq_link");
-    utils.assertTableExists("sqoop", "sq_job");
-    utils.assertTableExists("sqoop", "sq_link_input");
-    utils.assertTableExists("sqoop", "sq_job_input");
-    utils.assertTableExists("sqoop", "sq_submission");
-    utils.assertTableExists("sqoop", "sq_counter_group");
-    utils.assertTableExists("sqoop", "sq_counter");
-    utils.assertTableExists("sqoop", "sq_counter_submission");
+    utils.assertTableExists("SQOOP", "SQ_SYSTEM");
+    utils.assertTableExists("SQOOP", "SQ_DIRECTION");
+    utils.assertTableExists("SQOOP", "SQ_CONFIGURABLE");
+    utils.assertTableExists("SQOOP", "SQ_CONNECTOR_DIRECTIONS");
+    utils.assertTableExists("SQOOP", "SQ_CONFIG");
+    utils.assertTableExists("SQOOP", "SQ_CONNECTOR_DIRECTIONS");
+    utils.assertTableExists("SQOOP", "SQ_INPUT");
+    utils.assertTableExists("SQOOP", "SQ_LINK");
+    utils.assertTableExists("SQOOP", "SQ_JOB");
+    utils.assertTableExists("SQOOP", "SQ_LINK_INPUT");
+    utils.assertTableExists("SQOOP", "SQ_JOB_INPUT");
+    utils.assertTableExists("SQOOP", "SQ_SUBMISSION");
+    utils.assertTableExists("SQOOP", "SQ_COUNTER_GROUP");
+    utils.assertTableExists("SQOOP", "SQ_COUNTER");
+    utils.assertTableExists("SQOOP", "SQ_COUNTER_SUBMISSION");
   }
 
   @Test
   public void testForeignKeys() throws Exception {
-    utils.assertForeignKey("sqoop", "sq_configurable", "sqc_id", "sq_connector_directions", "sqcd_connector");
-    utils.assertForeignKey("sqoop", "sq_direction", "sqd_id", "sq_connector_directions", "sqcd_direction");
-    utils.assertForeignKey("sqoop", "sq_configurable", "sqc_id", "sq_config", "sq_cfg_configurable");
-    utils.assertForeignKey("sqoop", "sq_config", "sq_cfg_id", "sq_config_directions", "sq_cfg_dir_config");
-    utils.assertForeignKey("sqoop", "sq_direction", "sqd_id", "sq_config_directions", "sq_cfg_dir_direction");
-    utils.assertForeignKey("sqoop", "sq_config", "sq_cfg_id", "sq_input", "sqi_config");
-    utils.assertForeignKey("sqoop", "sq_configurable", "sqc_id", "sq_link", "sq_lnk_configurable");
-    utils.assertForeignKey("sqoop", "sq_link", "sq_lnk_id", "sq_job", "sqb_from_link");
-    utils.assertForeignKey("sqoop", "sq_link", "sq_lnk_id", "sq_job", "sqb_to_link");
-    utils.assertForeignKey("sqoop", "sq_link", "sq_lnk_id", "sq_link_input", "sq_lnki_link");
-    utils.assertForeignKey("sqoop", "sq_input", "sqi_id", "sq_link_input", "sq_lnki_input");
-    utils.assertForeignKey("sqoop", "sq_job", "sqb_id", "sq_job_input", "sqbi_job");
-    utils.assertForeignKey("sqoop", "sq_input", "sqi_id", "sq_job_input", "sqbi_input");
-    utils.assertForeignKey("sqoop", "sq_job", "sqb_id", "sq_submission", "sqs_job");
-    utils.assertForeignKey("sqoop", "sq_counter", "sqr_id", "sq_counter_submission", "sqrs_counter");
-    utils.assertForeignKey("sqoop", "sq_counter_group", "sqg_id", "sq_counter_submission", "sqrs_group");
-    utils.assertForeignKey("sqoop", "sq_submission", "sqs_id", "sq_counter_submission", "sqrs_submission");
+    utils.assertForeignKey("SQOOP", "SQ_CONFIGURABLE", "SQC_ID", "SQ_CONNECTOR_DIRECTIONS", "SQCD_CONNECTOR");
+    utils.assertForeignKey("SQOOP", "SQ_DIRECTION", "SQD_ID", "SQ_CONNECTOR_DIRECTIONS", "SQCD_DIRECTION");
+    utils.assertForeignKey("SQOOP", "SQ_CONFIGURABLE", "SQC_ID", "SQ_CONFIG", "SQ_CFG_CONFIGURABLE");
+    utils.assertForeignKey("SQOOP", "SQ_CONFIG", "SQ_CFG_ID", "SQ_CONFIG_DIRECTIONS", "SQ_CFG_DIR_CONFIG");
+    utils.assertForeignKey("SQOOP", "SQ_DIRECTION", "SQD_ID", "SQ_CONFIG_DIRECTIONS", "SQ_CFG_DIR_DIRECTION");
+    utils.assertForeignKey("SQOOP", "SQ_CONFIG", "SQ_CFG_ID", "SQ_INPUT", "SQI_CONFIG");
+    utils.assertForeignKey("SQOOP", "SQ_CONFIGURABLE", "SQC_ID", "SQ_LINK", "SQ_LNK_CONFIGURABLE");
+    utils.assertForeignKey("SQOOP", "SQ_LINK", "SQ_LNK_ID", "SQ_JOB", "SQB_FROM_LINK");
+    utils.assertForeignKey("SQOOP", "SQ_LINK", "SQ_LNK_ID", "SQ_JOB", "SQB_TO_LINK");
+    utils.assertForeignKey("SQOOP", "SQ_LINK", "SQ_LNK_ID", "SQ_LINK_INPUT", "SQ_LNKI_LINK");
+    utils.assertForeignKey("SQOOP", "SQ_INPUT", "SQI_ID", "SQ_LINK_INPUT", "SQ_LNKI_INPUT");
+    utils.assertForeignKey("SQOOP", "SQ_JOB", "SQB_ID", "SQ_JOB_INPUT", "SQBI_JOB");
+    utils.assertForeignKey("SQOOP", "SQ_INPUT", "SQI_ID", "SQ_JOB_INPUT", "SQBI_INPUT");
+    utils.assertForeignKey("SQOOP", "SQ_JOB", "SQB_ID", "SQ_SUBMISSION", "SQS_JOB");
+    utils.assertForeignKey("SQOOP", "SQ_COUNTER", "SQR_ID", "SQ_COUNTER_SUBMISSION", "SQRS_COUNTER");
+    utils.assertForeignKey("SQOOP", "SQ_COUNTER_GROUP", "SQG_ID", "SQ_COUNTER_SUBMISSION", "SQRS_GROUP");
+    utils.assertForeignKey("SQOOP", "SQ_SUBMISSION", "SQS_ID", "SQ_COUNTER_SUBMISSION", "SQRS_SUBMISSION");
   }
 
   @Test
   public void testUniqueConstraints() throws Exception {
-    utils.assertUniqueConstraints("sqoop", "sq_configurable", "sqc_name");
-    utils.assertUniqueConstraints("sqoop", "sq_link", "sq_lnk_name");
-    utils.assertUniqueConstraints("sqoop", "sq_job", "sqb_name");
-    utils.assertUniqueConstraints("sqoop", "sq_config", "sq_cfg_name", "sq_cfg_configurable", "sq_cfg_type");
-    utils.assertUniqueConstraints("sqoop", "sq_input", "sqi_name", "sqi_type", "sqi_config");
-    utils.assertUniqueConstraints("sqoop", "sq_counter", "sqr_name");
-    utils.assertUniqueConstraints("sqoop", "sq_counter_group", "sqg_name");
+    utils.assertUniqueConstraints("SQOOP", "SQ_CONFIGURABLE", "SQC_NAME");
+    utils.assertUniqueConstraints("SQOOP", "SQ_LINK", "SQ_LNK_NAME");
+    utils.assertUniqueConstraints("SQOOP", "SQ_JOB", "SQB_NAME");
+    utils.assertUniqueConstraints("SQOOP", "SQ_CONFIG", "SQ_CFG_NAME", "SQ_CFG_CONFIGURABLE", "SQ_CFG_TYPE");
+    utils.assertUniqueConstraints("SQOOP", "SQ_INPUT", "SQI_NAME", "SQI_TYPE", "SQI_CONFIG");
+    utils.assertUniqueConstraints("SQOOP", "SQ_COUNTER", "SQR_NAME");
+    utils.assertUniqueConstraints("SQOOP", "SQ_COUNTER_GROUP", "SQG_NAME");
   }
 }
