@@ -35,16 +35,6 @@ public class AuthorizationManager implements Reconfigurable {
   public static final String DEFAULT_AUTHORIZATION_HANDLER = "org.apache.sqoop.security.Authorization.DefaultAuthorizationHandler";
 
   /**
-   * Default authorization access controller
-   */
-  public static final String DEFAULT_AUTHORIZATION_ACCESS_CONTROLLER = "org.apache.sqoop.security.Authorization.DefaultAuthorizationAccessController";
-
-  /**
-   * Default authorization validator
-   */
-  public static final String DEFAULT_AUTHORIZATION_VALIDATOR = "org.apache.sqoop.security.Authorization.DefaultAuthorizationValidator";
-
-  /**
    * Default authorization auto upgrade option value
    */
   protected static boolean DEFAULT_AUTO_UPGRADE = false;
@@ -98,24 +88,12 @@ public class AuthorizationManager implements Reconfigurable {
 
   public synchronized void initialize() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     LOG.trace("Begin authorization manager initialization");
-    MapContext mapContext = SqoopConfiguration.getInstance().getContext();
 
-    String handler = mapContext.getString(SecurityConstants.AUTHORIZATION_HANDLER,
-        DEFAULT_AUTHORIZATION_HANDLER).trim();
+    String handler = SqoopConfiguration.getInstance().getContext().getString(
+            SecurityConstants.AUTHORIZATION_HANDLER,
+            DEFAULT_AUTHORIZATION_HANDLER).trim();
     authorizationHandler = SecurityFactory.getAuthorizationHandler(handler);
-
-    String accessController = mapContext.getString(
-            SecurityConstants.AUTHORIZATION_ACCESS_CONTROLLER,
-            DEFAULT_AUTHORIZATION_ACCESS_CONTROLLER).trim();
-    AuthorizationAccessController authorizationAccessController =
-            SecurityFactory.getAuthorizationAccessController(accessController);
-    authorizationHandler.setAuthorizationAccessController(authorizationAccessController);
-
-    String validator = mapContext.getString(SecurityConstants.AUTHORIZATION_VALIDATOR,
-            DEFAULT_AUTHORIZATION_VALIDATOR).trim();
-    AuthorizationValidator authorizationValidator =
-            SecurityFactory.getAuthorizationValidator(validator);
-    authorizationHandler.setAuthorizationValidator(authorizationValidator);
+    authorizationHandler.doInitialize();
 
     LOG.info("Authorization loaded.");
   }

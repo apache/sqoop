@@ -17,13 +17,17 @@
  */
 package org.apache.sqoop.security;
 
-import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.MPrincipal;
+import org.apache.sqoop.model.MPrivilege;
+
+import java.util.List;
 
 /***
  * AuthorizationHandler is responsible for checking access.
  */
 public abstract class AuthorizationValidator {
 
-  private static final Logger LOG = Logger.getLogger(AuthorizationValidator.class);
+  public abstract void checkPrivileges(MPrincipal principal, List<MPrivilege> privileges) throws SqoopException;
 
 }

@@ -18,9 +18,22 @@
 package org.apache.sqoop.security.Authorization;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.MPrincipal;
+import org.apache.sqoop.model.MPrivilege;
 import org.apache.sqoop.security.AuthorizationValidator;
+
+import java.util.List;
 
 public class DefaultAuthorizationValidator extends AuthorizationValidator {
 
   private static final Logger LOG = Logger.getLogger(DefaultAuthorizationValidator.class);
+
+  public void checkPrivileges(MPrincipal principal, List<MPrivilege> privileges) throws SqoopException {
+    LOG.debug("Check privilege in default authorization validator: always valid");
+    LOG.debug("principal: " + principal.toString());
+    for (MPrivilege privilege : privileges) {
+      LOG.debug("privilege: " + privilege.toString());
+    }
+  }
 }
