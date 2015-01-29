@@ -1396,6 +1396,7 @@ public class ClassWriter {
   private void parseColumn(String colName, int colType, StringBuilder sb) {
     // assume that we have __it and __cur_str vars, based on
     // __loadFromFields() code.
+	sb.append(" if(__it.hasNext()){ \n");  //add by chenshaoxing
     sb.append("    __cur_str = __it.next();\n");
     String javaType = toJavaType(colName, colType);
 
@@ -1446,6 +1447,7 @@ public class ClassWriter {
     }
 
     sb.append("    }\n\n"); // the closing '{' based on code in parseNullVal();
+    sb.append("  }\n\n");
   }
 
   /**
