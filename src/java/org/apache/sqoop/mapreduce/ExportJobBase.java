@@ -82,6 +82,18 @@ public class ExportJobBase extends JobBase {
   public static final String EXPORT_MAP_TASKS_KEY =
       "sqoop.mapreduce.export.map.tasks";
 
+  /**
+   *  Maximal number of attempts for map task during export
+   *
+   *  Sqoop will default to "1" if this property is not set regardless of what is configured directly
+   *  in your hadoop configuration.
+   */
+  public static final String SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS =
+    "sqoop.export.mapred.map.max.attempts";
+
+  private static final String HADOOP_MAP_TASK_MAX_ATTEMTPS =
+    "mapred.map.max.attempts";
+
   protected ExportJobContext context;
 
 
@@ -509,5 +521,26 @@ public class ExportJobBase extends JobBase {
    * Subclasses may override if necessary.
    */
   protected void jobTeardown(Job job) throws IOException, ExportException {
+  }
+
+  @Override
+  protected void propagateOptionsToJob(Job job) {
+    super.propagateOptionsToJob(job);
+    Configuration conf = job.getConfiguration();
+
+    // This is export job where re-trying failed mapper mostly don't make sense. By
+    // default we will force MR to run only one attempt per mapper. User or connector
+    // developer can override this behavior by setting SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS:
+    //
+    // * Positive number - we will allow specified number of attempts
+    // * Negative number - we will default to Hadoop's default number of attempts
+    //
+    // This is important for most connectors as they are directly committing data to
+    // final table and hence re-running one mapper will lead to a misleading errors
+    // of inserting duplicate rows.
+    int sqoopMaxAttempts = conf.getInt(SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS, 1);
+    if (sqoopMaxAttempts > 1) {
+      conf.setInt(HADOOP_MAP_TASK_MAX_ATTEMTPS, sqoopMaxAttempts);
+    }
   }
 }
