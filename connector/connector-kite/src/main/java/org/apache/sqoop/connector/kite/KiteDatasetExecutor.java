@@ -25,6 +25,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.connector.common.AvroDataTypeUtil;
 import org.apache.sqoop.connector.kite.util.KiteDataTypeUtil;
+import org.apache.sqoop.error.code.KiteConnectorError;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;

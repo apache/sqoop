@@ -48,7 +48,7 @@ import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.request.HttpEventContext;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
-import org.apache.sqoop.server.common.ServerError;
+import org.apache.sqoop.error.code.ServerError;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONObject;

@@ -35,7 +35,7 @@ import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.RequestHandler;
-import org.apache.sqoop.server.common.ServerError;
+import org.apache.sqoop.error.code.ServerError;
 
 public class ConnectorRequestHandler implements RequestHandler {
 

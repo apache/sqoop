@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sqoop.connector.idf;
+package org.apache.sqoop.error.code;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
@@ -24,33 +24,29 @@ import org.apache.sqoop.common.ErrorCode;
 
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public enum CSVIntermediateDataFormatError implements ErrorCode {
+public enum IntermediateDataFormatError implements ErrorCode {
   /** An unknown error has occurred. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
+  INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
 
-  /** An encoding is missing in the Java native libraries. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0001("Native character set error."),
+  /** Number of columns in schema does not match the data set. */
+  INTERMEDIATE_DATA_FORMAT_0001("Wrong number of columns."),
 
-  /** Error while escaping a row. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0002("An error has occurred while escaping a row."),
+  /** Schema is missing in the IDF. */
+  INTERMEDIATE_DATA_FORMAT_0002("Schema is null."),
 
-  /** Error while escaping a row. */
-  CSV_INTERMEDIATE_DATA_FORMAT_0003("An error has occurred while unescaping a row."),
+  INTERMEDIATE_DATA_FORMAT_0003("JSON parse error"),
 
-  /**
-   * For arrays and maps we use JSON representation and incorrect representation
-   * results in parse exception
-   */
-  CSV_INTERMEDIATE_DATA_FORMAT_0004("JSON parse internal error."),
+  /** Column type isn't known by Intermediate Data Format. */
+  INTERMEDIATE_DATA_FORMAT_0004("Unknown column type."),
 
-  /** Unsupported bit values */
-  CSV_INTERMEDIATE_DATA_FORMAT_0005("Unsupported bit value."),
+  /** Column value cannot be null. */
+  INTERMEDIATE_DATA_FORMAT_0005("Column value cannot be null"),
 
   ;
 
   private final String message;
 
-  private CSVIntermediateDataFormatError(String message) {
+  private IntermediateDataFormatError(String message) {
     this.message = message;
   }
 

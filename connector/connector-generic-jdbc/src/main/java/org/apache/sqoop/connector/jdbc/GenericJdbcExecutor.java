@@ -28,6 +28,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.GenericJdbcConnectorError;
 
 public class GenericJdbcExecutor {
 

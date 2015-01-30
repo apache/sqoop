@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
+import org.apache.sqoop.error.code.KafkaConnectorErrors;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
 

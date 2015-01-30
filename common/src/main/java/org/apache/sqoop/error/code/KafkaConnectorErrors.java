@@ -15,38 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.kite;
+package org.apache.sqoop.error.code;
 
 import org.apache.sqoop.common.ErrorCode;
 
-public enum KiteConnectorError implements ErrorCode {
+public enum KafkaConnectorErrors implements ErrorCode {
 
-  /** Unsupported dataset URI scheme */
-  GENERIC_KITE_CONNECTOR_0000("Unsupported dataset URI scheme"),
-
-  /** Target dataset is not empty */
-  GENERIC_KITE_CONNECTOR_0001("Dataset is not empty"),
-
-  /** Dataset does not exist */
-  GENERIC_KITE_CONNECTOR_0002("Dataset does not exist"),
-
-  /** Error occurred while creating partitions */
-  GENERIC_KITE_CONNECTOR_0003("Error occurred while creating partitions"),
-
+  KAFKA_CONNECTOR_0000("Unknown error occurred."),
+  KAFKA_CONNECTOR_0001("Error occurred while sending data to Kafka")
   ;
 
   private final String message;
 
-  private KiteConnectorError(String message) {
+  private KafkaConnectorErrors(String message) {
     this.message = message;
   }
 
+  @Override
   public String getCode() {
     return name();
   }
 
+  /**
+   * @return the message associated with error code.
+   */
+  @Override
   public String getMessage() {
     return message;
   }
-
 }

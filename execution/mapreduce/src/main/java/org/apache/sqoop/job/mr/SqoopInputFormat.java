@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.MRExecutionError;
+import org.apache.sqoop.error.code.MRExecutionError;
 import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;

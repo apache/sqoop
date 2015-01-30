@@ -21,6 +21,7 @@ package org.apache.sqoop.connector.idf;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.IntermediateDataFormatError;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 import org.joda.time.DateTime;

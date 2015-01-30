@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.sqoop.connector.idf;
+package org.apache.sqoop.error.code;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
@@ -25,15 +25,19 @@ import org.apache.sqoop.common.ErrorCode;
 
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public enum AVROIntermediateDataFormatError implements ErrorCode {
+public enum JSONIntermediateDataFormatError implements ErrorCode {
   /** An unknown error has occurred. */
-  AVRO_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
+  JSON_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
+
+  JSON_INTERMEDIATE_DATA_FORMAT_0001("JSON array parse error."),
+
+  JSON_INTERMEDIATE_DATA_FORMAT_0002("JSON object parse error."),
 
   ;
 
   private final String message;
 
-  private AVROIntermediateDataFormatError(String message) {
+  private JSONIntermediateDataFormatError(String message) {
     this.message = message;
   }
 

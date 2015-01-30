@@ -31,7 +31,7 @@ import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.repository.common.CommonRepositoryError;
+import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

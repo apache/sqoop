@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sqoop.connector.idf;
+
+package org.apache.sqoop.error.code;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
@@ -24,29 +25,15 @@ import org.apache.sqoop.common.ErrorCode;
 
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public enum IntermediateDataFormatError implements ErrorCode {
+public enum AVROIntermediateDataFormatError implements ErrorCode {
   /** An unknown error has occurred. */
-  INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
-
-  /** Number of columns in schema does not match the data set. */
-  INTERMEDIATE_DATA_FORMAT_0001("Wrong number of columns."),
-
-  /** Schema is missing in the IDF. */
-  INTERMEDIATE_DATA_FORMAT_0002("Schema is null."),
-
-  INTERMEDIATE_DATA_FORMAT_0003("JSON parse error"),
-
-  /** Column type isn't known by Intermediate Data Format. */
-  INTERMEDIATE_DATA_FORMAT_0004("Unknown column type."),
-
-  /** Column value cannot be null. */
-  INTERMEDIATE_DATA_FORMAT_0005("Column value cannot be null"),
+  AVRO_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
 
   ;
 
   private final String message;
 
-  private IntermediateDataFormatError(String message) {
+  private AVROIntermediateDataFormatError(String message) {
     this.message = message;
   }
 

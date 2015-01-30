@@ -36,7 +36,7 @@ import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.repository.common.CommonRepositoryError;
+import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

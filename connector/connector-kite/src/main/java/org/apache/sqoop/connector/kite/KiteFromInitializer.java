@@ -22,6 +22,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.common.AvroDataTypeUtil;
+import org.apache.sqoop.error.code.KiteConnectorError;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.schema.Schema;

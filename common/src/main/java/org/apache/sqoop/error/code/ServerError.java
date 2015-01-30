@@ -15,31 +15,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.kafka;
+package org.apache.sqoop.error.code;
 
 import org.apache.sqoop.common.ErrorCode;
 
-public enum KafkaConnectorErrors implements ErrorCode {
+/**
+ *
+ */
+public enum ServerError implements ErrorCode {
 
-  KAFKA_CONNECTOR_0000("Unknown error occurred."),
-  KAFKA_CONNECTOR_0001("Error occurred while sending data to Kafka")
+  /** Unknown error on server side. */
+  SERVER_0001("Unknown server error"),
+
+  /** Unknown error on server side. */
+  SERVER_0002("Unsupported HTTP method"),
+
+  /** We've received invalid HTTP request */
+  SERVER_0003("Invalid HTTP request"),
+
+  /** Invalid argument in HTTP request */
+  SERVER_0004("Invalid argument in HTTP request"),
+
+  /** Invalid entity requested */
+  SERVER_0005("Invalid entity requested"),
+
   ;
 
   private final String message;
 
-  private KafkaConnectorErrors(String message) {
+  private ServerError(String message) {
     this.message = message;
   }
 
-  @Override
   public String getCode() {
     return name();
   }
 
-  /**
-   * @return the message associated with error code.
-   */
-  @Override
   public String getMessage() {
     return message;
   }

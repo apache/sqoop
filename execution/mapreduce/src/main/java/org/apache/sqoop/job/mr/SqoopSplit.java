@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.job.MRExecutionError;
+import org.apache.sqoop.error.code.MRExecutionError;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.utils.ClassUtils;
 

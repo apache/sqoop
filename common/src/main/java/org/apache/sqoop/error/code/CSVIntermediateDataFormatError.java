@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sqoop.connector.matcher;
+package org.apache.sqoop.error.code;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
@@ -24,14 +24,33 @@ import org.apache.sqoop.common.ErrorCode;
 
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public enum MatcherError implements ErrorCode {
-  MATCHER_0000("To few Schemas provided."),
+public enum CSVIntermediateDataFormatError implements ErrorCode {
+  /** An unknown error has occurred. */
+  CSV_INTERMEDIATE_DATA_FORMAT_0000("An unknown error has occurred."),
+
+  /** An encoding is missing in the Java native libraries. */
+  CSV_INTERMEDIATE_DATA_FORMAT_0001("Native character set error."),
+
+  /** Error while escaping a row. */
+  CSV_INTERMEDIATE_DATA_FORMAT_0002("An error has occurred while escaping a row."),
+
+  /** Error while escaping a row. */
+  CSV_INTERMEDIATE_DATA_FORMAT_0003("An error has occurred while unescaping a row."),
+
+  /**
+   * For arrays and maps we use JSON representation and incorrect representation
+   * results in parse exception
+   */
+  CSV_INTERMEDIATE_DATA_FORMAT_0004("JSON parse internal error."),
+
+  /** Unsupported bit values */
+  CSV_INTERMEDIATE_DATA_FORMAT_0005("Unsupported bit value."),
 
   ;
 
   private final String message;
 
-  private MatcherError(String message) {
+  private CSVIntermediateDataFormatError(String message) {
     this.message = message;
   }
 

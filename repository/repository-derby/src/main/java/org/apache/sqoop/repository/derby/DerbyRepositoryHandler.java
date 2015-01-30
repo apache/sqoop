@@ -44,6 +44,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorHandler;
 import org.apache.sqoop.connector.ConnectorManagerUtils;
 import org.apache.sqoop.driver.Driver;
+import org.apache.sqoop.error.code.DerbyRepoError;
 import org.apache.sqoop.model.MConfigType;
 import org.apache.sqoop.model.MConfigurableType;
 import org.apache.sqoop.model.MDriver;

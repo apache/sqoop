@@ -32,6 +32,7 @@ import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.GenericHdfsWriter;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsSequenceWriter;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsTextWriter;
+import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;

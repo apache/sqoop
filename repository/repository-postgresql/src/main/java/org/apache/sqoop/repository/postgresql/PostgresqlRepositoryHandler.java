@@ -23,6 +23,7 @@ import static org.apache.sqoop.repository.postgresql.PostgresqlSchemaCreateQuery
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.PostgresqlRepoError;
 import org.apache.sqoop.repository.JdbcRepositoryContext;
 import org.apache.sqoop.repository.common.CommonRepoConstants;
 import org.apache.sqoop.repository.common.CommonRepositoryHandler;

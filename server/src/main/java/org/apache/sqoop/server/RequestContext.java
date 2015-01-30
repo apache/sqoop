@@ -21,7 +21,7 @@ import org.apache.hadoop.security.authentication.client.PseudoAuthenticator;
 import org.apache.hadoop.security.token.delegation.web.HttpUserGroupInformation;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.security.AuthenticationManager;
-import org.apache.sqoop.server.common.ServerError;
+import org.apache.sqoop.error.code.ServerError;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

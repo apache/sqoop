@@ -20,7 +20,7 @@ package org.apache.sqoop.handler;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.repository.Repository;
-import org.apache.sqoop.server.common.ServerError;
+import org.apache.sqoop.error.code.ServerError;
 
 public class HandlerUtils {
 

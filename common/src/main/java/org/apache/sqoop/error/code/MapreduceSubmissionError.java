@@ -15,29 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.repository.postgresql;
+package org.apache.sqoop.error.code;
 
 import org.apache.sqoop.common.ErrorCode;
 
-public enum PostgresqlRepoError implements ErrorCode {
+/**
+ *
+ */
+public enum MapreduceSubmissionError implements ErrorCode {
 
-  POSTGRESQLREPO_0000("An unknown error has occurred"),
+  MAPREDUCE_0001("Unknown error"),
 
-  POSTGRESQLREPO_0001("Unable to run specified query"),
+  MAPREDUCE_0002("Failure on submission engine initialization"),
 
-  POSTGRESQLREPO_0002("Update of driver config failed"),
+  MAPREDUCE_0003("Can't get RunningJob instance"),
 
-  POSTGRESQLREPO_0003("Could not add directions"),
+  MAPREDUCE_0004("Unknown map reduce job status"),
 
-  POSTGRESQLREPO_0004("Could not get ID of recently added direction"),
-
-  POSTGRESQLREPO_0005("Unsupported repository version"),
+  MAPREDUCE_0005("Failure on submission engine destroy"),
 
   ;
 
   private final String message;
 
-  private PostgresqlRepoError(String message) {
+  private MapreduceSubmissionError(String message) {
     this.message = message;
   }
 
