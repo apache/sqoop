@@ -38,6 +38,7 @@ import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
+import org.apache.sqoop.security.Authorization.AuthorizationEngine;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.error.code.ServerError;
@@ -91,6 +92,9 @@ public class LinkRequestHandler implements RequestHandler {
     // support linkName or linkId for the api
     long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier, repository);
 
+    // Authorization check
+    AuthorizationEngine.deleteLink(String.valueOf(linkId));
+
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "link", linkIdentifier);
 
@@ -126,6 +130,15 @@ public class LinkRequestHandler implements RequestHandler {
     }
 
     MLink postedLink = links.get(0);
+
+    // Authorization check
+    if (create) {
+      AuthorizationEngine.createLink(String.valueOf(postedLink.getConnectorId()));
+    } else {
+      AuthorizationEngine.updateLink(String.valueOf(postedLink.getConnectorId()),
+              String.valueOf(postedLink.getPersistenceId()));
+    }
+
     MLinkConfig linkConfig = ConnectorManager.getInstance()
         .getConnectorConfigurable(postedLink.getConnectorId()).getLinkConfig();
     if (!linkConfig.equals(postedLink.getConnectorLinkConfig())) {
@@ -187,7 +200,12 @@ public class LinkRequestHandler implements RequestHandler {
           ctx.getRequest().getRemoteAddr(), "get", "linksByConnector", identifier);
       if (repository.findConnector(identifier) != null) {
         long connectorId = repository.findConnector(identifier).getPersistenceId();
-        linkBean = createLinksBean(repository.findLinksForConnector(connectorId), locale);
+        List<MLink> linkList = repository.findLinksForConnector(connectorId);
+
+        // Authorization check
+        linkList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.LINK, linkList);
+
+        linkBean = createLinksBean(linkList, locale);
       } else {
         // this means name nor Id existed
         throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + identifier
@@ -199,7 +217,12 @@ public class LinkRequestHandler implements RequestHandler {
         || (ctx.getPath().contains(LINK_PATH) && identifier.equals("all"))) {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "links", "all");
-      linkBean = createLinksBean(repository.findLinks(), locale);
+      List<MLink> linkList = repository.findLinks();
+
+      // Authorization check
+      linkList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.LINK, linkList);
+
+      linkBean = createLinksBean(linkList, locale);
     }
     // link by Id
     else {
@@ -210,6 +233,10 @@ public class LinkRequestHandler implements RequestHandler {
       List<MLink> linkList = new ArrayList<MLink>();
       // a list of single element
       linkList.add(repository.findLink(linkId));
+
+      // Authorization check
+      linkList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.LINK, linkList);
+
       linkBean = createLinkBean(linkList, locale);
     }
     return linkBean;
@@ -243,6 +270,10 @@ public class LinkRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String linkIdentifier = elements[elements.length - 2];
     long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier, repository);
+
+    // Authorization check
+    AuthorizationEngine.enableDisableLink(String.valueOf(linkId));
+
     repository.enableLink(linkId, enabled);
     return JsonBean.EMPTY_BEAN;
   }

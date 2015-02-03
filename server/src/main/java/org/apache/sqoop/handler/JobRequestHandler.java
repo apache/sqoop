@@ -19,6 +19,7 @@ package org.apache.sqoop.handler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,6 +47,7 @@ import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.request.HttpEventContext;
+import org.apache.sqoop.security.Authorization.AuthorizationEngine;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.error.code.ServerError;
@@ -137,6 +139,9 @@ public class JobRequestHandler implements RequestHandler {
     String jobIdentifier = ctx.getLastURLElement();
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
 
+    // Authorization check
+    AuthorizationEngine.deleteJob(String.valueOf(jobId));
+
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "job", jobIdentifier);
     repository.deleteJob(jobId);
@@ -174,6 +179,16 @@ public class JobRequestHandler implements RequestHandler {
 
     // Job object
     MJob postedJob = jobs.get(0);
+
+    // Authorization check
+    if (create) {
+      AuthorizationEngine.createJob(String.valueOf(postedJob.getFromConnectorId()),
+              String.valueOf(postedJob.getToConnectorId()));
+    } else {
+      AuthorizationEngine.updateJob(String.valueOf(postedJob.getFromConnectorId()),
+              String.valueOf(postedJob.getToConnectorId()),
+              String.valueOf(postedJob.getPersistenceId()));
+    }
 
     // Verify that user is not trying to spoof us
     MFromConfig fromConfig = ConnectorManager.getInstance()
@@ -263,14 +278,24 @@ public class JobRequestHandler implements RequestHandler {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "jobsByConnector", connectorIdentifier);
       long connectorId = HandlerUtils.getConnectorIdFromIdentifier(connectorIdentifier);
-      jobBean = createJobsBean(repository.findJobsForConnector(connectorId), locale);
+      List<MJob> jobList = repository.findJobsForConnector(connectorId);
+
+      // Authorization check
+      jobList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.JOB, jobList);
+
+      jobBean = createJobsBean(jobList, locale);
     } else
     // all jobs in the system
     if (ctx.getPath().contains(JOBS_PATH)
         || (ctx.getPath().contains(JOB_PATH) && connectorIdentifier.equals("all"))) {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "jobs", "all");
-      jobBean = createJobsBean(repository.findJobs(), locale);
+      List<MJob> jobList = repository.findJobs();
+
+      // Authorization check
+      jobList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.JOB, jobList);
+
+      jobBean = createJobsBean(jobList, locale);
     }
     // job by Id
     else {
@@ -281,6 +306,10 @@ public class JobRequestHandler implements RequestHandler {
       List<MJob> jobList = new ArrayList<MJob>();
       // a list of single element
       jobList.add(repository.findJob(jobId));
+
+      // Authorization check
+      jobList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.JOB, jobList);
+
       jobBean = createJobBean(jobList, locale);
     }
     return jobBean;
@@ -320,6 +349,10 @@ public class JobRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+
+    // Authorization check
+    AuthorizationEngine.enableDisableJob(String.valueOf(jobId));
+
     repository.enableJob(jobId, enabled);
     return JsonBean.EMPTY_BEAN;
   }
@@ -329,6 +362,10 @@ public class JobRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+
+    // Authorization check
+    AuthorizationEngine.startJob(String.valueOf(jobId));
+
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "submit", "job", String.valueOf(jobId));
     // TODO(SQOOP-1638): This should be outsourced somewhere more suitable than
@@ -349,6 +386,10 @@ public class JobRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+
+    // Authorization check
+    AuthorizationEngine.stopJob(String.valueOf(jobId));
+
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "stop", "job", String.valueOf(jobId));
     MSubmission submission = JobManager.getInstance().stop(jobId, prepareRequestEventContext(ctx));
@@ -360,9 +401,14 @@ public class JobRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+
+    // Authorization check
+    AuthorizationEngine.statusJob(String.valueOf(jobId));
+
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "status", "job", String.valueOf(jobId));
     MSubmission submission = JobManager.getInstance().status(jobId);
+
     return new SubmissionBean(submission);
   }
 

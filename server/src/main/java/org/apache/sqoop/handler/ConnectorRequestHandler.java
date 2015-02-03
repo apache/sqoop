@@ -32,6 +32,7 @@ import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.ConnectorsBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.security.Authorization.AuthorizationEngine;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.RequestHandler;
@@ -67,6 +68,10 @@ public class ConnectorRequestHandler implements RequestHandler {
       configParamBundles = ConnectorManager.getInstance().getResourceBundles(locale);
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "connectors", "all");
+
+      // Authorization check
+      connectors = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.CONNECTOR, connectors);
+
       return new ConnectorsBean(connectors, configParamBundles);
 
     } else {
@@ -82,6 +87,10 @@ public class ConnectorRequestHandler implements RequestHandler {
 
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "connector", String.valueOf(cIdentifier));
+
+      // Authorization check
+      connectors = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.CONNECTOR, connectors);
+
       return new ConnectorBean(connectors, configParamBundles);
     }
   }

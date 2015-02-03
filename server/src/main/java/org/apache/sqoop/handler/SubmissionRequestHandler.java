@@ -27,6 +27,7 @@ import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
+import org.apache.sqoop.security.Authorization.AuthorizationEngine;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.RequestHandler;
@@ -69,12 +70,20 @@ public class SubmissionRequestHandler implements RequestHandler {
   private JsonBean getSubmissions() {
     List<MSubmission> submissions = RepositoryManager.getInstance().getRepository()
         .findSubmissions();
+
+    //Authorization check
+    submissions = AuthorizationEngine.filterSubmission(submissions);
+
     return new SubmissionsBean(submissions);
   }
 
   private JsonBean getSubmissionsForJob(long jid) {
+    //Authorization check
+    AuthorizationEngine.statusJob(String.valueOf(jid));
+
     List<MSubmission> submissions = RepositoryManager.getInstance().getRepository()
         .findSubmissionsForJob(jid);
+
     return new SubmissionsBean(submissions);
   }
 }
