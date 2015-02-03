@@ -29,10 +29,10 @@ import org.testng.annotations.Test;
 public class FromRDBMSToKafkaTest extends KafkaConnectorTestCase {
 
   private static final String[] input = {
-          "1,'USA','San Francisco'",
-          "2,'USA','Sunnyvale'",
-          "3,'Czech Republic','Brno'",
-          "4,'USA','Palo Alto'"
+          "1,'USA','2004-10-23','San Francisco'",
+          "2,'USA','2004-10-24','Sunnyvale'",
+          "3,'Czech Republic','2004-10-25','Brno'",
+          "4,'USA','2004-10-26','Palo Alto'"
   };
 
   @Test

@@ -38,7 +38,6 @@ public class GenericJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurat
     String password = linkConfig.linkConfig.password;
     GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
     executor.setAutoCommit(false);
-
     String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL);
     executor.beginBatch(sql);
     try {
@@ -48,7 +47,7 @@ public class GenericJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurat
 
       while ((array = context.getDataReader().readArrayRecord()) != null) {
         numberOfRowsPerBatch++;
-        executor.addBatch(array);
+        executor.addBatch(array, context.getSchema());
 
         if (numberOfRowsPerBatch == rowsPerBatch) {
           numberOfBatchesPerTransaction++;

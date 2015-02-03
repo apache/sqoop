@@ -17,6 +17,15 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.GenericJdbcConnectorError;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.Column;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -25,10 +34,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.error.code.GenericJdbcConnectorError;
+import java.sql.Timestamp;
 
 public class GenericJdbcExecutor {
 
@@ -167,10 +173,34 @@ public class GenericJdbcExecutor {
     }
   }
 
-  public void addBatch(Object[] array) {
+  public void addBatch(Object[] array, Schema schema) {
     try {
-      for (int i=0; i<array.length; i++) {
-        preparedStatement.setObject(i+1, array[i]);
+      Column[] schemaColumns = schema.getColumnsArray();
+      for (int i = 0; i < array.length; i++) {
+        Column schemaColumn = schemaColumns[i];
+        switch (schemaColumn.getType()) {
+        case DATE:
+          // convert the JODA date to sql date
+          LocalDate date = (LocalDate) array[i];
+          java.sql.Date sqlDate = new java.sql.Date(date.toDateTimeAtCurrentTime().getMillis());
+          preparedStatement.setObject(i + 1, sqlDate);
+          break;
+        case DATE_TIME:
+          // convert the JODA date time to sql date
+          DateTime dateTime = (DateTime) array[i];
+          Timestamp timestamp = new Timestamp(dateTime.getMillis());
+          preparedStatement.setObject(i + 1, timestamp);
+          break;
+        case TIME:
+          // convert the JODA time to sql date
+          LocalTime time = (LocalTime) array[i];
+          java.sql.Time sqlTime = new java.sql.Time(time.toDateTimeToday().getMillis());
+          preparedStatement.setObject(i + 1, sqlTime);
+          break;
+        default:
+          // for anything else
+          preparedStatement.setObject(i + 1, array[i]);
+        }
       }
       preparedStatement.addBatch();
     } catch (SQLException e) {

@@ -35,6 +35,7 @@ public class Cities extends DataSet {
       "id",
       "id", "int",
       "country", "varchar(50)",
+      "some_date", "date",
       "city", "varchar(50)"
     );
 
@@ -43,10 +44,10 @@ public class Cities extends DataSet {
 
   @Override
   public DataSet loadBasicData() {
-    provider.insertRow(tableBaseName, 1, "USA", "San Francisco");
-    provider.insertRow(tableBaseName, 2, "USA", "Sunnyvale");
-    provider.insertRow(tableBaseName, 3, "Czech Republic", "Brno");
-    provider.insertRow(tableBaseName, 4, "USA", "Palo Alto");
+    provider.insertRow(tableBaseName, 1, "USA", "2004-10-23","San Francisco");
+    provider.insertRow(tableBaseName, 2, "USA", "2004-10-24", "Sunnyvale");
+    provider.insertRow(tableBaseName, 3, "Czech Republic", "2004-10-25", "Brno");
+    provider.insertRow(tableBaseName, 4, "USA", "2004-10-26", "Palo Alto");
 
     return this;
   }

@@ -53,7 +53,7 @@ public class ProviderAsserts {
       int i = 1;
       for(Object expectedValue : values) {
         Object actualValue = rs.getObject(i);
-        assertEquals("Columns do not match on position: " + i, expectedValue, actualValue);
+        assertEquals("Columns do not match on position: " + i, expectedValue.toString(), actualValue.toString());
         i++;
       }
 

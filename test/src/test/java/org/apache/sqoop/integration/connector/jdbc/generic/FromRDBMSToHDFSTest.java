@@ -67,10 +67,10 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
     // Assert correct output
     assertTo(
-      "1,'USA','San Francisco'",
-      "2,'USA','Sunnyvale'",
-      "3,'Czech Republic','Brno'",
-      "4,'USA','Palo Alto'"
+      "1,'USA','2004-10-23','San Francisco'",
+      "2,'USA','2004-10-24','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25','Brno'",
+      "4,'USA','2004-10-26','Palo Alto'"
     );
 
     // Clean up testing table

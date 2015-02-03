@@ -36,10 +36,10 @@ public class FromHDFSToRDBMSTest extends ConnectorTestCase {
   public void testBasic() throws Exception {
     createTableCities();
     createFromFile("input-0001",
-      "1,'USA','San Francisco'",
-      "2,'USA','Sunnyvale'",
-      "3,'Czech Republic','Brno'",
-      "4,'USA','Palo Alto'"
+      "1,'USA','2004-10-23','San Francisco'",
+      "2,'USA','2004-10-24','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25','Brno'",
+      "4,'USA','2004-10-26','Palo Alto'"
     );
 
     // RDBMS link
@@ -69,10 +69,10 @@ public class FromHDFSToRDBMSTest extends ConnectorTestCase {
     executeJob(job);
 
     assertEquals(4L, rowCount());
-    assertRowInCities(1, "USA", "San Francisco");
-    assertRowInCities(2, "USA", "Sunnyvale");
-    assertRowInCities(3, "Czech Republic", "Brno");
-    assertRowInCities(4, "USA", "Palo Alto");
+    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
+    assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
+    assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");
+    assertRowInCities(4, "USA", "2004-10-26", "Palo Alto");
 
     // Clean up testing table
     dropTable();

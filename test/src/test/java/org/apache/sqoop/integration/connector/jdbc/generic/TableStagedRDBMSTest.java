@@ -37,11 +37,11 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
     final String stageTableName = "STAGE_" + getTableName();
     createTableCities();
     createFromFile("input-0001",
-      "1,'USA','San Francisco'",
-      "2,'USA','Sunnyvale'",
-      "3,'Czech Republic','Brno'",
-      "4,'USA','Palo Alto'"
-    );
+        "1,'USA','2004-10-23','San Francisco'",
+        "2,'USA','2004-10-24','Sunnyvale'",
+        "3,'Czech Republic','2004-10-25','Brno'",
+        "4,'USA','2004-10-26','Palo Alto'"
+      );
     new Cities(provider, stageTableName).createTables();
 
     // RDBMS link
@@ -76,10 +76,10 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
 
     assertEquals(0L, provider.rowCount(stageTableName));
     assertEquals(4L, rowCount());
-    assertRowInCities(1, "USA", "San Francisco");
-    assertRowInCities(2, "USA", "Sunnyvale");
-    assertRowInCities(3, "Czech Republic", "Brno");
-    assertRowInCities(4, "USA", "Palo Alto");
+    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
+    assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
+    assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");
+    assertRowInCities(4, "USA", "2004-10-26", "Palo Alto");
 
     // Clean up testing table
     provider.dropTable(stageTableName);

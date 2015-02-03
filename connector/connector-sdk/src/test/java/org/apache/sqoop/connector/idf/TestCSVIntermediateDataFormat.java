@@ -458,7 +458,7 @@ public class TestCSVIntermediateDataFormat {
     dataFormat = new CSVIntermediateDataFormat(schema);
     dataFormat.setCSVTextData("'2014-10-01'");
     org.joda.time.LocalDate date = new org.joda.time.LocalDate(2014, 10, 01);
-    assertEquals(date.toString(), dataFormat.getObjectData()[0].toString());
+    assertEquals(date, dataFormat.getObjectData()[0]);
   }
 
   @Test
