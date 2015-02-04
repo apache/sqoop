@@ -120,23 +120,8 @@ public class HBaseImportJob extends DataDrivenImportJob {
     conf.set(HBasePutProcessor.ROW_KEY_COLUMN_KEY, rowKeyCol);
   }
 
-  /**
-   * Hope for an existing authentication token.
-   * Test with basic metadata operation.
-   * Log exception if credentials exist, otherwise rethrow exception.
-   */
-  private boolean isAuthenticated(HBaseAdmin admin) {
-    try {
-      LOG.info("Checking for previous credentials by performing a metadata query.");
-      admin.tableExists("TEST");
-      LOG.info("Previous authentication credentials detected, so the job will use them.");
-    } catch (IOException e) {
-      LOG.info("No previous credentials found. Will attempt to authenticate.");
-      LOG.debug("Exception found when performing metadata query to check credentials.", e);
-      return false;
-    }
-
-    return true;
+  protected boolean skipDelegationTokens(Configuration conf) {
+    return conf.getBoolean("sqoop.hbase.security.token.skip", false);
   }
 
   @Override
@@ -177,7 +162,7 @@ public class HBaseImportJob extends DataDrivenImportJob {
 
     HBaseAdmin admin = new HBaseAdmin(conf);
 
-    if (!isAuthenticated(admin)) {
+    if (!skipDelegationTokens(conf)) {
       // Add authentication token to the job if we're running on secure cluster.
       //
       // We're currently supporting HBase version 0.90 that do not have security
