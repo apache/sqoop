@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.repository.postgresql;
+package org.apache.sqoop.integration.repository.postgresql;
 
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.repository.common.CommonRepoUtils;

@@ -67,6 +67,11 @@ public class NetezzaProvider extends DatabaseProvider {
     return escapeObjectName(tableName);
   }
 
+  @Override
+  public String escapeSchemaName(String schemaName) {
+    return schemaName;
+  }
+
   public String escapeObjectName(String name) {
     return '"' + name + '"';
   }

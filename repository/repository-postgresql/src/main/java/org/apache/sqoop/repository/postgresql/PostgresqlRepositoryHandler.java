@@ -17,9 +17,6 @@
  */
 package org.apache.sqoop.repository.postgresql;
 
-import static org.apache.sqoop.repository.postgresql.PostgresqlSchemaQuery.*;
-import static org.apache.sqoop.repository.postgresql.PostgresqlSchemaCreateQuery.*;
-
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
@@ -85,7 +82,7 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
           PostgresqlSchemaConstants.TABLE_SQ_SYSTEM_NAME.toLowerCase(), null);
 
       if (metadataResultSet.next()) {
-        stmt = conn.prepareStatement(STMT_SELECT_SYSTEM);
+        stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_SELECT_SYSTEM);
         stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
         rs = stmt.executeQuery();
 
@@ -118,22 +115,22 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
     }
 
     if (version == 0) {
-      runQuery(QUERY_CREATE_SCHEMA_SQOOP, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_CONFIGURABLE, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_CONFIG, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_INPUT, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_LINK, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_JOB, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_LINK_INPUT, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_JOB_INPUT, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_SUBMISSION, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_GROUP, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_COUNTER, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_SYSTEM, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_DIRECTION, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS, conn);
-      runQuery(QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_SCHEMA_SQOOP, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONFIGURABLE, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONFIG, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_INPUT, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_LINK, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_JOB, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_LINK_INPUT, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_JOB_INPUT, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_SUBMISSION, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_COUNTER_GROUP, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_COUNTER, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_COUNTER_SUBMISSION, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_SYSTEM, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_DIRECTION, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONNECTOR_DIRECTIONS, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONFIG_DIRECTIONS, conn);
 
       // Insert FROM and TO directions.
       insertDirections(conn);
@@ -145,13 +142,13 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
     ResultSet rs = null;
     PreparedStatement stmt = null;
     try {
-      stmt = conn.prepareStatement(STMT_DELETE_SYSTEM);
+      stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_DELETE_SYSTEM);
       stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
       stmt.executeUpdate();
 
       closeStatements(stmt);
 
-      stmt = conn.prepareStatement(STMT_INSERT_SYSTEM);
+      stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_INSERT_SYSTEM);
       stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
       stmt.setString(2, Integer.toString(PostgresqlRepoConstants.LATEST_POSTGRESQL_REPOSITORY_VERSION));
       stmt.executeUpdate();
@@ -175,7 +172,7 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
     try {
       // Insert directions and get IDs.
       for (Direction direction : Direction.values()) {
-        insertDirectionStmt = conn.prepareStatement(STMT_INSERT_DIRECTION, Statement.RETURN_GENERATED_KEYS);
+        insertDirectionStmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_INSERT_DIRECTION, Statement.RETURN_GENERATED_KEYS);
         insertDirectionStmt.setString(1, direction.toString());
         if (insertDirectionStmt.executeUpdate() != 1) {
           throw new SqoopException(PostgresqlRepoError.POSTGRESQLREPO_0003, "Could not add directions FROM and TO.");

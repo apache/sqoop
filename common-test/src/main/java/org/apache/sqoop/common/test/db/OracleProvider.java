@@ -68,6 +68,11 @@ public class OracleProvider extends DatabaseProvider {
   }
 
   @Override
+  public String escapeSchemaName(String schemaName) {
+    return escape(schemaName);
+  }
+
+  @Override
   public String escapeValueString(String value) {
     return "'" + value + "'";
   }

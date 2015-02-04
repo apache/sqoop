@@ -68,6 +68,11 @@ public class TeradataProvider extends DatabaseProvider {
   }
 
   @Override
+  public String escapeSchemaName(String schemaName) {
+    return schemaName;
+  }
+
+  @Override
   public String escapeValueString(String value) {
     return "'" + value + "'";
   }

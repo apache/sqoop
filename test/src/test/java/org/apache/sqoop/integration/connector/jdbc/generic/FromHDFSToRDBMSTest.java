@@ -68,7 +68,7 @@ public class FromHDFSToRDBMSTest extends ConnectorTestCase {
 
     executeJob(job);
 
-    assertEquals(4L, rowCount());
+    assertEquals(4L, provider.rowCount(null, getTableName()));
     assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
     assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
     assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");

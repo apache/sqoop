@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.test.testcases;
 
+import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.Assert.assertNotSame;
 
@@ -42,6 +43,9 @@ import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.validation.Status;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Base test case suitable for connector testing.
@@ -115,10 +119,6 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
 
   protected void insertRow(Object ...values) {
     provider.insertRow(getTableName(), values);
-  }
-
-  protected long rowCount() {
-    return provider.rowCount(getTableName());
   }
 
   /**
@@ -199,7 +199,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param conditions Conditions in config that are expected by the database provider
    * @param values Values that are expected in the table (with corresponding types)
    */
-  protected void assertRow(Object []conditions, Object ...values) {
+  protected void assertRow(Object[] conditions, Object ...values) {
     ProviderAsserts.assertRow(provider, getTableName(), conditions, values);
   }
 

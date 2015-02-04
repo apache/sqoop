@@ -15,13 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.repository.postgresql;
+package org.apache.sqoop.integration.repository.postgresql;
 
 import org.testng.annotations.Test;
 
 /**
  * Test connector methods on PostgreSQL repository.
  */
+@Test(groups = "postgresql")
 public class TestStructure extends PostgresqlTestCase {
 
   @Test

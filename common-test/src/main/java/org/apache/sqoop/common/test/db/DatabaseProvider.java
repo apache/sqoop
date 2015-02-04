@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -89,6 +90,20 @@ abstract public class DatabaseProvider {
   abstract public String escapeTableName(String tableName);
 
   /**
+   * Escape schema name based on specific database requirements.
+   *
+   * @param schemaName Schema name
+   * @return Escaped schemaname
+   */
+  public String escapeSchemaName(String schemaName) {
+    if (!isSupportingScheme()) {
+      throw new UnsupportedOperationException("Schema is not supported in this database");
+    }
+
+    return schemaName;
+  }
+
+  /**
    * Escape string value that can be safely used in the queries.
    *
    * @param value String value
@@ -116,6 +131,26 @@ abstract public class DatabaseProvider {
 
   public String getJdbcDriver() {
     return null;
+  }
+
+  /**
+   * Get full table name with qualifications
+   * @param schemaName
+   * @param tableName
+   * @param escape
+   * @return String table name
+   */
+  public String getTableName(String schemaName, String tableName, boolean escape) {
+    StringBuilder sb = new StringBuilder();
+
+    if (schemaName != null) {
+      sb.append(escape ? escapeSchemaName(schemaName) : schemaName);
+      sb.append(".");
+    }
+
+    sb.append(escape ? escapeTableName(tableName) : tableName);
+
+    return sb.toString();
   }
 
   /**
@@ -214,6 +249,46 @@ abstract public class DatabaseProvider {
       LOG.error("Error in executing query", e);
       throw new RuntimeException("Error in executing query", e);
     }
+  }
+
+  /**
+   * Execute given insert query in a new statement object and return
+   * generated IDs.
+   *
+   * @param query Query to execute
+   * @return Generated ID.
+   */
+  public Long executeInsertQuery(String query, Object... args) {
+    LOG.info("Executing query: " + query);
+    ResultSet rs = null;
+
+    try {
+      PreparedStatement stmt = databaseConnection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+      for (int i = 0; i < args.length; ++i) {
+        if (args[i] instanceof String) {
+          stmt.setString(i + 1, (String) args[i]);
+        } else if (args[i] instanceof Long) {
+          stmt.setLong(i + 1, (Long) args[i]);
+        } else if (args[i] instanceof Boolean) {
+          stmt.setBoolean(i + 1, (Boolean) args[i]);
+        } else {
+          stmt.setObject(i + 1, args[i]);
+        }
+      }
+
+      stmt.execute();
+      rs = stmt.getGeneratedKeys();
+      if (rs.next()) {
+        return rs.getLong(1);
+      }
+    } catch (SQLException e) {
+      LOG.error("Error in executing query", e);
+      throw new RuntimeException("Error in executing query", e);
+    } finally {
+      closeResultSetWithStatement(rs);
+    }
+
+    return -1L;
   }
 
   /**
@@ -357,7 +432,7 @@ abstract public class DatabaseProvider {
    */
   public void dropSchema(String schemaName) {
     StringBuilder sb = new StringBuilder("DROP SCHEMA ");
-    sb.append(escapeTableName(schemaName));
+    sb.append(escapeSchemaName(schemaName));
     sb.append(" CASCADE");
 
     try {
@@ -370,12 +445,13 @@ abstract public class DatabaseProvider {
   /**
    * Return number of rows from given table.
    *
+   * @param schemaName Schema name
    * @param tableName Table name
    * @return Number of rows
    */
-  public long rowCount(String tableName) {
+  public long rowCount(String schemaName, String tableName) {
     StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM ");
-    sb.append(escapeTableName(tableName));
+    sb.append(getTableName(schemaName, tableName, true));
 
     ResultSet rs = null;
     try {
@@ -391,6 +467,16 @@ abstract public class DatabaseProvider {
     } finally {
       closeResultSetWithStatement(rs);
     }
+  }
+
+  /**
+   * Return number of rows from a given table.
+   *
+   * @param tableName
+   * @return Number of rows
+   */
+  public long rowCount(String tableName) {
+    return rowCount(null, tableName);
   }
 
   /**

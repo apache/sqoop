@@ -23,7 +23,7 @@ public class PostgresqlRepoConstants {
    * Expected version of the repository structures.
    *
    * History:
-   * 1 - Version 1.99.4
+   * 1 - Version 1.99.5
    */
   public static final int LATEST_POSTGRESQL_REPOSITORY_VERSION = 1;
 
