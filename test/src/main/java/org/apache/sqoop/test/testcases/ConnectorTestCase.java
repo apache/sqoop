@@ -121,6 +121,10 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     provider.insertRow(getTableName(), values);
   }
 
+  protected void dumpTable() {
+    provider.dumpTable(getTableName());
+  }
+
   /**
    * Fill link config based on currently active provider.
    *

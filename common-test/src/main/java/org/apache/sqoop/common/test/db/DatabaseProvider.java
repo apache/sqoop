@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
@@ -129,6 +130,14 @@ abstract public class DatabaseProvider {
     return false;
   }
 
+  /**
+   * JDBC Driver class name.
+   *
+   * Fully qualified name of the driver class, so that Class.forName() or
+   * similar facility can be used.
+   *
+   * @return
+   */
   public String getJdbcDriver() {
     return null;
   }
@@ -506,6 +515,43 @@ abstract public class DatabaseProvider {
       Class.forName(className);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException("Class not found: " + className, e);
+    }
+  }
+
+  /**
+   * Dump content of given table to log.
+   *
+   * @param tableName Name of the table
+   */
+  public void dumpTable(String tableName) {
+    String query = "SELECT * FROM " + escapeTableName(tableName);
+    List<String> list = new LinkedList<String>();
+    ResultSet rs = null;
+
+    try {
+      rs = executeQuery(query);
+
+      // Header with column names
+      ResultSetMetaData md = rs.getMetaData();
+      for(int i = 0; i < md.getColumnCount(); i++) {
+        list.add(md.getColumnName(i+1));
+      }
+      LOG.info("Dumping table " + tableName);
+      LOG.info("|" + StringUtils.join(list, "|") + "|");
+
+      // Table rows
+      while(rs.next()) {
+        list.clear();
+        for(int i = 0; i < md.getColumnCount(); i++) {
+          list.add(rs.getObject(i+1).toString());
+        }
+        LOG.info("|" + StringUtils.join(list, "|") + "|");
+      }
+
+    } catch (SQLException e) {
+      LOG.info("Ignoring exception: ", e);
+    } finally {
+      closeResultSetWithStatement(rs);
     }
   }
 }
