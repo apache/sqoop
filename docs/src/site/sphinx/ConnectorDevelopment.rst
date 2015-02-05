@@ -385,6 +385,7 @@ Each ``ConfigClass`` defines the different inputs it exposes for the link and jo
 
 Each ``ConfigClass`` and the  inputs within the configs annotated with ``Input`` can specifiy validators via the ``@Validator`` annotation described below.
 
+
 Configs and Inputs
 ==================================
 As discussed above, ``Input`` provides a way to express the type of config parameter exposed. In addition it allows connector developer to add attributes
@@ -396,14 +397,20 @@ Inputs associated with the link configuration include:
 +-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
 | Attribute                   | Type    | Description                                                           | Example                                         |
 +=============================+=========+=======================================================================+=================================================+
-| size                        | Integer| Describes the maximum size of the attribute value .                    |@Input(size = 128) public String driver          |
+| size                        | Integer |Describes the maximum size of the attribute value .                    |@Input(size = 128) public String driver          |
 +-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
 | sensitive                   | Boolean |Describes if the input value should be hidden from display             |@Input(sensitive = true) public String password  |
 +-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
-| editable                    | Enum    |Describes the roles that can edit the value of this input              |@Input(editable =USER_ONLY) public String value  |
+| editable                    | Enum    |Describes the roles that can edit the value of this input              |@Input(editable = ANY) public String value       |
 +-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
 | overrides                   | String  |Describes a list of other inputs this input can override in this config|@Input(overrides ="value") public String lvalue  |
 +-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
+
+
+``Editable`` Attribute: Possible values for the Enum InputEditable are USER_ONLY, CONNECTOR_ONLY, ANY. If an input says editable by USER_ONLY, then the connector code during the
+job run or upgrade cannot update the config input value. Similarly for a CONNECTOR_ONLY, user cannot update its value via the rest api or shell command line.
+
+``Overrides`` Attribute: USER_ONLY input attribute values cannot be overriden by other inputs.
 
 Empty Configuration
 -------------------
