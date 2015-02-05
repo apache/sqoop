@@ -67,10 +67,11 @@ public class HdfsAsserts {
     }
 
     if(!setLines.isEmpty() || !notFound.isEmpty()) {
+      LOG.error("Output do not match expectations.");
       LOG.error("Expected lines that weren't present in the files:");
-      LOG.error("\t" + StringUtils.join(setLines, "\n\t"));
+      LOG.error("\t'" + StringUtils.join(setLines, "'\n\t'") + "'");
       LOG.error("Extra lines in files that weren't expected:");
-      LOG.error("\t" + StringUtils.join(notFound, "\n\t"));
+      LOG.error("\t'" + StringUtils.join(notFound, "'\n\t'") + "'");
       fail("Output do not match expectations.");
     }
   }
