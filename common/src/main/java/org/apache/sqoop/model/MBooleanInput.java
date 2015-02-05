@@ -27,8 +27,8 @@ import org.apache.sqoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public class MBooleanInput extends MInput<Boolean> {
 
-  public MBooleanInput(String name, boolean sensitive) {
-    super(name, sensitive);
+  public MBooleanInput(String name, boolean sensitive, InputEditable editable, String overrides) {
+    super(name, sensitive, editable, overrides);
   }
 
   @Override
@@ -78,8 +78,8 @@ public class MBooleanInput extends MInput<Boolean> {
 
   @Override
   public Object clone(boolean cloneWithValue) {
-    MBooleanInput copy = new MBooleanInput(getName(), isSensitive());
-    copy.setPersistenceId(this.getPersistenceId());
+    MBooleanInput copy = new MBooleanInput(getName(), isSensitive(), getEditable(), getOverrides());
+    copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(getValue());
     }

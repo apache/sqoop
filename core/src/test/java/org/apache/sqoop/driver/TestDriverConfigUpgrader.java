@@ -24,6 +24,8 @@ import static org.testng.Assert.assertNull;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MDriverConfig;
@@ -127,9 +129,11 @@ public class TestDriverConfigUpgrader {
 
   List<MInput<?>> inputs1(String formName) {
     List<MInput<?>> list = new LinkedList<MInput<?>>();
-    list.add(new MStringInput(formName + ".s1", false, (short) 30));
-    list.add(new MStringInput(formName + ".s2", false, (short) 30));
-    list.add(new MIntegerInput(formName + ".i", false));
+    list.add(new MStringInput(formName + ".s1", false, InputEditable.ANY, StringUtils.EMPTY,
+        (short) 30));
+    list.add(new MStringInput(formName + ".s2", false, InputEditable.ANY, StringUtils.EMPTY,
+        (short) 30));
+    list.add(new MIntegerInput(formName + ".i", false, InputEditable.ANY, StringUtils.EMPTY));
     return list;
   }
 
@@ -141,9 +145,11 @@ public class TestDriverConfigUpgrader {
 
   List<MInput<?>> inputs2(String formName) {
     List<MInput<?>> list = new LinkedList<MInput<?>>();
-    list.add(new MStringInput(formName + ".s1", false, (short) 30));
-    list.add(new MStringInput(formName + ".s2_", false, (short) 30));
-    list.add(new MIntegerInput(formName + ".i", false));
+    list.add(new MStringInput(formName + ".s1", false, InputEditable.ANY, StringUtils.EMPTY,
+        (short) 30));
+    list.add(new MStringInput(formName + ".s2_", false, InputEditable.ANY, StringUtils.EMPTY,
+        (short) 30));
+    list.add(new MIntegerInput(formName + ".i", false, InputEditable.ANY, StringUtils.EMPTY));
     return list;
   }
 

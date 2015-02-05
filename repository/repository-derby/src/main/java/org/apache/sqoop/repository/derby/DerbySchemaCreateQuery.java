@@ -122,6 +122,19 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQI_STRMASK: BOOLEAN       |
  *    | SQI_STRLENGTH: SMALLINT    |
  *    | SQI_ENUMVALS: VARCHAR(100) |
+ *    | SQI_EDITABLE: VARCHAR(32)  |
+ *    +----------------------------+
+ * </pre>
+* <p>
+ * <strong>SQ_INPUT_RELATION</strong>: Input to Input relationship
+ *
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_INPUT_RELATION           |
+ *    +----------------------------+
+ *    | SQIR_ID: BIGINT PK AUTO-GEN |
+ *    | SQIR_PARENT_ID: BIGINT      |FK SQ_INPUT(SQI_ID)
+ *    | SQIR_CHILD_ID: BIGINT       |FK SQ_INPUT(SQI_ID)
  *    +----------------------------+
  * </pre>
  *
@@ -368,6 +381,20 @@ public final class DerbySchemaCreateQuery {
         + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_FORM) + ") "
           + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_FORM_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQF_ID) + ")"
       + ")";
+
+    // DDL : Create table SQ_INPUT_RELATION
+    public static final String QUERY_CREATE_TABLE_SQ_INPUT_RELATION =
+        "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_RELATION_NAME) + " ("
+        + CommonRepoUtils.escapeColumnName(COLUMN_SQIR_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1) PRIMARY KEY, "
+        + CommonRepoUtils.escapeColumnName(COLUMN_SQIR_PARENT) + " BIGINT, "
+        + CommonRepoUtils.escapeColumnName(COLUMN_SQIR_CHILD) + " BIGINT, "
+        + "CONSTRAINT " + CONSTRAINT_SQIR_PARENT + " "
+          + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQIR_PARENT) + ") "
+            + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + "),"
+        + "CONSTRAINT " + CONSTRAINT_SQIR_CHILD + " "
+          + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQIR_CHILD) + ") "
+            + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")"
+        + ")";
 
   // DDL: Create table SQ_CONNECTION
   public static final String QUERY_CREATE_TABLE_SQ_CONNECTION =

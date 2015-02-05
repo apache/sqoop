@@ -60,6 +60,16 @@ public enum ModelError implements ErrorCode {
 
   MODEL_016("Can't instantiate class"),
 
+  MODEL_017("Config Input override name does nto exist"),
+  /**
+   * Config Input that is set to USER_ONLY editable cannot override other
+   * USER_ONLY input
+   **/
+  MODEL_018("Config Input cannot override USER_ONLY attribute"),
+
+  /** Config Input cannot override itself */
+  MODEL_019("Config Input cannot override itself"),
+
   ;
 
   private final String message;

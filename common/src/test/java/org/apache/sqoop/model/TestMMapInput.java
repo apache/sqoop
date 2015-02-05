@@ -20,6 +20,7 @@ package org.apache.sqoop.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -37,7 +38,7 @@ public class TestMMapInput {
    */
   @Test
   public void testInitialization() {
-    MMapInput input = new MMapInput("sqoopsqoop", false);
+    MMapInput input = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(MInputType.MAP, input.getType());
   }
@@ -48,13 +49,13 @@ public class TestMMapInput {
   @Test
   public void testEquals() {
     // Positive test
-    MMapInput input1 = new MMapInput("sqoopsqoop", false);
-    MMapInput input2 = new MMapInput("sqoopsqoop", false);
+    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MMapInput input2 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MMapInput input3 = new MMapInput("sqoopsqoop", false);
-    MMapInput input4 = new MMapInput("sqoopsqoop1", false);
+    MMapInput input3 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MMapInput input4 = new MMapInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY);
     assertFalse(input3.equals(input4));
   }
 
@@ -63,7 +64,7 @@ public class TestMMapInput {
    */
   @Test
   public void testValue() {
-    MMapInput input1 = new MMapInput("sqoopsqoop", false);
+    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
     Map<String, String> map1 = new HashMap<String, String>();
     input1.setValue(map1);
     assertEquals(map1, input1.getValue());
@@ -76,7 +77,7 @@ public class TestMMapInput {
    */
   @Test
   public void testUrlSafe() {
-    MMapInput input1 = new MMapInput("sqoopsqoop", false);
+    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
     Map<String, String> map1 = new HashMap<String, String>();
     input1.setValue(map1);
     // Getting URL safe string
@@ -97,7 +98,7 @@ public class TestMMapInput {
    */
   @Test
   public void testNamedElement() {
-    MStringInput input1 = new MStringInput("sqoopsqoop", true, (short) 5);
+    MStringInput input1 = new MStringInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY, (short) 5);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
   }
@@ -107,8 +108,8 @@ public class TestMMapInput {
    */
   @Test
   public void testSensitivity() {
-    MMapInput input1 = new MMapInput("NAME", false);
-    MMapInput input2 = new MMapInput("NAME", true);
+    MMapInput input1 = new MMapInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY );
+    MMapInput input2 = new MMapInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY );
     assertFalse(input1.isSensitive());
     assertTrue(input2.isSensitive());
   }

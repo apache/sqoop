@@ -510,7 +510,12 @@ public final class DerbySchemaUpgradeQuery {
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_SUBMISSION_COLUMN_2 = "RENAME COLUMN "
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME) + "." + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXCEPTION_TRACE) + " TO " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS);
 
-  private DerbySchemaUpgradeQuery() {
+  // SQOOP-1804, column add for SQ_INPUT
+  public static final String QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_COLUMN_SQI_EDITABLE = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " ADD COLUMN "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_EDITABLE) + " VARCHAR(32)";
+
+    private DerbySchemaUpgradeQuery() {
     // Disable explicit object creation
   }
 }

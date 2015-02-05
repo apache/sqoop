@@ -160,6 +160,15 @@ public final class DerbySchemaConstants {
   public static final String CONSTRAINT_SQ_INPUT_UNIQUE = SCHEMA_PREFIX
       + CONSTRAINT_SQ_INPUT_UNIQUE_NAME_TYPE_CONFIG;
 
+  // SQ_INPUT_RELATION FK
+
+  public static final String CONSTRAINT_SQIR_PARENT_NAME = CONSTRAINT_PREFIX + "SQIR_PARENT_ID";
+  public static final String CONSTRAINT_SQIR_PARENT = SCHEMA_PREFIX + CONSTRAINT_SQIR_PARENT_NAME;
+
+  public static final String CONSTRAINT_SQIR_CHILD_NAME = CONSTRAINT_PREFIX + "SQIR_CHILD_ID";
+  public static final String CONSTRAINT_SQIR_CHILD = SCHEMA_PREFIX + CONSTRAINT_SQIR_CHILD_NAME;
+
+
   // SQ_LINK
   @Deprecated
   // used only for upgrade

@@ -29,8 +29,8 @@ import org.apache.sqoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public class MIntegerInput extends MInput<Integer> {
 
-  public MIntegerInput(String name, boolean sensitive) {
-    super(name, sensitive);
+  public MIntegerInput(String name, boolean sensitive, InputEditable editable, String overrides) {
+    super(name, sensitive, editable, overrides);
   }
 
   @Override
@@ -87,8 +87,8 @@ public class MIntegerInput extends MInput<Integer> {
 
   @Override
   public MIntegerInput clone(boolean cloneWithValue) {
-    MIntegerInput copy = new MIntegerInput(this.getName(), this.isSensitive());
-    copy.setPersistenceId(this.getPersistenceId());
+    MIntegerInput copy = new MIntegerInput(getName(), isSensitive(), getEditable(), getOverrides());
+    copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(this.getValue());
     }

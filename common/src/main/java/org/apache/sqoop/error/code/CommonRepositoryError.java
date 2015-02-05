@@ -181,7 +181,20 @@ public enum CommonRepositoryError implements ErrorCode {
   COMMON_0043("Could not set connector direction"),
 
   /** The system was unable to register driver due to a server error **/
-  COMMON_0044("Registration of driver failed")
+  COMMON_0044("Registration of driver failed"),
+
+  /**
+   * Config Input that is set to USER_ONLY editable cannot override other
+   * USER_ONLY input
+   **/
+  COMMON_0045("Config Input cannot override USER_ONLY attribute"),
+
+  /** Config Input cannot override itself */
+  COMMON_0046("Config Input cannot override itself"),
+
+  COMMON_0047("Config Input relation insertion failed"),
+
+  COMMON_0048("Config Input overrides could not be fetched"),
 
   ;
 

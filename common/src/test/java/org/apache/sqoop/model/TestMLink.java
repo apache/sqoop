@@ -20,6 +20,7 @@ package org.apache.sqoop.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -81,9 +82,9 @@ public class TestMLink {
 
   private MLinkConfig linkConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
+    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
     input.setValue(100);
-    MStringInput strInput = new MStringInput("STRING-INPUT",false,(short)20);
+    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20);
     strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);

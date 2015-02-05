@@ -372,6 +372,10 @@ public class Constants {
       "config.displayer.type";
   public static final String RES_CONFIG_DISPLAYER_SENSITIVE =
       "config.displayer.sensitive";
+  public static final String RES_CONFIG_DISPLAYER_EDITABLE =
+      "config.displayer.editable";
+  public static final String RES_CONFIG_DISPLAYER_OVERRIDES =
+      "config.displayer.overrides";
   public static final String RES_CONFIG_DISPLAYER_SIZE =
       "config.displayer.size";
   public static final String RES_CONFIG_DISPLAYER_POSSIBLE_VALUES =

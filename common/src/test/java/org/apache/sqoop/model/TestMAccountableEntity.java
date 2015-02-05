@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -36,7 +37,7 @@ public class TestMAccountableEntity {
   @Test
   public void testInitialization() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
+    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     MConfig config = new MConfig("CONFIGNAME", list);

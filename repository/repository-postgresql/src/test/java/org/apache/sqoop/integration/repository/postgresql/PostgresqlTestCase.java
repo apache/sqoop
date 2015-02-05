@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.integration.repository.postgresql;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.PostgreSQLProvider;
@@ -148,16 +149,16 @@ abstract public class PostgresqlTestCase {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    MInput input = new MStringInput("I1", false, (short) 30);
+    MInput input = new MStringInput("I1", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
     inputs.add(input);
-    input = new MMapInput("I2", false);
+    input = new MMapInput("I2", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
     configs.add(new MConfig(configName1, inputs));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I3", false, (short) 30);
+    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
     inputs.add(input);
-    input = new MMapInput("I4", false);
+    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
     configs.add(new MConfig(configName2, inputs));
 

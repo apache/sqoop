@@ -32,8 +32,10 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
@@ -150,10 +152,10 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Create derby schema. FIX(SQOOP-1583): This code needs heavy refactoring.
-   * Details are in the ticket.
+   *Create derby schema. FIX(SQOOP-1583): This code needs heavy refactoring.
+   *Details are in the ticket.
    *
-   * @throws Exception
+   *@throws Exception
    */
   protected void createOrUpgradeSchema(int version) throws Exception {
     if (version > 0) {
@@ -215,6 +217,9 @@ abstract public class DerbyTestCase {
       // add submission table column name renames
       runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_SUBMISSION_COLUMN_1);
       runQuery(QUERY_UPGRADE_RENAME_TABLE_SQ_JOB_SUBMISSION_COLUMN_2);
+      // SQOOP-1804
+      runQuery(QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_COLUMN_SQI_EDITABLE);
+      runQuery(QUERY_CREATE_TABLE_SQ_INPUT_RELATION);
     }
 
     // deprecated repository version
@@ -230,9 +235,11 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Run arbitrary query on derby memory repository.
-   * @param query Query to execute
-   * @throws Exception
+   *Run arbitrary query on derby memory repository.
+   *
+   *@param query
+   *         Query to execute
+   *@throws Exception
    */
   protected void runQuery(String query, Object... args) throws Exception {
     PreparedStatement stmt = null;
@@ -258,11 +265,12 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Run single, arbitrary insert query on derby memory repository.
+   *Run single, arbitrary insert query on derby memory repository.
    *
-   * @param query Query to execute
-   * @return Long id of newly inserted row (-1 if none).
-   * @throws Exception
+   *@param query
+   *         Query to execute
+   *@return Long id of newly inserted row (-1 if none).
+   *@throws Exception
    */
   protected Long runInsertQuery(String query, Object... args) throws Exception {
     PreparedStatement stmt = null;
@@ -431,19 +439,19 @@ abstract public class DerbyTestCase {
     for (int i = 0; i < 3; i++) {
       // First config
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-          + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30)");
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+          + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-          + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30)");
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+          + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
 
       // Second config
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-          + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30)");
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+          + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-          + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30)");
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+          + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
     }
 
   }
@@ -517,28 +525,28 @@ abstract public class DerbyTestCase {
     for (int i = 0; i < 4; i++) {
       // First config
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-          + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30)");
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+          + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-          + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30)");
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+          + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
 
       // Second config
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-          + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30)");
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+          + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-          + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30)");
+          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+          + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
     }
   }
 
   /**
-   * Load testing connector and driver config into repository.
+   *Load testing connector and driver config into repository.
    *
-   * @param version
-   *          system version (2 or 4)
-   * @throws Exception
+   *@param version
+   *         system version (2 or 4)
+   *@throws Exception
    */
   protected void loadConnectorAndDriverConfig(int version) throws Exception {
     switch (version) {
@@ -561,9 +569,11 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Load testing link objects into repository.
-   * @param version system version (2 or 4)
-   * @throws Exception
+   *Load testing link objects into repository.
+   *
+   *@param version
+   *         system version (2 or 4)
+   *@throws Exception
    */
   public void loadConnectionsOrLinks(int version) throws Exception {
     switch (version) {
@@ -606,9 +616,11 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Load testing job objects into repository.
-   * @param version system version (2 or 4)
-   * @throws Exception
+   *Load testing job objects into repository.
+   *
+   *@param version
+   *         system version (2 or 4)
+   *@throws Exception
    */
   public void loadJobs(int version) throws Exception {
     int index = 0;
@@ -665,8 +677,9 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing job with non unique name objects into repository.
-   * @throws Exception
+   *testing job with non unique name objects into repository.
+   *
+   *@throws Exception
    */
   public void loadNonUniqueJobsInVersion4() throws Exception {
     int index = 0;
@@ -678,8 +691,9 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing link with non unique name objects into repository.
-   * @throws Exception
+   *testing link with non unique name objects into repository.
+   *
+   *@throws Exception
    */
   public void loadNonUniqueLinksInVersion4() throws Exception {
 
@@ -690,8 +704,9 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing configurable with non unique name objects into repository.
-   * @throws Exception
+   *testing configurable with non unique name objects into repository.
+   *
+   *@throws Exception
    */
   public void loadNonUniqueConfigurablesInVersion4() throws Exception {
 
@@ -704,8 +719,9 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing config with non unique name/type objects into repository.
-   * @throws Exception
+   *testing config with non unique name/type objects into repository.
+   *
+   *@throws Exception
    */
   public void loadNonUniqueConfigNameTypeInVersion4() throws Exception {
 
@@ -718,8 +734,9 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing input with non unique name/type objects into repository.
-   * @throws Exception
+   *testing input with non unique name/type objects into repository.
+   *
+   *@throws Exception
    */
   public void loadNonUniqueInputNameTypeInVersion4() throws Exception {
 
@@ -727,16 +744,17 @@ abstract public class DerbyTestCase {
         + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) "
         + "VALUES(1, 'C1', 'LINK', 0)");
     runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-        + " VALUES('I1', 1, 0, 'STRING', false, 30)");
+        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH,SQI_EDITABLE)"
+        + " VALUES('I1', 1, 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
     runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-        + " VALUES('I1', 1, 0, 'STRING', false, 30)");
+        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+        + " VALUES('I1', 1, 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
   }
 
   /**
-   * testing config with non unique name/type objects into repository.
-   * @throws Exception
+   *testing config with non unique name/type objects into repository.
+   *
+   *@throws Exception
    */
   public void loadNonUniqueConfigNameButUniqueTypeInVersion4() throws Exception {
 
@@ -749,8 +767,9 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing config with non unique name/type objects into repository.
-   * @throws Exception
+   *testing config with non unique name/type objects into repository.
+   *
+   *@throws Exception
    */
   public void loadNonUniqueConfigNameAndTypeButUniqueConfigurableInVersion4() throws Exception {
 
@@ -763,8 +782,9 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * testing input with non unique name/type objects into repository.
-   * @throws Exception
+   *testing input with non unique name/type objects into repository.
+   *
+   *@throws Exception
    */
   public void loadNonUniqueInputNameAndTypeButUniqueConfigInVersion4() throws Exception {
 
@@ -776,11 +796,11 @@ abstract public class DerbyTestCase {
         + "VALUES(2, 'C2', 'LINK', 0)");
 
     runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-        + " VALUES('C1.A', 1, 0, 'STRING', false, 30)");
+        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+        + " VALUES('C1.A', 1, 0, 'STRING', false, 30, 'ANY')");
     runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH)"
-        + " VALUES('C1.A', 2, 1, 'STRING', false, 30)");
+        + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+        + " VALUES('C1.A', 2, 1, 'STRING', false, 30, 'ANY')");
   }
 
   public void loadJobsForLatestVersion() throws Exception {
@@ -788,7 +808,7 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Add a second connector for testing with multiple connectors
+   *Add a second connector for testing with multiple connectors
    */
   public void addConnectorB() throws Exception {
     // Connector entry
@@ -801,8 +821,9 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Load testing submissions into the repository.
-   * @throws Exception
+   *Load testing submissions into the repository.
+   *
+   *@throws Exception
    */
   public void loadSubmissions() throws Exception {
     runQuery("INSERT INTO SQOOP.SQ_COUNTER_GROUP " + "(SQG_NAME) " + "VALUES" + "('gA'), ('gB')");
@@ -832,6 +853,57 @@ abstract public class DerbyTestCase {
     return getConnector(true, true);
   }
 
+  protected MConnector getConnectorWithIncorrectOverridesAttribute() {
+    return getBadConnector(true, true);
+  }
+
+  protected MConnector getConnectorWithIncorrectOverridesAttribute2() {
+    return getBadConnector2(true, true);
+  }
+
+  protected MConnector getConnectorWithMultipleOverridesAttribute() {
+    return getConnectorWithMultipleOverrides(true, true);
+  }
+
+  protected MConnector getConnectorWithMultipleOverrides(boolean from, boolean to) {
+    MFromConfig fromConfig = null;
+    MToConfig toConfig = null;
+    if (from) {
+      fromConfig = getMultipleOverridesFromConfig();
+    }
+    if (to) {
+      toConfig = getToConfig();
+    }
+    return new MConnector("A", "org.apache.sqoop.test.A", "1.0-test", getLinkConfig(), fromConfig,
+        toConfig);
+  }
+
+  protected MConnector getBadConnector(boolean from, boolean to) {
+    MFromConfig fromConfig = null;
+    MToConfig toConfig = null;
+    if (from) {
+      fromConfig = getBadFromConfig();
+    }
+    if (to) {
+      toConfig = getToConfig();
+    }
+    return new MConnector("A", "org.apache.sqoop.test.A", "1.0-test", getLinkConfig(), fromConfig,
+        toConfig);
+  }
+
+  protected MConnector getBadConnector2(boolean from, boolean to) {
+    MFromConfig fromConfig = null;
+    MToConfig toConfig = null;
+    if (from) {
+      fromConfig = getNonExistentOverridesFromConfig();
+    }
+    if (to) {
+      toConfig = getToConfig();
+    }
+    return new MConnector("A", "org.apache.sqoop.test.A", "1.0-test", getLinkConfig(), fromConfig,
+        toConfig);
+  }
+
   protected MConnector getConnector(boolean from, boolean to) {
     MFromConfig fromConfig = null;
     MToConfig toConfig = null;
@@ -847,6 +919,10 @@ abstract public class DerbyTestCase {
 
   protected MDriver getDriver() {
     return new MDriver(getDriverConfig(), DriverBean.CURRENT_DRIVER_VERSION);
+  }
+
+  protected MDriver getBadDriver() {
+    return new MDriver(getBadDriverConfig(), DriverBean.CURRENT_DRIVER_VERSION);
   }
 
   protected void fillLink(MLink link) {
@@ -877,6 +953,18 @@ abstract public class DerbyTestCase {
     return new MFromConfig(getConfigs("from1", "from2"));
   }
 
+  protected MFromConfig getBadFromConfig() {
+    return new MFromConfig(getBadConfigs("from1", "from2"));
+  }
+
+  protected MFromConfig getMultipleOverridesFromConfig() {
+    return new MFromConfig(getMultipleOverrideConfigs("from1", "from2"));
+  }
+
+  protected MFromConfig getNonExistentOverridesFromConfig() {
+    return new MFromConfig(getBadConfigsWithNonExistingInputOverrides("from1", "from2"));
+  }
+
   protected MToConfig getToConfig() {
     return new MToConfig(getConfigs("to1", "to2"));
   }
@@ -885,20 +973,111 @@ abstract public class DerbyTestCase {
     return new MDriverConfig(getConfigs("d1", "d2"));
   }
 
+  protected MDriverConfig getBadDriverConfig() {
+    return new MDriverConfig(getBadConfigsWithSelfOverrides("d1", "d2"));
+  }
+
   protected List<MConfig> getConfigs(String configName1, String configName2) {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    MInput input = new MStringInput("I1", false, (short) 30);
+    MInput input = new MStringInput("I1", false, InputEditable.ANY, "I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I2", false);
+    input = new MMapInput("I2", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
     configs.add(new MConfig(configName1, inputs));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I3", false, (short) 30);
+    input = new MStringInput("I3", false, InputEditable.ANY, "I4", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I4", false);
+    input = new MMapInput("I4", false, InputEditable.USER_ONLY, "I3");
+    inputs.add(input);
+    configs.add(new MConfig(configName2, inputs));
+
+    return configs;
+  }
+
+  protected List<MConfig> getBadConfigs(String configName1, String configName2) {
+    List<MConfig> configs = new LinkedList<MConfig>();
+
+    List<MInput<?>> inputs = new LinkedList<MInput<?>>();
+    // I1 overrides another user_only attribute, hence a bad config
+    MInput input = new MStringInput("I1", false, InputEditable.USER_ONLY, "I2", (short) 30);
+    inputs.add(input);
+    input = new MMapInput("I2", false, InputEditable.USER_ONLY, "I1");
+    inputs.add(input);
+    configs.add(new MConfig(configName1, inputs));
+
+    inputs = new LinkedList<MInput<?>>();
+    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    inputs.add(input);
+    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
+    inputs.add(input);
+    configs.add(new MConfig(configName2, inputs));
+
+    return configs;
+  }
+
+  protected List<MConfig> getBadConfigsWithSelfOverrides(String configName1, String configName2) {
+    List<MConfig> configs = new LinkedList<MConfig>();
+
+    List<MInput<?>> inputs = new LinkedList<MInput<?>>();
+    // I1 overrides another user_only attribute, hence a bad config
+    MInput input = new MStringInput("I1", false, InputEditable.USER_ONLY, "I2", (short) 30);
+    inputs.add(input);
+    input = new MMapInput("I2", false, InputEditable.USER_ONLY, "I2");
+    inputs.add(input);
+    configs.add(new MConfig(configName1, inputs));
+
+    inputs = new LinkedList<MInput<?>>();
+    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    inputs.add(input);
+    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
+    inputs.add(input);
+    configs.add(new MConfig(configName2, inputs));
+
+    return configs;
+  }
+
+  protected List<MConfig> getMultipleOverrideConfigs(String configName1, String configName2) {
+    List<MConfig> configs = new LinkedList<MConfig>();
+
+    List<MInput<?>> inputs = new LinkedList<MInput<?>>();
+    // I1 overrides another user_only attribute, hence a bad config
+    MInput input = new MStringInput("I1", false, InputEditable.USER_ONLY, "I2", (short) 30);
+    inputs.add(input);
+    input = new MMapInput("I2", false, InputEditable.ANY, "I1,I3");
+    inputs.add(input);
+    input = new MMapInput("I3", false, InputEditable.CONNECTOR_ONLY, "I1");
+    inputs.add(input);
+    configs.add(new MConfig(configName1, inputs));
+
+    inputs = new LinkedList<MInput<?>>();
+    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    inputs.add(input);
+    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
+    inputs.add(input);
+    configs.add(new MConfig(configName2, inputs));
+
+    return configs;
+  }
+
+  protected List<MConfig> getBadConfigsWithNonExistingInputOverrides(String configName1,
+      String configName2) {
+    List<MConfig> configs = new LinkedList<MConfig>();
+
+    List<MInput<?>> inputs = new LinkedList<MInput<?>>();
+    // I1 overrides another user_only attribute, hence a bad config
+    MInput input = new MStringInput("I1", false, InputEditable.USER_ONLY, "I2", (short) 30);
+    inputs.add(input);
+    input = new MMapInput("I2", false, InputEditable.USER_ONLY, "Foo");
+    inputs.add(input);
+    configs.add(new MConfig(configName1, inputs));
+
+    inputs = new LinkedList<MInput<?>>();
+    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    inputs.add(input);
+    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
     configs.add(new MConfig(configName2, inputs));
 
@@ -906,11 +1085,12 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Find out number of entries in given table.
+   *Find out number of entries in given table.
    *
-   * @param table Table name
-   * @return Number of rows in the table
-   * @throws Exception
+   *@param table
+   *         Table name
+   *@return Number of rows in the table
+   *@throws Exception
    */
   protected long countForTable(String table) throws Exception {
     Statement stmt = null;
@@ -934,10 +1114,13 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Assert row count for given table.
-   * @param table Table name
-   * @param expected Expected number of rows
-   * @throws Exception
+   *Assert row count for given table.
+   *
+   *@param table
+   *         Table name
+   *@param expected
+   *         Expected number of rows
+   *@throws Exception
    */
   protected void assertCountForTable(String table, long expected) throws Exception {
     long count = countForTable(table);
@@ -945,12 +1128,12 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Printout repository content for advance debugging.
+   *Printout repository content for advance debugging.
    *
-   * This method is currently unused, but might be helpful in the future, so I'm
-   * letting it here.
+   *This method is currently unused, but might be helpful in the future, so I'm
+   *letting it here.
    *
-   * @throws Exception
+   *@throws Exception
    */
   protected void generateDatabaseState() throws Exception {
     for (String tbl : new String[] { "SQ_CONNECTOR", "SQ_CONFIG", "SQ_INPUT", "SQ_LINK",
@@ -960,9 +1143,11 @@ abstract public class DerbyTestCase {
   }
 
   /**
-   * Printout one single table.
-   * @param table Table name
-   * @throws Exception
+   *Printout one single table.
+   *
+   *@param table
+   *         Table name
+   *@throws Exception
    */
   protected void generateTableState(String table) throws Exception {
     PreparedStatement ps = null;

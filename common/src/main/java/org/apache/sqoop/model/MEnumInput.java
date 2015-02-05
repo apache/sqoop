@@ -36,8 +36,8 @@ public class MEnumInput extends MInput<String> {
    */
   String []values;
 
-  public MEnumInput(String name, boolean sensitive, String[] values) {
-    super(name, sensitive);
+  public MEnumInput(String name, boolean sensitive, InputEditable editable, String overrides, String[] values) {
+    super(name, sensitive, editable, overrides);
     this.values = values;
   }
 
@@ -131,9 +131,9 @@ public class MEnumInput extends MInput<String> {
 
   @Override
   public MEnumInput clone(boolean cloneWithValue) {
-    MEnumInput copy = new MEnumInput(this.getName(),
-        this.isSensitive(), this.getValues());
-    copy.setPersistenceId(this.getPersistenceId());
+    MEnumInput copy = new MEnumInput(getName(), isSensitive(), getEditable(), getOverrides(),
+        getValues());
+    copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(this.getValue());
     }

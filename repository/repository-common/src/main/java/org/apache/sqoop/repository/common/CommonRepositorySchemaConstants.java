@@ -117,6 +117,19 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String COLUMN_SQI_ENUMVALS = "SQI_ENUMVALS";
 
+  public static final String COLUMN_SQI_EDITABLE = "SQI_EDITABLE";
+
+  // SQ_INPUT_RELATION
+
+  public static final String TABLE_SQ_INPUT_RELATION_NAME = "SQ_INPUT_RELATION";
+
+  public static final String COLUMN_SQIR_ID = "SQIR_ID";
+
+  public static final String COLUMN_SQIR_PARENT = "SQIR_PARENT_ID";
+
+  public static final String COLUMN_SQIR_CHILD = "SQIR_CHILD_ID";
+
+
   public static final String TABLE_SQ_LINK_NAME = "SQ_LINK";
 
   public static final String TABLE_SQ_LINK = SCHEMA_PREFIX + TABLE_SQ_LINK_NAME;

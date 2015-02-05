@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -34,7 +35,8 @@ public class TestMBooleanInput {
    */
   @Test
   public void testInitialization() {
-    MBooleanInput input = new MBooleanInput("sqoopsqoop", true);
+    MBooleanInput input = new MBooleanInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(true, input.isSensitive());
     assertEquals(MInputType.BOOLEAN, input.getType());
@@ -46,17 +48,19 @@ public class TestMBooleanInput {
   @Test
   public void testEquals() {
     // Positive test
-    MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true);
-    MBooleanInput input2 = new MBooleanInput("sqoopsqoop", true);
+    MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY);
+    MBooleanInput input2 = new MBooleanInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MBooleanInput input3 = new MBooleanInput("sqoopsqoop", false);
-    MBooleanInput input4 = new MBooleanInput("sqoopsqoop", true);
+    MBooleanInput input3 = new MBooleanInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY );
+    MBooleanInput input4 = new MBooleanInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY );
     assertFalse(input3.equals(input4));
 
-    MBooleanInput input5 = new MBooleanInput("sqoopsqoop", false);
-    MBooleanInput input6 = new MBooleanInput("sqoop", false);
+    MBooleanInput input5 = new MBooleanInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY );
+    MBooleanInput input6 = new MBooleanInput("sqoop", false, InputEditable.ANY, StringUtils.EMPTY );
     assertFalse(input5.equals(input6));
   }
 
@@ -65,7 +69,7 @@ public class TestMBooleanInput {
    */
   @Test
   public void testValue() {
-    MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true);
+    MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY );
     input1.setValue(true);
     assertEquals(true, input1.getValue().booleanValue());
     input1.setEmpty();
@@ -77,7 +81,7 @@ public class TestMBooleanInput {
    */
   @Test
   public void testUrlSafe() {
-    MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true);
+    MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY );
     input1.setValue(true);
     // Getting URL safe string
     String tmp = input1.getUrlSafeValueString();
@@ -91,7 +95,8 @@ public class TestMBooleanInput {
    */
   @Test
   public void testNamedElement() {
-    MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true);
+    MBooleanInput input1 = new MBooleanInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
   }

@@ -22,6 +22,7 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MEnumInput;
@@ -53,7 +54,7 @@ public final class ConfigFiller {
    * Internal input that will be reused for loading names for link and
    * job objects.
    */
-  private static MStringInput nameInput = new MStringInput("object-name", false, (short)25);
+  private static MStringInput nameInput = new MStringInput("object-name", false, InputEditable.ANY, StringUtils.EMPTY, (short)25);
 
   /**
    * Fill job object based on CLI options.

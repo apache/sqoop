@@ -21,6 +21,7 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
 import org.testng.annotations.BeforeMethod;
@@ -82,6 +83,11 @@ public class TestDriverHandling extends DerbyTestCase {
     assertEquals(driver.getVersion(), retrieved.getVersion());
   }
 
+  @Test(expectedExceptions = SqoopException.class)
+  public void testRegisterBadDriver() throws Exception {
+    MDriver driver = getBadDriver();
+    handler.registerDriver(driver, getDerbyDatabaseConnection());
+  }
 
   @Test
   public void testDriverVersionUpgrade() throws Exception {

@@ -115,6 +115,11 @@ public final class ConfigDisplayer {
         println(input.getType());
         print("        %s: ", resourceString(Constants.RES_CONFIG_DISPLAYER_SENSITIVE));
         println(input.isSensitive());
+        print("        %s: ", resourceString(Constants.RES_CONFIG_DISPLAYER_EDITABLE));
+        println(input.getEditable());
+        print("        %s: ", resourceString(Constants.RES_CONFIG_DISPLAYER_OVERRIDES));
+        println(input.getOverrides());
+
         if (input.getType() == MInputType.STRING) {
           print("        %s: ", resourceString(Constants.RES_CONFIG_DISPLAYER_SIZE));
           println(((MStringInput)input).getMaxLength());

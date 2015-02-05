@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.ConfigValidationRunner;
@@ -29,6 +30,7 @@ import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -137,6 +139,8 @@ public class  ConfigUtils {
       if(inputAnnotation != null) {
         boolean sensitive = inputAnnotation.sensitive();
         short maxLen = inputAnnotation.size();
+        InputEditable editable = inputAnnotation.editable();
+        String overrides = inputAnnotation.overrides();
         Class<?> type = field.getType();
 
         MInput input;
@@ -149,15 +153,15 @@ public class  ConfigUtils {
 
         // Instantiate corresponding MInput<?> structure
         if (type == String.class) {
-          input = new MStringInput(inputName, sensitive, maxLen);
+          input = new MStringInput(inputName, sensitive, editable, overrides, maxLen);
         } else if (type.isAssignableFrom(Map.class)) {
-          input = new MMapInput(inputName, sensitive);
+          input = new MMapInput(inputName, sensitive, editable, overrides);
         } else if (type == Integer.class) {
-          input = new MIntegerInput(inputName, sensitive);
+          input = new MIntegerInput(inputName, sensitive, editable, overrides);
         } else if (type == Boolean.class) {
-          input = new MBooleanInput(inputName, sensitive);
+          input = new MBooleanInput(inputName, sensitive, editable, overrides);
         } else if (type.isEnum()) {
-          input = new MEnumInput(inputName, sensitive,
+          input = new MEnumInput(inputName, sensitive, editable, overrides,
               ClassUtils.getEnumStrings(type));
         } else {
           throw new SqoopException(ModelError.MODEL_004, "Unsupported type "
@@ -183,8 +187,13 @@ public class  ConfigUtils {
         inputs.add(input);
       }
     }
+    MConfig config = new MConfig(configName, inputs);
+    // validation has to happen only when all inputs have been parsed
+    for (MInput<?> input : config.getInputs()) {
+      validateInputOverridesAttribute(input, config);
+    }
 
-    return new MConfig(configName, inputs);
+    return config;
   }
 
   private static Field getFieldFromName(Class<?> klass, String name) {
@@ -630,5 +639,43 @@ public class  ConfigUtils {
     } catch (IllegalAccessException e) {
       throw new SqoopException(ModelError.MODEL_015, e);
     }
+  }
+
+  /**
+   * Validate that the input override attribute adheres to the rules imposed
+   * NOTE: all input names in a config class will and must be unique, check the name exists and it is not self override
+   * Rule #1.
+   * If editable == USER_ONLY ( cannot override itself ) can override other  CONNECTOR_ONLY and ANY inputs,
+   * but cannot overriding other USER_ONLY attributes
+   * Rule #2.
+   * If editable == CONNECTOR_ONLY or ANY ( cannot override itself ) can override any other attribute in the config object
+   * @param currentInput
+   *
+   */
+  public static void validateInputOverridesAttribute(MInput<?> currentInput, MConfig config) {
+
+    // split the overrides string into comma separated list
+    String overrides = currentInput.getOverrides();
+    if (StringUtils.isEmpty(overrides)) {
+      return;
+    }
+    String[] overrideInputs = overrides.split("\\,");
+    for (String override : overrideInputs) {
+      if (!config.getInputNames().contains(override)) {
+        throw new SqoopException(ModelError.MODEL_017, "for input :"
+            + currentInput.toString());
+      }
+      if (override.equals(currentInput.getName())) {
+        throw new SqoopException(ModelError.MODEL_018, "for input :"
+            + currentInput.toString());
+      }
+      if (currentInput.getEditable().equals(InputEditable.USER_ONLY)) {
+        if (config.getUserOnlyEditableInputNames().contains(override)) {
+          throw new SqoopException(ModelError.MODEL_019, "for input :"
+              + currentInput.toString());
+        }
+      }
+    }
+    return;
   }
 }

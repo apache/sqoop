@@ -36,8 +36,10 @@ public class ConfigInputConstants {
   public static final String CONFIG_INPUT_TYPE = "type";
   public static final String CONFIG_INPUT_SENSITIVE = "sensitive";
   public static final String CONFIG_INPUT_SIZE = "size";
+  public static final String CONFIG_INPUT_EDITABLE = "editable";
+  public static final String CONFIG_INPUT_OVERRIDES = "overrides";
   public static final String CONFIG_INPUT_VALUE = "value";
-  public static final String CONFIG_INPUT_VALUES = "values";
+  public static final String CONFIG_INPUT_ENUM_VALUES = "values";
 
   private ConfigInputConstants() {
 

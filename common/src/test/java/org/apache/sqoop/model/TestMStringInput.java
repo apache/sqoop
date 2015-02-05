@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -32,7 +33,8 @@ public class TestMStringInput {
   @Test
   public void testInitialization() {
     short len = 6;
-    MStringInput input = new MStringInput("sqoopsqoop", true, len);
+    MStringInput input = new MStringInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY,
+        len);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(true, input.isSensitive());
     assertEquals(len, input.getMaxLength());
@@ -46,13 +48,17 @@ public class TestMStringInput {
   public void testEquals() {
     short len = 6;
     // Positive test
-    MStringInput input1 = new MStringInput("sqoopsqoop", true, len);
-    MStringInput input2 = new MStringInput("sqoopsqoop", true, len);
+    MStringInput input1 = new MStringInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY, len);
+    MStringInput input2 = new MStringInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY, len);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MStringInput input3 = new MStringInput("sqoopsqoop", false, len);
-    MStringInput input4 = new MStringInput("sqoopsqoop", true, len);
+    MStringInput input3 = new MStringInput("sqoopsqoop", false, InputEditable.ANY,
+        StringUtils.EMPTY, len);
+    MStringInput input4 = new MStringInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY, len);
     assertFalse(input3.equals(input4));
   }
 
@@ -61,7 +67,8 @@ public class TestMStringInput {
    */
   @Test
   public void testValue() {
-    MStringInput input1 = new MStringInput("sqoopsqoop", true, (short) 5);
+    MStringInput input1 = new MStringInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY, (short) 5);
     input1.setValue("sqoop");
     assertEquals("sqoop", input1.getValue());
     input1.setEmpty();
@@ -73,7 +80,8 @@ public class TestMStringInput {
    */
   @Test
   public void testUrlSafe() {
-    MStringInput input1 = new MStringInput("sqoopsqoop", true, (short) 5);
+    MStringInput input1 = new MStringInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY, (short) 5);
     String s = "Sqoop%$!@#&*()Sqoop";
     input1.setValue(s);
     // Getting URL safe string
@@ -88,7 +96,8 @@ public class TestMStringInput {
    */
   @Test
   public void testNamedElement() {
-    MStringInput input1 = new MStringInput("sqoopsqoop", true, (short) 5);
+    MStringInput input1 = new MStringInput("sqoopsqoop", true, InputEditable.ANY,
+        StringUtils.EMPTY, (short) 5);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
   }

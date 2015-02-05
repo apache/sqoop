@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MFromConfig;
@@ -42,11 +44,11 @@ public class ConfigTestUtil {
     List<MConfig> driverConfigs = new ArrayList<MConfig>();
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MIntegerInput("numExtractors", false);
+    input = new MIntegerInput("numExtractors", false, InputEditable.ANY, StringUtils.EMPTY);
     input.setPersistenceId(1);
     inputs.add(input);
 
-    input = new MIntegerInput("numLoaders", false);
+    input = new MIntegerInput("numLoaders", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
     input.setPersistenceId(2);
     inputs.add(input);
 
@@ -63,16 +65,16 @@ public class ConfigTestUtil {
     List<MConfig> linkConfig = new ArrayList<MConfig>();
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("url", false, (short) 10);
+    input = new MStringInput("url", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(1);
     inputs.add(input);
 
-    input = new MStringInput("username", false, (short) 10);
+    input = new MStringInput("username", false, InputEditable.USER_ONLY, "password", (short) 10);
     input.setPersistenceId(2);
     input.setValue("test");
     inputs.add(input);
 
-    input = new MStringInput("password", true, (short) 10);
+    input = new MStringInput("password", true, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(3);
     input.setValue("test");
     inputs.add(input);
@@ -92,33 +94,33 @@ public class ConfigTestUtil {
 
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("A", false, (short) 10);
+    input = new MStringInput("A", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(4);
     inputs.add(input);
 
-    input = new MStringInput("B", false, (short) 10);
+    input = new MStringInput("B", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(5);
     inputs.add(input);
 
-    input = new MStringInput("C", false, (short) 10);
+    input = new MStringInput("C", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(6);
     inputs.add(input);
 
     config = new MConfig("Z", inputs);
     config.setPersistenceId(11);
-    jobConfigs.add(config);
+ jobConfigs.add(config);
 
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("D", false, (short) 10);
+    input = new MStringInput("D", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(7);
     inputs.add(input);
 
-    input = new MStringInput("E", false, (short) 10);
+    input = new MStringInput("E", false, InputEditable.USER_ONLY, "D, F", (short) 10);
     input.setPersistenceId(8);
     inputs.add(input);
 
-    input = new MStringInput("F", false, (short) 10);
+    input = new MStringInput("F", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(9);
     inputs.add(input);
 
@@ -137,15 +139,15 @@ public class ConfigTestUtil {
 
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("A", false, (short) 10);
+    input = new MStringInput("A", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(4);
     inputs.add(input);
 
-    input = new MStringInput("B", false, (short) 10);
+    input = new MStringInput("B", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(5);
     inputs.add(input);
 
-    input = new MStringInput("C", false, (short) 10);
+    input = new MStringInput("C", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(6);
     inputs.add(input);
 
@@ -155,17 +157,17 @@ public class ConfigTestUtil {
 
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("D", false, (short) 10);
+    input = new MStringInput("D", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(7);
     inputs.add(input);
 
-    input = new MStringInput("E", false, (short) 10);
+    input = new MStringInput("E", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(8);
     inputs.add(input);
 
-    input = new MStringInput("F", false, (short) 10);
+    input = new MStringInput("F", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
     input.setPersistenceId(9);
-    inputs.add(input);
+ inputs.add(input);
 
     config = new MConfig("to-table", inputs);
     config.setPersistenceId(12);

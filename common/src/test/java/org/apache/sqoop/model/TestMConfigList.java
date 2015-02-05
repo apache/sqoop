@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -30,16 +31,18 @@ public class TestMConfigList {
   public void testGetInputs() {
     List<MConfig> configs = new LinkedList<MConfig>();
 
-    MIntegerInput intInput = new MIntegerInput("Config1.A", false);
-    MMapInput mapInput = new MMapInput("Config1.B", false);
+    MIntegerInput intInput = new MIntegerInput("Config1.A", false, InputEditable.ANY, StringUtils.EMPTY);
+    MMapInput mapInput = new MMapInput("Config1.B", false, InputEditable.ANY, StringUtils.EMPTY);
 
     List<MInput<?>> inputs = new ArrayList<MInput<?>>();
     inputs.add(intInput);
     inputs.add(mapInput);
     configs.add(new MConfig("Config1", inputs));
 
-    MStringInput stringInput = new MStringInput("Config2.C", false, (short)3);
-    MEnumInput enumInput = new MEnumInput("Config2.D", false, new String[] {"I", "V"});
+    MStringInput stringInput = new MStringInput("Config2.C", false, InputEditable.ANY,
+        StringUtils.EMPTY, (short) 3);
+    MEnumInput enumInput = new MEnumInput("Config2.D", false, InputEditable.ANY, StringUtils.EMPTY,
+        new String[] { "I", "V" });
 
     inputs = new ArrayList<MInput<?>>();
     inputs.add(stringInput);

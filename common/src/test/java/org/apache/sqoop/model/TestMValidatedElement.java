@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.testng.annotations.Test;
@@ -33,7 +34,7 @@ public class TestMValidatedElement {
    */
   @Test
   public void testInitialization() {
-    MValidatedElement input = new MIntegerInput("input", false);
+    MValidatedElement input = new MIntegerInput("input", false,InputEditable.ANY, StringUtils.EMPTY );
     assertEquals("input", input.getName());
     assertEquals(Status.OK, input.getValidationStatus());
   }
@@ -43,7 +44,7 @@ public class TestMValidatedElement {
    */
   @Test
   public void testVarious() {
-    MValidatedElement input = new MIntegerInput("input", false);
+    MValidatedElement input = new MIntegerInput("input", false, InputEditable.ANY, StringUtils.EMPTY );
 
     // Default status
     assertEquals(Status.OK, input.getValidationStatus());

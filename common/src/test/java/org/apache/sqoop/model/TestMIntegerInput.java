@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -33,7 +34,7 @@ public class TestMIntegerInput {
    */
   @Test
   public void testInitialization() {
-    MIntegerInput input = new MIntegerInput("sqoopsqoop", false);
+    MIntegerInput input = new MIntegerInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(MInputType.INTEGER, input.getType());
   }
@@ -44,13 +45,13 @@ public class TestMIntegerInput {
   @Test
   public void testEquals() {
     // Positive test
-    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false);
-    MIntegerInput input2 = new MIntegerInput("sqoopsqoop", false);
+    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MIntegerInput input2 = new MIntegerInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MIntegerInput input3 = new MIntegerInput("sqoopsqoop", false);
-    MIntegerInput input4 = new MIntegerInput("sqoopsqoop1", false);
+    MIntegerInput input3 = new MIntegerInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MIntegerInput input4 = new MIntegerInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY);
     assertFalse(input3.equals(input4));
   }
 
@@ -59,7 +60,7 @@ public class TestMIntegerInput {
    */
   @Test
   public void testValue() {
-    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false);
+    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
     input1.setValue(99);
     assertEquals(new Integer(99), input1.getValue());
     input1.setEmpty();
@@ -71,7 +72,7 @@ public class TestMIntegerInput {
    */
   @Test
   public void testUrlSafe() {
-    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false);
+    MIntegerInput input1 = new MIntegerInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
     input1.setValue(1001);
     // Getting URL safe string
     String tmp = input1.getUrlSafeValueString();
@@ -85,7 +86,7 @@ public class TestMIntegerInput {
    */
   @Test
   public void testNamedElement() {
-    MStringInput input1 = new MStringInput("sqoopsqoop", true, (short) 5);
+    MStringInput input1 = new MStringInput("sqoopsqoop", true, InputEditable.CONNECTOR_ONLY, StringUtils.EMPTY, (short) 5);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
   }
@@ -95,8 +96,8 @@ public class TestMIntegerInput {
    */
   @Test
   public void testSensitivity() {
-    MIntegerInput input1 = new MIntegerInput("NAME", false);
-    MIntegerInput input2 = new MIntegerInput("NAME", true);
+    MIntegerInput input1 = new MIntegerInput("NAME", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    MIntegerInput input2 = new MIntegerInput("NAME", true, InputEditable.CONNECTOR_ONLY, StringUtils.EMPTY);
     assertFalse(input1.isSensitive());
     assertTrue(input2.isSensitive());
   }

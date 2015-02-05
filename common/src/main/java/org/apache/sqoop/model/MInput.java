@@ -31,15 +31,22 @@ import org.apache.sqoop.classification.InterfaceStability;
 public abstract class MInput<T> extends MValidatedElement implements MClonable {
   private final boolean sensitive;
 
+  private final String overrides;
+
+  private final InputEditable editable;
+
   private T value;
 
-  protected MInput(String name, boolean sensitive) {
+  protected MInput(String name, boolean sensitive, InputEditable editable, String overrides) {
     super(name);
     this.sensitive = sensitive;
+    this.editable = editable;
+    this.overrides = overrides;
   }
 
   /**
-   * @param value the value to be set for this parameter
+   * @param value
+   *          the value to be set for this parameter
    */
   public void setValue(T value) {
     this.value = value;
@@ -59,6 +66,22 @@ public abstract class MInput<T> extends MValidatedElement implements MClonable {
     return sensitive;
   }
 
+  /**
+   * @return the editable {@link#InputEditable}attribute for the input
+   */
+  public InputEditable getEditable() {
+    return editable;
+  }
+
+  /**
+   * @return the overrides attribute for the input
+   * An input can override the value of one or more other inputs when edited
+   */
+  public String getOverrides() {
+    return overrides;
+  }
+
+  /**
   /**
    * @return a URL-safe string representation of the value
    */
@@ -127,7 +150,8 @@ public abstract class MInput<T> extends MValidatedElement implements MClonable {
   public final String toString() {
     StringBuilder sb = new StringBuilder("input-").append(getName());
     sb.append(":").append(getPersistenceId()).append(":");
-    sb.append(getType());
+    sb.append(getType()).append(":").append(isSensitive()).append(":").append(getEditable().name())
+        .append(":").append(getOverrides());
     if (hasExtraInfo()) {
       sb.append(":").append(getExtraInfoToString());
     }

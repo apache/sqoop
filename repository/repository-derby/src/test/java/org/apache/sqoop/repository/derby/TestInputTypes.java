@@ -26,6 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
@@ -99,11 +101,22 @@ public class TestInputTypes extends DerbyTestCase {
     // Connection object with all various values
     MLink link = new MLink(connector.getPersistenceId(), connector.getLinkConfig());
     MLinkConfig linkConfig = link.getConnectorLinkConfig();
-    linkConfig.getStringInput("l1.String").setValue("A");
-    linkConfig.getMapInput("l1.Map").setValue(map);
-    linkConfig.getIntegerInput("l1.Integer").setValue(1);
-    linkConfig.getBooleanInput("l1.Boolean").setValue(true);
-    linkConfig.getEnumInput("l1.Enum").setValue("YES");
+    assertEquals(linkConfig.getStringInput("l1.I1").getEditable(), InputEditable.ANY);
+    assertEquals(linkConfig.getStringInput("l1.I1").getOverrides(), "l1.I2");
+    assertEquals(linkConfig.getMapInput("l1.I2").getEditable(), InputEditable.CONNECTOR_ONLY);
+    assertEquals(linkConfig.getMapInput("l1.I2").getOverrides(), "l1.I5");
+    assertEquals(linkConfig.getIntegerInput("l1.I3").getEditable(), InputEditable.ANY);
+    assertEquals(linkConfig.getIntegerInput("l1.I3").getOverrides(), "l1.I1");
+    assertEquals(linkConfig.getBooleanInput("l1.I4").getEditable(), InputEditable.USER_ONLY);
+    assertEquals(linkConfig.getBooleanInput("l1.I4").getOverrides(), "");
+    assertEquals(linkConfig.getEnumInput("l1.I5").getEditable(), InputEditable.ANY);
+    assertEquals(linkConfig.getEnumInput("l1.I5").getOverrides(), "l1.I4,l1.I3");
+
+    linkConfig.getStringInput("l1.I1").setValue("A");
+    linkConfig.getMapInput("l1.I2").setValue(map);
+    linkConfig.getIntegerInput("l1.I3").setValue(1);
+    linkConfig.getBooleanInput("l1.I4").setValue(true);
+    linkConfig.getEnumInput("l1.I5").setValue("YES");
 
     // Create the link in repository
     handler.createLink(link, getDerbyDatabaseConnection());
@@ -112,11 +125,14 @@ public class TestInputTypes extends DerbyTestCase {
     // Retrieve created link
     MLink retrieved = handler.findLink(link.getPersistenceId(), getDerbyDatabaseConnection());
     linkConfig = retrieved.getConnectorLinkConfig();
-    assertEquals("A", linkConfig.getStringInput("l1.String").getValue());
-    assertEquals(map, linkConfig.getMapInput("l1.Map").getValue());
-    assertEquals(1, (int) linkConfig.getIntegerInput("l1.Integer").getValue());
-    assertEquals(true, (boolean) linkConfig.getBooleanInput("l1.Boolean").getValue());
-    assertEquals("YES", linkConfig.getEnumInput("l1.Enum").getValue());
+    assertEquals("A", linkConfig.getStringInput("l1.I1").getValue());
+    assertEquals(map, linkConfig.getMapInput("l1.I2").getValue());
+    assertEquals(1, (int) linkConfig.getIntegerInput("l1.I3").getValue());
+    assertEquals(true, (boolean) linkConfig.getBooleanInput("l1.I4").getValue());
+    assertEquals("YES", linkConfig.getEnumInput("l1.I5").getValue());
+    assertEquals(linkConfig.getEnumInput("l1.I5").getEditable(), InputEditable.ANY);
+    assertEquals(linkConfig.getEnumInput("l1.I5").getOverrides(), "l1.I4,l1.I3");
+
   }
 
   /**
@@ -133,19 +149,23 @@ public class TestInputTypes extends DerbyTestCase {
 
     inputs = new LinkedList<MInput<?>>();
 
-    input = new MStringInput(configName1 + ".String", false, (short) 30);
+    input = new MStringInput(configName1 + ".I1", false, InputEditable.ANY, configName1 + ".I2",
+        (short) 30);
     inputs.add(input);
 
-    input = new MMapInput(configName1 + ".Map", false);
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1
+        + ".I5");
     inputs.add(input);
 
-    input = new MIntegerInput(configName1 + ".Integer", false);
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
     inputs.add(input);
 
-    input = new MBooleanInput(configName1 + ".Boolean", false);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY,
+        StringUtils.EMPTY);
     inputs.add(input);
 
-    input = new MEnumInput(configName1 + ".Enum", false, new String[] { "YES", "NO" });
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4,"
+        + configName1 + ".I3", new String[] { "YES", "NO" });
     inputs.add(input);
 
     configs.add(new MConfig(configName1, inputs));

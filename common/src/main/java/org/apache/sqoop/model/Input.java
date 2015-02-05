@@ -43,6 +43,15 @@ public @interface Input {
   boolean sensitive() default false;
 
   /**
+   * Indicates the entity that can edit the input's values, all inputs are
+   * created/deleted only by the connector code, other entities do not have
+   * access to either create/delete an input
+   *
+   * @return editable
+   */
+  InputEditable editable() default InputEditable.ANY;
+
+  /**
    * Maximal length of field if applicable.
    *
    * @return Maximal length
@@ -50,9 +59,17 @@ public @interface Input {
   short size() default -1;
 
   /**
+   * In-order to express dependency on other inputs, the value supports a comma
+   * separated list of other inputs in the config class. It validates the
+   * attribute value obeys the expected conditions
+   */
+  String overrides() default "";
+
+  /**
    * List of validators associated with this input.
    *
    * @return
    */
   Validator[] validators() default {};
+
 }

@@ -25,6 +25,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.error.code.CommonRepositoryError;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
@@ -60,8 +61,10 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Set of methods required from each JDBC based repository.
@@ -184,8 +187,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteConfigDirection = null;
     PreparedStatement deleteInput = null;
+    PreparedStatement deleteInputRelation = null;
+
     try {
       updateConnectorStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
+      deleteInputRelation = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_INPUT_RELATIONS_FOR_INPUT);
       deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
       deleteConfigDirection = conn.prepareStatement(crudQueries.getStmtDeleteDirectionsForConfigurable());
       deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());
@@ -199,9 +205,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       if (updateConnectorStatement.executeUpdate() != 1) {
         throw new SqoopException(CommonRepositoryError.COMMON_0035);
       }
+      deleteInputRelation.setLong(1, mConnector.getPersistenceId());
       deleteInput.setLong(1, mConnector.getPersistenceId());
       deleteConfigDirection.setLong(1, mConnector.getPersistenceId());
       deleteConfig.setLong(1, mConnector.getPersistenceId());
+      deleteInputRelation.executeUpdate();
       deleteInput.executeUpdate();
       deleteConfigDirection.executeUpdate();
       deleteConfig.executeUpdate();
@@ -227,8 +235,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement updateDriverStatement = null;
     PreparedStatement deleteConfig = null;
     PreparedStatement deleteInput = null;
+    PreparedStatement deleteInputRelation = null;
     try {
       updateDriverStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
+      deleteInputRelation = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_INPUT_RELATIONS_FOR_INPUT);
       deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
       deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());
       updateDriverStatement.setString(1, mDriver.getUniqueName());
@@ -240,8 +250,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       if (updateDriverStatement.executeUpdate() != 1) {
         throw new SqoopException(CommonRepositoryError.COMMON_0035);
       }
+      deleteInputRelation.setLong(1, mDriver.getPersistenceId());
       deleteInput.setLong(1, mDriver.getPersistenceId());
       deleteConfig.setLong(1, mDriver.getPersistenceId());
+      deleteInputRelation.executeUpdate();
       deleteInput.executeUpdate();
       deleteConfig.executeUpdate();
 
@@ -261,6 +273,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @param conn    JDBC link to use for updating the configs
    */
   private void insertConfigsForDriver(MDriver mDriver, Connection conn) {
+    long driverId = mDriver.getPersistenceId();
     PreparedStatement baseConfigStmt = null;
     PreparedStatement baseInputStmt = null;
     try {
@@ -271,7 +284,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           Statement.RETURN_GENERATED_KEYS);
 
       // Register a driver config as a job type with no direction
-      registerConfigs(null, null, mDriver.getDriverConfig().getConfigs(),
+      registerConfigs(driverId, null, mDriver.getDriverConfig().getConfigs(),
           MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
 
     } catch (SQLException ex) {
@@ -308,11 +321,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
       driverConfigInputFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectInput());
       List<MConfig> driverConfigs = new ArrayList<MConfig>();
-      loadDriverConfigs(driverConfigs, driverConfigFetchStmt, driverConfigInputFetchStmt, 1);
+      loadDriverConfigs(driverConfigs, driverConfigFetchStmt, driverConfigInputFetchStmt, 1, conn);
 
-      if (driverConfigs.isEmpty()) {
-        return null;
-      }
       mDriver = new MDriver(new MDriverConfig(driverConfigs), driverVersion);
       mDriver.setPersistenceId(driverId);
 
@@ -355,7 +365,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       throw new SqoopException(CommonRepositoryError.COMMON_0008, mDriver.getUniqueName());
     }
     mDriver.setPersistenceId(insertAndGetDriverId(mDriver, conn));
-    insertConfigsforDriver(mDriver, conn);
+    insertConfigsForDriver(mDriver, conn);
   }
 
   /**
@@ -1295,27 +1305,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
-  private void insertConfigsforDriver(MDriver mDriver, Connection conn) {
-    PreparedStatement baseConfigStmt = null;
-    PreparedStatement baseInputStmt = null;
-    try {
-      baseConfigStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfig(),
-          Statement.RETURN_GENERATED_KEYS);
-      baseInputStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoInput(),
-          Statement.RETURN_GENERATED_KEYS);
-
-      // Register a driver config as a job type with no owner/connector and direction
-      registerConfigs(mDriver.getPersistenceId(), null /* no direction*/, mDriver.getDriverConfig().getConfigs(),
-          MConfigType.JOB.name(), baseConfigStmt, baseInputStmt, conn);
-
-    } catch (SQLException ex) {
-      logException(ex, mDriver);
-      throw new SqoopException(CommonRepositoryError.COMMON_0011, ex);
-    } finally {
-      closeStatements(baseConfigStmt, baseInputStmt);
-    }
-  }
-
   /**
    * Stores counters for given submission in repository.
    *
@@ -1595,7 +1584,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> fromConfig = new ArrayList<MConfig>();
         List<MConfig> toConfig = new ArrayList<MConfig>();
 
-        loadConnectorConfigTypes(linkConfig, fromConfig, toConfig, connectorConfigFetchStmt,
+        loadConnectorConfigs(linkConfig, fromConfig, toConfig, connectorConfigFetchStmt,
             connectorConfigInputFetchStmt, 1, conn);
 
         SupportedDirections supportedDirections
@@ -1654,7 +1643,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> fromConfig = new ArrayList<MConfig>();
         List<MConfig> toConfig = new ArrayList<MConfig>();
 
-        loadConnectorConfigTypes(connectorLinkConfig, fromConfig, toConfig, connectorConfigFetchStatement,
+        loadConnectorConfigs(connectorLinkConfig, fromConfig, toConfig, connectorConfigFetchStatement,
             connectorConfigInputStatement, 2, conn);
         MLink link = new MLink(connectorId, new MLinkConfig(connectorLinkConfig));
 
@@ -1721,7 +1710,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> fromConnectorFromJobConfig = new ArrayList<MConfig>();
         List<MConfig> fromConnectorToJobConfig = new ArrayList<MConfig>();
 
-        loadConnectorConfigTypes(fromConnectorLinkConfig, fromConnectorFromJobConfig, fromConnectorToJobConfig,
+        loadConnectorConfigs(fromConnectorLinkConfig, fromConnectorFromJobConfig, fromConnectorToJobConfig,
             fromConfigFetchStmt, jobInputFetchStmt, 2, conn);
 
         // TO entity configs
@@ -1732,10 +1721,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         // ?? dont we need 2 different driver configs for the from/to?
         List<MConfig> driverConfig = new ArrayList<MConfig>();
 
-        loadConnectorConfigTypes(toConnectorLinkConfig, toConnectorFromJobConfig, toConnectorToJobConfig,
+        loadConnectorConfigs(toConnectorLinkConfig, toConnectorFromJobConfig, toConnectorToJobConfig,
             toConfigFetchStmt, jobInputFetchStmt, 2, conn);
 
-        loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2);
+        loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2, conn);
 
         MJob job = new MJob(
             fromConnectorId, toConnectorId,
@@ -1792,18 +1781,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @return short number of configs registered.
    * @throws java.sql.SQLException
    */
-  private short registerConfigs(Long configurableId, Direction direction,
-                                List<MConfig> configs, String type, PreparedStatement baseConfigStmt,
-                                PreparedStatement baseInputStmt, Connection conn)
-      throws SQLException {
+  private short registerConfigs(Long configurableId, Direction direction, List<MConfig> configs,
+      String type, PreparedStatement baseConfigStmt, PreparedStatement baseInputStmt,
+      Connection conn) throws SQLException {
     short configIndex = 0;
 
     for (MConfig config : configs) {
-      if (configurableId == null) {
-        baseConfigStmt.setNull(1, Types.BIGINT);
-      } else {
-        baseConfigStmt.setLong(1, configurableId);
-      }
+      baseConfigStmt.setLong(1, configurableId);
 
       baseConfigStmt.setString(2, config.getName());
       baseConfigStmt.setString(3, type);
@@ -1828,7 +1812,26 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
       // Insert all the inputs
       List<MInput<?>> inputs = config.getInputs();
-      registerConfigInputs(configId, inputs, baseInputStmt);
+      registerConfigInputs(config, inputs, baseInputStmt);
+      // validate all the input relations
+      Map<Long, List<String>> inputRelationships = new HashMap<Long, List<String>>();
+      for (MInput<?> input : inputs) {
+        List<String> inputOverrides = validateAndGetOverridesAttribute(input, config);
+        if (inputOverrides != null && inputOverrides.size() > 0) {
+          inputRelationships.put(input.getPersistenceId(), inputOverrides);
+        }
+      }
+
+      // Insert all input relations
+      if (inputRelationships != null && inputRelationships.size() > 0) {
+        for (Map.Entry<Long, List<String>> entry : inputRelationships.entrySet()) {
+          List<String> children = entry.getValue();
+          for (String child : children) {
+            Long childId = config.getInput(child).getPersistenceId();
+            insertConfigInputRelationship(entry.getKey(), childId, conn);
+          }
+        }
+      }
     }
     return configIndex;
   }
@@ -1838,17 +1841,22 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    *
    * Use given prepare statement to save all inputs into repository.
    *
-   * @param configId Identifier for corresponding config
-   * @param inputs List of inputs that needs to be saved
-   * @param baseInputStmt Statement that we can utilize
-   * @throws java.sql.SQLException In case of any failure on Derby side
+   * @param config
+   *          corresponding config
+   * @param inputs
+   *          List of inputs that needs to be saved
+   * @param baseInputStmt
+   *          Statement that we can utilize
+   * @throws java.sql.SQLException
+   *           In case of any failure on Derby side
    */
-  private void registerConfigInputs(long configId, List<MInput<?>> inputs,
-                                    PreparedStatement baseInputStmt) throws SQLException {
+  private void registerConfigInputs(MConfig config, List<MInput<?>> inputs,
+      PreparedStatement baseInputStmt) throws SQLException {
+
     short inputIndex = 0;
     for (MInput<?> input : inputs) {
       baseInputStmt.setString(1, input.getName());
-      baseInputStmt.setLong(2, configId);
+      baseInputStmt.setLong(2, config.getPersistenceId());
       baseInputStmt.setShort(3, inputIndex++);
       baseInputStmt.setString(4, input.getType().name());
       baseInputStmt.setBoolean(5, input.isSensitive());
@@ -1859,11 +1867,14 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       } else {
         baseInputStmt.setNull(6, Types.INTEGER);
       }
+
+      baseInputStmt.setString(7, input.getEditable().name());
+
       // Enum specific column(s)
-      if(input.getType() == MInputType.ENUM) {
-        baseInputStmt.setString(7, StringUtils.join(((MEnumInput) input).getValues(), ","));
+      if (input.getType() == MInputType.ENUM) {
+        baseInputStmt.setString(8, StringUtils.join(((MEnumInput) input).getValues(), ","));
       } else {
-        baseInputStmt.setNull(7, Types.VARCHAR);
+        baseInputStmt.setNull(8, Types.VARCHAR);
       }
 
       int baseInputCount = baseInputStmt.executeUpdate();
@@ -1882,6 +1893,59 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
+  private void insertConfigInputRelationship(Long parent, Long child, Connection conn) {
+    PreparedStatement baseInputRelationStmt = null;
+    try {
+      baseInputRelationStmt = conn
+          .prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_INPUT_RELATION);
+      baseInputRelationStmt.setLong(1, parent);
+      baseInputRelationStmt.setLong(2, child);
+      baseInputRelationStmt.executeUpdate();
+
+    } catch (SQLException ex) {
+      throw new SqoopException(CommonRepositoryError.COMMON_0047, ex);
+    } finally {
+      closeStatements(baseInputRelationStmt);
+    }
+  }
+
+  /**
+   * Validate that the input override attribute adheres to the rules imposed
+   * NOTE: all input names in a config class will and must be unique
+   * Rule #1.
+   * If editable == USER_ONLY ( cannot override itself ) can override other  CONNECTOR_ONLY and ANY inputs,
+   * but cannot overriding other USER_ONLY attributes
+   * Rule #2.
+   * If editable == CONNECTOR_ONLY or ANY ( cannot override itself ) can override any other attribute in the config object
+   * @param currentInput
+   *
+   */
+  private List<String> validateAndGetOverridesAttribute(MInput<?> currentInput, MConfig config) {
+
+    // split the overrides string into comma separated list
+    String overrides = currentInput.getOverrides();
+    if (StringUtils.isEmpty(overrides)) {
+      return null;
+    }
+    String[] overrideInputs = overrides.split("\\,");
+    List<String> children = new ArrayList<String>();
+
+    for (String override : overrideInputs) {
+      if (override.equals(currentInput.getName())) {
+        throw new SqoopException(CommonRepositoryError.COMMON_0046, "for input :"
+            + currentInput.toString());
+      }
+      if (currentInput.getEditable().equals(InputEditable.USER_ONLY)) {
+        if (config.getUserOnlyEditableInputNames().contains(override)) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0045, "for input :"
+              + currentInput.toString());
+        }
+      }
+      children.add(override);
+    }
+    return children;
+  }
+
   /**
    * Load configs and corresponding inputs from Derby database.
    *
@@ -1894,10 +1958,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @param configPosition position of the config
    * @throws java.sql.SQLException In case of any failure on Derby side
    */
-  public void loadDriverConfigs(List<MConfig> driverConfig,
+  private void loadDriverConfigs(List<MConfig> driverConfig,
                                 PreparedStatement configFetchStatement,
                                 PreparedStatement inputFetchStmt,
-                                int configPosition) throws SQLException {
+                                int configPosition, Connection conn) throws SQLException {
 
     // Get list of structures from database
     ResultSet rsetConfig = configFetchStatement.executeQuery();
@@ -1923,27 +1987,31 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         String inputType = rsetInput.getString(5);
         boolean inputSensitivity = rsetInput.getBoolean(6);
         short inputStrLength = rsetInput.getShort(7);
-        String inputEnumValues = rsetInput.getString(8);
-        String value = rsetInput.getString(9);
+        String editable = rsetInput.getString(8);
+        InputEditable editableEnum = editable != null ? InputEditable.valueOf(editable)
+            : InputEditable.ANY;
+        // get the overrides value from the SQ_INPUT_RELATION table
+        String overrides = getOverrides(inputId, conn);
+        String inputEnumValues = rsetInput.getString(9);
+        String value = rsetInput.getString(10);
 
         MInputType mit = MInputType.valueOf(inputType);
-
         MInput input = null;
         switch (mit) {
-          case STRING:
-            input = new MStringInput(inputName, inputSensitivity, inputStrLength);
+     case STRING:
+            input = new MStringInput(inputName, inputSensitivity, editableEnum,  overrides, inputStrLength);
             break;
           case MAP:
-            input = new MMapInput(inputName, inputSensitivity);
+            input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides);
             break;
           case BOOLEAN:
-            input = new MBooleanInput(inputName, inputSensitivity);
+            input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
             break;
           case INTEGER:
-            input = new MIntegerInput(inputName, inputSensitivity);
+            input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
             break;
           case ENUM:
-            input = new MEnumInput(inputName, inputSensitivity, inputEnumValues.split(","));
+            input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides, inputEnumValues.split(","));
             break;
           default:
             throw new SqoopException(CommonRepositoryError.COMMON_0003,
@@ -2037,7 +2105,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @param conn Connection object that is used to find config direction.
    * @throws java.sql.SQLException In case of any failure on Derby side
    */
-  public void loadConnectorConfigTypes(List<MConfig> linkConfig, List<MConfig> fromConfig, List<MConfig> toConfig,
+  public void loadConnectorConfigs(List<MConfig> linkConfig, List<MConfig> fromConfig, List<MConfig> toConfig,
                                        PreparedStatement configFetchStmt, PreparedStatement inputFetchStmt,
                                        int configPosition, Connection conn) throws SQLException {
 
@@ -2065,32 +2133,38 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         String inputType = rsetInput.getString(5);
         boolean inputSensitivity = rsetInput.getBoolean(6);
         short inputStrLength = rsetInput.getShort(7);
-        String inputEnumValues = rsetInput.getString(8);
-        String value = rsetInput.getString(9);
+        String editable = rsetInput.getString(8);
+        InputEditable editableEnum = editable != null ? InputEditable.valueOf(editable)
+            : InputEditable.ANY;
+        // get the overrides value from the SQ_INPUT_RELATION table
+        String overrides = getOverrides(inputId, conn);
+        String inputEnumValues = rsetInput.getString(9);
+        String value = rsetInput.getString(10);
 
         MInputType mit = MInputType.valueOf(inputType);
 
         MInput<?> input = null;
         switch (mit) {
-          case STRING:
-            input = new MStringInput(inputName, inputSensitivity, inputStrLength);
-            break;
-          case MAP:
-            input = new MMapInput(inputName, inputSensitivity);
-            break;
-          case BOOLEAN:
-            input = new MBooleanInput(inputName, inputSensitivity);
-            break;
-          case INTEGER:
-            input = new MIntegerInput(inputName, inputSensitivity);
-            break;
-          case ENUM:
-            input = new MEnumInput(inputName, inputSensitivity, inputEnumValues.split(","));
-            break;
-          default:
-            throw new SqoopException(CommonRepositoryError.COMMON_0003,
-                "input-" + inputName + ":" + inputId + ":"
-                    + "config-" + inputConfig + ":" + mit.name());
+        case STRING:
+          input = new MStringInput(inputName, inputSensitivity, editableEnum, overrides,
+              inputStrLength);
+          break;
+        case MAP:
+          input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides);
+          break;
+        case BOOLEAN:
+          input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
+          break;
+        case INTEGER:
+          input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
+          break;
+        case ENUM:
+          input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides,
+              inputEnumValues.split(","));
+          break;
+        default:
+          throw new SqoopException(CommonRepositoryError.COMMON_0003, "input-" + inputName + ":"
+              + inputId + ":" + "config-" + inputConfig + ":" + mit.name());
         }
 
         // Set persistent ID
@@ -2166,6 +2240,60 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         default:
           throw new SqoopException(CommonRepositoryError.COMMON_0004,
               "connector-" + configConnectorId + ":" + config);
+      }
+    }
+  }
+
+  /**
+   * @param inputId
+   * @param conn
+   * @return
+   */
+  private String getOverrides(long inputId, Connection conn) {
+
+    PreparedStatement overridesStmt = null;
+    PreparedStatement inputStmt = null;
+
+    ResultSet rsOverride = null;
+    ResultSet rsInput = null;
+
+    List<String> overrides = new ArrayList<String>();
+    try {
+      overridesStmt = conn.prepareStatement(crudQueries.getStmtSelectInputOverrides());
+      inputStmt = conn.prepareStatement(crudQueries.getStmtSelectInputById());
+      overridesStmt.setLong(1, inputId);
+      rsOverride = overridesStmt.executeQuery();
+
+      while (rsOverride.next()) {
+        long overrideId = rsOverride.getLong(1);
+        inputStmt.setLong(1, overrideId);
+        rsInput = inputStmt.executeQuery();
+        if(rsInput.next()) {
+         overrides.add(rsInput.getString(2));
+        }
+      }
+      if (overrides != null && overrides.size() > 0) {
+        return StringUtils.join(overrides, ",");
+      } else {
+        return StringUtils.EMPTY;
+
+      }
+    } catch (SQLException ex) {
+      logException(ex, inputId);
+      throw new SqoopException(CommonRepositoryError.COMMON_0048, ex);
+    } finally {
+      if (rsOverride != null) {
+        closeResultSets(rsOverride);
+      }
+      if (rsInput != null) {
+        closeResultSets(rsInput);
+      }
+
+      if (overridesStmt != null) {
+        closeStatements(overridesStmt);
+      }
+      if (inputStmt != null) {
+        closeStatements(inputStmt);
       }
     }
   }

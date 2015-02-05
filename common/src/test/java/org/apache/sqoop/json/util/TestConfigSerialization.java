@@ -25,8 +25,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JSONUtils;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigType;
@@ -121,7 +123,7 @@ public class TestConfigSerialization {
 
     inputs = new LinkedList<MInput<?>>();
 
-    input = new MMapInput("Map", false);
+    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
 
     return new MConfig("c", inputs);
@@ -138,19 +140,19 @@ public class TestConfigSerialization {
 
     inputs = new LinkedList<MInput<?>>();
 
-    input = new MStringInput("String", false, (short)30);
+    input = new MStringInput("String", false, InputEditable.ANY, StringUtils.EMPTY, (short)30);
     inputs.add(input);
 
-    input = new MMapInput("Map", false);
+    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
 
-    input = new MIntegerInput("Integer", false);
+    input = new MIntegerInput("Integer", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
 
-    input = new MBooleanInput("Boolean", false);
+    input = new MBooleanInput("Boolean", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
 
-    input = new MEnumInput("Enum", false, new String[] {"YES", "NO"});
+    input = new MEnumInput("Enum", false, InputEditable.ANY, StringUtils.EMPTY, new String[] {"YES", "NO"});
     inputs.add(input);
 
     return new MConfig("c", inputs);

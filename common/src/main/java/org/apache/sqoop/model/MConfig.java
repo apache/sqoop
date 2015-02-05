@@ -22,7 +22,9 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a group of inputs that are processed together. This allows the
@@ -34,15 +36,32 @@ import java.util.List;
 public final class MConfig extends MValidatedElement implements MClonable {
 
   private final List<MInput<?>> inputs;
+  private Set<String> inputNames = new HashSet<String>();
+  private Set<String> userOnlyEditableInputNames = new HashSet<String>();
 
   public MConfig(String name, List<MInput<?>> inputs) {
     super(name);
-
     this.inputs = inputs;
+    if (inputs != null && inputs.size() > 0) {
+      for (MInput<?> input : inputs) {
+        inputNames.add(input.getName());
+        if (input.getEditable().equals(InputEditable.USER_ONLY)) {
+          userOnlyEditableInputNames.add(input.getName());
+        }
+      }
+    }
   }
 
   public List<MInput<?>> getInputs() {
     return inputs;
+  }
+
+  public Set<String> getInputNames() {
+    return inputNames;
+  }
+
+  public Set<String> getUserOnlyEditableInputNames() {
+    return userOnlyEditableInputNames;
   }
 
   public MInput<?> getInput(String inputName) {

@@ -17,10 +17,12 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MFromConfig;
@@ -71,13 +73,13 @@ public class TestGenericJdbcConnectorUpgrader {
     originalConfigs = new MFromConfig(new LinkedList<MConfig>());
     newConfigs = new MFromConfig(ConfigUtils.toConfigs(FromJobConfiguration.class));
     originalConfigs.getConfigs().add(new MConfig("table", new LinkedList<MInput<?>>()));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.schemaName", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.tableName", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.sql", false, (short)2000));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.columns", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.partitionColumn", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MBooleanInput("table.partitionColumnNull", false));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.boundaryQuery", false, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.schemaName", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.tableName", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.sql", false, InputEditable.ANY, StringUtils.EMPTY, (short)2000));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.columns", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.partitionColumn", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MBooleanInput("table.partitionColumnNull", false, InputEditable.ANY, StringUtils.EMPTY));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.boundaryQuery", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
     originalConfigs.getInput("table.schemaName").setValue("test-schema");
     originalConfigs.getInput("table.tableName").setValue("test-tableName");
     originalConfigs.getInput("table.sql").setValue("test-sql");
@@ -117,12 +119,13 @@ public class TestGenericJdbcConnectorUpgrader {
     originalConfigs = new MToConfig(new LinkedList<MConfig>());
     newConfigs = new MToConfig(ConfigUtils.toConfigs(ToJobConfiguration.class));
     originalConfigs.getConfigs().add(new MConfig("table", new LinkedList<MInput<?>>()));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.schemaName", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.tableName", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.sql", false, (short)2000));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.columns", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.stageTableName", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MBooleanInput("table.clearStageTable", false));
+
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.schemaName", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.tableName", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.sql", false, InputEditable.ANY, StringUtils.EMPTY,(short)2000));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.columns", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("table.stageTableName", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MBooleanInput("table.clearStageTable", false, InputEditable.ANY, StringUtils.EMPTY));
     originalConfigs.getInput("table.schemaName").setValue("test-schema");
     originalConfigs.getInput("table.tableName").setValue("test-tableName");
     originalConfigs.getInput("table.sql").setValue("test-sql");
@@ -160,11 +163,11 @@ public class TestGenericJdbcConnectorUpgrader {
     originalConfigs = new MLinkConfig(new LinkedList<MConfig>());
     newConfigs = new MLinkConfig(ConfigUtils.toConfigs(LinkConfiguration.class));
     originalConfigs.getConfigs().add(new MConfig("connection", new LinkedList<MInput<?>>()));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.jdbcDriver", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.connectionString", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.username", false, (short)2000));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.password", false, (short)50));
-    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.jdbcProperties", false, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.jdbcDriver", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.connectionString", false,InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.username", false, InputEditable.ANY, StringUtils.EMPTY, (short)2000));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.password", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
+    originalConfigs.getConfigs().get(0).getInputs().add(new MStringInput("connection.jdbcProperties", false, InputEditable.ANY, StringUtils.EMPTY, (short)50));
     originalConfigs.getInput("connection.jdbcDriver").setValue("test-jdbcDriver");
     originalConfigs.getInput("connection.connectionString").setValue("test-connectionString");
     originalConfigs.getInput("connection.username").setValue("test-username");

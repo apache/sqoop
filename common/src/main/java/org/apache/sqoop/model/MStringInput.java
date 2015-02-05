@@ -38,8 +38,8 @@ public final class MStringInput extends MInput<String> {
    * @param sensitive a flag indicating if the string should be masked
    * @param maxLength the maximum length of the string
    */
-  public MStringInput(String name, boolean sensitive, short maxLength) {
-    super(name, sensitive);
+  public MStringInput(String name, boolean sensitive, InputEditable editable, String overrides, short maxLength) {
+    super(name, sensitive, editable, overrides);
     this.maxLength = maxLength;
   }
 
@@ -111,9 +111,9 @@ public final class MStringInput extends MInput<String> {
 
   @Override
   public MStringInput clone(boolean cloneWithValue) {
-    MStringInput copy = new MStringInput(this.getName(),
-        this.isSensitive(), this.getMaxLength());
-    copy.setPersistenceId(this.getPersistenceId());
+    MStringInput copy = new MStringInput(getName(), isSensitive(), getEditable(), getOverrides(),
+        getMaxLength());
+    copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(this.getValue());
     }

@@ -23,6 +23,7 @@ import static org.testng.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.testng.annotations.Test;
 
@@ -104,9 +105,9 @@ public class TestMJob {
 
   private MFromConfig fromConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false);
+    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
     input.setValue(100);
-    MStringInput strInput = new MStringInput("STRING-INPUT",false,(short)20);
+    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20);
     strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
@@ -118,7 +119,7 @@ public class TestMJob {
 
   private MToConfig toConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MMapInput input = new MMapInput("MAP-INPUT", false);
+    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     MConfig config = new MConfig("CONFIGTONAME", list);
@@ -128,7 +129,7 @@ public class TestMJob {
 
   private MDriverConfig driverConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MMapInput input = new MMapInput("MAP-INPUT", false);
+    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     MConfig config = new MConfig("CONFIGDRIVERNAME", list);

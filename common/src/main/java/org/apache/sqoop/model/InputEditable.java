@@ -17,24 +17,25 @@
  */
 package org.apache.sqoop.model;
 
-import org.apache.commons.lang.StringUtils;
-import org.testng.annotations.Test;
-
-import static org.testng.Assert.*;
-
 /**
- * Test class for org.apache.sqoop.model.MNamedElement
+ * Various supported roles for editing input values that belong to a config
+ * NOTE: In future this can be extended based on the roles supported in sqoop
+ * for instance, we could have sqoop ADMIN_ONLY editable inputs
  */
-public class TestMNamedElement {
+public enum InputEditable {
+  /**
+   * Sqoop user alone can edit the input values via rest API or shell command line
+   */
+  USER_ONLY,
 
   /**
-   * Test initialization and values
+   * Connector code alone can edit the input values
    */
-  @Test
-  public void testInitialization() {
-    MNamedElement named = new MIntegerInput("SQOOP", false, InputEditable.ANY, StringUtils.EMPTY);
-    assertEquals("SQOOP", named.getName());
-    assertEquals("SQOOP.label", named.getLabelKey());
-    assertEquals("SQOOP.help", named.getHelpKey());
-  }
+  CONNECTOR_ONLY,
+
+  /**
+   * Either Connector code or the sqoop user alone can edit the input values
+   */
+
+  ANY
 }

@@ -29,8 +29,8 @@ import org.apache.sqoop.utils.UrlSafeUtils;
 @InterfaceStability.Unstable
 public final class MMapInput extends MInput<Map<String, String>> {
 
-  public MMapInput(String name, boolean sensitive) {
-    super(name, sensitive);
+  public MMapInput(String name, boolean sensitive, InputEditable editable, String overrides) {
+    super(name, sensitive, editable, overrides);
   }
 
   @Override
@@ -114,8 +114,8 @@ public final class MMapInput extends MInput<Map<String, String>> {
 
   @Override
   public MMapInput clone(boolean cloneWithValue) {
-    MMapInput copy = new MMapInput(this.getName(), this.isSensitive());
-    copy.setPersistenceId(this.getPersistenceId());
+    MMapInput copy = new MMapInput(getName(), isSensitive(), getEditable(), getOverrides());
+    copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue && this.getValue() != null) {
       Map<String, String> copyMap = new HashMap<String, String>();
       Set<Map.Entry<String, String>> entry = this.getValue().entrySet();

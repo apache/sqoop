@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MConfig;
@@ -83,6 +84,8 @@ public final class ConfigInputSerialization {
       input.put(ConfigInputConstants.CONFIG_INPUT_NAME, mInput.getName());
       input.put(ConfigInputConstants.CONFIG_INPUT_TYPE, mInput.getType().toString());
       input.put(ConfigInputConstants.CONFIG_INPUT_SENSITIVE, mInput.isSensitive());
+      input.put(ConfigInputConstants.CONFIG_INPUT_EDITABLE, mInput.getEditable().name());
+      input.put(ConfigInputConstants.CONFIG_INPUT_OVERRIDES, mInput.getOverrides());
 
       // String specific serialization
       if (mInput.getType() == MInputType.STRING) {
@@ -92,7 +95,7 @@ public final class ConfigInputSerialization {
 
       // Enum specific serialization
       if(mInput.getType() == MInputType.ENUM) {
-        input.put(ConfigInputConstants.CONFIG_INPUT_VALUES,
+        input.put(ConfigInputConstants.CONFIG_INPUT_ENUM_VALUES,
           StringUtils.join(((MEnumInput)mInput).getValues(), ","));
       }
 
@@ -145,28 +148,31 @@ public final class ConfigInputSerialization {
           MInputType.valueOf((String) input.get(ConfigInputConstants.CONFIG_INPUT_TYPE));
       String name = (String) input.get(ConfigInputConstants.CONFIG_INPUT_NAME);
       Boolean sensitive = (Boolean) input.get(ConfigInputConstants.CONFIG_INPUT_SENSITIVE);
+      InputEditable editable =  InputEditable.valueOf((String)input.get(ConfigInputConstants.CONFIG_INPUT_EDITABLE));
+      String overrides = (String) input.get(ConfigInputConstants.CONFIG_INPUT_OVERRIDES);
+
       MInput mInput = null;
       switch (type) {
       case STRING: {
         long size = (Long) input.get(ConfigInputConstants.CONFIG_INPUT_SIZE);
-        mInput = new MStringInput(name, sensitive.booleanValue(), (short) size);
+        mInput = new MStringInput(name, sensitive.booleanValue(), editable, overrides, (short) size);
         break;
       }
       case MAP: {
-        mInput = new MMapInput(name, sensitive.booleanValue());
+        mInput = new MMapInput(name, sensitive.booleanValue(), editable, overrides);
         break;
       }
       case INTEGER: {
-        mInput = new MIntegerInput(name, sensitive.booleanValue());
+        mInput = new MIntegerInput(name, sensitive.booleanValue(), editable, overrides);
         break;
       }
       case BOOLEAN: {
-        mInput = new MBooleanInput(name, sensitive.booleanValue());
+        mInput = new MBooleanInput(name, sensitive.booleanValue(), editable, overrides);
         break;
       }
       case ENUM: {
-        String values = (String) input.get(ConfigInputConstants.CONFIG_INPUT_VALUES);
-        mInput = new MEnumInput(name, sensitive.booleanValue(), values.split(","));
+        String values = (String) input.get(ConfigInputConstants.CONFIG_INPUT_ENUM_VALUES);
+        mInput = new MEnumInput(name, sensitive.booleanValue(), editable, overrides, values.split(","));
         break;
       }
       default:

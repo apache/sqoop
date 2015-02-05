@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.testng.annotations.Test;
 
@@ -35,9 +36,9 @@ public class TestMConnector {
 
   private MConnector createConnector(List<Direction> supportedDirections) {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput inputs = new MIntegerInput("INTEGER-INPUT", false);
+    MIntegerInput inputs = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.setValue(100);
-    MStringInput strInput = new MStringInput("STRING-INPUT",false,(short)20);
+    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20);
     strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(inputs);

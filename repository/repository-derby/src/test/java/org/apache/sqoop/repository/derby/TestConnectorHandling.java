@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnector;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -91,10 +92,27 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertEquals(connector, retrieved);
   }
 
+  @Test(expectedExceptions = SqoopException.class)
+  public void testRegisterConnectorWithIncorrectInputOverridesAttribute() throws Exception {
+    MConnector connector = getConnectorWithIncorrectOverridesAttribute();
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testRegisterConnectorWithIncorrectInputOverridesAttribute2() throws Exception {
+    MConnector connector = getConnectorWithIncorrectOverridesAttribute2();
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
+  }
+
+  @Test
+  public void testRegisterConnectorWithMultipleInputOverridesAttribute() throws Exception {
+    MConnector connector = getConnectorWithMultipleOverridesAttribute();
+    handler.registerConnector(connector, getDerbyDatabaseConnection());
+  }
+
   @Test
   public void testFromDirection() throws Exception {
     MConnector connector = getConnector(true, false);
-
     handler.registerConnector(connector, getDerbyDatabaseConnection());
 
     // Connector should get persistence ID
