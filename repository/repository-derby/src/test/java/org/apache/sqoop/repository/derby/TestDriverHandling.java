@@ -75,6 +75,7 @@ public class TestDriverHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONNECTOR", 0);
     assertCountForTable("SQOOP.SQ_CONFIG", 2);
     assertCountForTable("SQOOP.SQ_INPUT", 4);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 4);
 
     // Registered driver and config should be easily recovered back
     MDriver retrieved = handler.findDriver(MDriver.DRIVER_NAME, getDerbyDatabaseConnection());

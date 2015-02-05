@@ -83,6 +83,7 @@ public class TestConnectorHandling extends PostgresqlTestCase {
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 6);
     assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 12);
+    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 9);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", provider.getConnection());
@@ -103,6 +104,7 @@ public class TestConnectorHandling extends PostgresqlTestCase {
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 4);
     assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 8);
+    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 6);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", provider.getConnection());
@@ -123,6 +125,7 @@ public class TestConnectorHandling extends PostgresqlTestCase {
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 4);
     assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 8);
+    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 6);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", provider.getConnection());
@@ -143,6 +146,7 @@ public class TestConnectorHandling extends PostgresqlTestCase {
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 2);
     assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 4);
+    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 3);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", provider.getConnection());

@@ -22,7 +22,6 @@ import org.apache.sqoop.repository.common.CommonRepoUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

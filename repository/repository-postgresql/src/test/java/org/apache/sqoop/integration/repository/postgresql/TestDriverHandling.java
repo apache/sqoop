@@ -63,6 +63,7 @@ public class TestDriverHandling extends PostgresqlTestCase {
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
     assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 2);
     assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 4);
+    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 3);
 
     // Registered driver and config should be easily recovered back
     MDriver retrieved = handler.findDriver(MDriver.DRIVER_NAME, provider.getConnection());

@@ -18,6 +18,7 @@
 package org.apache.sqoop.repository.postgresql;
 
 import org.apache.sqoop.repository.common.CommonRepoUtils;
+import org.apache.sqoop.repository.common.CommonRepositorySchemaConstants;
 
 import static org.apache.sqoop.repository.postgresql.PostgresqlSchemaConstants.*;
 
@@ -101,20 +102,35 @@ import static org.apache.sqoop.repository.postgresql.PostgresqlSchemaConstants.*
  * </p>
  * <p>
  * <strong>SQ_INPUT</strong>: Input details
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_INPUT                   |
  *    +----------------------------+
- *    | SQI_ID: BIGSERIAL PK       |
+ *    | SQI_ID: BIGSERIAL PK  |
  *    | SQI_NAME: VARCHAR(64)      |
- *    | SQI_CONFIG: BIGINT         | FK SQI_CONFIG(SQ_CFG_ID)
+ *    | SQI_CONFIG: BIGINT         |FK SQ_CONFIG(SQ_CFG_ID)
  *    | SQI_INDEX: SMALLINT        |
- *    | SQI_TYPE: VARCHAR(32)      | "STRING"|"MAP"
+ *    | SQI_TYPE: VARCHAR(32)      |"STRING"|"MAP"
  *    | SQI_STRMASK: BOOLEAN       |
  *    | SQI_STRLENGTH: SMALLINT    |
  *    | SQI_ENUMVALS: VARCHAR(100) |
+ *    | SQI_EDITABLE: VARCHAR(32)  |
  *    +----------------------------+
  * </pre>
+* <p>
+ * <strong>SQ_INPUT_RELATION</strong>: Input to Input relationship
+ *
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_INPUT_RELATION           |
+ *    +----------------------------+
+ *    | SQIR_ID: BIGSERIAL PK  |
+ *    | SQIR_PARENT_ID: BIGINT      |FK SQ_INPUT(SQI_ID)
+ *    | SQIR_CHILD_ID: BIGINT       |FK SQ_INPUT(SQI_ID)
+ *    +----------------------------+
+ * </pre>
+ *
  * </p>
  * <p>
  * <strong>SQ_LINK</strong>: Stored connections
@@ -291,8 +307,16 @@ public class PostgresqlSchemaCreateQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + " VARCHAR(32), "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRMASK) + " BOOLEAN, "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + " SMALLINT, "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQI_EDITABLE) + " VARCHAR(32), "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + " VARCHAR(100), "
           + " UNIQUE (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_TYPE) + ", " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + ") "
+          + ")";
+
+  public static final String QUERY_CREATE_TABLE_SQ_INPUT_RELATION =
+      "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_INPUT_RELATION_NAME) + " ("
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQIR_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQIR_PARENT) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")" + ", "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQIR_CHILD) + " BIGINT REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + "("  + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")"
           + ")";
 
   public static final String QUERY_CREATE_TABLE_SQ_LINK =

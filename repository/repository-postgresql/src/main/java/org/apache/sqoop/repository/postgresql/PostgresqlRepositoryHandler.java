@@ -119,6 +119,7 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONFIGURABLE, conn);
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONFIG, conn);
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_INPUT, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_INPUT_RELATION, conn);
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_LINK, conn);
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_JOB, conn);
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_LINK_INPUT, conn);

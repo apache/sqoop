@@ -85,6 +85,8 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 6);
     assertCountForTable("SQOOP.SQ_INPUT", 12);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 9);
+
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
@@ -122,6 +124,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 4);
     assertCountForTable("SQOOP.SQ_INPUT", 8);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 6);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
@@ -142,6 +145,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 4);
     assertCountForTable("SQOOP.SQ_INPUT", 8);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 6);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
@@ -162,6 +166,7 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 2);
     assertCountForTable("SQOOP.SQ_INPUT", 4);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 3);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());

@@ -34,6 +34,7 @@ public class TestStructure extends PostgresqlTestCase {
     utils.assertTableExists("SQOOP", "SQ_CONFIG");
     utils.assertTableExists("SQOOP", "SQ_CONNECTOR_DIRECTIONS");
     utils.assertTableExists("SQOOP", "SQ_INPUT");
+    utils.assertTableExists("SQOOP", "SQ_INPUT_RELATION");
     utils.assertTableExists("SQOOP", "SQ_LINK");
     utils.assertTableExists("SQOOP", "SQ_JOB");
     utils.assertTableExists("SQOOP", "SQ_LINK_INPUT");
@@ -57,6 +58,8 @@ public class TestStructure extends PostgresqlTestCase {
     utils.assertForeignKey("SQOOP", "SQ_LINK", "SQ_LNK_ID", "SQ_JOB", "SQB_TO_LINK");
     utils.assertForeignKey("SQOOP", "SQ_LINK", "SQ_LNK_ID", "SQ_LINK_INPUT", "SQ_LNKI_LINK");
     utils.assertForeignKey("SQOOP", "SQ_INPUT", "SQI_ID", "SQ_LINK_INPUT", "SQ_LNKI_INPUT");
+    utils.assertForeignKey("SQOOP", "SQ_INPUT", "SQI_ID", "SQ_INPUT_RELATION", "SQIR_PARENT_ID");
+    utils.assertForeignKey("SQOOP", "SQ_INPUT", "SQI_ID", "SQ_INPUT_RELATION", "SQIR_CHILD_ID");
     utils.assertForeignKey("SQOOP", "SQ_JOB", "SQB_ID", "SQ_JOB_INPUT", "SQBI_JOB");
     utils.assertForeignKey("SQOOP", "SQ_INPUT", "SQI_ID", "SQ_JOB_INPUT", "SQBI_INPUT");
     utils.assertForeignKey("SQOOP", "SQ_JOB", "SQB_ID", "SQ_SUBMISSION", "SQS_JOB");
