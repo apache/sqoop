@@ -17,12 +17,15 @@
  */
 package org.apache.sqoop.client;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.hadoop.security.Credentials;
+import org.apache.hadoop.security.token.Token;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.client.request.SqoopResourceRequests;
@@ -554,6 +557,18 @@ public class SqoopClient {
    */
   public List<MSubmission> getSubmissionsForJob(long jobId) {
     return resourceRequests.readSubmission(jobId).getSubmissions();
+  }
+
+  /**
+   * Add delegation token into credentials of Hadoop security.
+   *
+   * @param renewer renewer string
+   * @param credentials credentials of Hadoop security, which will be added delegation token
+   * @return
+   */
+  public Token<?>[] addDelegationTokens(String renewer,
+                                        Credentials credentials) throws IOException {
+    return resourceRequests.addDelegationTokens(renewer, credentials);
   }
 
   private Status applyLinkValidations(ValidationResultBean bean, MLink link) {

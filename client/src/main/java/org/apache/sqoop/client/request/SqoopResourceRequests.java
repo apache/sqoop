@@ -17,7 +17,9 @@
  */
 package org.apache.sqoop.client.request;
 
+import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
+import org.apache.hadoop.security.Credentials;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.json.JobBean;
@@ -27,6 +29,8 @@ import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+
+import java.io.IOException;
 
 /**
  * Unified class for all request objects.
@@ -156,5 +160,10 @@ public class SqoopResourceRequests {
 
   public SubmissionsBean readSubmission(Long jid) {
     return getSubmissionResourceRequest().read(serverUrl, jid);
+  }
+
+  public Token<?>[] addDelegationTokens(String renewer,
+                                        Credentials credentials) throws IOException {
+    return getDriverResourceRequest().addDelegationTokens(serverUrl + DriverResourceRequest.RESOURCE, renewer, credentials);
   }
 }
