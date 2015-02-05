@@ -385,6 +385,26 @@ Each ``ConfigClass`` defines the different inputs it exposes for the link and jo
 
 Each ``ConfigClass`` and the  inputs within the configs annotated with ``Input`` can specifiy validators via the ``@Validator`` annotation described below.
 
+Configs and Inputs
+==================================
+As discussed above, ``Input`` provides a way to express the type of config parameter exposed. In addition it allows connector developer to add attributes
+that describe how the input will be used in the sqoop job. Here are the list of the supported attributes
+
+
+Inputs associated with the link configuration include:
+
++-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
+| Attribute                   | Type    | Description                                                           | Example                                         |
++=============================+=========+=======================================================================+=================================================+
+| size                        | Integer| Describes the maximum size of the attribute value .                    |@Input(size = 128) public String driver          |
++-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
+| sensitive                   | Boolean |Describes if the input value should be hidden from display             |@Input(sensitive = true) public String password  |
++-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
+| editable                    | Enum    |Describes the roles that can edit the value of this input              |@Input(editable =USER_ONLY) public String value  |
++-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
+| overrides                   | String  |Describes a list of other inputs this input can override in this config|@Input(overrides ="value") public String lvalue  |
++-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
+
 Empty Configuration
 -------------------
 If a connector does not have any configuration inputs to specify for the ``ConfigType.LINK`` or ``ConfigType.JOB`` it is recommended to return the ``EmptyConfiguration`` class in the ``getLinkConfigurationClass()`` or ``getJobConfigurationClass(..)`` methods.
