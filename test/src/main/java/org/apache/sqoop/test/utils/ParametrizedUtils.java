@@ -51,6 +51,25 @@ public class ParametrizedUtils {
   }
 
   /**
+   * Convert single array to array of arrays by putting each element in the source
+   * array into it's own one-item big array.
+   *
+   * This method is suitable for conversions required by Parametrized test runner.
+   *
+   * @param array Array to be converted
+   * @return Converted array
+   */
+  public static Iterable<Object []>toArrayOfArrays(Object []array) {
+    LinkedList<Object []> ret = new LinkedList<Object []>();
+
+    for(Object o : array) {
+      ret.add(toArray(o));
+    }
+
+    return ret;
+  }
+
+  /**
    * Merge two objects into array.
    *
    * This method will flatten any argument that is already an array, e.g.:
