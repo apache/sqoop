@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.repository.postgresql;
 
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.CONSTRAINT_PREFIX;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.SCHEMA_PREFIX;
+
 public class PostgresqlSchemaConstants {
   public static final String SCHEMA_SQOOP = "SQOOP";
 
@@ -274,6 +277,80 @@ public class PostgresqlSchemaConstants {
   public static final String COLUMN_SQRS_SUBMISSION = "SQRS_SUBMISSION";
 
   public static final String COLUMN_SQRS_VALUE = "SQRS_VALUE";
+
+  // Constraints
+
+  public static final String CONSTRAINT_SQCD_SQC_NAME
+      = CONSTRAINT_PREFIX + "SQCD_SQC";
+
+  public static final String CONSTRAINT_SQCD_SQD_NAME
+      = CONSTRAINT_PREFIX + "SQCD_SQD";
+
+  public static final String CONSTRAINT_SQ_CONFIGURABLE_UNIQUE_NAME
+      = CONSTRAINT_PREFIX + "SQC_NAME_UNIQUE";
+
+  public static final String CONSTRAINT_SQ_CFG_DIR_CONFIG_NAME
+      = CONSTRAINT_PREFIX + "SQ_CFG_DIR_CONFIG";
+
+  public static final String CONSTRAINT_SQ_CFG_DIR_DIRECTION_NAME
+      = CONSTRAINT_PREFIX + "SQ_CFG_DIR_DIRECTION";
+
+  public static final String CONSTRAINT_SQ_CFG_SQC_NAME
+      = CONSTRAINT_PREFIX + "SQ_CFG_SQC";
+
+  public static final String CONSTRAINT_SQ_CONFIG_UNIQUE_NAME_TYPE_CONFIGURABLE
+      = CONSTRAINT_PREFIX + "SQ_CFG_NAME_TYPE_CONFIGURABLE_UNIQUE";
+
+  public static final String CONSTRAINT_SQI_SQ_CFG_NAME
+      = CONSTRAINT_PREFIX + "SQI_SQ_CFG";
+
+  public static final String CONSTRAINT_SQ_INPUT_UNIQUE_NAME_TYPE_CONFIG
+      = CONSTRAINT_PREFIX + "SQI_NAME_TYPE_CONFIG_UNIQUE";
+
+  public static final String CONSTRAINT_SQIR_PARENT_NAME
+      = CONSTRAINT_PREFIX + "SQIR_PARENT_ID";
+
+  public static final String CONSTRAINT_SQIR_CHILD_NAME
+      = CONSTRAINT_PREFIX + "SQIR_CHILD_ID";
+
+  public static final String CONSTRAINT_SQ_LNK_SQC_NAME
+      = CONSTRAINT_PREFIX + "SQ_LNK_SQC";
+
+  public static final String CONSTRAINT_SQ_LNK_NAME_UNIQUE_NAME
+      = CONSTRAINT_PREFIX + "SQ_LNK_NAME_UNIQUE";
+
+  public static final String CONSTRAINT_SQB_SQ_LNK_FROM_NAME
+      = CONSTRAINT_PREFIX + "SQB_SQ_LNK_FROM";
+
+  public static final String CONSTRAINT_SQB_SQ_LNK_TO_NAME
+      = CONSTRAINT_PREFIX + "SQB_SQ_LNK_TO";
+
+  public static final String CONSTRAINT_SQB_NAME_UNIQUE_NAME
+      = CONSTRAINT_PREFIX + "SQB_NAME_UNIQUE";
+
+  public static final String CONSTRAINT_SQ_LNKI_SQ_LNK_NAME
+      = CONSTRAINT_PREFIX + "SQ_LNKI_SQ_LNK";
+
+  public static final String CONSTRAINT_SQ_LNKI_SQI_NAME
+      = CONSTRAINT_PREFIX + "SQ_LNKI_SQI";
+
+  public static final String CONSTRAINT_SQBI_SQB_NAME
+      = CONSTRAINT_PREFIX + "SQBI_SQB";
+
+  public static final String CONSTRAINT_SQBI_SQI_NAME
+      = CONSTRAINT_PREFIX + "SQBI_SQI";
+
+  public static final String CONSTRAINT_SQS_SQB_NAME
+      = CONSTRAINT_PREFIX + "SQS_SQB";
+
+  public static final String CONSTRAINT_SQRS_SQG_NAME
+      = CONSTRAINT_PREFIX + "SQRS_SQG";
+
+  public static final String CONSTRAINT_SQRS_SQR_NAME
+      = CONSTRAINT_PREFIX + "SQRS_SQR";
+
+  public static final String CONSTRAINT_SQRS_SQS_NAME
+      = CONSTRAINT_PREFIX + "SQRS_SQS";
 
   private PostgresqlSchemaConstants() {
     // Disable explicit object creation
