@@ -22,7 +22,7 @@ import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 
-/***
+/**
  * AuthorizationManager is responsible for managing AuthorizationHandler.
  */
 public class AuthorizationManager implements Reconfigurable {
@@ -33,6 +33,11 @@ public class AuthorizationManager implements Reconfigurable {
    * Default authorization handler
    */
   public static final String DEFAULT_AUTHORIZATION_HANDLER = "org.apache.sqoop.security.Authorization.DefaultAuthorizationHandler";
+
+  /**
+   * Default authentication provider
+   */
+  public static final String DEFAULT_AUTHENTICATION_PROVIDER = "org.apache.sqoop.security.Authorization.DefaultAuthenticationProvider";
 
   /**
    * Default authorization auto upgrade option value
@@ -93,7 +98,12 @@ public class AuthorizationManager implements Reconfigurable {
             SecurityConstants.AUTHORIZATION_HANDLER,
             DEFAULT_AUTHORIZATION_HANDLER).trim();
     authorizationHandler = SecurityFactory.getAuthorizationHandler(handler);
-    authorizationHandler.doInitialize();
+
+    String provider = SqoopConfiguration.getInstance().getContext().getString(
+            SecurityConstants.AUTHENTICATION_PROVIDER,
+            DEFAULT_AUTHENTICATION_PROVIDER).trim();
+
+    authorizationHandler.doInitialize(SecurityFactory.getAuthenticationProvider(provider));
 
     LOG.info("Authorization loaded.");
   }

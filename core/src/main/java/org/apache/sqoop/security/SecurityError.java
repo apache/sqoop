@@ -49,7 +49,13 @@ public enum SecurityError implements ErrorCode {
   AUTH_0008("Unable to find authorization access controller"),
 
   /** The system was not able to find authorization validator. */
-  AUTH_0009("Unable to find authorization validator");
+  AUTH_0009("Unable to find authorization validator"),
+
+  /** The system was not able to find authentication provider. */
+  AUTH_0010("Unable to find authentication provider"),
+
+  /** The system was not able to get authentication from http request. */
+  AUTH_0011("Unable to get remote authentication from http request");
 
   private final String message;
 

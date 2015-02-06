@@ -100,4 +100,23 @@ public class SecurityFactory {
     }
     return newValidator;
   }
+
+  public static AuthenticationProvider getAuthenticationProvider(String provider) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+
+    Class<?> providerClass = ClassUtils.loadClass(provider);
+
+    if (providerClass == null) {
+      throw new SqoopException(SecurityError.AUTH_0010,
+              "Authentication Provider Class is null: " + provider);
+    }
+
+    AuthenticationProvider newProvider;
+    try {
+      newProvider = (AuthenticationProvider) providerClass.newInstance();
+    } catch (Exception ex) {
+      throw new SqoopException(SecurityError.AUTH_0010,
+              "Authentication Provider Class is null: " + provider, ex);
+    }
+    return newProvider;
+  }
 }

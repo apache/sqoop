@@ -33,8 +33,17 @@ public abstract class AuthenticationHandler {
    */
   protected boolean securityEnabled = false;
 
+  /**
+   * AuthenticationProvider is an authentication to get userNames and groupNames.
+   */
+  protected AuthenticationProvider authenticationProvider;
+
   public boolean isSecurityEnabled() {
     return securityEnabled;
+  }
+
+  public AuthenticationProvider getAuthenticationProvider() {
+    return authenticationProvider;
   }
 
   public abstract void doInitialize();

@@ -133,6 +133,14 @@ public final class SecurityConstants {
           PREFIX_AUTHORIZATION_CONFIG + "validator";
 
   /**
+   * The config specifies the sqoop authentication provider class.
+   * The default type is org.apache.sqoop.security.DefaultAuthenticationProvider
+   * <tt>org.apache.sqoop.security.authorization.authentication_provider</tt>.
+   */
+  public static final String AUTHENTICATION_PROVIDER =
+          PREFIX_AUTHORIZATION_CONFIG + "authentication_provider";
+
+  /**
    * The config specifies the token kind in delegation token.
    */
   public static final String TOKEN_KIND = "sqoop_token_kind";

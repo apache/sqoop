@@ -31,7 +31,7 @@ import java.util.List;
  */
 public abstract class AuthorizationHandler {
 
-  public abstract void doInitialize() throws ClassNotFoundException, IllegalAccessException, InstantiationException;
+  public abstract void doInitialize(AuthenticationProvider provider) throws ClassNotFoundException, IllegalAccessException, InstantiationException;
 
   /**
    * Role related function
