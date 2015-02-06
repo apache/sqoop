@@ -32,6 +32,10 @@ public class CommonRepoUtils {
     return TABLE_NAME_QUOTE_CHAR + schemaName + TABLE_NAME_QUOTE_CHAR;
   }
 
+  public static final String escapeConstraintName(String constraintName) {
+    return TABLE_NAME_QUOTE_CHAR + constraintName + TABLE_NAME_QUOTE_CHAR;
+  }
+
   public static final String getTableName(String schemaName, String tableName) {
     if (schemaName != null) {
       return escapeSchemaName(schemaName) + "." + escapeTableName(tableName);
@@ -45,6 +49,14 @@ public class CommonRepoUtils {
       return escapeTableName(tableName) + "." + escapeColumnName(columnName);
     } else {
       return escapeColumnName(columnName);
+    }
+  }
+
+  public static final String getConstraintName(String schemaName, String constraintName) {
+    if (schemaName != null) {
+      return escapeSchemaName(schemaName) + "." + escapeConstraintName(constraintName);
+    } else {
+      return escapeConstraintName(constraintName);
     }
   }
 }
