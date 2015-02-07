@@ -52,6 +52,7 @@ import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.repository.JdbcRepositoryContext;
 import org.apache.sqoop.repository.common.CommonRepoConstants;
 import org.apache.sqoop.repository.common.CommonRepositoryHandler;
+import org.apache.sqoop.repository.common.CommonRepositorySchemaConstants;
 
 /**
  * JDBC based repository handler for Derby database.
@@ -166,7 +167,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       }
 
       // If we find all expected tables, then we are on version 1
-      if(foundAll && !tableNames.contains(DerbySchemaConstants.TABLE_SQ_SYSTEM_NAME)) {
+      if(foundAll && !tableNames.contains(CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME)) {
         return 1;
       }
 

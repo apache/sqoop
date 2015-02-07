@@ -24,6 +24,7 @@ import org.apache.sqoop.error.code.PostgresqlRepoError;
 import org.apache.sqoop.repository.JdbcRepositoryContext;
 import org.apache.sqoop.repository.common.CommonRepoConstants;
 import org.apache.sqoop.repository.common.CommonRepositoryHandler;
+import org.apache.sqoop.repository.common.CommonRepositorySchemaConstants;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -78,8 +79,8 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
     try {
       DatabaseMetaData md = conn.getMetaData();
       metadataResultSet = md.getTables(null,
-          PostgresqlSchemaConstants.SCHEMA_SQOOP.toLowerCase(),
-          PostgresqlSchemaConstants.TABLE_SQ_SYSTEM_NAME.toLowerCase(), null);
+          CommonRepositorySchemaConstants.SCHEMA_SQOOP.toLowerCase(),
+          CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME.toLowerCase(), null);
 
       if (metadataResultSet.next()) {
         stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_SELECT_SYSTEM);

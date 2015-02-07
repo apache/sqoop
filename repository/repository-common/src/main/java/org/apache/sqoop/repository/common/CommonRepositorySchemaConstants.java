@@ -27,11 +27,19 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String CONSTRAINT_PREFIX = "FK_";
 
+  // SQ_SYSTEM
+
+  public static final String TABLE_SQ_SYSTEM_NAME = "SQ_SYSTEM";
+
+  public static final String COLUMN_SQM_ID = "SQM_ID";
+
+  public static final String COLUMN_SQM_KEY = "SQM_KEY";
+
+  public static final String COLUMN_SQM_VALUE = "SQM_VALUE";
+
   // SQ_DIRECTION
 
   public static final String TABLE_SQ_DIRECTION_NAME = "SQ_DIRECTION";
-
-  public static final String TABLE_SQ_DIRECTION = SCHEMA_PREFIX + TABLE_SQ_DIRECTION_NAME;
 
   public static final String COLUMN_SQD_ID = "SQD_ID";
 
@@ -40,8 +48,6 @@ public final class CommonRepositorySchemaConstants {
   // SQ_CONFIGURABLE
 
   public static final String TABLE_SQ_CONFIGURABLE_NAME = "SQ_CONFIGURABLE";
-
-  public static final String TABLE_SQ_CONFIGURABLE = SCHEMA_PREFIX + TABLE_SQ_CONFIGURABLE_NAME;
 
   public static final String COLUMN_SQC_ID = "SQC_ID";
 
@@ -57,9 +63,6 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String TABLE_SQ_CONNECTOR_DIRECTIONS_NAME = "SQ_CONNECTOR_DIRECTIONS";
 
-  public static final String TABLE_SQ_CONNECTOR_DIRECTIONS = SCHEMA_PREFIX
-      + TABLE_SQ_CONNECTOR_DIRECTIONS_NAME;
-
   public static final String COLUMN_SQCD_ID = "SQCD_ID";
 
   public static final String COLUMN_SQCD_CONNECTOR = "SQCD_CONNECTOR";
@@ -69,8 +72,6 @@ public final class CommonRepositorySchemaConstants {
   // SQ_CONFIG
 
   public static final String TABLE_SQ_CONFIG_NAME = "SQ_CONFIG";
-
-  public static final String TABLE_SQ_CONFIG = SCHEMA_PREFIX + TABLE_SQ_CONFIG_NAME;
 
   public static final String COLUMN_SQ_CFG_ID = "SQ_CFG_ID";
 
@@ -88,8 +89,7 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String TABLE_SQ_CONFIG_DIRECTIONS_NAME = "SQ_CONFIG_DIRECTIONS";
 
-  public static final String TABLE_SQ_CONFIG_DIRECTIONS = SCHEMA_PREFIX
-      + TABLE_SQ_CONFIG_DIRECTIONS_NAME;
+  public static final String COLUMN_SQ_CFG_DIR_ID = "SQ_CFG_DIR_ID";
 
   public static final String COLUMN_SQ_CFG_DIR_CONFIG = "SQ_CFG_DIR_CONFIG";
 
@@ -98,8 +98,6 @@ public final class CommonRepositorySchemaConstants {
   // SQ_INPUT
 
   public static final String TABLE_SQ_INPUT_NAME = "SQ_INPUT";
-
-  public static final String TABLE_SQ_INPUT = SCHEMA_PREFIX + TABLE_SQ_INPUT_NAME;
 
   public static final String COLUMN_SQI_ID = "SQI_ID";
 
@@ -132,8 +130,6 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String TABLE_SQ_LINK_NAME = "SQ_LINK";
 
-  public static final String TABLE_SQ_LINK = SCHEMA_PREFIX + TABLE_SQ_LINK_NAME;
-
   public static final String COLUMN_SQ_LNK_ID = "SQ_LNK_ID";
 
   public static final String COLUMN_SQ_LNK_NAME = "SQ_LNK_NAME";
@@ -153,8 +149,6 @@ public final class CommonRepositorySchemaConstants {
   // SQ_JOB
 
   public static final String TABLE_SQ_JOB_NAME = "SQ_JOB";
-
-  public static final String TABLE_SQ_JOB = SCHEMA_PREFIX + TABLE_SQ_JOB_NAME;
 
   public static final String COLUMN_SQB_ID = "SQB_ID";
 
@@ -178,8 +172,6 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String TABLE_SQ_LINK_INPUT_NAME = "SQ_LINK_INPUT";
 
-  public static final String TABLE_SQ_LINK_INPUT = SCHEMA_PREFIX + TABLE_SQ_LINK_INPUT_NAME;
-
   public static final String COLUMN_SQ_LNKI_LINK = "SQ_LNKI_LINK";
 
   public static final String COLUMN_SQ_LNKI_INPUT = "SQ_LNKI_INPUT";
@@ -190,8 +182,6 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String TABLE_SQ_JOB_INPUT_NAME = "SQ_JOB_INPUT";
 
-  public static final String TABLE_SQ_JOB_INPUT = SCHEMA_PREFIX + TABLE_SQ_JOB_INPUT_NAME;
-
   public static final String COLUMN_SQBI_JOB = "SQBI_JOB";
 
   public static final String COLUMN_SQBI_INPUT = "SQBI_INPUT";
@@ -201,8 +191,6 @@ public final class CommonRepositorySchemaConstants {
   // SQ_SUBMISSION
 
   public static final String TABLE_SQ_SUBMISSION_NAME = "SQ_SUBMISSION";
-
-  public static final String TABLE_SQ_SUBMISSION = SCHEMA_PREFIX + TABLE_SQ_SUBMISSION_NAME;
 
   public static final String COLUMN_SQS_ID = "SQS_ID";
 
@@ -230,8 +218,6 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String TABLE_SQ_COUNTER_GROUP_NAME = "SQ_COUNTER_GROUP";
 
-  public static final String TABLE_SQ_COUNTER_GROUP = SCHEMA_PREFIX + TABLE_SQ_COUNTER_GROUP_NAME;
-
   public static final String COLUMN_SQG_ID = "SQG_ID";
 
   public static final String COLUMN_SQG_NAME = "SQG_NAME";
@@ -239,8 +225,6 @@ public final class CommonRepositorySchemaConstants {
   // SQ_COUNTER_GROUP
 
   public static final String TABLE_SQ_COUNTER_NAME = "SQ_COUNTER";
-
-  public static final String TABLE_SQ_COUNTER = SCHEMA_PREFIX + TABLE_SQ_COUNTER_NAME;
 
   public static final String COLUMN_SQR_ID = "SQR_ID";
 
@@ -250,9 +234,6 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String TABLE_SQ_COUNTER_SUBMISSION_NAME = "SQ_COUNTER_SUBMISSION";
 
-  public static final String TABLE_SQ_COUNTER_SUBMISSION = SCHEMA_PREFIX
-      + TABLE_SQ_COUNTER_SUBMISSION_NAME;
-
   public static final String COLUMN_SQRS_GROUP = "SQRS_GROUP";
 
   public static final String COLUMN_SQRS_COUNTER = "SQRS_COUNTER";
@@ -260,6 +241,82 @@ public final class CommonRepositorySchemaConstants {
   public static final String COLUMN_SQRS_SUBMISSION = "SQRS_SUBMISSION";
 
   public static final String COLUMN_SQRS_VALUE = "SQRS_VALUE";
+
+  // Constraints
+
+  // Constraints
+
+  public static final String CONSTRAINT_SQCD_SQC_NAME
+      = CONSTRAINT_PREFIX + "SQCD_SQC";
+
+  public static final String CONSTRAINT_SQCD_SQD_NAME
+      = CONSTRAINT_PREFIX + "SQCD_SQD";
+
+  public static final String CONSTRAINT_SQ_CONFIGURABLE_UNIQUE_NAME
+      = CONSTRAINT_PREFIX + "SQC_NAME_UNIQUE";
+
+  public static final String CONSTRAINT_SQ_CFG_DIR_CONFIG_NAME
+      = CONSTRAINT_PREFIX + "SQ_CFG_DIR_CONFIG";
+
+  public static final String CONSTRAINT_SQ_CFG_DIR_DIRECTION_NAME
+      = CONSTRAINT_PREFIX + "SQ_CFG_DIR_DIRECTION";
+
+  public static final String CONSTRAINT_SQ_CFG_SQC_NAME
+      = CONSTRAINT_PREFIX + "SQ_CFG_SQC";
+
+  public static final String CONSTRAINT_SQ_CONFIG_UNIQUE_NAME_TYPE_CONFIGURABLE
+      = CONSTRAINT_PREFIX + "SQ_CFG_NAME_TYPE_CONFIGURABLE_UNIQUE";
+
+  public static final String CONSTRAINT_SQI_SQ_CFG_NAME
+      = CONSTRAINT_PREFIX + "SQI_SQ_CFG";
+
+  public static final String CONSTRAINT_SQ_INPUT_UNIQUE_NAME_TYPE_CONFIG
+      = CONSTRAINT_PREFIX + "SQI_NAME_TYPE_CONFIG_UNIQUE";
+
+  public static final String CONSTRAINT_SQIR_PARENT_NAME
+      = CONSTRAINT_PREFIX + "SQIR_PARENT_ID";
+
+  public static final String CONSTRAINT_SQIR_CHILD_NAME
+      = CONSTRAINT_PREFIX + "SQIR_CHILD_ID";
+
+  public static final String CONSTRAINT_SQ_LNK_SQC_NAME
+      = CONSTRAINT_PREFIX + "SQ_LNK_SQC";
+
+  public static final String CONSTRAINT_SQ_LNK_NAME_UNIQUE_NAME
+      = CONSTRAINT_PREFIX + "SQ_LNK_NAME_UNIQUE";
+
+  public static final String CONSTRAINT_SQB_SQ_LNK_FROM_NAME
+      = CONSTRAINT_PREFIX + "SQB_SQ_LNK_FROM";
+
+  public static final String CONSTRAINT_SQB_SQ_LNK_TO_NAME
+      = CONSTRAINT_PREFIX + "SQB_SQ_LNK_TO";
+
+  public static final String CONSTRAINT_SQB_NAME_UNIQUE_NAME
+      = CONSTRAINT_PREFIX + "SQB_NAME_UNIQUE";
+
+  public static final String CONSTRAINT_SQ_LNKI_SQ_LNK_NAME
+      = CONSTRAINT_PREFIX + "SQ_LNKI_SQ_LNK";
+
+  public static final String CONSTRAINT_SQ_LNKI_SQI_NAME
+      = CONSTRAINT_PREFIX + "SQ_LNKI_SQI";
+
+  public static final String CONSTRAINT_SQBI_SQB_NAME
+      = CONSTRAINT_PREFIX + "SQBI_SQB";
+
+  public static final String CONSTRAINT_SQBI_SQI_NAME
+      = CONSTRAINT_PREFIX + "SQBI_SQI";
+
+  public static final String CONSTRAINT_SQS_SQB_NAME
+      = CONSTRAINT_PREFIX + "SQS_SQB";
+
+  public static final String CONSTRAINT_SQRS_SQG_NAME
+      = CONSTRAINT_PREFIX + "SQRS_SQG";
+
+  public static final String CONSTRAINT_SQRS_SQR_NAME
+      = CONSTRAINT_PREFIX + "SQRS_SQR";
+
+  public static final String CONSTRAINT_SQRS_SQS_NAME
+      = CONSTRAINT_PREFIX + "SQRS_SQS";
 
   private CommonRepositorySchemaConstants() {
     // Disable explicit object creation
