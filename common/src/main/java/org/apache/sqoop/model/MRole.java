@@ -22,42 +22,24 @@ package org.apache.sqoop.model;
  */
 public class MRole {
 
-  private final String id;
   private final String name;
 
   /**
    * Default constructor to build  new MRole model.
    *
-   * @param id   Role id
-   * @param name Role name
-   */
-  public MRole(String id,
-               String name) {
-    this.id = id;
-    this.name = name;
-  }
-
-  /**
-   * Constructor to build  new MRole model.
-   *
    * @param name Role name
    */
   public MRole(String name) {
-    this(null, name);
+    this.name = name;
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("Role (");
-    sb.append("Role id: ").append(this.id);
-    sb.append(", Role name: ").append(this.name);
+    sb.append("Role name: ").append(this.name);
     sb.append(" )");
 
     return sb.toString();
-  }
-
-  public String getId() {
-    return id;
   }
 
   public String getName() {

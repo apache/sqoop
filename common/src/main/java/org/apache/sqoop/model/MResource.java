@@ -22,7 +22,6 @@ package org.apache.sqoop.model;
  */
 public class MResource {
 
-  private final String id;
   private final String name;
   /**
    * Currently, the type supports connector, link, job and submission.
@@ -32,42 +31,23 @@ public class MResource {
   /**
    * Default constructor to build  new MResource model.
    *
-   * @param id   Resource id
-   * @param name Resource name
-   * @param type Resource type
-   */
-  public MResource(String id,
-                   String name,
-                   String type) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-  }
-
-  /**
-   * Constructor to build  new MResource model.
-   *
    * @param name Resource name
    * @param type Resource type
    */
   public MResource(String name,
                    String type) {
-    this(null, name, type);
+    this.name = name;
+    this.type = type;
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("Resource (");
-    sb.append("Resource id: ").append(this.id);
-    sb.append(", Resource name: ").append(this.name);
+    sb.append("Resource name: ").append(this.name);
     sb.append(", Resource type: ").append(this.type);
     sb.append(" )");
 
     return sb.toString();
-  }
-
-  public String getId() {
-    return id;
   }
 
   public String getName() {

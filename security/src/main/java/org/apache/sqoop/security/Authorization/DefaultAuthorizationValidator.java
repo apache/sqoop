@@ -29,6 +29,9 @@ public class DefaultAuthorizationValidator extends AuthorizationValidator {
 
   private static final Logger LOG = Logger.getLogger(DefaultAuthorizationValidator.class);
 
+  /**
+   * Validator related function
+   */
   public void checkPrivileges(MPrincipal principal, List<MPrivilege> privileges) throws SqoopException {
     LOG.debug("Check privilege in default authorization validator: always valid");
     LOG.debug("principal: " + principal.toString());

@@ -22,7 +22,6 @@ package org.apache.sqoop.model;
  */
 public class MPrincipal {
 
-  private final String id;
   private final String name;
   /**
    * Currently, the type supports user, group and role.
@@ -32,42 +31,23 @@ public class MPrincipal {
   /**
    * Default constructor to build  new MPrincipal model.
    *
-   * @param id   Principal id
-   * @param name Principal name
-   * @param type Principal type
-   */
-  public MPrincipal(String id,
-                    String name,
-                    String type) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-  }
-
-  /**
-   * Constructor to build  new MPrincipal model.
-   *
    * @param name Principal name
    * @param type Principal type
    */
   public MPrincipal(String name,
                     String type) {
-    this(null, name, type);
+    this.name = name;
+    this.type = type;
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("Principal (");
-    sb.append("Principal id: ").append(this.id);
-    sb.append(", Principal name: ").append(this.name);
+    sb.append("Principal name: ").append(this.name);
     sb.append(", Principal type: ").append(this.type);
     sb.append(" )");
 
     return sb.toString();
-  }
-
-  public String getId() {
-    return id;
   }
 
   public String getName() {

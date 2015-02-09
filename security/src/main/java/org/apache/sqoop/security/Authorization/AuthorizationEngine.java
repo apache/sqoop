@@ -172,7 +172,7 @@ public class AuthorizationEngine {
     // Do a transfer. "all" means global instances in Restful API, whilst empty
     // string means global instances in role based access controller.
     resourceId = (resourceId == null || resourceId.equals("all")) ? StringUtils.EMPTY : resourceId;
-    return new MPrivilege(new MResource(resourceId, resourceType.name()), privilegeActionType.name());
+    return new MPrivilege(new MResource(resourceId, resourceType.name()), privilegeActionType.name(), false);
   }
 
   private static void checkPrivilege(MPrivilege... privileges) {

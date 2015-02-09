@@ -73,6 +73,7 @@ public class DefaultAuthorizationHandler extends AuthorizationHandler {
     this.authenticationProvider = authenticationProvider;
   }
 
+  @Override
   public void doInitialize(AuthenticationProvider provider) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     MapContext mapContext = SqoopConfiguration.getInstance().getContext();
     String accessController = mapContext.getString(
@@ -91,81 +92,40 @@ public class DefaultAuthorizationHandler extends AuthorizationHandler {
   /**
    * Role related function
    */
+  @Override
+  public void createRole(MRole role) throws SqoopException {
+    this.authorizationAccessController.createRole(role);
+  }
+
+  @Override
+  public void dropRole(MRole role) throws SqoopException {
+    this.authorizationAccessController.dropRole(role);
+  }
+
+  @Override
   public List<MRole> getAllRoles() throws SqoopException {
     return this.authorizationAccessController.getAllRoles();
   }
 
-  public MRole getRole(String name) throws SqoopException {
-    return this.authorizationAccessController.getRole(name);
-  }
-
+  @Override
   public List<MRole> getRolesByPrincipal(MPrincipal principal) throws SqoopException {
     return this.authorizationAccessController.getRolesByPrincipal(principal);
-  }
-
-  public List<MRole> getRolesByPrivilege(MPrivilege privilege) throws SqoopException {
-    return this.authorizationAccessController.getRolesByPrivilege(privilege);
-  }
-
-  public void createRole(String name) throws SqoopException {
-    this.authorizationAccessController.createRole(name);
-  }
-
-  public void updateRole(String old_name, String new_name) throws SqoopException {
-    this.authorizationAccessController.updateRole(old_name, new_name);
-  }
-
-  public void removeRole(String name) throws SqoopException {
-    this.authorizationAccessController.removeRole(name);
   }
 
   /**
    * Principal related function
    */
-  public List<MPrincipal> getAllPrincipals() throws SqoopException {
-    return this.authorizationAccessController.getAllPrincipals();
-  }
-
-  public List<MPrincipal> getPrincipalsByName(String name) throws SqoopException {
-    return this.authorizationAccessController.getPrincipalsByName(name);
-  }
-
-  public List<MPrincipal> getPrincipalsByType(String type) throws SqoopException {
-    return this.authorizationAccessController.getPrincipalsByType(type);
-  }
-
-  public MPrincipal getPrincipal(String name, String type) throws SqoopException {
-    return this.authorizationAccessController.getPrincipal(name, type);
-  }
-
+  @Override
   public List<MPrincipal> getPrincipalsByRole(MRole role) throws SqoopException {
     return this.authorizationAccessController.getPrincipalsByRole(role);
   }
 
-  public void createPrincipal(String name, String type) throws SqoopException {
-    this.authorizationAccessController.createPrincipal(name, type);
-  }
-
-  public void updatePrincipal(MPrincipal old_principal, MPrincipal new_principal) throws SqoopException {
-    this.authorizationAccessController.updatePrincipal(old_principal, new_principal);
-  }
-
-  public void removePrincipalsByName(String name) throws SqoopException {
-    this.authorizationAccessController.removePrincipalsByName(name);
-  }
-
-  public void removePrincipalsByType(String type) throws SqoopException {
-    this.authorizationAccessController.removePrincipalsByType(type);
-  }
-
-  public void removePrincipal(MPrincipal principal) throws SqoopException {
-    this.authorizationAccessController.removePrincipal(principal);
-  }
-
+  @Override
   public void grantRole(List<MPrincipal> principals, List<MRole> roles) throws SqoopException {
     this.authorizationAccessController.grantRole(principals, roles);
   }
 
+  @Override
   public void revokeRole(List<MPrincipal> principals, List<MRole> roles) throws SqoopException {
     this.authorizationAccessController.revokeRole(principals, roles);
   }
@@ -173,30 +133,12 @@ public class DefaultAuthorizationHandler extends AuthorizationHandler {
   /**
    * Resource related function
    */
-  public List<MResource> getAllResources() throws SqoopException {
-    return this.authorizationAccessController.getAllResources();
-  }
-
-  public List<MResource> getResourcesByType(String type) throws SqoopException {
-    return this.authorizationAccessController.getResourcesByType(type);
-  }
-
-  public MResource getResource(String name, String type) throws SqoopException {
-    return this.authorizationAccessController.getResource(name, type);
-  }
-
-  public void createResource(String name, String type) throws SqoopException {
-    this.authorizationAccessController.createResource(name, type);
-  }
-
+  @Override
   public void updateResource(MResource old_resource, MResource new_resource) throws SqoopException {
     this.authorizationAccessController.updateResource(old_resource, new_resource);
   }
 
-  public void removeResourcesByType(String type) throws SqoopException {
-    this.authorizationAccessController.removeResourcesByType(type);
-  }
-
+  @Override
   public void removeResource(MResource resource) throws SqoopException {
     this.authorizationAccessController.removeResource(resource);
   }
@@ -204,46 +146,25 @@ public class DefaultAuthorizationHandler extends AuthorizationHandler {
   /**
    * Privilege related function
    */
-  public List<MPrivilege> getAllPrivileges() throws SqoopException {
-    return this.authorizationAccessController.getAllPrivileges();
+  @Override
+  public List<MPrivilege> getPrivilegesByPrincipal(MPrincipal principal, MResource resource) throws SqoopException {
+    return this.authorizationAccessController.getPrivilegesByPrincipal(principal, resource);
   }
 
-  public MPrivilege getPrivilegeByName(String name) throws SqoopException {
-    return this.authorizationAccessController.getPrivilegeByName(name);
-  }
-
-  public List<MPrivilege> getPrivilegesByResource(MResource resource) throws SqoopException {
-    return this.authorizationAccessController.getPrivilegesByResource(resource);
-  }
-
-  public List<MPrivilege> getPrivilegesByRole(MRole role) throws SqoopException {
-    return this.authorizationAccessController.getPrivilegesByRole(role);
-  }
-
-  public void createPrivilege(String name, MResource resource, String action, boolean with_grant_option) throws SqoopException {
-    this.authorizationAccessController.createPrivilege(name, resource, action, with_grant_option);
-  }
-
-  public void updatePrivilege(MPrivilege old_privilege, MPrivilege new_privilege) throws SqoopException {
-    this.authorizationAccessController.updatePrivilege(old_privilege, new_privilege);
-  }
-
-  public void removePrivilege(String name) throws SqoopException {
-    this.authorizationAccessController.removePrivilege(name);
-  }
-
-  public void removePrivilegesByResource(MResource resource) throws SqoopException {
-    this.authorizationAccessController.removePrivilegesByResource(resource);
-  }
-
+  @Override
   public void grantPrivileges(List<MPrincipal> principals, List<MPrivilege> privileges) throws SqoopException {
     this.authorizationAccessController.grantPrivileges(principals, privileges);
   }
 
+  @Override
   public void revokePrivileges(List<MPrincipal> principals, List<MPrivilege> privileges) throws SqoopException {
     this.authorizationAccessController.revokePrivileges(principals, privileges);
   }
 
+  /**
+   * Validator related function
+   */
+  @Override
   public void checkPrivileges(MPrincipal principal, List<MPrivilege> privileges) throws SqoopException {
     this.authorizationValidator.checkPrivileges(principal, privileges);
   }

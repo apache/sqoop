@@ -22,8 +22,6 @@ package org.apache.sqoop.model;
  */
 public class MPrivilege {
 
-  private final String id;
-  private final String name;
   private final MResource resource;
   /**
    * Currently, the action supports view, use, create, update, delete and enable_disable.
@@ -35,67 +33,27 @@ public class MPrivilege {
   /**
    * Default constructor to build  new MPrivilege model.
    *
-   * @param id                Privilege id
-   * @param name              Privilege name
    * @param resource          Privilege resource
    * @param action            Privilege action
    * @param with_grant_option Privilege with_grant_option
    */
-  public MPrivilege(String id,
-                    String name,
-                    MResource resource,
+  public MPrivilege(MResource resource,
                     String action,
                     boolean with_grant_option) {
-    this.id = id;
-    this.name = name;
     this.resource = resource;
     this.action = action;
     this.with_grant_option = with_grant_option;
   }
 
-  /**
-   * Constructor to build  new MPrivilege model.
-   *
-   * @param name     Privilege name
-   * @param resource Privilege resource
-   * @param action   Privilege action
-   */
-  public MPrivilege(String name,
-                    MResource resource,
-                    String action) {
-    this(null, name, resource, action, false);
-  }
-
-  /**
-   * Constructor to build  new MPrivilege model.
-   *
-   * @param resource Privilege resource
-   * @param action   Privilege action
-   */
-  public MPrivilege(MResource resource,
-                    String action) {
-    this(null, resource, action);
-  }
-
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("Privilege (");
-    sb.append("Privilege id: ").append(this.id);
-    sb.append(", Privilege name: ").append(this.name);
-    sb.append(", Privilege resource: ").append(this.getResource().toString());
+    sb.append("Privilege resource: ").append(this.getResource().toString());
     sb.append(", Privilege action: ").append(this.action);
     sb.append(", Privilege with_grant_option: ").append(this.with_grant_option);
     sb.append(" )");
 
     return sb.toString();
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public String getName() {
-    return name;
   }
 
   public MResource getResource() {

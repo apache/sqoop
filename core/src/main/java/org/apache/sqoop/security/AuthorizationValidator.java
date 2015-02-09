@@ -23,11 +23,14 @@ import org.apache.sqoop.model.MPrivilege;
 
 import java.util.List;
 
-/***
+/**
  * AuthorizationHandler is responsible for checking access.
  */
 public abstract class AuthorizationValidator {
 
+  /**
+   * Validator related function
+   */
   public abstract void checkPrivileges(MPrincipal principal, List<MPrivilege> privileges) throws SqoopException;
 
 }
