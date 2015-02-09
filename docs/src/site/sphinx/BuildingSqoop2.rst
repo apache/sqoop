@@ -39,13 +39,13 @@ Sqoop2 is currently developed in special branch ``sqoop2`` that you need to chec
 Building project
 ----------------
 
-You can use usual maven targets like ``compile`` or ``package`` to build the project. Sqoop supports two major Hadoop revisions at the moment - 1.x and 2.x. As compiled code for one Hadoop major version can't be used on another, you must compile Sqoop against appropriate Hadoop version. You can change the target Hadoop version by specifying ``-Dhadoop.profile=$hadoopVersion`` on the maven command line. Possible values of ``$hadoopVersions`` are 100 and 200 for Hadoop version 1.x and 2.x respectively. Sqoop will compile against Hadoop 2 by default. Following example will compile Sqoop against Hadoop 1.x:
+You can use usual maven targets like ``compile`` or ``package`` to build the project. Sqoop supports one major Hadoop revision at the moment - 2.x. As compiled code for one Hadoop major version can't be used on another, you must compile Sqoop against appropriate Hadoop version.
 
 ::
 
-  mvn compile -Dhadoop.profile=100
+  mvn compile
 
-Maven target ``package`` can be used to create Sqoop packages similar to the ones that are officially available for download. Sqoop will build only source tarball by default. You need to specify ``-Pbinary`` to build binary distribution. You might need to explicitly specify Hadoop version if the default is not accurate.
+Maven target ``package`` can be used to create Sqoop packages similar to the ones that are officially available for download. Sqoop will build only source tarball by default. You need to specify ``-Pbinary`` to build binary distribution.
 
 ::
 

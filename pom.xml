@@ -96,7 +96,6 @@ limitations under the License.
     <commons-compress.version>1.9</commons-compress.version>
     <commons-codec.version>1.9</commons-codec.version>
     <derby.version>10.8.2.2</derby.version>
-    <hadoop.1.version>1.0.3</hadoop.1.version>
     <hadoop.2.version>2.6.0</hadoop.2.version>
     <guava.version>11.0.2</guava.version>
     <json-simple.version>1.1</json-simple.version>
@@ -191,96 +190,6 @@ limitations under the License.
           </plugin>
         </plugins>
       </build>
-    </profile>
-
-    <!-- Hadoop 1.x -->
-    <profile>
-      <id>hadoop100</id>
-
-     <activation>
-        <property>
-          <name>hadoop.profile</name>
-          <value>100</value>
-        </property>
-      </activation>
-
-      <dependencyManagement>
-        <dependencies>
-
-          <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-          </dependency>
-
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>${hadoop.1.version}</version>
-            <scope>provided</scope>
-          </dependency>
-
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-test</artifactId>
-            <version>${hadoop.1.version}</version>
-          </dependency>
-
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-minicluster</artifactId>
-            <version>${hadoop.1.version}</version>
-          </dependency>
-
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-
-    <!-- Hadoop 2.x (active by default) -->
-    <profile>
-      <id>hadoop200</id>
-
-      <activation>
-        <activeByDefault>true</activeByDefault>
-        <property>
-          <name>hadoop.profile</name>
-          <value>200</value>
-        </property>
-      </activation>
-
-      <properties>
-        <hadoop.profile>200</hadoop.profile>
-      </properties>
-
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-core</artifactId>
-            <version>${hadoop.2.version}</version>
-            <scope>provided</scope>
-          </dependency>
-
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-            <version>${hadoop.2.version}</version>
-            <scope>provided</scope>
-          </dependency>
-
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-minicluster</artifactId>
-            <version>${hadoop.2.version}</version>
-          </dependency>
-
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-auth</artifactId>
-            <version>${hadoop.2.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
     </profile>
 
     <!-- Sign profile for releasing artifacts to Nexus repository -->
@@ -430,6 +339,31 @@ limitations under the License.
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-mapreduce-client-core</artifactId>
+        <version>${hadoop.2.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+        <version>${hadoop.2.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-minicluster</artifactId>
+        <version>${hadoop.2.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-auth</artifactId>
+        <version>${hadoop.2.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.googlecode.json-simple</groupId>
         <artifactId>json-simple</artifactId>
         <version>${json-simple.version}</version>
@@ -448,13 +382,11 @@ limitations under the License.
         <groupId>org.apache.sqoop.submission</groupId>
         <artifactId>sqoop-submission-mapreduce</artifactId>
         <version>${project.version}</version>
-        <classifier>hadoop${hadoop.profile}</classifier>
       </dependency>
       <dependency>
         <groupId>org.apache.sqoop.execution</groupId>
         <artifactId>sqoop-execution-mapreduce</artifactId>
         <version>${project.version}</version>
-        <classifier>hadoop${hadoop.profile}</classifier>
       </dependency>
       <dependency>
         <groupId>commons-dbcp</groupId>

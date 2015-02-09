@@ -32,6 +32,10 @@ limitations under the License.
   <name>Sqoop Distribution</name>
   <packaging>pom</packaging>
 
+  <properties>
+    <hadoop.version>200</hadoop.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.sqoop</groupId>
@@ -128,14 +132,14 @@ limitations under the License.
                 <configuration>
                   <target>
                     <!-- Clean up -->
-                    <delete dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}"/>
-                    <delete file="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}.tar.gz"/>
+                    <delete dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}"/>
+                    <delete file="target/sqoop-${project.version}-bin-hadoop${hadoop.version}.tar.gz"/>
 
                     <!-- Create dist dir -->
-                    <mkdir dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}"/>
+                    <mkdir dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}"/>
 
                     <!-- Copy sources over -->
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}" includeEmptyDirs="false" flatten="false">
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}" includeEmptyDirs="false" flatten="false">
                       <fileset dir="../">
                         <include name="**/*" />
                         <exclude name="build/**" />
@@ -149,7 +153,7 @@ limitations under the License.
                     </copy>
 
                     <!-- Copy generated documentation -->
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/docs" includeEmptyDirs="false" flatten="false">
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/docs" includeEmptyDirs="false" flatten="false">
                       <fileset dir="../docs/target/site">
                         <include name="**/*" />
                       </fileset>
@@ -159,26 +163,26 @@ limitations under the License.
                     <get src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.major.version}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.tar.gz"
                          dest="target/apache-tomcat.tar.gz" verbose="true" skipexisting="true"/>
                     <untar src="target/apache-tomcat.tar.gz" dest="target" compression="gzip"/>
-                    <move file="target/apache-tomcat-${tomcat.version}" tofile="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server"/>
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/bin">
+                    <move file="target/apache-tomcat-${tomcat.version}" tofile="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server"/>
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/bin">
                       <fileset dir="src/main/server/bin"/>
                     </copy>
-                    <chmod dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/bin" perm="u+x" includes="**/*.sh"/>
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/conf">
+                    <chmod dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/bin" perm="u+x" includes="**/*.sh"/>
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/conf">
                       <fileset dir="src/main/server/conf"/>
                     </copy>
-                    <delete dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/webapps"/>
-                    <mkdir dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/webapps"/>
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/webapps">
+                    <delete dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/webapps"/>
+                    <mkdir dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/webapps"/>
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/webapps">
                       <fileset dir="src/main/server/webapps"/>
                     </copy>
                     <copy file="../server/target/sqoop.war"
-                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/webapps"/>
+                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/webapps"/>
                     <copy file="../tomcat/target/sqoop-tomcat-${project.version}.jar"
-                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/server/lib"/>
+                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/lib"/>
 
                     <!-- Build shell client directory -->
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/shell/lib">
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/shell/lib">
                       <fileset dir="../shell/target/lib">
                         <include name="*.jar" />
                         <exclude name="junit-*.jar" />
@@ -186,20 +190,20 @@ limitations under the License.
                       </fileset>
                     </copy>
                     <copy file="../shell/target/sqoop-shell-${project.version}.jar"
-                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/shell/lib"/>
+                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/shell/lib"/>
 
                     <!-- Build "bin" directory -->
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/bin">
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/bin">
                       <fileset dir="src/main/bin"/>
                     </copy>
-                    <chmod dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}/bin" perm="u+x" includes="*"/>
+                    <chmod dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/bin" perm="u+x" includes="*"/>
 
                     <!-- Finally create distribution tar -->
-                    <tar destfile="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}.tar.gz" compression="gzip">
-                      <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.profile}" filemode="755">
+                    <tar destfile="target/sqoop-${project.version}-bin-hadoop${hadoop.version}.tar.gz" compression="gzip">
+                      <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.version}" filemode="755">
                         <include name="**/*.sh" />
                       </tarfileset>
-                      <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.profile}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.profile}">
+                      <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.version}">
                         <include name="**/*" />
                         <exclude name="**/*.sh" />
                       </tarfileset>
@@ -212,36 +216,6 @@ limitations under the License.
         </plugins>
       </build>
     </profile>
-
-    <!-- Hadoop 1.x -->
-    <profile>
-      <id>hadoop100</id>
-
-     <activation>
-        <property>
-          <name>hadoop.profile</name>
-          <value>100</value>
-        </property>
-      </activation>
-    </profile>
-
-    <!-- Hadoop 2.x (active by default) -->
-    <profile>
-      <id>hadoop200</id>
-
-      <activation>
-        <activeByDefault>true</activeByDefault>
-        <property>
-          <name>hadoop.profile</name>
-          <value>200</value>
-        </property>
-      </activation>
-
-      <properties>
-        <hadoop.profile>200</hadoop.profile>
-      </properties>
-    </profile>
-
   </profiles>
 
 </project>

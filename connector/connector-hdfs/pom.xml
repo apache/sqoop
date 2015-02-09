@@ -42,7 +42,25 @@ limitations under the License.
       <artifactId>connector-sdk</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
+
   <build>
     <finalName>sqoop</finalName>
     <plugins>
@@ -59,73 +77,4 @@ limitations under the License.
       </plugin>
     </plugins>
   </build>
-
-  <!-- Profiles for various supported Hadoop distributions -->
-  <profiles>
-
-    <!-- Hadoop 1.x -->
-    <profile>
-      <id>hadoop100</id>
-
-      <activation>
-        <property>
-          <name>hadoop.profile</name>
-          <value>100</value>
-        </property>
-      </activation>
-
-      <dependencies>
-        <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-core</artifactId>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <!-- Hadoop 2.x (active by default) -->
-    <profile>
-      <id>hadoop200</id>
-
-      <activation>
-        <activeByDefault>true</activeByDefault>
-        <property>
-          <name>hadoop.profile</name>
-          <value>200</value>
-        </property>
-      </activation>
-
-      <properties>
-        <hadoop.profile>200</hadoop.profile>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-common</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-core</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
-      </dependencies>
-    </profile>
-  </profiles>
-
-
 </project>

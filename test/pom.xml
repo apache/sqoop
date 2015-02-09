@@ -53,13 +53,11 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.sqoop.execution</groupId>
       <artifactId>sqoop-execution-mapreduce</artifactId>
-      <classifier>hadoop${hadoop.profile}</classifier>
     </dependency>
 
     <dependency>
       <groupId>org.apache.sqoop.submission</groupId>
       <artifactId>sqoop-submission-mapreduce</artifactId>
-      <classifier>hadoop${hadoop.profile}</classifier>
     </dependency>
 
     <dependency>
@@ -90,6 +88,28 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.sqoop.connector</groupId>
       <artifactId>sqoop-connector-kafka</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-minicluster</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-auth</artifactId>
     </dependency>
 
     <dependency>
@@ -136,9 +156,6 @@ limitations under the License.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
-          <classifier>hadoop${hadoop.profile}</classifier>
-        </configuration>
       </plugin>
 
       <!--
@@ -180,87 +197,6 @@ limitations under the License.
 
   <!-- Profiles for various supported Hadoop distributions -->
   <profiles>
-
-    <!-- Hadoop 1.x -->
-    <profile>
-      <id>hadoop100</id>
-
-      <activation>
-        <property>
-          <name>hadoop.profile</name>
-          <value>100</value>
-        </property>
-      </activation>
-
-      <dependencies>
-
-        <dependency>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-core</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-test</artifactId>
-        </dependency>
-
-      </dependencies>
-    </profile>
-
-    <!-- Hadoop 2.x (active by default) -->
-    <profile>
-      <id>hadoop200</id>
-
-      <activation>
-        <activeByDefault>true</activeByDefault>
-        <property>
-          <name>hadoop.profile</name>
-          <value>200</value>
-        </property>
-      </activation>
-
-      <properties>
-        <hadoop.profile>200</hadoop.profile>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-core</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-minicluster</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-auth</artifactId>
-        </dependency>
-
-      </dependencies>
-
-    </profile>
-
     <!-- Special JDBC Drivers -->
 
     <!--
