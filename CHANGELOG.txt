@@ -1,3 +1,447 @@
+Release 1.99.5
+
+  SUB-TASK
+
+    SQOOP-1348: Sqoop2: Remove Data class
+
+    SQOOP-1349: Sqoop2: Use configurable writable to get Intermediate Data Format
+
+    SQOOP-1526: Sqoop2: Kerberos support when starting service
+
+    SQOOP-1527: Sqoop2: Kerberos support (SPNEGO) in communication between server and client
+
+    SQOOP-1549: Simplifying the Configuration class concept in Connector api
+
+    SQOOP-1552: Revisit if we need a config list for the link/from/to configs in connector api
+
+    SQOOP-1588: Sqoop2: Kite connector write data to HDFS
+
+    SQOOP-1589: Sqoop2: Create common constants, error codes, and queries
+
+    SQOOP-1590: Sqoop2: PostgreSQL repository implementation
+
+    SQOOP-1591: Sqoop2: PostgreSQL integration tests
+
+    SQOOP-1592: Sqoop2: Remove Hadoop1 profile
+
+    SQOOP-1602: Sqoop2:  Fix the current balancing across Loaders internal to Sqoop 
+
+    SQOOP-1621: Sqoop2: Allow null as a dummy Schema
+
+    SQOOP-1624: Sqoop2: Apply repository upgrader api
+
+    SQOOP-1647: Sqoop2: Read data from HDFS in KiteConnector
+
+    SQOOP-1651: Sqoop2: Cleanup: Naming and ordering of methods in Repo relates classes
+
+    SQOOP-1681: DOC: Create an API doc for the Sqoop Execution engine ( since its extensible)
+
+    SQOOP-1702: Fix typo for SQOOP-1526
+
+    SQOOP-1703: Sqoop2: rename Type to Column Type + size to length + minor doc fixes
+
+    SQOOP-1706: Add IDF API doc/wiki  for the IDF interface and Schema -&gt; ColumnTypes
+
+    SQOOP-1707: SQOOP2: Address the validate method in Column class
+
+    SQOOP-1708: Rename Unsupported Column type to Unknown and add java doc
+
+    SQOOP-1709: Column Type enhancements for complex types
+
+    SQOOP-1715: Make name for column required ( fix the corr tests)
+
+    SQOOP-1716: Add Options as a field in the Enum object ( so it can be used for validation)
+
+    SQOOP-1717: Sqoop2: Remove Data class from docs
+
+    SQOOP-1733: Port SQOOP-1728 to sqoop2 branch
+
+    SQOOP-1734: Port SQOOP-1725 to sqoop2 branch
+
+    SQOOP-1741: Port SQOOP-1736 to sqoop2 branch
+
+    SQOOP-1749: Support List Type in CSV IDF
+
+    SQOOP-1750: Support Map Type in  CSV IDF
+
+    SQOOP-1751: Sqoop2: Rearrange LinkConfig and ToJobConfig of Kite Connector
+
+    SQOOP-1752: Kite connector cannot submit CSV import job
+
+    SQOOP-1754: Sqoop2: Remove JarUtil class
+
+    SQOOP-1755: Sqoop2: Security guide
+
+    SQOOP-1761: Sqoop2: Unit tests for  different Column sub classes Array/Set and Map types 
+
+    SQOOP-1765: Sqoop2: Time/Timestamp format support for CSV IDF
+
+    SQOOP-1769: Fix Enum to no inherit from list
+
+    SQOOP-1771: Investigation CSV IDF FORMAT of the Array/NestedArray/ Set/ Map in Postgres and HIVE.
+
+    SQOOP-1776: Sqoop2: Delegation Token support for Authentication
+
+    SQOOP-1791: Sqoop2: Add simple authentication parameters to documentation
+
+    SQOOP-1796: Support Incremental Semantics in command line tool for Job
+
+    SQOOP-1797: Support Incremental semantics in the REST apis 
+
+    SQOOP-1798: Support a API/ command line utility to retrieve the last value or any JOB_OUTPUT
+
+    SQOOP-1799: Connector API : Ability for connector to indicate if its FROM and TO support incremental reading/ writing
+
+    SQOOP-1801: Delta Fetch Merge Config API : Validations for the Delta Fetch/Merge Configs
+
+    SQOOP-1804: Add editable and override attribute to inputs
+
+    SQOOP-1811: Sqoop2: IDF API changes
+
+    SQOOP-1813: Sqoop2: Add SqoopIDFUtils class and unit tests
+
+    SQOOP-1815: Sqoop2: Date and DateTime is not encoded in Single Quotes
+
+    SQOOP-1817: Sqoop2: Update CSVIntermediate BIT data type
+
+    SQOOP-1819: Support Enum in CSVIDF ( + add unit tests)
+
+    SQOOP-1825: Sqoop2: Handle NULLs for all types in CSV Intermediate Data Format
+
+    SQOOP-1829: Sqoop2: Define IDF object model
+
+    SQOOP-1834: Sqoop2: RBAC pluggable framework
+
+    SQOOP-1842: Sqoop2: Fix timestamp type casting
+
+    SQOOP-1845: Sqoop2: Make DateTime Column type support datetime with and without timezone
+
+    SQOOP-1846: Sqoop2: DateTime support in CSV IDF and iso8601
+
+    SQOOP-1849: Using JODA for datetime means we only have 3 digit millisecond representation for fraction
+
+    SQOOP-1870: Sqoop2: Merge SPI and connector-sdk packages
+
+    SQOOP-1876: Update the submission JSON in the doc (restAPI.rst)
+
+    SQOOP-1879: Sqoop2: Submission Engine does not set all details on SubmissionRecord in Local mode
+
+    SQOOP-1881: Randomize ports for Kafka integration tests
+
+    SQOOP-1897: Sqoop2: Submission Engine API change for better performance
+
+    SQOOP-1898: Change the API of getJars to use SET than LIST to avoid duplicate jars
+
+    SQOOP-1899: Minor change to CSVIDF to use Set instead of Lists
+
+    SQOOP-1900: Fix the SqoopWritable read/ write method to delegate the toIDF methods
+
+    SQOOP-1901: Sqoop2: Support DRY code in IDF impementations and add JSONIDF
+
+    SQOOP-1902: Sqoop2: Avro IDF class and unit tests
+
+    SQOOP-1903: Wrap up the design doc once implementation is done
+
+    SQOOP-1908: Sqoop2: Document external connector support
+
+    SQOOP-1909: Sqoop2: Connect security guide to main docs
+
+    SQOOP-1913: Sqoop2: Add jackson as a dependency
+
+    SQOOP-1915: sqoop2: parseCSV in CSVIDF doesn&#39;t correctly parse strings with commas
+
+    SQOOP-1925: Sqoop2: Clean up duplicate constants in DerbySchemaConstants, use CommonRepoConstants
+
+    SQOOP-1930: Sqoop2: Enforce a non empty schema name and column names
+
+    SQOOP-1931: Tech debt : Alternative to isTest flag in the SqoopOutputFormatExecutor
+
+    SQOOP-1935: Sqoop2: Fix TestSqoopWritable test and make getString and setString package private
+
+    SQOOP-1936: Sqoop2: Sort by comparing IDF data in shuffle phase
+
+    SQOOP-1937: Why need  SqoopWritable, ? why not just Text?
+
+    SQOOP-1938: DOC:update the sqoop MR engine implementation details
+
+    SQOOP-1940: Add hashcode and equals methods to SqoopWritable
+
+    SQOOP-1950: Sqoop2: Use TestNG
+
+    SQOOP-1956: Sqoop2: Cleanup IDF implementations
+
+    SQOOP-1960: Sqoop2: Share auth token across ResourceRequest in SqoopClient
+
+    SQOOP-1962: Sqoop2: Start sqoop2 minicluster on random port
+
+    SQOOP-1974:  Sqoop2: parseCSVString in SQOOPIDFUtils add more tests
+
+    SQOOP-1980: Sqoop2: Rule based rest API protection
+
+    SQOOP-1981: Sqoop2: Default implementation of RBAC in Sqoop
+
+    SQOOP-1982: Sqoop2: Provide username globally via AuthenticationProvider
+
+    SQOOP-1984: Sqoop2: Add error summary and details to PostgreSQL repository
+
+    SQOOP-1985: Sqoop2: On job delete cascade to submission
+
+    SQOOP-1988: Sqoop2: isNull handling should be moved to CSVIntermediateDataFormat
+
+    SQOOP-1991: Sqoop2: Define slow category in integration tests
+
+    SQOOP-1994: Sqoop2: Use common repository constants
+
+    SQOOP-2002: Sqoop2: Refactor existing security component
+
+    SQOOP-2004: Sqoop2: Make annotations run always
+
+    SQOOP-2012: DOC:Explain the connector project structure and relevant modules in sqoop to depend on
+
+    SQOOP-2013: What is the story for External Connectors to write unit and integration tests?
+
+    SQOOP-2015: Sqoop2: Create HBase code path in Kite connector
+
+    SQOOP-2026: Sqoop2: Make getUserName function in RequestContext support Kerberos
+
+    SQOOP-2028: add license header to TestConnectorManagerUtils
+
+    SQOOP-2072: Sqoop2: Add editable and override attributes for postgres
+
+    SQOOP-2074: Sqoop2: Add input attributes documentation
+
+    SQOOP-2084: Sqoop2: Fix Indentation in input attributes documentation
+
+    SQOOP-2085: Sqoop2: Null handling in AuthorizationEngine
+
+  BUG
+
+    SQOOP-1452: Sqoop2: Upgrade to Hadoop 2.5.1
+
+    SQOOP-1523: Sqoop2: Support for PostgreSQL database for hosting the sqoop entity repository
+
+    SQOOP-1572: Sqoop2: Duplicate Column Name in Multiple Tables Import
+
+    SQOOP-1604: Base/ Marker class for Config and Configuration
+
+    SQOOP-1636: Sqoop2: Add unique constraint to the SQI_INPUT name per type per config
+
+    SQOOP-1640: Sqoop2: Pull DatabaseProvider into sqoop-common-test module
+
+    SQOOP-1672: Sqoop2 import inserting null strings(&#39;null&#39;) for empty values in Oracle
+
+    SQOOP-1680:  DOC: Create an Public API doc for the Sqoop repository.
+
+    SQOOP-1695: Sqoop2: Removed hardcoded version in pom.xml of connector-sdk 
+
+    SQOOP-1705: SQOOP2: Support AVRO as a an implementation for the IDF interface
+
+    SQOOP-1713: Sqoop2: Remove SQOOP-1348.patch file
+
+    SQOOP-1730: Sqoop2: httpcore and httpclient version has not upgrade after hadoop upgraded
+
+    SQOOP-1740: Sqoop2:The sqoop.properties should say driver.autoupgrade
+
+    SQOOP-1747: Sqoop2: Provide more information for Kerberos initialization exception
+
+    SQOOP-1748: Sqoop2: Client throws NPE when misconfigured for Kerberos
+
+    SQOOP-1773: Sqoop2: ClassAvailable validator null handling
+
+    SQOOP-1774: Sqoop2: Allow anonymous authentication
+
+    SQOOP-1775: Sqoop2: Migrate to URL parameter user.name instead of using header
+
+    SQOOP-1777: Sqoop2: Add integration tests to Pre-Commit build
+
+    SQOOP-1778: Sqoop2: Increase default memory allocations for tests
+
+    SQOOP-1782: Sqoop2: Get submissions per job
+
+    SQOOP-1783: Sqoop2: Create derby integration upgrade tests
+
+    SQOOP-1784: Sqoop2: Sending POST request to link or job end-point might end up with NPE
+
+    SQOOP-1785: Sqoop2: Send driver validation results back to client when creating job
+
+    SQOOP-1786: Sqoop2: Stop using JSONValue.parse method call
+
+    SQOOP-1787: Sqoop2: Fix dual guava dependency warnings in maven
+
+    SQOOP-1788: Sqoop2: Add missing version for build-helper-maven-plugin
+
+    SQOOP-1789: Sqoop2: Add validation for partition column when using query based import
+
+    SQOOP-1792: Sqoop2: Default to simple authentication type
+
+    SQOOP-1806: Sqoop2: Remove the duplicate connector-config.properties file in Kite connector
+
+    SQOOP-1812: Sqoop2: Repository upgrade issue will prevent server startup
+
+    SQOOP-1816: Sqoop2: Add logging to the test DerbyProvider implementation
+
+    SQOOP-1818: Sqoop2: Allow transfer between 2 schema less data sources
+
+    SQOOP-1821: Sqoop2: External connector loading
+
+    SQOOP-1823: Sqoop2: Fix Derby schema javadocs
+
+    SQOOP-1827: Sqoop2: Add pattern SQOOP-XYZ-vX.patch to our pre-commit hook
+
+    SQOOP-1830: GenericJdBcExtractor does not create java date objects when extracting
+
+    SQOOP-1831: Sqoop2: Log filenames of detected Mapreduce files in HdfsUtils
+
+    SQOOP-1832: Sqoop2: Enforce that integration test working directory is always in target/ directory
+
+    SQOOP-1833: Sqoop2: Add elapsed time information to pre-commit hook
+
+    SQOOP-1836: Sqoop2: Convert the List in Schema Columns to Array for better lookup time
+
+    SQOOP-1837: Sqoop2: Verify that executing job has been successful in ConnectorTestCase
+
+    SQOOP-1838: Sqoop2: While running Integration tests in IDE ( we get Derby Start Error)
+
+    SQOOP-1839: Sqoop2: Mapreduce submission record should propogate failure info as well
+
+    SQOOP-1840: Sqoop2: Guard test DerbyProvider from infinite waits in Derby implementation
+
+    SQOOP-1843: Sqoop2: Fix anonymous configuration bug
+
+    SQOOP-1844: Sqoop2: Start Derby server in DerbyProvider on random port
+
+    SQOOP-1847: Sqoop2: Move rat configuration from special execution to the main execution
+
+    SQOOP-1850: Sqoop2: DerbyProvider retry ping
+
+    SQOOP-1857: Sqoop2: Add rat check to pre-commit hook
+
+    SQOOP-1858: Sqoop2: Print out warnings from git apply on output of precommit hook
+
+    SQOOP-1861: Sqoop2: ResourceRequest clobbers uncaught server exceptions
+
+    SQOOP-1862:  Sqoop2: JDBC Connector To side needs to handle converting JODA objects to sql date 
+
+    SQOOP-1871: Sqoop2: Upgrade to Hadoop 2.6.0
+
+    SQOOP-1872: IDF API should expose a method to add dependent jars
+
+    SQOOP-1874: Sqoop2: ConfigurableError should be in the configurable package
+
+    SQOOP-1875: Sqoop2: Sync MSubmission with repository and add tests for the max limit handling for submission fields
+
+    SQOOP-1882: JobManager currently ignores the TO connector IDF and assumed all IDF use String for the generic T
+
+    SQOOP-1885: Sqoop2: KafkaConnector pom.xml needs license header
+
+    SQOOP-1893: add license header to TestSqoopIDFUtils.
+
+    SQOOP-1894: Sqoop2: Print out files that failed license check in pre-commit hook
+
+    SQOOP-1895: Sqoop2: Add links to output reports to pre-commit hook
+
+    SQOOP-1896: Upgrade the Derby repo version to 5 for 1.99.5 release
+
+    SQOOP-1910: Sqoop2: Add test categories
+
+    SQOOP-1911: Sqoop2: Derby1_99_4UpgradeTest is constantly failing on pre-commit hook
+
+    SQOOP-1917: Sqoop2: &quot;show connector --all&quot; fails
+
+    SQOOP-1927: Sqoop2: Move CSVURIValidator into validators package
+
+    SQOOP-1929: Sqoop2: Track number of records written in Loader
+
+    SQOOP-1934: SqoopWritable and MR engine documentation
+
+    SQOOP-1943: Sqoop2: PreCommit should continue if license check fails
+
+    SQOOP-1945: Sqoop2: Add table escaping to JDBC Repository
+
+    SQOOP-1963: Generated files such as .project and .classpath files are included in source distribution 
+
+    SQOOP-1971: Sqoop2: strURL may not be initialized when calling addDelegationToken 
+
+    SQOOP-1972: Sqoop2: PreCommit hook have incorrect link for test reports
+
+    SQOOP-1973: Sqoop2: Remove maven module spi completely after merging it with connector-sdk
+
+    SQOOP-1977: Sqoop2: Pre-commit hook does not work for Python 2.6 environment
+
+    SQOOP-1995: Sqoop2: Allow nulls only if the column for that field has IsNullable to be true 
+
+    SQOOP-1996: Sqoop2: Change getNullable to isNullable
+
+    SQOOP-2018: GenericJDBCConnector SqlTypes INTEGER should be set 4 bytes
+
+    SQOOP-2021: Sqoop2: Generic JDBC Connector extractor uses wrong nulls
+
+    SQOOP-2022: Sqoop2: SqoopIDFUtils uses bit size instead of byteSize to check for INT/LONG/FLOAT/Double
+
+    SQOOP-2023: GenericJDBCConnector Handling unsigned Ints is broken
+
+    SQOOP-2027: Sqoop2: SqoopIDFUtils handling of decimal need to be fixed
+
+    SQOOP-2029:  Sqoop2: Get jobs by connector
+
+    SQOOP-2030: Should we allow creating a job with both from and to to id been the same
+
+    SQOOP-2032: Command line exception message says class not found
+
+    SQOOP-2034: Sqoop2: Clean up docstring and names in repository API
+
+    SQOOP-2041: Sqoop2: Escape identifier names
+
+    SQOOP-2043: Sqoop2: Server errors don&#39;t look informative enough in the client
+
+    SQOOP-2054: Sqoop2: Client cannot understand server exceptions
+
+    SQOOP-2077: Sqoop2: Enclose missing/extra lines in output of HdfsAsserts.assertMapreduceOutput
+
+    SQOOP-2078: Sqoop2: Add ParametrizedUtils.toArrayOfArrays utils method
+
+    SQOOP-2081: Sqoop2: Provide ability to dump content of testing table to log
+
+    SQOOP-2086: Sqoop2: Use named constraints
+
+    SQOOP-2087: Sqoop2: Named constraints should be quoted
+
+    SQOOP-2088: Sqoop2: Rename constants for named constraints to match convention
+
+  IMPROVEMENT
+
+    SQOOP-1678: Sqoop2: [HDFS Connector] Configurable null values
+
+    SQOOP-1727: Sqoop2: Log server initialization errors to log4j
+
+    SQOOP-1767: Sqoop2: commands in 5 minute demo docs are out-of-sync 
+
+    SQOOP-1869: Sqoop2: Expand schema matching to support two schemaless connectors
+
+    SQOOP-1944: Sqoop2: No (or wrong) log message when Derby server startup/shutdown unexpectedly
+
+    SQOOP-1966: Turn off maven&#39;s source distribution profile by default
+
+    SQOOP-1968: Optimize schema operation in getMatchingData of NameMatcher
+
+    SQOOP-1969: Support getColumnSize method for Schema class
+
+    SQOOP-2006: bad smell: NPE check in SQOOP-1995 is not obvious
+
+  NEW FEATURE
+
+    SQOOP-1763: Sqoop2: Role Based Access Control
+
+    SQOOP-1926: Sqoop2: Add annotations for visibilty and compatibility guarantees
+
+  TASK
+
+    SQOOP-1350: Sqoop2: Support all supported data types in the CSV Intermediate Data Format implementation
+
+    SQOOP-1525: Kerberos support on Sqoop 2
+
+    SQOOP-2033: Technical Guide of the Sqoop Server
+
 Release 1.99.4
 
   NEW FEATURE
