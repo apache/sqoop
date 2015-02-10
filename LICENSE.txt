@@ -402,3 +402,38 @@ For jline-<version>.jar:
   IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
   OF THE POSSIBILITY OF SUCH DAMAGE.
 
+For kite-sdk.jar:
+
+  The Apache License, Version 2.0
+
+For jackson-core.jar:
+
+  The Apache License, Version 2.0
+
+For jackson-databind.jar:
+
+  The Apache License, Version 2.0
+
+For jackson-annotation.jar:
+
+  The Apache License, Version 2.0
+
+For testng.jar:
+
+  The Apache License, Version 2.0
+
+For powermock.jar:
+
+  The Apache License, Version 2.0
+
+For kafka.jar:
+
+  The Apache License, Version 2.0
+
+For avro.jar:
+
+  The Apache License, Version 2.0
+
+For zookeeper.jar:
+
+  The Apache License, Version 2.0
