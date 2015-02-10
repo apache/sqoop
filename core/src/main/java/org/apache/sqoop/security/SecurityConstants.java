@@ -46,7 +46,7 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the sqoop authentication handler class.
-   * The default type is org.apache.sqoop.security.SimpleAuthenticationHandler
+   * The default type is org.apache.sqoop.security.Authentication.SimpleAuthenticationHandler
    * <tt>org.apache.sqoop.security.authentication.handler</tt>.
    */
   public static final String AUTHENTICATION_HANDLER =
@@ -96,7 +96,7 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the kerberos keytab for http.
-   * <tt>org.apache.sqoop.security.authentication.kerberos.http.principal</tt>.
+   * <tt>org.apache.sqoop.security.authentication.kerberos.http.keytab</tt>.
    */
   public static final String AUTHENTICATION_KERBEROS_HTTP_KEYTAB =
           PREFIX_AUTHENTICATION_KERBEROS_HTTP_CONFIG + "keytab";
@@ -110,7 +110,7 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the sqoop authorization handler class.
-   * The default type is org.apache.sqoop.security.DefaultAuthorizationHandler
+   * The default type is org.apache.sqoop.security.Authorization.DefaultAuthorizationHandler
    * <tt>org.apache.sqoop.security.authorization.handler</tt>.
    */
   public static final String AUTHORIZATION_HANDLER =
@@ -118,23 +118,23 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the sqoop authorization access controller class.
-   * The default type is org.apache.sqoop.security.DefaultAuthorizationAccessController
-   * <tt>org.apache.sqoop.security.authorization.AccessController</tt>.
+   * The default type is org.apache.sqoop.security.Authorization.DefaultAuthorizationAccessController
+   * <tt>org.apache.sqoop.security.authorization.access_controller</tt>.
    */
   public static final String AUTHORIZATION_ACCESS_CONTROLLER =
           PREFIX_AUTHORIZATION_CONFIG + "access_controller";
 
   /**
    * The config specifies the sqoop authorization validator class.
-   * The default type is org.apache.sqoop.security.DefaultAuthorizationValidator
-   * <tt>org.apache.sqoop.security.authorization.Validator</tt>.
+   * The default type is org.apache.sqoop.security.Authorization.DefaultAuthorizationValidator
+   * <tt>org.apache.sqoop.security.authorization.validator</tt>.
    */
   public static final String AUTHORIZATION_VALIDATOR =
           PREFIX_AUTHORIZATION_CONFIG + "validator";
 
   /**
    * The config specifies the sqoop authentication provider class.
-   * The default type is org.apache.sqoop.security.DefaultAuthenticationProvider
+   * The default type is org.apache.sqoop.security.Authorization.DefaultAuthenticationProvider
    * <tt>org.apache.sqoop.security.authorization.authentication_provider</tt>.
    */
   public static final String AUTHENTICATION_PROVIDER =
