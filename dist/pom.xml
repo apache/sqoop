@@ -202,9 +202,11 @@ limitations under the License.
                     <tar destfile="target/sqoop-${project.version}-bin-hadoop${hadoop.version}.tar.gz" compression="gzip">
                       <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.version}" filemode="755">
                         <include name="**/*.sh" />
+                        <include name="bin/sqoop2-*" />
                       </tarfileset>
                       <tarfileset dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}" prefix="sqoop-${project.version}-bin-hadoop${hadoop.version}">
                         <include name="**/*" />
+                        <exclude name="bin/sqoop2-*" />
                         <exclude name="**/*.sh" />
                       </tarfileset>
                     </tar>
