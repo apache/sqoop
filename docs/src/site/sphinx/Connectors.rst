@@ -74,7 +74,7 @@ Inputs associated with the Job configuration for the FROM direction include:
 |                             |         | *Optional*. See note below.                                             |                                             |
 +-----------------------------+---------+-------------------------------------------------------------------------+---------------------------------------------+
 | Table SQL statement         | String  | The SQL statement used to perform a **free form query**.                | ``SELECT COUNT(*) FROM test ${CONDITIONS}`` |
-|                             |         | *Optional*. See notes below.                                             |                                             |
+|                             |         | *Optional*. See notes below.                                            |                                             |
 +-----------------------------+---------+-------------------------------------------------------------------------+---------------------------------------------+
 | Table column names          | String  | Columns to extract from the JDBC data source.                           | col1,col2                                   |
 |                             |         | *Optional* Comma separated list of columns.                             |                                             |
