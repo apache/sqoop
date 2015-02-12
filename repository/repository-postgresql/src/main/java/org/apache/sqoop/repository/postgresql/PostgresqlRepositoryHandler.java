@@ -79,8 +79,8 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
     try {
       DatabaseMetaData md = conn.getMetaData();
       metadataResultSet = md.getTables(null,
-          CommonRepositorySchemaConstants.SCHEMA_SQOOP.toLowerCase(),
-          CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME.toLowerCase(), null);
+          CommonRepositorySchemaConstants.SCHEMA_SQOOP,
+          CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME, null);
 
       if (metadataResultSet.next()) {
         stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_SELECT_SYSTEM);
