@@ -206,6 +206,8 @@ Release 1.99.5
 
     SQOOP-2028: add license header to TestConnectorManagerUtils
 
+    SQOOP-2064: Sqoop2: Update POM version on new 1.99.5 branch
+
     SQOOP-2072: Sqoop2: Add editable and override attributes for postgres
 
     SQOOP-2074: Sqoop2: Add input attributes documentation
@@ -213,6 +215,8 @@ Release 1.99.5
     SQOOP-2084: Sqoop2: Fix Indentation in input attributes documentation
 
     SQOOP-2085: Sqoop2: Null handling in AuthorizationEngine
+
+    SQOOP-2096: Sqoop2: Fix typos in comments in SecurityConstants
 
   BUG
 
@@ -408,6 +412,10 @@ Release 1.99.5
 
     SQOOP-2088: Sqoop2: Rename constants for named constraints to match convention
 
+    SQOOP-2099: Sqoop2: Postgresql&#39;s detectRepositoryVersion uses wrong casing
+
+    SQOOP-2100: Sqoop2: Connectors documentation is malformed
+
   IMPROVEMENT
 
     SQOOP-1678: Sqoop2: [HDFS Connector] Configurable null values
@@ -441,6 +449,7 @@ Release 1.99.5
     SQOOP-1525: Kerberos support on Sqoop 2
 
     SQOOP-2033: Technical Guide of the Sqoop Server
+
 
 Release 1.99.4
 
