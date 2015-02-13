@@ -158,6 +158,17 @@ limitations under the License.
     <url-pattern>/v1/submissions/*</url-pattern>
   </servlet-mapping>
 
+  <!-- Authorization servlet -->
+  <servlet>
+    <servlet-name>authorization.AuthorizationServlet</servlet-name>
+    <servlet-class>org.apache.sqoop.server.AuthorizationServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>authorization.AuthorizationServlet</servlet-name>
+    <url-pattern>/v1/authorization/*</url-pattern>
+  </servlet-mapping>
 
 </web-app>
 

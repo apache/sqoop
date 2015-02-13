@@ -55,7 +55,13 @@ public enum SecurityError implements ErrorCode {
   AUTH_0010("Unable to find authentication provider"),
 
   /** The system was not able to get authentication from http request. */
-  AUTH_0011("Unable to get remote authentication from http request");
+  AUTH_0011("Unable to get remote authentication from http request"),
+
+  /** The system was not able to get role name from http request. */
+  AUTH_0012("Unable to get role name from http request"),
+
+  /** The system was not able to get principal from http request. */
+  AUTH_0013("Unable to get principal from http request");
 
   private final String message;
 

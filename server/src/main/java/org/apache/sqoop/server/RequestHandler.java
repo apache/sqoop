@@ -24,6 +24,11 @@ public interface RequestHandler {
 
   static final String CONNECTOR_NAME_QUERY_PARAM = "cname";
   static final String JOB_NAME_QUERY_PARAM = "jname";
+  static final String ROLE_NAME_QUERY_PARAM = "role_name";
+  static final String PRINCIPAL_NAME_QUERY_PARAM = "principal_name";
+  static final String PRINCIPAL_TYPE_QUERY_PARAM = "principal_type";
+  static final String RESOURCE_NAME_QUERY_PARAM = "resource_name";
+  static final String RESOURCE_TYPE_QUERY_PARAM = "resource_type";
 
   JsonBean handleEvent(RequestContext ctx);
 }
