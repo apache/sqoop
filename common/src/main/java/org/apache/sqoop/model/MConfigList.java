@@ -77,6 +77,10 @@ public class MConfigList implements MClonable {
     return (MIntegerInput) getInput(name);
   }
 
+  public MLongInput getLongInput(String name) {
+    return (MLongInput) getInput(name);
+  }
+
   public MMapInput getMapInput(String name) {
     return (MMapInput) getInput(name);
   }

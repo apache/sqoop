@@ -86,6 +86,10 @@ public final class MConfig extends MValidatedElement implements MClonable {
     return (MIntegerInput)getInput(inputName);
   }
 
+  public MLongInput getLongInput(String inputName) {
+    return (MLongInput)getInput(inputName);
+  }
+
   public MBooleanInput getBooleanInput(String inputName) {
     return (MBooleanInput)getInput(inputName);
   }

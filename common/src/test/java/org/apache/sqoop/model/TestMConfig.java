@@ -54,20 +54,21 @@ public class TestMConfig {
     List<MInput<?>> list1 = new ArrayList<MInput<?>>();
     list1.add(input1);
     list1.add(input2);
-    MConfig mform1 = new MConfig("config", list1);
+    MConfig mConfig1 = new MConfig("config", list1);
 
     MInput<Integer> input3 = new MIntegerInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY );
     MInput<Integer> input4 = new MIntegerInput("sqoopsqoop2", false, InputEditable.ANY, StringUtils.EMPTY );
     List<MInput<?>> list2 = new ArrayList<MInput<?>>();
     list2.add(input3);
     list2.add(input4);
-    MConfig mform2 = new MConfig("config", list2);
-    assertEquals(mform2, mform1);
+    MConfig mConfig2 = new MConfig("config", list2);
+    assertEquals(mConfig2, mConfig1);
   }
 
   @Test
   public void testGetInputs() {
     MIntegerInput intInput = new MIntegerInput("Config.A", false, InputEditable.ANY, StringUtils.EMPTY );
+    MLongInput longInput = new MLongInput("Config.A1", false, InputEditable.ANY, StringUtils.EMPTY );
     MMapInput mapInput = new MMapInput("Config.B", false, InputEditable.ANY, StringUtils.EMPTY );
     MStringInput stringInput = new MStringInput("Config.C", false, InputEditable.ANY,
         StringUtils.EMPTY, (short) 3);
@@ -76,12 +77,14 @@ public class TestMConfig {
 
     List<MInput<?>> inputs = new ArrayList<MInput<?>>();
     inputs.add(intInput);
+    inputs.add(longInput);
     inputs.add(mapInput);
     inputs.add(stringInput);
     inputs.add(enumInput);
 
     MConfig config = new MConfig("Config", inputs);
     assertEquals(intInput, config.getIntegerInput("Config.A"));
+    assertEquals(longInput, config.getLongInput("Config.A1"));
     assertEquals(mapInput, config.getMapInput("Config.B"));
     assertEquals(stringInput, config.getStringInput("Config.C"));
     assertEquals(enumInput, config.getEnumInput("Config.D"));

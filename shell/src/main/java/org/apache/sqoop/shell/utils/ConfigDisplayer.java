@@ -40,6 +40,7 @@ import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.shell.core.Constants;
@@ -186,6 +187,9 @@ public final class ConfigDisplayer {
             case INTEGER:
               displayInputInteger((MIntegerInput) input);
               break;
+            case LONG:
+              displayLongInteger((MLongInput) input);
+              break;
             case BOOLEAN:
               displayInputBoolean((MBooleanInput) input);
               break;
@@ -223,6 +227,15 @@ public final class ConfigDisplayer {
     print(input.getValue());
   }
 
+
+  /**
+   * Display content of Long input.
+   *
+   * @param input Long input
+   */
+  private static void displayLongInteger(MLongInput input) {
+    print(input.getValue());
+  }
   /**
    * Display content of Boolean input.
    *

@@ -29,6 +29,7 @@ import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MNamedElement;
@@ -182,6 +183,8 @@ public final class ConfigFiller {
       return fillInputString(prefix, (MStringInput) input, line);
     case INTEGER:
       return fillInputInteger(prefix, (MIntegerInput) input, line);
+    case LONG:
+      return fillInputLong(prefix, (MLongInput) input, line);
     case BOOLEAN:
       return fillInputBoolean(prefix, (MBooleanInput) input, line);
     case MAP:
@@ -281,6 +284,33 @@ public final class ConfigFiller {
         input.setValue(Integer.valueOf(line.getOptionValue(ConfigOptions.getOptionKey(prefix, input))));
       } catch (NumberFormatException ex) {
         errorMessage(input, "Input is not valid integer number");
+        return false;
+      }
+    } else {
+      input.setEmpty();
+    }
+    return true;
+  }
+
+  /**
+   * Load long input from CLI option.
+   *
+   * @param prefix
+   *          placed at the beginning of the CLI option key
+   * @param input
+   *          Input that we should read or edit
+   * @param line
+   *          CLI options container
+   * @return
+   * @throws IOException
+   */
+  private static boolean fillInputLong(String prefix, MLongInput input, CommandLine line) throws IOException {
+    String opt = ConfigOptions.getOptionKey(prefix, input);
+    if (line.hasOption(opt)) {
+      try {
+        input.setValue(Long.valueOf(line.getOptionValue(ConfigOptions.getOptionKey(prefix, input))));
+      } catch (NumberFormatException ex) {
+        errorMessage(input, "Input is not a valid long ");
         return false;
       }
     } else {
@@ -459,6 +489,8 @@ public final class ConfigFiller {
         return fillInputStringWithBundle((MStringInput) input, reader, bundle);
       case INTEGER:
         return fillInputInteger((MIntegerInput) input, reader, bundle);
+      case LONG:
+        return fillInputLong((MLongInput) input, reader, bundle);
       case BOOLEAN:
         return fillInputBooleanWithBundle((MBooleanInput) input, reader, bundle);
       case MAP:
@@ -703,6 +735,41 @@ public final class ConfigFiller {
       }
 
       input.setValue(Integer.valueOf(userTyped));
+    }
+
+    return true;
+  }
+
+  private static boolean fillInputLong(MLongInput input, ConsoleReader reader, ResourceBundle bundle) throws IOException {
+    generatePrompt(reader, bundle, input);
+
+    if (!input.isEmpty() && !input.isSensitive()) {
+      reader.putString(input.getValue().toString());
+    }
+
+    // Get the data
+    String userTyped;
+    if (input.isSensitive()) {
+      userTyped = reader.readLine('*');
+    } else {
+      userTyped = reader.readLine();
+    }
+
+    if (userTyped == null) {
+      return false;
+    } else if (userTyped.isEmpty()) {
+      input.setEmpty();
+    } else {
+      Long value;
+      try {
+        value = Long.valueOf(userTyped);
+        input.setValue(value);
+      } catch (NumberFormatException ex) {
+        errorMessage("Input is not a valid long");
+        return fillInputLong(input, reader, bundle);
+      }
+
+      input.setValue(Long.valueOf(userTyped));
     }
 
     return true;

@@ -26,6 +26,7 @@ import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.model.InputEditable;
+import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
@@ -2010,6 +2011,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           case INTEGER:
             input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
             break;
+          case LONG:
+            input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides);
+            break;
           case ENUM:
             input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides, inputEnumValues.split(","));
             break;
@@ -2157,6 +2161,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           break;
         case INTEGER:
           input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
+          break;
+        case LONG:
+          input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides);
           break;
         case ENUM:
           input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides,

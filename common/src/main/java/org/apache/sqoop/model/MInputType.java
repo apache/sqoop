@@ -45,5 +45,8 @@ public enum MInputType {
   /** String based input that can contain only predefined values **/
   ENUM,
 
+  /** Long input type */
+  LONG,
+
   ;
 }

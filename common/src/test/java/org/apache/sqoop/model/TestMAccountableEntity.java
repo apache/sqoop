@@ -37,9 +37,12 @@ public class TestMAccountableEntity {
   @Test
   public void testInitialization() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MIntegerInput intInput = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MLongInput longInput = new MLongInput("LONG-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
-    list.add(input);
+    list.add(intInput);
+    list.add(longInput);
+
     MConfig config = new MConfig("CONFIGNAME", list);
     configs.add(config);
     MAccountableEntity link = new MLink(123l, new MLinkConfig(configs));
@@ -57,5 +60,8 @@ public class TestMAccountableEntity {
     assertEquals(testLastUpdateDate, link.getLastUpdateDate());
     assertEquals(false, link.getEnabled());
     assertEquals("user", link.getLastUpdateUser());
+    assertEquals(1, ((MLink) link).getConnectorLinkConfig().getConfigs().size());
+    assertEquals(2, ((MLink) link).getConnectorLinkConfig().getConfigs().get(0).getInputs().size());
+
   }
 }

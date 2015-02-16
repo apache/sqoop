@@ -175,7 +175,7 @@ public class TestConfigUtils {
     TestConfiguration config = new TestConfiguration();
     config.aConfig.a1 = "A";
     config.bConfig.b2 = "B";
-    config.cConfig.intValue = 4;
+    config.cConfig.longValue = 4L;
     config.cConfig.map.put("C", "D");
     config.cConfig.enumeration = Enumeration.X;
 
@@ -197,7 +197,7 @@ public class TestConfigUtils {
     assertNull(targetConfig.bConfig.b1);
     AssertJUnit.assertEquals("B", targetConfig.bConfig.b2);
 
-    AssertJUnit.assertEquals((Integer) 4, targetConfig.cConfig.intValue);
+    AssertJUnit.assertEquals((Long) 4L, targetConfig.cConfig.longValue);
     AssertJUnit.assertEquals(1, targetConfig.cConfig.map.size());
     AssertJUnit.assertTrue(targetConfig.cConfig.map.containsKey("C"));
     AssertJUnit.assertEquals("D", targetConfig.cConfig.map.get("C"));
@@ -231,7 +231,7 @@ public class TestConfigUtils {
 
     // Config C
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MIntegerInput("cConfig.intValue", false, InputEditable.ANY, StringUtils.EMPTY));
+    inputs.add(new MLongInput("cConfig.longValue", false, InputEditable.ANY, StringUtils.EMPTY));
     inputs.add(new MMapInput("cConfig.map", false, InputEditable.ANY, StringUtils.EMPTY));
     inputs.add(new MEnumInput("cConfig.enumeration", false, InputEditable.ANY, StringUtils.EMPTY,
         new String[] { "X", "Y" }));
@@ -411,7 +411,7 @@ public class TestConfigUtils {
   @ConfigClass
   public static class CConfig {
     @Input
-    Integer intValue;
+    Long longValue;
     @Input
     Map<String, String> map;
     @Input

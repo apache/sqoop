@@ -35,6 +35,7 @@ import org.apache.sqoop.model.MConfigType;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONObject;
@@ -136,7 +137,7 @@ public class TestConfigSerialization {
    */
   protected MConfig getConfig() {
     List<MInput<?>> inputs;
-    MInput input;
+    MInput<?> input;
 
     inputs = new LinkedList<MInput<?>>();
 
@@ -147,6 +148,9 @@ public class TestConfigSerialization {
     inputs.add(input);
 
     input = new MIntegerInput("Integer", false, InputEditable.ANY, StringUtils.EMPTY);
+    inputs.add(input);
+
+    input = new MLongInput("Long", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
 
     input = new MBooleanInput("Boolean", false, InputEditable.ANY, StringUtils.EMPTY);

@@ -29,6 +29,7 @@ import org.apache.sqoop.model.MConfigType;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.json.simple.JSONArray;
@@ -164,6 +165,10 @@ public final class ConfigInputSerialization {
       }
       case INTEGER: {
         mInput = new MIntegerInput(name, sensitive.booleanValue(), editable, overrides);
+        break;
+      }
+      case LONG: {
+        mInput = new MLongInput(name, sensitive.booleanValue(), editable, overrides);
         break;
       }
       case BOOLEAN: {

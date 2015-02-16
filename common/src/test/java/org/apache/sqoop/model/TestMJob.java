@@ -107,6 +107,8 @@ public class TestMJob {
     List<MConfig> configs = new ArrayList<MConfig>();
     MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
     input.setValue(100);
+    MLongInput lInput = new MLongInput("LONG-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    lInput.setValue(100L);
     MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20);
     strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();

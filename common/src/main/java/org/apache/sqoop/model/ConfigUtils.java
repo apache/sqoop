@@ -158,6 +158,8 @@ public class  ConfigUtils {
           input = new MMapInput(inputName, sensitive, editable, overrides);
         } else if (type == Integer.class) {
           input = new MIntegerInput(inputName, sensitive, editable, overrides);
+        } else if (type == Long.class) {
+          input = new MLongInput(inputName, sensitive, editable, overrides);
         } else if (type == Boolean.class) {
           input = new MBooleanInput(inputName, sensitive, editable, overrides);
         } else if (type.isEnum()) {
@@ -439,7 +441,7 @@ public class  ConfigUtils {
               map.put(key, ((Map) value).get(key));
             }
             jsonConfig.put(inputName, map);
-          } else if(type == Integer.class) {
+          } else if(type == Integer.class || type == Long.class) {
             jsonConfig.put(inputName, value);
           } else if(type.isEnum()) {
             jsonConfig.put(inputName, value.toString());
@@ -532,6 +534,8 @@ public class  ConfigUtils {
             inputField.set(configValue, map);
           } else if(type == Integer.class) {
             inputField.set(configValue, ((Long)jsonInputs.get(inputName)).intValue());
+          } else if(type == Long.class) {
+            inputField.set(configValue, ((Long)jsonInputs.get(inputName)).longValue());
           } else if(type.isEnum()) {
             inputField.set(configValue, Enum.valueOf((Class<? extends Enum>) inputField.getType(), (String) jsonInputs.get(inputName)));
           } else if(type == Boolean.class) {
