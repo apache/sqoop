@@ -35,6 +35,7 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-common-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>

@@ -123,13 +123,21 @@ limitations under the License.
     <jackson.databind.version>2.2.2</jackson.databind.version>
     <jackson.annotations.version>2.2.2</jackson.annotations.version>
     <avro.version>1.7.7</avro.version>
+    <jcommander.version>1.27</jcommander.version>
   </properties>
 
   <dependencies>
+
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <!-- Profiles for various supported Hadoop distributions -->
@@ -467,6 +475,11 @@ limitations under the License.
         <groupId>postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${jdbc.postgresql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.beust</groupId>
+        <artifactId>jcommander</artifactId>
+        <version>${jcommander.version}</version>
       </dependency>
       <dependency>
         <groupId>com.oracle</groupId>

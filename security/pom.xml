@@ -39,5 +39,11 @@ limitations under the License.
       <artifactId>hadoop-common</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.beust</groupId>
+      <artifactId>jcommander</artifactId>
+    </dependency>
+
   </dependencies>
 </project>
