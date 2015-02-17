@@ -20,17 +20,11 @@ package org.apache.sqoop.client.request;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.hadoop.security.Credentials;
-import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.DriverBean;
-import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.LinkBean;
-import org.apache.sqoop.json.SubmissionBean;
-import org.apache.sqoop.json.SubmissionsBean;
-import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.json.*;
+import org.apache.sqoop.model.*;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Unified class for all request objects.
@@ -44,9 +38,10 @@ public class SqoopResourceRequests {
   private LinkResourceRequest linkRequest;
   private JobResourceRequest jobRequest;
   private SubmissionResourceRequest submissionRequest;
+  private AuthorizationResourceRequest authorizationRequest;
   private DelegationTokenAuthenticatedURL.Token authToken;
 
-  public SqoopResourceRequests(){
+  public SqoopResourceRequests() {
     authToken = new DelegationTokenAuthenticatedURL.Token();
   }
 
@@ -92,6 +87,14 @@ public class SqoopResourceRequests {
     }
 
     return submissionRequest;
+  }
+
+  public AuthorizationResourceRequest getAuthorizationRequest() {
+    if (authorizationRequest == null) {
+      authorizationRequest = new AuthorizationResourceRequest(authToken);
+    }
+
+    return authorizationRequest;
   }
 
   public DriverBean readDriver() {
@@ -160,6 +163,46 @@ public class SqoopResourceRequests {
 
   public SubmissionsBean readSubmission(Long jid) {
     return getSubmissionResourceRequest().read(serverUrl, jid);
+  }
+
+  public RolesBean readRoles() {
+    return getAuthorizationRequest().readRoles(serverUrl);
+  }
+
+  public void createRole(MRole role) {
+    getAuthorizationRequest().createRole(serverUrl, role);
+  }
+
+  public void dropRole(MRole role) {
+    getAuthorizationRequest().dropRole(serverUrl, role);
+  }
+
+  public void grantRole(List<MRole> roles, List<MPrincipal> principals) {
+    getAuthorizationRequest().grantRevokeRole(serverUrl, roles, principals, true);
+  }
+
+  public void revokeRole(List<MRole> roles, List<MPrincipal> principals) {
+    getAuthorizationRequest().grantRevokeRole(serverUrl, roles, principals, false);
+  }
+
+  public RolesBean readRolesByPrincipal(MPrincipal principal) {
+    return getAuthorizationRequest().readRolesByPrincipal(serverUrl, principal);
+  }
+
+  public PrincipalsBean readPrincipalsByRole(MRole role) {
+    return getAuthorizationRequest().readPrincipalsByRole(serverUrl, role);
+  }
+
+  public void grantPrivilege(List<MPrincipal> principals, List<MPrivilege> privileges) {
+    getAuthorizationRequest().grantRevokePrivilege(serverUrl, principals, privileges, true);
+  }
+
+  public PrivilegesBean readPrivilegesByPrincipal(MPrincipal principal, MResource resource) {
+    return getAuthorizationRequest().readPrivilegesByPrincipal(serverUrl, principal, resource);
+  }
+
+  public void revokePrivilege(List<MPrincipal> principals, List<MPrivilege> privileges) {
+    getAuthorizationRequest().grantRevokePrivilege(serverUrl, principals, privileges, false);
   }
 
   public Token<?>[] addDelegationTokens(String renewer,

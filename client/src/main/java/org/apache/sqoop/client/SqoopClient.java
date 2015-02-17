@@ -31,16 +31,8 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.client.request.SqoopResourceRequests;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.DriverBean;
-import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.ConfigUtils;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MDriver;
-import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.json.*;
+import org.apache.sqoop.model.*;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.apache.sqoop.validation.Status;
 
@@ -557,6 +549,110 @@ public class SqoopClient {
    */
   public List<MSubmission> getSubmissionsForJob(long jobId) {
     return resourceRequests.readSubmission(jobId).getSubmissions();
+  }
+
+  /**
+   * Retrieve list of all roles.
+   *
+   * @return
+   */
+  public List<MRole> getRoles() {
+    return resourceRequests.readRoles().getRoles();
+  }
+
+  /**
+   * Create a new role.
+   *
+   * @param role MRole
+   * @return
+   */
+  public void createRole(MRole role) {
+    resourceRequests.createRole(role);
+  }
+
+  /**
+   * Drop a role.
+   *
+   * @param role MRole
+   * @return
+   */
+  public void dropRole(MRole role) {
+    resourceRequests.dropRole(role);
+  }
+
+  /**
+   * Grant roles on principals.
+   *
+   * @param roles      MRole List
+   * @param principals MPrincipal List
+   * @return
+   */
+  public void grantRole(List<MRole> roles, List<MPrincipal> principals) {
+    resourceRequests.grantRole(roles, principals);
+  }
+
+  /**
+   * Revoke roles on principals.
+   *
+   * @param roles      MRole List
+   * @param principals MPrincipal List
+   * @return
+   */
+  public void revokeRole(List<MRole> roles, List<MPrincipal> principals) {
+    resourceRequests.revokeRole(roles, principals);
+  }
+
+  /**
+   * Get roles by principal.
+   *
+   * @param principal MPrincipal
+   * @return
+   */
+  public RolesBean getRolesByPrincipal(MPrincipal principal) {
+    return resourceRequests.readRolesByPrincipal(principal);
+  }
+
+  /**
+   * Get principals by role.
+   *
+   * @param role MRole
+   * @return
+   */
+  public PrincipalsBean getPrincipalsByRole(MRole role) {
+    return resourceRequests.readPrincipalsByRole(role);
+  }
+
+  /**
+   * Grant privileges on principals.
+   *
+   * @param principals MPrincipal List
+   * @param privileges MPrivilege List
+   * @return
+   */
+  public void grantPrivilege(List<MPrincipal> principals, List<MPrivilege> privileges) {
+    resourceRequests.grantPrivilege(principals, privileges);
+  }
+
+  /**
+   * Revoke privileges on principals.
+   *
+   * @param principals MPrincipal List
+   * @param privileges MPrivilege List
+   * @return
+   */
+  public void revokePrivilege(List<MPrincipal> principals, List<MPrivilege> privileges) {
+    resourceRequests.revokePrivilege(principals, privileges);
+  }
+
+  /**
+   * Get privileges by principal.
+   *
+   * @param principal MPrincipal
+   * @param resource MResource
+   * @return
+   */
+  public PrivilegesBean getPrivilegesByPrincipal(MPrincipal principal, MResource resource) {
+    return resourceRequests.readPrivilegesByPrincipal(principal, resource);
   }
 
   /**
