@@ -416,6 +416,10 @@ Release 1.99.5
 
     SQOOP-2100: Sqoop2: Connectors documentation is malformed
 
+    SQOOP-2109: Sqoop2: Shell module is including test dependencies when building binary artifact
+
+    SQOOP-2116: Sqoop2: RequestContext should use user short name
+
   IMPROVEMENT
 
     SQOOP-1678: Sqoop2: [HDFS Connector] Configurable null values
@@ -449,7 +453,6 @@ Release 1.99.5
     SQOOP-1525: Kerberos support on Sqoop 2
 
     SQOOP-2033: Technical Guide of the Sqoop Server
-
 
 Release 1.99.4
 
