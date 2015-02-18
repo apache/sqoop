@@ -122,7 +122,7 @@ public class RequestContext {
    */
   public String getUserName() {
     if (AuthenticationManager.getAuthenticationHandler().isSecurityEnabled()) {
-      return HttpUserGroupInformation.get().getUserName();
+      return HttpUserGroupInformation.get().getShortUserName();
     } else {
       return request.getParameter(PseudoAuthenticator.USER_NAME);
     }
