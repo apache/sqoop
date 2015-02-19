@@ -42,12 +42,14 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
+import org.apache.sqoop.model.MResource;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.request.HttpEventContext;
 import org.apache.sqoop.security.Authorization.AuthorizationEngine;
+import org.apache.sqoop.security.AuthorizationManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.error.code.ServerError;
@@ -145,6 +147,8 @@ public class JobRequestHandler implements RequestHandler {
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "job", jobIdentifier);
     repository.deleteJob(jobId);
+    MResource resource = new MResource(String.valueOf(jobId), AuthorizationEngine.ResourceType.JOB.name());
+    AuthorizationManager.getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
   }
 

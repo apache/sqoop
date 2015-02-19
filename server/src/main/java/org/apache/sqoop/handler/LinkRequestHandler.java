@@ -36,9 +36,11 @@ import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MPersistableEntity;
+import org.apache.sqoop.model.MResource;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.security.Authorization.AuthorizationEngine;
+import org.apache.sqoop.security.AuthorizationManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.error.code.ServerError;
@@ -99,6 +101,8 @@ public class LinkRequestHandler implements RequestHandler {
         ctx.getRequest().getRemoteAddr(), "delete", "link", linkIdentifier);
 
     repository.deleteLink(linkId);
+    MResource resource = new MResource(String.valueOf(linkId), AuthorizationEngine.ResourceType.LINK.name());
+    AuthorizationManager.getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
   }
 
