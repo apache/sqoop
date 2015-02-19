@@ -337,8 +337,10 @@ public class Constants {
       "table.header.class";
   public static final String RES_TABLE_HEADER_SUPPORTED_DIRECTIONS =
       "table.header.supported_directions";
-  public static final String RES_TABLE_HEADER_CONNECTOR =
-      "table.header.connector";
+  public static final String RES_TABLE_HEADER_CONNECTOR_NAME =
+      "table.header.connector.name";
+  public static final String RES_TABLE_HEADER_CONNECTOR_ID =
+      "table.header.connector.id";
   public static final String RES_TABLE_HEADER_FROM_CONNECTOR =
       "table.header.connector.from";
   public static final String RES_TABLE_HEADER_TO_CONNECTOR =

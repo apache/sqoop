@@ -19,14 +19,18 @@ package org.apache.sqoop.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.apache.sqoop.validation.Status;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
@@ -67,22 +71,25 @@ public class ShowLinkFunction extends SqoopFunction {
     List<String> header = new LinkedList<String>();
     header.add(resourceString(Constants.RES_TABLE_HEADER_ID));
     header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
-    header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR_ID));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_ENABLED));
 
     List<String> ids = new LinkedList<String>();
     List<String> names = new LinkedList<String>();
-    List<String> connectors = new LinkedList<String>();
+    List<String> connectorIds = new LinkedList<String>();
     List<String> availabilities = new LinkedList<String>();
 
-    for(MLink link : links) {
+    for (MLink link : links) {
       ids.add(String.valueOf(link.getPersistenceId()));
       names.add(link.getName());
-      connectors.add(String.valueOf(link.getConnectorId()));
+      connectorIds.add(String.valueOf(link.getConnectorId()));
       availabilities.add(String.valueOf(link.getEnabled()));
     }
 
-    TableDisplayer.display(header, ids, names, connectors, availabilities);
+    List<String> connectorNames = getConnectorNames(connectorIds);
+
+    TableDisplayer.display(header, ids, names, connectorIds, connectorNames, availabilities);
   }
 
   private void showLinks() {
@@ -117,10 +124,36 @@ public class ShowLinkFunction extends SqoopFunction {
     );
 
     long connectorId = link.getConnectorId();
-    printlnResource(Constants.RES_SHOW_PROMPT_LINK_CID_INFO, connectorId);
+    MConnector connector = client.getConnector(connectorId);
+    String connectorName = "";
+    if (connector != null) {
+      connectorName = connector.getUniqueName();
+    }
+    printlnResource(Constants.RES_SHOW_PROMPT_LINK_CID_INFO, connectorName, connectorId);
 
     // Display link config
     displayConfig(link.getConnectorLinkConfig().getConfigs(),
-                 client.getConnectorConfigBundle(connectorId));
+    client.getConnectorConfigBundle(connectorId));
+  }
+
+  private List<String> getConnectorNames(List<String> connectorIds) {
+    Map<String, String> connectorIdToName = new HashMap<String, String>();
+    for (String connectorId : connectorIds) {
+      if (!connectorIdToName.containsKey(connectorId)) {
+        MConnector connector = client.getConnector(Long.valueOf(connectorId));
+        if (connector != null) {
+          connectorIdToName.put(connectorId, connector.getUniqueName());
+        }
+      }
+    }
+    List<String> connectorNames = new ArrayList<String>();
+    for (String connectorId : connectorIds) {
+      if (connectorIdToName.get(connectorId) != null) {
+        connectorNames.add(connectorIdToName.get(connectorId));
+      } else {
+        connectorNames.add("");
+      }
+    }
+    return connectorNames;
   }
 }
