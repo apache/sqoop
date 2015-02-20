@@ -51,12 +51,9 @@ limitations under the License.
   </reporting>
   <profiles>
     <profile>
-      <id>maven-3</id>
+      <id>binary</id>
       <activation>
-        <file>
-           <!--  This employs that the basedir expression is only recognized by Maven 3.x (see MNG-2363) -->
-          <exists>${basedir}</exists>
-        </file>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <build>
         <plugins>
