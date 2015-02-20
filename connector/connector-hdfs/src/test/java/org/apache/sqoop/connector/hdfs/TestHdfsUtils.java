@@ -42,7 +42,7 @@ public class TestHdfsUtils {
 
     linkConfiguration.linkConfig.uri = TEST_URI;
 
-    assertEquals(conf, HdfsUtils.configureURI(conf, linkConfiguration));
+    conf = HdfsUtils.configureURI(conf, linkConfiguration);
     assertEquals(TEST_URI, conf.get("fs.default.name"));
     assertEquals(TEST_URI, conf.get("fs.defaultFS"));
   }

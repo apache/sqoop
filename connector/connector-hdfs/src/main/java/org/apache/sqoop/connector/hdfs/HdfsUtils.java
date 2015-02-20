@@ -36,12 +36,14 @@ public class HdfsUtils {
    * @return Configuration object.
    */
   public static Configuration configureURI(Configuration conf, LinkConfiguration linkConfiguration) {
+    Configuration newConf = new Configuration(conf);
+
     if (linkConfiguration.linkConfig.uri != null) {
-      conf.set("fs.default.name", linkConfiguration.linkConfig.uri);
-      conf.set("fs.defaultFS", linkConfiguration.linkConfig.uri);
+      newConf.set("fs.default.name", linkConfiguration.linkConfig.uri);
+      newConf.set("fs.defaultFS", linkConfiguration.linkConfig.uri);
     }
 
-    return conf;
+    return newConf;
   }
 
   /**
