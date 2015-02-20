@@ -63,6 +63,12 @@ public abstract class SqoopCommand extends ComplexCommandSupport {
 
   protected SqoopCommand(Shell shell,
                          String name,
+                         String shortcut) {
+    this(shell, name, shortcut, null);
+  }
+
+  protected SqoopCommand(Shell shell,
+                         String name,
                          String shortcut,
                          Map<String, Class<? extends SqoopFunction>> funcs) {
     super(shell, name, shortcut);
@@ -72,7 +78,9 @@ public abstract class SqoopCommand extends ComplexCommandSupport {
     this.functionInstances = new HashMap<String, SqoopFunction>();
 
     this.functions = new LinkedList<String>();
-    this.functions.addAll(funcs.keySet());
+    if (funcs != null) {
+      this.functions.addAll(funcs.keySet());
+    }
   }
 
   @Override

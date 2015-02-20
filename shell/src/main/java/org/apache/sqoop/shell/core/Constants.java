@@ -53,6 +53,13 @@ public class Constants {
   public static final String OPT_SYNCHRONOUS = "synchronous";
   public static final String OPT_POLL_TIMEOUT = "poll-timeout";
   public static final String OPT_DETAIL = "detail";
+  public static final String OPT_ROLE = "role";
+  public static final String OPT_ACTION = "action";
+  public static final String OPT_RESOURCE = "resource";
+  public static final String OPT_RESOURCE_TYPE = "resource-type";
+  public static final String OPT_PRINCIPAL = "principal";
+  public static final String OPT_PRINCIPAL_TYPE = "principal-type";
+  public static final String OPT_WITH_GRANT = "with-grant";
 
   public static final char OPT_LID_CHAR = 'l';
   public static final char OPT_FROM_CHAR = 'f';
@@ -72,6 +79,9 @@ public class Constants {
   public static final char OPT_SYNCHRONOUS_CHAR = 's';
   public static final char OPT_POLL_TIMEOUT_CHAR = 'p';
   public static final char OPT_DETAIL_CHAR = 'd';
+  public static final char OPT_ROLE_CHAR = 'r';
+  public static final char OPT_ACTION_CHAR = 'a';
+  public static final char OPT_WITH_GRANT_CHAR = 'g';
 
   // Resource keys for various commands, command options,
   // functions and descriptions
@@ -111,6 +121,12 @@ public class Constants {
   public static final String CMD_DISABLE = "disable";
   public static final String CMD_DISABLE_SC = "\\di";
 
+  public static final String CMD_GRANT = "grant";
+  public static final String CMD_GRANT_SC = "\\g";
+
+  public static final String CMD_REVOKE = "revoke";
+  public static final String CMD_REVOKE_SC = "\\r";
+
   public static final String FN_LINK = "link";
   public static final String FN_JOB = "job";
   public static final String FN_SUBMISSION = "submission";
@@ -119,6 +135,8 @@ public class Constants {
   public static final String FN_CONNECTOR = "connector";
   public static final String FN_VERSION = "version";
   public static final String FN_DRIVER_CONFIG = "driver";
+  public static final String FN_ROLE = "role";
+  public static final String FN_PRIVILEGE = "privilege";
 
   public static final String PROP_HOMEDIR = "user.home";
   public static final String PROP_CURDIR = "user.dir";
@@ -173,10 +191,15 @@ public class Constants {
       "create.link_successful";
   public static final String RES_CREATE_JOB_SUCCESSFUL =
       "create.job_successful";
+  public static final String RES_CREATE_ROLE_SUCCESSFUL =
+      "create.role_successful";
   public static final String RES_CREATE_CREATING_LINK =
       "create.creating_link";
   public static final String RES_CREATE_CREATING_JOB =
       "create.creating_job";
+
+  public static final String RES_DELETE_ROLE_SUCCESSFUL =
+      "delete.role_successful";
 
   public static final String RES_DISABLE_LINK_SUCCESSFUL =
       "disable.link_successful";
@@ -414,6 +437,34 @@ public class Constants {
       "submission.from_schema";
   public static final String RES_TO_SCHEMA =
     "submission.to_schema";
+
+  public static final String RES_GRANT_ROLE_SUCCESSFUL =
+    "grant.role_successful";
+  public static final String RES_GRANT_PRIVILEGE_SUCCESSFUL =
+    "grant.privilege_successful";
+  public static final String RES_GRANT_PRIVILEGE_SUCCESSFUL_WITH_GRANT =
+    "grant.privilege_successful_with_grant";
+  public static final String RES_REVOKE_ROLE_SUCCESSFUL =
+    "revoke.role_successful";
+  public static final String RES_REVOKE_PRIVILEGE_SUCCESSFUL =
+    "revoke.privilege_successful";
+  public static final String RES_REVOKE_PRIVILEGE_SUCCESSFUL_WITH_GRANT =
+    "revoke.privilege_successful_with_grant";
+
+  public static final String RES_PROMPT_ROLE =
+    "prompt.role";
+  public static final String RES_PROMPT_RESOURCE_TYPE =
+    "prompt.resource_type";
+  public static final String RES_PROMPT_RESOURCE =
+    "prompt.resource";
+  public static final String RES_PROMPT_ACTION =
+    "prompt.action";
+  public static final String RES_PROMPT_PRINCIPAL =
+    "prompt.principal";
+  public static final String RES_PROMPT_PRINCIPAL_TYPE =
+    "prompt.principal_type";
+  public static final String RES_PROMPT_WITH_GRANT =
+    "prompt.with_grant";
 
   private Constants() {
     // Instantiation is prohibited

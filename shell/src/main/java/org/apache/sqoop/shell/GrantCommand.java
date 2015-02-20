@@ -24,16 +24,15 @@ import org.codehaus.groovy.tools.shell.Shell;
 /**
  *
  */
-public class DeleteCommand extends SqoopCommand {
+public class GrantCommand extends SqoopCommand {
 
-  public DeleteCommand(Shell shell) {
+  public GrantCommand(Shell shell) {
     super(shell,
-      Constants.CMD_DELETE,
-      Constants.CMD_DELETE_SC,
+      Constants.CMD_GRANT,
+      Constants.CMD_GRANT_SC,
       ImmutableMap.of(
-        Constants.FN_LINK, DeleteLinkFunction.class,
-        Constants.FN_JOB, DeleteJobFunction.class,
-        Constants.FN_ROLE, DeleteRoleFunction.class
+        Constants.FN_ROLE, GrantRoleFunction.class,
+        Constants.FN_PRIVILEGE, GrantPrivilegeFunction.class
       )
     );
   }

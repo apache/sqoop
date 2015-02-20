@@ -99,6 +99,8 @@ public final class SqoopShell {
     shell.register(new StatusCommand(shell));
     shell.register(new EnableCommand(shell));
     shell.register(new DisableCommand(shell));
+    shell.register(new GrantCommand(shell));
+    shell.register(new RevokeCommand(shell));
 
     // Configure shared shell io object
     setIo(shell.getIo());
