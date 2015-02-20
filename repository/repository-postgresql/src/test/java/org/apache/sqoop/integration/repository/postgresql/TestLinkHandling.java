@@ -32,7 +32,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
