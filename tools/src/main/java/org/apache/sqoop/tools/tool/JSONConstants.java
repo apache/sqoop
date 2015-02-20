@@ -25,8 +25,9 @@ public final class JSONConstants {
   }
 
   public static final String CONNECTOR_ID = "connector-id";
+  public static final String FROM_CONNECTOR_ID = "from-connector-id";
+  public static final String TO_CONNECTOR_ID = "from-connector-id";
   public static final String CONNECTOR_NAME = "connector-name";
-  public static final String ALL = "all";
   public static final String NAME = "name";
   public static final String LINK_ID = "link-id";
   public static final String JOB_ID = "job-id";

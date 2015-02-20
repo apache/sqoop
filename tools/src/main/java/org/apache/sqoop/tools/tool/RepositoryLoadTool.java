@@ -43,9 +43,9 @@ import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.JSONUtils;
-import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.LinkBean;
-import org.apache.sqoop.json.SubmissionBean;
+import org.apache.sqoop.json.JobsBean;
+import org.apache.sqoop.json.LinksBean;
+import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
@@ -136,19 +136,23 @@ public class RepositoryLoadTool extends ConfiguredTool {
     ConnectorManager.getInstance().initialize();
     LOG.info("Loading Connections");
 
-    JSONObject jsonConns = (JSONObject) repo.get(JSONConstants.LINKS);
+    JSONObject jsonLinks = (JSONObject) repo.get(JSONConstants.LINKS);
 
-    if (jsonConns == null) {
+    if (jsonLinks == null) {
       LOG.error("Malformed JSON file. Key " + JSONConstants.LINKS + " not found.");
       return false;
     }
 
-    LinkBean linkBean = new LinkBean();
-    linkBean.restore(updateConnectorIDUsingName(jsonConns));
+    updateConnectorIDUsingName(
+        (JSONArray)jsonLinks.get(JSONConstants.LINKS),
+        JSONConstants.CONNECTOR_ID);
 
-    HashMap<Long, Long> connectionIds = new HashMap<Long, Long>();
+    LinksBean linksBean = new LinksBean();
+    linksBean.restore(jsonLinks);
 
-    for (MLink link : linkBean.getLinks()) {
+    HashMap<Long, Long> linkIds = new HashMap<Long, Long>();
+
+    for (MLink link : linksBean.getLinks()) {
       long oldId = link.getPersistenceId();
       long newId = loadLink(link);
       if (newId == link.PERSISTANCE_ID_DEFAULT) {
@@ -156,9 +160,9 @@ public class RepositoryLoadTool extends ConfiguredTool {
             + " failed. Aborting repository load. Check log for details.");
         return false;
       }
-      connectionIds.put(oldId, newId);
+      linkIds.put(oldId, newId);
     }
-    LOG.info("Loaded " + connectionIds.size() + " connections");
+    LOG.info("Loaded " + linkIds.size() + " links");
 
     LOG.info("Loading Jobs");
     JSONObject jsonJobs = (JSONObject) repo.get(JSONConstants.JOBS);
@@ -168,12 +172,20 @@ public class RepositoryLoadTool extends ConfiguredTool {
       return false;
     }
 
-    JobBean jobBean = new JobBean();
-    jobBean.restore(updateIdUsingMap(updateConnectorIDUsingName(jsonJobs), connectionIds,
-        JSONConstants.LINK_ID));
+    updateConnectorIDUsingName(
+        (JSONArray)jsonJobs.get(JSONConstants.JOBS),
+        JSONConstants.FROM_CONNECTOR_ID);
+    updateConnectorIDUsingName(
+        (JSONArray)jsonJobs.get(JSONConstants.JOBS),
+        JSONConstants.TO_CONNECTOR_ID);
+    updateIdUsingMap((JSONArray)jsonJobs.get(JSONConstants.JOBS),
+        linkIds, JSONConstants.LINK_ID);
+
+    JobsBean jobsBean = new JobsBean();
+    jobsBean.restore(jsonJobs);
 
     HashMap<Long, Long> jobIds = new HashMap<Long, Long>();
-    for (MJob job : jobBean.getJobs()) {
+    for (MJob job : jobsBean.getJobs()) {
       long oldId = job.getPersistenceId();
       long newId = loadJob(job);
 
@@ -195,10 +207,12 @@ public class RepositoryLoadTool extends ConfiguredTool {
       return false;
     }
 
-    SubmissionBean submissionBean = new SubmissionBean();
-    submissionBean.restore(updateIdUsingMap(jsonSubmissions, jobIds, JSONConstants.JOB_ID));
+    updateIdUsingMap((JSONArray)jsonSubmissions.get(JSONConstants.SUBMISSIONS), jobIds, JSONConstants.JOB_ID);
+
+    SubmissionsBean submissionsBean = new SubmissionsBean();
+    submissionsBean.restore(jsonSubmissions);
     int submissionCount = 0;
-    for (MSubmission submission : submissionBean.getSubmissions()) {
+    for (MSubmission submission : submissionsBean.getSubmissions()) {
       resetPersistenceId(submission);
       repository.createSubmission(submission);
       submissionCount++;
@@ -238,7 +252,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
   private long loadLink(MLink link) {
 
-    // starting by pretending we have a brand new connection
+    // starting by pretending we have a brand new link
     resetPersistenceId(link);
 
     Repository repository = RepositoryManager.getInstance().getRepository();
@@ -345,9 +359,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
   }
 
-  private JSONObject updateConnectorIDUsingName(JSONObject json) {
-    JSONArray array = (JSONArray) json.get(JSONConstants.ALL);
-
+  private JSONArray updateConnectorIDUsingName(JSONArray jsonArray, String connectorIdKey) {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     List<MConnector> connectors = repository.findConnectors();
@@ -357,34 +369,32 @@ public class RepositoryLoadTool extends ConfiguredTool {
       connectorMap.put(connector.getUniqueName(), connector.getPersistenceId());
     }
 
-    for (Object obj : array) {
+    for (Object obj : jsonArray) {
       JSONObject object = (JSONObject) obj;
-      long connectorId = (Long) object.get(JSONConstants.CONNECTOR_ID);
+      long connectorId = (Long) object.get(connectorIdKey);
       String connectorName = (String) object.get(JSONConstants.CONNECTOR_NAME);
       long currentConnectorId = connectorMap.get(connectorName);
-      String connectionName = (String) object.get(JSONConstants.NAME);
+      String linkName = (String) object.get(JSONConstants.NAME);
 
       // If a given connector now has a different ID, we need to update the ID
       if (connectorId != currentConnectorId) {
-        LOG.warn("Connection " + connectionName + " uses connector " + connectorName + ". "
+        LOG.warn("Link " + linkName + " uses connector " + connectorName + ". "
             + "Replacing previous ID " + connectorId + " with new ID " + currentConnectorId);
 
-        object.put(JSONConstants.CONNECTOR_ID, currentConnectorId);
+        object.put(connectorIdKey, currentConnectorId);
       }
     }
-    return json;
+
+    return jsonArray;
   }
 
-  private JSONObject updateIdUsingMap(JSONObject json, HashMap<Long, Long> idMap, String fieldName) {
-    JSONArray array = (JSONArray) json.get(JSONConstants.ALL);
-
-    for (Object obj : array) {
+  private JSONArray updateIdUsingMap(JSONArray jsonArray, HashMap<Long, Long> idMap, String fieldName) {
+    for (Object obj : jsonArray) {
       JSONObject object = (JSONObject) obj;
 
       object.put(fieldName, idMap.get(object.get(fieldName)));
     }
 
-    return json;
+    return jsonArray;
   }
-
 }

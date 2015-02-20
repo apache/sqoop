@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -31,10 +32,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.JsonBean;
-import org.apache.sqoop.json.LinkBean;
+import org.apache.sqoop.json.JobsBean;
+import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.SubmissionsBean;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.tools.ConfiguredTool;
@@ -101,17 +102,26 @@ public class RepositoryDumpTool extends ConfiguredTool {
 
     JSONObject result = new JSONObject();
 
-    LOG.info("Dumping Connections with skipSensitive=" + String.valueOf(skipSensitive));
-    LinkBean links = new LinkBean(repository.findLinks());
-    result.put(JSONConstants.LINKS, addConnectorName(links.extract(skipSensitive)));
+    LOG.info("Dumping Links with skipSensitive=" + String.valueOf(skipSensitive));
+    List<MLink> links = repository.findLinks();
+    LinksBean linkBeans = new LinksBean(links);
+    JSONObject linksJsonObject = linkBeans.extract(skipSensitive);
+    JSONArray linksJsonArray = (JSONArray)linksJsonObject.get(JSONConstants.LINKS);
+    addConnectorName(linksJsonArray, JSONConstants.CONNECTOR_ID);
+    result.put(JSONConstants.LINKS, linksJsonObject);
 
     LOG.info("Dumping Jobs with skipSensitive=" + String.valueOf(skipSensitive));
-    JobBean jobs = new JobBean(repository.findJobs());
-    result.put(JSONConstants.JOBS, addConnectorName(jobs.extract(skipSensitive)));
+    JobsBean jobs = new JobsBean(repository.findJobs());
+    JSONObject jobsJsonObject = jobs.extract(skipSensitive);
+    JSONArray jobsJsonArray = (JSONArray)jobsJsonObject.get(JSONConstants.JOBS);
+    addConnectorName(jobsJsonArray, JSONConstants.FROM_CONNECTOR_ID);
+    addConnectorName(jobsJsonArray, JSONConstants.TO_CONNECTOR_ID);
+    result.put(JSONConstants.JOBS, jobsJsonObject);
 
     LOG.info("Dumping Submissions with skipSensitive=" + String.valueOf(skipSensitive));
     SubmissionsBean submissions = new SubmissionsBean(repository.findSubmissions());
-    result.put(JSONConstants.SUBMISSIONS, submissions.extract(skipSensitive));
+    JSONObject submissionsJsonObject = submissions.extract(skipSensitive);
+    result.put(JSONConstants.SUBMISSIONS, submissionsJsonObject);
 
     result.put(JSONConstants.METADATA, repoMetadata(skipSensitive));
 
@@ -129,19 +139,17 @@ public class RepositoryDumpTool extends ConfiguredTool {
     return metadata;
   }
 
-  private JSONObject addConnectorName(JSONObject json) {
+  private JSONArray addConnectorName(JSONArray jsonArray, String connectorKey) {
     ConnectorManager connectorManager = ConnectorManager.getInstance();
 
-    JSONArray results = (JSONArray) json.get(JsonBean.ALL);
-
-    Iterator<JSONObject> iterator = results.iterator();
+    Iterator<JSONObject> iterator = jsonArray.iterator();
 
     while (iterator.hasNext()) {
       JSONObject result = iterator.next();
-      Long connectorId = (Long) result.get(JSONConstants.CONNECTOR_ID);
+      Long connectorId = (Long) result.get(connectorKey);
       result.put(JSONConstants.CONNECTOR_NAME,  connectorManager.getConnectorConfigurable(connectorId).getUniqueName());
     }
 
-    return json;
+    return jsonArray;
   }
 }
