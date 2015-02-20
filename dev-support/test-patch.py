@@ -270,11 +270,24 @@ def run_mvn_test(command, test_type, result, output_dir, slow):
     test_file_name = "%s_fast" % test_type
     test_type = "fast %s" % test_type
 
+  # Execute the test run
   rc = execute("mvn %s 1>%s/test_%s.txt 2>&1" % (command, output_dir, test_file_name))
+
+  # Test run statistics (number of executed/skipped tests)
+  executed_tests = 0
+  fd = open("%s/test_%s.txt" % (output_dir, test_file_name))
+  for line in fd:
+    if "Tests run:" in line:
+      matcher = re.search("^Tests run: ([0-9+]), Failures: ([0-9+]), Errors: ([0-9+]), Skipped: ([0-9+]), Time elapsed:", line)
+      if matcher:
+        executed_tests += int(matcher.group(1))
+  fd.close()
+
+  # Based on whether they are
   if rc == 0:
-    result.success("All %s tests passed" % test_type)
+    result.success("All %s tests passed (executed %d tests)" % (test_type ,executed_tests) )
   else:
-    result.error("Some %s tests failed (%s)" % (test_type, jenkins_file_link_for_jira("report", "test_%s.txt" % test_file_name)))
+    result.error("Some of %s tests failed (%s, executed %d tests)" % (test_type, jenkins_file_link_for_jira("report", "test_%s.txt" % test_file_name), executed_tests))
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
