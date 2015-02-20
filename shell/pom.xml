@@ -80,9 +80,9 @@ limitations under the License.
 
   <profiles>
     <profile>
-      <id>dist</id>
+      <id>binary</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <build>
         <plugins>
