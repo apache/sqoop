@@ -649,7 +649,8 @@ limitations under the License.
             <reuseForks>false</reuseForks>
             <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
-            <argLine>-Xms512m -Xmx2g -XX:MaxPermSize=1024m</argLine>
+            <!-- See SQOOP-2120 for details about use of -XX:-UseSplitVerifier -->
+            <argLine>-Xms512m -Xmx2g -XX:MaxPermSize=1024m -XX:-UseSplitVerifier</argLine>
             <properties>
               <property>
                 <name>usedefaultlisteners</name>
