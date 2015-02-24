@@ -18,22 +18,22 @@
 package org.apache.sqoop.repository.common;
 
 public class CommonRepoUtils {
-  public static final String TABLE_NAME_QUOTE_CHAR = "\"";
+  public static final String QUOTE_CHARACTER = "\"";
 
   public static final String escapeTableName(String tableName) {
-    return TABLE_NAME_QUOTE_CHAR + tableName + TABLE_NAME_QUOTE_CHAR;
+    return QUOTE_CHARACTER + tableName + QUOTE_CHARACTER;
   }
 
   public static final String escapeColumnName(String columnName) {
-    return TABLE_NAME_QUOTE_CHAR + columnName + TABLE_NAME_QUOTE_CHAR;
+    return QUOTE_CHARACTER + columnName + QUOTE_CHARACTER;
   }
 
   public static final String escapeSchemaName(String schemaName) {
-    return TABLE_NAME_QUOTE_CHAR + schemaName + TABLE_NAME_QUOTE_CHAR;
+    return QUOTE_CHARACTER + schemaName + QUOTE_CHARACTER;
   }
 
   public static final String escapeConstraintName(String constraintName) {
-    return TABLE_NAME_QUOTE_CHAR + constraintName + TABLE_NAME_QUOTE_CHAR;
+    return QUOTE_CHARACTER + constraintName + QUOTE_CHARACTER;
   }
 
   public static final String getTableName(String schemaName, String tableName) {

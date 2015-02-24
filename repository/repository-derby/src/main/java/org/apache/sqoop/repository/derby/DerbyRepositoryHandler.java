@@ -17,9 +17,9 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.SCHEMA_SQOOP;
 import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.*;
-import static org.apache.sqoop.repository.common.CommonRepositoryInsertUpdateDeleteSelectQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
 
 import java.net.URL;
@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -236,6 +237,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_ADD_COLUMN_UPDATE_USER, conn);
     }
     if(repositoryVersion <= 2) {
+      migrateFromUnnamedConstraintsToNamedConstraints(conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_SUBMISSION_MODIFY_COLUMN_SQS_EXTERNAL_ID_VARCHAR_50, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONNECTOR_MODIFY_COLUMN_SQC_VERSION_VARCHAR_64, conn);
     }
@@ -305,6 +307,88 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
 
     // last step upgrade the repository version to the latest value in the code
     upgradeRepositoryVersion(conn);
+  }
+
+  /**
+   * In reality, this method simply drops all constrains on particular tables
+   * and creates new constraints. Pre-1.99.3 these will be unnamed,
+   * Post-1.99.3 these will be named.
+   *
+   * @param conn
+   */
+  private void migrateFromUnnamedConstraintsToNamedConstraints(Connection conn) {
+    // Get unnamed constraints
+    PreparedStatement fetchUnnamedConstraintsStmt = null;
+    Statement dropUnnamedConstraintsStmt = null;
+    Map<String, List<String>> autoConstraintNameMap = new TreeMap<String, List<String>>();
+
+    try {
+      fetchUnnamedConstraintsStmt = conn.prepareStatement(STMT_FETCH_TABLE_FOREIGN_KEYS);
+      for (String tableName : new String[] {
+          DerbySchemaConstants.TABLE_SQ_FORM_NAME,
+          CommonRepositorySchemaConstants.TABLE_SQ_INPUT_NAME,
+          DerbySchemaConstants.TABLE_SQ_CONNECTION_NAME,
+          CommonRepositorySchemaConstants.TABLE_SQ_JOB_NAME,
+          DerbySchemaConstants.TABLE_SQ_CONNECTION_INPUT_NAME,
+          CommonRepositorySchemaConstants.TABLE_SQ_JOB_INPUT_NAME,
+          CommonRepositorySchemaConstants.TABLE_SQ_SUBMISSION_NAME,
+          CommonRepositorySchemaConstants.TABLE_SQ_COUNTER_SUBMISSION_NAME
+      }) {
+        fetchUnnamedConstraintsStmt.setString(1, tableName);
+
+        if (!autoConstraintNameMap.containsKey(tableName)) {
+          autoConstraintNameMap.put(tableName, new ArrayList<String>());
+        }
+
+        List<String> autoConstraintNames = autoConstraintNameMap.get(tableName);
+
+        if (fetchUnnamedConstraintsStmt.execute()) {
+          LOG.info("QUERY(" + STMT_FETCH_TABLE_FOREIGN_KEYS + ") with args: [" + tableName + "]");
+          ResultSet rs = fetchUnnamedConstraintsStmt.getResultSet();
+
+          while (rs.next()) {
+            autoConstraintNames.add(rs.getString(1));
+          }
+
+          rs.close();
+        }
+      }
+    } catch (SQLException e) {
+      throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
+    } finally {
+      closeStatements(fetchUnnamedConstraintsStmt);
+    }
+
+    // Drop constraints
+    for (String tableName : autoConstraintNameMap.keySet()) {
+      for (String constraintName : autoConstraintNameMap.get(tableName)) {
+        String query = DerbySchemaUpgradeQuery.getDropConstraintQuery(
+            SCHEMA_SQOOP, tableName, constraintName);
+        try {
+          dropUnnamedConstraintsStmt = conn.createStatement();
+          dropUnnamedConstraintsStmt.execute(query);
+        } catch (SQLException e) {
+          throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
+        } finally {
+          LOG.info("QUERY(" + query + ")");
+          closeStatements(dropUnnamedConstraintsStmt);
+        }
+      }
+    }
+
+    // Create named constraints
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQF_SQC, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQI_SQF, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQN_SQC, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQB_SQN, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQNI_SQN, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQNI_SQI, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQBI_SQB, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQBI_SQI, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQS_SQB, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQRS_SQG, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQRS_SQR, conn);
+    runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQRS_SQS, conn);
   }
 
   // SQOOP-1498 refactoring related upgrades for table and column names

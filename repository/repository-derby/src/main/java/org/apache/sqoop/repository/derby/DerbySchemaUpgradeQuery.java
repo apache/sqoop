@@ -38,7 +38,6 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
 // enhancing this code
 public final class DerbySchemaUpgradeQuery {
 
-
   // DDL: Increased size of SQ_CONNECTOR.SQC_VERSION to 64
   public static final String QUERY_UPGRADE_TABLE_SQ_CONNECTOR_MODIFY_COLUMN_SQC_VERSION_VARCHAR_64 =
     "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " ALTER COLUMN "
@@ -515,7 +514,91 @@ public final class DerbySchemaUpgradeQuery {
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " ADD COLUMN "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQI_EDITABLE) + " VARCHAR(32)";
 
-    private DerbySchemaUpgradeQuery() {
+  // Add 1.99.3 constraints
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQF_SQC = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_FORM_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQF_SQC_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQF_CONNECTOR) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQI_SQF = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQI_SQF_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_FORM) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_FORM_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQF_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQN_SQC = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQN_SQC_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQN_CONNECTOR) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQB_SQN = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQB_SQN_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CONNECTION) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQN_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQNI_SQN = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_INPUT_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQNI_SQN_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_CONNECTION) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQN_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQNI_SQI = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_INPUT_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQNI_SQI_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_INPUT) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQBI_SQB = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQBI_SQB_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQBI_SQI = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQBI_SQI_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQS_SQB = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQS_SQB_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQRS_SQG = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQRS_SQG_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_GROUP) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_GROUP_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQG_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQRS_SQR = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQRS_SQR_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_COUNTER) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQR_ID) + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQRS_SQS = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME)
+      + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQRS_SQS_NAME)
+      + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQRS_SUBMISSION) + ") REFERENCES "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + ") ON DELETE CASCADE";
+
+  public static final String getDropConstraintQuery(String schemaName, String tableName, String constraintName) {
+    StringBuilder queryBuilder = new StringBuilder();
+
+    queryBuilder.append("ALTER TABLE ");
+    queryBuilder.append(CommonRepoUtils.getTableName(schemaName, tableName));
+    queryBuilder.append(" DROP CONSTRAINT ");
+    queryBuilder.append(CommonRepoUtils.getConstraintName(schemaName, constraintName));
+
+    return queryBuilder.toString();
+  }
+
+  private DerbySchemaUpgradeQuery() {
     // Disable explicit object creation
   }
 }

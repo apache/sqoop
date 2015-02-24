@@ -98,6 +98,13 @@ public final class DerbySchemaInsertUpdateDeleteSelectQuery extends CommonReposi
            + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIRECTION)
            + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME);
 
+  public static final String STMT_FETCH_TABLE_FOREIGN_KEYS = "SELECT "
+      + CommonRepoUtils.escapeColumnName("CONSTRAINTNAME")
+      + " FROM " + CommonRepoUtils.getTableName("SYS", "SYSCONSTRAINTS")
+      + " C LEFT JOIN " + CommonRepoUtils.getTableName("SYS", "SYSTABLES")
+      + " T ON C." + CommonRepoUtils.escapeColumnName("TABLEID") + " = T." + CommonRepoUtils.escapeColumnName("TABLEID")
+      +  " WHERE C.TYPE = 'F' AND T." + CommonRepoUtils.escapeColumnName("TABLENAME") + " = ?";
+
   private DerbySchemaInsertUpdateDeleteSelectQuery() {
     // Disable explicit object creation
   }
