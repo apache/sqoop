@@ -247,6 +247,10 @@ public class HBaseImportJob extends DataDrivenImportJob {
       }
     }
 
+    // Make sure we close the connection to HBA, this is only relevant in
+    // unit tests
+    admin.close();
+
     // Make sure HBase libraries are shipped as part of the job.
     TableMapReduceUtil.addDependencyJars(job);
     TableMapReduceUtil.addDependencyJars(conf, HTable.class);
