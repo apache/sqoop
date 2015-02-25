@@ -526,7 +526,7 @@ abstract public class DerbyTestCase {
       // First config
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
+          + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30, 'USER_ONLY')");
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
           + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
@@ -534,10 +534,10 @@ abstract public class DerbyTestCase {
       // Second config
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
+          + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30, 'USER_ONLY')");
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
+          + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30, 'USER_ONLY')");
     }
   }
 

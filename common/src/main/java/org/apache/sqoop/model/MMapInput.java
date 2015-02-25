@@ -48,7 +48,7 @@ public final class MMapInput extends MInput<Map<String, String>> {
         vsb.append("&");
       }
       vsb.append(UrlSafeUtils.urlEncode(entry.getKey())).append("=");
-      vsb.append(UrlSafeUtils.urlEncode(entry.getValue()));
+      vsb.append(entry.getValue() != null ? UrlSafeUtils.urlEncode(entry.getValue()): null);
     }
     return vsb.toString();
   }

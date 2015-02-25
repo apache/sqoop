@@ -20,6 +20,11 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Represents the various config types supported by the system.
  */
@@ -35,9 +40,26 @@ public enum MConfigType {
   CONNECTION,
 
   /** link config type */
-  LINK,
+  LINK("link"),
 
   /** Job config type */
-  JOB;
+  // NOTE: cannot use the constants declared below since it is not declared yet
+  // compiler restriction
+  JOB("from", "to", "driver");
 
+  private final Set<String> subTypes;
+
+  MConfigType(String... subTypes) {
+    Set<String> subT = new HashSet<String>();
+    subT.addAll(Arrays.asList(subTypes));
+    this.subTypes = Collections.unmodifiableSet(subT);
+  }
+
+  public static Set<String> getSubTypes(MConfigType type) {
+    return type.subTypes;
+  }
+
+  public static final String FROM_SUB_TYPE = "from";
+  public static final String TO_SUB_TYPE = "to";
+  public static final String DRIVER_SUB_TYPE = "driver";
 }

@@ -28,7 +28,9 @@ import java.util.List;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.error.code.CommonRepositoryError;
@@ -285,6 +287,48 @@ public class TestLinkHandling extends DerbyTestCase {
     handler.deleteLink(2, getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_LINK", 0);
     assertCountForTable("SQOOP.SQ_LINK_INPUT", 0);
+  }
+
+  @Test
+  public void testUpdateLinkConfig() throws Exception {
+    loadLinksForLatestVersion();
+
+    assertCountForTable("SQOOP.SQ_LINK", 2);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 8);
+    MLink link = handler.findLink(1, getDerbyDatabaseConnection());
+
+    List<MConfig> configs = link.getConnectorLinkConfig().getConfigs();
+    MConfig config = configs.get(0).clone(false);
+    MConfig newConfig = new MConfig(config.getName(), config.getInputs());
+
+    ((MStringInput) newConfig.getInputs().get(0)).setValue("LinkConfigUpdated");
+
+    handler.updateLinkConfig(link.getPersistenceId(), newConfig, MConfigUpdateEntityType.USER,
+        getDerbyDatabaseConnection());
+
+    MLink updatedLink = handler.findLink(1, getDerbyDatabaseConnection());
+    MLinkConfig newConfigs = updatedLink.getConnectorLinkConfig();
+    assertEquals(2, newConfigs.getConfigs().size());
+    MConfig updatedLinkConfig = newConfigs.getConfigs().get(0);
+    assertEquals("LinkConfigUpdated", updatedLinkConfig.getInputs().get(0).getValue());
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testNonExistingLinkConfigFetch() throws Exception {
+    loadLinksForLatestVersion();
+    assertCountForTable("SQOOP.SQ_LINK", 2);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 8);
+    handler.findLinkConfig(1, "Non-ExistingC1LINK1", getDerbyDatabaseConnection());
+  }
+
+  @Test
+  public void testLinkConfigFetch() throws Exception {
+    loadLinksForLatestVersion();
+    assertCountForTable("SQOOP.SQ_LINK", 2);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 8);
+    MConfig config = handler.findLinkConfig(1, "C1LINK0", getDerbyDatabaseConnection());
+    assertEquals("Value1", config.getInputs().get(0).getValue());
+    assertNull(config.getInputs().get(1).getValue());
   }
 
   public MLink getLink() {

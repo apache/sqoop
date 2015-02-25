@@ -277,6 +277,14 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + " = ? "
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
 
+
+  // UPDATE the LINK Input
+  public static final String STMT_UPDATE_LINK_INPUT =
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " SET "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE) + " = ? "
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + " = ?"
+          + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " = ?";
+
   // DML: Delete rows from link input table
   public static final String STMT_DELETE_LINK_INPUT =
       "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
@@ -383,6 +391,13 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
       "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " SET "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ENABLED) + " = ? "
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
+
+  // UPDATE the JOB Input
+  public static final String STMT_UPDATE_JOB_INPUT =
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME) + " SET "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE) + " = ? "
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + " = ?"
+          + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " = ?";
 
   // DML: Delete rows from job input table
   public static final String STMT_DELETE_JOB_INPUT =
@@ -695,6 +710,10 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
     return STMT_ENABLE_LINK;
   }
 
+  public String getStmtUpdateLinkInput() {
+    return STMT_UPDATE_LINK_INPUT;
+  }
+
   public String getStmtDeleteLinkInput() {
     return STMT_DELETE_LINK_INPUT;
   }
@@ -737,6 +756,10 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   public String getStmtEnableJob() {
     return STMT_ENABLE_JOB;
+  }
+
+  public String getStmtUpdateJobInput() {
+    return STMT_UPDATE_JOB_INPUT;
   }
 
   public String getStmtDeleteJobInput() {

@@ -23,8 +23,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
+import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MSubmission;
@@ -657,6 +660,119 @@ public class JdbcRepository extends Repository {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MConfig findFromJobConfig(final long jobId, final String configName) {
+    return (MConfig) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if (!handler.existsJob(jobId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
+        }
+        return handler.findFromJobConfig(jobId, configName, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MConfig findToJobConfig(final long jobId, final String configName) {
+    return (MConfig) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if (!handler.existsJob(jobId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
+        }
+        return handler.findToJobConfig(jobId, configName, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MConfig findDriverJobConfig(final long jobId, final String configName) {
+    return (MConfig) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if (!handler.existsJob(jobId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
+        }
+        return handler.findDriverJobConfig(jobId, configName, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MConfig findLinkConfig(final long linkId, final String configName) {
+    return (MConfig) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if (!handler.existsLink(linkId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid id: " + linkId);
+        }
+        return handler.findLinkConfig(linkId, configName, conn);
+      }
+    });
+  }
+
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateJobConfig(final long jobId, final MConfig config, final MConfigUpdateEntityType type) {
+    updateJobConfig(jobId, config, null);
+  }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateJobConfig(final long jobId, final MConfig config, final MConfigUpdateEntityType type, RepositoryTransaction tx) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if (!handler.existsJob(jobId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
+        }
+        handler.updateJobConfig(jobId, config, type, conn);
+        return null;
+      }
+    }, (JdbcRepositoryTransaction) tx);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateLinkConfig(final long linkId, final MConfig config, final MConfigUpdateEntityType type) {
+    updateLinkConfig(linkId, config, type, null);
+  }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateLinkConfig(final long linkId, final MConfig config, final MConfigUpdateEntityType type, RepositoryTransaction tx) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if (!handler.existsLink(linkId, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid id: " + linkId);
+        }
+        handler.updateLinkConfig(linkId, config, type,  conn);
+        return null;
+      }
+    }, (JdbcRepositoryTransaction) tx);
+  }
+
   @Override
   protected void deleteJobInputs(final long jobID, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
@@ -666,7 +782,6 @@ public class JdbcRepository extends Repository {
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);
-
   }
 
   @Override

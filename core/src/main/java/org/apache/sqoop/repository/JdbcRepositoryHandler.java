@@ -21,6 +21,8 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
@@ -416,4 +418,62 @@ public abstract class JdbcRepositoryHandler {
    * @return Most recent submission
    */
   public abstract MSubmission findLastSubmissionForJob(long jobId, Connection conn);
+
+  /**
+   * fetch the job config for the FROM type for the given name
+   * @param jobId id of the job
+   * @param configName name of the config unique to this job and type
+   * @param conn Connection to the repository
+   * @return config object
+   */
+   public abstract MConfig findFromJobConfig(long jobId, String configName, Connection con);
+
+
+   /**
+    * fetch the job config for the TO type for the given name
+    * @param jobId id of the job
+    * @param configName name of the config unique to this job and type
+    * @param conn Connection to the repository
+    * @return config object
+    */
+   public abstract MConfig findToJobConfig(long jobId, String configName, Connection con);
+
+
+   /**
+    * fetch the job config for the DRIVER type for the given name
+    * @param jobId id of the job
+    * @param configName name of the config unique to this job and type
+    * @param conn Connection to the repository
+    * @return config object
+    */
+   public abstract MConfig findDriverJobConfig(long jobId, String configName, Connection con);
+
+
+   /**
+    * fetch the link config for the link type for the given name
+    * @param linkId id of the link
+    * @param configName name of the config unique to this link and type
+    * @param conn Connection to the repository
+    * @return config object
+    */
+   public abstract MConfig findLinkConfig(long linkId, String configName, Connection con);
+
+   /**
+    * Update the config object for the job
+    * @param jobId id of the job
+    * @param config name of the config
+    * @param type entity type updating the link config
+    * @param conn Connection to the repository
+    */
+   public abstract void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType type,  Connection con);
+
+   /**
+    * Update the config object for the link
+    * @param linkId id of the link
+    * @param config name of the config
+    * @param type entity type updating the link config
+    * @param conn Connection to the repository
+    */
+   public abstract void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType type, Connection con);
+
 }

@@ -26,6 +26,7 @@ import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.model.InputEditable;
+import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.model.MBooleanInput;
@@ -1258,8 +1259,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           Statement.RETURN_GENERATED_KEYS);
 
       // Register link type config
-      registerConfigs(connectorId, null /* No direction for LINK type config*/, mc.getLinkConfig().getConfigs(),
-          MConfigType.LINK.name(), baseConfigStmt, baseInputStmt, conn);
+      registerConfigs(connectorId, null /* No direction for LINK type config */, mc.getLinkConfig()
+          .getConfigs(), MConfigType.LINK.name(), baseConfigStmt, baseInputStmt, conn);
 
       // Register both from/to job type config for connector
       if (mc.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
@@ -1622,7 +1623,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     try {
       rsConnection = stmt.executeQuery();
 
-      //
       connectorConfigFetchStatement = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
       connectorConfigInputStatement = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());
 
@@ -1719,7 +1719,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> toConnectorFromJobConfig = new ArrayList<MConfig>();
         List<MConfig> toConnectorToJobConfig = new ArrayList<MConfig>();
 
-        // ?? dont we need 2 different driver configs for the from/to?
         List<MConfig> driverConfig = new ArrayList<MConfig>();
 
         loadConnectorConfigs(toConnectorLinkConfig, toConnectorFromJobConfig, toConnectorToJobConfig,
@@ -1945,6 +1944,125 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       children.add(override);
     }
     return children;
+  }
+
+  @Override
+  public MConfig findFromJobConfig(long jobId, String configName, Connection conn) {
+    MFromConfig fromConfigs = findJob(jobId, conn).getFromJobConfig();
+    if (fromConfigs != null) {
+      MConfig config = fromConfigs.getConfig(configName);
+      if (config == null) {
+        throw new SqoopException(CommonRepositoryError.COMMON_0049, "for configName :" + configName);
+      }
+      return config;
+    }
+    throw new SqoopException(CommonRepositoryError.COMMON_0049, "for configName :" + configName);
+  }
+
+  @Override
+  public MConfig findToJobConfig(long jobId, String configName, Connection conn) {
+    MToConfig toConfigs = findJob(jobId, conn).getToJobConfig();
+    if (toConfigs != null) {
+      MConfig config = toConfigs.getConfig(configName);
+      if (config == null) {
+        throw new SqoopException(CommonRepositoryError.COMMON_0050, "for configName :" + configName);
+      }
+      return config;
+    }
+    throw new SqoopException(CommonRepositoryError.COMMON_0050, "for configName :" + configName);
+  }
+
+  @Override
+  public MConfig findDriverJobConfig(long jobId, String configName, Connection conn) {
+    MDriverConfig driverConfigs = findJob(jobId, conn).getDriverConfig();
+    if (driverConfigs != null) {
+      MConfig config = driverConfigs.getConfig(configName);
+      if (config == null) {
+        throw new SqoopException(CommonRepositoryError.COMMON_0051, "for configName :" + configName);
+      }
+      return config;
+    }
+    throw new SqoopException(CommonRepositoryError.COMMON_0051, "for configName :" + configName);
+  }
+
+  @Override
+  public MConfig findLinkConfig(long linkId, String configName, Connection conn) {
+    MConfig driverConfig = findLink(linkId, conn).getConnectorLinkConfig(configName);
+    if (driverConfig == null) {
+      throw new SqoopException(CommonRepositoryError.COMMON_0052, "for configName :" + configName);
+    }
+    return driverConfig;
+  }
+
+  @SuppressWarnings("resource")
+  @Override
+  public void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType type,
+      Connection conn) {
+    List<MInput<?>> inputs = config.getInputs();
+    PreparedStatement updateStmt = null;
+
+    try {
+      updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJobInput());
+      for (MInput<?> input : inputs) {
+        if (input.isEmpty()) {
+          continue;
+        }
+        validateEditableConstraints(type, input);
+        updateStmt.setString(1, input.getUrlSafeValueString());
+        updateStmt.setLong(2, input.getPersistenceId());
+        updateStmt.setLong(3, jobId);
+        updateStmt.executeUpdate();
+      }
+    } catch (SQLException ex) {
+      logException(ex, jobId);
+      throw new SqoopException(CommonRepositoryError.COMMON_0053, ex);
+    } finally {
+      closeStatements(updateStmt);
+    }
+  }
+
+  private void validateEditableConstraints(MConfigUpdateEntityType type, MInput<?> input) {
+    if (input.getEditable().equals(InputEditable.CONNECTOR_ONLY)
+        && type.equals(MConfigUpdateEntityType.USER)) {
+      throw new SqoopException(CommonRepositoryError.COMMON_0055);
+    }
+    if (input.getEditable().equals(InputEditable.USER_ONLY)
+        && type.equals(MConfigUpdateEntityType.CONNECTOR)) {
+      throw new SqoopException(CommonRepositoryError.COMMON_0056);
+    }
+  }
+
+  @Override
+  public void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType type,
+      Connection conn) {
+    List<MInput<?>> inputs = config.getInputs();
+    PreparedStatement updateStmt = null;
+    try {
+      updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateLinkInput());
+      for (MInput<?> input : inputs) {
+        if (input.isEmpty()) {
+          continue;
+        }
+        validateEditableConstraints(type, input);
+        updateStmt.setString(1, input.getUrlSafeValueString());
+        updateStmt.setLong(2, input.getPersistenceId());
+        updateStmt.setLong(3, linkId);
+        updateStmt.executeUpdate();
+      }
+    } catch (SQLException ex) {
+      logException(ex, linkId);
+      throw new SqoopException(CommonRepositoryError.COMMON_0054, ex);
+    } finally {
+      closeStatements(updateStmt);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String validationQuery() {
+    return "values(1)"; // Yes, this is valid PostgreSQL SQL
   }
 
   /**
@@ -2305,10 +2423,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
-  private void createInputValues(String query,
-                                 long id,
-                                 List<MConfig> configs,
-                                 Connection conn) throws SQLException {
+  private void createInputValues(String query, long id, List<MConfig> configs, Connection conn)
+      throws SQLException {
     PreparedStatement stmt = null;
     int result;
 
@@ -2316,7 +2432,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       stmt = conn.prepareStatement(query);
 
       for (MConfig config : configs) {
-        for (MInput input : config.getInputs()) {
+        for (MInput<?> input : config.getInputs()) {
           // Skip empty values as we're not interested in storing those in db
           if (input.isEmpty()) {
             continue;
@@ -2327,8 +2443,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
           result = stmt.executeUpdate();
           if (result != 1) {
-            throw new SqoopException(CommonRepositoryError.COMMON_0017,
-                Integer.toString(result));
+            throw new SqoopException(CommonRepositoryError.COMMON_0017, Integer.toString(result));
           }
         }
       }

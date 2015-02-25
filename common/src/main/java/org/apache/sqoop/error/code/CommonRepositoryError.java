@@ -196,6 +196,22 @@ public enum CommonRepositoryError implements ErrorCode {
 
   COMMON_0048("Config Input overrides could not be fetched"),
 
+  COMMON_0049("Unable to fetch FROM job config"),
+
+  COMMON_0050("Unable to fetch TO job config"),
+
+  COMMON_0051("Unable to fetch DRIVER job config"),
+
+  COMMON_0052("Unable to fetch LINK config"),
+
+  COMMON_0053("Unable to update job config"),
+
+  COMMON_0054("Unable to update link config"),
+
+  COMMON_0055("Unable to update CONNECTOR_ONLY editable config"),
+
+  COMMON_0056("Unable to update  USER_ONLY editable config"),
+
   ;
 
   private final String message;

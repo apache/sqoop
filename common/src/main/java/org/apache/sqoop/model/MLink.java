@@ -81,8 +81,8 @@ public class MLink extends MAccountableEntity implements MClonable {
   public MLinkConfig getConnectorLinkConfig() {
     return connectorLinkConfig;
   }
-  public MConfig getConnectorLinkConfig(String formName) {
-    return connectorLinkConfig.getConfig(formName);
+  public MConfig getConnectorLinkConfig(String configName) {
+    return connectorLinkConfig.getConfig(configName);
   }
 
   @Override

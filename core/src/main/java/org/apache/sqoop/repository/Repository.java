@@ -33,6 +33,7 @@ import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
@@ -325,6 +326,80 @@ public abstract class Repository {
    * @return Most recent submission
    */
   public abstract MSubmission findLastSubmissionForJob(long jobId);
+
+ /**
+  * fetch the job config for the FROM type for the given name
+  * @param jobId id of the job
+  * @param configName name of the config unique to this job and type
+  * @return config object
+  */
+  public abstract MConfig findFromJobConfig(long jobId, String configName);
+
+
+  /**
+   * fetch the job config for the TO type for the given name
+   * @param jobId id of the job
+   * @param configName name of the config unique to this job and type
+   * @return config object
+   */
+  public abstract MConfig findToJobConfig(long jobId, String configName);
+
+
+  /**
+   * fetch the job config for the DRIVER type for the given name
+   * @param jobId id of the job
+   * @param configName name of the config unique to this job and type
+   * @return config object
+   */
+  public abstract MConfig findDriverJobConfig(long jobId, String configName);
+
+
+  /**
+   * fetch the link config for the link type for the given name
+   * @param linkId id of the link
+   * @param configName name of the config unique to this link and type
+   * @return config object
+   */
+  public abstract MConfig findLinkConfig(long linkId, String configName);
+
+
+  /**
+   * Update the config object for the job
+   * @param jobId id of the job
+   * @param config name of the config
+   * @param updateEntityType entity type updating the link config
+   */
+  public abstract void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType updateEntityType);
+
+  /**
+   * Update the config object for the job
+   * @param jobId id of the job
+   * @param config name of the config
+   * @param updateEntityType entity type updating the link config
+   * @param tx database transaction
+   */
+  public abstract void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType updateEntityType,  RepositoryTransaction tx);
+
+
+  /**
+   * Update the config object for the link
+   * @param linkId id of the link
+   * @param config name of the config
+   * @param updateEntityType entity type updating the link config
+   */
+  public abstract void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType updateEntityType);
+
+  /**
+   * Update the config object for the link
+   * @param linkId id of the link
+   * @param config name of the config
+   * @param updateEntityType entity type updating the link config
+   * @param tx database transaction
+   */
+  public abstract void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType updateEntityType, RepositoryTransaction tx);
+
+
+  /*********************Configurable Upgrade APIs ******************************/
 
   /**
    * Update the connector with the new data supplied in the
