@@ -567,7 +567,7 @@ public final class DerbySchemaUpgradeQuery {
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
       + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQS_SQB_NAME)
       + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + ") REFERENCES "
-      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + ")";
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " (" + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + ") ON DELETE CASCADE";
 
   public static final String QUERY_UPGRADE_TABLE_SQ_FORM_ADD_CONSTRAINT_SQRS_SQG = "ALTER TABLE "
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_COUNTER_SUBMISSION_NAME)
