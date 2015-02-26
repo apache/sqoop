@@ -598,6 +598,37 @@ public final class DerbySchemaUpgradeQuery {
     return queryBuilder.toString();
   }
 
+  // Update Generic Jdbc Connector configs
+
+  public static final String QUERY_UPDATE_TABLE_SQ_CONFIG_NAME =
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
+          + " SET " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + " = ?"
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + " = ?";
+
+  public static final String QUERY_UPDATE_TABLE_SQ_INPUT_SQI_NAME =
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
+          + " SET " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + " = ?"
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + " = ?"
+          + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = ?";
+
+  public static final String QUERY_SELECT_CONFIG_ID_BY_NAME =
+      "SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + " = ?";
+
+  public static final String QUERY_SELECT_DIRECTION_CONFIG_BY_DIRECTION_NAME =
+      "SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_DIRECTIONS_NAME)
+          + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME)
+            + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_DIRECTION)
+            + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQD_NAME) + " = ?";
+
+  public static final String QUERY_SELECT_CONFIG_ID_BY_NAME_AND_DIRECTION = QUERY_SELECT_CONFIG_ID_BY_NAME
+      + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + " IN ("
+        + QUERY_SELECT_DIRECTION_CONFIG_BY_DIRECTION_NAME
+      + ")";
+
   private DerbySchemaUpgradeQuery() {
     // Disable explicit object creation
   }

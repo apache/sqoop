@@ -77,6 +77,7 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String COLUMN_SQ_CFG_CONFIGURABLE = "SQ_CFG_CONFIGURABLE";
 
+  @Deprecated
   public static final String COLUMN_SQ_CFG_DIRECTION = "SQ_CFG_DIRECTION";
 
   public static final String COLUMN_SQ_CFG_NAME = "SQ_CFG_NAME";

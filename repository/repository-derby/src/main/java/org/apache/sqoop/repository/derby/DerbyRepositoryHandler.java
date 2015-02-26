@@ -291,6 +291,13 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
         updateDriverConfigInput(conn, driverId);
         LOG.info("Finished Updating config and inputs for the driver.");
       }
+
+      // Update generic jdbc connector
+      if (repositoryVersion > 0) {
+        DerbyUpgradeGenericJdbcConnectorConfigAndInputNames derbyUpgradeGenericJdbcConnectorConfigAndInputNames
+            = new DerbyUpgradeGenericJdbcConnectorConfigAndInputNames(this, conn);
+        derbyUpgradeGenericJdbcConnectorConfigAndInputNames.execute();
+      }
     }
 
     if (repositoryVersion < 5) {

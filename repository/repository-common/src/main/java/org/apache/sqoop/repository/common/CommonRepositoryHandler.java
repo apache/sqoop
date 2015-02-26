@@ -2523,7 +2523,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    *
    * @param stmts Statements to close
    */
-  protected void closeStatements(Statement... stmts) {
+  public void closeStatements(Statement... stmts) {
     if(stmts == null) {
       return;
     }
