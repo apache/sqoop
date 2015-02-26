@@ -70,7 +70,7 @@ public class SqlServerUpsertOutputFormatTest {
       + "_source.FirstColumn = _target.FirstColumn"
       + "  WHEN MATCHED THEN UPDATE SET _target.SecondColumn = "
       + "_source.SecondColumn, _target.ThirdColumn = _source.ThirdColumn"
-      + "  WHEN NOT MATCHED THEN INSERT ( FirstColumn, SecondColumn, "
+      + "  WHEN NOT MATCHED THEN INSERT ( FirstColumn, SecondColumn,"
       + " ThirdColumn ) VALUES "
       + "( _source.FirstColumn, _source.SecondColumn, _source.ThirdColumn ) "
       + "OPTION (NOLOCK);", recordWriter.getUpdateStatement());
