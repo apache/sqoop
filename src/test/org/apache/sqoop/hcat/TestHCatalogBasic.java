@@ -192,7 +192,7 @@ public class TestHCatalogBasic extends TestCase {
       "dbtable",
       "--hcatalog-table",
       "table",
-      "--as-avrofile",
+      "--as-avrodatafile",
     };
     try {
       SqoopOptions opts = parseImportArgs(args);
