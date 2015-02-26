@@ -18,8 +18,6 @@
 
 package org.apache.sqoop.tool;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -43,60 +41,15 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 
   private MainframeImportTool mfImportTool;
 
-  private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-
   @Before
   public void setUp() {
 
     mfImportTool = new MainframeImportTool();
-    System.setOut(new PrintStream(outContent));
   }
 
   @After
   public void tearDown() {
     System.setOut(null);
-  }
-
-  @Test
-  public void testPrintHelp() {
-    ToolOptions toolOptions = new ToolOptions();
-    String separator = System.getProperty("line.separator");
-    mfImportTool.printHelp(toolOptions);
-    String outputMsg = "usage: sqoop "
-        + mfImportTool.getToolName()
-        + " [GENERIC-ARGS] [TOOL-ARGS]"
-        + separator
-        + ""
-        + separator
-        + ""
-        + separator
-        + "Generic Hadoop command-line arguments:"
-        + separator
-        + "(must preceed any tool-specific arguments)"
-        + separator
-        + "Generic options supported are"
-        + separator
-        + "-conf <configuration file>     specify an application configuration file"
-        + separator
-        + "-D <property=value>            use value for given property"
-        + separator
-        + "-fs <local|namenode:port>      specify a namenode"
-        + separator
-        + "-jt <local|jobtracker:port>    specify a job tracker"
-        + separator
-        + "-files <comma separated list of files>    "
-        + "specify comma separated files to be copied to the map reduce cluster"
-        + separator
-        + "-libjars <comma separated list of jars>    "
-        + "specify comma separated jar files to include in the classpath."
-        + separator
-        + "-archives <comma separated list of archives>    "
-        + "specify comma separated archives to be unarchived on the compute machines.\n"
-        + separator + "The general command line syntax is" + separator
-        + "bin/hadoop command [genericOptions] [commandOptions]\n" + separator
-        + "" + separator + "At minimum, you must specify --connect and --"
-        + MainframeImportTool.DS_ARG + separator;
-    assertEquals(outputMsg, outContent.toString());
   }
 
   @SuppressWarnings("deprecation")
