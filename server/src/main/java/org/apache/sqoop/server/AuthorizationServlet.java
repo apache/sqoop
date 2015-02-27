@@ -23,7 +23,7 @@ import org.apache.sqoop.json.JsonBean;
 /**
  * Provides operations for authorization
  *
- * PUT /authorization/roles/create
+ * POST /authorization/roles/create
  * Create new role with {name}
  *
  * DELETE /authorization/role/{role-name}
@@ -69,6 +69,11 @@ public class AuthorizationServlet extends SqoopProtocolServlet {
 
   @Override
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
+    return authorizationRequestHandler.handleEvent(ctx);
+  }
+
+  @Override
+  protected JsonBean handlePostRequest(RequestContext ctx) throws Exception {
     return authorizationRequestHandler.handleEvent(ctx);
   }
 

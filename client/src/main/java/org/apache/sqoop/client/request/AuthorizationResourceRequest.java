@@ -63,7 +63,7 @@ public class AuthorizationResourceRequest extends ResourceRequest {
     RoleBean roleBean = new RoleBean(role);
     // Extract all config inputs including sensitive inputs
     JSONObject roleJson = roleBean.extract(false);
-    super.put(serverUrl + RESOURCE + ROLES + CREATE, roleJson.toJSONString());
+    super.post(serverUrl + RESOURCE + ROLES + CREATE, roleJson.toJSONString());
   }
 
   public void dropRole(String serverUrl, MRole role) {

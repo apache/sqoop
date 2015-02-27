@@ -90,14 +90,19 @@ public class AuthorizationRequestHandler implements RequestHandler {
           default:
             throw new SqoopException(ServerError.SERVER_0003, "Invalid action in url" + url);
         }
+      case POST:
+        switch (action) {
+          case CREATE:                              //url: /authorization/roles/create
+            return createRole(ctx);
+          default:
+            throw new SqoopException(ServerError.SERVER_0003, "Invalid action in url" + url);
+        }
       case PUT:
         String[] urlElements = ctx.getUrlElements();
         Action first_level_action = Action.fromString(urlElements[urlElements.length - 2]);
         switch (first_level_action) {
           case ROLES:
             switch (action) {
-              case CREATE:                              //url: /authorization/roles/create
-                return createRole(ctx);
               case GRANT:                               //url: /authorization/roles/grant
                 return grantRevokeRole(ctx, true);
               case REVOKE:                              //url: /authorization/roles/revoke
