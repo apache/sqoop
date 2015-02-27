@@ -75,15 +75,19 @@ public class TestHdfsUtils {
     LinkConfiguration linkConfiguration = new LinkConfiguration();
     FromJobConfiguration fromJobConfiguration = new FromJobConfiguration();
     ToJobConfiguration toJobConfiguration = new ToJobConfiguration();
-    final String record = "'Abe',\0,'test'";
-    final Object[] arrayRecord = new Object[]{
+    final Object[] fromRecord = new Object[]{
+        "'Abe'",
+        "\0",
+        "'test'"
+    };
+    final Object[] toRecord = new Object[]{
       "'Abe'",
       "\0",
       "'test'"
     };
 
     // No transformations
-    assertArrayEquals(arrayRecord, HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, record));
-    assertEquals(record, HdfsUtils.formatRecord(linkConfiguration, toJobConfiguration, arrayRecord));
+    assertArrayEquals(toRecord, HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, fromRecord));
+    assertArrayEquals(fromRecord, HdfsUtils.formatRecord(linkConfiguration, toJobConfiguration, toRecord));
   }
 }

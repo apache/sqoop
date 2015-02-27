@@ -24,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -33,7 +32,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.sqoop.common.PrefixContext;
@@ -44,6 +42,10 @@ import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
+import org.apache.sqoop.schema.type.Text;
 import org.testng.annotations.AfterMethod;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -96,6 +98,9 @@ public class TestLoader extends TestHdfsBase {
   @Test
   public void testLoader() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
+    Schema schema = new Schema("schema").addColumn(new FixedPoint("col1", 8L, true))
+        .addColumn(new FloatingPoint("col2", 4L))
+        .addColumn(new Text("col3"));
 
     Configuration conf = new Configuration();
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
@@ -146,6 +151,10 @@ public class TestLoader extends TestHdfsBase {
   @Test
   public void testOverrideNull() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
+    Schema schema = new Schema("schema").addColumn(new FixedPoint("col1", 8L, true))
+        .addColumn(new FloatingPoint("col2", 8L))
+        .addColumn(new Text("col3"))
+        .addColumn(new Text("col4"));
 
     Configuration conf = new Configuration();
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
@@ -159,7 +168,7 @@ public class TestLoader extends TestHdfsBase {
               index,
               (double)index,
               null,
-              "'" + index + "'"
+              String.valueOf(index)
           };
         } else {
           return null;
@@ -175,7 +184,7 @@ public class TestLoader extends TestHdfsBase {
       public Object readContent() {
         throw new AssertionError("should not be at readContent");
       }
-    }, null);
+    }, schema);
     LinkConfiguration linkConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
     jobConf.toJobConfig.outputDirectory = outputDirectory;
@@ -189,7 +198,7 @@ public class TestLoader extends TestHdfsBase {
     Assert.assertEquals(1, fs.listStatus(outputPath).length);
 
     for (FileStatus status : fs.listStatus(outputPath)) {
-      verifyOutput(fs, status.getPath(), "%d,%f,\\N,%s");
+      verifyOutput(fs, status.getPath(), "%d,%f,'\\\\N',%s");
     }
 
     loader.load(context, linkConf, jobConf);
@@ -238,7 +247,7 @@ public class TestLoader extends TestHdfsBase {
         BufferedReader textReader = new BufferedReader(in);
 
         for (int i = 1; i <= NUMBER_OF_ROWS_PER_FILE; ++i) {
-          Assert.assertEquals(formatRow(format, i), textReader.readLine());
+          Assert.assertEquals(textReader.readLine(), formatRow(format, i));
         }
         break;
 
@@ -262,11 +271,11 @@ public class TestLoader extends TestHdfsBase {
             break;
         }
 
-        Text line = new Text();
+        org.apache.hadoop.io.Text line = new org.apache.hadoop.io.Text();
         int index = 1;
         while (sequenceReader.next(line)) {
-          Assert.assertEquals(formatRow(format, index++), line.toString());
-          line = new Text();
+          Assert.assertEquals(line.toString(), formatRow(format, index++));
+          line = new org.apache.hadoop.io.Text();
         }
         break;
     }

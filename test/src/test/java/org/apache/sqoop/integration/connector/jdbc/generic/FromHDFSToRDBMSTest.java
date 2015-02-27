@@ -23,6 +23,9 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -31,15 +34,23 @@ import static org.testng.AssertJUnit.assertEquals;
  *
  */
 public class FromHDFSToRDBMSTest extends ConnectorTestCase {
+  @BeforeMethod(alwaysRun = true)
+  public void createTable() {
+    createTableCities();
+  }
+
+  @AfterMethod(alwaysRun = true)
+  public void dropTable() {
+    super.dropTable();
+  }
 
   @Test
   public void testBasic() throws Exception {
-    createTableCities();
     createFromFile("input-0001",
-      "1,'USA','2004-10-23','San Francisco'",
-      "2,'USA','2004-10-24','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25','Brno'",
-      "4,'USA','2004-10-26','Palo Alto'"
+        "1,'USA','2004-10-23','San Francisco'",
+        "2,'USA','2004-10-24','Sunnyvale'",
+        "3,'Czech Republic','2004-10-25','Brno'",
+        "4,'USA','2004-10-26','Palo Alto'"
     );
 
     // RDBMS link
@@ -68,14 +79,10 @@ public class FromHDFSToRDBMSTest extends ConnectorTestCase {
 
     executeJob(job);
 
-    assertEquals(4L, provider.rowCount(null, getTableName()));
+    assertEquals(4L, provider.rowCount(getTableName()));
     assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
     assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
     assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");
     assertRowInCities(4, "USA", "2004-10-26", "Palo Alto");
-
-    // Clean up testing table
-    dropTable();
   }
-
 }

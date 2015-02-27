@@ -32,12 +32,14 @@ import org.apache.hadoop.util.LineReader;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
+import org.apache.sqoop.schema.Schema;
 
 /**
  * Extract from HDFS.
@@ -49,6 +51,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
 
   private Configuration conf;
   private DataWriter dataWriter;
+  private Schema schema;
   private long rowsRead = 0;
 
   @Override
@@ -57,6 +60,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
 
     conf = HdfsUtils.configureURI(((PrefixContext) context.getContext()).getConfiguration(), linkConfiguration);
     dataWriter = context.getDataWriter();
+    schema = context.getSchema();
 
     try {
       HdfsPartition p = partition;
@@ -112,7 +116,8 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     while (hasNext) {
       rowsRead++;
       if (HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
-        dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, line.toString()));
+        Object[] data = SqoopIDFUtils.fromCSV(line.toString(), schema);
+        dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, data));
       } else {
         dataWriter.writeStringRecord(line.toString());
       }
@@ -179,7 +184,8 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
       }
       rowsRead++;
       if (HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
-        dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, line.toString()));
+        Object[] data = SqoopIDFUtils.fromCSV(line.toString(), schema);
+        dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, data));
       } else {
         dataWriter.writeStringRecord(line.toString());
       }

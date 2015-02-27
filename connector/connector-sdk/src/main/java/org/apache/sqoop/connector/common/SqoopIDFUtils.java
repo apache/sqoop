@@ -22,6 +22,7 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.error.code.CSVIntermediateDataFormatError;
 import org.apache.sqoop.error.code.IntermediateDataFormatError;
+import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
@@ -47,6 +48,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 
 /**
@@ -66,17 +68,29 @@ public class SqoopIDFUtils {
   // implementation.
   public static final String BYTE_FIELD_CHARSET = "ISO-8859-1";
 
-  public static final char[] originals = { 0x5C, 0x00, 0x0A, 0x0D, 0x1A, 0x22, 0x27 };
+  public static final Map<Character, String> ORIGINALS = new TreeMap<Character, String>();
 
   public static final char CSV_SEPARATOR_CHARACTER = ',';
   public static final char ESCAPE_CHARACTER = '\\';
   public static final char QUOTE_CHARACTER = '\'';
 
-  // string related replacements
-  private static final String[] replacements = { new String(new char[] { ESCAPE_CHARACTER, '\\' }),
-      new String(new char[] { ESCAPE_CHARACTER, '0' }), new String(new char[] { ESCAPE_CHARACTER, 'n' }),
-      new String(new char[] { ESCAPE_CHARACTER, 'r' }), new String(new char[] { ESCAPE_CHARACTER, 'Z' }),
-      new String(new char[] { ESCAPE_CHARACTER, '\"' }), new String(new char[] { ESCAPE_CHARACTER, '\'' }) };
+  private static final Map<Character, Character> REPLACEMENTS = new TreeMap<Character, Character>();
+
+  static {
+    ORIGINALS.put(new Character((char)0x00), new String(new char[] { ESCAPE_CHARACTER, '0' }));
+    ORIGINALS.put(new Character((char)0x0A), new String(new char[] { ESCAPE_CHARACTER, 'n' }));
+    ORIGINALS.put(new Character((char)0x0D), new String(new char[] { ESCAPE_CHARACTER, 'r' }));
+    ORIGINALS.put(new Character((char)0x1A), new String(new char[] { ESCAPE_CHARACTER, 'Z' }));
+    ORIGINALS.put(new Character((char)0x22), new String(new char[] { ESCAPE_CHARACTER, '"' }));
+    ORIGINALS.put(new Character((char)0x27), new String(new char[] { ESCAPE_CHARACTER, '\'' }));
+
+    REPLACEMENTS.put('0', new Character((char)0x00));
+    REPLACEMENTS.put('n', new Character((char)0x0A));
+    REPLACEMENTS.put('r', new Character((char)0x0D));
+    REPLACEMENTS.put('Z', new Character((char)0x1A));
+    REPLACEMENTS.put('"', new Character((char)0x22));
+    REPLACEMENTS.put('\'', new Character((char)0x27));
+  }
 
   // http://www.joda.org/joda-time/key_format.html provides details on the
   // formatter token
@@ -420,42 +434,66 @@ public class SqoopIDFUtils {
 
   // ************ TEXT Column Type utils*********
 
-  private static String getRegExp(char character) {
-    return getRegExp(String.valueOf(character));
-  }
-
-  private static String getRegExp(String string) {
-    return string.replaceAll("\\\\", Matcher.quoteReplacement("\\\\"));
-  }
-
   public static String toCSVString(String string) {
-    int j = 0;
-    String replacement = string;
-    try {
-      for (j = 0; j < replacements.length; j++) {
-        replacement = replacement.replaceAll(getRegExp(originals[j]), Matcher.quoteReplacement(replacements[j]));
+    StringBuilder sb1 = new StringBuilder();
+    StringBuilder sb2 = new StringBuilder();
+
+    // Escape the escape character
+    for (int i = 0; i < string.length(); ++i) {
+      char c = string.charAt(i);
+      if (c == ESCAPE_CHARACTER) {
+        sb1.append(ESCAPE_CHARACTER);
       }
-    } catch (Exception e) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0002, string + "  " + replacement
-          + "  " + String.valueOf(j) + "  " + e.getMessage());
+
+      sb1.append(c);
     }
-    return encloseWithQuotes(replacement);
+
+    // Encode characters
+    for (char c : sb1.toString().toCharArray()) {
+      if (ORIGINALS.containsKey(c)) {
+        sb2.append(ORIGINALS.get(c));
+      } else {
+        sb2.append(c);
+      }
+    }
+
+    return encloseWithQuotes(sb2.toString());
   }
 
   public static String toText(String string) {
+    boolean escaped = false;
+    StringBuilder sb = new StringBuilder();
+    int i;
+
     // Remove the trailing and starting quotes.
     string = removeQuotes(string);
-    int j = 0;
-    try {
-      for (j = 0; j < replacements.length; j++) {
-        string = string.replaceAll(getRegExp(replacements[j]), Matcher.quoteReplacement(String.valueOf(originals[j])));
+
+    // Decode
+    for (i = 0; i < string.length(); ++i) {
+      char c = string.charAt(i);
+
+      if (escaped) {
+        escaped = false;
+
+        if (REPLACEMENTS.containsKey(c)) {
+          c = REPLACEMENTS.get(c);
+        }
+
+        sb.append(c);
+      } else {
+        switch(c) {
+          case ESCAPE_CHARACTER:
+            escaped = true;
+            break;
+
+          default:
+            sb.append(c);
+            break;
+        }
       }
-    } catch (Exception e) {
-      throw new SqoopException(CSVIntermediateDataFormatError.CSV_INTERMEDIATE_DATA_FORMAT_0003, string + "  "
-          + String.valueOf(j) + e.getMessage());
     }
 
-    return string;
+    return sb.toString();
   }
 
   // ************ BINARY Column type utils*********
@@ -510,6 +548,85 @@ public class SqoopIDFUtils {
   }
 
   // ******* parse sqoop CSV ********
+
+  /**
+   * Encode to the sqoop prescribed CSV String for every element in the object
+   * array
+   *
+   * @param objectArray
+   */
+  @SuppressWarnings("unchecked")
+  public static String toCSV(Object[] objectArray, Schema schema) {
+    Column[] columns = schema.getColumnsArray();
+
+    StringBuilder csvString = new StringBuilder();
+    for (int i = 0; i < columns.length; i++) {
+      if (objectArray[i] == null && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
+      if (objectArray[i] == null) {
+        csvString.append(NULL_VALUE);
+      } else {
+        switch (columns[i].getType()) {
+          case ARRAY:
+          case SET:
+            csvString.append(toCSVList((Object[]) objectArray[i], (AbstractComplexListType) columns[i]));
+            break;
+          case MAP:
+            csvString.append(toCSVMap((Map<Object, Object>) objectArray[i], columns[i]));
+            break;
+          case ENUM:
+          case TEXT:
+            csvString.append(toCSVString(objectArray[i].toString()));
+            break;
+          case BINARY:
+          case UNKNOWN:
+            csvString.append(toCSVByteArray((byte[]) objectArray[i]));
+            break;
+          case FIXED_POINT:
+            csvString.append(toCSVFixedPoint(objectArray[i], columns[i]));
+            break;
+          case FLOATING_POINT:
+            csvString.append(toCSVFloatingPoint(objectArray[i], columns[i]));
+            break;
+          case DECIMAL:
+            csvString.append(toCSVDecimal(objectArray[i]));
+            break;
+          // stored in JSON as strings in the joda time format
+          case DATE:
+            csvString.append(toCSVDate(objectArray[i]));
+            break;
+          case TIME:
+            csvString.append(toCSVTime(objectArray[i], columns[i]));
+            break;
+          case DATE_TIME:
+            if (objectArray[i] instanceof org.joda.time.DateTime) {
+              org.joda.time.DateTime dateTime = (org.joda.time.DateTime) objectArray[i];
+              // check for fraction and time zone and then use the right formatter
+              csvString.append(toCSVDateTime(dateTime, columns[i]));
+            } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
+              org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) objectArray[i];
+              csvString.append(toCSVLocalDateTime(localDateTime, columns[i]));
+            }
+            break;
+          case BIT:
+            csvString.append(toCSVBit(objectArray[i]));
+            break;
+          default:
+            throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
+                "Column type from schema was not recognized for " + columns[i].getType());
+        }
+      }
+      if (i < columns.length - 1) {
+        csvString.append(CSV_SEPARATOR_CHARACTER);
+      }
+
+    }
+
+    return csvString.toString();
+  }
+
   /**
    * Custom CSV Text parser that honors quoting and escaped quotes.
    *
@@ -561,4 +678,87 @@ public class SqoopIDFUtils {
     return parsedData.toArray(new String[parsedData.size()]);
   }
 
+  private static Object toObject(String csvString, Column column) {
+    Object returnValue = null;
+
+    switch (column.getType()) {
+      case ENUM:
+      case TEXT:
+        returnValue = toText(csvString);
+        break;
+      case BINARY:
+        // Unknown is treated as a binary type
+      case UNKNOWN:
+        returnValue = toByteArray(csvString);
+        break;
+      case FIXED_POINT:
+        returnValue = toFixedPoint(csvString, column);
+        break;
+      case FLOATING_POINT:
+        returnValue = toFloatingPoint(csvString, column);
+        break;
+      case DECIMAL:
+        returnValue = toDecimal(csvString, column);
+        break;
+      case DATE:
+        returnValue = toDate(csvString, column);
+        break;
+      case TIME:
+        returnValue = toTime(csvString, column);
+        break;
+      case DATE_TIME:
+        returnValue = toDateTime(csvString, column);
+        break;
+      case BIT:
+        returnValue = toBit(csvString);
+        break;
+      case ARRAY:
+      case SET:
+        returnValue = toList(csvString);
+        break;
+      case MAP:
+        returnValue = toMap(csvString);
+        break;
+      default:
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0004,
+            "Column type from schema was not recognized for " + column.getType());
+    }
+    return returnValue;
+  }
+
+  /**
+   * Parse CSV text data
+   * @param csvText csv text to parse
+   * @param schema schema to understand data
+   * @return Object[]
+   */
+  public static Object[] fromCSV(String csvText, Schema schema) {
+    String[] csvArray = parseCSVString(csvText);
+
+    if (csvArray == null) {
+      return null;
+    }
+
+    Column[] columns = schema.getColumnsArray();
+
+    if (csvArray.length != columns.length) {
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
+          "The data " + csvArray + " has the wrong number of fields.");
+    }
+
+    Object[] objectArray = new Object[csvArray.length];
+    for (int i = 0; i < csvArray.length; i++) {
+      if (csvArray[i].equals(NULL_VALUE) && !columns[i].isNullable()) {
+        throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
+            columns[i].getName() + " does not support null values");
+      }
+      if (csvArray[i].equals(NULL_VALUE)) {
+        objectArray[i] = null;
+        continue;
+      }
+      objectArray[i] = toObject(csvArray[i], columns[i]);
+    }
+
+    return objectArray;
+  }
 }

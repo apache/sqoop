@@ -37,6 +37,7 @@ import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.test.data.Cities;
+import org.apache.sqoop.test.data.ShortStories;
 import org.apache.sqoop.test.data.UbuntuReleases;
 import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
@@ -195,6 +196,20 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    */
   protected void createAndLoadTableUbuntuReleases() {
     new UbuntuReleases(provider, getTableName()).createTables().loadBasicData();
+  }
+
+  /**
+   * Create table for short stories.
+   */
+  protected void createTableShortStories() {
+    new ShortStories(provider, getTableName()).createTables();
+  }
+
+  /**
+   * Create table for short stories.
+   */
+  protected void createAndLoadTableShortStories() {
+    new ShortStories(provider, getTableName()).createTables().loadBasicData();
   }
 
   /**

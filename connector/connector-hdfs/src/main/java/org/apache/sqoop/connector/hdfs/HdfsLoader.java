@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
@@ -89,7 +90,10 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
         Object[] record;
 
         while ((record = reader.readArrayRecord()) != null) {
-          filewriter.write(HdfsUtils.formatRecord(linkConfiguration, toJobConfig, record));
+          filewriter.write(
+              SqoopIDFUtils.toCSV(
+                  HdfsUtils.formatRecord(linkConfiguration, toJobConfig, record),
+                  context.getSchema()));
           rowsWritten++;
         }
       } else {

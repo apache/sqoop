@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
@@ -53,8 +52,7 @@ public class HdfsUtils {
    * @return boolean
    */
   public static boolean hasCustomFormat(LinkConfiguration linkConfiguration, FromJobConfiguration fromJobConfiguration) {
-    return fromJobConfiguration.fromJobConfig.overrideNullValue != null
-            && fromJobConfiguration.fromJobConfig.overrideNullValue;
+    return Boolean.TRUE.equals(fromJobConfiguration.fromJobConfig.overrideNullValue);
   }
 
   /**
@@ -64,8 +62,7 @@ public class HdfsUtils {
    * @return boolean
    */
   public static boolean hasCustomFormat(LinkConfiguration linkConfiguration, ToJobConfiguration toJobConfiguration) {
-    return toJobConfiguration.toJobConfig.overrideNullValue != null
-            && toJobConfiguration.toJobConfig.overrideNullValue;
+    return Boolean.TRUE.equals(toJobConfiguration.toJobConfig.overrideNullValue);
   }
 
   /**
@@ -73,24 +70,22 @@ public class HdfsUtils {
    * format the record according to configuration.
    * @param linkConfiguration Link configuration
    * @param fromJobConfiguration Job configuration
-   * @param record String record
+   * @param record Object[] record
    * @return Object[]
    */
   public static Object[] formatRecord(LinkConfiguration linkConfiguration,
                                       FromJobConfiguration fromJobConfiguration,
-                                      String record) {
-    Object[] arrayRecord = StringUtils.split(record, HdfsConstants.DEFAULT_FIELD_DELIMITER);
-
+                                      Object[] record) {
     if (fromJobConfiguration.fromJobConfig.overrideNullValue != null
             && fromJobConfiguration.fromJobConfig.overrideNullValue) {
-      for (int i = 0; i < arrayRecord.length; ++i) {
-        if (arrayRecord[i].equals(fromJobConfiguration.fromJobConfig.nullValue)) {
-          arrayRecord[i] = null;
+      for (int i = 0; i < record.length; ++i) {
+        if (record[i] != null && record[i].equals(fromJobConfiguration.fromJobConfig.nullValue)) {
+          record[i] = null;
         }
       }
     }
 
-    return arrayRecord;
+    return record;
   }
 
   /**
@@ -99,9 +94,9 @@ public class HdfsUtils {
    * @param linkConfiguration Link configuration
    * @param toJobConfiguration Job configuration
    * @param record Record array
-   * @return String
+   * @return Object[]
    */
-  public static String formatRecord(LinkConfiguration linkConfiguration,
+  public static Object[] formatRecord(LinkConfiguration linkConfiguration,
                                     ToJobConfiguration toJobConfiguration,
                                     Object[] record) {
     if (toJobConfiguration.toJobConfig.overrideNullValue != null
@@ -113,6 +108,6 @@ public class HdfsUtils {
       }
     }
 
-    return StringUtils.join(record, HdfsConstants.DEFAULT_FIELD_DELIMITER);
+    return record;
   }
 }

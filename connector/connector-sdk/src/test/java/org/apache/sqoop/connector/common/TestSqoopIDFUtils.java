@@ -320,4 +320,41 @@ public class TestSqoopIDFUtils {
     assertEquals("23.44444444", toCSVDecimal(bd));
   }
 
+  @Test
+  public void testEscaping() {
+    String[][] testData = new String[][]{
+        {"\0", "'\\0'"},
+        {"\\0", "'\\\\0'"},
+        {"\\\0", "'\\\\\\0'"},
+        {"\\\\0", "'\\\\\\\\0'"},
+        {"\n", "'\\n'"},
+        {"\\n", "'\\\\n'"},
+        {"\\\n", "'\\\\\\n'"},
+        {"\\\\n", "'\\\\\\\\n'"},
+        {"\r", "'\\r'"},
+        {"\\r", "'\\\\r'"},
+        {"\\\r", "'\\\\\\r'"},
+        {"\\\\r", "'\\\\\\\\r'"},
+        {Character.toString((char)0x1A), "'\\Z'"},
+        {"\\Z", "'\\\\Z'"},
+        {"\\" + Character.toString((char)0x1A), "'\\\\\\Z'"},
+        {"\\\\Z", "'\\\\\\\\Z'"},
+        {"\"", "'\\\"'"},
+        {"\\\"", "'\\\\\\\"'"},
+        {"\\\\\"", "'\\\\\\\\\\\"'"},
+        {"\\\\\\\"", "'\\\\\\\\\\\\\\\"'"},
+        {"'", "'\\''"},
+        {"\\'", "'\\\\\\''"},
+        {"\\\\'", "'\\\\\\\\\\''"},
+        {"\\\\\\'", "'\\\\\\\\\\\\\\''"}
+    };
+
+    for (String[] testDatum : testData) {
+      String csvData = SqoopIDFUtils.toCSVString(testDatum[0]);
+
+      assertEquals(csvData, testDatum[1]);
+
+      assertEquals(SqoopIDFUtils.toText(csvData), testDatum[0]);
+    }
+  }
 }

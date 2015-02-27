@@ -25,12 +25,9 @@ import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.apache.sqoop.validation.validators.NotEmpty;
 
 /**
- *
  */
 @ConfigClass(validators = { @Validator(ToJobConfig.ToJobConfigValidator.class)})
 public class ToJobConfig {
-
-  public static String DEFAULT_NULL_VALUE = "NULL";
 
   @Input(size = 255) public Boolean overrideNullValue;
 

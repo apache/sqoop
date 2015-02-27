@@ -23,7 +23,6 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -37,6 +36,11 @@ import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
+import org.apache.sqoop.schema.type.Text;
+import org.testng.ITest;
 import org.testng.annotations.AfterMethod;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -80,11 +84,11 @@ public class TestExtractor extends TestHdfsBase {
     FileUtils.mkdirs(inputDirectory);
     switch (this.outputFileType) {
       case TEXT_FILE:
-        createTextInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\N");
+        createTextInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\\\N");
         break;
 
       case SEQUENCE_FILE:
-        createSequenceInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\N");
+        createSequenceInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\\\N");
         break;
     }
   }
@@ -99,6 +103,11 @@ public class TestExtractor extends TestHdfsBase {
     Configuration conf = new Configuration();
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
     final boolean[] visited = new boolean[NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE];
+    Schema schema = new Schema("schema").addColumn(new FixedPoint("col1", 4L, true))
+        .addColumn(new FloatingPoint("col2", 4L))
+        .addColumn(new Text("col3"))
+        .addColumn(new Text("col4"))
+        .addColumn(new Text("col5"));
     ExtractorContext context = new ExtractorContext(prefixContext, new DataWriter() {
       @Override
       public void writeArrayRecord(Object[] array) {
@@ -123,7 +132,7 @@ public class TestExtractor extends TestHdfsBase {
         Assert.assertEquals(String.valueOf((double) index), components[1]);
         Assert.assertEquals("NULL", components[2]);
         Assert.assertEquals("'" + index + "'", components[3]);
-        Assert.assertEquals("\\N", components[4]);
+        Assert.assertEquals("\\\\N", components[4]);
 
         visited[index - 1] = true;
       }
@@ -132,7 +141,7 @@ public class TestExtractor extends TestHdfsBase {
       public void writeRecord(Object obj) {
         throw new AssertionError("Should not be writing object.");
       }
-    }, null);
+    }, schema);
 
     LinkConfiguration emptyLinkConfig = new LinkConfiguration();
     FromJobConfiguration emptyJobConfig = new FromJobConfiguration();
@@ -150,6 +159,11 @@ public class TestExtractor extends TestHdfsBase {
     Configuration conf = new Configuration();
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
     final boolean[] visited = new boolean[NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE];
+    Schema schema = new Schema("schema").addColumn(new FixedPoint("col1", 4L, true))
+        .addColumn(new FloatingPoint("col2", 4L))
+        .addColumn(new Text("col3"))
+        .addColumn(new Text("col4"))
+        .addColumn(new Text("col5"));
     ExtractorContext context = new ExtractorContext(prefixContext, new DataWriter() {
       @Override
       public void writeArrayRecord(Object[] array) {
@@ -165,9 +179,9 @@ public class TestExtractor extends TestHdfsBase {
         }
 
         Assert.assertFalse(visited[index - 1]);
-        Assert.assertEquals(String.valueOf((double) index), array[1]);
-        Assert.assertEquals("NULL", array[2]);
-        Assert.assertEquals("'" + index + "'", array[3]);
+        Assert.assertEquals(String.valueOf((double) index), array[1].toString());
+        Assert.assertEquals(null, array[2]);
+        Assert.assertEquals(String.valueOf(index), array[3]);
         Assert.assertNull(array[4]);
 
         visited[index - 1] = true;
@@ -182,7 +196,7 @@ public class TestExtractor extends TestHdfsBase {
       public void writeRecord(Object obj) {
         throw new AssertionError("Should not be writing object.");
       }
-    }, null);
+    }, schema);
 
     LinkConfiguration emptyLinkConfig = new LinkConfiguration();
     FromJobConfiguration fromJobConfiguration = new FromJobConfiguration();
