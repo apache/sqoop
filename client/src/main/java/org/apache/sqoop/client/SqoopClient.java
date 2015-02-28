@@ -608,8 +608,8 @@ public class SqoopClient {
    * @param principal MPrincipal
    * @return
    */
-  public RolesBean getRolesByPrincipal(MPrincipal principal) {
-    return resourceRequests.readRolesByPrincipal(principal);
+  public List<MRole> getRolesByPrincipal(MPrincipal principal) {
+    return resourceRequests.readRolesByPrincipal(principal).getRoles();
   }
 
   /**
@@ -618,8 +618,8 @@ public class SqoopClient {
    * @param role MRole
    * @return
    */
-  public PrincipalsBean getPrincipalsByRole(MRole role) {
-    return resourceRequests.readPrincipalsByRole(role);
+  public List<MPrincipal> getPrincipalsByRole(MRole role) {
+    return resourceRequests.readPrincipalsByRole(role).getPrincipals();
   }
 
   /**
@@ -651,8 +651,8 @@ public class SqoopClient {
    * @param resource MResource
    * @return
    */
-  public PrivilegesBean getPrivilegesByPrincipal(MPrincipal principal, MResource resource) {
-    return resourceRequests.readPrivilegesByPrincipal(principal, resource);
+  public List<MPrivilege> getPrivilegesByPrincipal(MPrincipal principal, MResource resource) {
+    return resourceRequests.readPrivilegesByPrincipal(principal, resource).getPrivileges();
   }
 
   /**
