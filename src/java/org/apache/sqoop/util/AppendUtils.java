@@ -19,10 +19,8 @@
 package org.apache.sqoop.util;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,8 +39,6 @@ public class AppendUtils {
 
   public static final Log LOG = LogFactory.getLog(AppendUtils.class.getName());
 
-  private static final SimpleDateFormat DATE_FORM = new SimpleDateFormat(
-      "ddHHmmssSSSSSSSSS");
   private static final String TEMP_IMPORT_ROOT =
           System.getProperty("sqoop.test.import.rootDir", "_sqoop");
 
@@ -278,9 +274,8 @@ public class AppendUtils {
    * @return a path pointing to the temporary directory
    */
   public static Path getTempAppendDir(String salt) {
-    String timeId = DATE_FORM.format(new Date(System.currentTimeMillis()));
-    String jvmName = ManagementFactory.getRuntimeMXBean().getName().replaceAll("@", "_");
-    String tempDir = TEMP_IMPORT_ROOT + Path.SEPARATOR + timeId + "_"  + jvmName + "_" + salt;
+    String uuid = UUID.randomUUID().toString().replace("-", "");
+    String tempDir = TEMP_IMPORT_ROOT + Path.SEPARATOR + uuid + "_" + salt;
     return new Path(tempDir);
   }
 
