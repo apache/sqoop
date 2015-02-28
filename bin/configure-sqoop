@@ -105,6 +105,13 @@ if [ -z "${ZOOKEEPER_HOME}" ]; then
     ZOOKEEPER_HOME=${SQOOP_HOME}/../zookeeper
   fi
 fi
+if [ -z "${HIVE_HOME}" ]; then
+  if [ -d "/usr/lib/hive" ]; then
+    export HIVE_HOME=/usr/lib/hive
+  elif [ -d ${SQOOP_HOME}/../hive ]; then
+    export HIVE_HOME=${SQOOP_HOME}/../hive
+  fi
+fi
 
 # Check: If we can't find our dependencies, give up here.
 if [ ! -d "${HADOOP_COMMON_HOME}" ]; then
