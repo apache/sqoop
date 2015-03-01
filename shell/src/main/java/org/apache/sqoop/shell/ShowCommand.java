@@ -36,6 +36,9 @@ public class ShowCommand extends SqoopCommand {
         .put(Constants.FN_JOB, ShowJobFunction.class)
         .put(Constants.FN_SUBMISSION, ShowSubmissionFunction.class)
         .put(Constants.FN_OPTION, ShowOptionFunction.class)
+        .put(Constants.FN_ROLE, ShowRoleFunction.class)
+        .put(Constants.FN_PRINCIPAL, ShowPrincipalFunction.class)
+        .put(Constants.FN_PRIVILEGE, ShowPrivilegeFunction.class)
         .build()
     );
   }

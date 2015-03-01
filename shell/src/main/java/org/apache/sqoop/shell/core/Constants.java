@@ -136,6 +136,7 @@ public class Constants {
   public static final String FN_VERSION = "version";
   public static final String FN_DRIVER_CONFIG = "driver";
   public static final String FN_ROLE = "role";
+  public static final String FN_PRINCIPAL = "principal";
   public static final String FN_PRIVILEGE = "privilege";
 
   public static final String PROP_HOMEDIR = "user.home";
@@ -266,6 +267,10 @@ public class Constants {
       "show.prompt_link_info";
   public static final String RES_SHOW_PROMPT_LINK_CID_INFO =
       "show.prompt_link_cid_info";
+  public static final String RES_SHOW_ROLE_BAD_ARGUMENTS_PRINCIPAL_TYPE =
+      "show.role.bad_arguments_principal_type";
+  public static final String RES_SHOW_PRIVILEGE_BAD_ARGUMENTS_RESOURCE_TYPE =
+      "show.privilege.bad_arguments_resource_type";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_CONNECTORS =
       "show.prompt_display_all_connectors";
@@ -378,6 +383,20 @@ public class Constants {
       "table.header.date";
   public static final String RES_TABLE_HEADER_ENABLED =
       "table.header.enabled";
+  public static final String RES_TABLE_HEADER_ROLE_NAME =
+      "table.header.role.name";
+  public static final String RES_TABLE_HEADER_RESOURCE_NAME =
+      "table.header.resource.name";
+  public static final String RES_TABLE_HEADER_RESOURCE_TYPE =
+      "table.header.resource.type";
+  public static final String RES_TABLE_HEADER_PRIVILEGE_ACTION =
+      "table.header.privilege.action";
+  public static final String RES_TABLE_HEADER_PRIVILEGE_WITH_GRANT =
+      "table.header.privilege.with_grant";
+  public static final String RES_TABLE_HEADER_PRINCIPAL_NAME =
+      "table.header.principal.name";
+  public static final String RES_TABLE_HEADER_PRINCIPAL_TYPE =
+      "table.header.principal.type";
 
   public static final String RES_CONFIG_DISPLAYER_LINK =
       "config.displayer.link";

@@ -69,8 +69,10 @@ public class RoleBean implements JsonBean {
   @SuppressWarnings("unchecked")
   protected JSONArray extractRoles() {
     JSONArray rolesArray = new JSONArray();
-    for (MRole role : roles) {
-      rolesArray.add(extractRole(role));
+    if (roles != null) {
+      for (MRole role : roles) {
+        rolesArray.add(extractRole(role));
+      }
     }
     return rolesArray;
   }

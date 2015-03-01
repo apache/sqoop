@@ -73,8 +73,10 @@ public class PrivilegeBean implements JsonBean {
   @SuppressWarnings("unchecked")
   protected JSONArray extractPrivileges() {
     JSONArray privilegesArray = new JSONArray();
-    for (MPrivilege privilege : privileges) {
-      privilegesArray.add(extractPrivilege(privilege));
+    if (privileges != null) {
+      for (MPrivilege privilege : privileges) {
+        privilegesArray.add(extractPrivilege(privilege));
+      }
     }
     return privilegesArray;
   }

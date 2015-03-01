@@ -70,8 +70,10 @@ public class PrincipalBean implements JsonBean {
   @SuppressWarnings("unchecked")
   protected JSONArray extractPrincipals() {
     JSONArray principalsArray = new JSONArray();
-    for (MPrincipal principal : principals) {
-      principalsArray.add(extractPrincipal(principal));
+    if (principals != null) {
+      for (MPrincipal principal : principals) {
+        principalsArray.add(extractPrincipal(principal));
+      }
     }
     return principalsArray;
   }
