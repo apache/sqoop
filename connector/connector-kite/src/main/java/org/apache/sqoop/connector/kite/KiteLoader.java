@@ -48,6 +48,7 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
     // not able to pass the temporary dataset uri to KiteToDestroyer. So we
     // delegate KiteDatasetExecutor to manage name convention for datasets.
     uri = KiteDatasetExecutor.suggestTemporaryDatasetUri(uri);
+    LOG.info("Generated temporary dataset URI: " + uri);
     Dataset<GenericRecord> dataset =
         KiteDatasetExecutor.createDataset(uri, schema, format);
     return new KiteDatasetExecutor(dataset);

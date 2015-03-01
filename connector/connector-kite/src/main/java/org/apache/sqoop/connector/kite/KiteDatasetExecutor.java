@@ -159,7 +159,7 @@ public class KiteDatasetExecutor {
    */
   public static String suggestTemporaryDatasetUri(String uri) {
     if (uri.startsWith("dataset:hdfs:")) {
-      return uri + TEMPORARY_DATASET_PREFIX + UUID.randomUUID();
+      return uri + TEMPORARY_DATASET_PREFIX + UUID.randomUUID().toString().replace("-", "");
     } else {
       throw new SqoopException(
           KiteConnectorError.GENERIC_KITE_CONNECTOR_0000, uri);
