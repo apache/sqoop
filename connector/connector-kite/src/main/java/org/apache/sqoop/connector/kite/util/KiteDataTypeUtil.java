@@ -24,6 +24,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
+import org.apache.sqoop.schema.type.FixedPoint;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.kitesdk.data.Format;
@@ -70,7 +71,7 @@ public class KiteDataTypeUtil {
   }
 
   private static Schema createAvroFieldSchema(Column column) {
-    Schema.Type type = toAvroType(column.getType());
+    Schema.Type type = toAvroType(column);
     if (!column.isNullable()) {
       return Schema.create(type);
     } else {
@@ -81,9 +82,8 @@ public class KiteDataTypeUtil {
     }
   }
 
-  private static Schema.Type toAvroType(ColumnType type)
-      throws IllegalArgumentException {
-    switch (type) {
+  private static Schema.Type toAvroType(Column column) throws IllegalArgumentException {
+    switch (column.getType()) {
       case ARRAY:
         return Schema.Type.ARRAY;
       case BINARY:
@@ -101,8 +101,16 @@ public class KiteDataTypeUtil {
       case ENUM:
       case SET:
         return Schema.Type.ENUM;
-      case FIXED_POINT:
-        return Schema.Type.LONG;
+      case FIXED_POINT: {
+        FixedPoint fp = (FixedPoint)column;
+        if(fp.getByteSize() <= 4L) {
+          return Schema.Type.INT;
+        } else if(fp.getByteSize() <= 8L) {
+          return Schema.Type.LONG;
+        } else {
+          throw new IllegalArgumentException("Unsupported size of FixedType column " + fp.getByteSize());
+        }
+      }
       case FLOATING_POINT:
         return Schema.Type.DOUBLE;
       case MAP:
@@ -112,8 +120,7 @@ public class KiteDataTypeUtil {
       case UNKNOWN:
         return Schema.Type.NULL;
       default:
-        throw new IllegalArgumentException(
-            "Unsupported Sqoop Data Type " + type);
+        throw new IllegalArgumentException("Unsupported Sqoop Data Type " + column.getType());
     }
   }
 
