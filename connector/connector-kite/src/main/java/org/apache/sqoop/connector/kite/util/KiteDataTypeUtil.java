@@ -57,11 +57,11 @@ public class KiteDataTypeUtil {
     String name = sqoopSchema.getName();
     String doc = sqoopSchema.getNote();
     String namespace = DEFAULT_SQOOP_SCHEMA_NAMESPACE;
-    Schema schema = Schema.createRecord(name, doc, namespace, false);
+    Schema schema = Schema.createRecord(toAvroName(name), doc, namespace, false);
 
     List<Schema.Field> fields = new ArrayList<Schema.Field>();
     for (Column column : sqoopSchema.getColumnsArray()) {
-      Schema.Field field = new Schema.Field(column.getName(),
+      Schema.Field field = new Schema.Field(toAvroName(column.getName()),
           createAvroFieldSchema(column), null, null);
       field.addProp(SQOOP_TYPE, column.getType().toString());
       fields.add(field);
@@ -80,6 +80,36 @@ public class KiteDataTypeUtil {
       union.add(Schema.create(Schema.Type.NULL));
       return Schema.createUnion(union);
     }
+  }
+
+  /**
+   * Converts arbitrary string to valid Avro name.
+   *
+   * This method does not guarantee that different two strings
+   * ends up as different two strings after conversion. It's
+   * up to the caller to ensure uniqueness if/when needed.
+   *
+   * Valid Avro names:
+   * * Starts with [A-Za-z_]
+   * * Subsequently only [A-Za-z0-9_]
+   *
+   * http://avro.apache.org/docs/1.7.7/spec.html#Names   *
+   *
+   * @param name
+   * @return
+   */
+  static String toAvroName(String name) {
+    if(name == null || name.isEmpty()) {
+      return name;
+    }
+
+    // If we're not starting with [A-Za-z_], prepend '_'
+    if(name.charAt(0) != '_' && !Character.isLetter(name.charAt(0)) ) {
+      name = "_" + name;
+    }
+
+    // Otherwise replace all invalid characters with '_'
+    return name.replaceAll("[^0-9A-Za-z_]", "_");
   }
 
   private static Schema.Type toAvroType(Column column) throws IllegalArgumentException {
