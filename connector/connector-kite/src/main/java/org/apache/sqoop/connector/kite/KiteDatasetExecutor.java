@@ -146,6 +146,9 @@ public class KiteDatasetExecutor {
     FileSystemDataset<GenericRecord> update = Datasets.load(uri);
     if (dataset instanceof FileSystemDataset) {
       ((FileSystemDataset<GenericRecord>) dataset).merge(update);
+
+      // And let's completely drop the temporary dataset
+      Datasets.delete(uri);
     } else {
       throw new SqoopException(
           KiteConnectorError.GENERIC_KITE_CONNECTOR_0000, uri);
