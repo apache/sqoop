@@ -20,6 +20,7 @@ package org.apache.sqoop.test.utils;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedWriter;
@@ -37,6 +38,14 @@ public class HdfsUtils {
 
   private static final char PATH_SEPARATOR = '/';
 
+  public static PathFilter filterHiddenFiles = new PathFilter() {
+    @Override
+    public boolean accept(Path path) {
+      String fileName = path.getName();
+      return !fileName.startsWith("_") && !fileName.startsWith(".");
+    }
+  };
+
   /**
    * Get list of mapreduce output files from given directory.
    *
@@ -45,9 +54,9 @@ public class HdfsUtils {
    * @throws IOException
    * @throws FileNotFoundException
    */
-  public static Path [] getOutputMapreduceFiles(FileSystem fs, String directory) throws FileNotFoundException, IOException {
+  public static Path [] getOutputMapreduceFiles(FileSystem fs, String directory) throws IOException {
     LinkedList<Path> files = new LinkedList<Path>();
-    for (FileStatus fileStatus : fs.listStatus(new Path(directory))) {
+    for (FileStatus fileStatus : fs.listStatus(new Path(directory), filterHiddenFiles)) {
       LOG.debug("Found mapreduce output file: " + fileStatus.getPath() + " with size " + fileStatus.getLen());
       files.add(fileStatus.getPath());
     }
