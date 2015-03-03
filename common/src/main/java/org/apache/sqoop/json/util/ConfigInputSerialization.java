@@ -149,7 +149,9 @@ public final class ConfigInputSerialization {
           MInputType.valueOf((String) input.get(ConfigInputConstants.CONFIG_INPUT_TYPE));
       String name = (String) input.get(ConfigInputConstants.CONFIG_INPUT_NAME);
       Boolean sensitive = (Boolean) input.get(ConfigInputConstants.CONFIG_INPUT_SENSITIVE);
-      InputEditable editable =  InputEditable.valueOf((String)input.get(ConfigInputConstants.CONFIG_INPUT_EDITABLE));
+      InputEditable editable =  (input.containsKey(ConfigInputConstants.CONFIG_INPUT_EDITABLE)) ?
+          InputEditable.valueOf((String)input.get(ConfigInputConstants.CONFIG_INPUT_EDITABLE))
+              : InputEditable.USER_ONLY;
       String overrides = (String) input.get(ConfigInputConstants.CONFIG_INPUT_OVERRIDES);
 
       MInput mInput = null;

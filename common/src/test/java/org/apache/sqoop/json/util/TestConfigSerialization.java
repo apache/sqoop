@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.json.util;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -38,6 +39,7 @@ import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
@@ -116,6 +118,56 @@ public class TestConfigSerialization {
     System.out.println(badSerializedJson);
     JSONObject retrievedJson = JSONUtils.parse(badSerializedJson);
     ConfigInputSerialization.restoreConfig(retrievedJson);
+  }
+
+  @Test
+  public void testInputEditableOptional() {
+    // Inserted values
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("A", "B");
+
+    // Fill config with all values
+    MConfig config = getConfig();
+    config.getStringInput("String").setValue("A");
+    config.getMapInput("Map").setValue(map);
+    config.getIntegerInput("Integer").setValue(1);
+    config.getBooleanInput("Boolean").setValue(true);
+    config.getEnumInput("Enum").setValue("YES");
+
+    // Serialize that into JSON
+    JSONObject jsonObject = ConfigInputSerialization.extractConfig(config, MConfigType.JOB,  false);
+    assertNotNull(jsonObject);
+
+    // Make sure editable is optional
+    // Remove the editable
+    JSONArray inputs = (JSONArray) jsonObject.get(ConfigInputConstants.CONFIG_INPUTS);
+    for (int i = 0; i < inputs.size(); i++) {
+      JSONObject input = (JSONObject) inputs.get(i);
+      if ((input.containsKey(ConfigInputConstants.CONFIG_INPUT_EDITABLE))) {
+        input.remove(ConfigInputConstants.CONFIG_INPUT_EDITABLE);
+      }
+    }
+
+    // Exchange the data on string level
+    String serializedJson = jsonObject.toJSONString();
+    JSONObject retrievedJson = JSONUtils.parse(serializedJson);
+
+    // Make sure editable isn't part of the JSON
+    inputs = (JSONArray) retrievedJson.get(ConfigInputConstants.CONFIG_INPUTS);
+    for (int i = 0; i < inputs.size(); i++) {
+      JSONObject input = (JSONObject) inputs.get(i);
+      assertFalse(input.containsKey(ConfigInputConstants.CONFIG_INPUT_EDITABLE));
+    }
+
+    // And retrieve back from JSON representation
+    MConfig retrieved = ConfigInputSerialization.restoreConfig(retrievedJson);
+
+    // Verify all expected values
+    assertEquals("A", retrieved.getStringInput("String").getValue());
+    assertEquals(map, retrieved.getMapInput("Map").getValue());
+    assertEquals(1, (int)retrieved.getIntegerInput("Integer").getValue());
+    assertEquals(true, retrieved.getBooleanInput("Boolean").getValue().booleanValue());
+    assertEquals("YES", retrieved.getEnumInput("Enum").getValue());
   }
 
   protected MConfig getMapConfig() {
