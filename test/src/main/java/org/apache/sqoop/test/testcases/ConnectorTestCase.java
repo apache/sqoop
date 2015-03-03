@@ -44,6 +44,7 @@ import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.validation.Status;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -80,7 +81,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     }
   };
 
-  @BeforeClass(alwaysRun = true)
+  @BeforeSuite(alwaysRun = true)
   public static void startHadoop() throws Exception {
     // Start Hadoop Clusters
     hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopMiniClusterRunner.class);

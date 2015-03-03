@@ -32,10 +32,13 @@ import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.test.hadoop.HadoopLocalRunner;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
+import org.testng.ITest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 
 /**
  * Basic test case that will bootstrap Sqoop server running in external Tomcat
@@ -88,7 +91,7 @@ abstract public class TomcatTestCase {
    */
   private SqoopClient client;
 
-  @BeforeClass(alwaysRun = true)
+  @BeforeSuite(alwaysRun = true)
   public static void startHadoop() throws Exception {
     // Start Hadoop Clusters
     hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopLocalRunner.class);
@@ -103,7 +106,11 @@ abstract public class TomcatTestCase {
 
   @BeforeMethod(alwaysRun = true)
   public void findMethodName(Method method) {
-    name = method.getName();
+    if(this instanceof ITest) {
+      name = ((ITest)this).getTestName();
+    } else {
+      name = method.getName();
+    }
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -127,7 +134,7 @@ abstract public class TomcatTestCase {
     cluster.stop();
   }
 
-  @AfterClass(alwaysRun = true)
+  @AfterSuite(alwaysRun = true)
   public static void stopHadoop() throws Exception {
     hadoopCluster.stop();
   }
