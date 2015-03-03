@@ -92,9 +92,9 @@ public class RevokePrivilegeFunction extends SqoopFunction {
   private Status revokePrivilege(String action, String resourceType, String resource,
                                  String principalType, String principal, boolean withGrant)
     throws IOException {
-    MResource resourceObject = new MResource(resourceType, resource);
+    MResource resourceObject = new MResource(resource, resourceType);
     MPrivilege privilegeObject = new MPrivilege(resourceObject, action, withGrant);
-    MPrincipal principalObject = new MPrincipal(principalType, principal);
+    MPrincipal principalObject = new MPrincipal(principal, principalType);
 
     client.revokePrivilege(
       Arrays.asList(principalObject),

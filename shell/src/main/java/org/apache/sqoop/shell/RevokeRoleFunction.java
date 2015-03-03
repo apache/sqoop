@@ -69,7 +69,7 @@ public class RevokeRoleFunction extends SqoopFunction {
 
   private Status revokeRole(String role, String principalType, String principal) throws IOException {
     MRole roleObject = new MRole(role);
-    MPrincipal principalObject = new MPrincipal(principalType, principal);
+    MPrincipal principalObject = new MPrincipal(principal, principalType);
 
     client.revokeRole(
       Arrays.asList(roleObject),
