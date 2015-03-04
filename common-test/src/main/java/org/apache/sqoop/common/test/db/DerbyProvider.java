@@ -20,6 +20,8 @@ package org.apache.sqoop.common.test.db;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.sqoop.common.test.db.types.DatabaseTypeList;
+import org.apache.sqoop.common.test.db.types.DerbyTypeList;
 import org.apache.sqoop.common.test.utils.LoggerWriter;
 import org.apache.sqoop.common.test.utils.NetworkUtils;
 
@@ -164,5 +166,10 @@ public class DerbyProvider extends DatabaseProvider {
   @Override
   public String getConnectionPassword() {
     return null;
+  }
+
+  @Override
+  public DatabaseTypeList getDatabaseTypes() {
+    return new DerbyTypeList();
   }
 }

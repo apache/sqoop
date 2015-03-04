@@ -19,6 +19,9 @@ package org.apache.sqoop.common.test.db;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.test.db.types.DatabaseType;
+import org.apache.sqoop.common.test.db.types.DatabaseTypeList;
+import org.apache.sqoop.common.test.db.types.EmptyTypeList;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -140,6 +143,17 @@ abstract public class DatabaseProvider {
    */
   public String getJdbcDriver() {
     return null;
+  }
+
+  /**
+   * Return type overview for this database.
+   *
+   * This method must work even in case that the provider hasn't been started.
+   *
+   * @return
+   */
+  public DatabaseTypeList getDatabaseTypes() {
+    return new EmptyTypeList();
   }
 
   /**
@@ -343,13 +357,24 @@ abstract public class DatabaseProvider {
    * @param values List of objects that should be inserted
    */
   public void insertRow(String tableName, Object ...values) {
+    insertRow(tableName, true, values);
+  }
+
+  /**
+   * Insert new row into the table.
+   *
+   * @param tableName Table name
+   * @param escapeValues Should the values be escaped based on their type or not
+   * @param values List of objects that should be inserted
+   */
+  public void insertRow(String tableName, boolean escapeValues, Object ...values) {
     StringBuilder sb = new StringBuilder("INSERT INTO ");
     sb.append(escapeTableName(tableName));
     sb.append(" VALUES (");
 
     List<String> valueList = new LinkedList<String>();
     for(Object value : values) {
-      valueList.add(convertObjectToQueryString(value));
+      valueList.add(escapeValues ? convertObjectToQueryString(value) : value.toString());
     }
 
     sb.append(StringUtils.join(valueList, ", "));
@@ -366,6 +391,18 @@ abstract public class DatabaseProvider {
    * @return ResultSet with given criteria
    */
   public ResultSet getRows(String tableName, Object []conditions) {
+    return getRows(tableName, true, conditions);
+  }
+
+  /**
+   * Return rows that match given conditions.
+   *
+   * @param tableName Table name
+   * @param escapeValues Should the values be escaped based on their type or not
+   * @param conditions Conditions in form of double values - column name and value, for example: "id", 1 or "last_update_date", null
+   * @return ResultSet with given criteria
+   */
+  public ResultSet getRows(String tableName, boolean escapeValues, Object []conditions) {
     // Columns are in form of two strings - name and value
     if(conditions.length % 2 != 0) {
       throw new RuntimeException("Incorrect number of parameters.");
@@ -386,7 +423,7 @@ abstract public class DatabaseProvider {
       if(value == null) {
         conditionList.add(escapeColumnName((String) columnName) + " IS NULL");
       } else {
-        conditionList.add(escapeColumnName((String) columnName) + " = " + convertObjectToQueryString(value));
+        conditionList.add(escapeColumnName((String) columnName) + " = " + (escapeValues ? convertObjectToQueryString(value) : value));
       }
     }
 

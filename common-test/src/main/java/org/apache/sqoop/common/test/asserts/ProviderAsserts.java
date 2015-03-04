@@ -42,9 +42,22 @@ public class ProviderAsserts {
    * @param values Values that should be present in the table
    */
   public static void assertRow(DatabaseProvider provider, String tableName,  Object []conditions, Object ...values) {
+    assertRow(provider, tableName, true, conditions, values);
+  }
+
+  /**
+   * Assert row in the table.
+   *
+   * @param provider Provider that should be used to query the database
+   * @param tableName Table name
+   * @param escapeValues Flag whether the values should be escaped based on their type when using in the generated queries or not
+   * @param conditions Conditions for identifying the row
+   * @param values Values that should be present in the table
+   */
+  public static void assertRow(DatabaseProvider provider, String tableName, boolean escapeValues, Object []conditions, Object ...values) {
     ResultSet rs = null;
     try {
-      rs = provider.getRows(tableName, conditions);
+      rs = provider.getRows(tableName, escapeValues, conditions);
 
       if(! rs.next()) {
         fail("No rows found.");

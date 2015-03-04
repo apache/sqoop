@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.test.testcases;
 
-import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.Assert.assertNotSame;
 
@@ -45,9 +44,6 @@ import org.apache.sqoop.validation.Status;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Base test case suitable for connector testing.
@@ -121,6 +117,14 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
 
   protected void insertRow(Object ...values) {
     provider.insertRow(getTableName(), values);
+  }
+
+  protected void insertRow(boolean escapeValues, Object ...values) {
+    provider.insertRow(getTableName(), escapeValues, values);
+  }
+
+  protected long rowCount() {
+    return provider.rowCount(getTableName());
   }
 
   protected void dumpTable() {
@@ -221,6 +225,17 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    */
   protected void assertRow(Object[] conditions, Object ...values) {
     ProviderAsserts.assertRow(provider, getTableName(), conditions, values);
+  }
+
+  /**
+   * Assert row in testing table.
+   *
+   * @param conditions Conditions in config that are expected by the database provider
+   * @param escapeValues Flag whether the values should be escaped based on their type when using in the generated queries or not
+   * @param values Values that are expected in the table (with corresponding types)
+   */
+  protected void assertRow(Object []conditions, boolean escapeValues, Object ...values) {
+    ProviderAsserts.assertRow(provider, getTableName(), escapeValues, conditions, values);
   }
 
   /**

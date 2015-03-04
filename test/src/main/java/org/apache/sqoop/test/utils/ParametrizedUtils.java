@@ -20,6 +20,7 @@ package org.apache.sqoop.test.utils;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Various utils to help build expected structure for JUNIT Parametrized runner.
@@ -63,6 +64,25 @@ public class ParametrizedUtils {
     LinkedList<Object []> ret = new LinkedList<Object []>();
 
     for(Object o : array) {
+      ret.add(toArray(o));
+    }
+
+    return ret;
+  }
+
+  /**
+   * Convert single list to array of arrays by putting each element in the source
+   * list into it's own one-item big array.
+   *
+   * This method is suitable for conversions required by Parametrized test runner.
+   *
+   * @param list List to be converted
+   * @return Converted array
+   */
+  public static Iterable<Object []>toArrayOfArrays(List<? extends Object> list) {
+     LinkedList<Object []> ret = new LinkedList<Object []>();
+
+    for(Object o : list) {
       ret.add(toArray(o));
     }
 
