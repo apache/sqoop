@@ -179,7 +179,7 @@ public class TableDefWriter {
       }
       if (null == hiveColType) {
         throw new IOException("Hive does not support the SQL type for column "
-            + col);
+            + col + " from table " + inputTableName);
       }
 
       sb.append('`').append(col).append("` ").append(hiveColType);
