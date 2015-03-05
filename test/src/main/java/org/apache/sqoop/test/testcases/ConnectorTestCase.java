@@ -119,7 +119,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     provider.insertRow(getTableName(), values);
   }
 
-  protected void insertRow(boolean escapeValues, Object ...values) {
+  protected void insertRow(Boolean escapeValues, Object ...values) {
     provider.insertRow(getTableName(), escapeValues, values);
   }
 
@@ -234,7 +234,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param escapeValues Flag whether the values should be escaped based on their type when using in the generated queries or not
    * @param values Values that are expected in the table (with corresponding types)
    */
-  protected void assertRow(Object []conditions, boolean escapeValues, Object ...values) {
+  protected void assertRow(Object []conditions, Boolean escapeValues, Object ...values) {
     ProviderAsserts.assertRow(provider, getTableName(), escapeValues, conditions, values);
   }
 
