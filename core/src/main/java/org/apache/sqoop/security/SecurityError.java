@@ -61,7 +61,10 @@ public enum SecurityError implements ErrorCode {
   AUTH_0012("Unable to get role name from http request"),
 
   /** The system was not able to get principal from http request. */
-  AUTH_0013("Unable to get principal from http request");
+  AUTH_0013("Unable to get principal from http request"),
+
+  /** Authorization Exception, used by authorization implementation, etc. Sentry. */
+  AUTH_0014("Authorization exception");
 
   private final String message;
 
