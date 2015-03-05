@@ -21,6 +21,7 @@ package com.cloudera.sqoop.manager;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,6 +98,14 @@ public class JdbcMySQLExportTest extends TestExport {
 
   @After
   public void tearDown() {
+    try {
+      Statement stmt = conn.createStatement();
+      stmt.execute(getDropTableStatement(getTableName()));
+      stmt.execute(getDropTableStatement(getStagingTableName()));
+    } catch(SQLException e) {
+      LOG.error("Can't clean up the database:", e);
+    }
+
     super.tearDown();
 
     if (null != this.conn) {
@@ -104,16 +113,6 @@ public class JdbcMySQLExportTest extends TestExport {
         this.conn.close();
       } catch (SQLException sqlE) {
         LOG.error("Got SQLException closing conn: " + sqlE.toString());
-      }
-    }
-
-    if (null != manager) {
-      try {
-        manager.close();
-        manager = null;
-      } catch (SQLException sqlE) {
-        LOG.error("Got SQLException: " + sqlE.toString());
-        fail("Got SQLException: " + sqlE.toString());
       }
     }
   }

@@ -56,6 +56,18 @@ public class MySqlCallExportTest extends ExportJobTestCase {
     createObjects();
   }
 
+  @Override
+  public void tearDown() {
+    try {
+      Statement stmt = getManager().getConnection().createStatement();
+      stmt.execute("DROP TABLE " + getTableName());
+    } catch(SQLException e) {
+      LOG.error("Can't clean up the database:", e);
+    }
+
+    super.tearDown();
+  }
+
   private String[] getArgv(String... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 

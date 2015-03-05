@@ -29,6 +29,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.Before;
+import org.junit.After;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
@@ -108,6 +109,18 @@ public class TestAllTables extends ImportJobTestCase {
       this.removeTableDir();
       incrementTableNum();
     }
+  }
+
+  @After
+  public void tearDown() {
+    try {
+      for (String table : tableNames) {
+        dropTableIfExists(table);
+      }
+    } catch(SQLException e) {
+      LOG.error("Can't clean up the database:", e);
+    }
+    super.tearDown();
   }
 
   public void testMultiTableImport() throws IOException {

@@ -98,6 +98,13 @@ public class DirectMySQLExportTest extends TestExport {
 
   @After
   public void tearDown() {
+    try {
+      Statement stmt = conn.createStatement();
+      stmt.execute(getDropTableStatement(getTableName()));
+    } catch(SQLException e) {
+      LOG.error("Can't clean up the database:", e);
+    }
+
     super.tearDown();
 
     if (null != this.conn) {
@@ -105,16 +112,6 @@ public class DirectMySQLExportTest extends TestExport {
         this.conn.close();
       } catch (SQLException sqlE) {
         LOG.error("Got SQLException closing conn: " + sqlE.toString());
-      }
-    }
-
-    if (null != manager) {
-      try {
-        manager.close();
-        manager = null;
-      } catch (SQLException sqlE) {
-        LOG.error("Got SQLException: " + sqlE.toString());
-        fail("Got SQLException: " + sqlE.toString());
       }
     }
   }
