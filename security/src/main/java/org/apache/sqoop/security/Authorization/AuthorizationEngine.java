@@ -170,7 +170,7 @@ public class AuthorizationEngine {
   private static void checkPrivilege(MPrivilege... privileges) {
     AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
     UserGroupInformation user = HttpUserGroupInformation.get();
-    String user_name = user == null ? StringUtils.EMPTY : user.getUserName();
+    String user_name = user == null ? StringUtils.EMPTY : user.getShortUserName();
     MPrincipal principal = new MPrincipal(user_name, RoleType.USER.name());
     handler.checkPrivileges(principal, Arrays.asList(privileges));
   }
