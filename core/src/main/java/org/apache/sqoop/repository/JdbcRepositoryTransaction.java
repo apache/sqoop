@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.RepositoryError;
 
 public class JdbcRepositoryTransaction implements RepositoryTransaction {
 

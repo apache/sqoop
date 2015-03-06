@@ -31,6 +31,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.CoreError;
+
 import static org.apache.sqoop.core.ConfigurationConstants.PROPERTIES_PROVIDER_SLEEP;
 
 public class PropertiesConfigurationProvider implements ConfigurationProvider {

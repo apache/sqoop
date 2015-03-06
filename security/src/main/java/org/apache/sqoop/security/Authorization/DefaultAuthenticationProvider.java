@@ -22,7 +22,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.delegation.web.HttpUserGroupInformation;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.security.AuthenticationProvider;
-import org.apache.sqoop.security.SecurityError;
+import org.apache.sqoop.error.code.SecurityError;
 
 public class DefaultAuthenticationProvider extends AuthenticationProvider {
 

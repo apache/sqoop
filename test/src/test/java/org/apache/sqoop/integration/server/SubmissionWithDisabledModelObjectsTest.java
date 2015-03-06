@@ -21,7 +21,7 @@ import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
-import org.apache.sqoop.driver.DriverError;
+import org.apache.sqoop.error.code.DriverError;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;

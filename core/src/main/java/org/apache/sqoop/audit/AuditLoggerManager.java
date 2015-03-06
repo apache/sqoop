@@ -23,6 +23,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
+import org.apache.sqoop.error.code.AuditLoggerError;
 import org.apache.sqoop.utils.ClassUtils;
 
 import java.util.ArrayList;

@@ -20,6 +20,7 @@ package org.apache.sqoop.core;
 import java.util.Properties;
 
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.CoreError;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

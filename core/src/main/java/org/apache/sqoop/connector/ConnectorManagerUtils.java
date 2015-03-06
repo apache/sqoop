@@ -20,6 +20,7 @@ package org.apache.sqoop.connector;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.ConfigurationConstants;
+import org.apache.sqoop.error.code.ConnectorError;
 
 import java.io.File;
 import java.io.IOException;

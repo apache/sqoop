@@ -18,6 +18,7 @@
 package org.apache.sqoop.security;
 
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.SecurityError;
 import org.apache.sqoop.utils.ClassUtils;
 
 /**

@@ -26,6 +26,7 @@ import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.ConfigurationConstants;
+import org.apache.sqoop.error.code.ConnectorError;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFromConfig;

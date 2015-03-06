@@ -30,7 +30,7 @@ import org.apache.sqoop.json.ThrowableBean;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.common.SqoopResponseCode;
-import org.apache.sqoop.core.CoreError;
+import org.apache.sqoop.error.code.CoreError;
 import org.apache.sqoop.json.JsonBean;
 
 @SuppressWarnings("serial")

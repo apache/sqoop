@@ -30,6 +30,7 @@ import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.DriverUpgrader;
+import org.apache.sqoop.error.code.RepositoryError;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;

@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.CoreError;
 
 /**
  * Configuration manager that loads Sqoop configuration.
