@@ -36,8 +36,8 @@ import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -175,7 +175,7 @@ public class KiteDatasetExecutor {
   public static String[] listTemporaryDatasetUris(String uri) {
     String repo = URIBuilder.REPO_SCHEME +
         uri.substring(URIBuilder.DATASET_SCHEME.length());
-    List<String> result = new ArrayList<String>();
+    Set<String> result = new HashSet<String>();
     for (URI match : Datasets.list(repo)) {
       if (match.toString().contains(TEMPORARY_DATASET_PREFIX)) {
         result.add(match.toString());
