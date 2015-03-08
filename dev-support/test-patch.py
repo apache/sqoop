@@ -263,7 +263,7 @@ def mvn_integration(result, output_dir, slow):
 
 def run_mvn_test(command, test_type, result, output_dir, slow):
   if slow:
-    command += " -Pslow,hadoop200"
+    command += " -Pslow"
     test_file_name = "%s_slow" % test_type
     test_type = "slow %s" % test_type
   else:
