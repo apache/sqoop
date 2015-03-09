@@ -40,6 +40,11 @@ public class AuthorizationManager implements Reconfigurable {
   public static final String DEFAULT_AUTHENTICATION_PROVIDER = "org.apache.sqoop.security.Authorization.DefaultAuthenticationProvider";
 
   /**
+   * Default authentication provider
+   */
+  public static final String DEFAULT_SERVER_NAME = "SqoopServer1";
+
+  /**
    * Default authorization auto upgrade option value
    */
   protected static boolean DEFAULT_AUTO_UPGRADE = false;
@@ -103,7 +108,11 @@ public class AuthorizationManager implements Reconfigurable {
             SecurityConstants.AUTHENTICATION_PROVIDER,
             DEFAULT_AUTHENTICATION_PROVIDER).trim();
 
-    authorizationHandler.doInitialize(SecurityFactory.getAuthenticationProvider(provider));
+    String serverName = SqoopConfiguration.getInstance().getContext().getString(
+            SecurityConstants.SERVER_NAME,
+            DEFAULT_SERVER_NAME).trim();
+
+    authorizationHandler.doInitialize(SecurityFactory.getAuthenticationProvider(provider), serverName);
 
     LOG.info("Authorization loaded.");
   }

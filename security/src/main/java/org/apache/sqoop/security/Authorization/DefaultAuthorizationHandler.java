@@ -49,6 +49,8 @@ public class DefaultAuthorizationHandler extends AuthorizationHandler {
 
   protected AuthenticationProvider authenticationProvider;
 
+  protected String serverName;
+
   public AuthorizationValidator getAuthorizationValidator() {
     return authorizationValidator;
   }
@@ -74,7 +76,7 @@ public class DefaultAuthorizationHandler extends AuthorizationHandler {
   }
 
   @Override
-  public void doInitialize(AuthenticationProvider provider) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+  public void doInitialize(AuthenticationProvider provider, String serverName) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     MapContext mapContext = SqoopConfiguration.getInstance().getContext();
     String accessController = mapContext.getString(
             SecurityConstants.AUTHORIZATION_ACCESS_CONTROLLER,
@@ -87,6 +89,7 @@ public class DefaultAuthorizationHandler extends AuthorizationHandler {
     this.authorizationValidator = SecurityFactory.getAuthorizationValidator(validator);
 
     this.authenticationProvider = provider;
+    this.serverName = serverName;
   }
 
   /**

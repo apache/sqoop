@@ -141,6 +141,14 @@ public final class SecurityConstants {
           PREFIX_AUTHORIZATION_CONFIG + "authentication_provider";
 
   /**
+   * The config specifies the sqoop server name for authorization.
+   * The default server name is "SqoopServer1"
+   * <tt>org.apache.sqoop.security.authorization.server_name</tt>.
+   */
+  public static final String SERVER_NAME =
+          PREFIX_AUTHORIZATION_CONFIG + "server_name";
+
+  /**
    * The config specifies the token kind in delegation token.
    */
   public static final String TOKEN_KIND = "sqoop_token_kind";
