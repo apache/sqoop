@@ -147,7 +147,7 @@ public class JobRequestHandler implements RequestHandler {
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "job", jobIdentifier);
     repository.deleteJob(jobId);
-    MResource resource = new MResource(String.valueOf(jobId), AuthorizationEngine.ResourceType.JOB.name());
+    MResource resource = new MResource(String.valueOf(jobId), MResource.TYPE.JOB);
     AuthorizationManager.getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
   }
@@ -285,7 +285,7 @@ public class JobRequestHandler implements RequestHandler {
       List<MJob> jobList = repository.findJobsForConnector(connectorId);
 
       // Authorization check
-      jobList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.JOB, jobList);
+      jobList = AuthorizationEngine.filterResource(MResource.TYPE.JOB, jobList);
 
       jobBean = createJobsBean(jobList, locale);
     } else
@@ -297,7 +297,7 @@ public class JobRequestHandler implements RequestHandler {
       List<MJob> jobList = repository.findJobs();
 
       // Authorization check
-      jobList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.JOB, jobList);
+      jobList = AuthorizationEngine.filterResource(MResource.TYPE.JOB, jobList);
 
       jobBean = createJobsBean(jobList, locale);
     }
@@ -312,7 +312,7 @@ public class JobRequestHandler implements RequestHandler {
       jobList.add(repository.findJob(jobId));
 
       // Authorization check
-      jobList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.JOB, jobList);
+      jobList = AuthorizationEngine.filterResource(MResource.TYPE.JOB, jobList);
 
       jobBean = createJobBean(jobList, locale);
     }

@@ -22,11 +22,13 @@ package org.apache.sqoop.model;
  */
 public class MResource {
 
+  public static enum TYPE {SERVER, CONNECTOR, LINK, JOB}
+
   private final String name;
   /**
    * Currently, the type supports connector, link, job and submission.
    */
-  private final String type;
+  private final TYPE type;
 
   /**
    * Default constructor to build  new MResource model.
@@ -35,9 +37,20 @@ public class MResource {
    * @param type Resource type
    */
   public MResource(String name,
-                   String type) {
+                   TYPE type) {
     this.name = name;
     this.type = type;
+  }
+
+  /**
+   * constructor to build  new MResource model.
+   *
+   * @param name     Resource name
+   * @param typeName Resource type name
+   */
+  public MResource(String name,
+                   String typeName) {
+    this(name, TYPE.valueOf(typeName.toUpperCase()));
   }
 
   @Override
@@ -55,6 +68,6 @@ public class MResource {
   }
 
   public String getType() {
-    return type;
+    return type.name();
   }
 }

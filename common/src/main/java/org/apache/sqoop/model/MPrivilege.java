@@ -22,11 +22,13 @@ package org.apache.sqoop.model;
  */
 public class MPrivilege {
 
+  public static enum ACTION {ALL, READ, WRITE}
+
   private final MResource resource;
   /**
    * Currently, the action supports view, use, create, update, delete and enable_disable.
    */
-  private final String action;
+  private final ACTION action;
   private final boolean with_grant_option;
 
 
@@ -38,11 +40,24 @@ public class MPrivilege {
    * @param with_grant_option Privilege with_grant_option
    */
   public MPrivilege(MResource resource,
-                    String action,
+                    ACTION action,
                     boolean with_grant_option) {
     this.resource = resource;
     this.action = action;
     this.with_grant_option = with_grant_option;
+  }
+
+  /**
+   * constructor to build  new MPrivilege model.
+   *
+   * @param resource          Privilege resource
+   * @param actionName        Privilege action name
+   * @param with_grant_option Privilege with_grant_option
+   */
+  public MPrivilege(MResource resource,
+                    String actionName,
+                    boolean with_grant_option) {
+    this(resource, ACTION.valueOf(actionName.toUpperCase()), with_grant_option);
   }
 
   @Override
@@ -61,7 +76,7 @@ public class MPrivilege {
   }
 
   public String getAction() {
-    return action;
+    return action.name();
   }
 
   public boolean isWith_grant_option() {

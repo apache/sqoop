@@ -101,7 +101,7 @@ public class LinkRequestHandler implements RequestHandler {
         ctx.getRequest().getRemoteAddr(), "delete", "link", linkIdentifier);
 
     repository.deleteLink(linkId);
-    MResource resource = new MResource(String.valueOf(linkId), AuthorizationEngine.ResourceType.LINK.name());
+    MResource resource = new MResource(String.valueOf(linkId), MResource.TYPE.LINK);
     AuthorizationManager.getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
   }
@@ -207,7 +207,7 @@ public class LinkRequestHandler implements RequestHandler {
         List<MLink> linkList = repository.findLinksForConnector(connectorId);
 
         // Authorization check
-        linkList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.LINK, linkList);
+        linkList = AuthorizationEngine.filterResource(MResource.TYPE.LINK, linkList);
 
         linkBean = createLinksBean(linkList, locale);
       } else {
@@ -224,7 +224,7 @@ public class LinkRequestHandler implements RequestHandler {
       List<MLink> linkList = repository.findLinks();
 
       // Authorization check
-      linkList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.LINK, linkList);
+      linkList = AuthorizationEngine.filterResource(MResource.TYPE.LINK, linkList);
 
       linkBean = createLinksBean(linkList, locale);
     }
@@ -239,7 +239,7 @@ public class LinkRequestHandler implements RequestHandler {
       linkList.add(repository.findLink(linkId));
 
       // Authorization check
-      linkList = AuthorizationEngine.filterResource(AuthorizationEngine.ResourceType.LINK, linkList);
+      linkList = AuthorizationEngine.filterResource(MResource.TYPE.LINK, linkList);
 
       linkBean = createLinkBean(linkList, locale);
     }

@@ -22,11 +22,13 @@ package org.apache.sqoop.model;
  */
 public class MPrincipal {
 
+  public static enum TYPE {USER, GROUP, ROLE}
+
   private final String name;
   /**
    * Currently, the type supports user, group and role.
    */
-  private final String type;
+  private final TYPE type;
 
   /**
    * Default constructor to build  new MPrincipal model.
@@ -35,9 +37,20 @@ public class MPrincipal {
    * @param type Principal type
    */
   public MPrincipal(String name,
-                    String type) {
+                    TYPE type) {
     this.name = name;
     this.type = type;
+  }
+
+  /**
+   * constructor to build  new MPrincipal model.
+   *
+   * @param name     Principal name
+   * @param typeName Principal type name
+   */
+  public MPrincipal(String name,
+                    String typeName) {
+    this(name, TYPE.valueOf(typeName.toUpperCase()));
   }
 
   @Override
@@ -55,6 +68,6 @@ public class MPrincipal {
   }
 
   public String getType() {
-    return type;
+    return type.name();
   }
 }

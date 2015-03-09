@@ -38,36 +38,15 @@ public class AuthorizationEngine {
   private static final Logger LOG = Logger.getLogger(AuthorizationEngine.class);
 
   /**
-   * Role type
-   */
-  public enum RoleType {
-    USER, GROUP, ROLE
-  }
-
-  /**
-   * Resource type
-   */
-  public enum ResourceType {
-    SERVER, CONNECTOR, LINK, JOB
-  }
-
-  /**
-   * Action type in Privilege
-   */
-  public enum PrivilegeActionType {
-    ALL, READ, WRITE
-  }
-
-  /**
    * Filter resources, get all valid resources from all resources
    */
-  public static <T extends MPersistableEntity> List<T> filterResource(final ResourceType type, List<T> resources) throws SqoopException {
+  public static <T extends MPersistableEntity> List<T> filterResource(final MResource.TYPE type, List<T> resources) throws SqoopException {
     Collection<T> collection = Collections2.filter(resources, new Predicate<T>() {
       @Override
       public boolean apply(T input) {
         try {
           String name = String.valueOf(input.getPersistenceId());
-          checkPrivilege(getPrivilege(type, name, PrivilegeActionType.READ));
+          checkPrivilege(getPrivilege(type, name, MPrivilege.ACTION.READ));
           // add valid resource
           return true;
         } catch (Exception e) {
@@ -83,58 +62,58 @@ public class AuthorizationEngine {
    * Link related function
    */
   public static void createLink(String connectorId) throws SqoopException {
-    checkPrivilege(getPrivilege(ResourceType.CONNECTOR, connectorId, PrivilegeActionType.READ));
+    checkPrivilege(getPrivilege(MResource.TYPE.CONNECTOR, connectorId, MPrivilege.ACTION.READ));
   }
 
   public static void updateLink(String connectorId, String linkId) throws SqoopException {
-    MPrivilege privilege1 = getPrivilege(ResourceType.CONNECTOR, connectorId, PrivilegeActionType.READ);
-    MPrivilege privilege2 = getPrivilege(ResourceType.LINK, linkId, PrivilegeActionType.WRITE);
+    MPrivilege privilege1 = getPrivilege(MResource.TYPE.CONNECTOR, connectorId, MPrivilege.ACTION.READ);
+    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkId, MPrivilege.ACTION.WRITE);
     checkPrivilege(privilege1, privilege2);
   }
 
   public static void deleteLink(String linkId) throws SqoopException {
-    checkPrivilege(getPrivilege(ResourceType.LINK, linkId, PrivilegeActionType.WRITE));
+    checkPrivilege(getPrivilege(MResource.TYPE.LINK, linkId, MPrivilege.ACTION.WRITE));
   }
 
   public static void enableDisableLink(String linkId) throws SqoopException {
-    checkPrivilege(getPrivilege(ResourceType.LINK, linkId, PrivilegeActionType.WRITE));
+    checkPrivilege(getPrivilege(MResource.TYPE.LINK, linkId, MPrivilege.ACTION.WRITE));
   }
 
   /**
    * Job related function
    */
   public static void createJob(String linkId1, String linkId2) throws SqoopException {
-    MPrivilege privilege1 = getPrivilege(ResourceType.LINK, linkId1, PrivilegeActionType.READ);
-    MPrivilege privilege2 = getPrivilege(ResourceType.LINK, linkId2, PrivilegeActionType.READ);
+    MPrivilege privilege1 = getPrivilege(MResource.TYPE.LINK, linkId1, MPrivilege.ACTION.READ);
+    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkId2, MPrivilege.ACTION.READ);
     checkPrivilege(privilege1, privilege2);
   }
 
   public static void updateJob(String linkId1, String linkId2, String jobId) throws SqoopException {
-    MPrivilege privilege1 = getPrivilege(ResourceType.LINK, linkId1, PrivilegeActionType.READ);
-    MPrivilege privilege2 = getPrivilege(ResourceType.LINK, linkId2, PrivilegeActionType.READ);
-    MPrivilege privilege3 = getPrivilege(ResourceType.JOB, jobId, PrivilegeActionType.WRITE);
+    MPrivilege privilege1 = getPrivilege(MResource.TYPE.LINK, linkId1, MPrivilege.ACTION.READ);
+    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkId2, MPrivilege.ACTION.READ);
+    MPrivilege privilege3 = getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE);
     checkPrivilege(privilege1, privilege2, privilege3);
   }
 
   public static void deleteJob(String jobId) throws SqoopException {
-    checkPrivilege(getPrivilege(ResourceType.JOB, jobId, PrivilegeActionType.WRITE));
+    checkPrivilege(getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE));
   }
 
   public static void enableDisableJob(String jobId) throws SqoopException {
-    checkPrivilege(getPrivilege(ResourceType.JOB, jobId, PrivilegeActionType.WRITE));
+    checkPrivilege(getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE));
   }
 
   public static void startJob(String jobId) throws SqoopException {
     ;
-    checkPrivilege(getPrivilege(ResourceType.JOB, jobId, PrivilegeActionType.WRITE));
+    checkPrivilege(getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE));
   }
 
   public static void stopJob(String jobId) throws SqoopException {
-    checkPrivilege(getPrivilege(ResourceType.JOB, jobId, PrivilegeActionType.WRITE));
+    checkPrivilege(getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE));
   }
 
   public static void statusJob(String jobId) throws SqoopException {
-    checkPrivilege(getPrivilege(ResourceType.JOB, jobId, PrivilegeActionType.READ));
+    checkPrivilege(getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.READ));
   }
 
   /**
@@ -146,7 +125,7 @@ public class AuthorizationEngine {
       public boolean apply(MSubmission input) {
         try {
           String jobId = String.valueOf(input.getJobId());
-          checkPrivilege(getPrivilege(ResourceType.JOB, jobId, PrivilegeActionType.READ));
+          checkPrivilege(getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.READ));
           // add valid submission
           return true;
         } catch (Exception e) {
@@ -161,17 +140,17 @@ public class AuthorizationEngine {
   /**
    * Help function
    */
-  private static MPrivilege getPrivilege(ResourceType resourceType,
+  private static MPrivilege getPrivilege(MResource.TYPE resourceType,
                                          String resourceId,
-                                         PrivilegeActionType privilegeActionType) {
-    return new MPrivilege(new MResource(resourceId, resourceType.name()), privilegeActionType.name(), false);
+                                         MPrivilege.ACTION privilegeAction) {
+    return new MPrivilege(new MResource(resourceId, resourceType), privilegeAction, false);
   }
 
   private static void checkPrivilege(MPrivilege... privileges) {
     AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
     UserGroupInformation user = HttpUserGroupInformation.get();
     String user_name = user == null ? StringUtils.EMPTY : user.getShortUserName();
-    MPrincipal principal = new MPrincipal(user_name, RoleType.USER.name());
+    MPrincipal principal = new MPrincipal(user_name, MPrincipal.TYPE.USER);
     handler.checkPrivileges(principal, Arrays.asList(privileges));
   }
 }
