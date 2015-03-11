@@ -21,14 +21,15 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.test.utils.HdfsUtils;
 
 /**
- * Represents a local cluster.
- * It uses an unchanged Configuration object.
- * HadoopRunner implementation that is using LocalJobRunner for executing mapreduce jobs and local filesystem instead of HDFS.
+ * Represents a local cluster. It uses an unchanged Configuration object.
+ * HadoopRunner implementation that is using LocalJobRunner for executing
+ * mapreduce jobs and local filesystem instead of HDFS.
  */
 public class HadoopLocalRunner extends HadoopRunner {
 
   @Override
-  public Configuration prepareConfiguration(Configuration conf) {
+  public Configuration prepareConfiguration(Configuration conf)
+      throws Exception {
     return conf;
   }
 

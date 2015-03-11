@@ -24,13 +24,13 @@ import org.apache.hadoop.mapred.MiniMRCluster;
 import org.apache.log4j.Logger;
 
 /**
- * Represents a minicluster setup.
- * It creates a configuration object and mutates it.
- * Clients that need to connect to the miniclusters should use
- * the provided configuration object.
+ * Represents a minicluster setup. It creates a configuration object and mutates
+ * it. Clients that need to connect to the miniclusters should use the provided
+ * configuration object.
  */
 public class HadoopMiniClusterRunner extends HadoopRunner {
-  private static final Logger LOG = Logger.getLogger(HadoopMiniClusterRunner.class);
+  private static final Logger LOG = Logger
+      .getLogger(HadoopMiniClusterRunner.class);
 
   /**
    * Hadoop HDFS cluster
@@ -43,7 +43,8 @@ public class HadoopMiniClusterRunner extends HadoopRunner {
   protected MiniMRCluster mrCluster;
 
   @Override
-  public Configuration prepareConfiguration(Configuration config) {
+  public Configuration prepareConfiguration(Configuration config)
+      throws Exception {
     config.set("dfs.block.access.token.enable", "false");
     config.set("dfs.permissions", "true");
     config.set("hadoop.security.authentication", "simple");
@@ -51,7 +52,8 @@ public class HadoopMiniClusterRunner extends HadoopRunner {
     config.set("mapred.tasktracker.reduce.tasks.maximum", "1");
     config.set("mapred.submit.replication", "1");
     config.set("yarn.resourcemanager.scheduler.class", "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler");
-    config.set("yarn.application.classpath", System.getProperty("java.class.path"));
+    config.set("yarn.application.classpath",
+        System.getProperty("java.class.path"));
     return config;
   }
 
@@ -75,7 +77,8 @@ public class HadoopMiniClusterRunner extends HadoopRunner {
 
     // Start MR server
     LOG.info("Starting MR cluster");
-    mrCluster = new MiniMRCluster(0, 0, 1, dfsCluster.getFileSystem().getUri().toString(), 1, null, null, null, new JobConf(config));
+    mrCluster = new MiniMRCluster(0, 0, 1, dfsCluster.getFileSystem().getUri()
+        .toString(), 1, null, null, null, new JobConf(config));
     LOG.info("Started MR cluster");
     config = prepareConfiguration(mrCluster.createJobConf());
   }
