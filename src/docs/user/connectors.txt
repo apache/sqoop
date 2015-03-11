@@ -389,8 +389,23 @@ Argument                              Description
                                       Default value is 1.
 +--log-dir+                           Applicable only in direct mode.\
                                       Specifies the directory where Netezza\
-                                      external table operation logs are stored.\
-                                      Default value is /tmp.
+                                      external table operation logs are stored\
+                                      on the hadoop filesystem.  Logs are\
+                                      stored under this directory with one\
+                                      directory for the job and sub-directories\
+                                      for each task number and attempt.\
+                                      Default value is the user home directory.
++--trunc-string+                      Applicable only in direct mode.\
+                                      Specifies whether the system \
+                                      truncates strings to the declared\
+                                      storage and loads the data. By default\
+                                      truncation of strings is reported as an\
+                                      error.
++--ctrl-chars+                        Applicable only in direct mode.\
+                                      Specifies whether control characters \
+                                      (ASCII chars 1 - 31) can be allowed \
+                                      to be part of char/nchar/varchar/nvarchar\
+                                      columns.  Default is false.
 --------------------------------------------------------------------------------
 
 
