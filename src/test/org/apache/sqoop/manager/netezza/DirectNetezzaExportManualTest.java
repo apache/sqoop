@@ -155,6 +155,8 @@ public class DirectNetezzaExportManualTest extends NetezzaExportManualTest {
         "--",
         "--log-dir", "/tmp",
         "--max-errors", "2",
+        "--trunc-string",
+        "--ctrl-chars"
      };
     String[] argv = getArgv(true, 10, 10, extraArgs);
     runNetezzaTest(getTableName(), argv);

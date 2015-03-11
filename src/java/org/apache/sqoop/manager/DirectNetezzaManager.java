@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.sqoop.mapreduce.netezza.NetezzaExternalTableExportJob;
 import org.apache.sqoop.mapreduce.netezza.NetezzaExternalTableImportJob;
 
@@ -58,11 +59,24 @@ public class DirectNetezzaManager extends NetezzaManager {
   public static final String NETEZZA_ERROR_THRESHOLD_LONG_ARG =
       "max-errors";
 
+  public static final String NETEZZA_CTRL_CHARS_OPT =
+      "netezza.ctrl.chars";
+  public static final String NETEZZA_CTRL_CHARS_LONG_ARG =
+      "ctrl-chars";
+
+  public static final String NETEZZA_TRUNC_STRING_OPT =
+      "netezza.trunc.string";
+  public static final String NETEZZA_TRUNC_STRING_LONG_ARG =
+      "trunc-string";
+
+
+
   private static final String QUERY_CHECK_DICTIONARY_FOR_TABLE =
       "SELECT 1 FROM _V_TABLE WHERE OWNER= ? "
       + " AND TABLENAME = ?";
   public static final String NETEZZA_NULL_VALUE =
       "netezza.exttable.null.value";
+
   public DirectNetezzaManager(SqoopOptions opts) {
     super(opts);
     try {
@@ -159,7 +173,7 @@ public class DirectNetezzaManager extends NetezzaManager {
     options = context.getOptions();
     context.setConnManager(this);
 
-    checkTable(); // Throws excpetion as necessary
+    checkTable(); // Throws exception as necessary
     NetezzaExternalTableExportJob exporter = null;
 
     char qc = (char) options.getInputEnclosedBy();
@@ -248,6 +262,12 @@ public class DirectNetezzaManager extends NetezzaManager {
     netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_LOG_DIR_OPT)
         .hasArg().withDescription("Netezza log directory")
         .withLongOpt(NETEZZA_LOG_DIR_LONG_ARG).create());
+    netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_CTRL_CHARS_OPT)
+      .withDescription("Allow control chars in data")
+      .withLongOpt(NETEZZA_CTRL_CHARS_LONG_ARG).create());
+    netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_TRUNC_STRING_OPT)
+      .withDescription("Truncate string to declared storage size")
+      .withLongOpt(NETEZZA_TRUNC_STRING_LONG_ARG).create());
     return netezzaOpts;
   }
 
@@ -270,6 +290,12 @@ public class DirectNetezzaManager extends NetezzaManager {
       conf.set(NETEZZA_LOG_DIR_OPT, dir);
     }
 
+    conf.setBoolean(NETEZZA_CTRL_CHARS_OPT,
+      cmdLine.hasOption(NETEZZA_CTRL_CHARS_LONG_ARG));
+
+    conf.setBoolean(NETEZZA_CTRL_CHARS_OPT,
+      cmdLine.hasOption(NETEZZA_CTRL_CHARS_LONG_ARG));
+
     // Always true for Netezza direct mode access
     conf.setBoolean(NETEZZA_DATASLICE_ALIGNED_ACCESS_OPT, true);
   }
@@ -290,5 +316,16 @@ public class DirectNetezzaManager extends NetezzaManager {
   @Override
   public boolean isDirectModeHCatSupported() {
     return true;
+  }
+
+
+  public static String getLocalLogDir(TaskAttemptID attemptId) {
+      int tid = attemptId.getTaskID().getId();
+      int aid = attemptId.getId();
+      String jid = attemptId.getJobID().toString();
+      StringBuilder sb = new StringBuilder(jid).append('-');
+      sb.append(tid).append('-').append(aid);
+      String localLogDir = sb.toString();
+      return localLogDir;
   }
 }

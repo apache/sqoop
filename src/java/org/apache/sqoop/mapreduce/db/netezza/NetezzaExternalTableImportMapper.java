@@ -21,14 +21,19 @@ package org.apache.sqoop.mapreduce.db.netezza;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.sqoop.config.ConfigurationHelper;
@@ -36,6 +41,7 @@ import org.apache.sqoop.io.NamedFifo;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.util.FileUploader;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.util.TaskId;
 
@@ -61,7 +67,9 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     .getLog(NetezzaExternalTableImportMapper.class.getName());
   private NetezzaJDBCStatementRunner extTableThread;
   private PerfCounters counter;
-
+  private String localLogDir = null;
+  private String logDir = null;
+  private File taskAttemptDir = null;
   private String getSqlStatement(int myId) throws IOException {
 
     char fd = (char) conf.getInt(DelimiterSet.OUTPUT_FIELD_DELIM_KEY, ',');
@@ -69,6 +77,11 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     char ec = (char) conf.getInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, 0);
 
     String nullValue = conf.get(DirectNetezzaManager.NETEZZA_NULL_VALUE);
+
+    boolean ctrlChars =
+        conf.getBoolean(DirectNetezzaManager.NETEZZA_CTRL_CHARS_OPT, false);
+    boolean truncString =
+        conf.getBoolean(DirectNetezzaManager.NETEZZA_TRUNC_STRING_OPT, false);
 
     int errorThreshold = conf.getInt(
       DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
@@ -82,6 +95,12 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     sqlStmt.append("' USING (REMOTESOURCE 'JDBC' ");
     sqlStmt.append(" BOOLSTYLE 'T_F' ");
     sqlStmt.append(" CRINSTRING FALSE ");
+    if (ctrlChars) {
+      sqlStmt.append(" CTRLCHARS TRUE ");
+    }
+    if (truncString) {
+      sqlStmt.append(" TRUNCSTRING TRUE ");
+    }
     sqlStmt.append(" DELIMITER ");
     sqlStmt.append(Integer.toString(fd));
     sqlStmt.append(" ENCODING 'internal' ");
@@ -112,17 +131,12 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
 
     sqlStmt.append(" MAXERRORS ").append(errorThreshold);
 
-    if (logDir != null) {
-      logDir = logDir.trim();
-      if (logDir.length() > 0) {
-        File logDirPath = new File(logDir);
-        logDirPath.mkdirs();
-        if (logDirPath.canWrite() && logDirPath.isDirectory()) {
-          sqlStmt.append(" LOGDIR ").append(logDir).append(' ');
-        } else {
-          throw new IOException("Unable to create log directory specified");
-        }
-      }
+    File logDirPath = new File(taskAttemptDir, localLogDir);
+    logDirPath.mkdirs();
+    if (logDirPath.canWrite() && logDirPath.isDirectory()) {
+       sqlStmt.append(" LOGDIR ").append(logDirPath.getAbsolutePath()).append(' ');
+    } else {
+        throw new IOException("Unable to create log directory specified");
     }
 
     sqlStmt.append(") AS SELECT ");
@@ -149,7 +163,7 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
 
   private void initNetezzaExternalTableImport(int myId) throws IOException {
 
-    File taskAttemptDir = TaskId.getLocalWorkPath(conf);
+    taskAttemptDir = TaskId.getLocalWorkPath(conf);
 
     this.fifoFile = new File(taskAttemptDir, ("nzexttable-" + myId + ".txt"));
     String filename = fifoFile.toString();
@@ -199,6 +213,10 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
   public void map(Integer dataSliceId, NullWritable val, Context context)
     throws IOException, InterruptedException {
     conf = context.getConfiguration();
+    localLogDir =
+        DirectNetezzaManager.getLocalLogDir(context.getTaskAttemptID());
+    logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
+
     dbc = new DBConfiguration(conf);
     numMappers = ConfigurationHelper.getConfNumMaps(conf);
     char rd = (char) conf.getInt(DelimiterSet.OUTPUT_RECORD_DELIM_KEY, '\n');
@@ -232,7 +250,11 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
           extTableThread.printException();
           throw new IOException(extTableThread.getException());
         }
+        FileUploader.uploadFilesToDFS(taskAttemptDir.getAbsolutePath(),
+          localLogDir, logDir, context.getJobID().toString(),
+          conf);
       }
     }
   }
+
 }

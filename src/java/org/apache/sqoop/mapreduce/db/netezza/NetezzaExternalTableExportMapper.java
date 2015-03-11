@@ -20,15 +20,21 @@ package org.apache.sqoop.mapreduce.db.netezza;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.sqoop.io.NamedFifo;
@@ -36,6 +42,7 @@ import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.mapreduce.SqoopMapper;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.util.FileUploader;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.util.TaskId;
 
@@ -61,6 +68,9 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
   private NetezzaJDBCStatementRunner extTableThread;
   private PerfCounters counter;
   private DelimiterSet outputDelimiters;
+  private String localLogDir = null;
+  private String logDir = null;
+  private File taskAttemptDir = null;
 
   private String getSqlStatement(DelimiterSet delimiters) throws IOException {
 
@@ -72,7 +82,11 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
 
     int errorThreshold = conf.getInt(
       DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
-    String logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
+
+    boolean ctrlChars =
+        conf.getBoolean(DirectNetezzaManager.NETEZZA_CTRL_CHARS_OPT, false);
+    boolean truncString =
+        conf.getBoolean(DirectNetezzaManager.NETEZZA_TRUNC_STRING_OPT, false);
 
     StringBuilder sqlStmt = new StringBuilder(2048);
 
@@ -83,6 +97,12 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     sqlStmt.append("' USING (REMOTESOURCE 'JDBC' ");
     sqlStmt.append(" BOOLSTYLE 'TRUE_FALSE' ");
     sqlStmt.append(" CRINSTRING FALSE ");
+    if (ctrlChars) {
+      sqlStmt.append(" CTRLCHARS TRUE ");
+    }
+    if (truncString) {
+      sqlStmt.append(" TRUNCSTRING TRUE ");
+    }
     sqlStmt.append(" DELIMITER ");
     sqlStmt.append(Integer.toString(fd));
     sqlStmt.append(" ENCODING 'internal' ");
@@ -112,19 +132,18 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     }
     sqlStmt.append(" MAXERRORS ").append(errorThreshold);
 
-    if (logDir != null) {
-      logDir = logDir.trim();
-      if (logDir.length() > 0) {
-        File logDirPath = new File(logDir);
-        logDirPath.mkdirs();
-        if (logDirPath.canWrite() && logDirPath.isDirectory()) {
-          sqlStmt.append(" LOGDIR ").append(logDir).append(' ');
-        } else {
-          throw new IOException("Unable to create log directory specified");
-        }
-      }
-    }
-    sqlStmt.append(")");
+
+
+  File logDirPath = new File(taskAttemptDir, localLogDir);
+  logDirPath.mkdirs();
+  if (logDirPath.canWrite() && logDirPath.isDirectory()) {
+     sqlStmt.append(" LOGDIR ")
+       .append(logDirPath.getAbsolutePath()).append(' ');
+  } else {
+      throw new IOException("Unable to create log directory specified");
+  }
+
+  sqlStmt.append(")");
 
     String stmt = sqlStmt.toString();
     LOG.debug("SQL generated for external table export" + stmt);
@@ -135,6 +154,12 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
   private void initNetezzaExternalTableExport(Context context)
     throws IOException {
     this.conf = context.getConfiguration();
+
+    taskAttemptDir = TaskId.getLocalWorkPath(conf);
+    localLogDir =
+        DirectNetezzaManager.getLocalLogDir(context.getTaskAttemptID());
+    logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
+
     dbc = new DBConfiguration(conf);
     File taskAttemptDir = TaskId.getLocalWorkPath(conf);
 
@@ -212,6 +237,9 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
           throw new IOException(extTableThread.getException());
         }
       }
+      FileUploader.uploadFilesToDFS(taskAttemptDir.getAbsolutePath(),
+        localLogDir, logDir, context.getJobID().toString(),
+        conf);
     }
   }
 
