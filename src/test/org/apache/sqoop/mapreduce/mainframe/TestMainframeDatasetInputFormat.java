@@ -43,6 +43,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cloudera.sqoop.config.ConfigurationHelper;
+
 public class TestMainframeDatasetInputFormat {
 
   private MainframeDatasetInputFormat<SqoopRecord> format;
@@ -97,7 +99,8 @@ public class TestMainframeDatasetInputFormat {
     String dsName = "dsName1";
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME, dsName);
     Job job = new Job(conf);
-    format.getSplits(job);
+    ConfigurationHelper.setJobNumMaps(job, 2);
+    //format.getSplits(job);
 
     List<InputSplit> splits = new ArrayList<InputSplit>();
     splits = ((MainframeDatasetInputFormat<SqoopRecord>) format).getSplits(job);

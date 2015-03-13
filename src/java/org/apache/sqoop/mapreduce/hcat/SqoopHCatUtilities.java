@@ -63,6 +63,7 @@ import org.apache.hive.hcatalog.mapreduce.HCatInputFormat;
 import org.apache.hive.hcatalog.mapreduce.HCatOutputFormat;
 import org.apache.hive.hcatalog.mapreduce.OutputJobInfo;
 import org.apache.sqoop.config.ConfigurationConstants;
+import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.util.Executor;
@@ -857,7 +858,7 @@ public final class SqoopHCatUtilities {
    */
   public static void addJars(Job job, SqoopOptions options) throws IOException {
 
-    if (isLocalJobTracker(job)) {
+    if (ConfigurationHelper.isLocalJobTracker(job.getConfiguration())) {
       LOG.info("Not adding hcatalog jars to distributed cache in local mode");
       return;
     }
@@ -1033,23 +1034,9 @@ public final class SqoopHCatUtilities {
    }
  }
 
-  public static boolean isLocalJobTracker(Job job) {
-    Configuration conf = job.getConfiguration();
-    // If framework is set to YARN, then we can't be running in local mode
-    if ("yarn".equalsIgnoreCase(conf
-      .get(ConfigurationConstants.PROP_MAPREDUCE_FRAMEWORK_NAME))) {
-      return false;
-    }
-    String jtAddr = conf
-      .get(ConfigurationConstants.PROP_MAPRED_JOB_TRACKER_ADDRESS);
-    String jtAddr2 = conf
-      .get(ConfigurationConstants.PROP_MAPREDUCE_JOB_TRACKER_ADDRESS);
-    return (jtAddr != null && jtAddr.equals("local"))
-      || (jtAddr2 != null && jtAddr2.equals("local"));
-  }
 
   public void invokeOutputCommitterForLocalMode(Job job) throws IOException {
-    if (isLocalJobTracker(job) && isHadoop1()) {
+    if (ConfigurationHelper.isLocalJobTracker(job.getConfiguration()) && isHadoop1()) {
       // HCatalog 0.11- do have special class HCatHadoopShims, however this
       // class got merged into Hive Shim layer in 0.12+. Following method will
       // try to find correct implementation via reflection.

@@ -28,6 +28,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+
 import org.apache.hadoop.util.ReflectionUtils;
 
 /**
@@ -39,19 +40,34 @@ import org.apache.hadoop.util.ReflectionUtils;
 public final class ConfigurationHelper {
 
   /**
+   * We track the number of maps in local mode separately as
+   * mapred.map.tasks or mapreduce.job.maps is ignored in local mode and will
+   * always return 1 irrespective of what we set the value to in the
+   * configuration.
+   */
+  public static int numLocalModeMaps = 1;
+  /**
    * Set the (hinted) number of map tasks for a job.
    */
   public static void setJobNumMaps(Job job, int numMapTasks) {
-    job.getConfiguration().setInt(
+    if (isLocalJobTracker(job.getConfiguration())) {
+      numLocalModeMaps = numMapTasks;
+    } else {
+      job.getConfiguration().setInt(
         ConfigurationConstants.PROP_MAPRED_MAP_TASKS, numMapTasks);
+    }
   }
 
   /**
    * Get the (hinted) number of map tasks for a job.
    */
   public static int getJobNumMaps(JobContext job) {
-    return job.getConfiguration().getInt(
+    if (isLocalJobTracker(job.getConfiguration())) {
+      return numLocalModeMaps;
+    } else {
+      return job.getConfiguration().getInt(
         ConfigurationConstants.PROP_MAPRED_MAP_TASKS, 1);
+    }
   }
 
   /**
@@ -78,7 +94,11 @@ public final class ConfigurationHelper {
    * Get the (hinted) number of map tasks for a job.
    */
   public static int getConfNumMaps(Configuration conf) {
-    return conf.getInt(ConfigurationConstants.PROP_MAPRED_MAP_TASKS, 1);
+    if (isLocalJobTracker(conf)) {
+      return numLocalModeMaps;
+    } else {
+      return conf.getInt(ConfigurationConstants.PROP_MAPRED_MAP_TASKS, 1);
+    }
   }
 
   /**
@@ -191,6 +211,20 @@ public final class ConfigurationHelper {
       ret.add((U) ReflectionUtils.newInstance(cl, conf));
     }
     return ret;
+  }
+
+  public static boolean isLocalJobTracker(Configuration conf) {
+    // If framework is set to YARN, then we can't be running in local mode
+    if ("yarn".equalsIgnoreCase(conf
+      .get(ConfigurationConstants.PROP_MAPREDUCE_FRAMEWORK_NAME))) {
+      return false;
+    }
+    String jtAddr = conf
+      .get(ConfigurationConstants.PROP_MAPRED_JOB_TRACKER_ADDRESS);
+    String jtAddr2 = conf
+      .get(ConfigurationConstants.PROP_MAPREDUCE_JOB_TRACKER_ADDRESS);
+    return (jtAddr != null && jtAddr.equals("local"))
+      || (jtAddr2 != null && jtAddr2.equals("local"));
   }
 
   private ConfigurationHelper() {

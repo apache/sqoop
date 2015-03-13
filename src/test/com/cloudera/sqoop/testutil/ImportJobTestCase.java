@@ -94,7 +94,7 @@ public abstract class ImportJobTestCase extends BaseSqoopTestCase {
     args.add(getConnectString());
     args.add("--as-sequencefile");
     args.add("--num-mappers");
-    args.add("2");
+    args.add("1");
 
     args.addAll(getExtraArgs(conf));
 

@@ -750,7 +750,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         + "database when more rows are needed")
         .withLongOpt(FETCH_SIZE_ARG)
         .create());
-
+    importOpts.addOption(OptionBuilder.withArgName("reset-mappers")
+      .withDescription("Reset the number of mappers to one mapper if no split key available")
+      .withLongOpt(AUTORESET_TO_ONE_MAPPER)
+      .create());
     return importOpts;
   }
 
@@ -969,6 +972,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         out.setExistingJarName(in.getOptionValue(JAR_FILE_NAME_ARG));
       }
 
+      if (in.hasOption(AUTORESET_TO_ONE_MAPPER)) {
+        out.setAutoResetToOneMapper(true);
+      }
+
       applyIncrementalOptions(in, out);
       applyHiveOptions(in, out);
       applyOutputFormatOptions(in, out);
@@ -1066,6 +1073,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
          != SqoopOptions.IncrementalMode.None) {
        throw new InvalidOptionsException("--delete-target-dir can not be used"
          + " with incremental imports.");
+    } else if (options.getAutoResetToOneMapper()
+        && (options.getSplitByCol() != null)) {
+        throw new InvalidOptionsException("--autoreset-to-one-mapper and"
+          + " --split-by cannot be used together.");
     }
   }
 

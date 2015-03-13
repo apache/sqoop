@@ -170,7 +170,7 @@ public class TestBoundaryQuery extends ImportJobTestCase {
       + getTableName() +" where intfield1 in (3, 5)";
 
     runQueryTest(query, true, 2, 8, getTablePath().toString(),
-        "--split-by", "INTFIELD1");
+      "--m", "1", "--split-by", "INTFIELD1");
   }
 
   public void testNoBoundaryQuerySingleMapper() throws IOException {

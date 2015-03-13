@@ -276,7 +276,7 @@ public abstract class SqlManager
     }
 
     try {
-      Map<String, List<Integer>> colInfo = 
+      Map<String, List<Integer>> colInfo =
           new SqlTypeMap<String, List<Integer>>();
 
       int cols = results.getMetaData().getColumnCount();
@@ -618,10 +618,15 @@ public abstract class SqlManager
     // correctly.
     String splitCol = getSplitColumn(opts, tableName);
     if (null == splitCol && opts.getNumMappers() > 1) {
-      // Can't infer a primary key.
-      throw new ImportException("No primary key could be found for table "
+      if (!opts.getAutoResetToOneMapper()) {
+        // Can't infer a primary key.
+        throw new ImportException("No primary key could be found for table "
           + tableName + ". Please specify one with --split-by or perform "
           + "a sequential import with '-m 1'.");
+      } else {
+        LOG.warn("Split by column not provided or can't be inferred.  Resetting to one mapper");
+        opts.setNumMappers(1);
+      }
     }
   }
 

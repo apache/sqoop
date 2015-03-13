@@ -7,9 +7,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ Data from each table is stored in a separate directory in HDFS.
 For the +import-all-tables+ tool to be useful, the following conditions
 must be met:
 
-- Each table must have a single-column primary key.
+- Each table must have a single-column primary key or +--autoreset-to-one-mapper+ option must be used.
 - You must intend to import all columns of each table.
 - You must not intend to use non-default splitting column, nor impose
   any conditions via a +WHERE+ clause.

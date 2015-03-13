@@ -311,6 +311,10 @@ public class SqoopOptions implements Cloneable {
   // Relaxed Isolation
   @StoredAsProperty("relaxed.isolation") private boolean relaxedIsolation;
 
+  // Use single mapper for non-primary key tables without
+  // explicit split by cols
+  @StoredAsProperty("reset.onemapper") private boolean autoResetToOneMapper;
+
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved job, these will
   // be populated by the JobStorage to facilitate updating the same
@@ -2496,9 +2500,18 @@ public class SqoopOptions implements Cloneable {
     return this.relaxedIsolation;
   }
 
+  public void setAutoResetToOneMapper(boolean b) {
+	 this.autoResetToOneMapper = b;
+  }
+
+  public boolean getAutoResetToOneMapper() {
+	return this.autoResetToOneMapper;
+  }
+
   public String getHCatalogPartitionKeys() {
     return hCatalogPartitionKeys;
   }
+
 
   public void setHCatalogPartitionKeys(String hpks) {
     this.hCatalogPartitionKeys = hpks;

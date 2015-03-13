@@ -66,7 +66,8 @@ public class TestAvroImport extends ImportJobTestCase {
     if (includeHadoopFlags) {
       CommonArgs.addHadoopFlags(args);
     }
-
+    args.add("-m");
+    args.add("1");
     args.add("--table");
     args.add(getTableName());
     args.add("--connect");

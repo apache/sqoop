@@ -220,6 +220,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String OLD_DATASET_ARG = "onto";
   public static final String MERGE_KEY_ARG = "merge-key";
 
+  // Reset number of mappers to one if there is no primary key avaliable and
+  // split by column is explicitly not provided
+
+  public static final String AUTORESET_TO_ONE_MAPPER = "autoreset-to-one-mapper";
+
+
   public BaseSqoopTool() {
   }
 

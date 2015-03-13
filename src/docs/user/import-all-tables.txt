@@ -6,9 +6,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -56,6 +56,8 @@ Argument                     Description
 +\--compression-codec <c>+   Use Hadoop codec (default gzip)
 +\--exclude-tables <tables>+ Comma separated list of tables to exclude\
                              from import process
++\--autoreset-to-one-mapper+ Import should use one mapper if a table\
+                             with no primary key is encountered
 ---------------------------------------------------------------------
 
 These arguments behave in the same manner as they do when used for the

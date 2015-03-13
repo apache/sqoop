@@ -66,6 +66,8 @@ public class TestParquetImport extends ImportJobTestCase {
     args.add(HsqldbTestServer.getUrl());
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
+    args.add("--m");
+    args.add("1");
     args.add("--split-by");
     args.add("INTFIELD1");
     args.add("--as-parquetfile");

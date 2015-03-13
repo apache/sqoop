@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -30,6 +31,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationConstants;
+import org.apache.sqoop.config.ConfigurationHelper;
 
 /**
  * This class provides a method that checks if Accumulo jars are present in the
@@ -73,7 +75,7 @@ public final class AccumuloUtil {
    */
   public static void addJars(Job job, SqoopOptions options) throws IOException {
 
-    if (isLocalJobTracker(job)) {
+    if (ConfigurationHelper.isLocalJobTracker(job.getConfiguration())) {
       LOG.info("Not adding Accumulo jars to distributed cache in local mode");
     } else if (options.isSkipDistCache()) {
       LOG.info("Not adding Accumulo jars to distributed cache as requested");
@@ -168,24 +170,4 @@ public final class AccumuloUtil {
     }
   }
 
-  /**
-   * Check to see if the job is running in local mode.
-   */
-  public static boolean isLocalJobTracker(Job job) {
-    boolean retval = false;
-    Configuration conf = job.getConfiguration();
-    // If framework is set to YARN, then we can't be running in local mode
-    if ("yarn".equalsIgnoreCase(conf
-      .get(ConfigurationConstants.PROP_MAPREDUCE_FRAMEWORK_NAME))) {
-      retval = false;
-    } else {
-      String jtAddr = conf
-        .get(ConfigurationConstants.PROP_MAPRED_JOB_TRACKER_ADDRESS);
-      String jtAddr2 = conf
-        .get(ConfigurationConstants.PROP_MAPREDUCE_JOB_TRACKER_ADDRESS);
-      retval = (jtAddr != null && jtAddr.equals("local"))
-         || (jtAddr2 != null && jtAddr2.equals("local"));
-    }
-    return retval;
-  }
 }

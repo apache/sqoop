@@ -475,4 +475,25 @@ public class TestSqoopOptions extends TestCase {
     };
     validateImportOptions(extraArgs);
   }
+
+  public void testResetToOneMapper() throws Exception {
+    String extraArgs[] = {
+      "--autoreset-to-one-mapper",
+    };
+    validateImportOptions(extraArgs);
+  }
+
+  public void testResetToOneMapperAndSplitBy() throws Exception {
+    String extraArgs[] = {
+      "--autoreset-to-one-mapper",
+      "--split-by",
+      "col0",
+    };
+    try {
+      validateImportOptions(extraArgs);
+      fail("Expected InvalidOptionsException");
+    } catch (SqoopOptions.InvalidOptionsException ioe) {
+      // Expected
+    }
+  }
 }

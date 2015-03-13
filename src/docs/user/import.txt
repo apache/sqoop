@@ -71,7 +71,12 @@ Argument                          Description
 +-m,\--num-mappers <n>+           Use 'n' map tasks to import in parallel
 +-e,\--query <statement>+         Import the results of '+statement+'.
 +\--split-by <column-name>+       Column of the table used to split work\
-                                  units
+                                  units.  Cannot be used with\
+                                  +--autoreset-to-one-mapper+ option.
++\--autoreset-to-one-mapper+      Import should use one mapper if a table\
+                                  has no primary key and no split-by column\
+                                  is provided.  Cannot be used with\
+                                  +--split-by <col>+ option.
 +\--table <table-name>+           Table to read
 +\--target-dir <dir>+             HDFS destination dir
 +\--warehouse-dir <dir>+          HDFS parent for table destination
@@ -205,6 +210,13 @@ For example, +\--split-by employee_id+. Sqoop cannot currently split on
 multi-column indices. If your table has no index column, or has a
 multi-column key, then you must also manually choose a splitting
 column.
+
+If a table does not have a primary key defined and the +--split-by <col>+
+is not provided, then import will fail unless the number
+of mappers is explicitly set to one with the +--num-mappers 1+ option
+or the +--autoreset-to-one-mapper+ option is used.  The option
++--autoreset-to-one-mapper+ is typically used with the import-all-tables
+tool to automatically handle tables without a primary key in a schema.
 
 include::distributed-cache.txt[]
 
