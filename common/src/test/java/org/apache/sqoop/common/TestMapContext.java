@@ -23,6 +23,9 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
 /**
  * Test class for org.apache.sqoop.common.MapContext
  */
@@ -105,5 +108,31 @@ public class TestMapContext {
     Assert.assertTrue(result.containsKey("test2"));
     Assert.assertFalse(result.containsKey("testsqoop1"));
     Assert.assertFalse(result.containsKey("testsqoop2"));
+  }
+
+  /**
+   * Test iteration
+   */
+  @Test
+  public void testIterator() {
+    Map<String, String> options = new HashMap<String, String>();
+    options.put("sqooptest1", "value");
+    options.put("sqooptest2", "value");
+
+    MapContext mc = new MapContext(options);
+    boolean seenSqooptest1 = false;
+    boolean seenSqooptest2 = false;
+    for(Map.Entry<String, String> entry : mc) {
+      if("sqooptest1".equals(entry.getKey()) && "value".equals(entry.getValue())) {
+        seenSqooptest1 = true;
+      } else if("sqooptest2".equals(entry.getKey()) && "value".equals(entry.getValue())) {
+        seenSqooptest2 = true;
+      } else {
+        fail("Found unexpected property: " + entry.getKey() + " with value " + entry.getValue());
+      }
+    }
+
+    assertTrue(seenSqooptest1);
+    assertTrue(seenSqooptest2);
   }
 }

@@ -20,6 +20,8 @@ package org.apache.sqoop.common;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.Map;
+
 /**
  * Immutable context interface for key value pairs.
  *
@@ -27,7 +29,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public interface ImmutableContext {
+public interface ImmutableContext extends Iterable<Map.Entry<String,String>> {
 
   /**
    * Return string for given key or null by default.

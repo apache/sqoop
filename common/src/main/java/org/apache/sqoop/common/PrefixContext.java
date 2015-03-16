@@ -22,6 +22,10 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.common.ImmutableContext;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Implementation of immutable context that is based on Hadoop configuration
  * object. Each context property is prefixed with special prefix and loaded
@@ -70,5 +74,24 @@ public class PrefixContext implements ImmutableContext {
    */
   public Configuration getConfiguration() {
     return configuration;
+  }
+
+  /*
+   * There is no good way to get iterator from the underlying Configuration object that would
+   * filter only the prefixed properties, so we create new Context/Map that contains only the
+   * relevant properties.
+   */
+  @Override
+  public Iterator<Map.Entry<String, String>> iterator() {
+    Map<String, String> intermediateMap = new HashMap<String, String>();
+    for(Map.Entry<String, String> entry : configuration) {
+      String key = entry.getKey();
+
+      if(key.startsWith(prefix)) {
+        intermediateMap.put(key.replaceFirst(prefix, ""), entry.getValue());
+      }
+    }
+
+    return intermediateMap.entrySet().iterator();
   }
 }

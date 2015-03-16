@@ -21,6 +21,7 @@ import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,5 +138,10 @@ public class MapContext implements ImmutableContext {
       }
     }
     return result;
+  }
+
+  @Override
+  public Iterator<Map.Entry<String, String>> iterator() {
+    return options.entrySet().iterator();
   }
 }
