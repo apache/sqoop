@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -50,6 +51,8 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     try {
       configurePartitionProperties(context.getContext(), linkConfig, fromJobConfig);
       configureTableProperties(context.getContext(), linkConfig, fromJobConfig);
+    } catch(SQLException e) {
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0016, e);
     } finally {
       executor.close();
     }
@@ -124,108 +127,141 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
-  private void configurePartitionProperties(MutableContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    // ----- configure column name -----
+  private void configurePartitionProperties(MutableContext context, LinkConfiguration linkConfig, FromJobConfiguration jobConf) throws SQLException {
+    // Assertions that should be valid (verified via validator)
+    assert (jobConf.fromJobConfig.tableName != null && jobConf.fromJobConfig.sql == null) ||
+           (jobConf.fromJobConfig.tableName == null && jobConf.fromJobConfig.sql != null);
+    assert (jobConf.fromJobConfig.boundaryQuery == null && jobConf.incrementalRead.checkColumn == null) ||
+           (jobConf.fromJobConfig.boundaryQuery != null && jobConf.incrementalRead.checkColumn == null) ||
+           (jobConf.fromJobConfig.boundaryQuery == null && jobConf.incrementalRead.checkColumn != null);
 
-    String partitionColumnName = fromJobConfig.fromJobConfig.partitionColumn;
+    // We have few if/else conditions based on import type
+    boolean tableImport = jobConf.fromJobConfig.tableName != null;
+    boolean incrementalImport = jobConf.incrementalRead.checkColumn != null;
 
-    if (partitionColumnName == null) {
-      // if column is not specified by the user,
-      // find the primary key of the fromTable (when there is a fromTable).
-      String tableName = fromJobConfig.fromJobConfig.tableName;
-      if (tableName != null) {
-        partitionColumnName = executor.getPrimaryKey(tableName);
-      }
+    // For generating queries
+    StringBuilder sb = new StringBuilder();
+
+    // Partition column name
+    String partitionColumnName = jobConf.fromJobConfig.partitionColumn;
+    // If it's not specified, we can use primary key of given table (if it's table based import)
+    if (StringUtils.isBlank(partitionColumnName) && tableImport) {
+        partitionColumnName = executor.getPrimaryKey(jobConf.fromJobConfig.tableName);
     }
-
+    // If we don't have partition column name, we will error out
     if (partitionColumnName != null) {
-      context.setString(
-          GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME,
-          partitionColumnName);
-
+      context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, partitionColumnName);
     } else {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0005);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0005);
+    }
+    LOG.info("Using partition column: " + partitionColumnName);
+
+    // From fragment for subsequent queries
+    String fromFragment;
+    if(tableImport) {
+      String tableName = jobConf.fromJobConfig.tableName;
+      String schemaName = jobConf.fromJobConfig.schemaName;
+
+      fromFragment = executor.delimitIdentifier(tableName);
+      if(schemaName != null) {
+        fromFragment = executor.delimitIdentifier(schemaName) + "." + fromFragment;
+      }
+    } else {
+      sb.setLength(0);
+      sb.append("(");
+      sb.append(jobConf.fromJobConfig.sql.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 1"));
+      sb.append(") ");
+      sb.append(GenericJdbcConnectorConstants.SUBQUERY_ALIAS);
+      fromFragment = sb.toString();
     }
 
-    // ----- configure column type, min value, and max value -----
+    // If this is incremental, then we need to get new maximal value and persist is a constant
+    String incrementalMaxValue = null;
+    if(incrementalImport) {
+      sb.setLength(0);
+      sb.append("SELECT ");
+      sb.append("MAX(").append(jobConf.incrementalRead.checkColumn).append(") ");
+      sb.append("FROM ");
+      sb.append(fromFragment);
 
-    String minMaxQuery = fromJobConfig.fromJobConfig.boundaryQuery;
+      String incrementalNewMaxValueQuery = sb.toString();
+      LOG.info("Incremental new max value query:  " + incrementalNewMaxValueQuery);
 
+      ResultSet rs = null;
+      try {
+        rs = executor.executeQuery(incrementalNewMaxValueQuery);
+
+        if (!rs.next()) {
+          throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0022);
+        }
+
+        incrementalMaxValue = rs.getString(1);
+        context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE, incrementalMaxValue);
+        LOG.info("New maximal value for incremental import is " + incrementalMaxValue);
+      } finally {
+        if(rs != null) {
+          rs.close();
+        }
+      }
+    }
+
+    // Retrieving min and max values for partition column
+    String minMaxQuery = jobConf.fromJobConfig.boundaryQuery;
     if (minMaxQuery == null) {
-      StringBuilder builder = new StringBuilder();
+      sb.setLength(0);
+      sb.append("SELECT ");
+      sb.append("MIN(").append(partitionColumnName).append("), ");
+      sb.append("MAX(").append(partitionColumnName).append(") ");
+      sb.append("FROM ").append(fromFragment).append(" ");
 
-      String schemaName = fromJobConfig.fromJobConfig.schemaName;
-      String tableName = fromJobConfig.fromJobConfig.tableName;
-      String tableSql = fromJobConfig.fromJobConfig.sql;
-
-      if (tableName != null && tableSql != null) {
-        // when both fromTable name and fromTable sql are specified:
-        throw new SqoopException(
-            GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0007);
-
-      } else if (tableName != null) {
-        // when fromTable name is specified:
-
-        // For databases that support schemas (IE: postgresql).
-        String fullTableName = (schemaName == null) ? executor.delimitIdentifier(tableName) : executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
-
-        String column = partitionColumnName;
-        builder.append("SELECT MIN(");
-        builder.append(column);
-        builder.append("), MAX(");
-        builder.append(column);
-        builder.append(") FROM ");
-        builder.append(fullTableName);
-
-      } else if (tableSql != null) {
-        String column = executor.qualify(
-            partitionColumnName, GenericJdbcConnectorConstants.SUBQUERY_ALIAS);
-        builder.append("SELECT MIN(");
-        builder.append(column);
-        builder.append("), MAX(");
-        builder.append(column);
-        builder.append(") FROM ");
-        builder.append("(");
-        builder.append(tableSql.replace(
-            GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 1"));
-        builder.append(") ");
-        builder.append(GenericJdbcConnectorConstants.SUBQUERY_ALIAS);
-
-      } else {
-        // when neither are specified:
-        throw new SqoopException(
-            GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0008);
+      if(incrementalImport) {
+        sb.append("WHERE ");
+        sb.append(jobConf.incrementalRead.checkColumn).append(" > ?");
+        sb.append(" AND ");
+        sb.append(jobConf.incrementalRead.checkColumn).append(" <= ?");
       }
 
-      minMaxQuery = builder.toString();
+      minMaxQuery = sb.toString();
     }
+    LOG.info("Using min/max query: " + minMaxQuery);
 
-
-    LOG.debug("Using minMaxQuery: " + minMaxQuery);
-    ResultSet rs = executor.executeQuery(minMaxQuery);
+    PreparedStatement ps = null;
+    ResultSet rs = null;
     try {
-      ResultSetMetaData rsmd = rs.getMetaData();
-      if (rsmd.getColumnCount() != 2) {
-        throw new SqoopException(
-            GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0006);
+      ps = executor.createStatement(minMaxQuery);
+      if (incrementalImport) {
+        ps.setString(1, jobConf.incrementalRead.lastValue);
+        ps.setString(2, incrementalMaxValue);
       }
 
-      rs.next();
+      rs = ps.executeQuery();
+      if(!rs.next()) {
+        throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0006);
+      }
 
-      int columnType = rsmd.getColumnType(1);
+      // Boundaries for the job
       String min = rs.getString(1);
       String max = rs.getString(2);
 
-      LOG.info("Boundaries: min=" + min + ", max=" + max + ", columnType=" + columnType);
+      // Type of the partition column
+      ResultSetMetaData rsmd = rs.getMetaData();
+      if (rsmd.getColumnCount() != 2) {
+        throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0006);
+      }
+      int columnType = rsmd.getColumnType(1);
+
+      LOG.info("Boundaries for the job: min=" + min + ", max=" + max + ", columnType=" + columnType);
 
       context.setInteger(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE, columnType);
       context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, min);
       context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, max);
-
-    } catch (SQLException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0006, e);
+    } finally {
+      if(ps != null) {
+        ps.close();
+      }
+      if(rs != null) {
+        rs.close();
+      }
     }
   }
 

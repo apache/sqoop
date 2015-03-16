@@ -142,6 +142,66 @@ public class TestFromInitializer {
 
   @Test
   @SuppressWarnings("unchecked")
+  public void testIncrementalTableNameFullRange() throws Exception {
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+
+    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
+    jobConfig.fromJobConfig.tableName = schemalessTableName;
+    jobConfig.incrementalRead.checkColumn = "ICOL";
+    jobConfig.incrementalRead.lastValue = "-51";
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcFromInitializer();
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    verifyResult(context,
+        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "ICOL,DCOL,VCOL",
+        "ICOL",
+        String.valueOf(Types.INTEGER),
+        String.valueOf(START),
+        String.valueOf(START+NUMBER_OF_ROWS-1));
+
+    assertEquals(String.valueOf(START+NUMBER_OF_ROWS-1), context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testIncrementalTableNameFromZero() throws Exception {
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+
+    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
+    jobConfig.fromJobConfig.tableName = schemalessTableName;
+    jobConfig.incrementalRead.checkColumn = "ICOL";
+    jobConfig.incrementalRead.lastValue = "0";
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcFromInitializer();
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    verifyResult(context,
+        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "ICOL,DCOL,VCOL",
+        "ICOL",
+        String.valueOf(Types.INTEGER),
+        String.valueOf(1),
+        String.valueOf(START+NUMBER_OF_ROWS-1));
+
+    assertEquals(String.valueOf(START+NUMBER_OF_ROWS-1), context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
   public void testTableNameWithTableColumns() throws Exception {
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
@@ -194,6 +254,66 @@ public class TestFromInitializer {
         String.valueOf(Types.DOUBLE),
         String.valueOf((double)START),
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testIncrementalTableSqlFullRange() throws Exception {
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+
+    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
+    jobConfig.fromJobConfig.sql = schemalessTableSql;
+    jobConfig.fromJobConfig.partitionColumn = "ICOL";
+    jobConfig.incrementalRead.checkColumn = "ICOL";
+    jobConfig.incrementalRead.lastValue = "-51";
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcFromInitializer();
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    verifyResult(context,
+        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "ICOL,DCOL,VCOL",
+        "ICOL",
+        String.valueOf(Types.INTEGER),
+        String.valueOf(START),
+        String.valueOf((START+NUMBER_OF_ROWS-1)));
+    assertEquals(String.valueOf(START+NUMBER_OF_ROWS-1), context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testIncrementalTableSqlFromZero() throws Exception {
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+
+    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
+    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
+    jobConfig.fromJobConfig.sql = schemalessTableSql;
+    jobConfig.fromJobConfig.partitionColumn = "ICOL";
+    jobConfig.incrementalRead.checkColumn = "ICOL";
+    jobConfig.incrementalRead.lastValue = "0";
+
+    MutableContext context = new MutableMapContext();
+    InitializerContext initializerContext = new InitializerContext(context);
+
+    @SuppressWarnings("rawtypes")
+    Initializer initializer = new GenericJdbcFromInitializer();
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    verifyResult(context,
+        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "ICOL,DCOL,VCOL",
+        "ICOL",
+        String.valueOf(Types.INTEGER),
+        String.valueOf(1),
+        String.valueOf((START+NUMBER_OF_ROWS-1)));
+    assertEquals(String.valueOf(START+NUMBER_OF_ROWS-1), context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE));
   }
 
   @Test

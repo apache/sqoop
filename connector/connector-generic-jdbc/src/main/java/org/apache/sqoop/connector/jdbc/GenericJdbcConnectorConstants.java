@@ -41,6 +41,8 @@ public final class GenericJdbcConnectorConstants {
       PREFIX_CONNECTOR_JDBC_CONFIG + "partition.minvalue";
   public static final String CONNECTOR_JDBC_PARTITION_MAXVALUE =
       PREFIX_CONNECTOR_JDBC_CONFIG + "partition.maxvalue";
+  public static final String CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE =
+    PREFIX_CONNECTOR_JDBC_CONFIG + "incremental.last_value";
 
   public static final String CONNECTOR_JDBC_FROM_DATA_SQL =
       PREFIX_CONNECTOR_JDBC_CONFIG + "from.data.sql";

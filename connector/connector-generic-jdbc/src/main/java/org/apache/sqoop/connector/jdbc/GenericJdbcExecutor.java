@@ -72,6 +72,15 @@ public class GenericJdbcExecutor {
     }
   }
 
+  public PreparedStatement createStatement(String sql) {
+     try {
+      return connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    } catch (SQLException e) {
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+    }
+  }
+
   public void setAutoCommit(boolean autoCommit) {
     try {
       connection.setAutoCommit(autoCommit);

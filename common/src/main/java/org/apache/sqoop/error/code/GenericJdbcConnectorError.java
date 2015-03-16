@@ -85,6 +85,10 @@ public enum GenericJdbcConnectorError implements ErrorCode {
 
   GENERIC_JDBC_CONNECTOR_0021("Schema column size do not match the result set column size"),
 
+  GENERIC_JDBC_CONNECTOR_0022("Can't find maximal value of column"),
+
+  GENERIC_JDBC_CONNECTOR_0023("Received error from the database"),
+
   ;
 
   private final String message;

@@ -27,7 +27,10 @@ import org.apache.sqoop.model.Config;
 public class FromJobConfiguration {
   @Config public FromJobConfig fromJobConfig;
 
+  @Config public IncrementalRead incrementalRead;
+
   public FromJobConfiguration() {
     fromJobConfig = new FromJobConfig();
+    incrementalRead = new IncrementalRead();
   }
 }
