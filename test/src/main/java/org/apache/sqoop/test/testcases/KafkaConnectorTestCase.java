@@ -31,6 +31,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
 
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.toText;
 
@@ -70,11 +73,16 @@ public class KafkaConnectorTestCase extends ConnectorTestCase {
    * @throws UnsupportedEncodingException
    */
   protected void validateContent(String[] content) throws UnsupportedEncodingException {
+
+    Set<String> inputSet = new HashSet<String>(Arrays.asList(content));
+    Set<String> outputSet = new HashSet<String>();
+
     for(String str: content) {
       MessageAndMetadata<byte[],byte[]> fetchedMsg =
               testUtil.getNextMessageFromConsumer(TOPIC);
-      Assert.assertEquals(str,
-              toText(new String(fetchedMsg.message(), "UTF-8")));
+      outputSet.add(toText(new String(fetchedMsg.message(), "UTF-8")));
     }
+
+    Assert.assertEquals(inputSet, outputSet);
   }
 }
