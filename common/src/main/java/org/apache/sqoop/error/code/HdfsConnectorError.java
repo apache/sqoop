@@ -32,7 +32,9 @@ public enum HdfsConnectorError implements ErrorCode{
   GENERIC_HDFS_CONNECTOR_0004("Unable to instantiate the specified class"),
   /** Error occurs during loader run */
   GENERIC_HDFS_CONNECTOR_0005("Error occurs during loader run"),
-  GENERIC_HDFS_CONNECTOR_0006("Unknown job type")
+  GENERIC_HDFS_CONNECTOR_0006("Unknown job type"),
+
+  GENERIC_HDFS_CONNECTOR_0007("Invalid output directory"),
 
   ;
 

@@ -18,10 +18,17 @@
 package org.apache.sqoop.connector.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
+import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
+
+import java.io.IOException;
 
 public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfiguration> {
   /**
@@ -37,5 +44,26 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
   public void initialize(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
     Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
     HdfsUtils.configurationToContext(configuration, context.getContext());
+
+    // Verification that given HDFS directory either don't exists or is empty
+    try {
+      FileSystem fs = FileSystem.get(configuration);
+      Path path = new Path(jobConfig.toJobConfig.outputDirectory);
+
+      if(fs.exists(path)) {
+        if(fs.isFile(path)) {
+          throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory already exists and is a file");
+        }
+
+        if(fs.isDirectory(path)) {
+          FileStatus[] fileStatuses = fs.listStatus(path);
+          if(fileStatuses.length != 0) {
+            throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory is not empty");
+          }
+        }
+      }
+    } catch (IOException e) {
+      throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Unexpected exception", e);
+    }
   }
 }
