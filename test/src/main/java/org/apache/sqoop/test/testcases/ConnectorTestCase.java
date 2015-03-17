@@ -144,6 +144,11 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     configs.getStringInput("linkConfig.password").setValue(provider.getConnectionPassword());
   }
 
+  protected void fillHdfsLink(MLink link) {
+    MConfigList configs = link.getConnectorLinkConfig();
+    configs.getStringInput("linkConfig.confDir").setValue(getCluster().getConfigurationPath());
+  }
+
   /**
    * Fill TO config with specific storage and output type.
    *

@@ -43,6 +43,7 @@ public class FromHDFSToKafkaTest extends KafkaConnectorTestCase {
 
     // HDFS link
     MLink hdfsLink = getClient().createLink("hdfs-connector");
+    fillHdfsLink(hdfsLink);
     saveLink(hdfsLink);
 
     // Job creation

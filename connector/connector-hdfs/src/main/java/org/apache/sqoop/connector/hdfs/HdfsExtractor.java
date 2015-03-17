@@ -30,7 +30,6 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.util.LineReader;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
@@ -49,16 +48,14 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
 
   public static final Logger LOG = Logger.getLogger(HdfsExtractor.class);
 
-  private Configuration conf;
+  private Configuration conf = new Configuration();
   private DataWriter dataWriter;
   private Schema schema;
   private long rowsRead = 0;
 
   @Override
-  public void extract(ExtractorContext context, LinkConfiguration linkConfiguration,
-      FromJobConfiguration jobConfiguration, HdfsPartition partition) {
-
-    conf = HdfsUtils.configureURI(((PrefixContext) context.getContext()).getConfiguration(), linkConfiguration);
+  public void extract(ExtractorContext context, LinkConfiguration linkConfiguration, FromJobConfiguration jobConfiguration, HdfsPartition partition) {
+    HdfsUtils.contextToConfiguration(context.getContext(), conf);
     dataWriter = context.getDataWriter();
     schema = context.getSchema();
 

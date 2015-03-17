@@ -22,6 +22,7 @@ import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.DirectoryExistsValidator;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +30,9 @@ import java.util.regex.Pattern;
 @ConfigClass(validators = {@Validator(LinkConfig.ConfigValidator.class)})
 public class LinkConfig {
   @Input(size = 255) public String uri;
+
+  @Input(size = 255, validators = { @Validator(DirectoryExistsValidator.class)})
+  public String confDir;
 
   public static class ConfigValidator extends AbstractValidator<LinkConfig> {
     private static final Pattern URI_PATTERN = Pattern.compile("((?<=\\()[A-Za-z][A-Za-z0-9\\+\\.\\-]*:([A-Za-z0-9\\.\\-_~:/\\?#\\[\\]@!\\$&'\\(\\)\\*\\+,;=]|%[A-Fa-f0-9]{2})+(?=\\)))|([A-Za-z][A-Za-z0-9\\+\\.\\-]*:([A-Za-z0-9\\.\\-_~:/\\?#\\[\\]@!\\$&'\\(\\)\\*\\+,;=]|%[A-Fa-f0-9]{2})+)");

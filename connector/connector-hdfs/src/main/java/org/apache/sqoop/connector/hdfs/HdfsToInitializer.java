@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
@@ -33,8 +34,8 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
    * @param jobConfig TO job configuration object
    */
   @Override
-  public void initialize(InitializerContext context, LinkConfiguration linkConfig,
-      ToJobConfiguration jobConfig) {
-    // do nothing at this point
+  public void initialize(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
+    Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
+    HdfsUtils.configurationToContext(configuration, context.getContext());
   }
 }

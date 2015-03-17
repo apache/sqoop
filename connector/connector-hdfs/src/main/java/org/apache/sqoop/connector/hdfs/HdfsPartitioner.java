@@ -38,7 +38,6 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.hadoop.net.NodeBase;
-import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
@@ -71,8 +70,8 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
   public List<Partition> getPartitions(PartitionerContext context,
                                        LinkConfiguration linkConfiguration,
                                        FromJobConfiguration fromJobConfig) {
-
-    Configuration conf = HdfsUtils.configureURI(((PrefixContext) context.getContext()).getConfiguration(), linkConfiguration);
+    Configuration conf = new Configuration();
+    HdfsUtils.contextToConfiguration(context.getContext(), conf);
 
     try {
       long numInputBytes = getInputSize(conf, fromJobConfig.fromJobConfig.inputDirectory);

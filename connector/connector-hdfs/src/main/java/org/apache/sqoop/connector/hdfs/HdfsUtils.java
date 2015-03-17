@@ -17,15 +17,76 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.net.MalformedURLException;
+import java.util.Map;
 
 /**
  * Utilities for HDFS.
  */
 public class HdfsUtils {
+
+  public static final String DEFAULT_HADOOP_CONF_DIR = "/etc/hadoop/conf";
+
+  private static final Logger LOG = Logger.getLogger(HdfsUtils.class);
+  /**
+   * Create Hadoop configuration object
+   */
+  public static Configuration createConfiguration(LinkConfiguration linkConfig) {
+    Configuration configuration = new Configuration();
+    String confDir = linkConfig.linkConfig.confDir;
+
+    // If the configuration directory wasn't specify we will use default
+    if (StringUtils.isBlank(confDir)) {
+      confDir = DEFAULT_HADOOP_CONF_DIR;
+    }
+
+    // In case that the configuration directory is valid, load all config files
+    File dir = new File(confDir);
+    if (dir.exists() && dir.isDirectory()) {
+      String[] files = dir.list(new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+          return name.endsWith("-site.xml");
+        }
+      });
+
+      if (files != null) {
+        for (String file : files) {
+          LOG.info("Found Hadoop configuration file " + file);
+          try {
+            configuration.addResource(new File(confDir, file).toURI().toURL());
+          } catch (MalformedURLException e) {
+            LOG.warn("Can't load configuration file: " + file, e);
+          }
+        }
+      }
+    }
+
+    return configureURI(configuration, linkConfig);
+  }
+
+  public static void configurationToContext(Configuration configuration, MutableContext context) {
+    for (Map.Entry<String, String> entry : configuration) {
+      context.setString(entry.getKey(), entry.getValue());
+    }
+  }
+
+  public static void contextToConfiguration(ImmutableContext context, Configuration configuration) {
+    for (Map.Entry<String, String> entry : context) {
+      configuration.set(entry.getKey(), entry.getValue());
+    }
+  }
 
   /**
    * Configures the URI to connect to.

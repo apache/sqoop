@@ -30,6 +30,7 @@ import org.apache.sqoop.test.asserts.HdfsAsserts;
 import org.apache.sqoop.test.hadoop.HadoopRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.test.hadoop.HadoopLocalRunner;
+import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.ITest;
@@ -157,6 +158,10 @@ abstract public class TomcatTestCase {
    */
   public SqoopClient getClient() {
     return client;
+  }
+
+  public SqoopMiniCluster getCluster() {
+    return cluster;
   }
 
   public String getTemporaryPath() {

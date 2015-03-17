@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.sqoop.common.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
@@ -54,9 +53,10 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   @Override
   public void load(LoaderContext context, LinkConfiguration linkConfiguration,
                    ToJobConfiguration toJobConfig) throws Exception {
+    Configuration conf = new Configuration();
+    HdfsUtils.contextToConfiguration(context.getContext(), conf);
 
     DataReader reader = context.getDataReader();
-    Configuration conf = HdfsUtils.configureURI(((PrefixContext) context.getContext()).getConfiguration(), linkConfiguration);
     String directoryName = toJobConfig.toJobConfig.outputDirectory;
     String codecname = getCompressionCodecName(toJobConfig);
 
