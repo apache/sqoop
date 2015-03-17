@@ -39,6 +39,19 @@ public class TestDirectoryExistsValidator {
   }
 
   @Test
+  public void testNull() {
+    validator.validate(null);
+    assertEquals(Status.OK, validator.getStatus());
+  }
+
+  @Test
+  public void testEmpty() {
+    validator.validate("");
+    assertEquals(Status.OK, validator.getStatus());
+  }
+
+
+  @Test
   public void testExistingDirectory() {
     File tmpDir = Files.createTempDir();
     tmpDir.deleteOnExit();

@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.validation.Status;
 
 import java.io.File;
@@ -27,6 +28,10 @@ import java.io.File;
 public class DirectoryExistsValidator extends AbstractValidator<String> {
   @Override
   public void validate(String filePath) {
+    if(StringUtils.isBlank(filePath)) {
+      return;
+    }
+
     File file = new File(filePath);
 
     if(!file.exists()) {
