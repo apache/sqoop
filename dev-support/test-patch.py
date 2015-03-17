@@ -255,20 +255,16 @@ def find_all_files(top):
         for f in files:
             yield os.path.join(root, f)
 
-def mvn_test(result, output_dir, slow):
-  run_mvn_test("test", "unit", result, output_dir, slow)
+def mvn_test(result, output_dir, category):
+  run_mvn_test("test", "unit", result, output_dir, category)
 
-def mvn_integration(result, output_dir, slow):
-  run_mvn_test("integration-test -pl test", "integration", result, output_dir, slow)
+def mvn_integration(result, output_dir, category):
+  run_mvn_test("integration-test -pl test", "integration", result, output_dir, category)
 
-def run_mvn_test(command, test_type, result, output_dir, slow):
-  if slow:
-    command += " -Pslow"
-    test_file_name = "%s_slow" % test_type
-    test_type = "slow %s" % test_type
-  else:
-    test_file_name = "%s_fast" % test_type
-    test_type = "fast %s" % test_type
+def run_mvn_test(command, test_type, result, output_dir, category):
+  command += " -P%s" % category
+  test_file_name = "%s_%s" % (test_type, category)
+  test_results_dir = "test-results"
 
   # Execute the test run
   rc = execute("mvn %s 1>%s/test_%s.txt 2>&1" % (command, output_dir, test_file_name))
@@ -285,13 +281,17 @@ def run_mvn_test(command, test_type, result, output_dir, slow):
 
   # Based on whether they are
   if rc == 0:
-    result.success("All %s tests passed (executed %d tests)" % (test_type ,executed_tests) )
+    result.success("All %s %s tests passed (executed %d tests)" % (category, test_type ,executed_tests) )
   else:
-    result.error("Some of %s tests failed (%s, executed %d tests)" % (test_type, jenkins_file_link_for_jira("report", "test_%s.txt" % test_file_name), executed_tests))
+    archive_dir = os.path.join(output_dir, test_results_dir, test_type, category)
+    if not os.path.exists(archive_dir):
+      os.makedirs(archive_dir)
+    result.error("Some of %s %s tests failed (%s, executed %d tests)" % (category, test_type, jenkins_file_link_for_jira("report", "test_%s.txt" % test_file_name), executed_tests))
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
-      if file_name.startswith("TEST-") and file_name.endswith(".xml"):
+      if file_name.startswith("TEST-") and file_name.endswith(".xml") and test_results_dir not in path:
+        shutil.copy(path, archive_dir)
         fd = open(path)
         for line in fd:
           if "<failure" in line or "<error" in line:
@@ -300,7 +300,7 @@ def run_mvn_test(command, test_type, result, output_dir, slow):
               failed_tests += [ matcher.groups()[0] ]
         fd.close()
     for failed_test in set(failed_tests):
-      result.error("Failed %s test: {{%s}}" % (test_type, failed_test))
+      result.error("Failed %s %s test: {{%s}}" % (category, test_type, failed_test))
 
 def clean_folder(folder):
   for the_file in os.listdir(folder):
@@ -470,10 +470,10 @@ static_test(result, patch_file, output_dir)
 mvn_rat(result, output_dir)
 mvn_install(result, output_dir)
 if run_tests:
-  mvn_test(result, output_dir, slow=False)
-  mvn_test(result, output_dir, slow=True)
-  mvn_integration(result, output_dir, slow=False)
-  mvn_integration(result, output_dir, slow=True)
+  mvn_test(result, output_dir, category="fast")
+  mvn_test(result, output_dir, category="slow")
+  mvn_integration(result, output_dir, category="fast")
+  mvn_integration(result, output_dir, category="slow")
 else:
   result.info("patch applied and built but tests did not execute")
 
