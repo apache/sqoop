@@ -1,4 +1,88 @@
 
+Release Notes - Sqoop - Version 1.4.6
+
+** Sub-task
+    * [SQOOP-1390] - Import data to HDFS as a set of Parquet files
+    * [SQOOP-1393] - Import data from database to Hive as Parquet files
+    * [SQOOP-1394] - Export data from HDFS back to an RDMS
+    * [SQOOP-1395] - Potential naming conflict in Avro schema
+    * [SQOOP-1401] - Fix checkstyle violations for ClassWriter.java
+    * [SQOOP-1491] - Remove SqoopAvroRecord
+    * [SQOOP-1492] - Move Avro and GenericRecord related common code to AvroUtil
+    * [SQOOP-1508] - Add warning when using unsupported compression codec
+
+** Bug
+    * [SQOOP-1125] - Out of memory errors when number of records to import < 0.5 * splitSize
+    * [SQOOP-1368] - the configuration properties are reset in HBaseImportJob
+    * [SQOOP-1387] - Incorrect permissions on manager.d directory can lead to NPE
+    * [SQOOP-1400] - Failed to import data using mysql-connector-java-5.1.17.jar
+    * [SQOOP-1411] - The number of tasks is not set properly in PGBulkloadExportManager
+    * [SQOOP-1412] - Text splitter should also consider NCHAR and NVARCHAR fields
+    * [SQOOP-1422] - Integration tests for Oracle connector fail as not using direct option
+    * [SQOOP-1423] - hcatalog export with --map-column-java fails
+    * [SQOOP-1429] - Fix native characters usage for SqlServer object names
+    * [SQOOP-1433] - Oracle direct connector fails with Oracle 12c JDBC driver
+    * [SQOOP-1437] - 'Text' reserved word in compliation
+    * [SQOOP-1472] - Use Properties.load() method to load property files under conf/manager.d
+    * [SQOOP-1474] - Fix usage of StringUtils.repeat method
+    * [SQOOP-1490] - Connectors documentation doesn't build on CentOS 5
+    * [SQOOP-1494] - Fix generateArvoSchema in DataDrivenImportJob
+    * [SQOOP-1519] - Enable HCat/HBase/Accumulo operations with OraOop connection manager
+    * [SQOOP-1520] - The table is null when using import into hive as parquet file and query option
+    * [SQOOP-1524] - Error to import into hive as textfile on hive 0.13.0
+    * [SQOOP-1539] - Empty partition keys and values in multiple partition key hcatalog usage should be validated
+    * [SQOOP-1540] - Accumulo unit tests fail with Accumulo 1.6.1 because of conflicts in libthrift libraries
+    * [SQOOP-1617] - MySQL fetch-size behavior changed with SQOOP-1400
+    * [SQOOP-1627] - Fix Hadoop100 and Hadoop20 profile
+    * [SQOOP-1631] - Drop confusing use of --clean-staging-table parameter from PGBulkloadManager
+    * [SQOOP-1663] - OraOop test cases are not logging any output
+    * [SQOOP-1682] - Test cases *LobAvroImportTest are failing
+    * [SQOOP-1684] - Use pre-existing HBase delegation token
+    * [SQOOP-1685] - HCatalog integration is not working on JDK8
+    * [SQOOP-1759] - TestIncrementalImport fails with NPE on Windows
+    * [SQOOP-1764] - Numeric Overflow when getting extent map
+    * [SQOOP-1779] - Add support for --hive-database when importing Parquet files into Hive
+    * [SQOOP-1826] - NPE in ImportTool.lastModifiedMerge during postgres import
+    * [SQOOP-1890] - Properly escape table name in generated queries
+    * [SQOOP-1970] - Add warning about trailing whitespace characters when using password file to User guide
+    * [SQOOP-2017] - Print out loaded columns and their type in verbose mode
+    * [SQOOP-2024] - Hive import doesn't remove target directory in hive
+    * [SQOOP-2055] - Run only one map task attempt during export
+    * [SQOOP-2057] - Skip delegation token generation flag during hbase import
+    * [SQOOP-2128] - HBaseImportJob should close connection from HBaseAdmin to HBase
+    * [SQOOP-2130] - BaseSqoopTestCase should use manager.escapeTable instead of directly hardcoding double quotes
+    * [SQOOP-2132] - Remove test TestMainframeImportTool.testPrintHelp
+    * [SQOOP-2136] - Test case SqlServerUpsertOutputFormatTest is failing
+    * [SQOOP-2137] - Sqoop tests and documentation refer to as-avrofile (instead of as-avrodatafile)
+    * [SQOOP-2145] - Default Hive home is not being set properly under certain circumstances
+    * [SQOOP-2164] - Enhance the Netezza Connector for Sqoop
+    * [SQOOP-2170] - MySQL specific tests are not properly cleaning up created tables
+    * [SQOOP-2191] - Provide an option automatically choose one mapper when neither primary key is defined nor split by column is provided
+
+** Improvement
+    * [SQOOP-1330] - Ignore blank newlines in managers.d property files
+    * [SQOOP-1391] - Compression codec handling
+    * [SQOOP-1392] - Create the temporary directory inside task working dir rather then in tmp
+    * [SQOOP-1421] - Automated patch script
+    * [SQOOP-1471] - Use Hadoop CredentialProvider API to encyrpt passwords at rest
+    * [SQOOP-1489] - Propagate cubrid properties to the test VM
+    * [SQOOP-1567] - Auto-Configure JTDS Driver From JDBCUrl
+    * [SQOOP-1622] - Copying from staging table should be in single transaction for pg_bulkload connector
+    * [SQOOP-1632] - Add support for index organized tables to direct connector
+    * [SQOOP-2149] - Update Kite dependency to 1.0.0
+
+** New Feature
+    * [SQOOP-1272] - Support importing mainframe sequential datasets
+    * [SQOOP-1309] - Expand the Sqoop to support CUBRID database.
+    * [SQOOP-1366] - Propose to add Parquet support
+    * [SQOOP-1403] - Upsert export for SQL Server
+    * [SQOOP-1405] - Add arg to enable SQL Server identity insert on export
+    * [SQOOP-1450] - Copy the avro schema file to hdfs for AVRO based import
+
+** Task
+    * [SQOOP-1693] - Upgrade Kite SDK to 0.17
+
+
 Release Notes - Sqoop - Version 1.4.5
 
 ** Sub-task
@@ -88,9 +172,9 @@ Release Notes - Sqoop - Version 1.4.5
     * [SQOOP-1344] - Add documentation for Oracle connector
     * [SQOOP-1408] - Document SQL Server's --non-resilient arg
 
-
 ** Test
     * [SQOOP-1057] - Introduce fault injection framework to test connection resiliency
+
 
 Changelog - Sqoop - Version 1.4.4 - 07-18-2013
 
@@ -168,6 +252,7 @@ Changelog - Sqoop - Version 1.4.4 - 07-18-2013
 
 ** Test
     * [SQOOP-1035] - Add MS Sqoop Connecter tests
+
 
 Changelog - Sqoop - Version 1.4.3 - 02/20/2012
 
