@@ -17,22 +17,51 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
+import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 
+import java.io.IOException;
+
 public class HdfsToDestroyer extends Destroyer<LinkConfiguration, ToJobConfiguration> {
+
+  private static final Logger LOG = Logger.getLogger(HdfsToDestroyer.class);
+
   /**
-   * Callback to clean up after job execution.
-   *
-   * @param context Destroyer context
-   * @param linkConfig link configuration object
-   * @param jobConfig TO job configuration object
+   * {@inheritDoc}
    */
   @Override
-  public void destroy(DestroyerContext context, LinkConfiguration linkConfig,
-      ToJobConfiguration jobConfig) {
-    // do nothing at this point
+  public void destroy(DestroyerContext context, LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
+    Configuration configuration = new Configuration();
+    HdfsUtils.contextToConfiguration(context.getContext(), configuration);
+
+    String workingDirectory = context.getString(HdfsConstants.WORK_DIRECTORY);
+    Path targetDirectory = new Path(jobConfig.toJobConfig.outputDirectory);
+
+    try {
+      FileSystem fs = FileSystem.get(configuration);
+
+      // If we succeeded, we need to move all files from working directory
+      if(context.isSuccess()) {
+        FileStatus[] fileStatuses = fs.listStatus(new Path(workingDirectory));
+        for (FileStatus status : fileStatuses) {
+          LOG.info("Committing file: " + status.getPath().toString() + " of size " + status.getLen());
+          fs.rename(status.getPath(), new Path(targetDirectory, status.getPath().getName()));
+        }
+      }
+
+      // Clean up working directory
+      fs.delete(new Path(workingDirectory), true);
+    } catch (IOException e) {
+      throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0008, e);
+    }
   }
 }

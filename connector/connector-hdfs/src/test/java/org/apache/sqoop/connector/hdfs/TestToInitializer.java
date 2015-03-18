@@ -28,10 +28,31 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 /**
  *
  */
 public class TestToInitializer extends TestHdfsBase {
+
+  @Test
+  public void testWorkDirectoryBeingSet() {
+    final String TARGET_DIR = "/target/directory";
+
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    ToJobConfiguration jobConfig = new ToJobConfiguration();
+
+    jobConfig.toJobConfig.outputDirectory = TARGET_DIR;
+
+    InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
+
+    Initializer initializer = new HdfsToInitializer();
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    assertNotNull(initializerContext.getString(HdfsConstants.WORK_DIRECTORY));
+    assertTrue(initializerContext.getString(HdfsConstants.WORK_DIRECTORY).startsWith(TARGET_DIR + "/."));
+  }
 
   @Test(expectedExceptions = SqoopException.class)
   public void testOutputDirectoryIsAFile() throws Exception {

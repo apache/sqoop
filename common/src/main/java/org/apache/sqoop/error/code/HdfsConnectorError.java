@@ -36,6 +36,8 @@ public enum HdfsConnectorError implements ErrorCode{
 
   GENERIC_HDFS_CONNECTOR_0007("Invalid output directory"),
 
+  GENERIC_HDFS_CONNECTOR_0008("Error occurs during destroyer run"),
+
   ;
 
   private final String message;

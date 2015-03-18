@@ -103,6 +103,7 @@ public class TestLoader extends TestHdfsBase {
         .addColumn(new Text("col3"));
 
     Configuration conf = new Configuration();
+    conf.set("org.apache.sqoop.job.connector.from.context." + HdfsConstants.WORK_DIRECTORY, outputDirectory);
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
     LoaderContext context = new LoaderContext(prefixContext, new DataReader() {
       private long index = 0L;
@@ -128,7 +129,6 @@ public class TestLoader extends TestHdfsBase {
     }, null);
     LinkConfiguration linkConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
-    jobConf.toJobConfig.outputDirectory = outputDirectory;
     jobConf.toJobConfig.compression = compression;
     jobConf.toJobConfig.outputFormat = outputFormat;
     Path outputPath = new Path(outputDirectory);
@@ -157,6 +157,7 @@ public class TestLoader extends TestHdfsBase {
         .addColumn(new Text("col4"));
 
     Configuration conf = new Configuration();
+    conf.set("org.apache.sqoop.job.connector.from.context." + HdfsConstants.WORK_DIRECTORY, outputDirectory);
     PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
     LoaderContext context = new LoaderContext(prefixContext, new DataReader() {
       private long index = 0L;
@@ -187,7 +188,6 @@ public class TestLoader extends TestHdfsBase {
     }, schema);
     LinkConfiguration linkConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
-    jobConf.toJobConfig.outputDirectory = outputDirectory;
     jobConf.toJobConfig.compression = compression;
     jobConf.toJobConfig.outputFormat = outputFormat;
     jobConf.toJobConfig.overrideNullValue = true;

@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
@@ -29,19 +30,22 @@ import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfiguration> {
+
+  private static final Logger LOG = Logger.getLogger(HdfsToInitializer.class);
+
   /**
-   * Initialize new submission based on given configuration properties. Any
-   * needed temporary values might be saved to context object and they will be
-   * promoted to all other part of the workflow automatically.
-   *
-   * @param context Initializer context object
-   * @param linkConfig link configuration object
-   * @param jobConfig TO job configuration object
+   * {@inheritDoc}
    */
   @Override
   public void initialize(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
+    assert jobConfig != null;
+    assert linkConfig != null;
+    assert jobConfig.toJobConfig != null;
+    assert jobConfig.toJobConfig.outputDirectory != null;
+
     Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
     HdfsUtils.configurationToContext(configuration, context.getContext());
 
@@ -65,5 +69,10 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
     } catch (IOException e) {
       throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Unexpected exception", e);
     }
+
+    // Building working directory
+    String workingDirectory = jobConfig.toJobConfig.outputDirectory + "/." + UUID.randomUUID();
+    LOG.info("Using working directory: " + workingDirectory);
+    context.getContext().setString(HdfsConstants.WORK_DIRECTORY, workingDirectory);
   }
 }

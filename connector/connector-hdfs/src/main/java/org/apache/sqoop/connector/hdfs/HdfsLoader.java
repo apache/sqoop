@@ -57,7 +57,7 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
     HdfsUtils.contextToConfiguration(context.getContext(), conf);
 
     DataReader reader = context.getDataReader();
-    String directoryName = toJobConfig.toJobConfig.outputDirectory;
+    String directoryName = context.getString(HdfsConstants.WORK_DIRECTORY);
     String codecname = getCompressionCodecName(toJobConfig);
 
     CompressionCodec codec = null;

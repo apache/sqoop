@@ -30,4 +30,7 @@ public final class HdfsConstants extends Constants {
 
   public static final char DEFAULT_RECORD_DELIMITER = '\n';
 
+  public static final String PREFIX = "org.apache.sqoop.connector.hdfs.";
+
+  public static final String WORK_DIRECTORY = PREFIX + "work_dir";
 }
