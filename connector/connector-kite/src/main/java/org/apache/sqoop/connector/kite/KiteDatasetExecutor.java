@@ -21,6 +21,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Closeables;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.connector.common.AvroDataTypeUtil;
@@ -162,7 +163,25 @@ public class KiteDatasetExecutor {
    */
   public static String suggestTemporaryDatasetUri(String uri) {
     if (uri.startsWith("dataset:hdfs:")) {
-      return uri + TEMPORARY_DATASET_PREFIX + UUID.randomUUID().toString().replace("-", "");
+      int pathStart = uri.lastIndexOf(":") + 1;
+      int pathEnd = uri.lastIndexOf("?");
+      String[] uriParts = null;
+
+      // Get URI parts
+      if (pathEnd > -1) {
+        uriParts = new String[3];
+        uriParts[2] = uri.substring(pathEnd, uri.length());
+      } else {
+        pathEnd = uri.length();
+        uriParts = new String[2];
+      }
+      uriParts[1] = uri.substring(pathStart, pathEnd);
+      uriParts[0] = uri.substring(0, pathStart);
+
+      // Add to path
+      uriParts[1] += TEMPORARY_DATASET_PREFIX + UUID.randomUUID().toString().replace("-", "");
+
+      return StringUtils.join(uriParts, "");
     } else {
       throw new SqoopException(
           KiteConnectorError.GENERIC_KITE_CONNECTOR_0000, uri);

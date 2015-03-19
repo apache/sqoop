@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.kite.configuration;
 
 import com.google.common.base.Strings;
+import org.kitesdk.data.URIBuilder;
 
 public class ConfigUtil {
 
@@ -27,10 +28,19 @@ public class ConfigUtil {
    */
   public static String buildDatasetUri(String fsLocation, String uri) {
     if (!Strings.isNullOrEmpty(fsLocation) && !uri.contains("://")) {
-      // Add fsLocation after the second colon
-      int p = uri.indexOf(":", uri.indexOf(":") + 1);
-      return uri.substring(0, p + 1) + "//" + fsLocation + uri.substring(p + 1);
+      URIBuilder builder = new URIBuilder(uri);
+
+      String[] parts = fsLocation.split(":");
+      if (parts.length > 0) {
+        builder.with("auth:host", parts[0]);
+      }
+      if (parts.length > 1) {
+        builder.with("auth:port", parts[1]);
+      }
+
+      return builder.build().toString().replaceFirst("view:", "dataset:");
     }
+
     return uri;
   }
 

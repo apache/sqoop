@@ -147,6 +147,19 @@ public class TestKiteExecutor {
     assertTrue(executor.isReaderClosed());
   }
 
+  @Test
+  public void testSuggestTemporaryDatasetUri() {
+    String uri = "dataset:hdfs:/tmp/sqoop/test";
+    String suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(uri);
+    assertTrue(suggestedUri.length() > uri.length());
+    assertTrue(suggestedUri.contains(uri));
+
+    uri = "dataset:hdfs://namenode:8020/tmp/sqoop/test";
+    suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(uri);
+    assertTrue(suggestedUri.length() > uri.length());
+    assertTrue(suggestedUri.contains(uri));
+  }
+
   private static Schema createTwoFieldSchema() {
     return new Schema.Parser().parse("{" +
         "\"name\":\"test\",\"type\":\"record\"," +
