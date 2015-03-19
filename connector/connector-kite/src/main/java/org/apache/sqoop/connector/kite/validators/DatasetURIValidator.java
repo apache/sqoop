@@ -15,12 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.validation.validators;
+package org.apache.sqoop.connector.kite.validators;
 
 import com.google.common.base.Strings;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.AbstractValidator;
 
 import java.util.regex.Pattern;
 
@@ -31,8 +32,7 @@ import java.util.regex.Pattern;
 @InterfaceStability.Unstable
 public class DatasetURIValidator extends AbstractValidator<String> {
 
-  private static final Pattern DATASET_URI_PATTERN = Pattern
-      .compile("^dataset:(hive|hdfs|file):.*$");
+  private static final Pattern DATASET_URI_PATTERN = Pattern.compile("^dataset:(hive|hdfs|file):.*$");
 
   @Override
   public void validate(String uri) {

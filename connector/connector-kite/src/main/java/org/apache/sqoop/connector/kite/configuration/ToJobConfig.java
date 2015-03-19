@@ -21,7 +21,7 @@ import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
-import org.apache.sqoop.validation.validators.DatasetURIValidator;
+import org.apache.sqoop.connector.kite.validators.DatasetURIValidator;
 import org.apache.sqoop.validation.validators.NotNull;
 
 @ConfigClass

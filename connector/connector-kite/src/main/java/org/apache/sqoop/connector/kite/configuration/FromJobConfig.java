@@ -20,7 +20,7 @@ package org.apache.sqoop.connector.kite.configuration;
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
-import org.apache.sqoop.validation.validators.DatasetURIValidator;
+import org.apache.sqoop.connector.kite.validators.DatasetURIValidator;
 
 @ConfigClass
 public class FromJobConfig {
