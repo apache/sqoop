@@ -18,17 +18,57 @@
  */
 package org.apache.sqoop.connector.kite;
 
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.configurable.ConfigurableUpgradeUtil;
 import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
+import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MFromConfig;
+import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class KiteConnectorUpgrader extends ConnectorConfigurableUpgrader {
+  private static final Logger LOG = Logger.getLogger(KiteConnectorUpgrader.class);
+
+  private static final Map<String, String> LINK_CONFIG_MAP;
+
+  static {
+    LINK_CONFIG_MAP = new HashMap<String, String>();
+    LINK_CONFIG_MAP.put("linkConfig.authority", "linkConfig.hdfsHostAndPort");
+  }
 
   @Override
   public void upgradeLinkConfig(MLinkConfig original, MLinkConfig upgradeTarget) {
-    ConfigurableUpgradeUtil.doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
+    Map<String, MConfig> configMap = new HashMap<String, MConfig>();
+    for (MConfig config : original.getConfigs()) {
+      configMap.put(config.getName(), config);
+    }
+    for (MConfig config : upgradeTarget.getConfigs()) {
+      List<MInput<?>> inputs = config.getInputs();
+      MConfig originalConfig = configMap.get(config.getName());
+      if (originalConfig == null) {
+        LOG.warn("Config: '" + config.getName() + "' not present in old " +
+            "configurable. So it and its inputs will not be transferred by the upgrader.");
+        continue;
+      }
+      for (MInput input : inputs) {
+        try {
+          if (LINK_CONFIG_MAP.containsKey(input.getName())) {
+            input.setValue(originalConfig.getInput(LINK_CONFIG_MAP.get(input.getName())).getValue());
+          } else {
+            input.setValue(originalConfig.getInput(input.getName()).getValue());
+          }
+        } catch (SqoopException ex) {
+          LOG.warn("Input: '" + input.getName() + "' not present in old " +
+              "configurable. So it will not be transferred by the upgrader.");
+        }
+      }
+    }
   }
 
   @Override

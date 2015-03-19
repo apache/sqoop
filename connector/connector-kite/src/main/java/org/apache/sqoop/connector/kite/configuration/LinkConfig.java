@@ -29,16 +29,16 @@ import org.apache.sqoop.validation.validators.HostAndPortValidator;
 public class LinkConfig {
 
   @Input(size = 255)
-  public String hdfsHostAndPort;
+  public String authority;
 
   public static class ConfigValidator extends AbstractValidator<LinkConfig> {
 
     @Override
     public void validate(LinkConfig config) {
       // TODO: There is no way to declare it as optional (SQOOP-1643), we cannot validate it directly using HostAndPortValidator.
-      if (!Strings.isNullOrEmpty(config.hdfsHostAndPort)) {
+      if (!Strings.isNullOrEmpty(config.authority)) {
         HostAndPortValidator validator = new HostAndPortValidator();
-        validator.validate(config.hdfsHostAndPort);
+        validator.validate(config.authority);
         if (!validator.getStatus().equals(Status.OK)) {
           addMessage(validator.getStatus(), getMessages().toString());
         }

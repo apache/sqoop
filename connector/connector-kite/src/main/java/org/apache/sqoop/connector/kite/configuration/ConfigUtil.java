@@ -26,11 +26,11 @@ public class ConfigUtil {
    * Returns a dataset uri, including the filesystem location part, if it is
    * provided separated,
    */
-  public static String buildDatasetUri(String fsLocation, String uri) {
-    if (!Strings.isNullOrEmpty(fsLocation) && !uri.contains("://")) {
+  public static String buildDatasetUri(String authority, String uri) {
+    if (!Strings.isNullOrEmpty(authority) && !uri.contains("://")) {
       URIBuilder builder = new URIBuilder(uri);
 
-      String[] parts = fsLocation.split(":");
+      String[] parts = authority.split(":");
       if (parts.length > 0) {
         builder.with("auth:host", parts[0]);
       }
@@ -50,7 +50,7 @@ public class ConfigUtil {
    */
   public static String buildDatasetUri(LinkConfig linkConfig,
       ToJobConfig toJobConfig) {
-    return buildDatasetUri(linkConfig.hdfsHostAndPort, toJobConfig.uri);
+    return buildDatasetUri(linkConfig.authority, toJobConfig.uri);
   }
 
   /**
