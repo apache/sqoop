@@ -274,7 +274,7 @@ def run_mvn_test(command, test_type, result, output_dir, category):
   fd = open("%s/test_%s.txt" % (output_dir, test_file_name))
   for line in fd:
     if "Tests run:" in line:
-      matcher = re.search("^Tests run: ([0-9+]), Failures: ([0-9]+), Errors: ([0-9]+), Skipped: ([0-9]+), Time elapsed:", line)
+      matcher = re.search("^Tests run: ([0-9]+), Failures: ([0-9]+), Errors: ([0-9]+), Skipped: ([0-9]+), Time elapsed:", line)
       if matcher:
         executed_tests += int(matcher.group(1))
   fd.close()
