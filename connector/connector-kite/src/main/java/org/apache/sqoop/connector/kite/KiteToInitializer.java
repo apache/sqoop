@@ -48,6 +48,7 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
       LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     String uri = ConfigUtil.buildDatasetUri(
         linkConfig.linkConfig, toJobConfig.toJobConfig);
+    LOG.info("Generated final dataset URI: " + uri);
     if (Datasets.exists(uri)) {
       LOG.error("Overwrite an existing dataset is not expected in new create mode.");
       throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0001);
