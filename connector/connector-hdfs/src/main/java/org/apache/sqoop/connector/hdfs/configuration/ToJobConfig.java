@@ -41,6 +41,8 @@ public class ToJobConfig {
 
   @Input(size = 255, validators = { @Validator(NotEmpty.class)}) public String outputDirectory;
 
+  @Input public Boolean appendMode;
+
   public static class ToJobConfigValidator extends AbstractValidator<ToJobConfig> {
     @Override
     public void validate(ToJobConfig conf) {

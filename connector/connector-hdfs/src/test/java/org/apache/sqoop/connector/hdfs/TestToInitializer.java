@@ -88,4 +88,25 @@ public class TestToInitializer extends TestHdfsBase {
     Initializer initializer = new HdfsToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
   }
+
+  @Test
+  public void testOutputDirectoryIsNotEmptyWithIncremental() throws Exception {
+    File dir = Files.createTempDir();
+    File file = File.createTempFile("MastersOfOrion", ".txt", dir);
+
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    ToJobConfiguration jobConfig = new ToJobConfiguration();
+
+    linkConfig.linkConfig.uri = "file:///";
+    jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
+    jobConfig.toJobConfig.appendMode = true;
+
+    InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
+
+    Initializer initializer = new HdfsToInitializer();
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    assertNotNull(initializerContext.getString(HdfsConstants.WORK_DIRECTORY));
+    assertTrue(initializerContext.getString(HdfsConstants.WORK_DIRECTORY).startsWith(dir.getAbsolutePath()));
+  }
 }

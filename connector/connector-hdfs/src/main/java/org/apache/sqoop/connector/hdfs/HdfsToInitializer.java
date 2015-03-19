@@ -48,6 +48,7 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
 
     Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
     HdfsUtils.configurationToContext(configuration, context.getContext());
+    boolean appendMode = Boolean.TRUE.equals(jobConfig.toJobConfig.appendMode);
 
     // Verification that given HDFS directory either don't exists or is empty
     try {
@@ -59,7 +60,7 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
           throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory already exists and is a file");
         }
 
-        if(fs.isDirectory(path)) {
+        if(fs.isDirectory(path) && !appendMode) {
           FileStatus[] fileStatuses = fs.listStatus(path);
           if(fileStatuses.length != 0) {
             throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory is not empty");

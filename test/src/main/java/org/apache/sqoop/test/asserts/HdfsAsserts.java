@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.test.asserts;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -50,7 +52,7 @@ public class HdfsAsserts {
    * @throws IOException
    */
   public static void assertMapreduceOutput(FileSystem fs, String directory, String... lines) throws IOException {
-    Set<String> setLines = new HashSet<String>(Arrays.asList(lines));
+    Multiset<String> setLines = HashMultiset.create(Arrays.asList(lines));
     List<String> notFound = new LinkedList<String>();
 
     Path[] files = HdfsUtils.getOutputMapreduceFiles(fs, directory);
