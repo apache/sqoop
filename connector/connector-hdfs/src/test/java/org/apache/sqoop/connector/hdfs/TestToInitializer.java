@@ -43,6 +43,7 @@ public class TestToInitializer extends TestHdfsBase {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
+    linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = TARGET_DIR;
 
     InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
@@ -62,6 +63,7 @@ public class TestToInitializer extends TestHdfsBase {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
+    linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = file.getAbsolutePath();
 
     InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
@@ -78,6 +80,7 @@ public class TestToInitializer extends TestHdfsBase {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
+    linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
 
     InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
