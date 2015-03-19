@@ -22,7 +22,6 @@ import org.apache.sqoop.model.MSubmission;
 /**
  * Callback interface for synchronous job submission
  */
-//TODO(https://issues.apache.org/jira/browse/SQOOP-1652): address the submit/start consistent usage
 public interface SubmissionCallback {
 
   /**
