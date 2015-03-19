@@ -81,11 +81,32 @@ public class DerbyTypeList extends DatabaseTypeList {
       .addExample( "999.99",  new BigDecimal(999.99).setScale(2,   RoundingMode.FLOOR),  "999.99")
       .build());
 
-    // BLOB
     // Boolean
-    // Char
-    // CLOB
+    add(DatabaseType.builder("BOOLEAN")
+      .addExample( "true",  Boolean.TRUE,  "true")
+      .addExample("false", Boolean.FALSE, "false")
+      .build());
+
+    // String types
+    add(DatabaseType.builder("VARCHAR(5)")
+      .addExample("'A'", "A", "'A'")
+      .addExample("''", "", "''")
+      .addExample("''''", "'", "'\\\''")
+      .addExample("'\"'", "\"", "'\\\"'")
+      .build());
+    add(DatabaseType.builder("CHAR(5)")
+      .addExample("'A'", "A    ", "'A    '")
+      .addExample( "''", "     ", "'     '")
+      .build());
+
     // Date
+    add(DatabaseType.builder("DATE")
+      .addExample("'1970-01-01'", new java.sql.Date(70, 0, 1), "'1970-01-01'")
+      .addExample("'2000-2-2'", new java.sql.Date(100, 1, 2), "'2000-02-02'")
+      .build());
+
+    // BLOB
+    // CLOB
     // Time
     // Timestamp
     // XML?
