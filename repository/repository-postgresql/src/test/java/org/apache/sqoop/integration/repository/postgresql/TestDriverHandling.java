@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.integration.repository.postgresql;
 
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MDriver;
 import org.testng.annotations.Test;
 
@@ -60,10 +61,10 @@ public class TestDriverHandling extends PostgresqlTestCase {
     assertEquals(1, driver.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 2);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 4);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 3);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIGURABLE")), 1);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIG")), 2);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT")), 4);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT_RELATION")), 3);
 
     // Registered driver and config should be easily recovered back
     MDriver retrieved = handler.findDriver(MDriver.DRIVER_NAME, provider.getConnection());

@@ -20,6 +20,7 @@ package org.apache.sqoop.integration.connector.jdbc.generic;
 import static org.testng.AssertJUnit.assertEquals;
 
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
@@ -34,7 +35,7 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
 
   @Test
   public void testStagedTransfer() throws Exception {
-    final String stageTableName = "STAGE_" + getTableName();
+    final TableName stageTableName = new TableName("STAGE_" + getTableName());
     createTableCities();
     createFromFile("input-0001",
         "1,'USA','2004-10-23','San Francisco'",
@@ -62,11 +63,10 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
     fillHdfsFromConfig(job);
 
     // fill rdbms "TO" config here
+    fillRdbmsToConfig(job);
     MConfigList configs = job.getJobConfig(Direction.TO);
-    configs.getStringInput("toJobConfig.tableName").setValue(
-      provider.escapeTableName(getTableName()));
-    configs.getStringInput("toJobConfig.stageTableName").setValue(
-      provider.escapeTableName(stageTableName));
+    configs.getStringInput("toJobConfig.stageTableName").setValue(provider.escapeTableName(stageTableName.getTableName()));
+
     // driver config
     MConfigList driverConfig = job.getDriverConfig();
     driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(3);
@@ -75,8 +75,8 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
 
     executeJob(job);
 
-    assertEquals(0L, provider.rowCount(null, stageTableName));
-    assertEquals(4L, provider.rowCount(null, getTableName()));
+    assertEquals(0L, provider.rowCount(stageTableName));
+    assertEquals(4L, provider.rowCount(getTableName()));
     assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
     assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
     assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");

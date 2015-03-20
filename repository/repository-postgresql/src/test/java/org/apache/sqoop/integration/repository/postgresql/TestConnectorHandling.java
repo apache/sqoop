@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.integration.repository.postgresql;
 
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MConnector;
 import org.testng.annotations.Test;
 
@@ -80,10 +81,10 @@ public class TestConnectorHandling extends PostgresqlTestCase {
     assertEquals(1, connector.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 6);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 12);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 9);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIGURABLE")), 1);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIG")), 6);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT")), 12);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT_RELATION")), 9);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", provider.getConnection());
@@ -101,10 +102,10 @@ public class TestConnectorHandling extends PostgresqlTestCase {
     assertEquals(1, connector.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 4);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 8);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 6);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIGURABLE")), 1);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIG")), 4);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT")), 8);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT_RELATION")), 6);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", provider.getConnection());
@@ -122,10 +123,10 @@ public class TestConnectorHandling extends PostgresqlTestCase {
     assertEquals(1, connector.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 4);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 8);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 6);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIGURABLE")), 1);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIG")), 4);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT")), 8);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT_RELATION")), 6);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", provider.getConnection());
@@ -143,10 +144,10 @@ public class TestConnectorHandling extends PostgresqlTestCase {
     assertEquals(1, connector.getPersistenceId());
 
     // Now check content in corresponding tables
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIGURABLE"), 1);
-    assertEquals(provider.rowCount("SQOOP", "SQ_CONFIG"), 2);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT"), 4);
-    assertEquals(provider.rowCount("SQOOP", "SQ_INPUT_RELATION"), 3);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIGURABLE")), 1);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_CONFIG")), 2);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT")), 4);
+    assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_INPUT_RELATION")), 3);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", provider.getConnection());

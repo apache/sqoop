@@ -69,9 +69,8 @@ public class FromHDFSToRDBMSTest extends ConnectorTestCase {
     // set hdfs "FROM" config for the job, since the connector test case base class only has utilities for hdfs!
     fillHdfsFromConfig(job);
 
-    // set the rdms "TO" config here
-    MConfigList toConfig = job.getJobConfig(Direction.TO);
-    toConfig.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    // set the rdbms "TO" config here
+    fillRdbmsToConfig(job);
 
     // driver config
     MDriverConfig driverConfig = job.getDriverConfig();

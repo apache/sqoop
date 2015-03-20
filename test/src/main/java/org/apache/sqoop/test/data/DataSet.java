@@ -18,6 +18,7 @@
 package org.apache.sqoop.test.data;
 
 import org.apache.sqoop.common.test.db.DatabaseProvider;
+import org.apache.sqoop.common.test.db.TableName;
 
 /**
  * Abstract class for basic testing data sets.
@@ -35,9 +36,9 @@ public abstract class DataSet {
   /**
    * Base name for created tables.
    */
-  protected String tableBaseName;
+  protected TableName tableBaseName;
 
-  public DataSet(DatabaseProvider provider, String tableBaseName) {
+  public DataSet(DatabaseProvider provider, TableName tableBaseName) {
     setProvider(provider);
     setTableBaseName(tableBaseName);
   }
@@ -47,7 +48,7 @@ public abstract class DataSet {
     return this;
   }
 
-  public DataSet setTableBaseName(String tableBaseName) {
+  public DataSet setTableBaseName(TableName tableBaseName) {
     this.tableBaseName = tableBaseName;
     return this;
   }

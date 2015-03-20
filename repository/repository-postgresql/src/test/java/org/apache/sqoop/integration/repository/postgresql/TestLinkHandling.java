@@ -20,6 +20,7 @@ package org.apache.sqoop.integration.repository.postgresql;
 import java.util.List;
 
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
@@ -195,8 +196,8 @@ public class TestLinkHandling extends PostgresqlTestCase {
     assertEquals("Value2", configs.get(1).getInputs().get(0).getValue());
     assertNull(configs.get(1).getInputs().get(1).getValue());
 
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_LINK"), 2);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_LINK_INPUT"), 4);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK")), 2);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK_INPUT")), 4);
   }
 
   @Test(expectedExceptions = SqoopException.class)
@@ -241,8 +242,8 @@ public class TestLinkHandling extends PostgresqlTestCase {
     handler.updateLink(link, provider.getConnection());
 
     assertEquals(1, link.getPersistenceId());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_LINK"), 2);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_LINK_INPUT"), 4);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK")), 2);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK_INPUT")), 4);
 
     MLink retrieved = handler.findLink(1, provider.getConnection());
     assertEquals("name", link.getName());
@@ -274,11 +275,11 @@ public class TestLinkHandling extends PostgresqlTestCase {
   @Test
   public void testDeleteLink() throws Exception {
     handler.deleteLink(1, provider.getConnection());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_LINK"), 1);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_LINK_INPUT"), 2);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK")), 1);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK_INPUT")), 2);
 
     handler.deleteLink(2, provider.getConnection());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_LINK"), 0);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_LINK_INPUT"), 0);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK")), 0);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK_INPUT")), 0);
   }
 }

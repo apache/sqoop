@@ -57,9 +57,7 @@ public class OutputDirectoryTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
 
     // Set rdbms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    fillRdbmsFromConfig(job, "id");
 
     // fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
@@ -95,9 +93,7 @@ public class OutputDirectoryTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
 
     // Set rdbms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    fillRdbmsFromConfig(job, "id");
 
     // fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
@@ -132,9 +128,7 @@ public class OutputDirectoryTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
 
     // Set rdbms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    fillRdbmsFromConfig(job, "id");
 
     // fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);

@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.integration.repository.postgresql;
 
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
@@ -153,7 +154,7 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
 
 
     assertEquals(1, submission.getPersistenceId());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 1);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 1);
 
     List<MSubmission> submissions = handler.findUnfinishedSubmissions(provider.getConnection());
     assertNotNull(submissions);
@@ -202,7 +203,7 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
     handler.createSubmission(submission, provider.getConnection());
 
     assertEquals(2, submission.getPersistenceId());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 2);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 2);
   }
 
   @Test
@@ -303,7 +304,7 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
     submissions = handler.findUnfinishedSubmissions(provider.getConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 4);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 4);
 
     Calendar calendar = Calendar.getInstance();
     // 2012-01-03 05:05:05
@@ -313,21 +314,21 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
     submissions = handler.findUnfinishedSubmissions(provider.getConnection());
     assertNotNull(submissions);
     assertEquals(1, submissions.size());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 4);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 4);
 
     handler.purgeSubmissions(new Date(), provider.getConnection());
 
     submissions = handler.findUnfinishedSubmissions(provider.getConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 0);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 0);
 
     handler.purgeSubmissions(new Date(), provider.getConnection());
 
     submissions = handler.findUnfinishedSubmissions(provider.getConnection());
     assertNotNull(submissions);
     assertEquals(0, submissions.size());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 0);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 0);
   }
 
   /**
@@ -342,12 +343,12 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
     MJob jobB = handler.findJob(JOB_B_NAME, provider.getConnection());
 
     loadSubmissions();
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 4);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 4);
 
     handler.deleteJob(jobA.getPersistenceId(), provider.getConnection());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 2);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 2);
 
     handler.deleteJob(jobB.getPersistenceId(), provider.getConnection());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_SUBMISSION"), 0);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 0);
   }
 }

@@ -95,9 +95,8 @@ public class PartitionerTest extends ConnectorTestCase implements ITest {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // set the rdbms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
+    fillRdbmsFromConfig(job, partitionColumn);
+
     // fill hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
 

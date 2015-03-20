@@ -53,9 +53,7 @@ public class FromRDBMSToKafkaTest extends KafkaConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), kafkaLink.getPersistenceId());
 
     // set rdbms "FROM" job config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    fillRdbmsFromConfig(job, "id");
 
     // set Kafka  "TO" job config
     fillKafkaToConfig(job);

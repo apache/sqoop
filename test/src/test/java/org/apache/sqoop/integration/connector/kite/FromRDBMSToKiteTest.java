@@ -70,10 +70,9 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), kiteLink.getPersistenceId());
 
     // Set rdbms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    fillRdbmsFromConfig(job, "id");
     // TODO: Kite have troubles with some data types, so we're limiting the columns to int only
+    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
     fromConfig.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
 
     // Fill the Kite "TO" config

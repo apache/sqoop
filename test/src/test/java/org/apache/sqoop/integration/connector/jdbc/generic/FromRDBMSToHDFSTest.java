@@ -51,10 +51,8 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     // Job creation
     MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
 
-    // srt rdbms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    // Set rdbms "FROM" config
+    fillRdbmsFromConfig(job, "id");
 
     // fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
@@ -96,9 +94,8 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Connector values
+    fillRdbmsFromConfig(job, "id");
     MConfigList configs = job.getJobConfig(Direction.FROM);
-    configs.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    configs.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
     configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("name") + "," + provider.escapeColumnName("story"));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
     saveJob(job);
@@ -142,9 +139,8 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Connector values
+    fillRdbmsFromConfig(job, "id");
     MConfigList configs = job.getJobConfig(Direction.FROM);
-    configs.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    configs.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
     configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
     saveJob(job);
@@ -191,7 +187,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     // Connector values
     MConfigList configs = job.getJobConfig(Direction.FROM);
     configs.getStringInput("fromJobConfig.sql").setValue("SELECT " + provider.escapeColumnName("id")
-        + " FROM " + provider.escapeTableName(getTableName()) + " WHERE ${CONDITIONS}");
+        + " FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}");
     configs.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
     saveJob(job);
@@ -236,16 +232,16 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Connector values
-    String partitionColumn = provider.escapeTableName(getTableName()) + "." + provider.escapeColumnName("id");
+    String partitionColumn = provider.escapeTableName(getTableName().getTableName()) + "." + provider.escapeColumnName("id");
     MConfigList configs = job.getJobConfig(Direction.FROM);
     configs.getStringInput("fromJobConfig.sql").setValue(
         "SELECT " + provider.escapeColumnName("id") + " as " + provider.escapeColumnName("i") + ", "
             + provider.escapeColumnName("id") + " as " + provider.escapeColumnName("j")
-            + " FROM " + provider.escapeTableName(getTableName()) + " WHERE ${CONDITIONS}");
+            + " FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}");
     configs.getStringInput("fromJobConfig.partitionColumn").setValue(partitionColumn);
     configs.getStringInput("fromJobConfig.boundaryQuery").setValue(
         "SELECT MIN(" + partitionColumn + "), MAX(" + partitionColumn + ") FROM "
-            + provider.escapeTableName(getTableName()));
+            + provider.escapeTableName(getTableName().getTableName()));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
     saveJob(job);
 

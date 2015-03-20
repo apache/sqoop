@@ -157,26 +157,6 @@ abstract public class DatabaseProvider {
   }
 
   /**
-   * Get full table name with qualifications
-   * @param schemaName
-   * @param tableName
-   * @param escape
-   * @return String table name
-   */
-  public String getTableName(String schemaName, String tableName, boolean escape) {
-    StringBuilder sb = new StringBuilder();
-
-    if (schemaName != null) {
-      sb.append(escape ? escapeSchemaName(schemaName) : schemaName);
-      sb.append(".");
-    }
-
-    sb.append(escape ? escapeTableName(tableName) : tableName);
-
-    return sb.toString();
-  }
-
-  /**
    * Start the handler.
    */
   public void start() {
@@ -321,7 +301,7 @@ abstract public class DatabaseProvider {
    * @param primaryKey Primary key column(0) or null if table should not have any
    * @param columns List of double values column name and value for example ... "id", "varchar(50)"...
    */
-  public void createTable(String name, String primaryKey, String ...columns) {
+  public void createTable(TableName name, String primaryKey, String ...columns) {
     // Columns are in form of two strings - name and type
     if(columns.length == 0  || columns.length % 2 != 0) {
       throw new RuntimeException("Incorrect number of parameters.");
@@ -331,7 +311,7 @@ abstract public class DatabaseProvider {
     dropTable(name);
 
     StringBuilder sb = new StringBuilder("CREATE TABLE ");
-    sb.append(escapeTableName(name)).append("(");
+    sb.append(getTableFragment(name)).append("(");
 
     // Column list
     List<String> columnList = new LinkedList<String>();
@@ -356,7 +336,7 @@ abstract public class DatabaseProvider {
    * @param tableName Table name
    * @param values List of objects that should be inserted
    */
-  public void insertRow(String tableName, Object ...values) {
+  public void insertRow(TableName tableName, Object ...values) {
     insertRow(tableName, true, values);
   }
 
@@ -367,9 +347,9 @@ abstract public class DatabaseProvider {
    * @param escapeValues Should the values be escaped based on their type or not
    * @param values List of objects that should be inserted
    */
-  public void insertRow(String tableName, boolean escapeValues, Object ...values) {
+  public void insertRow(TableName tableName, boolean escapeValues, Object ...values) {
     StringBuilder sb = new StringBuilder("INSERT INTO ");
-    sb.append(escapeTableName(tableName));
+    sb.append(getTableFragment(tableName));
     sb.append(" VALUES (");
 
     List<String> valueList = new LinkedList<String>();
@@ -390,7 +370,7 @@ abstract public class DatabaseProvider {
    * @param conditions Conditions in form of double values - column name and value, for example: "id", 1 or "last_update_date", null
    * @return ResultSet with given criteria
    */
-  public ResultSet getRows(String tableName, Object []conditions) {
+  public ResultSet getRows(TableName tableName, Object []conditions) {
     return getRows(tableName, true, conditions);
   }
 
@@ -402,14 +382,14 @@ abstract public class DatabaseProvider {
    * @param conditions Conditions in form of double values - column name and value, for example: "id", 1 or "last_update_date", null
    * @return ResultSet with given criteria
    */
-  public ResultSet getRows(String tableName, boolean escapeValues, Object []conditions) {
+  public ResultSet getRows(TableName tableName, boolean escapeValues, Object []conditions) {
     // Columns are in form of two strings - name and value
     if(conditions.length % 2 != 0) {
       throw new RuntimeException("Incorrect number of parameters.");
     }
 
     StringBuilder sb = new StringBuilder("SELECT * FROM ");
-    sb.append(escapeTableName(tableName));
+    sb.append(getTableFragment(tableName));
 
     List<String> conditionList = new LinkedList<String>();
     for(int i = 0; i < conditions.length; i += 2) {
@@ -458,9 +438,9 @@ abstract public class DatabaseProvider {
    *
    * @param tableName
    */
-  public void dropTable(String tableName) {
+  public void dropTable(TableName tableName) {
     StringBuilder sb = new StringBuilder("DROP TABLE ");
-    sb.append(escapeTableName(tableName));
+    sb.append(getTableFragment(tableName));
 
     try {
       executeUpdate(sb.toString());
@@ -491,13 +471,12 @@ abstract public class DatabaseProvider {
   /**
    * Return number of rows from given table.
    *
-   * @param schemaName Schema name
    * @param tableName Table name
    * @return Number of rows
    */
-  public long rowCount(String schemaName, String tableName) {
+  public long rowCount(TableName tableName) {
     StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM ");
-    sb.append(getTableName(schemaName, tableName, true));
+    sb.append(getTableFragment(tableName));
 
     ResultSet rs = null;
     try {
@@ -513,16 +492,6 @@ abstract public class DatabaseProvider {
     } finally {
       closeResultSetWithStatement(rs);
     }
-  }
-
-  /**
-   * Return number of rows from a given table.
-   *
-   * @param tableName
-   * @return Number of rows
-   */
-  public long rowCount(String tableName) {
-    return rowCount(null, tableName);
   }
 
   /**
@@ -560,8 +529,8 @@ abstract public class DatabaseProvider {
    *
    * @param tableName Name of the table
    */
-  public void dumpTable(String tableName) {
-    String query = "SELECT * FROM " + escapeTableName(tableName);
+  public void dumpTable(TableName tableName) {
+    String query = "SELECT * FROM " + getTableFragment(tableName);
     List<String> list = new LinkedList<String>();
     ResultSet rs = null;
 
@@ -590,5 +559,20 @@ abstract public class DatabaseProvider {
     } finally {
       closeResultSetWithStatement(rs);
     }
+  }
+
+  /**
+   * Generated properly escaped table name fragment that can be used
+   * in SQL query.
+   *
+   * @param tableName Full table name
+   * @return
+   */
+  public String getTableFragment(TableName tableName) {
+    if(tableName.getSchemaName() == null) {
+      return escapeTableName(tableName.getTableName());
+    }
+
+    return escapeSchemaName(tableName.getSchemaName()) + "." + escapeTableName(tableName.getTableName());
   }
 }

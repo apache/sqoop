@@ -28,6 +28,7 @@ import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.test.asserts.ProviderAsserts;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.DatabaseProviderFactory;
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
@@ -103,8 +104,8 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     provider.stop();
   }
 
-  public String getTableName() {
-    return getClass().getSimpleName();
+  public TableName getTableName() {
+    return new TableName(getClass().getSimpleName());
   }
 
   protected void createTable(String primaryKey, String ...columns) {
@@ -142,6 +143,17 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
     configs.getStringInput("linkConfig.connectionString").setValue(provider.getConnectionUrl());
     configs.getStringInput("linkConfig.username").setValue(provider.getConnectionUsername());
     configs.getStringInput("linkConfig.password").setValue(provider.getConnectionPassword());
+  }
+
+  protected void fillRdbmsFromConfig(MJob job, String partitionColumn) {
+    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
+    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
+  }
+
+  protected void fillRdbmsToConfig(MJob job) {
+    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    toConfig.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
   }
 
   protected void fillHdfsLink(MLink link) {

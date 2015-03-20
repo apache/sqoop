@@ -77,16 +77,10 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // rdms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    fillRdbmsFromConfig(job, "id");
 
     // hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
-
-    // driver config
-    MConfigList driverConfig = job.getDriverConfig();
-    //driverConfig.getIntegerInput("throttlingConfig.extractors").setValue(3);
 
     saveJob(job);
 

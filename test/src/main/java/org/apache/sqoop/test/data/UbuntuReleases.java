@@ -18,6 +18,7 @@
 package org.apache.sqoop.test.data;
 
 import org.apache.sqoop.common.test.db.DatabaseProvider;
+import org.apache.sqoop.common.test.db.TableName;
 
 /**
  * Releases of Ubuntu Linux.
@@ -26,7 +27,7 @@ import org.apache.sqoop.common.test.db.DatabaseProvider;
  */
 public class UbuntuReleases extends DataSet {
 
-  public UbuntuReleases(DatabaseProvider provider, String tableBaseName) {
+  public UbuntuReleases(DatabaseProvider provider, TableName tableBaseName) {
     super(provider, tableBaseName);
   }
 

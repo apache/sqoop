@@ -19,6 +19,7 @@ package org.apache.sqoop.common.test.asserts;
 
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.test.db.TableName;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,7 +42,7 @@ public class ProviderAsserts {
    * @param conditions Conditions for identifying the row
    * @param values Values that should be present in the table
    */
-  public static void assertRow(DatabaseProvider provider, String tableName,  Object []conditions, Object ...values) {
+  public static void assertRow(DatabaseProvider provider, TableName tableName,  Object []conditions, Object ...values) {
     assertRow(provider, tableName, true, conditions, values);
   }
 
@@ -54,7 +55,7 @@ public class ProviderAsserts {
    * @param conditions Conditions for identifying the row
    * @param values Values that should be present in the table
    */
-  public static void assertRow(DatabaseProvider provider, String tableName, boolean escapeValues, Object []conditions, Object ...values) {
+  public static void assertRow(DatabaseProvider provider, TableName tableName, boolean escapeValues, Object []conditions, Object ...values) {
     ResultSet rs = null;
     try {
       rs = provider.getRows(tableName, escapeValues, conditions);

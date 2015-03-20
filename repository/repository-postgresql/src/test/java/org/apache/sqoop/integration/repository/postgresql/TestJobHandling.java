@@ -19,6 +19,7 @@ package org.apache.sqoop.integration.repository.postgresql;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
@@ -180,8 +181,8 @@ public class TestJobHandling extends PostgresqlTestCase {
 
   @Test
   public void testCreateJob() throws Exception {
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB"), 2);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB_INPUT"), 12);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB")), 2);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB_INPUT")), 12);
 
     MJob retrieved = handler.findJob(1, provider.getConnection());
     assertEquals(1, retrieved.getPersistenceId());
@@ -211,8 +212,8 @@ public class TestJobHandling extends PostgresqlTestCase {
 
   @Test
   public void testUpdateJob() throws Exception {
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB"), 2);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB_INPUT"), 12);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB")), 2);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB_INPUT")), 12);
 
     MJob job = handler.findJob(1, provider.getConnection());
 
@@ -237,8 +238,8 @@ public class TestJobHandling extends PostgresqlTestCase {
     handler.updateJob(job, provider.getConnection());
 
     assertEquals(1, job.getPersistenceId());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB"), 2);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB_INPUT"), 14);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB")), 2);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB_INPUT")), 14);
 
     MJob retrieved = handler.findJob(1, provider.getConnection());
     assertEquals("name", retrieved.getName());
@@ -279,11 +280,11 @@ public class TestJobHandling extends PostgresqlTestCase {
   @Test
   public void testDeleteJob() throws Exception {
     handler.deleteJob(1, provider.getConnection());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB"), 1);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB_INPUT"), 6);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB")), 1);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB_INPUT")), 6);
 
     handler.deleteJob(2, provider.getConnection());
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB"), 0);
-    Assert.assertEquals(provider.rowCount("SQOOP", "SQ_JOB_INPUT"), 0);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB")), 0);
+    Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB_INPUT")), 0);
   }
 }

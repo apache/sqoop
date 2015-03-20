@@ -18,13 +18,14 @@
 package org.apache.sqoop.test.data;
 
 import org.apache.sqoop.common.test.db.DatabaseProvider;
+import org.apache.sqoop.common.test.db.TableName;
 
 /**
  * Simple listing of few world's cities to do basic sanity tests.
  */
 public class Cities extends DataSet {
 
-  public Cities(DatabaseProvider provider, String tableBaseName) {
+  public Cities(DatabaseProvider provider, TableName tableBaseName) {
     super(provider, tableBaseName);
   }
 

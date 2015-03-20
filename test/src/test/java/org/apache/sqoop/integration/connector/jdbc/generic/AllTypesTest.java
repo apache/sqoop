@@ -84,10 +84,9 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
     MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
 
     // Fill rdbms "FROM" config
+    fillRdbmsFromConfig(job, "id");
     MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
     fromConfig.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("value"));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
 
     // Fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
@@ -128,9 +127,8 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
     MJob job = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
     fillHdfsFromConfig(job);
 
-    // Set the rdms "TO" config here
-    MConfigList toConfig = job.getJobConfig(Direction.TO);
-    toConfig.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
+    // Set the rdbms "TO" config here
+    fillRdbmsToConfig(job);
 
     // Driver config
     MDriverConfig driverConfig = job.getDriverConfig();

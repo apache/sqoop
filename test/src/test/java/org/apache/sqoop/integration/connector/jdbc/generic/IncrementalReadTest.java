@@ -78,9 +78,8 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Set the rdbms "FROM" config
+    fillRdbmsFromConfig(job, "id");
     MConfigList fromConfig = job.getJobConfig(Direction.FROM);
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
     fromConfig.getStringInput("incrementalRead.checkColumn").setValue(provider.escapeColumnName(checkColumn));
     fromConfig.getStringInput("incrementalRead.lastValue").setValue(lastValue);
 
@@ -128,7 +127,7 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     // Job creation
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
-    String query = "SELECT * FROM " + provider.escapeTableName(getTableName()) + " WHERE ${CONDITIONS}";
+    String query = "SELECT * FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}";
 
     // Set the rdbms "FROM" config
     MConfigList fromConfig = job.getJobConfig(Direction.FROM);
