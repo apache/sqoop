@@ -46,7 +46,7 @@ public class TestKiteLoader {
 
     loader = new KiteLoader() {
       @Override
-      protected KiteDatasetExecutor getExecutor(String uri, Schema schema,
+      protected KiteDatasetExecutor getExecutor(LinkConfiguration linkConfiguration, String uri, Schema schema,
           FileFormat format) {
         return executorMock;
       }

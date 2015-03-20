@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.kite;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.kitesdk.data.Datasets;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -53,7 +54,7 @@ public class TestKiteFromInitializer extends PowerMockTestCase {
     when(Datasets.exists(jobConfig.fromJobConfig.uri)).thenReturn(true);
 
     // exercise
-    initializer.initialize(null, null, jobConfig);
+    initializer.initialize(null, new LinkConfiguration(), jobConfig);
   }
 
   @Test(expectedExceptions = SqoopException.class)
@@ -64,7 +65,7 @@ public class TestKiteFromInitializer extends PowerMockTestCase {
     when(Datasets.exists(jobConfig.fromJobConfig.uri)).thenReturn(false);
 
     // exercise
-    initializer.initialize(null, null, jobConfig);
+    initializer.initialize(null, new LinkConfiguration(), jobConfig);
   }
 
 }

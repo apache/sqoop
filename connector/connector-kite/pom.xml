@@ -41,6 +41,14 @@ limitations under the License.
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-serde</artifactId>
+    </dependency>
 
     <!-- Testing specified modules -->
     <dependency>
@@ -68,6 +76,10 @@ limitations under the License.
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hive</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

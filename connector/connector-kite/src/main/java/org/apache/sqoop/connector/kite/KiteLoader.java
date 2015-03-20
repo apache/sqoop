@@ -40,27 +40,27 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   private long rowsWritten = 0;
 
   @VisibleForTesting
-  KiteDatasetExecutor getExecutor(String uri, Schema schema,
+  KiteDatasetExecutor getExecutor(LinkConfiguration linkConfiguration, String uri, Schema schema,
       FileFormat format) {
     // Note that instead of creating a dataset at destination, we create a
     // temporary dataset by every KiteLoader instance. They will be merged when
     // all data portions are written successfully. Unfortunately, KiteLoader is
     // not able to pass the temporary dataset uri to KiteToDestroyer. So we
     // delegate KiteDatasetExecutor to manage name convention for datasets.
-    uri = KiteDatasetExecutor.suggestTemporaryDatasetUri(uri);
-    LOG.info("Generated temporary dataset URI: " + uri);
+    uri = KiteDatasetExecutor.suggestTemporaryDatasetUri(linkConfiguration.linkConfig, uri);
+    LOG.info("Constructed temporary dataset URI: " + uri);
     Dataset<GenericRecord> dataset =
         KiteDatasetExecutor.createDataset(uri, schema, format);
     return new KiteDatasetExecutor(dataset);
   }
 
   @Override
-  public void load(LoaderContext context, LinkConfiguration linkConfig,
+  public void load(LoaderContext context, LinkConfiguration linkConfiguration,
       ToJobConfiguration toJobConfig) throws Exception {
     String uri = ConfigUtil.buildDatasetUri(
-        linkConfig.linkConfig, toJobConfig.toJobConfig);
+        linkConfiguration.linkConfig, toJobConfig.toJobConfig);
     KiteDatasetExecutor executor = getExecutor(
-        uri, context.getSchema(), toJobConfig.toJobConfig.fileFormat);
+        linkConfiguration, uri, context.getSchema(), toJobConfig.toJobConfig.fileFormat);
     LOG.info("Temporary dataset created.");
 
     DataReader reader = context.getDataReader();

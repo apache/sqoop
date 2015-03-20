@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.connector.kite;
 
+import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Partition;
@@ -41,7 +42,9 @@ public class KiteDatasetPartitioner extends Partitioner<LinkConfiguration,
     // There is no way to create partitions of an un-partitioned dataset.
     // TODO: SQOOP-1942 will create partitions, if dataset is partitioned.
     KiteDatasetPartition partition = new KiteDatasetPartition();
-    partition.setUri(fromJobConfig.fromJobConfig.uri);
+    String uri = ConfigUtil.buildDatasetUri(
+        linkConfiguration.linkConfig, fromJobConfig.fromJobConfig.uri);
+    partition.setUri(uri);
 
     List<Partition> partitions = new LinkedList<Partition>();
     partitions.add(partition);

@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.kite;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.etl.io.DataWriter;
@@ -48,7 +49,8 @@ public class KiteExtractor extends Extractor<LinkConfiguration,
   @Override
   public void extract(ExtractorContext context, LinkConfiguration linkConfig,
       FromJobConfiguration fromJobConfig, KiteDatasetPartition partition) {
-    String uri = partition.getUri();
+    String uri = ConfigUtil.buildDatasetUri(
+        linkConfig.linkConfig, partition.getUri());
     LOG.info("Loading data from " + uri);
 
     KiteDatasetExecutor executor = getExecutor(uri);

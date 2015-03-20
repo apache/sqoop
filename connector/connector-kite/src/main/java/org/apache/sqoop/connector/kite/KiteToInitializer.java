@@ -48,7 +48,7 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
       LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     String uri = ConfigUtil.buildDatasetUri(
         linkConfig.linkConfig, toJobConfig.toJobConfig);
-    LOG.info("Generated final dataset URI: " + uri);
+    LOG.debug("Constructed dataset URI: " + uri);
     if (Datasets.exists(uri)) {
       LOG.error("Overwrite an existing dataset is not expected in new create mode.");
       throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0001);
@@ -64,6 +64,20 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.core.TreeNode"));
     if (FileFormat.CSV.equals(toJobConfig.toJobConfig.fileFormat)) {
       jars.add(ClassUtils.jarForClass("au.com.bytecode.opencsv.CSVWriter"));
+    }
+    if (toJobConfig.toJobConfig.uri.startsWith("dataset:hive")) {
+      // @TODO(Abe): Remove a deps that aren't used?
+      jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.conf.HiveConf"));
+      jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.serde2.SerDe"));
+      jars.add(ClassUtils.jarForClass("org.kitesdk.data.spi.hive.MetaStoreUtil"));
+      jars.add(ClassUtils.jarForClass("org.kitesdk.compat.DynConstructors"));
+      jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.metastore.Warehouse"));
+      jars.add(ClassUtils.jarForClass("org.apache.hive.common.HiveCompat"));
+      jars.add(ClassUtils.jarForClass("parquet.hive.HiveBindingFactory"));
+      jars.add(ClassUtils.jarForClass("com.facebook.fb303.FacebookService"));
+      jars.add(ClassUtils.jarForClass("org.datanucleus.query.compiler.JavaQueryCompiler"));
+      jars.add(ClassUtils.jarForClass("org.datanucleus.query.typesafe.TypesafeSubquery"));
+      jars.add(ClassUtils.jarForClass("org.datanucleus.store.rdbms.sql.SQLStatement"));
     }
     return jars;
   }

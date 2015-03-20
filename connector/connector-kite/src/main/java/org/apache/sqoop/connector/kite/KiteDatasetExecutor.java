@@ -25,6 +25,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.connector.common.AvroDataTypeUtil;
+import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
+import org.apache.sqoop.connector.kite.configuration.LinkConfig;
 import org.apache.sqoop.connector.kite.util.KiteDataTypeUtil;
 import org.apache.sqoop.error.code.KiteConnectorError;
 import org.kitesdk.data.Dataset;
@@ -147,7 +149,6 @@ public class KiteDatasetExecutor {
     FileSystemDataset<GenericRecord> update = Datasets.load(uri);
     if (dataset instanceof FileSystemDataset) {
       ((FileSystemDataset<GenericRecord>) dataset).merge(update);
-
       // And let's completely drop the temporary dataset
       Datasets.delete(uri);
     } else {
@@ -156,14 +157,15 @@ public class KiteDatasetExecutor {
     }
   }
 
-  private static final String TEMPORARY_DATASET_PREFIX = "/temp_";
+  private static final String TEMPORARY_DATASET_PREFIX = "temp_";
 
   /**
    * Workaround for managing temporary datasets.
    */
-  public static String suggestTemporaryDatasetUri(String uri) {
-    if (uri.startsWith("dataset:hdfs:")) {
-      int pathStart = uri.lastIndexOf(":") + 1;
+  public static String suggestTemporaryDatasetUri(LinkConfig linkConfig, String uri) {
+    if (uri.startsWith("dataset:hdfs:") || uri.startsWith("dataset:hive:")) {
+      int pathStart = uri.indexOf(":") + 1;
+      pathStart = uri.indexOf(":", pathStart);
       int pathEnd = uri.lastIndexOf("?");
       String[] uriParts = null;
 
@@ -179,7 +181,19 @@ public class KiteDatasetExecutor {
       uriParts[0] = uri.substring(0, pathStart);
 
       // Add to path
-      uriParts[1] += TEMPORARY_DATASET_PREFIX + UUID.randomUUID().toString().replace("-", "");
+      String temporaryDatasetName = TEMPORARY_DATASET_PREFIX + UUID.randomUUID().toString().replace("-", "");
+      if (uri.startsWith("dataset:hive:")) {
+        if (uriParts[1].lastIndexOf("/") > -1) {
+          // Kite creates databases from namespace names in hive.
+          // Re-use entire path except for dataset name (table name in hive).
+          // Replace dataset name with temporary dataset name.
+          uriParts[1] = uriParts[1].substring(0, uriParts[1].lastIndexOf("/")) + "/" + temporaryDatasetName;
+        } else {
+          uriParts[1] = temporaryDatasetName;
+        }
+      } else {
+        uriParts[1] += "/" + temporaryDatasetName;
+      }
 
       return StringUtils.join(uriParts, "");
     } else {

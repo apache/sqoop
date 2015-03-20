@@ -19,6 +19,7 @@ package org.apache.sqoop.connector.kite;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.common.AvroDataTypeUtil;
@@ -43,7 +44,10 @@ public class KiteFromInitializer extends Initializer<LinkConfiguration,
   @Override
   public void initialize(InitializerContext context,
       LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    if (!Datasets.exists(fromJobConfig.fromJobConfig.uri)) {
+    String uri = ConfigUtil.buildDatasetUri(
+        linkConfig.linkConfig, fromJobConfig.fromJobConfig.uri);
+    LOG.debug("Constructed dataset URI: " + uri);
+    if (!Datasets.exists(uri)) {
       LOG.error("Dataset does not exist");
       throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0002);
     }
@@ -55,13 +59,29 @@ public class KiteFromInitializer extends Initializer<LinkConfiguration,
     jars.add(ClassUtils.jarForClass("org.kitesdk.data.Datasets"));
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.databind.JsonNode"));
     jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.core.TreeNode"));
+    if (fromJobConfig.fromJobConfig.uri.startsWith("dataset:hive")) {
+      // @TODO(Abe): Remove a deps that aren't used?
+      jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.conf.HiveConf"));
+      jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.serde2.SerDe"));
+      jars.add(ClassUtils.jarForClass("org.kitesdk.data.spi.hive.MetaStoreUtil"));
+      jars.add(ClassUtils.jarForClass("org.kitesdk.compat.DynConstructors"));
+      jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.metastore.Warehouse"));
+      jars.add(ClassUtils.jarForClass("org.apache.hive.common.HiveCompat"));
+      jars.add(ClassUtils.jarForClass("parquet.hive.HiveBindingFactory"));
+      jars.add(ClassUtils.jarForClass("com.facebook.fb303.FacebookService"));
+      jars.add(ClassUtils.jarForClass("org.datanucleus.query.compiler.JavaQueryCompiler"));
+      jars.add(ClassUtils.jarForClass("org.datanucleus.query.typesafe.TypesafeSubquery"));
+      jars.add(ClassUtils.jarForClass("org.datanucleus.store.rdbms.sql.SQLStatement"));
+    }
     return jars;
   }
 
   @Override
   public Schema getSchema(InitializerContext context,
       LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    Dataset dataset = Datasets.load(fromJobConfig.fromJobConfig.uri);
+    String uri = ConfigUtil.buildDatasetUri(
+        linkConfig.linkConfig, fromJobConfig.fromJobConfig.uri);
+    Dataset dataset = Datasets.load(uri);
     org.apache.avro.Schema avroSchema = dataset.getDescriptor().getSchema();
     return AvroDataTypeUtil.createSqoopSchema(avroSchema);
   }

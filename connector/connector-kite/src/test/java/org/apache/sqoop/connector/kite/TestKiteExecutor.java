@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.kite;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.sqoop.connector.kite.configuration.LinkConfig;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
@@ -150,14 +151,28 @@ public class TestKiteExecutor {
   @Test
   public void testSuggestTemporaryDatasetUri() {
     String uri = "dataset:hdfs:/tmp/sqoop/test";
-    String suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(uri);
+    String suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(new LinkConfig(), uri);
     assertTrue(suggestedUri.length() > uri.length());
     assertTrue(suggestedUri.contains(uri));
 
     uri = "dataset:hdfs://namenode:8020/tmp/sqoop/test";
-    suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(uri);
+    suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(new LinkConfig(), uri);
     assertTrue(suggestedUri.length() > uri.length());
     assertTrue(suggestedUri.contains(uri));
+
+    String subURI = "dataset:hive://metastore:9083/tmp/sqoop";
+    uri = "dataset:hive://metastore:9083/tmp/sqoop/test";
+    suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(new LinkConfig(), uri);
+    assertTrue(suggestedUri.length() > subURI.length());
+    assertTrue(suggestedUri.contains(subURI));
+
+    String endURI = "auth:host=metastore&auth:port=9083";
+    uri = "dataset:hive:tmp/sqoop?auth:host=metastore&auth:port=9083";
+    subURI = "dataset:hive:tmp";
+    suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(new LinkConfig(), uri);
+    assertTrue(suggestedUri.length() > subURI.length());
+    assertTrue(suggestedUri.contains(subURI));
+    assertTrue(suggestedUri.endsWith(endURI));
   }
 
   private static Schema createTwoFieldSchema() {

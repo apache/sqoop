@@ -48,6 +48,14 @@ public class ConfigUtil {
    * Returns a dataset uri, including the filesystem location part, if it is
    * provided separated,
    */
+  public static String buildDatasetUri(LinkConfig linkConfig, String uri) {
+    return buildDatasetUri(linkConfig.authority, uri);
+  }
+
+  /**
+   * Returns a dataset uri, including the filesystem location part, if it is
+   * provided separated,
+   */
   public static String buildDatasetUri(LinkConfig linkConfig,
       ToJobConfig toJobConfig) {
     return buildDatasetUri(linkConfig.authority, toJobConfig.uri);
