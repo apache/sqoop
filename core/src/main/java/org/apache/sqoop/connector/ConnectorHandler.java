@@ -71,12 +71,9 @@ public final class ConnectorHandler {
       throw new SqoopException(ConnectorError.CONN_0008, connectorClassName);
     }
 
-    Class<?> connectorClass = null;
-    try {
-      connectorClass = ClassUtils.loadClass(connectorClassName);
-    } catch (Exception ex) {
-      throw new SqoopException(ConnectorError.CONN_0005,
-              connectorClassName, ex);
+    Class<?> connectorClass = ClassUtils.loadClass(connectorClassName);
+    if(connectorClass == null) {
+      throw new SqoopException(ConnectorError.CONN_0005, connectorClassName);
     }
 
     try {
