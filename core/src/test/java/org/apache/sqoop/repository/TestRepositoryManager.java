@@ -24,7 +24,6 @@ import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.PropertiesConfigurationProvider;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.TestUtils;
-import org.apache.sqoop.error.code.RepositoryError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

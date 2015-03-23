@@ -25,7 +25,6 @@ import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
-import org.apache.sqoop.error.code.RepositoryError;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class RepositoryManager implements Reconfigurable {
