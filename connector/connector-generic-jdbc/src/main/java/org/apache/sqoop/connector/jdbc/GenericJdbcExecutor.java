@@ -19,9 +19,11 @@ package org.apache.sqoop.connector.jdbc;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfig;
 import org.apache.sqoop.error.code.GenericJdbcConnectorError;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
+import org.apache.sqoop.utils.ClassUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -35,25 +37,75 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Properties;
 
+/**
+ * Database executor that is based on top of JDBC spec.
+ */
 public class GenericJdbcExecutor {
 
-  private static final Logger LOG =
-    Logger.getLogger(GenericJdbcExecutor.class);
+  private static final Logger LOG = Logger.getLogger(GenericJdbcExecutor.class);
 
+  /**
+   * Keys for JDBC properties
+   *
+   * We're following JDBC 4 spec:
+   * http://download.oracle.com/otn-pub/jcp/jdbc-4_1-mrel-spec/jdbc4.1-fr-spec.pdf?AuthParam=1426813649_0155f473b02dbca8bbd417dd061669d7
+   */
+  public static final String JDBC_PROPERTY_USERNAME = "user";
+  public static final String JDBC_PROPERTY_PASSWORD = "password";
+
+  /**
+   * User configured link with credentials and such
+   */
+  private LinkConfig linkConfig;
+
+  /**
+   * Internal connection object (we'll hold to it)
+   */
   private Connection connection;
+
+  /**
+   * Prepare statement
+   */
   private PreparedStatement preparedStatement;
 
-  public GenericJdbcExecutor(String driver, String url,
-      String username, String password) {
+  public GenericJdbcExecutor(LinkConfig linkConfig) {
+    assert linkConfig != null;
+    assert linkConfig.connectionString != null;
+
+    // Persist link configuration for future use
+    this.linkConfig = linkConfig;
+
+    // Load/register the JDBC driver to JVM
+    Class driverClass = ClassUtils.loadClass(linkConfig.jdbcDriver);
+    if(driverClass == null) {
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0000, linkConfig.jdbcDriver);
+    }
+
+    // Properties that we will use for the connection
+    Properties properties = new Properties();
+    if(linkConfig.jdbcProperties != null) {
+      properties.putAll(linkConfig.jdbcProperties);
+    }
+
+    // Propagate username and password to the properties
+    //
+    // DriverManager have two relevant API for us:
+    // * getConnection(url, username, password)
+    // * getConnection(url, properties)
+    // As we have to use properties, we need to use the later
+    // method and hence we have to persist the credentials there.
+    if(linkConfig.username != null) {
+      properties.put(JDBC_PROPERTY_USERNAME, linkConfig.username);
+    }
+    if(linkConfig.password != null) {
+      properties.put(JDBC_PROPERTY_PASSWORD, linkConfig.password);
+    }
+
+    // Finally create the connection
     try {
-      Class.forName(driver);
-      connection = DriverManager.getConnection(url, username, password);
-
-    } catch (ClassNotFoundException e) {
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0000, driver, e);
-
+      connection = DriverManager.getConnection(linkConfig.connectionString, properties);
     } catch (SQLException e) {
       logSQLException(e);
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0001, e);

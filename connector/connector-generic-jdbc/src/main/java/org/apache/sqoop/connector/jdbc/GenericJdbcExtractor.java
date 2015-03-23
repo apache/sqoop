@@ -41,13 +41,8 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
 
  private long rowsRead = 0;
   @Override
-  public void extract(ExtractorContext context, LinkConfiguration linkConfig,
-      FromJobConfiguration fromJobConfig, GenericJdbcPartition partition) {
-    String driver = linkConfig.linkConfig.jdbcDriver;
-    String url = linkConfig.linkConfig.connectionString;
-    String username = linkConfig.linkConfig.username;
-    String password = linkConfig.linkConfig.password;
-    GenericJdbcExecutor executor = new GenericJdbcExecutor(driver, url, username, password);
+  public void extract(ExtractorContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig, GenericJdbcPartition partition) {
+    GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig.linkConfig);
 
     String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL);
     String conditions = partition.getConditions();

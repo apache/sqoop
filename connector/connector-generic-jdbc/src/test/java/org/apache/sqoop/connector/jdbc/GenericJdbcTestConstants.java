@@ -17,9 +17,26 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfig;
+
 public class GenericJdbcTestConstants {
 
+  /**
+   * Testing Driver
+   */
   public static final String DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
+
+  /**
+   * Testing database (in memory derby)
+   */
   public static final String URL = "jdbc:derby:memory:TESTDB;create=true";
 
+  /**
+   * Test link configuration
+   */
+  public static final LinkConfig LINK_CONFIG = new LinkConfig();
+  static {
+    LINK_CONFIG.jdbcDriver = DRIVER;
+    LINK_CONFIG.connectionString = URL;
+  }
 }

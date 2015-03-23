@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfig;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -33,8 +35,7 @@ public class GenericJdbcExecutorTest {
   public GenericJdbcExecutorTest() {
     table = getClass().getSimpleName().toUpperCase();
     emptyTable = table + "_EMPTY";
-    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.DRIVER,
-      GenericJdbcTestConstants.URL, null, null);
+    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIG);
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -57,6 +58,15 @@ public class GenericJdbcExecutorTest {
         + " VALUES(" + value + ", '" + value + "')";
       executor.executeUpdate(sql);
     }
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testUnknownDriver() {
+    LinkConfig linkConfig = new LinkConfig();
+    linkConfig.jdbcDriver = "net.jarcec.driver.MyAwesomeDatabase";
+    linkConfig.connectionString = "jdbc:awesome:";
+
+    new GenericJdbcExecutor(linkConfig);
   }
 
   @Test

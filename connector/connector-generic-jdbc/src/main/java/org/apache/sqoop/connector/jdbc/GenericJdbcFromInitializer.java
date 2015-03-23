@@ -47,7 +47,8 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
   @Override
   public void initialize(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    configureJdbcProperties(context.getContext(), linkConfig, fromJobConfig);
+    executor = new GenericJdbcExecutor(linkConfig.linkConfig);
+
     try {
       configurePartitionProperties(context.getContext(), linkConfig, fromJobConfig);
       configureTableProperties(context.getContext(), linkConfig, fromJobConfig);
@@ -67,7 +68,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
   @Override
   public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    configureJdbcProperties(context.getContext(), linkConfig, fromJobConfig);
+    executor = new GenericJdbcExecutor(linkConfig.linkConfig);
 
     String schemaName = fromJobConfig.fromJobConfig.tableName;
     if(schemaName == null) {
@@ -113,18 +114,6 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
         executor.close();
       }
     }
-  }
-
-  private void configureJdbcProperties(MutableContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    String driver = linkConfig.linkConfig.jdbcDriver;
-    String url = linkConfig.linkConfig.connectionString;
-    String username = linkConfig.linkConfig.username;
-    String password = linkConfig.linkConfig.password;
-
-    assert driver != null;
-    assert url != null;
-
-    executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
   private void configurePartitionProperties(MutableContext context, LinkConfiguration linkConfig, FromJobConfiguration jobConf) throws SQLException {

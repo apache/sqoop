@@ -44,7 +44,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
 
   @Override
   public void initialize(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    configureJdbcProperties(context.getContext(), linkConfig, toJobConfig);
+    executor = new GenericJdbcExecutor(linkConfig.linkConfig);
     try {
       configureTableProperties(context.getContext(), linkConfig, toJobConfig);
     } finally {
@@ -61,7 +61,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
 
   @Override
   public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    configureJdbcProperties(context.getContext(), linkConfig, toJobConfig);
+    executor = new GenericJdbcExecutor(linkConfig.linkConfig);
 
     String schemaName = toJobConfig.toJobConfig.tableName;
 
@@ -107,18 +107,6 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
         }
       }
     }
-  }
-
-  private void configureJdbcProperties(MutableContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    String driver = linkConfig.linkConfig.jdbcDriver;
-    String url = linkConfig.linkConfig.connectionString;
-    String username = linkConfig.linkConfig.username;
-    String password = linkConfig.linkConfig.password;
-
-    assert driver != null;
-    assert url != null;
-
-    executor = new GenericJdbcExecutor(driver, url, username, password);
   }
 
   private void configureTableProperties(MutableContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
