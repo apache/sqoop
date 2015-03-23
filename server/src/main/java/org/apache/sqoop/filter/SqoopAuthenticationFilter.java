@@ -29,7 +29,7 @@ import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.security.SecurityConstants;
-import org.apache.sqoop.error.code.SecurityError;
+import org.apache.sqoop.security.SecurityError;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;

@@ -28,7 +28,7 @@ import org.apache.sqoop.model.MResource;
 import org.apache.sqoop.model.MRole;
 import org.apache.sqoop.security.AuthorizationHandler;
 import org.apache.sqoop.security.AuthorizationManager;
-import org.apache.sqoop.error.code.SecurityError;
+import org.apache.sqoop.security.SecurityError;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.json.simple.JSONObject;
