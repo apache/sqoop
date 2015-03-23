@@ -5,7 +5,7 @@
 
 <article lang="en">
 <articleinfo>
-    <title>Sqoop User Guide (v1.4.6-SNAPSHOT)</title>
+    <title>Sqoop User Guide (v1.4.7-SNAPSHOT)</title>
 </articleinfo>
 <screen>  Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -68,7 +68,7 @@ Data engineers
 </section>
 <section id="_supported_releases">
 <title>Supported Releases</title>
-<simpara>This documentation applies to Sqoop v1.4.6-SNAPSHOT.</simpara>
+<simpara>This documentation applies to Sqoop v1.4.7-SNAPSHOT.</simpara>
 </section>
 <section id="_sqoop_releases">
 <title>Sqoop Releases</title>
