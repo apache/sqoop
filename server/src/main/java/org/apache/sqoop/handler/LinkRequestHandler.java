@@ -43,7 +43,7 @@ import org.apache.sqoop.security.Authorization.AuthorizationEngine;
 import org.apache.sqoop.security.AuthorizationManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
-import org.apache.sqoop.error.code.ServerError;
+import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
 

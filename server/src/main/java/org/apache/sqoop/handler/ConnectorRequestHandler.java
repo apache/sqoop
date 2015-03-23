@@ -37,7 +37,7 @@ import org.apache.sqoop.security.Authorization.AuthorizationEngine;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.RequestHandler;
-import org.apache.sqoop.error.code.ServerError;
+import org.apache.sqoop.server.common.ServerError;
 
 public class ConnectorRequestHandler implements RequestHandler {
 

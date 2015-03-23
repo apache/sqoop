@@ -26,7 +26,7 @@ import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.RequestContext.Method;
-import org.apache.sqoop.error.code.ServerError;
+import org.apache.sqoop.server.common.ServerError;
 
 public class DriverRequestHandler implements RequestHandler {
 

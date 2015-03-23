@@ -20,7 +20,7 @@ package org.apache.sqoop.handler;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.error.code.ServerError;
+import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.json.*;
 import org.apache.sqoop.model.MPrincipal;
 import org.apache.sqoop.model.MPrivilege;
