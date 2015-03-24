@@ -71,9 +71,9 @@ public final class ParquetJob {
    * {@link org.apache.avro.generic.GenericRecord}.
    */
   public static void configureImportJob(Configuration conf, Schema schema,
-      String uri, boolean doAppend) throws IOException {
+      String uri, boolean reuseExistingDataset) throws IOException {
     Dataset dataset;
-    if (doAppend) {
+    if (reuseExistingDataset) {
       try {
         dataset = Datasets.load(uri);
       } catch (DatasetNotFoundException ex) {
