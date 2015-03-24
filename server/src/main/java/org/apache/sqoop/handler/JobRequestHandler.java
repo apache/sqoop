@@ -185,11 +185,11 @@ public class JobRequestHandler implements RequestHandler {
 
     // Authorization check
     if (create) {
-      AuthorizationEngine.createJob(String.valueOf(postedJob.getFromConnectorId()),
-              String.valueOf(postedJob.getToConnectorId()));
+      AuthorizationEngine.createJob(String.valueOf(postedJob.getFromLinkId()),
+              String.valueOf(postedJob.getToLinkId()));
     } else {
-      AuthorizationEngine.updateJob(String.valueOf(postedJob.getFromConnectorId()),
-              String.valueOf(postedJob.getToConnectorId()),
+      AuthorizationEngine.updateJob(String.valueOf(postedJob.getFromLinkId()),
+              String.valueOf(postedJob.getToLinkId()),
               String.valueOf(postedJob.getPersistenceId()));
     }
 
