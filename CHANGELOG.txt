@@ -58,6 +58,8 @@ Release Notes - Sqoop - Version 1.4.6
     * [SQOOP-2164] - Enhance the Netezza Connector for Sqoop
     * [SQOOP-2170] - MySQL specific tests are not properly cleaning up created tables
     * [SQOOP-2191] - Provide an option automatically choose one mapper when neither primary key is defined nor split by column is provided
+    * [SQOOP-2254] - Failed to build release notes
+    * [SQOOP-2257] - Parquet target for imports with Hive overwrite option does not work
 
 ** Improvement
     * [SQOOP-1330] - Ignore blank newlines in managers.d property files
