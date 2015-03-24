@@ -103,7 +103,9 @@ public class DataDrivenImportJob extends ImportJobBase {
       // Parquet data records. The import will fail, if schema is invalid.
       Schema schema = generateAvroSchema(tableName);
       String uri = getKiteUri(conf, tableName);
-      ParquetJob.configureImportJob(conf, schema, uri, options.isAppendMode());
+      boolean reuseExistingDataset = options.isAppendMode() ||
+          (options.doHiveImport() && options.doOverwriteHiveTable());
+      ParquetJob.configureImportJob(conf, schema, uri, reuseExistingDataset);
     }
 
     job.setMapperClass(getMapperClass());
