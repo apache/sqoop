@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -34,7 +35,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
-import org.apache.sqoop.common.PrefixContext;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToCompression;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
@@ -102,10 +103,9 @@ public class TestLoader extends TestHdfsBase {
         .addColumn(new FloatingPoint("col2", 4L))
         .addColumn(new Text("col3"));
 
-    Configuration conf = new Configuration();
-    conf.set("org.apache.sqoop.job.connector.from.context." + HdfsConstants.WORK_DIRECTORY, outputDirectory);
-    PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
-    LoaderContext context = new LoaderContext(prefixContext, new DataReader() {
+    MutableMapContext mutableContext = new MutableMapContext(new HashMap<String, String>());
+    mutableContext.setString(HdfsConstants.WORK_DIRECTORY, outputDirectory);
+    LoaderContext context = new LoaderContext(mutableContext, new DataReader() {
       private long index = 0L;
 
       @Override
@@ -156,10 +156,9 @@ public class TestLoader extends TestHdfsBase {
         .addColumn(new Text("col3"))
         .addColumn(new Text("col4"));
 
-    Configuration conf = new Configuration();
-    conf.set("org.apache.sqoop.job.connector.from.context." + HdfsConstants.WORK_DIRECTORY, outputDirectory);
-    PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
-    LoaderContext context = new LoaderContext(prefixContext, new DataReader() {
+    MutableMapContext mutableContext = new MutableMapContext(new HashMap<String, String>());
+    mutableContext.setString(HdfsConstants.WORK_DIRECTORY, outputDirectory);
+    LoaderContext context = new LoaderContext(mutableContext, new DataReader() {
       private long index = 0L;
 
       @Override

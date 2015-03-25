@@ -23,13 +23,13 @@ import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DefaultCodec;
-import org.apache.sqoop.common.PrefixContext;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
@@ -94,9 +94,7 @@ public class TestPartitioner extends TestHdfsBase {
 
   @Test
   public void testPartitioner() {
-    Configuration conf = new Configuration();
-    PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
-    PartitionerContext context = new PartitionerContext(prefixContext, 5, null);
+    PartitionerContext context = new PartitionerContext(new MapContext(new HashMap<String, String>()), 5, null);
     LinkConfiguration linkConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 

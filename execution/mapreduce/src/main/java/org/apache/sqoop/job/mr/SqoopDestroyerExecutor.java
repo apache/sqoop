@@ -20,7 +20,7 @@ package org.apache.sqoop.job.mr;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.common.PrefixContext;
+import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.connector.matcher.Matcher;
 import org.apache.sqoop.connector.matcher.MatcherFactory;
 import org.apache.sqoop.job.MRJobConstants;

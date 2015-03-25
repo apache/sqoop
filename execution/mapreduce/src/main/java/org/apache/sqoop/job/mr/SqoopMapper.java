@@ -33,7 +33,7 @@ import org.apache.sqoop.connector.matcher.Matcher;
 import org.apache.sqoop.connector.matcher.MatcherFactory;
 import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.error.code.MRExecutionError;
-import org.apache.sqoop.common.PrefixContext;
+import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
 import org.apache.sqoop.etl.io.DataWriter;

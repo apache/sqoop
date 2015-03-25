@@ -23,13 +23,13 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DefaultCodec;
-import org.apache.sqoop.common.PrefixContext;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
@@ -40,7 +40,6 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
-import org.testng.ITest;
 import org.testng.annotations.AfterMethod;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -100,15 +99,14 @@ public class TestExtractor extends TestHdfsBase {
 
   @Test
   public void testExtractor() throws Exception {
-    Configuration conf = new Configuration();
-    PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
+    MutableMapContext mutableContext = new MutableMapContext(new HashMap<String, String>());
     final boolean[] visited = new boolean[NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE];
     Schema schema = new Schema("schema").addColumn(new FixedPoint("col1", 4L, true))
         .addColumn(new FloatingPoint("col2", 4L))
         .addColumn(new Text("col3"))
         .addColumn(new Text("col4"))
         .addColumn(new Text("col5"));
-    ExtractorContext context = new ExtractorContext(prefixContext, new DataWriter() {
+    ExtractorContext context = new ExtractorContext(mutableContext, new DataWriter() {
       @Override
       public void writeArrayRecord(Object[] array) {
         throw new AssertionError("Should not be writing array.");
@@ -156,15 +154,14 @@ public class TestExtractor extends TestHdfsBase {
 
   @Test
   public void testOverrideNull() throws Exception {
-    Configuration conf = new Configuration();
-    PrefixContext prefixContext = new PrefixContext(conf, "org.apache.sqoop.job.connector.from.context.");
+    MutableMapContext mutableContext = new MutableMapContext(new HashMap<String, String>());
     final boolean[] visited = new boolean[NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE];
     Schema schema = new Schema("schema").addColumn(new FixedPoint("col1", 4L, true))
         .addColumn(new FloatingPoint("col2", 4L))
         .addColumn(new Text("col3"))
         .addColumn(new Text("col4"))
         .addColumn(new Text("col5"));
-    ExtractorContext context = new ExtractorContext(prefixContext, new DataWriter() {
+    ExtractorContext context = new ExtractorContext(mutableContext, new DataWriter() {
       @Override
       public void writeArrayRecord(Object[] array) {
         int index;
