@@ -475,8 +475,6 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
       submission.setProgress(progress);
       submission.setCounters(counters);
       submission.setLastUpdateDate(new Date());
-
-      RepositoryManager.getInstance().getRepository().updateSubmission(submission);
     } catch (IOException e) {
       throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0003, e);
     }
