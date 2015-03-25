@@ -17,13 +17,20 @@
  */
 package org.apache.sqoop.common.test.utils;
 
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Network related utilities.
  */
 public class NetworkUtils {
+
+  private static final Logger LOG = Logger.getLogger(NetworkUtils.class);
 
   /**
    * Create port number that is available on this machine for
@@ -56,6 +63,35 @@ public class NetworkUtils {
         socket.close();
       }
     }
+  }
+
+  /**
+   * Create a socket and attempt to connect to ``hostname``:``port``
+   * ``numberOfAttempts`` amount of times with ``sleepTime`` milliseconds
+   * between each attempt.
+   *
+   * @param hostname host name to connect to
+   * @param port port to connect on
+   * @param numberOfAttempts number of tries to connect
+   * @param sleepTime time in between connection attempts in milliseconds
+   * @throws InterruptedException
+   * @throws TimeoutException
+   */
+  public static void waitForStartUp(String hostname, int port, int numberOfAttempts, long sleepTime)
+      throws InterruptedException, TimeoutException {
+    for (int i = 0; i < numberOfAttempts; ++i) {
+      try {
+        LOG.debug("Attempt " + (i + 1) + " to access " + hostname + ":" + port);
+        new Socket(InetAddress.getByName(hostname), port).close();
+        return;
+      } catch (Exception e) {
+        LOG.debug("Failed to connect to " + hostname + ":" + port, e);
+      }
+
+      Thread.sleep(sleepTime);
+    }
+
+    throw new TimeoutException("Couldn't access new server: " + hostname + ":" + port);
   }
 
   private NetworkUtils() {

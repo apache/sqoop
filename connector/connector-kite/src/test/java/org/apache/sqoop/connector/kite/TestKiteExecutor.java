@@ -38,7 +38,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class TestKiteExecutor {
 
@@ -173,6 +174,16 @@ public class TestKiteExecutor {
     assertTrue(suggestedUri.length() > subURI.length());
     assertTrue(suggestedUri.contains(subURI));
     assertTrue(suggestedUri.endsWith(endURI));
+
+    endURI = "auth:host=metastore&auth:port=9083";
+    uri = "dataset:hive:sqoop?auth:host=metastore&auth:port=9083";
+    subURI = "dataset:hive:";
+    suggestedUri = KiteDatasetExecutor.suggestTemporaryDatasetUri(new LinkConfig(), uri);
+    assertTrue(suggestedUri.length() > subURI.length());
+    assertTrue(suggestedUri.contains(subURI), suggestedUri);
+    assertTrue(suggestedUri.endsWith(endURI), suggestedUri);
+    assertFalse(suggestedUri.contains("sqoop"));
+    assertFalse(suggestedUri.contains("/"));
   }
 
   private static Schema createTwoFieldSchema() {

@@ -189,7 +189,7 @@ public class KiteDatasetExecutor {
           // Replace dataset name with temporary dataset name.
           uriParts[1] = uriParts[1].substring(0, uriParts[1].lastIndexOf("/")) + "/" + temporaryDatasetName;
         } else {
-          uriParts[1] = temporaryDatasetName;
+          uriParts[1] = ":" + temporaryDatasetName;
         }
       } else {
         uriParts[1] += "/" + temporaryDatasetName;

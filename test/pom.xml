@@ -113,6 +113,18 @@ limitations under the License.
     </dependency>
 
     <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-jdbc</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-service</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.codehaus.cargo</groupId>
       <artifactId>cargo-core-container-tomcat</artifactId>
     </dependency>

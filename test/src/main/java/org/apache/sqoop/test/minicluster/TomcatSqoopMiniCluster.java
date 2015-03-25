@@ -95,6 +95,7 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
     String []classpath = System.getProperty("java.class.path").split(":");
     for(String jar : classpath) {
       if(jar.contains("hadoop-")      || // Hadoop jars
+         jar.contains("hive-")        || // Hive jars
          jar.contains("commons-")     || // Apache Commons libraries
          jar.contains("httpcore-")    || // Apache Http Core libraries
          jar.contains("httpclient-")  || // Apache Http Client libraries
@@ -106,6 +107,7 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
          jar.contains("jackson-")     || // Jackson
          jar.contains("derby")        || // Derby drivers
          jar.contains("avro-")        || // Avro
+         jar.contains("parquet-")     || // Parquet
          jar.contains("mysql")        || // MySQL JDBC driver
          jar.contains("postgre")      || // PostgreSQL JDBC driver
          jar.contains("oracle")       || // Oracle driver
@@ -113,6 +115,8 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
          jar.contains("tdgs")         || // Teradata driver
          jar.contains("nzjdbc")       || // Netezza driver
          jar.contains("sqljdbc")      || // Microsoft SQL Server driver
+         jar.contains("libfb303")     || // Facebook thrift lib
+         jar.contains("datanucleus-") || // Data nucleus libs
          jar.contains("google")          // Google libraries (guava, ...)
        ) {
         extraClassPath.add(jar);
