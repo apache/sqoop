@@ -18,7 +18,7 @@
 package org.apache.sqoop.handler;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -234,14 +234,12 @@ public class LinkRequestHandler implements RequestHandler {
           ctx.getRequest().getRemoteAddr(), "get", "link", identifier);
 
       long linkId = HandlerUtils.getLinkIdFromIdentifier(identifier, repository);
-      List<MLink> linkList = new ArrayList<MLink>();
-      // a list of single element
-      linkList.add(repository.findLink(linkId));
+      MLink link = repository.findLink(linkId);
 
       // Authorization check
-      linkList = AuthorizationEngine.filterResource(MResource.TYPE.LINK, linkList);
+      AuthorizationEngine.readLink(String.valueOf(link.getPersistenceId()));
 
-      linkBean = createLinkBean(linkList, locale);
+      linkBean = createLinkBean(Arrays.asList(link), locale);
     }
     return linkBean;
   }

@@ -212,6 +212,9 @@ public enum CommonRepositoryError implements ErrorCode {
 
   COMMON_0056("Unable to update  USER_ONLY editable config"),
 
+  /** We can't restore specific connector**/
+  COMMON_0057("Unable to load specific connector"),
+
   ;
 
   private final String message;

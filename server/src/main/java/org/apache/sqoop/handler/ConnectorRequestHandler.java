@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.handler;
 
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -80,19 +80,18 @@ public class ConnectorRequestHandler implements RequestHandler {
       // NOTE: connectorId is a fallback for older sqoop clients if any, since we want to primarily use unique conenctorNames
       long cId = HandlerUtils.getConnectorIdFromIdentifier(cIdentifier);
 
-      connectors = new LinkedList<MConnector>();
       configParamBundles = new HashMap<Long, ResourceBundle>();
 
-      connectors.add(ConnectorManager.getInstance().getConnectorConfigurable(cId));
+      MConnector connector = ConnectorManager.getInstance().getConnectorConfigurable(cId);
       configParamBundles.put(cId, ConnectorManager.getInstance().getResourceBundle(cId, locale));
 
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "connector", String.valueOf(cIdentifier));
 
       // Authorization check
-      connectors = AuthorizationEngine.filterResource(MResource.TYPE.CONNECTOR, connectors);
+      AuthorizationEngine.readConnector(String.valueOf(connector.getPersistenceId()));
 
-      return new ConnectorBean(connectors, configParamBundles);
+      return new ConnectorBean(Arrays.asList(connector), configParamBundles);
     }
   }
 }

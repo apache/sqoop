@@ -35,6 +35,7 @@ import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
+import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.error.code.ConnectorError;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.repository.Repository;
@@ -129,7 +130,8 @@ public class ConnectorManager implements Reconfigurable {
   public MConnector getConnectorConfigurable(long connectorId) {
     ConnectorHandler handler = handlerMap.get(idToNameMap.get(connectorId));
     if (handler == null) {
-      return null;
+      throw new SqoopException(CommonRepositoryError.COMMON_0057, "Couldn't find"
+              + " connector with id " + connectorId);
     }
     return handler.getConnectorConfigurable();
   }

@@ -18,7 +18,7 @@
 package org.apache.sqoop.handler;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -306,14 +306,12 @@ public class JobRequestHandler implements RequestHandler {
           ctx.getRequest().getRemoteAddr(), "get", "job", connectorIdentifier);
 
       long jobId = HandlerUtils.getJobIdFromIdentifier(connectorIdentifier, repository);
-      List<MJob> jobList = new ArrayList<MJob>();
-      // a list of single element
-      jobList.add(repository.findJob(jobId));
+      MJob job = repository.findJob(jobId);
 
       // Authorization check
-      jobList = AuthorizationEngine.filterResource(MResource.TYPE.JOB, jobList);
+      AuthorizationEngine.readJob(String.valueOf(job.getPersistenceId()));
 
-      jobBean = createJobBean(jobList, locale);
+      jobBean = createJobBean(Arrays.asList(job), locale);
     }
     return jobBean;
   }

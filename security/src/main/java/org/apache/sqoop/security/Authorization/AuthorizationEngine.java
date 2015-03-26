@@ -26,9 +26,12 @@ import org.apache.hadoop.security.token.delegation.web.HttpUserGroupInformation;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.*;
+import org.apache.sqoop.repository.Repository;
+import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.security.AuthorizationHandler;
 import org.apache.sqoop.security.AuthorizationManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -59,8 +62,19 @@ public class AuthorizationEngine {
   }
 
   /**
+   * Connector related function
+   */
+  public static void readConnector(String connectorId) throws SqoopException {
+    checkPrivilege(getPrivilege(MResource.TYPE.CONNECTOR, connectorId, MPrivilege.ACTION.READ));
+  }
+
+  /**
    * Link related function
    */
+  public static void readLink(String linkId) throws SqoopException {
+    checkPrivilege(getPrivilege(MResource.TYPE.LINK, linkId, MPrivilege.ACTION.READ));
+  }
+
   public static void createLink(String connectorId) throws SqoopException {
     checkPrivilege(getPrivilege(MResource.TYPE.CONNECTOR, connectorId, MPrivilege.ACTION.READ));
   }
@@ -82,6 +96,10 @@ public class AuthorizationEngine {
   /**
    * Job related function
    */
+  public static void readJob(String jobId) throws SqoopException {
+    checkPrivilege(getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.READ));
+  }
+
   public static void createJob(String linkId1, String linkId2) throws SqoopException {
     MPrivilege privilege1 = getPrivilege(MResource.TYPE.LINK, linkId1, MPrivilege.ACTION.READ);
     MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkId2, MPrivilege.ACTION.READ);
