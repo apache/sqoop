@@ -19,6 +19,7 @@ package org.apache.sqoop.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.shell.core.Constants;
@@ -140,9 +141,13 @@ public class ShowLinkFunction extends SqoopFunction {
     Map<String, String> connectorIdToName = new HashMap<String, String>();
     for (String connectorId : connectorIds) {
       if (!connectorIdToName.containsKey(connectorId)) {
-        MConnector connector = client.getConnector(Long.valueOf(connectorId));
-        if (connector != null) {
-          connectorIdToName.put(connectorId, connector.getUniqueName());
+        try {
+          MConnector connector = client.getConnector(Long.valueOf(connectorId));
+          if (connector != null) {
+            connectorIdToName.put(connectorId, connector.getUniqueName());
+          }
+        } catch (SqoopException ex) {
+          connectorIdToName.put(connectorId, "Access Denied");
         }
       }
     }
