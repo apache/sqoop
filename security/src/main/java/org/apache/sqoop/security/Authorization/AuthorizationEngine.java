@@ -32,7 +32,6 @@ import org.apache.sqoop.security.AuthorizationHandler;
 import org.apache.sqoop.security.AuthorizationManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -169,6 +168,28 @@ public class AuthorizationEngine {
     UserGroupInformation user = HttpUserGroupInformation.get();
     String user_name = user == null ? StringUtils.EMPTY : user.getShortUserName();
     MPrincipal principal = new MPrincipal(user_name, MPrincipal.TYPE.USER);
-    handler.checkPrivileges(principal, Arrays.asList(privileges));
+
+    // SQOOP-2256: Hack code, do not check privilege when the user is the creator
+    // If the user is the owner/creator of this resource, then privilege will
+    // not be checked. It is a hack code for the time being. The concept of
+    // "Owner" will be added in the future and this code will be removed.
+    ArrayList<MPrivilege> privilegesNeedCheck = new ArrayList<MPrivilege>();
+    for (MPrivilege privilege : privileges) {
+      Repository repository = RepositoryManager.getInstance().getRepository();
+      if (MResource.TYPE.LINK.name().equalsIgnoreCase(privilege.getResource().getType())) {
+        MLink link = repository.findLink(Long.valueOf(privilege.getResource().getName()));
+        if (!user_name.equals(link.getCreationUser())) {
+          privilegesNeedCheck.add(privilege);
+        }
+      }
+      if (MResource.TYPE.JOB.name().equalsIgnoreCase(privilege.getResource().getType())) {
+        MJob job = repository.findJob(Long.valueOf(privilege.getResource().getName()));
+        if (!user_name.equals(job.getCreationUser())) {
+          privilegesNeedCheck.add(privilege);
+        }
+      }
+    }
+
+    handler.checkPrivileges(principal, privilegesNeedCheck);
   }
 }
