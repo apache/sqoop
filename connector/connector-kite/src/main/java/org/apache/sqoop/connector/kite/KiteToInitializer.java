@@ -65,6 +65,16 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
     if (FileFormat.CSV.equals(toJobConfig.toJobConfig.fileFormat)) {
       jars.add(ClassUtils.jarForClass("au.com.bytecode.opencsv.CSVWriter"));
     }
+    if (FileFormat.PARQUET.equals(toJobConfig.toJobConfig.fileFormat)) {
+      jars.add(ClassUtils.jarForClass("parquet.hadoop.metadata.CompressionCodecName"));
+      jars.add(ClassUtils.jarForClass("parquet.format.CompressionCodec"));
+      jars.add(ClassUtils.jarForClass("parquet.avro.AvroParquetWriter"));
+      jars.add(ClassUtils.jarForClass("parquet.column.ParquetProperties"));
+      jars.add(ClassUtils.jarForClass("parquet.Version"));
+      jars.add(ClassUtils.jarForClass("parquet.org.codehaus.jackson.type.TypeReference"));
+      jars.add(ClassUtils.jarForClass("parquet.bytes.CapacityByteArrayOutputStream"));
+      jars.add(ClassUtils.jarForClass("parquet.encoding.Generator"));
+    }
     if (toJobConfig.toJobConfig.uri.startsWith("dataset:hive")) {
       // @TODO(Abe): Remove a deps that aren't used?
       jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.conf.HiveConf"));
@@ -78,6 +88,7 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
       jars.add(ClassUtils.jarForClass("org.datanucleus.query.compiler.JavaQueryCompiler"));
       jars.add(ClassUtils.jarForClass("org.datanucleus.query.typesafe.TypesafeSubquery"));
       jars.add(ClassUtils.jarForClass("org.datanucleus.store.rdbms.sql.SQLStatement"));
+      jars.add(ClassUtils.jarForClass("parquet.hive.serde.ParquetHiveSerDe"));
     }
     return jars;
   }
