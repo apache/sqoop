@@ -51,7 +51,7 @@ public class AppendModeTest extends ConnectorTestCase {
 
     // Fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
-    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    MConfigList toConfig = job.getToJobConfig();
     toConfig.getBooleanInput("toJobConfig.appendMode").setValue(true);
 
 

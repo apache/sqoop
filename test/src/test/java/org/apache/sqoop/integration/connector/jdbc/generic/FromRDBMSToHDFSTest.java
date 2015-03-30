@@ -95,7 +95,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
     // Connector values
     fillRdbmsFromConfig(job, "id");
-    MConfigList configs = job.getJobConfig(Direction.FROM);
+    MConfigList configs = job.getFromJobConfig();
     configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("name") + "," + provider.escapeColumnName("story"));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
     saveJob(job);
@@ -140,7 +140,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
     // Connector values
     fillRdbmsFromConfig(job, "id");
-    MConfigList configs = job.getJobConfig(Direction.FROM);
+    MConfigList configs = job.getFromJobConfig();
     configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
     saveJob(job);
@@ -185,7 +185,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
 
     // Connector values
-    MConfigList configs = job.getJobConfig(Direction.FROM);
+    MConfigList configs = job.getFromJobConfig();
     configs.getStringInput("fromJobConfig.sql").setValue("SELECT " + provider.escapeColumnName("id")
         + " FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}");
     configs.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
@@ -233,7 +233,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
     // Connector values
     String partitionColumn = provider.escapeTableName(getTableName().getTableName()) + "." + provider.escapeColumnName("id");
-    MConfigList configs = job.getJobConfig(Direction.FROM);
+    MConfigList configs = job.getFromJobConfig();
     configs.getStringInput("fromJobConfig.sql").setValue(
         "SELECT " + provider.escapeColumnName("id") + " as " + provider.escapeColumnName("i") + ", "
             + provider.escapeColumnName("id") + " as " + provider.escapeColumnName("j")

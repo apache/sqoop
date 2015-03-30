@@ -95,14 +95,14 @@ public class TestJobHandling extends PostgresqlTestCase {
 
     List<MConfig> configs;
 
-    configs = firstJob.getJobConfig(Direction.FROM).getConfigs();
+    configs = firstJob.getFromJobConfig().getConfigs();
     assertEquals(2, configs.size());
     assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
     assertEquals("Value2", configs.get(1).getInputs().get(0).getValue());
     assertNull(configs.get(1).getInputs().get(1).getValue());
 
-    configs = firstJob.getJobConfig(Direction.TO).getConfigs();
+    configs = firstJob.getToJobConfig().getConfigs();
     assertEquals(2, configs.size());
     assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
@@ -188,10 +188,10 @@ public class TestJobHandling extends PostgresqlTestCase {
     assertEquals(1, retrieved.getPersistenceId());
 
     List<MConfig> configs;
-    configs = retrieved.getJobConfig(Direction.FROM).getConfigs();
+    configs = retrieved.getFromJobConfig().getConfigs();
     assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
-    configs = retrieved.getJobConfig(Direction.TO).getConfigs();
+    configs = retrieved.getToJobConfig().getConfigs();
     assertEquals("Value2", configs.get(1).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
 
@@ -219,11 +219,11 @@ public class TestJobHandling extends PostgresqlTestCase {
 
     List<MConfig> configs;
 
-    configs = job.getJobConfig(Direction.FROM).getConfigs();
+    configs = job.getFromJobConfig().getConfigs();
     ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
     ((MMapInput)configs.get(0).getInputs().get(1)).setValue(null);
 
-    configs = job.getJobConfig(Direction.TO).getConfigs();
+    configs = job.getToJobConfig().getConfigs();
     ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
     ((MMapInput)configs.get(0).getInputs().get(1)).setValue(null);
 
@@ -244,11 +244,11 @@ public class TestJobHandling extends PostgresqlTestCase {
     MJob retrieved = handler.findJob(1, provider.getConnection());
     assertEquals("name", retrieved.getName());
 
-    configs = job.getJobConfig(Direction.FROM).getConfigs();
+    configs = job.getFromJobConfig().getConfigs();
     assertEquals(2, configs.size());
     assertEquals("Updated", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
-    configs = job.getJobConfig(Direction.TO).getConfigs();
+    configs = job.getToJobConfig().getConfigs();
     assertEquals(2, configs.size());
     assertEquals("Updated", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());

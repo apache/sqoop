@@ -74,9 +74,9 @@ public class CreateJobFunction extends  SqoopFunction {
     MJob job = client.createJob(fromLinkId, toLinkId);
 
     ResourceBundle fromConfigBundle = client.getConnectorConfigBundle(
-        job.getConnectorId(Direction.FROM));
+        job.getFromConnectorId());
     ResourceBundle toConfigBundle = client.getConnectorConfigBundle(
-        job.getConnectorId(Direction.TO));
+        job.getToConnectorId());
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;

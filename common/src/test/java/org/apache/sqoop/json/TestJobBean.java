@@ -38,10 +38,10 @@ public class TestJobBean {
     MJob job = BeanTestUtil.createJob("ahoj", "The big Job", 22L, created, updated);
 
     // Fill some data at the beginning
-    MStringInput input = (MStringInput) job.getJobConfig(Direction.FROM).getConfigs().get(0)
+    MStringInput input = (MStringInput) job.getFromJobConfig().getConfigs().get(0)
         .getInputs().get(0);
     input.setValue("Hi there!");
-    input = (MStringInput) job.getJobConfig(Direction.TO).getConfigs().get(0).getInputs().get(0);
+    input = (MStringInput) job.getToJobConfig().getConfigs().get(0).getInputs().get(0);
     input.setValue("Hi there again!");
 
     // Serialize it to JSON object
@@ -61,19 +61,19 @@ public class TestJobBean {
     assertEquals(22L, target.getPersistenceId());
     assertEquals("The big Job", target.getName());
 
-    assertEquals(target.getLinkId(Direction.FROM), 1);
-    assertEquals(target.getLinkId(Direction.TO), 2);
-    assertEquals(target.getConnectorId(Direction.FROM), 1);
-    assertEquals(target.getConnectorId(Direction.TO), 2);
+    assertEquals(target.getFromLinkId(), 1);
+    assertEquals(target.getToLinkId(), 2);
+    assertEquals(target.getFromConnectorId(), 1);
+    assertEquals(target.getToConnectorId(), 2);
     assertEquals(created, target.getCreationDate());
     assertEquals(updated, target.getLastUpdateDate());
     assertEquals(false, target.getEnabled());
 
     // Test that value was correctly moved
-    MStringInput targetInput = (MStringInput) target.getJobConfig(Direction.FROM).getConfigs()
+    MStringInput targetInput = (MStringInput) target.getFromJobConfig().getConfigs()
         .get(0).getInputs().get(0);
     assertEquals("Hi there!", targetInput.getValue());
-    targetInput = (MStringInput) target.getJobConfig(Direction.TO).getConfigs().get(0).getInputs()
+    targetInput = (MStringInput) target.getToJobConfig().getConfigs().get(0).getInputs()
         .get(0);
     assertEquals("Hi there again!", targetInput.getValue());
   }

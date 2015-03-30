@@ -109,11 +109,11 @@ abstract public class PostgresqlTestCase {
   }
 
   protected void fillJob(MJob job) {
-    List<MConfig> configs = job.getJobConfig(Direction.FROM).getConfigs();
+    List<MConfig> configs = job.getFromJobConfig().getConfigs();
     ((MStringInput) configs.get(0).getInputs().get(0)).setValue("Value1");
     ((MStringInput) configs.get(1).getInputs().get(0)).setValue("Value2");
 
-    configs = job.getJobConfig(Direction.TO).getConfigs();
+    configs = job.getToJobConfig().getConfigs();
     ((MStringInput) configs.get(0).getInputs().get(0)).setValue("Value1");
     ((MStringInput) configs.get(1).getInputs().get(0)).setValue("Value2");
 

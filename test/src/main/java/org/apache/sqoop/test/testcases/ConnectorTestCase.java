@@ -146,13 +146,13 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   }
 
   protected void fillRdbmsFromConfig(MJob job, String partitionColumn) {
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    MConfigList fromConfig = job.getFromJobConfig();
     fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
     fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
   }
 
   protected void fillRdbmsToConfig(MJob job) {
-    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    MConfigList toConfig = job.getToJobConfig();
     toConfig.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
   }
 
@@ -168,7 +168,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param output Output type that should be set
    */
   protected void fillHdfsToConfig(MJob job, ToFormat output) {
-    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    MConfigList toConfig = job.getToJobConfig();
     toConfig.getEnumInput("toJobConfig.outputFormat").setValue(output);
     toConfig.getStringInput("toJobConfig.outputDirectory").setValue(getMapreduceDirectory());
   }
@@ -179,7 +179,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param job MJob object to fill
    */
   protected void fillHdfsFromConfig(MJob job) {
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    MConfigList fromConfig = job.getFromJobConfig();
     fromConfig.getStringInput("fromJobConfig.inputDirectory").setValue(getMapreduceDirectory());
   }
 

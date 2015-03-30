@@ -35,13 +35,13 @@ public class JobDynamicConfigOptions extends DynamicConfigOptions<MJob> {
                   .withLongOpt("name")
                   .hasArg()
                   .create());
-    for (Option option : ConfigOptions.getConfigsOptions("from", job.getJobConfig(Direction.FROM).getConfigs())) {
+    for (Option option : ConfigOptions.getConfigsOptions("from", job.getFromJobConfig().getConfigs())) {
       this.addOption(option);
     }
     for (Option option : ConfigOptions.getConfigsOptions("driver", job.getDriverConfig().getConfigs())) {
       this.addOption(option);
     }
-    for (Option option : ConfigOptions.getConfigsOptions("to", job.getJobConfig(Direction.TO).getConfigs())) {
+    for (Option option : ConfigOptions.getConfigsOptions("to", job.getToJobConfig().getConfigs())) {
       this.addOption(option);
     }
   }

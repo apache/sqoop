@@ -67,13 +67,13 @@ public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), kiteLink.getPersistenceId());
 
     // Set rdbms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    MConfigList fromConfig = job.getFromJobConfig();
     fillRdbmsFromConfig(job, "id");
     // TODO: Kite have troubles with some data types, so we're limiting the columns to int only
     fromConfig.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
 
     // Fill the Kite "TO" config
-    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    MConfigList toConfig = job.getToJobConfig();
     toConfig.getStringInput("toJobConfig.uri").setValue("dataset:hive:testtable");
     toConfig.getEnumInput("toJobConfig.fileFormat").setValue(FileFormat.AVRO);
 

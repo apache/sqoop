@@ -63,12 +63,15 @@ public final class ConfigDisplayer {
         resourceString(Constants.RES_CONFIG_DISPLAYER_LINK),
         bundle);
 
-    for (Direction direction : new Direction[] {Direction.FROM, Direction.TO}) {
+    for (Direction direction : new Direction[]{Direction.FROM, Direction.TO}) {
       if (connector.getSupportedDirections().isDirectionSupported(direction)) {
+        List<MConfig> configs = direction.equals(Direction.FROM)
+                ? connector.getFromConfig().getConfigs()
+                : connector.getToConfig().getConfigs();
         displayConfig(
-            connector.getConfig(direction).getConfigs(),
-            direction.toString() + " " + resourceString(Constants.RES_CONFIG_DISPLAYER_JOB),
-            bundle);
+                configs,
+                direction.toString() + " " + resourceString(Constants.RES_CONFIG_DISPLAYER_JOB),
+                bundle);
       }
     }
   }
@@ -150,9 +153,9 @@ public final class ConfigDisplayer {
       configList.addAll(link.getConnectorLinkConfig().getConfigs());
     } else if(entity instanceof MJob) {
       MJob job = (MJob) entity;
-      configList.addAll(job.getJobConfig(Direction.FROM).getConfigs());
+      configList.addAll(job.getFromJobConfig().getConfigs());
       configList.addAll(job.getDriverConfig().getConfigs());
-      configList.addAll(job.getJobConfig(Direction.TO).getConfigs());
+      configList.addAll(job.getToJobConfig().getConfigs());
     }
     for(MConfig config : configList) {
       if(config.getValidationStatus() == Status.WARNING) {

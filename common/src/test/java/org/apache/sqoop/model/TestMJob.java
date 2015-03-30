@@ -35,32 +35,32 @@ public class TestMJob {
   public void testInitialization() {
     // Test default constructor
     MJob job = job();
-    assertEquals(123l, job.getConnectorId(Direction.FROM));
-    assertEquals(456l, job.getConnectorId(Direction.TO));
+    assertEquals(123l, job.getFromConnectorId());
+    assertEquals(456l, job.getToConnectorId());
     assertEquals("Buffy", job.getCreationUser());
     assertEquals("Vampire", job.getName());
-    assertEquals(fromConfig(), job.getJobConfig(Direction.FROM));
-    assertEquals(toConfig(), job.getJobConfig(Direction.TO));
+    assertEquals(fromConfig(), job.getFromJobConfig());
+    assertEquals(toConfig(), job.getToJobConfig());
     assertEquals(driverConfig(), job.getDriverConfig());
 
     // Test copy constructor
     MJob copy = new MJob(job);
-    assertEquals(123l, copy.getConnectorId(Direction.FROM));
-    assertEquals(456l, copy.getConnectorId(Direction.TO));
+    assertEquals(123l, copy.getFromConnectorId());
+    assertEquals(456l, copy.getToConnectorId());
     assertEquals("Buffy", copy.getCreationUser());
     assertEquals("Vampire", copy.getName());
-    assertEquals(fromConfig(), copy.getJobConfig(Direction.FROM));
-    assertEquals(toConfig(), copy.getJobConfig(Direction.TO));
+    assertEquals(fromConfig(), copy.getFromJobConfig());
+    assertEquals(toConfig(), copy.getToJobConfig());
     assertEquals(driverConfig(), copy.getDriverConfig());
 
     // Test constructor for metadata upgrade (the order of configs is different)
     MJob upgradeCopy = new MJob(job, fromConfig(), toConfig(), driverConfig());
-    assertEquals(123l, upgradeCopy.getConnectorId(Direction.FROM));
-    assertEquals(456l, upgradeCopy.getConnectorId(Direction.TO));
+    assertEquals(123l, upgradeCopy.getFromConnectorId());
+    assertEquals(456l, upgradeCopy.getToConnectorId());
     assertEquals("Buffy", upgradeCopy.getCreationUser());
     assertEquals("Vampire", upgradeCopy.getName());
-    assertEquals(fromConfig(), upgradeCopy.getJobConfig(Direction.FROM));
-    assertEquals(toConfig(), upgradeCopy.getJobConfig(Direction.TO));
+    assertEquals(fromConfig(), upgradeCopy.getFromJobConfig());
+    assertEquals(toConfig(), upgradeCopy.getToJobConfig());
     assertEquals(driverConfig(), upgradeCopy.getDriverConfig());
   }
 
@@ -74,12 +74,12 @@ public class TestMJob {
     assertEquals(MPersistableEntity.PERSISTANCE_ID_DEFAULT, withoutJobValue.getPersistenceId());
     assertNull(withoutJobValue.getName());
     assertNull(withoutJobValue.getCreationUser());
-    assertEquals(fromConfig(), withoutJobValue.getJobConfig(Direction.FROM));
-    assertEquals(toConfig(), withoutJobValue.getJobConfig(Direction.TO));
+    assertEquals(fromConfig(), withoutJobValue.getFromJobConfig());
+    assertEquals(toConfig(), withoutJobValue.getToJobConfig());
     assertEquals(driverConfig(), withoutJobValue.getDriverConfig());
-    assertNull(withoutJobValue.getJobConfig(Direction.FROM)
+    assertNull(withoutJobValue.getFromJobConfig()
         .getConfig("CONFIGFROMNAME").getInput("INTEGER-INPUT").getValue());
-    assertNull(withoutJobValue.getJobConfig(Direction.FROM)
+    assertNull(withoutJobValue.getFromJobConfig()
         .getConfig("CONFIGFROMNAME").getInput("STRING-INPUT").getValue());
 
     // Clone with value
@@ -88,12 +88,12 @@ public class TestMJob {
     assertEquals(job.getPersistenceId(), withJobValue.getPersistenceId());
     assertEquals(job.getName(), withJobValue.getName());
     assertEquals(job.getCreationUser(), withJobValue.getCreationUser());
-    assertEquals(fromConfig(), withJobValue.getJobConfig(Direction.FROM));
-    assertEquals(toConfig(), withJobValue.getJobConfig(Direction.TO));
+    assertEquals(fromConfig(), withJobValue.getFromJobConfig());
+    assertEquals(toConfig(), withJobValue.getToJobConfig());
     assertEquals(driverConfig(), withJobValue.getDriverConfig());
-    assertEquals(100, withJobValue.getJobConfig(Direction.FROM)
+    assertEquals(100, withJobValue.getFromJobConfig()
         .getConfig("CONFIGFROMNAME").getInput("INTEGER-INPUT").getValue());
-    assertEquals("TEST-VALUE", withJobValue.getJobConfig(Direction.FROM)
+    assertEquals("TEST-VALUE", withJobValue.getFromJobConfig()
         .getConfig("CONFIGFROMNAME").getInput("STRING-INPUT").getValue());  }
 
   private MJob job() {

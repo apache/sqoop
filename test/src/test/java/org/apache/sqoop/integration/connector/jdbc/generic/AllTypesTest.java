@@ -85,7 +85,7 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
 
     // Fill rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    MConfigList fromConfig = job.getFromJobConfig();
     fromConfig.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("value"));
 
     // Fill the hdfs "TO" config

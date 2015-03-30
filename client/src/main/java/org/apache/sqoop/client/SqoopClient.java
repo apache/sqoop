@@ -685,10 +685,10 @@ public class SqoopClient {
     ConfigValidationResult driver = bean.getValidationResults()[2];
 
     ConfigUtils.applyValidation(
-        job.getJobConfig(Direction.FROM).getConfigs(),
+        job.getFromJobConfig().getConfigs(),
         fromConfig);
     ConfigUtils.applyValidation(
-        job.getJobConfig(Direction.TO).getConfigs(),
+        job.getToJobConfig().getConfigs(),
         toConfig);
     ConfigUtils.applyValidation(
       job.getDriverConfig().getConfigs(),

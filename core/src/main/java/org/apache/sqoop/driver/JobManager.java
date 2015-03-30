@@ -303,8 +303,8 @@ public class JobManager implements Reconfigurable {
     MJob job = getJob(jobId);
 
     // get from/to connections for the job
-    MLink fromConnection = getLink(job.getLinkId(Direction.FROM));
-    MLink toConnection = getLink(job.getLinkId(Direction.TO));
+    MLink fromConnection = getLink(job.getFromLinkId());
+    MLink toConnection = getLink(job.getToLinkId());
 
     // get from/to connectors for the connection
     SqoopConnector fromConnector = getSqoopConnector(fromConnection.getConnectorId());
@@ -322,11 +322,11 @@ public class JobManager implements Reconfigurable {
 
     // from config for the job
     Object fromJob = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
-    ConfigUtils.fromConfigs(job.getJobConfig(Direction.FROM).getConfigs(), fromJob);
+    ConfigUtils.fromConfigs(job.getFromJobConfig().getConfigs(), fromJob);
 
     // to config for the job
     Object toJob = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
-    ConfigUtils.fromConfigs(job.getJobConfig(Direction.TO).getConfigs(), toJob);
+    ConfigUtils.fromConfigs(job.getToJobConfig().getConfigs(), toJob);
 
     // the only driver config for the job
     Object driverConfig = ClassUtils

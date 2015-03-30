@@ -664,8 +664,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     try {
       stmt = conn.prepareStatement(crudQueries.getStmtInsertJob(), Statement.RETURN_GENERATED_KEYS);
       stmt.setString(1, job.getName());
-      stmt.setLong(2, job.getLinkId(Direction.FROM));
-      stmt.setLong(3, job.getLinkId(Direction.TO));
+      stmt.setLong(2, job.getFromLinkId());
+      stmt.setLong(3, job.getToLinkId());
       stmt.setBoolean(4, job.getEnabled());
       stmt.setString(5, job.getCreationUser());
       stmt.setTimestamp(6, new Timestamp(job.getCreationDate().getTime()));
@@ -689,12 +689,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       // from config for the job
       createInputValues(crudQueries.getStmtInsertJobInput(),
           jobId,
-          job.getJobConfig(Direction.FROM).getConfigs(),
+          job.getFromJobConfig().getConfigs(),
           conn);
       // to config for the job
       createInputValues(crudQueries.getStmtInsertJobInput(),
           jobId,
-          job.getJobConfig(Direction.TO).getConfigs(),
+          job.getToJobConfig().getConfigs(),
           conn);
       // driver config per job
       createInputValues(crudQueries.getStmtInsertJobInput(),
@@ -737,11 +737,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       // And reinsert new values
       createInputValues(crudQueries.getStmtInsertJobInput(),
           job.getPersistenceId(),
-          job.getJobConfig(Direction.FROM).getConfigs(),
+          job.getFromJobConfig().getConfigs(),
           conn);
       createInputValues(crudQueries.getStmtInsertJobInput(),
           job.getPersistenceId(),
-          job.getJobConfig(Direction.TO).getConfigs(),
+          job.getToJobConfig().getConfigs(),
           conn);
       createInputValues(crudQueries.getStmtInsertJobInput(),
           job.getPersistenceId(),

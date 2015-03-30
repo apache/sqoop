@@ -71,8 +71,8 @@ public final class ConfigFiller {
 
     job.setName(line.getOptionValue("name"));
     return fillJobConfig(line,
-                     job.getJobConfig(Direction.FROM).getConfigs(),
-                     job.getJobConfig(Direction.TO).getConfigs(),
+                     job.getFromJobConfig().getConfigs(),
+                     job.getToJobConfig().getConfigs(),
                      job.getDriverConfig().getConfigs());
   }
 
@@ -404,9 +404,9 @@ public final class ConfigFiller {
     job.setName(getName(reader, job.getName()));
 
     return fillJobConfigWithBundle(reader,
-                     job.getJobConfig(Direction.FROM).getConfigs(),
+                     job.getFromJobConfig().getConfigs(),
                      fromConfigBundle,
-                     job.getJobConfig(Direction.TO).getConfigs(),
+                     job.getToJobConfig().getConfigs(),
                      toConfigBundle,
                      job.getDriverConfig().getConfigs(),
                      driverConfigBundle);
@@ -954,13 +954,13 @@ public final class ConfigFiller {
 
   // job has the from/to and the driver config
   public static void printJobValidationMessages(MJob job) {
-    for (MConfig config : job.getJobConfig(Direction.FROM).getConfigs()) {
+    for (MConfig config : job.getFromJobConfig().getConfigs()) {
       for (MInput<?> input : config.getInputs()) {
         printValidationMessage(input, true);
       }
     }
 
-    for (MConfig config : job.getJobConfig(Direction.TO).getConfigs()) {
+    for (MConfig config : job.getToJobConfig().getConfigs()) {
       for (MInput<?> input : config.getInputs()) {
         printValidationMessage(input, true);
       }

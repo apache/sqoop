@@ -316,10 +316,10 @@ public class RepositoryLoadTool extends ConfiguredTool {
     // Transform config structures to objects for validations
     SqoopConnector fromConnector =
         ConnectorManager.getInstance().getSqoopConnector(
-            job.getConnectorId(Direction.FROM));
+            job.getFromConnectorId());
     SqoopConnector toConnector =
         ConnectorManager.getInstance().getSqoopConnector(
-            job.getConnectorId(Direction.TO));
+            job.getToConnectorId());
 
     Object fromConnectorConfig = ClassUtils.instantiate(
         fromConnector.getJobConfigurationClass(Direction.FROM));

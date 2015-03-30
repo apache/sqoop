@@ -131,11 +131,11 @@ public class JobBean implements JsonBean {
     object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
     // job link associated connectors
     // TODO(SQOOP-1634): fix not to require the connectorIds in the post data
-    object.put(FROM_CONNECTOR_ID, job.getConnectorId(Direction.FROM));
-    object.put(TO_CONNECTOR_ID, job.getConnectorId(Direction.TO));
+    object.put(FROM_CONNECTOR_ID, job.getFromConnectorId());
+    object.put(TO_CONNECTOR_ID, job.getToConnectorId());
     // job associated links
-    object.put(FROM_LINK_ID, job.getLinkId(Direction.FROM));
-    object.put(TO_LINK_ID, job.getLinkId(Direction.TO));
+    object.put(FROM_LINK_ID, job.getFromLinkId());
+    object.put(TO_LINK_ID, job.getToLinkId());
     // job configs
     MFromConfig fromConfigList = job.getFromJobConfig();
     object.put(FROM_CONFIG_VALUES,

@@ -87,9 +87,9 @@ public class ShowJobFunction extends SqoopFunction {
       ids.add(String.valueOf(job.getPersistenceId()));
       names.add(job.getName());
       fromConnectors.add(String.valueOf(
-          job.getConnectorId(Direction.FROM)));
+          job.getFromConnectorId()));
       toConnectors.add(String.valueOf(
-          job.getConnectorId(Direction.TO)));
+          job.getToConnectorId()));
       availabilities.add(String.valueOf(job.getEnabled()));
     }
 
@@ -131,14 +131,14 @@ public class ShowJobFunction extends SqoopFunction {
       formatter.format(job.getLastUpdateDate())
     );
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_LID_CID_INFO,
-        job.getLinkId(Direction.FROM),
-        job.getConnectorId(Direction.FROM));
+        job.getFromLinkId(),
+        job.getFromConnectorId());
 
-    displayConfig(job.getJobConfig(Direction.FROM).getConfigs(),
-                 client.getConnectorConfigBundle(job.getConnectorId(Direction.FROM)));
+    displayConfig(job.getFromJobConfig().getConfigs(),
+                 client.getConnectorConfigBundle(job.getFromConnectorId()));
     displayConfig(job.getDriverConfig().getConfigs(),
                  client.getDriverConfigBundle());
-    displayConfig(job.getJobConfig(Direction.TO).getConfigs(),
-                 client.getConnectorConfigBundle(job.getConnectorId(Direction.TO)));
+    displayConfig(job.getToJobConfig().getConfigs(),
+                 client.getConnectorConfigBundle(job.getToConnectorId()));
   }
 }

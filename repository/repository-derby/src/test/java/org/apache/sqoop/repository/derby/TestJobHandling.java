@@ -82,14 +82,14 @@ public class TestJobHandling extends DerbyTestCase {
 
     List<MConfig> configs;
 
-    configs = firstJob.getJobConfig(Direction.FROM).getConfigs();
+    configs = firstJob.getFromJobConfig().getConfigs();
     assertEquals(2, configs.size());
     assertEquals("Value5", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
     assertEquals("Value5", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(1).getInputs().get(1).getValue());
 
-    configs = firstJob.getJobConfig(Direction.TO).getConfigs();
+    configs = firstJob.getToJobConfig().getConfigs();
     assertEquals(2, configs.size());
     assertEquals("Value9", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
@@ -198,10 +198,10 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals(1, retrieved.getPersistenceId());
 
     List<MConfig> configs;
-    configs = job.getJobConfig(Direction.FROM).getConfigs();
+    configs = job.getFromJobConfig().getConfigs();
     assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
-    configs = job.getJobConfig(Direction.TO).getConfigs();
+    configs = job.getToJobConfig().getConfigs();
     assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
 
@@ -246,7 +246,7 @@ public class TestJobHandling extends DerbyTestCase {
 
     List<MConfig> configs;
 
-    configs = job.getJobConfig(Direction.FROM).getConfigs();
+    configs = job.getFromJobConfig().getConfigs();
     ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
     Map<String, String> newFromMap = new HashMap<String, String>();
     newFromMap.put("1F", "foo");
@@ -254,7 +254,7 @@ public class TestJobHandling extends DerbyTestCase {
 
     ((MMapInput)configs.get(0).getInputs().get(1)).setValue(newFromMap);
 
-    configs = job.getJobConfig(Direction.TO).getConfigs();
+    configs = job.getToJobConfig().getConfigs();
     ((MStringInput)configs.get(0).getInputs().get(0)).setValue("Updated");
     Map<String, String> newToMap = new HashMap<String, String>();
     newToMap.put("1T", "foo");
@@ -279,11 +279,11 @@ public class TestJobHandling extends DerbyTestCase {
     MJob retrieved = handler.findJob(1, derbyConnection);
     assertEquals("name", retrieved.getName());
 
-    configs = job.getJobConfig(Direction.FROM).getConfigs();
+    configs = job.getFromJobConfig().getConfigs();
     assertEquals(2, configs.size());
     assertEquals("Updated", configs.get(0).getInputs().get(0).getValue());
     assertEquals(newFromMap, configs.get(0).getInputs().get(1).getValue());
-    configs = job.getJobConfig(Direction.TO).getConfigs();
+    configs = job.getToJobConfig().getConfigs();
     assertEquals(2, configs.size());
     assertEquals("Updated", configs.get(0).getInputs().get(0).getValue());
     assertEquals(newToMap, configs.get(0).getInputs().get(1).getValue());
@@ -343,7 +343,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
     MJob job = handler.findJob(1, derbyConnection);
 
-    List<MConfig> fromConfigs = job.getJobConfig(Direction.FROM).getConfigs();
+    List<MConfig> fromConfigs = job.getFromJobConfig().getConfigs();
     MConfig fromConfig = fromConfigs.get(0).clone(false);
     MConfig newFromConfig = new MConfig(fromConfig.getName(), fromConfig.getInputs());
 
@@ -358,7 +358,7 @@ public class TestJobHandling extends DerbyTestCase {
     MConfig updatedFromConfig = newFromConfigs.getConfigs().get(0);
     assertEquals("FromJobConfigUpdated", updatedFromConfig.getInputs().get(0).getValue());
 
-    List<MConfig> toConfigs = job.getJobConfig(Direction.TO).getConfigs();
+    List<MConfig> toConfigs = job.getToJobConfig().getConfigs();
     MConfig toConfig = toConfigs.get(0).clone(false);
     MConfig newToConfig = new MConfig(toConfig.getName(), toConfig.getInputs());
 
@@ -382,7 +382,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
     MJob job = handler.findJob(1, derbyConnection);
 
-    List<MConfig> fromConfigs = job.getJobConfig(Direction.FROM).getConfigs();
+    List<MConfig> fromConfigs = job.getFromJobConfig().getConfigs();
     MConfig fromConfig = fromConfigs.get(0).clone(false);
     MConfig newFromConfig = new MConfig(fromConfig.getName(), fromConfig.getInputs());
     HashMap<String, String> newMap = new HashMap<String, String>();

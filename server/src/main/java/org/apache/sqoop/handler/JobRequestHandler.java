@@ -195,14 +195,14 @@ public class JobRequestHandler implements RequestHandler {
 
     // Verify that user is not trying to spoof us
     MFromConfig fromConfig = ConnectorManager.getInstance()
-        .getConnectorConfigurable(postedJob.getConnectorId(Direction.FROM)).getFromConfig();
+        .getConnectorConfigurable(postedJob.getFromConnectorId()).getFromConfig();
     MToConfig toConfig = ConnectorManager.getInstance()
-        .getConnectorConfigurable(postedJob.getConnectorId(Direction.TO)).getToConfig();
+        .getConnectorConfigurable(postedJob.getToConnectorId()).getToConfig();
     MDriverConfig driverConfig = Driver.getInstance().getDriver().getDriverConfig();
 
-    if (!fromConfig.equals(postedJob.getJobConfig(Direction.FROM))
+    if (!fromConfig.equals(postedJob.getFromJobConfig())
         || !driverConfig.equals(postedJob.getDriverConfig())
-        || !toConfig.equals(postedJob.getJobConfig(Direction.TO))) {
+        || !toConfig.equals(postedJob.getToJobConfig())) {
       throw new SqoopException(ServerError.SERVER_0003, "Detected incorrect config structure");
     }
 
@@ -219,9 +219,9 @@ public class JobRequestHandler implements RequestHandler {
 
     // Corresponding connectors for this
     SqoopConnector fromConnector = ConnectorManager.getInstance().getSqoopConnector(
-        postedJob.getConnectorId(Direction.FROM));
+        postedJob.getFromConnectorId());
     SqoopConnector toConnector = ConnectorManager.getInstance().getSqoopConnector(
-        postedJob.getConnectorId(Direction.TO));
+        postedJob.getToConnectorId());
 
     if (!fromConnector.getSupportedDirections().contains(Direction.FROM)) {
       throw new SqoopException(ServerError.SERVER_0004, "Connector "
@@ -235,10 +235,10 @@ public class JobRequestHandler implements RequestHandler {
 
     // Validate user supplied data
     ConfigValidationResult fromConfigValidator = ConfigUtils.validateConfigs(
-        postedJob.getJobConfig(Direction.FROM).getConfigs(),
+        postedJob.getFromJobConfig().getConfigs(),
         fromConnector.getJobConfigurationClass(Direction.FROM));
     ConfigValidationResult toConfigValidator = ConfigUtils.validateConfigs(
-        postedJob.getJobConfig(Direction.TO).getConfigs(),
+        postedJob.getToJobConfig().getConfigs(),
         toConnector.getJobConfigurationClass(Direction.TO));
     ConfigValidationResult driverConfigValidator = ConfigUtils.validateConfigs(postedJob
         .getDriverConfig().getConfigs(), Driver.getInstance().getDriverJobConfigurationClass());
@@ -331,8 +331,8 @@ public class JobRequestHandler implements RequestHandler {
   private void addJob(List<MJob> jobs, Locale locale, JobBean bean) {
     // Add associated resources into the bean
     for (MJob job : jobs) {
-      long fromConnectorId = job.getConnectorId(Direction.FROM);
-      long toConnectorId = job.getConnectorId(Direction.TO);
+      long fromConnectorId = job.getFromConnectorId();
+      long toConnectorId = job.getToConnectorId();
       // replace it only if it does not already exist
       if (!bean.hasConnectorConfigBundle(fromConnectorId)) {
         bean.addConnectorConfigBundle(fromConnectorId, ConnectorManager.getInstance()

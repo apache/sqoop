@@ -97,10 +97,10 @@ public class MJob extends MAccountableEntity implements MClonable {
   public MJob(MJob other, MFromConfig fromConfig, MToConfig toConfig, MDriverConfig driverConfig) {
     super(other);
 
-    this.fromConnectorId = other.getConnectorId(Direction.FROM);
-    this.toConnectorId = other.getConnectorId(Direction.TO);
-    this.fromLinkId = other.getLinkId(Direction.FROM);
-    this.toLinkId = other.getLinkId(Direction.TO);
+    this.fromConnectorId = other.getFromConnectorId();
+    this.toConnectorId = other.getToConnectorId();
+    this.fromLinkId = other.getFromLinkId();
+    this.toLinkId = other.getToLinkId();
     this.fromConfig = fromConfig;
     this.toConfig = toConfig;
     this.driverConfig = driverConfig;
@@ -110,24 +110,11 @@ public class MJob extends MAccountableEntity implements MClonable {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("job");
-    sb.append("From job config: ").append(getJobConfig(Direction.FROM));
-    sb.append(", To job config: ").append(getJobConfig(Direction.TO));
+    sb.append("From job config: ").append(getFromJobConfig());
+    sb.append(", To job config: ").append(getToJobConfig());
     sb.append(", Driver config: ").append(driverConfig);
 
     return sb.toString();
-  }
-
-  public long getLinkId(Direction type) {
-    switch(type) {
-      case FROM:
-        return fromLinkId;
-
-      case TO:
-        return toLinkId;
-
-      default:
-        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
-    }
   }
 
   public long getFromLinkId() {
@@ -138,38 +125,12 @@ public class MJob extends MAccountableEntity implements MClonable {
     return toLinkId;
   }
 
-  public long getConnectorId(Direction type) {
-    switch(type) {
-      case FROM:
-        return fromConnectorId;
-
-      case TO:
-        return toConnectorId;
-
-      default:
-        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
-    }
-  }
-
   public long getFromConnectorId() {
     return fromConnectorId;
   }
 
   public long getToConnectorId() {
     return toConnectorId;
-  }
-
-  public MConfigList getJobConfig(Direction type) {
-    switch(type) {
-      case FROM:
-        return fromConfig;
-
-      case TO:
-        return toConfig;
-
-      default:
-        throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
-    }
   }
 
   public MFromConfig getFromJobConfig() {
@@ -190,10 +151,10 @@ public class MJob extends MAccountableEntity implements MClonable {
       return new MJob(this);
     } else {
       return new MJob(
-          getConnectorId(Direction.FROM),
-          getConnectorId(Direction.TO),
-          getLinkId(Direction.FROM),
-          getLinkId(Direction.TO),
+          getFromConnectorId(),
+          getToConnectorId(),
+          getFromLinkId(),
+          getToLinkId(),
           getFromJobConfig().clone(false),
           getToJobConfig().clone(false),
           getDriverConfig().clone(false));
@@ -211,13 +172,13 @@ public class MJob extends MAccountableEntity implements MClonable {
     }
 
     MJob job = (MJob)object;
-    return (job.getConnectorId(Direction.FROM) == this.getConnectorId(Direction.FROM))
-        && (job.getConnectorId(Direction.TO) == this.getConnectorId(Direction.TO))
-        && (job.getLinkId(Direction.FROM) == this.getLinkId(Direction.FROM))
-        && (job.getLinkId(Direction.TO) == this.getLinkId(Direction.TO))
+    return (job.getFromConnectorId() == this.getFromConnectorId())
+        && (job.getToConnectorId() == this.getToConnectorId())
+        && (job.getFromLinkId() == this.getFromLinkId())
+        && (job.getToLinkId() == this.getToLinkId())
         && (job.getPersistenceId() == this.getPersistenceId())
-        && (job.getFromJobConfig().equals(this.getJobConfig(Direction.FROM)))
-        && (job.getToJobConfig().equals(this.getJobConfig(Direction.TO)))
+        && (job.getFromJobConfig().equals(this.getFromJobConfig()))
+        && (job.getToJobConfig().equals(this.getToJobConfig()))
         && (job.getDriverConfig().equals(this.driverConfig));
   }
 }

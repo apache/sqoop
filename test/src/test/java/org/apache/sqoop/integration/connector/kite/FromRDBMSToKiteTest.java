@@ -71,11 +71,11 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
     // TODO: Kite have troubles with some data types, so we're limiting the columns to int only
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    MConfigList fromConfig = job.getFromJobConfig();
     fromConfig.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
 
     // Fill the Kite "TO" config
-    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    MConfigList toConfig = job.getToJobConfig();
     toConfig.getStringInput("toJobConfig.uri").setValue("dataset:hdfs:" + getMapreduceDirectory());
     toConfig.getEnumInput("toJobConfig.fileFormat").setValue(FileFormat.CSV);
 

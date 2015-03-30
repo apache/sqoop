@@ -70,11 +70,11 @@ public final class MConnector extends Configurable {
     sb.append(uniqueName).append(":").append(getPersistenceId()).append(":");
     sb.append(className);
     sb.append(", ").append(getLinkConfig().toString());
-    if (getConfig(Direction.FROM) != null) {
-      sb.append(", ").append(getConfig(Direction.FROM).toString());
+    if (getFromConfig() != null) {
+      sb.append(", ").append(getFromConfig().toString());
     }
-    if (getConfig(Direction.TO) != null) {
-      sb.append(", ").append(getConfig(Direction.TO).toString());
+    if (getToConfig() != null) {
+      sb.append(", ").append(getToConfig().toString());
     }
     return sb.toString();
   }
@@ -160,19 +160,6 @@ public final class MConnector extends Configurable {
     return linkConfig;
   }
 
-  public MConfigList getConfig(Direction type) {
-    switch (type) {
-    case FROM:
-      return fromConfig;
-
-    case TO:
-      return toConfig;
-
-    default:
-      throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
-    }
-  }
-
   public MFromConfig getFromConfig() {
     return fromConfig;
   }
@@ -190,7 +177,7 @@ public final class MConnector extends Configurable {
   }
 
   public SupportedDirections getSupportedDirections() {
-    return new SupportedDirections(this.getConfig(Direction.FROM) != null,
-        this.getConfig(Direction.TO) != null);
+    return new SupportedDirections(this.getFromConfig() != null,
+        this.getToConfig() != null);
   }
 }

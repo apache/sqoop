@@ -60,7 +60,7 @@ public class KafkaConnectorTestCase extends ConnectorTestCase {
   }
 
   protected void fillKafkaToConfig(MJob job){
-    MConfigList toConfig = job.getJobConfig(Direction.TO);
+    MConfigList toConfig = job.getToJobConfig();
     toConfig.getStringInput("toJobConfig.topic").setValue(TOPIC);
     List<String> topics = new ArrayList<String>(1);
     topics.add(TOPIC);

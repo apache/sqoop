@@ -65,9 +65,9 @@ public class UpdateJobFunction extends SqoopFunction {
     MJob job = client.getJob(jobId);
 
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
-        job.getConnectorId(Direction.FROM));
+        job.getFromConnectorId());
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
-        job.getConnectorId(Direction.TO));
+        job.getToConnectorId());
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;

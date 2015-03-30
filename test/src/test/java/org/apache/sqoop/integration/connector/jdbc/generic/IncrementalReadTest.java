@@ -79,7 +79,7 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
 
     // Set the rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    MConfigList fromConfig = job.getFromJobConfig();
     fromConfig.getStringInput("incrementalRead.checkColumn").setValue(provider.escapeColumnName(checkColumn));
     fromConfig.getStringInput("incrementalRead.lastValue").setValue(lastValue);
 
@@ -130,7 +130,7 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     String query = "SELECT * FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}";
 
     // Set the rdbms "FROM" config
-    MConfigList fromConfig = job.getJobConfig(Direction.FROM);
+    MConfigList fromConfig = job.getFromJobConfig();
     fromConfig.getStringInput("fromJobConfig.sql").setValue(query);
     fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
     fromConfig.getStringInput("incrementalRead.checkColumn").setValue(provider.escapeColumnName(checkColumn));

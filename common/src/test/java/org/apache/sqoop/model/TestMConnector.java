@@ -113,11 +113,11 @@ public class TestMConnector {
     assertNull(clonedLinkConfig.getInputs().get(0).getValue());
     assertNull(clonedLinkConfig.getInputs().get(1).getValue());
 
-    MConfig clonedFromConfig = cloneConnector1.getConfig(Direction.FROM).getConfigs().get(0);
+    MConfig clonedFromConfig = cloneConnector1.getFromConfig().getConfigs().get(0);
     assertNull(clonedFromConfig.getInputs().get(0).getValue());
     assertNull(clonedFromConfig.getInputs().get(1).getValue());
 
-    MConfig clonedToConfig = cloneConnector1.getConfig(Direction.TO).getConfigs().get(0);
+    MConfig clonedToConfig = cloneConnector1.getToConfig().getConfigs().get(0);
     assertNull(clonedToConfig.getInputs().get(0).getValue());
     assertNull(clonedToConfig.getInputs().get(1).getValue());
 
@@ -126,10 +126,10 @@ public class TestMConnector {
     clonedLinkConfig = clonedConnector2.getLinkConfig().getConfigs().get(0);
     assertNull(clonedLinkConfig.getInputs().get(0).getValue());
     assertNull(clonedLinkConfig.getInputs().get(1).getValue());
-    clonedFromConfig = clonedConnector2.getConfig(Direction.FROM).getConfigs().get(0);
+    clonedFromConfig = clonedConnector2.getFromConfig().getConfigs().get(0);
     assertNull(clonedFromConfig.getInputs().get(0).getValue());
     assertNull(clonedFromConfig.getInputs().get(1).getValue());
-    clonedToConfig = clonedConnector2.getConfig(Direction.TO).getConfigs().get(0);
+    clonedToConfig = clonedConnector2.getToConfig().getConfigs().get(0);
     assertNull(clonedToConfig.getInputs().get(0).getValue());
     assertNull(clonedToConfig.getInputs().get(1).getValue());
   }
