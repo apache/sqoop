@@ -1440,3 +1440,162 @@ Provide the name of the job in the url [jname] part.
       }
     ]
   }
+
+/v1/authorization/roles/create - [POST] - Create Role
+-----------------------------------------------------
+
+Create a new role object. Provide values to the link config inputs for the ones that are required.
+
+* Method: ``POST``
+* Format: ``JSON``
+* Fields of Request:
+
++--------------------------+--------------------------------------------------------------------------------------+
+|   Field                  | Description                                                                          |
++==========================+======================================================================================+
+| ``role``                 | The root of the post data in JSON                                                    |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``name``                 | The name of this role                                                                |
++--------------------------+--------------------------------------------------------------------------------------+
+
+* Request Example:
+
+::
+
+  {
+    role: {
+        name: "testRole",
+    }
+  }
+
+/v1/authorization/role/[role-name]  - [DELETE] - Delete Role
+------------------------------------------------------------
+
+Delete a role with name [role-name]
+
+* Method: ``DELETE``
+* Format: ``JSON``
+* Request Content: ``None``
+* Response Content: ``None``
+
+/v1/authorization/roles?principal_type=[principal-type]&principal_name=[principal-name] - [GET]  Get all Roles by Principal
+---------------------------------------------------------------------------------------------------------------------------
+
+Get all the roles or for a given principal identified by ``[principal-type]`` and ``[principal-name]`` part.
+
+/v1/authorization/principals?role_name=[rname] - [GET]  Get all Principals by Role
+----------------------------------------------------------------------------------
+
+Get all the principals for a given role identified by ``[rname]`` part.
+
+/v1/authorization/roles/grant - [PUT] - Grant a Role to a Principal
+-------------------------------------------------------------------
+
+Grant a role with ``[role-name]`` to a principal with ``[principal-type]`` and ``[principal-name]``.
+
+* Method: ``PUT``
+* Format: ``JSON``
+* Fields of Request:
+
+The same as Create Role and
+
++--------------------------+--------------------------------------------------------------------------------------+
+|   Field                  | Description                                                                          |
++==========================+======================================================================================+
+| ``principals``           | The root of the post data in JSON                                                    |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``name``                 | The name of this principal                                                           |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``type``                 | The type of this principal, ("USER", "GROUP", "ROLE")                                |
++--------------------------+--------------------------------------------------------------------------------------+
+
+* Request Example:
+
+::
+
+  {
+    roles: [{
+        name: "testRole",
+    }],
+    principals: [{
+        name: "testPrincipalName",
+        type: "USER",
+    }]
+  }
+
+* Response Content: ``None``
+
+/v1/authorization/roles/revoke - [PUT] - Revoke a Role from a Principal
+-----------------------------------------------------------------------
+
+Revoke a role with ``[role-name]`` to a principal with ``[principal-type]`` and ``[principal-name]``.
+
+* Method: ``PUT``
+* Format: ``JSON``
+* Fields of Request:
+
+The same as Grant Role
+
+* Response Content: ``None``
+
+/v1/authorization/privileges/grant - [PUT] - Grant a Privilege to a Principal
+-----------------------------------------------------------------------------
+
+Grant a privilege with ``[resource-name]``, ``[resource-type]``, ``[action]`` and ``[with-grant-option]`` to a principal with``[principal-type]`` and ``[principal-name]``.
+
+* Method: ``PUT``
+* Format: ``JSON``
+* Fields of Request:
+
+The same as Principal and
+
++--------------------------+--------------------------------------------------------------------------------------+
+|   Field                  | Description                                                                          |
++==========================+======================================================================================+
+| ``privileges``           | The root of the post data in JSON                                                    |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``resource-name``        | The resource name of this privilege                                                  |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``resource-type``        | The resource type of this privilege, ("CONNECTOR", "LINK", "JOB")                    |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``action``               | The action type of this privilege, ("READ", "WRITE", "ALL")                          |
++--------------------------+--------------------------------------------------------------------------------------+
+| ``with-grant-option``    | The resource type of this privilege                                                  |
++--------------------------+--------------------------------------------------------------------------------------+
+
+* Request Example:
+
+::
+
+  {
+    privileges: [{
+        resource-name: "testResourceName",
+        resource-type: "LINK",
+        action: "READ",
+        with-grant-option: false,
+    }]
+    principals: [{
+        name: "testPrincipalName",
+        type: "USER",
+    }]
+  }
+
+* Response Content: ``None``
+
+/v1/authorization/privileges/revoke - [PUT] - Revoke a Privilege to a Principal
+-------------------------------------------------------------------------------
+
+Revoke a privilege with ``[resource-name]``, ``[resource-type]``, ``[action]`` and ``[with-grant-option]`` to a principal with``[principal-type]`` and ``[principal-name]``.
+
+* Method: ``PUT``
+* Format: ``JSON``
+* Fields of Request:
+
+The same as Grant Privilege
+
+* Response Content: ``None``
+
+/v1/authorization/privilieges?principal_type=[principal-type]&principal_name=[principal-name]&resource_type=[resource-type]&resource_name=[resource-name] - [GET]  Get all Roles by Principal (and Resource)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Get all the privileges or for a given principal identified by ``[principal-type]`` and ``[principal-name]`` (and a given resource identified by ``[resource-type]`` and ``[resource-name]``).
