@@ -15,46 +15,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.server;
+package org.apache.sqoop.server.v1;
 
 import org.apache.sqoop.handler.AuthorizationRequestHandler;
 import org.apache.sqoop.json.JsonBean;
+import org.apache.sqoop.server.RequestContext;
+import org.apache.sqoop.server.RequestHandler;
+import org.apache.sqoop.server.SqoopProtocolServlet;
 
 /**
  * Provides operations for authorization
  *
- * POST /authorization/roles/create
+ * POST v1/authorization/roles/create
  * Create new role with {name}
  *
- * DELETE /authorization/role/{role-name}
+ * DELETE v1/authorization/role/{role-name}
  *
- * GET /authorization/roles
+ * GET v1/authorization/roles
  * Show all roles
  *
- * GET /authorization/principals?role_name={name}
+ * GET v1/authorization/principals?role_name={name}
  * Show all principals in role with {name}
  *
- * GET /authorization/roles?principal_type={type}&principal_name={name}
+ * GET v1/authorization/roles?principal_type={type}&principal_name={name}
  * Show all roles in principal with {name, type}
  *
- * PUT /authorization/roles/grant
+ * PUT v1/authorization/roles/grant
  * Grant a role to a user/group/role
  * PUT data of JsonObject role(name) and principal (name, type)
  *
- * PUT /authorization/roles/revoke
+ * PUT v1/authorization/roles/revoke
  * Revoke a role to a user/group/role
  * PUT data of JsonObject role(name) and principal (name, type)
  *
- * PUT /authorization/privileges/grant
+ * PUT v1/authorization/privileges/grant
  * Grant a privilege to a principal
  * PUT data of JsonObject principal(name, type) and privilege (resource-name, resource-type, action, with-grant-option)
  *
- * PUT /authorization/privileges/revoke
+ * PUT v1/authorization/privileges/revoke
  * Revoke a privilege to a principal
  * PUT data of JsonObject principal(name, type) and privilege (resource-name, resource-type, action, with-grant-option)
  * If privilege is null, then revoke all privileges for principal(name, type)
  *
- * GET /authorization/privileges?principal_type={type}&principal_name={name}&resource_type={type}&resource_name={name}
+ * GET v1/authorization/privileges?principal_type={type}&principal_name={name}&resource_type={type}&resource_name={name}
  * Show all privileges in principal with {name, type} and resource with {resource-name, resource-type}
  * If resource is null, then show all privileges in principal with {name, type}
  */

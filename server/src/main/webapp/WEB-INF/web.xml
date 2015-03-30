@@ -161,7 +161,7 @@ limitations under the License.
   <!-- Authorization servlet -->
   <servlet>
     <servlet-name>authorization.AuthorizationServlet</servlet-name>
-    <servlet-class>org.apache.sqoop.server.AuthorizationServlet</servlet-class>
+    <servlet-class>org.apache.sqoop.server.v1.AuthorizationServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
 
