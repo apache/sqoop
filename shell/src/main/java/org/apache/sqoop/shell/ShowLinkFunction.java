@@ -57,8 +57,8 @@ public class ShowLinkFunction extends SqoopFunction {
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_ALL)) {
       showLinks();
-    } else if (line.hasOption(Constants.OPT_FROM)) {
-      showLink(getLong(line, Constants.OPT_FROM));
+    } else if (line.hasOption(Constants.OPT_LID)) {
+      showLink(getLong(line, Constants.OPT_LID));
     } else {
       showSummary();
     }
