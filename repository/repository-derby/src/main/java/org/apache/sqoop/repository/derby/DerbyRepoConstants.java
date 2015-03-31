@@ -43,8 +43,9 @@ public final class DerbyRepoConstants {
    * 4 - Version 1.99.4
    *     Changed to FROM/TO design.
    * 5 - Version 1.99.5
+   * 6 - Version 1.99.6
    */
-  public static final int LATEST_DERBY_REPOSITORY_VERSION = 5;
+  public static final int LATEST_DERBY_REPOSITORY_VERSION = 6;
 
   private DerbyRepoConstants() {
     // Disable explicit object creation

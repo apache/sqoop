@@ -325,6 +325,10 @@ public final class DerbySchemaUpgradeQuery {
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQ_LNKI_SQ_LNK_NAME) + " "
       + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + ") " + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " ("
       + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + ")";
+  public static final String QUERY_UPGRADE_ADD_TABLE_SQ_LINK_INPUT_CONSTRAINT_2 = "ALTER TABLE "
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " ADD CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQ_LNKI_SQI_NAME) + " "
+      + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + ") " + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ")";
 
   // table rename for FORM-> CONFIG
   public static final String QUERY_UPGRADE_DROP_TABLE_SQ_FORM_CONSTRAINT = "ALTER TABLE "

@@ -299,7 +299,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
         derbyUpgradeGenericJdbcConnectorConfigAndInputNames.execute();
       }
     }
-
+    // 1.99.5 release changes
     if (repositoryVersion < 5) {
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIG_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIGURABLE_ID, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_UNIQUE_CONSTRAINT_NAME_TYPE_AND_CONFIG_ID, conn);
@@ -310,6 +310,10 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       runQuery(QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_COLUMN_SQI_EDITABLE, conn);
       // create a new table for SQ_INPUT relationships
       runQuery(QUERY_CREATE_TABLE_SQ_INPUT_RELATION, conn);
+    }
+    // 1.99.6 release changes
+    if (repositoryVersion < 6) {
+      runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_LINK_INPUT_CONSTRAINT_2, conn);
     }
 
     // last step upgrade the repository version to the latest value in the code

@@ -1638,7 +1638,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
         connectorConfigFetchStatement.setLong(1, connectorId);
         connectorConfigInputStatement.setLong(1, id);
-        connectorConfigInputStatement.setLong(3, id);
 
         List<MConfig> connectorLinkConfig = new ArrayList<MConfig>();
         List<MConfig> fromConfig = new ArrayList<MConfig>();
@@ -1704,7 +1703,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         driverConfigfetchStmt.setLong(1, driverId);
 
         jobInputFetchStmt.setLong(1, id);
-        jobInputFetchStmt.setLong(3, id);
 
         // FROM entity configs
         List<MConfig> fromConnectorLinkConfig = new ArrayList<MConfig>();

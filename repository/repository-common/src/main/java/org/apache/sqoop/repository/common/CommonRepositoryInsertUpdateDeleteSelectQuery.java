@@ -213,7 +213,6 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID)
           + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " = ?"
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = ?"
-          + " AND (" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " = ?" + " OR " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " IS NULL)"
           + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX);
 
   /**
@@ -237,7 +236,6 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID)
           + " AND  " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " = ?"
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = ?"
-          + " AND (" + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " = ? OR " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " IS NULL)"
           + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX);
 
   /**

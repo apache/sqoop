@@ -220,6 +220,8 @@ abstract public class DerbyTestCase {
       // SQOOP-1804
       runQuery(QUERY_UPGRADE_TABLE_SQ_INPUT_ADD_COLUMN_SQI_EDITABLE);
       runQuery(QUERY_CREATE_TABLE_SQ_INPUT_RELATION);
+      runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_LINK_INPUT_CONSTRAINT_2);
+
     }
 
     // deprecated repository version
@@ -523,7 +525,7 @@ abstract public class DerbyTestCase {
     // Connector job (TO) config: 8-11
     // Driver JOB config: 12-15
     for (int i = 0; i < 4; i++) {
-      // First config
+      // First config inputs with config ids 1,3, 5, 7
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
           + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30, 'USER_ONLY')");
@@ -531,7 +533,7 @@ abstract public class DerbyTestCase {
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
           + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
 
-      // Second config
+      // Second config inputs with config ids 2, 4,,6 8
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
           + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30, 'USER_ONLY')");
@@ -556,6 +558,7 @@ abstract public class DerbyTestCase {
 
     case 4:
     case 5:
+    case 6:
       loadConnectorAndDriverConfigVersion4();
       break;
 
@@ -583,7 +586,7 @@ abstract public class DerbyTestCase {
       runQuery("INSERT INTO SQOOP.SQ_CONNECTION(SQN_NAME, SQN_CONNECTOR) " + "VALUES('CB', 1)");
 
       for (String ci : new String[] { "1", "2" }) {
-        for (String i : new String[] { "1", "3", "13", "15" }) {
+        for (String i : new String[] { "1", "3", "15" }) {
           runQuery("INSERT INTO SQOOP.SQ_CONNECTION_INPUT"
               + "(SQNI_CONNECTION, SQNI_INPUT, SQNI_VALUE) " + "VALUES(" + ci + ", " + i
               + ", 'Value" + i + "')");
@@ -593,7 +596,9 @@ abstract public class DerbyTestCase {
 
     case 4:
     case 5:
+    case 6:
       // Insert two links - CA and CB
+      // Connector 1 has one link config
       runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) " + "VALUES('CA', 1)");
       runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) " + "VALUES('CB', 1)");
 
@@ -652,6 +657,7 @@ abstract public class DerbyTestCase {
 
     case 4:
     case 5:
+    case 6:
       for (String name : new String[] { "JA", "JB", "JC", "JD" }) {
         runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_FROM_LINK, SQB_TO_LINK)" + " VALUES('"
             + name + index + "', 1, 1)");
