@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.integration.connector.hive;
 
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.test.asserts.ProviderAsserts;
 import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.connector.common.FileFormat;
@@ -26,7 +25,6 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.HiveConnectorTestCase;
-import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -67,10 +65,8 @@ public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase {
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), kiteLink.getPersistenceId());
 
     // Set rdbms "FROM" config
-    MConfigList fromConfig = job.getFromJobConfig();
     fillRdbmsFromConfig(job, "id");
-    // TODO: Kite have troubles with some data types, so we're limiting the columns to int only
-    fromConfig.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
+    job.getFromJobConfig().getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
 
     // Fill the Kite "TO" config
     MConfigList toConfig = job.getToJobConfig();
@@ -82,7 +78,6 @@ public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase {
     driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(1);
 
     saveJob(job);
-
     executeJob(job);
 
     // Assert correct output

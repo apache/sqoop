@@ -25,6 +25,7 @@ import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
 import org.apache.sqoop.schema.type.FixedPoint;
+import org.apache.sqoop.schema.type.FloatingPoint;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.kitesdk.data.Format;
@@ -142,7 +143,14 @@ public class KiteDataTypeUtil {
         }
       }
       case FLOATING_POINT:
-        return Schema.Type.DOUBLE;
+        FloatingPoint fp = (FloatingPoint)column;
+        if(fp.getByteSize() <= 4L) {
+          return Schema.Type.FLOAT;
+        } else if(fp.getByteSize() <= 8L) {
+          return Schema.Type.DOUBLE;
+        } else {
+          throw new IllegalArgumentException("Unsupported size of FloatingPoint column " + fp.getByteSize());
+        }
       case MAP:
         return Schema.Type.MAP;
       case TEXT:

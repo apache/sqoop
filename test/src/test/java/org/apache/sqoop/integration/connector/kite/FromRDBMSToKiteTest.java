@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.integration.connector.kite;
 
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MDriverConfig;
@@ -70,9 +69,7 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
-    // TODO: Kite have troubles with some data types, so we're limiting the columns to int only
-    MConfigList fromConfig = job.getFromJobConfig();
-    fromConfig.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
+    job.getFromJobConfig().getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
 
     // Fill the Kite "TO" config
     MConfigList toConfig = job.getToJobConfig();
@@ -84,15 +81,14 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
     driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(1);
 
     saveJob(job);
-
     executeJob(job);
 
     // Assert correct output
     assertTo(
-      "\"1\"",
-      "\"2\"",
-      "\"3\"",
-      "\"4\""
+        "\"1\"",
+        "\"2\"",
+        "\"3\"",
+        "\"4\""
     );
   }
 }
