@@ -158,12 +158,11 @@ public class TestSqoopIDFUtils {
     assertTrue(Integer.valueOf(encodedText) instanceof Integer);
   }
 
-  @Test(expectedExceptions = Exception.class)
+  @Test
   public void testToCSVFixedPointWithLongSignedAsInteger() {
     Column col = new FixedPoint("ft", 4L, true);
     Long test = 459999999444L;
     String encodedText = toCSVFixedPoint(test, col);
-    // should be a long
     assertTrue(Integer.valueOf(encodedText) instanceof Integer);
   }
 
@@ -191,6 +190,36 @@ public class TestSqoopIDFUtils {
     long test = 100000000900000L;
     String encodedText = toCSVFixedPoint(test, col);
     assertTrue(Long.valueOf(encodedText) instanceof Long);
+  }
+
+  @Test
+  public void testToCSVFixedPointWithLongAsInt() {
+    Column col = new FixedPoint("ft", 2L, false);
+    // java does not have a concept of unsigned int, so it has to be a long for
+    // testing
+    String encodedText = toCSVFixedPoint(new Long(Integer.MAX_VALUE), col);
+    assertEquals("2147483647", encodedText);
+  }
+
+  @Test
+  public void testToCSVFixedPointWithIntAsLong() {
+    Column col = new FixedPoint("ft", 4L, false);
+    // java does not have a concept of unsigned int, so it has to be a long for
+    // testing
+    String encodedText = toCSVFixedPoint(Integer.MAX_VALUE, col);
+    assertEquals("2147483647", encodedText);
+  }
+
+  @Test(expectedExceptions = NumberFormatException.class)
+  public void testToCSVFixedPointWithBadNumberAsLong() {
+    Column col = new FixedPoint("ft", 4L, false);
+    toCSVFixedPoint("lame", col);
+  }
+
+  @Test(expectedExceptions = NumberFormatException.class)
+  public void testToCSVFixedPointWithBadNumberAsInteger() {
+    Column col = new FixedPoint("ft", 2L, false);
+    toCSVFixedPoint("lame", col);
   }
 
   @Test
