@@ -26,6 +26,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.error.code.CoreError;
@@ -33,6 +35,8 @@ import org.apache.sqoop.error.code.CoreError;
 /**
  * Configuration manager that loads Sqoop configuration.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public class SqoopConfiguration implements Reconfigurable {
 
   /**

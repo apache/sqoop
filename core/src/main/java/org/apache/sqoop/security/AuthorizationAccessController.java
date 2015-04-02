@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.security;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MPrincipal;
 import org.apache.sqoop.model.MPrivilege;
@@ -28,6 +30,8 @@ import java.util.List;
 /**
  * AuthorizationAccessController is responsible for managing access rule and principal.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class AuthorizationAccessController {
 
   /**

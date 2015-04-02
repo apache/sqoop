@@ -18,10 +18,15 @@
 
 package org.apache.sqoop.security;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * AuthenticationProvider is an abstract class for authentication. The
  * implementation should return userNames and groupNames.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class AuthenticationProvider {
 
   public abstract String getUserName();

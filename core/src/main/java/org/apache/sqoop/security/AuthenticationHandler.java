@@ -18,12 +18,16 @@
 package org.apache.sqoop.security;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 
 /***
  * AuthenticationHandler is responsible for secure checking.
  * KerberosAuthenticationHandler and SimpleAuthenticationHandler have
  * implemented this abstract class.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class AuthenticationHandler {
 
   private static final Logger LOG = Logger.getLogger(AuthenticationHandler.class);

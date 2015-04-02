@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.security;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MPrincipal;
 import org.apache.sqoop.model.MPrivilege;
@@ -28,6 +30,8 @@ import java.util.List;
 /**
  * AuthorizationHandler is responsible for controlling role based access.
  */
+@InterfaceAudience.Public
+@InterfaceStability.Unstable
 public abstract class AuthorizationHandler {
 
   public abstract void doInitialize(AuthenticationProvider provider, String serverName) throws ClassNotFoundException, IllegalAccessException, InstantiationException;
