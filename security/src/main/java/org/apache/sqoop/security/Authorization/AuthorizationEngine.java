@@ -181,12 +181,13 @@ public class AuthorizationEngine {
         if (!user_name.equals(link.getCreationUser())) {
           privilegesNeedCheck.add(privilege);
         }
-      }
-      if (MResource.TYPE.JOB.name().equalsIgnoreCase(privilege.getResource().getType())) {
+      } else if (MResource.TYPE.JOB.name().equalsIgnoreCase(privilege.getResource().getType())) {
         MJob job = repository.findJob(Long.valueOf(privilege.getResource().getName()));
         if (!user_name.equals(job.getCreationUser())) {
           privilegesNeedCheck.add(privilege);
         }
+      } else {
+        privilegesNeedCheck.add(privilege);
       }
     }
 
