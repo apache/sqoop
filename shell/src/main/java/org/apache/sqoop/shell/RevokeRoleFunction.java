@@ -75,6 +75,8 @@ public class RevokeRoleFunction extends SqoopFunction {
       Arrays.asList(roleObject),
       Arrays.asList(principalObject));
 
+    client.clearCache();
+
     printlnResource(Constants.RES_REVOKE_ROLE_SUCCESSFUL,
       role, principalType + " " + principal);
 

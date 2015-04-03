@@ -75,6 +75,8 @@ public class GrantRoleFunction extends SqoopFunction {
       Arrays.asList(roleObject),
       Arrays.asList(principalObject));
 
+    client.clearCache();
+
     printlnResource(Constants.RES_GRANT_ROLE_SUCCESSFUL,
       role, principalType + " " + principal);
 
