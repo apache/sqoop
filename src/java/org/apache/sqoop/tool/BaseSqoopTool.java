@@ -1396,6 +1396,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         + "importing into SequenceFile format.");
     }
 
+    if (options.doHiveImport()
+        && options.isAppendMode()) {
+      throw new InvalidOptionsException("Append mode for hive imports is not "
+          + " yet supported. Please remove the parameter --append-mode");
+    }
+
     // Many users are reporting issues when they are trying to import data
     // directly into hive warehouse. This should prevent users from doing
     // so in case of a default location.
