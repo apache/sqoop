@@ -307,6 +307,9 @@ public class TestHiveImport extends ImportJobTestCase {
     runImportTest(TABLE_NAME, types, vals,
         "createOverwriteImport.q", getCreateHiveTableArgs(extraArgs),
         new CreateHiveTableTool());
+    runImportTest(TABLE_NAME, types, vals,
+        "createOverwriteImport.q", getCreateHiveTableArgs(extraArgs),
+        new CreateHiveTableTool());
   }
 
   /** Test that dates are coerced properly to strings. */
