@@ -100,9 +100,7 @@ public class RevokePrivilegeFunction extends SqoopFunction {
       Arrays.asList(principalObject),
       Arrays.asList(privilegeObject));
 
-    if (resourceType.toUpperCase().equals(MResource.TYPE.CONNECTOR.name())) {
-      client.clearCache();
-    }
+    client.clearCache();
 
     printlnResource(Constants.RES_REVOKE_PRIVILEGE_SUCCESSFUL,
       action, resourceType + " " + resource,
