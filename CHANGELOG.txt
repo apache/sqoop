@@ -1,3 +1,235 @@
+Release 1.99.6
+
+  SUB-TASK
+
+    SQOOP-1528: Sqoop2: Kerberos support on DoAs function
+
+    SQOOP-1757: Sqoop2: Document generic jdbc connector
+
+    SQOOP-1961: Sqoop2: addDelegationTokens is not exposed in SqoopClient
+
+    SQOOP-1978: Sqoop2: Command line support
+
+    SQOOP-1979: Sqoop2: Rest API support
+
+    SQOOP-1998: Sqoop2: Kite Connector: Hive support
+
+    SQOOP-2016: Sqoop2: Create integration test for JDBC to Hive
+
+    SQOOP-2019: Sqoop2: Handle post-function for updating/deleting resource
+
+    SQOOP-2079: Sqoop2: Remove useless functions for RBAC
+
+    SQOOP-2080: Sqoop2: Combine privileges into READ and WRITE
+
+    SQOOP-2092: Support for LONG in MInputType
+
+    SQOOP-2094: Sqoop2: Update RESTAPI.rst
+
+    SQOOP-2101: Sqoop2: Add SqoopClient support to call Restful API
+
+    SQOOP-2139: Sqoop2: Change create role API from PUT to POST
+
+    SQOOP-2144: Sqoop2: Show command for CLI
+
+    SQOOP-2146: Sqoop2: Sqoop client should return model objects for RBAC methods
+
+    SQOOP-2148: Sqoop2: Fix wrong input sequence of name and type in function new Principal and Resource
+
+    SQOOP-2160: Sqoop2: Datatypes: Provide foundation for the exhaustive type checks
+
+    SQOOP-2166: Sqoop2: Add &quot;Authorization Exception&quot; error code in SecurityError.java
+
+    SQOOP-2183: Sqoop2: Change resource type, privilege action and principal type from String to Enum.
+
+    SQOOP-2184: Sqoop2: Add ServerName for authorization handler
+
+    SQOOP-2198: Sqoop2: Datatypes: Add boolean/char/date support to DerbyTypeList
+
+    SQOOP-2204: Sanitize issues
+
+    SQOOP-2205: Cut 1.99.6 branch
+
+    SQOOP-2206: Update change log with 1.99.6 release
+
+    SQOOP-2207: Update POM with new version
+
+    SQOOP-2208: Create release candidate
+
+    SQOOP-2209: Run vote on RC candidates
+
+    SQOOP-2210: Release artifacts
+
+    SQOOP-2211: Finish release
+
+    SQOOP-2212: Update website
+
+    SQOOP-2220: Sqoop2: Fix the privilege check on job using the link id not the connector id
+
+    SQOOP-2226: Sqoop2: Access denied in shell
+
+    SQOOP-2227: Sqoop2: Clear connector cache in ShowConnectorFunction.java
+
+    SQOOP-2246: Sqoop2: Use jdbcProperties when creating database connection in GenericJDBCExecutor
+
+    SQOOP-2248: Sqoop2: ErrorCodes: Move ServerError to server module
+
+    SQOOP-2249: Sqoop2: ErrorCodes: Move SecurityError to core module
+
+    SQOOP-2251: Sqoop2: ErrorCodes: Move RepositoryError to core module
+
+    SQOOP-2255: Sqoop2: Throw Exception when no permission to the resource
+
+    SQOOP-2256: Sqoop2: Creator should have access to its entities
+
+  BUG
+
+    SQOOP-1439: Sqoop2: Refactor validations
+
+    SQOOP-1516: Sqoop2: Config Input as a Top Level Entity - RepositoryAPI changes
+
+    SQOOP-1577: Sqoop2: Refactor repository dump and load tools
+
+    SQOOP-1579: Sqoop2: Data transfer to load into Hive does not work
+
+    SQOOP-1738: Sqoop2: HDFS Connector : Check for output directory
+
+    SQOOP-1746: Sqoop2: Mapreduce job is running in DEBUG mode by default
+
+    SQOOP-1790: Sqoop2: Upgrade configs with name conflicts
+
+    SQOOP-1808: Add Integration tests to for Incremental read / write between JDBC and HDFS
+
+    SQOOP-1841: Sqoop2: Upgrade from 1.99.1 to 1.99.4 onwards is broken
+
+    SQOOP-1868: Sqoop2: Document MySQL Fast Connector
+
+    SQOOP-1949: Sqoop2: HDFS append only support
+
+    SQOOP-2036: Sqoop2: JDBC Connector need to send BigDecimal for decimal type in Object array
+
+    SQOOP-2089: Sqoop2: Clone configuration object instead of overwriting global
+
+    SQOOP-2095: Sqoop2: Remove duplicate maven dependency org.mockito:mockito-all
+
+    SQOOP-2102: Binary tarball missing executable bit on sqoop2-* files
+
+    SQOOP-2106: Upgrade the version of Derby to 6 and Postgres to 1 in sqoop trunk
+
+    SQOOP-2117: Sqoop2: Shell command &#39;show link&#39; should show connector name
+
+    SQOOP-2119: Sqoop2: Remove remaining imports from junit in PostgreSQL repository tests
+
+    SQOOP-2120: Sqoop2: Test classes using powermock fails badly when compiling with java target version 1.7
+
+    SQOOP-2122: Sqoop2: Build documentation only in binary packaging profile
+
+    SQOOP-2123: Sqoop2: Copy shell libraries only in binary package profile
+
+    SQOOP-2124: Sqoop2: Pre-Commit hook should report how many tests are executed
+
+    SQOOP-2129: Sqoop2: SQ_SUBMISSION deletes should cascade
+
+    SQOOP-2140: Sqoop2: Cast exception when try to cast an integer to Avro&#39;s Long type
+
+    SQOOP-2150: Sqoop2: Kite 1.0 don&#39;t allow dashes to be used in dataset names
+
+    SQOOP-2152: Sqoop2: Kite connector always assumes that FixedPoint is long regardless of the configured size
+
+    SQOOP-2153: Sqoop2: Ensure creation of valid Avro schema names
+
+    SQOOP-2155: Sqoop2: KiteDatasetExecutor is not cleaning up merged datasets
+
+    SQOOP-2156: Sqoop2: HdfsUtils.getOutputMapreduceFiles should ignore hidden files
+
+    SQOOP-2157: Sqoop2: Kite: Add simple integration test for TO direction
+
+    SQOOP-2158: Sqoop2: Pre-Commit hook is incorrectly counting number of executed tests
+
+    SQOOP-2159: Sqoop2: Use BeforeSuite/AfterSuite for startHadoop/stopHadoop in integration tests
+
+    SQOOP-2162: Sqoop2: InputEditable should be optional in JSON API
+
+    SQOOP-2163: Sqoop2: Remove jackson dependency
+
+    SQOOP-2167: Sqoop2: Change getUserName to getShortUserName in AuthorizationEngine.java
+
+    SQOOP-2169: Sqoop2: Kafka integration test bug
+
+    SQOOP-2171: Sqoop2: Incorrect basic type boxing with JDK1.7
+
+    SQOOP-2172: Sqoop2: Move ErrorCode&#39;s sub-class from sqoop-core to sqoop-common
+
+    SQOOP-2188: Sqoop2: Failed to merge Kite datasets
+
+    SQOOP-2190: Sqoop2: Remove hadoop200 profile from test-patch.py
+
+    SQOOP-2201: Sqoop2: Add possibility to read Hadoop configuration files to HFDS connector
+
+    SQOOP-2202: Sqoop2: Add validator to check existence of local directory on Sqoop 2 server
+
+    SQOOP-2213: Sqoop2: toCSVFixedPoint ClassCastException
+
+    SQOOP-2214: Sqoop2: Add ability to easily iterate over entries stored in Context
+
+    SQOOP-2215: Sqoop2: Remember all test logs in pre-commit hook
+
+    SQOOP-2219: Sqoop2: Skip missing input in DirectoryExistsValidator
+
+    SQOOP-2225: Sqoop2: Shell client clobbers server exceptions
+
+    SQOOP-2228: Sqoop2: HDFS Connector: Import data to temporary directory before moving them to target directory
+
+    SQOOP-2229: Sqoop2: Kite connector should handle doubles
+
+    SQOOP-2230: Sqoop2: Kite connector can use URIBuilder
+
+    SQOOP-2231: Sqoop2: Kite connector should use authority in link configuration
+
+    SQOOP-2232: Sqoop2: Test initializer against local filesystem
+
+    SQOOP-2233: Sqoop2: Move TestHdfsConnector class under test directory
+
+    SQOOP-2234: Sqoop2: Move DatasetURIValidator to Kite package as it&#39;s not generally usable validator
+
+    SQOOP-2235: Sqoop2: Move PrefixContext back to mapreduce execution engine
+
+    SQOOP-2236: Sqoop2: Drop outdated comment from SubmissionCallbacks class
+
+    SQOOP-2238: Sqoop2: Parquet jars missing
+
+    SQOOP-2239: Sqoop2: Remove Repository.updateSubmission() call from Mapreduce submission engine
+
+    SQOOP-2240: Sqoop2: Remove Hadoop 1.x example from catalina.properties
+
+    SQOOP-2241: Sqoop2: PreCommit hook is incorrectly counting number of executed tests
+
+    SQOOP-2242: Sqoop2: Add support for full table names into our DatabaseProvider infrastructure
+
+    SQOOP-2265: Sqoop2: Standardize on methods
+
+    SQOOP-2268: Sqoop2: Fix a typo in ShowLinkFunction
+
+    SQOOP-2273: Sqoop2: Move authorizationServlet into v1 package
+
+    SQOOP-2277: Sqoop2: Add annotation for public usage classes in Sqoop Core
+
+    SQOOP-2278: Sqoop2: Fix bug for all user could read connector
+
+    SQOOP-2279: Sqoop2: Clean connector cache after grant and revoke statements
+
+  IMPROVEMENT
+
+    SQOOP-1805: Sqoop2: GenericJdbcConnector: Delta read support
+
+    SQOOP-2134: Update Kite dependency to 1.0.0
+
+    SQOOP-2250: Sqoop2: SQ_LINK_INPUT is missing a foreign key constraint
+
+  TASK
+
+    SQOOP-506: Create Sqoop integration test infrastructure.
+
 Release 1.99.5
 
   SUB-TASK
