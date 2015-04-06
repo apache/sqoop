@@ -243,6 +243,122 @@ For lib/ant-eclipse-<version>.jar:
 
   The Apache License, Version 2.0
 
+For lib/avro-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/avro-mapred-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/commons-codec-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/commons-compress-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/commons-io-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/commons-jexl-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/commons-logging-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/hsqldb-<version>.jar:
+
+  The BSD License
+
 For lib/ivy-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/jackson-annotations-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/jackson-core-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/jackson-core-asl-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/jackson-databind-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/jackson-mapper-asl-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/kite-data-core-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/kite-data-hive-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/kite-data-mapreduce-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/kite-hadoop-compatibility-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/opencsv-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/paranamer-<version>.jar:
+
+  The BSD License
+
+For lib/parquet-avro-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/parquet-column-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/parquet-common-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/parquet-encoding-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/parquet-format-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/parquet-generator-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/parquet-hadoop-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/parquet-jackson-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/slf4j-api-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For lib/snappy-java-<version>.jar:
 
   The Apache License, Version 2.0
