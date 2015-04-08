@@ -24,6 +24,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
+import org.apache.sqoop.orm.ClassWriter;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -72,6 +73,25 @@ public final class AvroUtil {
   }
 
   /**
+   * Convert Column name into Avro column name.
+   */
+  public static String toAvroColumn(String column) {
+    return toAvroIdentifier(column);
+  }
+
+  /**
+   * Format candidate to avro specifics
+   */
+  public static String toAvroIdentifier(String candidate) {
+    String formattedCandidate = candidate.replaceAll("\\W+", "");
+    if (formattedCandidate.substring(0,1).matches("[a-zA-Z_]")) {
+      return formattedCandidate;
+    } else {
+      return "AVRO_" + formattedCandidate;
+    }
+  }
+
+  /**
    * Manipulate a GenericRecord instance.
    */
   public static GenericRecord toGenericRecord(Map<String, Object> fieldMap,
@@ -79,7 +99,8 @@ public final class AvroUtil {
     GenericRecord record = new GenericData.Record(schema);
     for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
       Object avroObject = toAvro(entry.getValue(), bigDecimalFormatString);
-      record.put(entry.getKey(), avroObject);
+      String avroColumn = toAvroColumn(entry.getKey());
+      record.put(avroColumn, avroObject);
     }
     return record;
   }

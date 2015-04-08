@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.avro.AvroUtil;
 
 /**
  * Creates an Avro schema to represent a table from a database.
@@ -60,7 +61,7 @@ public class AvroSchemaGenerator {
 
     List<Field> fields = new ArrayList<Field>();
     for (String columnName : columnNames) {
-      String cleanedCol = ClassWriter.toJavaIdentifier(columnName);
+      String cleanedCol = AvroUtil.toAvroIdentifier(ClassWriter.toJavaIdentifier(columnName));
       int sqlType = columnTypes.get(columnName);
       Schema avroSchema = toAvroSchema(sqlType, columnName);
       Field field = new Field(cleanedCol, avroSchema, null, null);
