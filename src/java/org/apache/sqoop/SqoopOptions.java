@@ -33,6 +33,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.accumulo.AccumuloConstants;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
+import org.apache.sqoop.util.password.CredentialProviderHelper;
 import org.apache.sqoop.validation.AbortOnFailureHandler;
 import org.apache.sqoop.validation.AbsoluteValidationThreshold;
 import org.apache.sqoop.validation.RowCountValidator;
@@ -677,6 +678,16 @@ public class SqoopOptions implements Cloneable {
       }
     }
 
+    passwordAlias = props.getProperty("db.password.alias");
+    if (passwordAlias != null) {
+      try {
+        setPassword(CredentialProviderHelper.resolveAlias(getConf(), passwordAlias));
+        return; // short-circuit
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to resolve credentials.", e);
+      }
+    }
+
     if (getBooleanProperty(props, "db.require.password", false)) {
       // The user's password was stripped out from the metastore.
       // Require that the user enter it now.
@@ -750,6 +761,11 @@ public class SqoopOptions implements Cloneable {
   private void writePasswordProperty(Properties props) {
     if (getPasswordFilePath() != null) { // short-circuit
       putProperty(props, "db.password.file", getPasswordFilePath());
+      return;
+    }
+
+    if (getPasswordAlias() != null) { // short-circuit
+      putProperty(props, "db.password.alias", getPasswordAlias());
       return;
     }
 
