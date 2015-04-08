@@ -206,6 +206,27 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals("__NAME", 1987, record1.get("__NAME"));
   }
 
+  public void testNonstandardCharactersInColumnName() throws IOException {
+    String [] names = { "avroå1" };
+    String [] types = { "INT" };
+    String [] vals = { "1987" };
+    createTableWithColTypesAndNames(names, types, vals);
+
+    runImport(getOutputArgv(true, null));
+
+    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+    DataFileReader<GenericRecord> reader = read(outputFile);
+    Schema schema = reader.getSchema();
+    assertEquals(Schema.Type.RECORD, schema.getType());
+    List<Field> fields = schema.getFields();
+    assertEquals(types.length, fields.size());
+
+    checkField(fields.get(0), "AVRO1", Type.INT);
+
+    GenericRecord record1 = reader.next();
+    assertEquals("AVRO1", 1987, record1.get("AVRO1"));
+  }
+
   private void checkField(Field field, String name, Type type) {
     assertEquals(name, field.name());
     assertEquals(Schema.Type.UNION, field.schema().getType());
