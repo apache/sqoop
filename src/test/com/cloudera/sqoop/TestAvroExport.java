@@ -338,8 +338,8 @@ public class TestAvroExport extends ExportJobTestCase {
     final int TOTAL_RECORDS = 1 * 10;
 
     List<Schema> childSchemas = new ArrayList<Schema>();
-    childSchemas.add(Schema.create(Schema.Type.STRING));
     childSchemas.add(Schema.create(Schema.Type.NULL));
+    childSchemas.add(Schema.create(Schema.Type.STRING));
     Schema schema =  Schema.createUnion(childSchemas);
     ColumnGenerator gen0 = colGenerator(null, schema, null, "VARCHAR(64)");
     ColumnGenerator gen1 = colGenerator("s", schema, "s", "VARCHAR(64)");

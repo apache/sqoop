@@ -230,8 +230,8 @@ public class TestAvroImport extends ImportJobTestCase {
   private void checkField(Field field, String name, Type type) {
     assertEquals(name, field.name());
     assertEquals(Schema.Type.UNION, field.schema().getType());
-    assertEquals(type, field.schema().getTypes().get(0).getType());
-    assertEquals(Schema.Type.NULL, field.schema().getTypes().get(1).getType());
+    assertEquals(Schema.Type.NULL, field.schema().getTypes().get(0).getType());
+    assertEquals(type, field.schema().getTypes().get(1).getType());
   }
 
   public void testNullableAvroImport() throws IOException, SQLException {

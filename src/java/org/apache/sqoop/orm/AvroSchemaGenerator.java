@@ -34,6 +34,8 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import org.apache.sqoop.avro.AvroUtil;
 
+import org.codehaus.jackson.node.NullNode;
+
 /**
  * Creates an Avro schema to represent a table from a database.
  */
@@ -64,7 +66,7 @@ public class AvroSchemaGenerator {
       String cleanedCol = AvroUtil.toAvroIdentifier(ClassWriter.toJavaIdentifier(columnName));
       int sqlType = columnTypes.get(columnName);
       Schema avroSchema = toAvroSchema(sqlType, columnName);
-      Field field = new Field(cleanedCol, avroSchema, null, null);
+      Field field = new Field(cleanedCol, avroSchema, null,  NullNode.getInstance());
       field.addProp("columnName", columnName);
       field.addProp("sqlType", Integer.toString(sqlType));
       fields.add(field);
@@ -92,8 +94,8 @@ public class AvroSchemaGenerator {
    */
   public Schema toAvroSchema(int sqlType, String columnName) {
     List<Schema> childSchemas = new ArrayList<Schema>();
-    childSchemas.add(Schema.create(toAvroType(columnName, sqlType)));
     childSchemas.add(Schema.create(Schema.Type.NULL));
+    childSchemas.add(Schema.create(toAvroType(columnName, sqlType)));
     return Schema.createUnion(childSchemas);
   }
 
