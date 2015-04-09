@@ -105,6 +105,7 @@ supportfiles:
 
 clean:
 	-rm $(BUILD_DIR)/sqoop-*.1.gz
+	-rm $(BUILD_DIR)/SqoopDevGuide.html
 	-rm $(BUILD_DIR)/SqoopUserGuide.html
 	-rm user/SqoopUserGuide.html
 	-rm dev/SqoopDevGuide.html
