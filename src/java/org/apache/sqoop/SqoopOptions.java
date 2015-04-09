@@ -1217,6 +1217,10 @@ public class SqoopOptions implements Cloneable {
     String[] maps = mapping.split(",");
     for(String map : maps) {
       String[] details = map.split("=");
+      if (details.length != 2) {
+        throw new IllegalArgumentException("Malformed mapping.  "
+            + "Column mapping should be the form key=value[,key=value]*");
+      }
       output.put(details[0], details[1]);
     }
   }
