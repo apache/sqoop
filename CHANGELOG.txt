@@ -10,6 +10,7 @@ Release Notes - Sqoop - Version 1.4.6
     * [SQOOP-1491] - Remove SqoopAvroRecord
     * [SQOOP-1492] - Move Avro and GenericRecord related common code to AvroUtil
     * [SQOOP-1508] - Add warning when using unsupported compression codec
+    * [SQOOP-2284] - Update license file
 
 ** Bug
     * [SQOOP-1125] - Out of memory errors when number of records to import < 0.5 * splitSize
@@ -60,6 +61,13 @@ Release Notes - Sqoop - Version 1.4.6
     * [SQOOP-2191] - Provide an option automatically choose one mapper when neither primary key is defined nor split by column is provided
     * [SQOOP-2254] - Failed to build release notes
     * [SQOOP-2257] - Parquet target for imports with Hive overwrite option does not work
+    * [SQOOP-2263] - Sqoop1 has some files without a copyright header
+    * [SQOOP-2264] - Exclude and remove SqoopUserGuide.xml from git repository
+    * [SQOOP-2281] - Set overwrite on kite dataset
+    * [SQOOP-2282] - Add validation check for --hive-import and --append
+    * [SQOOP-2283] - Support usage of --exec and --password-alias
+    * [SQOOP-2286] - Ensure Sqoop generates valid avro column names
+    * [SQOOP-2290] - java.lang.ArrayIndexOutOfBoundsException thrown when malformed column mapping is provided
 
 ** Improvement
     * [SQOOP-1330] - Ignore blank newlines in managers.d property files
@@ -72,6 +80,7 @@ Release Notes - Sqoop - Version 1.4.6
     * [SQOOP-1622] - Copying from staging table should be in single transaction for pg_bulkload connector
     * [SQOOP-1632] - Add support for index organized tables to direct connector
     * [SQOOP-2149] - Update Kite dependency to 1.0.0
+    * [SQOOP-2252] - Add default to Avro Schema
 
 ** New Feature
     * [SQOOP-1272] - Support importing mainframe sequential datasets
