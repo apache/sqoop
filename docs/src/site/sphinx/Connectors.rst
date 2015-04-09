@@ -340,3 +340,49 @@ Destroyers
 ----------
 
 The HDFS TO destroyer moves all created files to the proper output directory.
+
+
++++++++++++++++
+Kafka Connector
++++++++++++++++
+
+Currently, only the TO direction is supported.
+
+-----
+Usage
+-----
+
+To use the Kafka Connector, create a link for the connector and a job that uses the link.
+
+**Link Configuration**
+++++++++++++++++++++++
+
+Inputs associated with the link configuration include:
+
++----------------------+---------+-----------------------------------------------------------+-------------------------------------+
+| Input                | Type    | Description                                               | Example                             |
++======================+=========+===========================================================+=====================================+
+| Broker list          | String  | Comma separated list of kafka brokers.                    | example.com:10000,example.com:11000 |
+|                      |         | *Required*.                                               |                                     |
++----------------------+---------+-----------------------------------------------------------+-------------------------------------+
+| Zookeeper connection | String  | Comma separated list of zookeeper servers in your quorum. | /etc/conf/hadoop                    |
+|                      |         | *Required*.                                               |                                     |
++----------------------+---------+-----------------------------------------------------------+-------------------------------------+
+
+**TO Job Configuration**
+++++++++++++++++++++++++
+
+Inputs associated with the Job configuration for the FROM direction include:
+
++-------+---------+---------------------------------+----------+
+| Input | Type    | Description                     | Example  |
++=======+=========+=================================+==========+
+| topic | String  | The Kafka topic to transfer to. | my topic |
+|       |         | *Required*.                     |          |
++-------+---------+---------------------------------+----------+
+
+------
+Loader
+------
+
+During the *loading* phase, Kafka is written to directly from each loader. The order in which data is loaded into Kafka is not guaranteed.
