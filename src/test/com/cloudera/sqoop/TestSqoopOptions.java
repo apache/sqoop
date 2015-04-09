@@ -269,6 +269,18 @@ public class TestSqoopOptions extends TestCase {
     assertEquals("STRING", mapping.get("id"));
   }
 
+  public void testMalformedMapColumnHiveParams() throws Exception {
+    String[] args = {
+      "--map-column-hive", "id",
+    };
+    try {
+      SqoopOptions opts = parse(args);
+      fail("Malformed hive mapping does not throw exception");
+    } catch (Exception e) {
+      // Caught exception as expected
+    }
+  }
+
   public void testMapColumnJavaParams() throws Exception {
     String[] args = {
       "--map-column-java", "id=String",
@@ -278,6 +290,18 @@ public class TestSqoopOptions extends TestCase {
     Properties mapping = opts.getMapColumnJava();
     assertTrue(mapping.containsKey("id"));
     assertEquals("String", mapping.get("id"));
+  }
+
+  public void testMalfromedMapColumnJavaParams() throws Exception {
+    String[] args = {
+      "--map-column-java", "id",
+    };
+    try {
+      SqoopOptions opts = parse(args);
+      fail("Malformed java mapping does not throw exception");
+    } catch (Exception e) {
+      // Caught exception as expected
+    }
   }
 
   public void testSkipDistCacheOption() throws Exception {
