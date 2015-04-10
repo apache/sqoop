@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.common.test.db;
 
+import org.apache.sqoop.common.test.db.types.DatabaseTypeList;
+import org.apache.sqoop.common.test.db.types.MySQLTypeList;
+
 /**
  * MySQL Provider that will connect to remote MySQL server.
  *
@@ -77,6 +80,10 @@ public class MySQLProvider extends DatabaseProvider {
     return DRIVER;
   }
 
+  @Override
+  public DatabaseTypeList getDatabaseTypes() {
+    return new MySQLTypeList();
+  }
   public String escape(String entity) {
     return "`" + entity + "`";
   }
