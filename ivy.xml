@@ -300,6 +300,11 @@ under the License.
     <dependency org="org.postgresql" name="postgresql"
       rev="${postgresql.version}" conf="common->default" />
 
+    <dependency org="org.apache.zookeeper" name="zookeeper"
+      rev="${zookeeper.version}" conf="test->default">
+      <artifact name="zookeeper" type="jar" />
+    </dependency>
+
     <dependency org="org.apache.avro" name="avro" rev="${avro.version}"
       conf="avro->default;redist->default">
       <exclude org="org.slf4j" module="slf4j-api"/>
