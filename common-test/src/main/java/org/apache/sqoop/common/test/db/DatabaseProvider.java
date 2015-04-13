@@ -19,9 +19,8 @@ package org.apache.sqoop.common.test.db;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.test.db.types.DatabaseType;
 import org.apache.sqoop.common.test.db.types.DatabaseTypeList;
-import org.apache.sqoop.common.test.db.types.EmptyTypeList;
+import org.apache.sqoop.common.test.db.types.DefaultTypeList;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -153,7 +152,7 @@ abstract public class DatabaseProvider {
    * @return
    */
   public DatabaseTypeList getDatabaseTypes() {
-    return new EmptyTypeList();
+    return new DefaultTypeList();
   }
 
   /**

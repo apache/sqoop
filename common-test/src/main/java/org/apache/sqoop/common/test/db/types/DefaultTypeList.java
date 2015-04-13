@@ -17,15 +17,22 @@
  */
 package org.apache.sqoop.common.test.db.types;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
- * Default implementation that don't have any types.
+ * This class provides one default type to be consumed by Types Tests.
+ * Any DB provider which wants to have more types covered should provide
+ * a separate class and return that instead of this class.
  */
-public class EmptyTypeList extends DatabaseTypeList {
-  @Override
-  public List<DatabaseType> getAllTypes() {
-    return new LinkedList<DatabaseType>();
+public class DefaultTypeList extends DatabaseTypeList {
+  public DefaultTypeList() {
+    super();
+
+    // Integer type
+    add(DatabaseType.builder("INT")
+        .addExample("-32768", new Integer(-32768), "-32768")
+        .addExample("-1", new Integer(-1), "-1")
+        .addExample("0", new Integer(0), "0")
+        .addExample("1", new Integer(1), "1")
+        .addExample("32767", new Integer(32767), "32767")
+        .build());
   }
 }
