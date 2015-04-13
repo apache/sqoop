@@ -95,10 +95,10 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * </pre>
  * </p>
  * <p>
- * <strong>SQ_CONFIG_DIRECTIONS</strong>: Connector directions.
+ * <strong>SQ_CONFIG_DIRECTIONS</strong>: Config directions.
  * <pre>
  *    +------------------------------+
- *    | SQ_CONNECTOR_DIRECTIONS      |
+ *    | SQ_CONFIG_DIRECTIONS         |
  *    +------------------------------+
  *    | SQCD_ID: BIGINT PK AUTO-GEN  |
  *    | SQCD_CONFIG: BIGINT          |FK SQ_CONFIG(SQ_CFG_ID)
