@@ -83,12 +83,11 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
       jars.add(ClassUtils.jarForClass("org.kitesdk.compat.DynConstructors"));
       jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.metastore.Warehouse"));
       jars.add(ClassUtils.jarForClass("org.apache.hive.common.HiveCompat"));
-      jars.add(ClassUtils.jarForClass("parquet.hive.HiveBindingFactory"));
       jars.add(ClassUtils.jarForClass("com.facebook.fb303.FacebookService"));
       jars.add(ClassUtils.jarForClass("org.datanucleus.query.compiler.JavaQueryCompiler"));
       jars.add(ClassUtils.jarForClass("org.datanucleus.query.typesafe.TypesafeSubquery"));
       jars.add(ClassUtils.jarForClass("org.datanucleus.store.rdbms.sql.SQLStatement"));
-      jars.add(ClassUtils.jarForClass("parquet.hive.serde.ParquetHiveSerDe"));
+      jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"));
     }
     return jars;
   }

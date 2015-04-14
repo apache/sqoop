@@ -80,6 +80,12 @@ limitations under the License.
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hive</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.twitter</groupId>
+          <artifactId>parquet-hive-bundle</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

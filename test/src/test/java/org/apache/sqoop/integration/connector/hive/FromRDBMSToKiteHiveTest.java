@@ -18,6 +18,8 @@
 package org.apache.sqoop.integration.connector.hive;
 
 import org.apache.sqoop.common.test.asserts.ProviderAsserts;
+import org.apache.sqoop.common.test.db.DatabaseProvider;
+import org.apache.sqoop.common.test.db.DatabaseProviderFactory;
 import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.model.MConfigList;
@@ -25,15 +27,56 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.HiveConnectorTestCase;
+import org.testng.ITest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
-/**
- */
-public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase {
+import java.lang.reflect.Method;
+
+@Test(groups = "slow")
+public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase implements ITest {
+  private String testName;
+
+  private FileFormat fileFormat;
+
   private MLink rdbmsLink;
   private MLink kiteLink;
+  private String hiveTableName;
+
+  @Factory(dataProvider="rdbms-to-kite-hive-test")
+  public FromRDBMSToKiteHiveTest(FileFormat fileFormat) {
+    this.fileFormat = fileFormat;
+  }
+
+  @DataProvider(name="rdbms-to-kite-hive-test", parallel=true)
+  public static Object[][] data() throws Exception {
+    DatabaseProvider provider = DatabaseProviderFactory.getProvider(System.getProperties());
+    return new Object[][]{
+        {FileFormat.AVRO},
+        {FileFormat.PARQUET}
+    };
+  }
+
+  @Override
+  public String getTestName() {
+    return testName + "[" + fileFormat.name() + "]";
+  }
+
+  public String getHiveTableName() {
+    return testName + "_" + fileFormat.name();
+  }
+
+  public String getDatasetURI() {
+    return "dataset:hive:" + getHiveTableName();
+  }
+
+  @BeforeMethod(alwaysRun = true)
+  public void setTestName(Method aMethod) {
+    this.testName = aMethod.getName();
+  }
 
   @BeforeMethod(alwaysRun = true)
   public void createTable() {
@@ -70,8 +113,8 @@ public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase {
 
     // Fill the Kite "TO" config
     MConfigList toConfig = job.getToJobConfig();
-    toConfig.getStringInput("toJobConfig.uri").setValue("dataset:hive:testtable");
-    toConfig.getEnumInput("toJobConfig.fileFormat").setValue(FileFormat.AVRO);
+    toConfig.getStringInput("toJobConfig.uri").setValue(getDatasetURI());
+    toConfig.getEnumInput("toJobConfig.fileFormat").setValue(this.fileFormat);
 
     // driver config
     MDriverConfig driverConfig = job.getDriverConfig();
@@ -81,11 +124,11 @@ public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase {
     executeJob(job);
 
     // Assert correct output
-    ProviderAsserts.assertRow(hiveProvider, new TableName("testtable"), new Object[]{"id", 1}, "1");
-    ProviderAsserts.assertRow(hiveProvider, new TableName("testtable"), new Object[]{"id", 2}, "2");
-    ProviderAsserts.assertRow(hiveProvider, new TableName("testtable"), new Object[]{"id", 3}, "3");
-    ProviderAsserts.assertRow(hiveProvider, new TableName("testtable"), new Object[]{"id", 4}, "4");
+    ProviderAsserts.assertRow(hiveProvider, new TableName(getHiveTableName()), new Object[]{"id", 1}, "1");
+    ProviderAsserts.assertRow(hiveProvider, new TableName(getHiveTableName()), new Object[]{"id", 2}, "2");
+    ProviderAsserts.assertRow(hiveProvider, new TableName(getHiveTableName()), new Object[]{"id", 3}, "3");
+    ProviderAsserts.assertRow(hiveProvider, new TableName(getHiveTableName()), new Object[]{"id", 4}, "4");
 
-    hiveProvider.dropTable(new TableName("testtable"));
+    hiveProvider.dropTable(new TableName(getHiveTableName()));
   }
 }
