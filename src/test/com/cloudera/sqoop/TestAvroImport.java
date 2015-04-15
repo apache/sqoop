@@ -207,7 +207,7 @@ public class TestAvroImport extends ImportJobTestCase {
   }
 
   public void testNonstandardCharactersInColumnName() throws IOException {
-    String [] names = { "avroå1" };
+    String [] names = { "avro\uC3A11" };
     String [] types = { "INT" };
     String [] vals = { "1987" };
     createTableWithColTypesAndNames(names, types, vals);
