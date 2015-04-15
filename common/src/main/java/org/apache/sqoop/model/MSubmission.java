@@ -19,6 +19,7 @@ package org.apache.sqoop.model;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
+import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
@@ -106,6 +107,16 @@ public class MSubmission extends MAccountableEntity {
    */
   Schema toSchema;
 
+  /**
+   * Context objects that are associated with the job.
+   *
+   * Please note that we are not sending those to client as they can potentially contain
+   * sensitive information.
+   */
+  ImmutableContext fromConnectorContext;
+  ImmutableContext toConnectorContext;
+  ImmutableContext driverContext;
+
   public MSubmission() {
     status = SubmissionStatus.UNKNOWN;
     progress = -1;
@@ -185,6 +196,30 @@ public class MSubmission extends MAccountableEntity {
 
   public void setError(SubmissionError error) {
     this.error = error;
+  }
+
+  public ImmutableContext getFromConnectorContext() {
+    return fromConnectorContext;
+  }
+
+  public void setFromConnectorContext(ImmutableContext fromConnectorContext) {
+    this.fromConnectorContext = fromConnectorContext;
+  }
+
+  public ImmutableContext getToConnectorContext() {
+    return toConnectorContext;
+  }
+
+  public void setToConnectorContext(ImmutableContext toConnectorContext) {
+    this.toConnectorContext = toConnectorContext;
+  }
+
+  public ImmutableContext getDriverContext() {
+    return driverContext;
+  }
+
+  public void setDriverContext(ImmutableContext driverContext) {
+    this.driverContext = driverContext;
   }
 
   public SubmissionError getError() {

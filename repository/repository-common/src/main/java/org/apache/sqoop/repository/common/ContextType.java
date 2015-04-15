@@ -15,21 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.repository.postgresql;
+package org.apache.sqoop.repository.common;
 
-public class PostgresqlRepoConstants {
-
-  /**
-   * Expected version of the repository structures.
-   *
-   * History:
-   * 1 - Version 1.99.5
-   * 2 - Version 1.99.7
-   *     Stored context classes in SQ_CONTEXT tables
-   */
-  public static final int LATEST_POSTGRESQL_REPOSITORY_VERSION = 2;
-
-  private PostgresqlRepoConstants() {
-    // Disable explicit object creation
-  }
+/**
+ * Context types that can be stored in the repository
+ */
+public enum ContextType {
+  FROM,
+  TO,
+  DRIVER,
 }

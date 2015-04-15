@@ -315,6 +315,12 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
     if (repositoryVersion < 6) {
       runQuery(QUERY_UPGRADE_ADD_TABLE_SQ_LINK_INPUT_CONSTRAINT_2, conn);
     }
+    // 1.99.7 release changes
+    if (repositoryVersion < 7) {
+      runQuery(QUERY_CREATE_TABLE_SQ_CONTEXT_TYPE, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONTEXT_PROPERTY, conn);
+      runQuery(QUERY_CREATE_TABLE_SQ_CONTEXT, conn);
+    }
 
     // last step upgrade the repository version to the latest value in the code
     upgradeRepositoryVersion(conn);

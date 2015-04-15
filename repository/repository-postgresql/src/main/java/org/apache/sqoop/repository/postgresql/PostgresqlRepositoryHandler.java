@@ -110,12 +110,13 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
   @Override
   public void createOrUpgradeRepository(Connection conn) {
     int version = detectRepositoryVersion(conn);
+    LOG.info("Detected repository version: " + version);
 
     if (version == PostgresqlRepoConstants.LATEST_POSTGRESQL_REPOSITORY_VERSION) {
       return;
     }
 
-    if (version == 0) {
+    if (version < 1) {
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_SCHEMA_SQOOP, conn);
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONFIGURABLE, conn);
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONFIG, conn);
@@ -136,9 +137,11 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
 
       // Insert FROM and TO directions.
       insertDirections(conn);
-    } else if (version < 4) {
-      LOG.error("Found unknown version for PostgreSQL repository: " + version);
-      throw new SqoopException(PostgresqlRepoError.POSTGRESQLREPO_0005, "Found version: " + version);
+    }
+    if (version < 2) {
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONTEXT_TYPE, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONTEXT_PROPERTY, conn);
+      runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONTEXT, conn);
     }
 
     ResultSet rs = null;

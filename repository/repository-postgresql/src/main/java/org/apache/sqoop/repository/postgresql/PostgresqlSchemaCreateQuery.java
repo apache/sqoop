@@ -246,6 +246,47 @@ import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants
  *    +----------------------------+
  * </pre>
  * </p>
+ *  <p>
+ * <strong>SQ_CONTEXT_TYPE</strong>: Type of stored context
+ *
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_CONTEXT_TYPE            |
+ *    +----------------------------+
+ *    | SQCT_ID: BIGINT PK         |
+ *    | SQCT_NAME: VARCHAR(25)     |
+ *    +----------------------------+
+ * </pre>
+ *
+ * </p>
+ * <p>
+ * <strong>SQ_CONTEXT_PROPERTY</strong>: Names (keys) of stored properties
+ * (We're assuming that they will repeat a lot in various submissions)
+ *
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_CONTEXT_PROPERTY        |
+ *    +----------------------------+
+ *    | SQCP_ID: BIGINT PK         |
+ *    | SQCP_NAME: VARCHAR(500)    |
+ *    +----------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_CONTEXT</strong>: Context instances for each submission
+ *
+ * <pre>
+ *    +----------------------------+
+ *    | SQ_CONTEXT                 |
+ *    +----------------------------+
+ *    | SQCO_ID: BIGINT PK         |
+ *    | SQCO_SUBMISSION: BIGINT    | FK SQ_JOB_SUBMISSION(SQS_ID)
+ *    | SQCO_TYPE: BIGINT          | FK SQ_CONTEXT_TYPE(SQCT_ID)
+ *    | SQCO_PROPERTY: BIGINT      | FK SQ_CONTEXT_PROPERTY(SQCP_ID)
+ *    | SQCO_VALUE: VARCHAR(500)   |
+ *    +----------------------------+
+ * </pre>
+ * </p>
  */
 public class PostgresqlSchemaCreateQuery {
 
@@ -459,6 +500,39 @@ public class PostgresqlSchemaCreateQuery {
             + " FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQRS_SUBMISSION) + ") REFERENCES "
               + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_SUBMISSION_NAME) + "("  + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQS_ID) + ") ON DELETE CASCADE"
           + ")";
+
+   // DDL: Create table SQ_CONTEXT_TYPE
+   public static final String QUERY_CREATE_TABLE_SQ_CONTEXT_TYPE =
+       "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_CONTEXT_TYPE) + " ("
+           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCT_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCT_NAME) + " VARCHAR(25) UNIQUE"
+           + ")";
+
+   // DDL: Create table SQ_CONTEXT_PROPERTY
+   public static final String QUERY_CREATE_TABLE_SQ_CONTEXT_PROPERTY =
+       "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_CONTEXT_PROPERTY) + " ("
+           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCP_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCP_NAME) + " VARCHAR(500) UNIQUE"
+           + ")";
+
+   // DDL: Create table SQ_CONTEXT
+   public static final String QUERY_CREATE_TABLE_SQ_CONTEXT =
+       "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_CONTEXT) + " ("
+       + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCO_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+       + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCO_SUBMISSION) + " BIGINT, "
+       + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCO_TYPE) + " BIGINT, "
+       + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCO_PROPERTY) + " BIGINT, "
+       + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCO_VALUE) + " VARCHAR(500), "
+       + "CONSTRAINT " + CommonRepoUtils.escapeConstraintName(CommonRepositorySchemaConstants.CONSTRAINT_SQCO_SQS_ID) + " "
+         + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCO_SUBMISSION) + ") "
+           + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_SUBMISSION_NAME) + "(" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQS_ID) + ") ON DELETE CASCADE, "
+       + "CONSTRAINT " + CommonRepoUtils.escapeConstraintName(CommonRepositorySchemaConstants.CONSTRAINT_SQCO_SQCT_ID) + " "
+         + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCO_TYPE) + ") "
+           + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_CONTEXT_TYPE) + "(" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCT_ID) + "), "
+       + "CONSTRAINT " + CommonRepoUtils.escapeConstraintName(CommonRepositorySchemaConstants.CONSTRAINT_SQCO_SQCP_ID) + " "
+         + "FOREIGN KEY (" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCO_PROPERTY) + ") "
+           + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_CONTEXT_PROPERTY) + "(" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCP_ID) + ") "
+       + ")";
 
   private PostgresqlSchemaCreateQuery() {
     // Disable explicit object creation

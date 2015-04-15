@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.repository.derby;
 
+import org.apache.sqoop.common.MutableContext;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
@@ -106,6 +108,16 @@ public class TestSubmissionHandling extends DerbyTestCase {
     counters.addCounterGroup(firstGroup);
     counters.addCounterGroup(secondGroup);
 
+    MutableContext fromContext = new MutableMapContext();
+    MutableContext toContext = new MutableMapContext();
+    MutableContext driverContext = new MutableMapContext();
+    fromContext.setString("from1", "value1");
+    fromContext.setString("from2", "value2");
+    toContext.setString("to1", "value1");
+    toContext.setString("to2", "value2");
+    driverContext.setString("driver1", "value1");
+    driverContext.setString("driver2", "value2");
+
     MSubmission submission = new MSubmission();
     submission.setJobId(1);
     submission.setStatus(SubmissionStatus.RUNNING);
@@ -116,6 +128,9 @@ public class TestSubmissionHandling extends DerbyTestCase {
     submission.getError().setErrorSummary("RuntimeException");
     submission.getError().setErrorDetails("Yeah it happens");
     submission.setCounters(counters);
+    submission.setFromConnectorContext(fromContext);
+    submission.setToConnectorContext(toContext);
+    submission.setDriverContext(driverContext);
 
     handler.createSubmission(submission, getDerbyDatabaseConnection());
 
@@ -163,6 +178,16 @@ public class TestSubmissionHandling extends DerbyTestCase {
     counter = group.getCounter("cd");
     assertNotNull(counter);
     assertEquals(400, counter.getValue());
+
+    assertNotNull(submission.getFromConnectorContext());
+    assertNotNull(submission.getToConnectorContext());
+    assertNotNull(submission.getDriverContext());
+    assertEquals(submission.getFromConnectorContext().getString("from1"), "value1");
+    assertEquals(submission.getFromConnectorContext().getString("from2"), "value2");
+    assertEquals(submission.getToConnectorContext().getString("to1"), "value1");
+    assertEquals(submission.getToConnectorContext().getString("to2"), "value2");
+    assertEquals(submission.getDriverContext().getString("driver1"), "value1");
+    assertEquals(submission.getDriverContext().getString("driver2"), "value2");
 
     // Let's create second (simpler) connection
     submission = new MSubmission(1, new Date(), SubmissionStatus.SUCCEEDED, "job-x");

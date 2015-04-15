@@ -21,6 +21,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.DirectionError;
+import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.common.MutableContext;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.driver.Driver;
@@ -970,6 +973,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         createSubmissionCounters(submissionId, submission.getCounters(), conn);
       }
 
+      createSubmissionContext(submissionId, submission.getFromConnectorContext(), ContextType.FROM, conn);
+      createSubmissionContext(submissionId, submission.getToConnectorContext(), ContextType.TO, conn);
+      createSubmissionContext(submissionId, submission.getDriverContext(), ContextType.DRIVER, conn);
+
       // Save created persistence id
       submission.setPersistenceId(submissionId);
 
@@ -1034,6 +1041,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       if(submission.getCounters() != null) {
         createSubmissionCounters(submission.getPersistenceId(), submission.getCounters(), conn);
       }
+
+      // We are not updating contexts as they are immutable once the submission is created
 
     } catch (SQLException ex) {
       logException(ex, submission);
@@ -1307,6 +1316,98 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
+  private void createSubmissionContext(long submissionId, ImmutableContext context, ContextType contextType, Connection conn) throws SQLException {
+    PreparedStatement stmt = null;
+
+    if(context == null) {
+      return;
+    }
+
+    try {
+      stmt = conn.prepareStatement(crudQueries.getStmtInsertContext());
+      long contextTypeId = getContextType(contextType, conn);
+
+      for(Map.Entry<String, String> entry: context) {
+        long propertyId = getContextProperty(entry.getKey(), conn);
+
+        stmt.setLong(1, submissionId);
+        stmt.setLong(2, contextTypeId);
+        stmt.setLong(3, propertyId);
+        stmt.setString(4, entry.getValue());
+
+        stmt.executeUpdate();
+      }
+    } finally {
+      closeStatements(stmt);
+    }
+  }
+
+  private long getContextType(ContextType type, Connection conn) throws SQLException {
+    PreparedStatement select = null;
+    PreparedStatement insert = null;
+    ResultSet rsSelect = null;
+    ResultSet rsInsert = null;
+
+    try {
+      select = conn.prepareStatement(crudQueries.getStmtSelectContextType());
+      select.setString(1, type.toString());
+
+      rsSelect = select.executeQuery();
+
+      if(rsSelect.next()) {
+        return rsSelect.getLong(1);
+      }
+
+      insert = conn.prepareStatement(crudQueries.getStmtInsertContextType(), Statement.RETURN_GENERATED_KEYS);
+      insert.setString(1, type.toString());
+      insert.executeUpdate();
+
+      rsInsert = insert.getGeneratedKeys();
+
+      if (!rsInsert.next()) {
+        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+      }
+
+      return rsInsert.getLong(1);
+    } finally {
+      closeResultSets(rsSelect, rsInsert);
+      closeStatements(select, insert);
+    }
+  }
+
+  private long getContextProperty(String property, Connection conn) throws SQLException {
+    PreparedStatement select = null;
+    PreparedStatement insert = null;
+    ResultSet rsSelect = null;
+    ResultSet rsInsert = null;
+
+    try {
+      select = conn.prepareStatement(crudQueries.getStmtSelectContextProperty());
+      select.setString(1, property);
+
+      rsSelect = select.executeQuery();
+
+      if(rsSelect.next()) {
+        return rsSelect.getLong(1);
+      }
+
+      insert = conn.prepareStatement(crudQueries.getStmtInsertContextProperty(), Statement.RETURN_GENERATED_KEYS);
+      insert.setString(1, property);
+      insert.executeUpdate();
+
+      rsInsert = insert.getGeneratedKeys();
+
+      if (!rsInsert.next()) {
+        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+      }
+
+      return rsInsert.getLong(1);
+    } finally {
+      closeResultSets(rsSelect, rsInsert);
+      closeStatements(select, insert);
+    }
+  }
+
   /**
    * Stores counters for given submission in repository.
    *
@@ -1449,7 +1550,36 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     Counters counters = loadCountersSubmission(rs.getLong(1), conn);
     submission.setCounters(counters);
 
+    submission.setFromConnectorContext(loadContextSubmission(rs.getLong(1), ContextType.FROM, conn));
+    submission.setToConnectorContext(loadContextSubmission(rs.getLong(1), ContextType.TO, conn));
+    submission.setDriverContext(loadContextSubmission(rs.getLong(1), ContextType.DRIVER, conn));
+
     return submission;
+  }
+
+  private MutableContext loadContextSubmission(long submissionId, ContextType type, Connection conn) throws SQLException {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = conn.prepareStatement(crudQueries.getStmtSelectContext());
+      stmt.setLong(1, submissionId);
+      stmt.setLong(2, getContextType(type, conn));
+      rs = stmt.executeQuery();
+
+      MutableContext context = new MutableMapContext();
+
+      while (rs.next()) {
+        String key = rs.getString(1);
+        String value = rs.getString(2);
+
+        context.setString(key, value);
+      }
+
+      return context;
+    } finally {
+      closeStatements(stmt);
+      closeResultSets(rs);
+    }
   }
 
   private Counters loadCountersSubmission(long submissionId, Connection conn) throws SQLException {
@@ -2486,6 +2616,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         LOG.info("QUERY(" + query + ") Update count: " + updateCount);
       }
     } catch (SQLException ex) {
+      LOG.error("Can't execute query: " + query, ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0000, query, ex);
     } finally {
       closeStatements(stmt);

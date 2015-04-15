@@ -44,8 +44,10 @@ public final class DerbyRepoConstants {
    *     Changed to FROM/TO design.
    * 5 - Version 1.99.5
    * 6 - Version 1.99.6
+   * 7 - Version 1.99.7
+   *     Stored context classes in SQ_CONTEXT tables
    */
-  public static final int LATEST_DERBY_REPOSITORY_VERSION = 6;
+  public static final int LATEST_DERBY_REPOSITORY_VERSION = 7;
 
   private DerbyRepoConstants() {
     // Disable explicit object creation

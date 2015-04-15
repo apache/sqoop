@@ -243,7 +243,35 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String COLUMN_SQRS_VALUE = "SQRS_VALUE";
 
-  // Constraints
+  // SQ_CONTEXT_TYPE
+
+  public static final String TABLE_SQ_CONTEXT_TYPE = "SQ_CONTEXT_TYPE";
+
+  public static final String COLUMN_SQCT_ID = "SQCT_ID";
+
+  public static final String COLUMN_SQCT_NAME = "SQCT_NAME";
+
+  // SQ_CONTEXT_PROPERTY
+
+  public static final String TABLE_SQ_CONTEXT_PROPERTY = "SQ_CONTEXT_PROPERTY";
+
+  public static final String COLUMN_SQCP_ID = "SQCP_ID";
+
+  public static final String COLUMN_SQCP_NAME = "SQCP_NAME";
+
+  // SQ_CONTEXT
+
+  public static final String TABLE_SQ_CONTEXT = "SQ_CONTEXT";
+
+  public static final String COLUMN_SQCO_ID = "SQCO_ID";
+
+  public static final String COLUMN_SQCO_SUBMISSION = "SQCO_SUBMISSION";
+
+  public static final String COLUMN_SQCO_TYPE = "SQCO_TYPE";
+
+  public static final String COLUMN_SQCO_PROPERTY = "SQCO_PROPERTY";
+
+  public static final String COLUMN_SQCO_VALUE = "SQCO_VALUE";
 
   // Constraints
 
@@ -318,6 +346,15 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String CONSTRAINT_SQRS_SQS_NAME
       = CONSTRAINT_PREFIX + "SQRS_SQS";
+
+  public static final String CONSTRAINT_SQCO_SQS_ID
+      = CONSTRAINT_PREFIX + "SQCO_SQS_ID";
+
+  public static final String CONSTRAINT_SQCO_SQCT_ID
+      = CONSTRAINT_PREFIX + "SQCO_SQCT_ID";
+
+  public static final String CONSTRAINT_SQCO_SQCP_ID
+      = CONSTRAINT_PREFIX + "SQCO_SQCP_ID";
 
   private CommonRepositorySchemaConstants() {
     // Disable explicit object creation

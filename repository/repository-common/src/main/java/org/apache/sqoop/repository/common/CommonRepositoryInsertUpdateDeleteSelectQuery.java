@@ -549,6 +549,54 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " = ?"
           + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " DESC";
 
+  // DML: Select context type
+  public static final String STMT_SELECT_CONTEXT_TYPE =
+      "SELECT "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCT_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCT_NAME) + " "
+          + "FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONTEXT_TYPE) + " "
+          + "WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQCT_NAME) + " = substr(?, 1, 25)";
+
+  // DML: Insert new context type
+  public static final String STMT_INSERT_CONTEXT_TYPE =
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONTEXT_TYPE) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCT_NAME) + ") "
+          + "VALUES (substr(?, 1, 25))";
+
+  // DML: Select context property
+  public static final String STMT_SELECT_CONTEXT_PROPERTY =
+      "SELECT "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCP_ID) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCP_NAME) + " "
+          + "FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONTEXT_PROPERTY) + " "
+          + "WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQCP_NAME) + " = substr(?, 1, 500)";
+
+  // DML: Insert new context property
+  public static final String STMT_INSERT_CONTEXT_PROPERTY =
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONTEXT_PROPERTY) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCP_NAME) + ") "
+          + "VALUES (substr(?, 1, 500))";
+
+  // DML: Insert new context
+  public static final String STMT_INSERT_CONTEXT =
+      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONTEXT) + " ("
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCO_SUBMISSION) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCO_TYPE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCO_PROPERTY) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCO_VALUE) + ") "
+          + "VALUES (?, ?, ?, substr(?, 1, 500))";
+
+  // DML: Select context
+  public static final String STMT_SELECT_CONTEXT =
+      "SELECT "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCP_NAME) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQCO_VALUE) + " "
+          + "FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONTEXT) + " "
+          + "LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONTEXT_PROPERTY)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQCP_ID) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQCO_PROPERTY) + " "
+          + "WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQCO_SUBMISSION) + " = ? "
+          + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQCO_TYPE) + " = ? ";
+
   // DML: Select counter group
   public static final String STMT_SELECT_COUNTER_GROUP =
       "SELECT "
@@ -818,6 +866,30 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   public String getStmtSelectSubmissionsForJob() {
     return STMT_SELECT_SUBMISSIONS_FOR_JOB;
+  }
+
+  public String getStmtSelectContextType() {
+    return STMT_SELECT_CONTEXT_TYPE;
+  }
+
+  public String getStmtInsertContextType() {
+    return STMT_INSERT_CONTEXT_TYPE;
+  }
+
+  public String getStmtSelectContextProperty() {
+    return STMT_SELECT_CONTEXT_PROPERTY;
+  }
+
+  public String getStmtInsertContextProperty() {
+    return STMT_INSERT_CONTEXT_PROPERTY;
+  }
+
+  public String getStmtInsertContext() {
+    return STMT_INSERT_CONTEXT;
+  }
+
+  public String getStmtSelectContext() {
+    return STMT_SELECT_CONTEXT;
   }
 
   public String getStmtSelectCounterGroup() {

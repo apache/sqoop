@@ -340,6 +340,11 @@ public class JobManager implements Reconfigurable {
     jobRequest.setConnector(Direction.FROM, fromConnector);
     jobRequest.setConnector(Direction.TO, toConnector);
 
+    // We also have to store the JobRequest's context pointers to the associated Submission
+    submission.setFromConnectorContext(jobRequest.getConnectorContext(Direction.FROM));
+    submission.setToConnectorContext(jobRequest.getConnectorContext(Direction.TO));
+    submission.setDriverContext(jobRequest.getDriverContext());
+
     jobRequest.setConnectorLinkConfig(Direction.FROM, fromLinkConfig);
     jobRequest.setConnectorLinkConfig(Direction.TO, toLinkConfig);
 
