@@ -20,6 +20,7 @@ package org.apache.sqoop.model;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
+
 import static org.testng.AssertJUnit.assertNull;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,10 +39,12 @@ public class TestConfigUtils {
   public void testConfigs() {
     TestConfiguration config = new TestConfiguration();
     config.aConfig.a1 = "value";
+    config.cConfig.enumeration = Enumeration.X;
 
     List<MConfig> configsByInstance = ConfigUtils.toConfigs(config);
     AssertJUnit.assertEquals(getConfigs(), configsByInstance);
     AssertJUnit.assertEquals("value", configsByInstance.get(0).getInputs().get(0).getValue());
+    AssertJUnit.assertEquals("X", configsByInstance.get(2).getInput("cConfig.enumeration").getValue());
 
     List<MConfig> configsByClass = ConfigUtils.toConfigs(TestConfiguration.class);
     AssertJUnit.assertEquals(getConfigs(), configsByClass);
@@ -49,6 +52,7 @@ public class TestConfigUtils {
     List<MConfig> configsByBoth = ConfigUtils.toConfigs(TestConfiguration.class, config);
     AssertJUnit.assertEquals(getConfigs(), configsByBoth);
     AssertJUnit.assertEquals("value", configsByBoth.get(0).getInputs().get(0).getValue());
+    AssertJUnit.assertEquals("X", configsByBoth.get(2).getInput("cConfig.enumeration").getValue());
   }
 
   @Test(expectedExceptions = SqoopException.class)

@@ -182,7 +182,13 @@ public class  ConfigUtils {
           if(value == null) {
             input.setEmpty();
           } else {
-            input.setValue(value);
+            // Some types requires special cast here due to type changes
+            // between Java and model objects
+            if(type.isEnum()) {
+             input.setValue(value.toString());
+            } else {
+              input.setValue(value);
+            }
           }
         }
 
