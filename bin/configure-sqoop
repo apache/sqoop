@@ -21,6 +21,20 @@
 # This is sourced in by bin/sqoop to set environment variables prior to
 # invoking Hadoop.
 
+function find_home() {
+target="$1"
+
+# file exists and is a symbolic link
+while [ -h "$target" ]; do
+target=`readlink "$target"`
+done
+
+# find home
+home_dir=$(dirname "$target") # points to bin dir
+home_dir="$home_dir/../"
+echo "$home_dir"
+}
+
 bin="$1"
 
 if [ -z "${bin}" ]; then
@@ -105,11 +119,20 @@ if [ -z "${HBASE_HOME}" ]; then
     HBASE_HOME=${SQOOP_HOME}/../hbase
   fi
 fi
+
+# Find hive home
+if [ "$HIVE_HOME" == "" ]; then
+   if [ -f "/usr/bin/hive" ]; then
+     HIVE_HOME=$(find_home "/usr/bin/hive")
+  fi
+fi
+
+
 if [ -z "${HCAT_HOME}" ]; then
-  if [ -d "/usr/lib/hive-hcatalog" ]; then
-    HCAT_HOME=/usr/lib/hive-hcatalog
-  elif [ -d "/usr/lib/hcatalog" ]; then
-    HCAT_HOME=/usr/lib/hcatalog
+  if [ -d "$HIVE_HOME/hive-hcatalog" ]; then
+    HCAT_HOME="$HIVE_HOME"/hive-hcatalog
+  elif [ -d "$HIVE_HOME/hcatalog" ]; then
+    HCAT_HOME="$HIVE_HOME"/hcatalog
   else
     HCAT_HOME=${SQOOP_HOME}/../hive-hcatalog
     if [ ! -d ${HCAT_HOME} ]; then
@@ -125,11 +148,8 @@ if [ -z "${ACCUMULO_HOME}" ]; then
   fi
 fi
 if [ -z "${ZOOKEEPER_HOME}" ]; then
-  if [ -d "/usr/lib/zookeeper" ]; then
-    ZOOKEEPER_HOME=/usr/lib/zookeeper
-  else
-    ZOOKEEPER_HOME=${SQOOP_HOME}/../zookeeper
-  fi
+  ZOOKEEPER_VERSION=$(cat "$MAPR_HOME"/zookeeper/zookeeperversion)
+  ZOOKEEPER_HOME="$MAPR_HOME"/zookeeper/zookeeper-"$ZOOKEEPER_VERSION"
 fi
 
 # Check: If we can't find our dependencies, give up here.
