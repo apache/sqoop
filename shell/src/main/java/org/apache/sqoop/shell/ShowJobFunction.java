@@ -130,14 +130,14 @@ public class ShowJobFunction extends SqoopFunction {
       job.getLastUpdateUser(),
       formatter.format(job.getLastUpdateDate())
     );
-    printlnResource(Constants.RES_SHOW_PROMPT_JOB_LID_CID_INFO,
-        job.getFromLinkId(),
-        job.getFromConnectorId());
-
+    displayConfig(job.getDriverConfig().getConfigs(),
+            client.getDriverConfigBundle());
+    printlnResource(Constants.RES_SHOW_PROMPT_JOB_FROM_LID_INFO,
+        job.getFromLinkId());
     displayConfig(job.getFromJobConfig().getConfigs(),
                  client.getConnectorConfigBundle(job.getFromConnectorId()));
-    displayConfig(job.getDriverConfig().getConfigs(),
-                 client.getDriverConfigBundle());
+    printlnResource(Constants.RES_SHOW_PROMPT_JOB_TO_LID_INFO,
+            job.getToLinkId());
     displayConfig(job.getToJobConfig().getConfigs(),
                  client.getConnectorConfigBundle(job.getToConnectorId()));
   }

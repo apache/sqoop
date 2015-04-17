@@ -296,8 +296,10 @@ public class Constants {
       "show.prompt_jobs_to_show";
   public static final String RES_SHOW_PROMPT_JOB_INFO =
       "show.prompt_job_info";
-  public static final String RES_SHOW_PROMPT_JOB_LID_CID_INFO =
-      "show.prompt_job_lid_cid_info";
+  public static final String RES_SHOW_PROMPT_JOB_FROM_LID_INFO =
+      "show.prompt_job_from_lid_info";
+  public static final String RES_SHOW_PROMPT_JOB_TO_LID_INFO =
+      "show.prompt_job_to_lid_info";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS =
       "show.prompt_display_all_submissions";
