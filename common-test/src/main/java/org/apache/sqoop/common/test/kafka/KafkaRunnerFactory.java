@@ -18,40 +18,24 @@
 
 package org.apache.sqoop.common.test.kafka;
 
-import kafka.server.KafkaConfig;
-import kafka.server.KafkaServerStartable;
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 
 /**
- * A local Kafka server for running unit tests.
- * Reference: https://gist.github.com/fjavieralba/7930018/
+ * This class encapsulates logic behind which Kafka class to instantiate
  */
-public class KafkaLocal {
+public class KafkaRunnerFactory {
 
-  public KafkaServerStartable kafka;
-  public ZooKeeperLocal zookeeper;
-  private KafkaConfig kafkaConfig;
+  private static final String KAFKA_CLASS_PROPERTY = "sqoop.kafka.runner.class";
 
-  public KafkaLocal(Properties kafkaProperties) throws IOException,
-          InterruptedException{
-    kafkaConfig = new KafkaConfig(kafkaProperties);
-
-    //start local kafka broker
-    kafka = new KafkaServerStartable(kafkaConfig);
-  }
-
-  public void start() throws Exception{
-    kafka.startup();
-  }
-
-  public void stop() throws IOException {
-    kafka.shutdown();
-    File dir = new File(kafkaConfig.logDirs().head()).getAbsoluteFile();
-    FileUtils.deleteDirectory(dir);
+  public static KafkaRunnerBase getKafkaRunner() throws ClassNotFoundException, IllegalAccessException,
+                                                        InstantiationException, InterruptedException, IOException {
+    String className = System.getProperty(KAFKA_CLASS_PROPERTY);
+    if(className == null) {
+      return new KafkaLocalRunner();
+    } else {
+      Class<?> klass = Class.forName(className);
+      return (KafkaRunnerBase) klass.newInstance();
+    }
   }
 
 }

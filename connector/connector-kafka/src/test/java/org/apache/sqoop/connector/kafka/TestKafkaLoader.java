@@ -41,7 +41,7 @@ public class TestKafkaLoader {
   private static String TOPIC = "mytopic";
 
   @BeforeClass(alwaysRun = true)
-  public static void setup() throws IOException {
+  public static void setup() throws Exception {
     testUtil.prepare();
     List<String> topics = new ArrayList<String>(1);
     topics.add(TOPIC);

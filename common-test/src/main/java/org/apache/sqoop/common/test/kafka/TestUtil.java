@@ -19,16 +19,11 @@
 package org.apache.sqoop.common.test.kafka;
 
 import kafka.message.MessageAndMetadata;
-import org.apache.sqoop.common.test.utils.NetworkUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Properties;
-import java.util.Random;
 
 /**
  * A utility class for starting/stopping Kafka Server.
@@ -38,71 +33,29 @@ public class TestUtil {
   private static final Logger logger = LoggerFactory.getLogger(TestUtil.class);
   private static TestUtil instance = new TestUtil();
 
-  private Random randPortGen = new Random(System.currentTimeMillis());
-  private KafkaLocal kafkaServer;
-  private ZooKeeperLocal zookeeperServer;
+  private KafkaRunnerBase kafkaServer;
   private KafkaConsumer kafkaConsumer;
-  private String hostname = "localhost";
-  private int kafkaLocalPort = 9022;
-  private int zkLocalPort = 2188;
 
-  private TestUtil() {
-    init();
-  }
+  private TestUtil() {}
 
   public static TestUtil getInstance() {
     return instance;
   }
 
-  private void init() {
-    // get the localhost.
+  private boolean startKafkaServer() throws IOException, InterruptedException, ClassNotFoundException,
+                                            IllegalAccessException, InstantiationException {
+    kafkaServer = KafkaRunnerFactory.getKafkaRunner();
+
     try {
-      hostname = InetAddress.getLocalHost().getHostName();
-
-    } catch (UnknownHostException e) {
-      logger.warn("Error getting the value of localhost. " +
-              "Proceeding with 'localhost'.", e);
-    }
-  }
-
-  private boolean startKafkaServer() throws IOException {
-    kafkaLocalPort = NetworkUtils.findAvailablePort();
-    zkLocalPort = NetworkUtils.findAvailablePort();
-
-    logger.info("Starting kafka server with kafka port " + kafkaLocalPort +
-            " and zookeeper port " + zkLocalPort );
-    try {
-      //start local Zookeeper
-      zookeeperServer = new ZooKeeperLocal(zkLocalPort);
-      logger.info("ZooKeeper instance is successfully started on port " +
-              zkLocalPort);
-
-      Properties kafkaProperties = getKafkaProperties();
-
-      kafkaServer = new KafkaLocal(kafkaProperties);
       kafkaServer.start();
-
-      logger.info("Kafka Server is successfully started on port " +
-              kafkaLocalPort);
-      return true;
-
     } catch (Exception e) {
       logger.error("Error starting the Kafka Server.", e);
       return false;
     }
+
+    return true;
   }
 
-  Properties getKafkaProperties() {
-    Properties kafkaProps = new Properties();
-    kafkaProps.put("broker.id","0");
-    // Kafka expects strings for all properties and KafkaConfig will throw an exception otherwise
-    kafkaProps.put("port",Integer.toString(kafkaLocalPort));
-    kafkaProps.put("log.dirs","target/kafka-logs");
-    kafkaProps.put("num.partitions","1");
-    kafkaProps.put("zookeeper.connect",zookeeperServer.getConnectString());
-
-    return kafkaProps;
-  }
 
   private KafkaConsumer getKafkaConsumer() {
     synchronized (this) {
@@ -121,7 +74,7 @@ public class TestUtil {
     return getKafkaConsumer().getNextMessage(topic);
   }
 
-  public void prepare() throws IOException {
+  public void prepare() throws Exception {
     boolean startStatus = startKafkaServer();
     if (!startStatus) {
       throw new RuntimeException("Error starting the server!");
@@ -147,16 +100,14 @@ public class TestUtil {
     }
     logger.info("Shutting down the kafka Server.");
     kafkaServer.stop();
-    logger.info("Shutting down Zookeeper Server.");
-    zookeeperServer.stopZookeeper();
     logger.info("Completed the tearDown phase.");
   }
 
   public String getZkUrl() {
-    return zookeeperServer.getConnectString();
+    return kafkaServer.getZkConnectionString();
   }
 
   public String getKafkaServerUrl() {
-    return "localhost:"+kafkaLocalPort;
+    return kafkaServer.getKafkaUrl();
   }
 }

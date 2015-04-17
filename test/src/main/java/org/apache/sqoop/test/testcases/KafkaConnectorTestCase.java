@@ -42,7 +42,7 @@ public class KafkaConnectorTestCase extends ConnectorTestCase {
   private static final String TOPIC = "mytopic";
 
   @BeforeClass(alwaysRun = true)
-  public static void startKafka() throws IOException {
+  public static void startKafka() throws Exception {
     // starts Kafka server and its dependent zookeeper
     testUtil.prepare();
   }
