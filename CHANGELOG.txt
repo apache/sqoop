@@ -64,7 +64,7 @@ Release 1.99.6
 
     SQOOP-2212: Update website
 
-    SQOOP-2220: Sqoop2: Fix the privilege check on job using the link id not the connector id
+    SQOOP-2220: Sqoop2: Fix the privilege check on job using the link id not the connector id 
 
     SQOOP-2226: Sqoop2: Access denied in shell
 
@@ -81,6 +81,14 @@ Release 1.99.6
     SQOOP-2255: Sqoop2: Throw Exception when no permission to the resource
 
     SQOOP-2256: Sqoop2: Creator should have access to its entities
+
+    SQOOP-2304: Update license file
+
+    SQOOP-2313: Update change log with 1.99.6 release for RC-1
+
+    SQOOP-2314: Create release candidate for RC-1
+
+    SQOOP-2315: Run vote on RC candidates for RC-1
 
   BUG
 
@@ -212,11 +220,21 @@ Release 1.99.6
 
     SQOOP-2273: Sqoop2: Move authorizationServlet into v1 package
 
+    SQOOP-2276: MapReduce execution error in Sqoop job
+
     SQOOP-2277: Sqoop2: Add annotation for public usage classes in Sqoop Core
 
     SQOOP-2278: Sqoop2: Fix bug for all user could read connector
 
     SQOOP-2279: Sqoop2: Clean connector cache after grant and revoke statements
+
+    SQOOP-2307: Sqoop2: Fix a typo for hdfs-connector-config.properties and kafka-connector-config.properties
+
+    SQOOP-2308: Sqoop2: Fix a typo for hdfs-connector-config.properties and kafka-connector-config.properties
+
+    SQOOP-2309: Sqoop2: Add to link id in show job --all command
+
+    SQOOP-2310: Sqoop2: fix a typo for Hadoop conf directory
 
   IMPROVEMENT
 
