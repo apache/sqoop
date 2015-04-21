@@ -55,7 +55,7 @@ public class AvroSchemaGenerator {
     this.tableName = table;
   }
 
-  public Schema generate() throws IOException {
+  public Schema generate(String schemaNameOverride) throws IOException {
     ClassWriter classWriter = new ClassWriter(options, connManager,
         tableName, null);
     Map<String, Integer> columnTypes = classWriter.getColumnTypes();
@@ -75,7 +75,8 @@ public class AvroSchemaGenerator {
     TableClassName tableClassName = new TableClassName(options);
     String shortClassName = tableClassName.getShortClassForTable(tableName);
     String avroTableName = (tableName == null ? TableClassName.QUERY_RESULT : tableName);
-    String avroName = "sqoop_import_" + (shortClassName == null ? avroTableName : shortClassName);
+    String avroName = schemaNameOverride != null ? schemaNameOverride :
+        (shortClassName == null ? avroTableName : shortClassName);
     String avroNamespace = tableClassName.getPackageForTable();
 
     String doc = "Sqoop import of " + avroTableName;
