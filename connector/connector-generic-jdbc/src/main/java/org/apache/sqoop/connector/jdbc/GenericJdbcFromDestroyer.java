@@ -33,4 +33,8 @@ public class GenericJdbcFromDestroyer extends Destroyer<LinkConfiguration, FromJ
     LOG.info("Running generic JDBC connector destroyer");
   }
 
+  @Override
+  public void updateConfiguration(DestroyerContext context, LinkConfiguration linkConfiguration, FromJobConfiguration fromJobConfiguration) {
+    fromJobConfiguration.incrementalRead.lastValue = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE);
+  }
 }

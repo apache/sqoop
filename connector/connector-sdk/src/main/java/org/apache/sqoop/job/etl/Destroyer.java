@@ -41,4 +41,23 @@ public abstract class Destroyer<LinkConfiguration, JobConfiguration> {
                                LinkConfiguration linkConfiguration,
                                JobConfiguration jobConfiguration);
 
+  /** Callback to update configuration objects given values in context.
+   *
+   * This callback will be called only after successful execution of the job. It will
+   * might be executed on different machine then other callbacks and hence it should not
+   * use any state stored within the instance.
+   *
+   * This method is designed to update configuration objects for next job run, so that
+   * user can move data in incremental fashion. Sqoop framework will update the configuration
+   * objects in repository after calling this method.
+   *
+   * @param context Destroyer context
+   * @param linkConfiguration Link configuration object
+   * @param jobConfiguration Job configuration object
+   */
+  public void updateConfiguration(DestroyerContext context,
+                                  LinkConfiguration linkConfiguration,
+                                  JobConfiguration jobConfiguration) {
+    // Default implementation does nothing
+  }
 }

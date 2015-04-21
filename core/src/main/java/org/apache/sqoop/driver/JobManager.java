@@ -38,7 +38,9 @@ import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.job.etl.Transferable;
 import org.apache.sqoop.model.ConfigUtils;
-import org.apache.sqoop.model.SubmissionError;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MSubmission;
@@ -47,7 +49,6 @@ import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.request.HttpEventContext;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
-import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class JobManager implements Reconfigurable {
@@ -511,6 +512,61 @@ public class JobManager implements Reconfigurable {
     executionEngine.prepareJob(request);
   }
 
+  void invokeDestroyerOnJobSuccess(MSubmission submission) {
+    try {
+      MJob job = getJob(submission.getJobId());
+
+      SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorId());
+      SqoopConnector toConnector = getSqoopConnector(job.getToConnectorId());
+
+      MLink fromConnection = getLink(job.getFromLinkId());
+      MLink toConnection = getLink(job.getToLinkId());
+
+      Object fromLinkConfig = ClassUtils.instantiate(fromConnector.getLinkConfigurationClass());
+      ConfigUtils.fromConfigs(fromConnection.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
+
+      Object toLinkConfig = ClassUtils.instantiate(toConnector.getLinkConfigurationClass());
+      ConfigUtils.fromConfigs(toConnection.getConnectorLinkConfig().getConfigs(), toLinkConfig);
+
+      Object fromJob = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
+      ConfigUtils.fromConfigs(job.getFromJobConfig().getConfigs(), fromJob);
+
+      Object toJob = ClassUtils.instantiate(toConnector.getJobConfigurationClass(Direction.TO));
+      ConfigUtils.fromConfigs(job.getToJobConfig().getConfigs(), toJob);
+
+      Destroyer fromDestroyer = (Destroyer) ClassUtils.instantiate(fromConnector.getFrom().getDestroyer());
+      Destroyer toDestroyer = (Destroyer) ClassUtils.instantiate(toConnector.getTo().getDestroyer());
+
+      DestroyerContext fromDestroyerContext = new DestroyerContext(submission.getFromConnectorContext(), true, submission.getFromSchema());
+      DestroyerContext toDestroyerContext = new DestroyerContext(submission.getToConnectorContext(), false, submission.getToSchema());
+
+      fromDestroyer.updateConfiguration(fromDestroyerContext, fromLinkConfig, fromJob);
+      toDestroyer.updateConfiguration(toDestroyerContext, toLinkConfig, toJob);
+
+      List<MConfig> fromJobUpdated = ConfigUtils.toConfigs(fromJob);
+      List<MConfig> toJobUpdated = ConfigUtils.toConfigs(toJob);
+
+      for (MConfig config : fromJobUpdated) {
+        MConfigList originalInput = job.getFromJobConfig();
+        for (MInput input : config.getInputs()) {
+          originalInput.getInput(input.getName()).setValue(input.getValue());
+        }
+      }
+      for (MConfig config : toJobUpdated) {
+        MConfigList originalInput = job.getToJobConfig();
+        for (MInput input : config.getInputs()) {
+          Object value = input.getValue();
+          originalInput.getInput(input.getName()).setValue(value);
+        }
+      }
+
+      RepositoryManager.getInstance().getRepository().updateJob(job);
+    } catch(Exception ex) {
+      LOG.error("Exception when invoking destroyer on job success", ex);
+      submission.setStatus(SubmissionStatus.FAILED);
+    }
+  }
+
   /**
    * Callback that will be called only if we failed to submit the job to the
    * remote cluster.
@@ -590,7 +646,15 @@ public class JobManager implements Reconfigurable {
    * @param submission Submission to update
    */
   public void updateSubmission(MSubmission submission) {
+    // We're expecting that this method will be called only if we think that the submission is still running
+    assert submission.getStatus().isRunning();
+
     submissionEngine.update(submission);
+
+    if (!submission.getStatus().isRunning() && !submission.getStatus().isFailure()) {
+      invokeDestroyerOnJobSuccess(submission);
+    }
+
     RepositoryManager.getInstance().getRepository().updateSubmission(submission);
   }
 

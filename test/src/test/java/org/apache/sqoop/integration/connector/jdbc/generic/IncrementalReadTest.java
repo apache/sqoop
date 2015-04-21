@@ -18,7 +18,6 @@
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import com.google.common.collect.Iterables;
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
@@ -32,6 +31,8 @@ import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  */
@@ -104,7 +105,9 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
         "19,'Saucy Salamander',13.10,'2013-10-17',false"
       );
 
-    // TODO: After Sqoop will be properly updating configuration objects we need to verify new max value
+    // Verify new last value
+    MJob updatedJob = getClient().getJob(job.getPersistenceId());
+    assertEquals(updatedJob.getFromJobConfig().getStringInput("incrementalRead.lastValue").getValue(), newMaxValue);
 
     // Clean up testing table
     dropTable();
@@ -157,7 +160,9 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
         "19,'Saucy Salamander',13.10,'2013-10-17',false"
       );
 
-    // TODO: After Sqoop will be properly updating configuration objects we need to verify new max value
+    // Verify new last value
+    MJob updatedJob = getClient().getJob(job.getPersistenceId());
+    assertEquals(updatedJob.getFromJobConfig().getStringInput("incrementalRead.lastValue").getValue(), newMaxValue);
 
     // Clean up testing table
     dropTable();
