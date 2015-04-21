@@ -47,7 +47,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
   @Override
   public void initialize(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    executor = new GenericJdbcExecutor(linkConfig.linkConfig);
+    executor = new GenericJdbcExecutor(linkConfig);
 
     try {
       configurePartitionProperties(context.getContext(), linkConfig, fromJobConfig);
@@ -68,7 +68,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
   @Override
   public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    executor = new GenericJdbcExecutor(linkConfig.linkConfig);
+    executor = new GenericJdbcExecutor(linkConfig);
 
     String schemaName = fromJobConfig.fromJobConfig.tableName;
     if(schemaName == null) {

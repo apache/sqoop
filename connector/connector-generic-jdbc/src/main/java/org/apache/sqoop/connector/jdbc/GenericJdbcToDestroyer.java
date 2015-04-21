@@ -42,7 +42,7 @@ public class GenericJdbcToDestroyer extends Destroyer<LinkConfiguration, ToJobCo
   }
 
   private void moveDataToDestinationTable(LinkConfiguration linkConfig, boolean success, String stageTableName, String tableName) {
-    GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig.linkConfig);
+    GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig);
     try {
       if(success) {
         LOG.info("Job completed, transferring data from stage fromTable to " +

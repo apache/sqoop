@@ -32,7 +32,7 @@ public class GenericJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurat
 
   @Override
   public void load(LoaderContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) throws Exception{
-    GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig.linkConfig);
+    GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig);
     executor.setAutoCommit(false);
     String sql = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL);
     executor.beginBatch(sql);

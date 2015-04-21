@@ -44,7 +44,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
 
   @Override
   public void initialize(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    executor = new GenericJdbcExecutor(linkConfig.linkConfig);
+    executor = new GenericJdbcExecutor(linkConfig);
     try {
       configureTableProperties(context.getContext(), linkConfig, toJobConfig);
     } finally {
@@ -61,7 +61,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
 
   @Override
   public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
-    executor = new GenericJdbcExecutor(linkConfig.linkConfig);
+    executor = new GenericJdbcExecutor(linkConfig);
 
     String schemaName = toJobConfig.toJobConfig.tableName;
 

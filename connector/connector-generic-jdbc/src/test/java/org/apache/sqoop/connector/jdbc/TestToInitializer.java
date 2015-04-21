@@ -59,7 +59,7 @@ public class TestToInitializer {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
-    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIG);
+    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIGURATION);
 
     String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
     if (!executor.existTable(tableName)) {

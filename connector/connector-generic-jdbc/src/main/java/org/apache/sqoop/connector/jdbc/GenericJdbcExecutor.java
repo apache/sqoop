@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.jdbc;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfig;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.error.code.GenericJdbcConnectorError;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
@@ -58,7 +59,7 @@ public class GenericJdbcExecutor {
   /**
    * User configured link with credentials and such
    */
-  private LinkConfig linkConfig;
+  private LinkConfiguration link;
 
   /**
    * Internal connection object (we'll hold to it)
@@ -70,23 +71,24 @@ public class GenericJdbcExecutor {
    */
   private PreparedStatement preparedStatement;
 
-  public GenericJdbcExecutor(LinkConfig linkConfig) {
-    assert linkConfig != null;
-    assert linkConfig.connectionString != null;
-
+  public GenericJdbcExecutor(LinkConfiguration linkConfig) {
     // Persist link configuration for future use
-    this.linkConfig = linkConfig;
+    this.link = linkConfig;
+
+    assert link != null;
+    assert link.linkConfig != null;
+    assert link.linkConfig.connectionString != null;
 
     // Load/register the JDBC driver to JVM
-    Class driverClass = ClassUtils.loadClass(linkConfig.jdbcDriver);
+    Class driverClass = ClassUtils.loadClass(link.linkConfig.jdbcDriver);
     if(driverClass == null) {
-      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0000, linkConfig.jdbcDriver);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0000, link.linkConfig.jdbcDriver);
     }
 
     // Properties that we will use for the connection
     Properties properties = new Properties();
-    if(linkConfig.jdbcProperties != null) {
-      properties.putAll(linkConfig.jdbcProperties);
+    if(link.linkConfig.jdbcProperties != null) {
+      properties.putAll(link.linkConfig.jdbcProperties);
     }
 
     // Propagate username and password to the properties
@@ -96,16 +98,16 @@ public class GenericJdbcExecutor {
     // * getConnection(url, properties)
     // As we have to use properties, we need to use the later
     // method and hence we have to persist the credentials there.
-    if(linkConfig.username != null) {
-      properties.put(JDBC_PROPERTY_USERNAME, linkConfig.username);
+    if(link.linkConfig.username != null) {
+      properties.put(JDBC_PROPERTY_USERNAME, link.linkConfig.username);
     }
-    if(linkConfig.password != null) {
-      properties.put(JDBC_PROPERTY_PASSWORD, linkConfig.password);
+    if(link.linkConfig.password != null) {
+      properties.put(JDBC_PROPERTY_PASSWORD, link.linkConfig.password);
     }
 
     // Finally create the connection
     try {
-      connection = DriverManager.getConnection(linkConfig.connectionString, properties);
+      connection = DriverManager.getConnection(link.linkConfig.connectionString, properties);
     } catch (SQLException e) {
       logSQLException(e);
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0001, e);

@@ -69,7 +69,7 @@ public class TestLoader {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
-    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIG);
+    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIGURATION);
 
     if (!executor.existTable(tableName)) {
       executor.executeUpdate("CREATE TABLE "

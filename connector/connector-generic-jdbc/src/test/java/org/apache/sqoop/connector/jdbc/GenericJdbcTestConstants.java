@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.apache.sqoop.connector.jdbc.configuration.LinkConfig;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 
 public class GenericJdbcTestConstants {
 
@@ -34,9 +34,9 @@ public class GenericJdbcTestConstants {
   /**
    * Test link configuration
    */
-  public static final LinkConfig LINK_CONFIG = new LinkConfig();
+  public static final LinkConfiguration LINK_CONFIGURATION = new LinkConfiguration();
   static {
-    LINK_CONFIG.jdbcDriver = DRIVER;
-    LINK_CONFIG.connectionString = URL;
+    LINK_CONFIGURATION.linkConfig.jdbcDriver = DRIVER;
+    LINK_CONFIGURATION.linkConfig.connectionString = URL;
   }
 }

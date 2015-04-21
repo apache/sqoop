@@ -42,7 +42,7 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
  private long rowsRead = 0;
   @Override
   public void extract(ExtractorContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig, GenericJdbcPartition partition) {
-    GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig.linkConfig);
+    GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig);
 
     String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL);
     String conditions = partition.getConditions();
