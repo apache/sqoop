@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,7 +86,8 @@ public class DataDrivenImportJob extends ImportJobBase {
       job.setOutputValueClass(NullWritable.class);
     } else if (options.getFileLayout()
         == SqoopOptions.FileLayout.AvroDataFile) {
-      Schema schema = generateAvroSchema(tableName);
+      final String schemaNameOverride = null;
+      Schema schema = generateAvroSchema(tableName, schemaNameOverride);
       try {
         writeAvroSchema(schema);
       } catch (final IOException e) {
@@ -99,9 +98,12 @@ public class DataDrivenImportJob extends ImportJobBase {
     } else if (options.getFileLayout()
         == SqoopOptions.FileLayout.ParquetFile) {
       Configuration conf = job.getConfiguration();
-      // An Avro schema is required for creating a dataset that manages
-      // Parquet data records. The import will fail, if schema is invalid.
-      Schema schema = generateAvroSchema(tableName);
+      // Kite SDK requires an Avro schema to represent the data structure of
+      // target dataset. If the schema name equals to generated java class name,
+      // the import will fail. So we use table name as schema name and add a
+      // prefix "codegen_" to generated java class to avoid the conflict.
+      final String schemaNameOverride = tableName;
+      Schema schema = generateAvroSchema(tableName, schemaNameOverride);
       String uri = getKiteUri(conf, tableName);
       ParquetJob.configureImportJob(conf, schema, uri, options.isAppendMode(),
           options.doHiveImport() && options.doOverwriteHiveTable());
@@ -123,11 +125,12 @@ public class DataDrivenImportJob extends ImportJobBase {
     }
   }
 
-  private Schema generateAvroSchema(String tableName) throws IOException {
+  private Schema generateAvroSchema(String tableName,
+      String schemaNameOverride) throws IOException {
     ConnManager connManager = getContext().getConnManager();
     AvroSchemaGenerator generator = new AvroSchemaGenerator(options,
         connManager, tableName);
-    return generator.generate();
+    return generator.generate(schemaNameOverride);
   }
 
   private void writeAvroSchema(final Schema schema) throws IOException {
