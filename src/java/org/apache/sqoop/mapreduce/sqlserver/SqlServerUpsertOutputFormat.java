@@ -149,12 +149,6 @@ public class SqlServerUpsertOutputFormat<K extends SqoopRecord, V>
       }
       sb.append(" )");
 
-      String tableHints = getConf().get(org.apache.sqoop.manager.SQLServerManager.TABLE_HINTS_PROP);
-      if (tableHints != null) {
-        LOG.info("Using table hints for query hints: " + tableHints);
-        sb.append(" OPTION (").append(tableHints).append(")");
-      }
-
       sb.append(";");
 
       return sb.toString();

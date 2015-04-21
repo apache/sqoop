@@ -52,7 +52,6 @@ public class SqlServerUpsertOutputFormatTest {
       StringUtils.join(columnNames, ','));
     conf.set(ExportJobBase.SQOOP_EXPORT_UPDATE_COL_KEY,
       StringUtils.join(updateKeyColumns, ','));
-    conf.set(SQLServerManager.TABLE_HINTS_PROP, "NOLOCK");
     conf.set(SQLServerManager.IDENTITY_INSERT_PROP, "true");
     TaskAttemptContext context = null;
     Class cls = null;
@@ -90,7 +89,7 @@ public class SqlServerUpsertOutputFormatTest {
       + "_source.SecondColumn, _target.ThirdColumn = _source.ThirdColumn"
       + "  WHEN NOT MATCHED THEN INSERT ( FirstColumn, SecondColumn,"
       + " ThirdColumn ) VALUES "
-      + "( _source.FirstColumn, _source.SecondColumn, _source.ThirdColumn ) "
-      + "OPTION (NOLOCK);", recordWriter.getUpdateStatement());
+      + "( _source.FirstColumn, _source.SecondColumn, _source.ThirdColumn );",
+      recordWriter.getUpdateStatement());
   }
 }
