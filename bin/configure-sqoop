@@ -285,3 +285,4 @@ export HCAT_HOME
 export HIVE_CONF_DIR
 export ACCUMULO_HOME
 export ZOOKEEPER_HOME
+export HIVE_HOME
