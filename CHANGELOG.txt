@@ -68,6 +68,7 @@ Release Notes - Sqoop - Version 1.4.6
     * [SQOOP-2283] - Support usage of --exec and --password-alias
     * [SQOOP-2286] - Ensure Sqoop generates valid avro column names
     * [SQOOP-2290] - java.lang.ArrayIndexOutOfBoundsException thrown when malformed column mapping is provided
+    * [SQOOP-2294] - Change to Avro schema name breaks some use cases
 
 ** Improvement
     * [SQOOP-1330] - Ignore blank newlines in managers.d property files
@@ -91,6 +92,7 @@ Release Notes - Sqoop - Version 1.4.6
     * [SQOOP-1450] - Copy the avro schema file to hdfs for AVRO based import
 
 ** Task
+    * [SQOOP-1408] - Document SQL Server's --non-resilient arg
     * [SQOOP-1693] - Upgrade Kite SDK to 0.17
 
 
