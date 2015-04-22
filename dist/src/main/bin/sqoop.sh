@@ -114,7 +114,7 @@ case $COMMAND in
     if [ -n "${JAVA_HOME}" ] ; then
         EXEC_JAVA="${JAVA_HOME}/bin/java"
     fi
-    ${EXEC_JAVA} -classpath ${CLASSPATH} org.apache.sqoop.shell.SqoopShell $2
+    ${EXEC_JAVA} $JAVA_OPTS -classpath ${CLASSPATH} org.apache.sqoop.shell.SqoopShell $2
     ;;
 
   *)
