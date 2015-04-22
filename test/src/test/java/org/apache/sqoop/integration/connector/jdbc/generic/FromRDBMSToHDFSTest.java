@@ -98,13 +98,14 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     MConfigList configs = job.getFromJobConfig();
     configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("name") + "," + provider.escapeColumnName("story"));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+
     saveJob(job);
 
-    MSubmission submission = getClient().startJob(job.getPersistenceId());
-    assertTrue(submission.getStatus().isRunning());
+    executeJob(job);
 
     // Wait until the job finish - this active waiting will be removed once
     // Sqoop client API will get blocking support.
+    MSubmission submission;
     do {
       Thread.sleep(5000);
       submission = getClient().getJobStatus(job.getPersistenceId());
@@ -143,13 +144,14 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     MConfigList configs = job.getFromJobConfig();
     configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+
     saveJob(job);
 
-    MSubmission submission = getClient().startJob(job.getPersistenceId());
-    assertTrue(submission.getStatus().isRunning());
+    executeJob(job);
 
     // Wait until the job finish - this active waiting will be removed once
     // Sqoop client API will get blocking support.
+    MSubmission submission;
     do {
       Thread.sleep(5000);
       submission = getClient().getJobStatus(job.getPersistenceId());
@@ -190,13 +192,14 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
         + " FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}");
     configs.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+
     saveJob(job);
 
-    MSubmission submission = getClient().startJob(job.getPersistenceId());
-    assertTrue(submission.getStatus().isRunning());
+    executeJob(job);
 
     // Wait until the job finish - this active waiting will be removed once
     // Sqoop client API will get blocking support.
+    MSubmission submission;
     do {
       Thread.sleep(5000);
       submission = getClient().getJobStatus(job.getPersistenceId());
@@ -243,13 +246,14 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
         "SELECT MIN(" + partitionColumn + "), MAX(" + partitionColumn + ") FROM "
             + provider.escapeTableName(getTableName().getTableName()));
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+
     saveJob(job);
 
-    MSubmission submission = getClient().startJob(job.getPersistenceId());
-    assertTrue(submission.getStatus().isRunning());
+    executeJob(job);
 
     // Wait until the job finish - this active waiting will be removed once
     // Sqoop client API will get blocking support.
+    MSubmission submission;
     do {
       Thread.sleep(5000);
       submission = getClient().getJobStatus(job.getPersistenceId());
