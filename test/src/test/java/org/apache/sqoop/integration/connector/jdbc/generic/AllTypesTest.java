@@ -43,6 +43,7 @@ import static org.testng.Assert.assertEquals;
 /**
  * Test transfer of all supported data types.
  */
+@Test(groups = "slow")
 public class AllTypesTest extends ConnectorTestCase implements ITest {
 
   @DataProvider(name="all-types-test", parallel=true)
