@@ -27,28 +27,26 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.test.asserts.HdfsAsserts;
+import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
-import org.apache.sqoop.test.hadoop.HadoopLocalRunner;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.ITest;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 
 /**
  * Basic test case that will bootstrap Sqoop server running in external Tomcat
  * process.
  */
-abstract public class TomcatTestCase {
+abstract public class TomcatTestCase implements ITest {
   private static final Logger LOG = Logger.getLogger(TomcatTestCase.class);
 
-  public String name;
+  public String methodName;
 
   /**
    * Temporary base path that will be used for tests.
@@ -59,7 +57,7 @@ abstract public class TomcatTestCase {
    * in case that no property is set.
    */
   protected static final String TMP_PATH_BASE =
-    System.getProperty("sqoop.integration.tmpdir", System.getProperty("java.io.tmpdir", "/tmp")) + "/sqoop-cargo-tests/";
+    System.getProperty("sqoop.integration.tmpdir", System.getProperty("java.io.tmpdir", "/tmp")) + "/sqoop-cargo-tests";
 
   /**
    * Temporary directory that will be used by the test.
@@ -92,12 +90,19 @@ abstract public class TomcatTestCase {
    */
   private SqoopClient client;
 
+  /**
+   * Use the method name as the test name
+   */
+  public String getTestName() {
+    return methodName;
+  }
+
   @BeforeSuite(alwaysRun = true)
-  public static void startHadoop() throws Exception {
+  public void startHadoop() throws Exception {
     // Start Hadoop Clusters
-    hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopLocalRunner.class);
+    hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopMiniClusterRunner.class);
     hadoopCluster.setTemporaryPath(TMP_PATH_BASE);
-    hadoopCluster.setConfiguration( hadoopCluster.prepareConfiguration(new JobConf()) );
+    hadoopCluster.setConfiguration(hadoopCluster.prepareConfiguration(new JobConf()));
     hadoopCluster.start();
 
     // Initialize Hdfs Client
@@ -106,18 +111,11 @@ abstract public class TomcatTestCase {
   }
 
   @BeforeMethod(alwaysRun = true)
-  public void findMethodName(Method method) {
-    if(this instanceof ITest) {
-      name = ((ITest)this).getTestName();
-    } else {
-      name = method.getName();
-    }
-  }
+  public void startServer(Method method) throws Exception {
+    methodName = method.getName();
 
-  @BeforeMethod(alwaysRun = true)
-  public void startServer() throws Exception {
     // Get and set temporary path in hadoop cluster.
-    tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, getClass().getName(), name);
+    tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, getClass().getName(), getTestName());
     FileUtils.deleteDirectory(new File(tmpPath));
 
     LOG.debug("Temporary Directory: " + tmpPath);
@@ -187,7 +185,7 @@ abstract public class TomcatTestCase {
    * @return
    */
   public String getMapreduceDirectory() {
-    return HdfsUtils.joinPathFragments(hadoopCluster.getTestDirectory(), getClass().getName(), name);
+    return HdfsUtils.joinPathFragments(hadoopCluster.getTestDirectory(), getClass().getName(), getTestName());
   }
 
   /**

@@ -25,6 +25,7 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
 import org.testng.ITest;
+import org.testng.ITestContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
@@ -45,6 +46,8 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     {"release_date", "2008-10-18", "2013-10-17"},
   };
 
+  private static String testName;
+
   private String checkColumn;
   private String lastValue;
   private String newMaxValue;
@@ -57,8 +60,19 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
   }
 
   @DataProvider(name="incremental-integration-test", parallel=true)
-  public static Object[][] data() {
+  public static Object[][] data(ITestContext context) {
+    testName = context.getName();
+
     return Iterables.toArray(ParametrizedUtils.toArrayOfArrays(COLUMNS), Object[].class);
+  }
+
+  @Override
+  public String getTestName() {
+    if (methodName == null) {
+      return testName;
+    } else {
+      return methodName + "[" + checkColumn + "]";
+    }
   }
 
   @Test
@@ -166,17 +180,5 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
 
     // Clean up testing table
     dropTable();
-  }
-
-  private String testName;
-
-  @BeforeMethod(alwaysRun = true)
-  public void beforeMethod(Method aMethod) {
-    this.testName = aMethod.getName();
-  }
-
-  @Override
-  public String getTestName() {
-    return testName + "[" + checkColumn + "]";
   }
 }

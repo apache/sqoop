@@ -91,7 +91,12 @@ public class TestUtil {
 
   public void tearDown() throws IOException {
     logger.info("Shutting down the Kafka Consumer.");
-    getKafkaConsumer().shutdown();
+
+    // Set kafkaConsumer to null so that a new one is created when
+    // getKafkaConsumer is called.
+    kafkaConsumer.shutdown();
+    kafkaConsumer = null;
+
     try {
       Thread.sleep(3 * 1000);   // add this sleep time to
       // ensure that the server is fully started before proceeding with tests.

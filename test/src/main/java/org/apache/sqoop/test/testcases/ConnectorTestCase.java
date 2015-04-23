@@ -24,7 +24,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SubmissionCallback;
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.test.asserts.ProviderAsserts;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.DatabaseProviderFactory;
@@ -42,8 +41,7 @@ import org.apache.sqoop.test.data.UbuntuReleases;
 import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.validation.Status;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 
 /**
@@ -79,26 +77,13 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   };
 
   @BeforeSuite(alwaysRun = true)
-  public static void startHadoop() throws Exception {
-    // Start Hadoop Clusters
-    hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopMiniClusterRunner.class);
-    hadoopCluster.setTemporaryPath(TMP_PATH_BASE);
-    hadoopCluster.setConfiguration( hadoopCluster.prepareConfiguration(new JobConf()) );
-    hadoopCluster.start();
-
-    // Initialize Hdfs Client
-    hdfsClient = FileSystem.get(hadoopCluster.getConfiguration());
-    LOG.debug("HDFS Client: " + hdfsClient);
-  }
-
-  @BeforeClass(alwaysRun = true)
   public static void startProvider() throws Exception {
     provider = DatabaseProviderFactory.getProvider(System.getProperties());
     LOG.info("Starting database provider: " + provider.getClass().getName());
     provider.start();
   }
 
-  @AfterClass(alwaysRun = true)
+  @AfterSuite(alwaysRun = true)
   public static void stopProvider() {
     LOG.info("Stopping database provider: " + provider.getClass().getName());
     provider.stop();

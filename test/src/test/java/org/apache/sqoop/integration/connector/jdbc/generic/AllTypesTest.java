@@ -18,7 +18,6 @@
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import com.google.common.collect.Iterables;
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.DatabaseProviderFactory;
 import org.apache.sqoop.common.test.db.types.DatabaseType;
@@ -31,12 +30,10 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
 import org.testng.ITest;
-import org.testng.annotations.BeforeMethod;
+import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
-
-import java.lang.reflect.Method;
 
 import static org.testng.Assert.assertEquals;
 
@@ -46,8 +43,14 @@ import static org.testng.Assert.assertEquals;
 @Test(groups = "slow")
 public class AllTypesTest extends ConnectorTestCase implements ITest {
 
-  @DataProvider(name="all-types-test", parallel=true)
-  public static Object[][] data() throws Exception {
+  private static String testName;
+
+  private DatabaseType type;
+
+  @DataProvider(name="all-types-test", parallel=false)
+  public static Object[][] data(ITestContext context) throws Exception {
+    testName = context.getName();
+
     DatabaseProvider provider = DatabaseProviderFactory.getProvider(System.getProperties());
     return Iterables.toArray(ParametrizedUtils.toArrayOfArrays(provider.getDatabaseTypes().getAllTypes()), Object[].class);
   }
@@ -57,7 +60,14 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
     this.type = type;
   }
 
-  private DatabaseType type;
+  @Override
+  public String getTestName() {
+    if (methodName == null) {
+      return testName;
+    } else {
+      return methodName + "[" + type.name + "]";
+    }
+  }
 
   @Test
   public void testFrom() throws Exception {
@@ -149,17 +159,5 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
 
     // Clean up testing table
     dropTable();
-  }
-
-  private String testName;
-
-  @BeforeMethod(alwaysRun = true)
-  public void beforeMethod(Method aMethod) {
-    this.testName = aMethod.getName();
-  }
-
-  @Override
-  public String getTestName() {
-    return testName + "[" + type.name + "]";
   }
 }

@@ -100,7 +100,7 @@ limitations under the License.
     <hive.version>0.13.1</hive.version>
     <guava.version>11.0.2</guava.version>
     <json-simple.version>1.1</json-simple.version>
-    <testng.version>6.8.13</testng.version>
+    <testng.version>6.8.17</testng.version>
     <mockito.version>1.9.5</mockito.version>
     <powermock.version>1.5.6</powermock.version>
     <log4j.version>1.2.16</log4j.version>
@@ -154,6 +154,7 @@ limitations under the License.
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <excludedGroups>slow</excludedGroups>
+              <reportNameSuffix>fast</reportNameSuffix>
             </configuration>
           </plugin>
 
@@ -162,6 +163,7 @@ limitations under the License.
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <excludedGroups>slow</excludedGroups>
+              <reportNameSuffix>slow</reportNameSuffix>
             </configuration>
           </plugin>
         </plugins>
@@ -184,6 +186,7 @@ limitations under the License.
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <groups>slow</groups>
+              <reportNameSuffix>slow</reportNameSuffix>
             </configuration>
           </plugin>
 
@@ -192,6 +195,7 @@ limitations under the License.
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <groups>slow</groups>
+              <reportNameSuffix>slow</reportNameSuffix>
             </configuration>
           </plugin>
         </plugins>
@@ -664,6 +668,10 @@ limitations under the License.
               <property>
                 <name>usedefaultlisteners</name>
                 <value>false</value> <!-- disabling default listeners is optional -->
+              </property>
+              <property>
+                <name>listener</name>
+                <value>org.testng.reporters.JUnitReportReporter</value>
               </property>
             </properties>
           </configuration>

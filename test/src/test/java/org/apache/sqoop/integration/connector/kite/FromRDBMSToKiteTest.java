@@ -49,7 +49,7 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
    */
   @Override
   public String getMapreduceDirectory() {
-    return HdfsUtils.joinPathFragments(hadoopCluster.getTestDirectory(), getClass().getName(), "namespace", name).replaceAll("/$", "");
+    return HdfsUtils.joinPathFragments(hadoopCluster.getTestDirectory(), getClass().getName(), "namespace", getTestName()).replaceAll("/$", "");
   }
 
   @Test

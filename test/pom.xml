@@ -193,12 +193,9 @@ limitations under the License.
             </goals>
             <phase>integration-test</phase>
             <configuration>
-              <excludes>
-                <exclude>none</exclude>
-              </excludes>
-              <includes>
-                <include>**/integration/**</include>
-              </includes>
+              <suiteXmlFiles>
+                <suiteXmlFile>src/test/resources/integration-tests-suite.xml</suiteXmlFile>
+              </suiteXmlFiles>
             </configuration>
           </execution>
         </executions>
