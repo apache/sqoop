@@ -69,6 +69,7 @@ Release Notes - Sqoop - Version 1.4.6
     * [SQOOP-2286] - Ensure Sqoop generates valid avro column names
     * [SQOOP-2290] - java.lang.ArrayIndexOutOfBoundsException thrown when malformed column mapping is provided
     * [SQOOP-2294] - Change to Avro schema name breaks some use cases
+    * [SQOOP-2324] - Remove extra license handling for consistency
 
 ** Improvement
     * [SQOOP-1330] - Ignore blank newlines in managers.d property files
