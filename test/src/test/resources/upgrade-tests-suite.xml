@@ -18,17 +18,11 @@ limitations under the License.
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="IntegrationTests" verbose="2" parallel="false">
+<suite name="UpgradeTests" verbose="2" parallel="false">
 
-  <test name="ConnectorTests">
+  <test name="RepositoryTests">
     <packages>
-      <package name="org.apache.sqoop.integration.connector.*"/>
-    </packages>
-  </test>
-
-  <test name="ServerTests">
-    <packages>
-      <package name="org.apache.sqoop.integration.server"/>
+      <package name="org.apache.sqoop.integration.repository.derby.upgrade"/>
     </packages>
   </test>
 

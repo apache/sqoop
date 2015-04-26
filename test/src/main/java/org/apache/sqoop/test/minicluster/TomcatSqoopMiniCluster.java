@@ -71,12 +71,18 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
 
     prepareTemporaryPath();
 
+    // Source: http://cargo.codehaus.org/Functional+testing
+    String tomcatPath = getTemporaryPath() + "/tomcat";
+    String extractPath = tomcatPath + "/extract";
+    String confPath = tomcatPath + "/conf";
+
     // TODO(jarcec): We should parametrize those paths, version, etc...
     // Source: http://cargo.codehaus.org/Functional+testing
-    Installer installer = new ZipURLInstaller(new URL("http://archive.apache.org/dist/tomcat/tomcat-6/v6.0.36/bin/apache-tomcat-6.0.36.zip"));
+    // Use null download path so that download path can be shared.
+    Installer installer = new ZipURLInstaller(new URL("http://archive.apache.org/dist/tomcat/tomcat-6/v6.0.36/bin/apache-tomcat-6.0.36.zip"), null, extractPath);
     installer.install();
 
-    LocalConfiguration configuration = (LocalConfiguration) new DefaultConfigurationFactory().createConfiguration("tomcat6x", ContainerType.INSTALLED, ConfigurationType.STANDALONE);
+    LocalConfiguration configuration = (LocalConfiguration) new DefaultConfigurationFactory().createConfiguration("tomcat6x", ContainerType.INSTALLED, ConfigurationType.STANDALONE, confPath);
     container = (InstalledLocalContainer) new DefaultContainerFactory().createContainer("tomcat6x", ContainerType.INSTALLED, configuration);
 
     // Set home to our installed tomcat instance
@@ -132,6 +138,9 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
     configuration.setProperty(ServletPropertySet.PORT, port.toString());
 
     // Start Sqoop server
+    LOG.info("Tomcat extract path: " + extractPath);
+    LOG.info("Tomcat home path: " + installer.getHome());
+    LOG.info("Tomcat config home path: " + confPath);
     LOG.info("Starting tomcat server on port " + port);
     container.start();
   }

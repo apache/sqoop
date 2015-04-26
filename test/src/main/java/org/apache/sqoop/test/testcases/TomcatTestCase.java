@@ -34,7 +34,7 @@ import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.ITest;
-import org.testng.annotations.AfterMethod;
+import org.testng.ITestContext;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
@@ -62,13 +62,11 @@ abstract public class TomcatTestCase implements ITest {
   /**
    * Temporary directory that will be used by the test.
    *
-   * We will take TMP_PATH_BASE and append two subdirectories. First will be named
-   * after fully qualified class name of current test class, second directory will
-   * be named after current test method name. For example:
+   * We will take TMP_PATH_BASE and append the test suite. For example:
    *
-   * TMP_PATH_BASE/org.apache.sqoop.TestClass/testMethod/
+   * TMP_PATH_BASE/TestConnectorsSuite
    */
-  private String tmpPath;
+  private static String tmpPath;
 
   /**
    * Hadoop cluster
@@ -83,12 +81,12 @@ abstract public class TomcatTestCase implements ITest {
   /**
    * Tomcat based Sqoop mini cluster
    */
-  private TomcatSqoopMiniCluster cluster;
+  private static TomcatSqoopMiniCluster cluster;
 
   /**
    * Sqoop client API.
    */
-  private SqoopClient client;
+  private static SqoopClient client;
 
   /**
    * Use the method name as the test name
@@ -97,11 +95,32 @@ abstract public class TomcatTestCase implements ITest {
     return methodName;
   }
 
+  @BeforeMethod(alwaysRun = true)
+  public void setMethodName(Method method) throws Exception {
+    methodName = method.getName();
+  }
+
   @BeforeSuite(alwaysRun = true)
-  public void startHadoop() throws Exception {
+  public void setupSuite(ITestContext context) throws Exception {
+    tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, context.getSuite().getName());
+
+    LOG.debug("Temporary Directory: " + getTemporaryPath());
+    FileUtils.deleteDirectory(new File(getTemporaryPath()));
+
+    startHadoop();
+    startSqoop();
+  }
+
+  @AfterSuite(alwaysRun = true)
+  public void tearDownSuite() throws Exception {
+    stopSqoop();
+    stopHadoop();
+  }
+
+  protected void startHadoop() throws Exception {
     // Start Hadoop Clusters
     hadoopCluster = HadoopRunnerFactory.getHadoopCluster(System.getProperties(), HadoopMiniClusterRunner.class);
-    hadoopCluster.setTemporaryPath(TMP_PATH_BASE);
+    hadoopCluster.setTemporaryPath(getTemporaryPath());
     hadoopCluster.setConfiguration(hadoopCluster.prepareConfiguration(new JobConf()));
     hadoopCluster.start();
 
@@ -110,16 +129,7 @@ abstract public class TomcatTestCase implements ITest {
     LOG.debug("HDFS Client: " + hdfsClient);
   }
 
-  @BeforeMethod(alwaysRun = true)
-  public void startServer(Method method) throws Exception {
-    methodName = method.getName();
-
-    // Get and set temporary path in hadoop cluster.
-    tmpPath = HdfsUtils.joinPathFragments(TMP_PATH_BASE, getClass().getName(), getTestName());
-    FileUtils.deleteDirectory(new File(tmpPath));
-
-    LOG.debug("Temporary Directory: " + tmpPath);
-
+  protected void startSqoop() throws Exception {
     // Start server
     cluster = createSqoopMiniCluster();
     cluster.start();
@@ -128,20 +138,16 @@ abstract public class TomcatTestCase implements ITest {
     client = new SqoopClient(getServerUrl());
   }
 
-  @AfterMethod(alwaysRun = true)
-  public void stopServer() throws Exception {
+  protected void stopSqoop() throws Exception {
     cluster.stop();
   }
 
-  @AfterSuite(alwaysRun = true)
-  public static void stopHadoop() throws Exception {
+  protected void stopHadoop() throws Exception {
     hadoopCluster.stop();
   }
 
   /**
    * Create Sqoop MiniCluster instance that should be used for this test.
-   *
-   * This method will be executed only once prior each test execution.
    *
    * @return New instance of test mini cluster
    */
@@ -154,20 +160,28 @@ abstract public class TomcatTestCase implements ITest {
    *
    * @return
    */
-  public SqoopClient getClient() {
+  public static SqoopClient getClient() {
     return client;
   }
 
-  public SqoopMiniCluster getCluster() {
+  public static void setClient(SqoopClient sqoopClient) {
+    client = sqoopClient;
+  }
+
+  public static SqoopMiniCluster getCluster() {
     return cluster;
   }
 
-  public String getTemporaryPath() {
+  public static void setCluster(TomcatSqoopMiniCluster sqoopMiniClusterluster) {
+    cluster = sqoopMiniClusterluster;
+  }
+
+  public static String getTemporaryPath() {
     return tmpPath;
   }
 
-  public String getSqoopMiniClusterTemporaryPath() {
-    return HdfsUtils.joinPathFragments(tmpPath, "sqoop-mini-cluster");
+  public static String getSqoopMiniClusterTemporaryPath() {
+    return HdfsUtils.joinPathFragments(getTemporaryPath(), "sqoop-mini-cluster");
   }
 
   /**
@@ -175,7 +189,7 @@ abstract public class TomcatTestCase implements ITest {
    *
    * @return
    */
-  public String getServerUrl() {
+  public static String getServerUrl() {
     return cluster.getServerUrl();
   }
 

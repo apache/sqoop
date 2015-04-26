@@ -18,10 +18,14 @@
 package org.apache.sqoop.integration.repository.derby.upgrade;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.testcases.TomcatTestCase;
 import org.apache.sqoop.test.utils.CompressionUtils;
 import org.apache.sqoop.test.utils.HdfsUtils;
+import org.testng.ITestContext;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import org.apache.log4j.Logger;
@@ -120,18 +124,43 @@ public abstract class DerbyRepositoryUpgradeTest extends TomcatTestCase {
   public abstract Integer[] getDeleteJobIds();
 
   public String getRepositoryPath() {
-    return HdfsUtils.joinPathFragments(getTemporaryPath(), "repo");
+    return HdfsUtils.joinPathFragments(getTemporaryTomcatPath(), "repo");
+  }
+
+  public String getTemporaryTomcatPath() {
+    return HdfsUtils.joinPathFragments(getTemporaryPath(), getClass().getCanonicalName(), getTestName());
   }
 
   @Override
-  public TomcatSqoopMiniCluster createSqoopMiniCluster() throws Exception {
+  public void startSqoop() throws Exception {
+    // Do nothing so that Sqoop isn't started before Suite.
+  }
+
+  @Override
+  public void stopSqoop() throws Exception {
+    // Do nothing so that Sqoop isn't stopped after Suite.
+  }
+
+  @BeforeMethod
+  public void startSqoopMiniCluster(ITestContext context) throws Exception {
     // Prepare older repository structures
     InputStream tarballStream = getClass().getResourceAsStream(getPathToRepositoryTarball());
     assertNotNull(tarballStream);
     CompressionUtils.untarStreamToDirectory(tarballStream, getRepositoryPath());
 
     // And use them for new Derby repo instance
-    return new DerbySqoopMiniCluster(getRepositoryPath(), getSqoopMiniClusterTemporaryPath(), hadoopCluster.getConfiguration());
+    setCluster(new DerbySqoopMiniCluster(getRepositoryPath(), getTemporaryTomcatPath() + "/sqoop-mini-cluster", hadoopCluster.getConfiguration()));
+
+    // Start server
+    getCluster().start();
+
+    // Initialize Sqoop Client API
+    setClient(new SqoopClient(getServerUrl()));
+  }
+
+  @AfterMethod
+  public void stopSqoopMiniCluster() throws Exception {
+    getCluster().stop();
   }
 
   @Test

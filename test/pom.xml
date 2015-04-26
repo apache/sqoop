@@ -196,6 +196,24 @@ limitations under the License.
               <suiteXmlFiles>
                 <suiteXmlFile>src/test/resources/integration-tests-suite.xml</suiteXmlFile>
               </suiteXmlFiles>
+              <properties>
+                <suitename>integration-tests</suitename>
+              </properties>
+            </configuration>
+          </execution>
+          <execution>
+            <id>upgrade-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <suiteXmlFiles>
+                <suiteXmlFile>src/test/resources/upgrade-tests-suite.xml</suiteXmlFile>
+              </suiteXmlFiles>
+              <properties>
+                <suitename>upgrade-tests</suitename>
+              </properties>
             </configuration>
           </execution>
         </executions>
