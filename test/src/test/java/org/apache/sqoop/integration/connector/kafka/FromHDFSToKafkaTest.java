@@ -34,6 +34,8 @@ public class FromHDFSToKafkaTest extends KafkaConnectorTestCase {
   };
   @Test
   public void testBasic() throws Exception {
+    topic = getTestName();
+
     createFromFile("input-0001",input);
 
     // Create Kafka link

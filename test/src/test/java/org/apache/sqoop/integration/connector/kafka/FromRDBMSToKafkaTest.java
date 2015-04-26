@@ -37,6 +37,8 @@ public class FromRDBMSToKafkaTest extends KafkaConnectorTestCase {
 
   @Test
   public void testBasic() throws Exception {
+    topic = getTestName();
+
     createAndLoadTableCities();
 
     // Kafka link

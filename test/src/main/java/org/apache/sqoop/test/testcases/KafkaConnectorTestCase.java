@@ -18,14 +18,13 @@
 package org.apache.sqoop.test.testcases;
 
 import kafka.message.MessageAndMetadata;
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.testng.annotations.AfterClass;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.apache.sqoop.common.test.kafka.TestUtil;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -39,16 +38,16 @@ import static org.apache.sqoop.connector.common.SqoopIDFUtils.toText;
 
 public class KafkaConnectorTestCase extends ConnectorTestCase {
   private static TestUtil testUtil = TestUtil.getInstance();
-  private static final String TOPIC = "mytopic";
+  protected String topic;
 
   @BeforeClass(alwaysRun = true)
-  public static void startKafka() throws Exception {
+  public void startKafka() throws Exception {
     // starts Kafka server and its dependent zookeeper
     testUtil.prepare();
   }
 
   @AfterClass(alwaysRun = true)
-  public static void stopKafka() throws IOException {
+  public void stopKafka() throws IOException {
     testUtil.tearDown();
   }
 
@@ -61,9 +60,9 @@ public class KafkaConnectorTestCase extends ConnectorTestCase {
 
   protected void fillKafkaToConfig(MJob job){
     MConfigList toConfig = job.getToJobConfig();
-    toConfig.getStringInput("toJobConfig.topic").setValue(TOPIC);
+    toConfig.getStringInput("toJobConfig.topic").setValue(topic);
     List<String> topics = new ArrayList<String>(1);
-    topics.add(TOPIC);
+    topics.add(topic);
     testUtil.initTopicList(topics);
   }
 
@@ -79,7 +78,7 @@ public class KafkaConnectorTestCase extends ConnectorTestCase {
 
     for(String str: content) {
       MessageAndMetadata<byte[],byte[]> fetchedMsg =
-              testUtil.getNextMessageFromConsumer(TOPIC);
+              testUtil.getNextMessageFromConsumer(topic);
       outputSet.add(toText(new String(fetchedMsg.message(), "UTF-8")));
     }
 
