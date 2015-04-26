@@ -67,8 +67,6 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     .getLog(NetezzaExternalTableImportMapper.class.getName());
   private NetezzaJDBCStatementRunner extTableThread;
   private PerfCounters counter;
-  private String localLogDir = null;
-  private String logDir = null;
   private File taskAttemptDir = null;
   private String getSqlStatement(int myId) throws IOException {
 
@@ -78,10 +76,6 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
 
     String nullValue = conf.get(DirectNetezzaManager.NETEZZA_NULL_VALUE);
 
-    boolean ctrlChars =
-        conf.getBoolean(DirectNetezzaManager.NETEZZA_CTRL_CHARS_OPT, false);
-    boolean truncString =
-        conf.getBoolean(DirectNetezzaManager.NETEZZA_TRUNC_STRING_OPT, false);
 
     int errorThreshold = conf.getInt(
       DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
@@ -95,12 +89,6 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     sqlStmt.append("' USING (REMOTESOURCE 'JDBC' ");
     sqlStmt.append(" BOOLSTYLE 'T_F' ");
     sqlStmt.append(" CRINSTRING FALSE ");
-    if (ctrlChars) {
-      sqlStmt.append(" CTRLCHARS TRUE ");
-    }
-    if (truncString) {
-      sqlStmt.append(" TRUNCSTRING TRUE ");
-    }
     sqlStmt.append(" DELIMITER ");
     sqlStmt.append(Integer.toString(fd));
     sqlStmt.append(" ENCODING 'internal' ");
@@ -131,13 +119,6 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
 
     sqlStmt.append(" MAXERRORS ").append(errorThreshold);
 
-    File logDirPath = new File(taskAttemptDir, localLogDir);
-    logDirPath.mkdirs();
-    if (logDirPath.canWrite() && logDirPath.isDirectory()) {
-       sqlStmt.append(" LOGDIR ").append(logDirPath.getAbsolutePath()).append(' ');
-    } else {
-        throw new IOException("Unable to create log directory specified");
-    }
 
     sqlStmt.append(") AS SELECT ");
     if (cols == null || cols.length == 0) {
@@ -213,9 +194,7 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
   public void map(Integer dataSliceId, NullWritable val, Context context)
     throws IOException, InterruptedException {
     conf = context.getConfiguration();
-    localLogDir =
-        DirectNetezzaManager.getLocalLogDir(context.getTaskAttemptID());
-    logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
+
 
     dbc = new DBConfiguration(conf);
     numMappers = ConfigurationHelper.getConfNumMaps(conf);
@@ -250,9 +229,6 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
           extTableThread.printException();
           throw new IOException(extTableThread.getException());
         }
-        FileUploader.uploadFilesToDFS(taskAttemptDir.getAbsolutePath(),
-          localLogDir, logDir, context.getJobID().toString(),
-          conf);
       }
     }
   }

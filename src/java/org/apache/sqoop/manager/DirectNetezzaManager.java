@@ -293,8 +293,8 @@ public class DirectNetezzaManager extends NetezzaManager {
     conf.setBoolean(NETEZZA_CTRL_CHARS_OPT,
       cmdLine.hasOption(NETEZZA_CTRL_CHARS_LONG_ARG));
 
-    conf.setBoolean(NETEZZA_CTRL_CHARS_OPT,
-      cmdLine.hasOption(NETEZZA_CTRL_CHARS_LONG_ARG));
+    conf.setBoolean(NETEZZA_TRUNC_STRING_OPT,
+      cmdLine.hasOption(NETEZZA_TRUNC_STRING_LONG_ARG));
 
     // Always true for Netezza direct mode access
     conf.setBoolean(NETEZZA_DATASLICE_ALIGNED_ACCESS_OPT, true);
