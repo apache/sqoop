@@ -47,7 +47,7 @@ import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.request.HttpEventContext;
-import org.apache.sqoop.security.Authorization.AuthorizationEngine;
+import org.apache.sqoop.security.authorization.AuthorizationEngine;
 import org.apache.sqoop.security.AuthorizationManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;

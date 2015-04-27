@@ -39,7 +39,7 @@ import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MResource;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
-import org.apache.sqoop.security.Authorization.AuthorizationEngine;
+import org.apache.sqoop.security.authorization.AuthorizationEngine;
 import org.apache.sqoop.security.AuthorizationManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;

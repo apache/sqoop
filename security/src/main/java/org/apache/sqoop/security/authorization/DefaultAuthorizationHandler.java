@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.security.Authorization;
+package org.apache.sqoop.security.authorization;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
@@ -34,12 +34,12 @@ public class DefaultAuthorizationHandler extends AuthorizationHandler {
   /**
    * Default authorization access controller
    */
-  public static final String DEFAULT_AUTHORIZATION_ACCESS_CONTROLLER = "org.apache.sqoop.security.Authorization.DefaultAuthorizationAccessController";
+  public static final String DEFAULT_AUTHORIZATION_ACCESS_CONTROLLER = "org.apache.sqoop.security.authorization.DefaultAuthorizationAccessController";
 
   /**
    * Default authorization validator
    */
-  public static final String DEFAULT_AUTHORIZATION_VALIDATOR = "org.apache.sqoop.security.Authorization.DefaultAuthorizationValidator";
+  public static final String DEFAULT_AUTHORIZATION_VALIDATOR = "org.apache.sqoop.security.authorization.DefaultAuthorizationValidator";
 
   private static final Logger LOG = Logger.getLogger(DefaultAuthorizationHandler.class);
 
