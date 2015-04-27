@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.security.Authorization;
+package org.apache.sqoop.security.authorization;
 
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.delegation.web.HttpUserGroupInformation;

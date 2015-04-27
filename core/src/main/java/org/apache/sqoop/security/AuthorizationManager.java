@@ -32,12 +32,12 @@ public class AuthorizationManager implements Reconfigurable {
   /**
    * Default authorization handler
    */
-  public static final String DEFAULT_AUTHORIZATION_HANDLER = "org.apache.sqoop.security.Authorization.DefaultAuthorizationHandler";
+  public static final String DEFAULT_AUTHORIZATION_HANDLER = "org.apache.sqoop.security.authorization.DefaultAuthorizationHandler";
 
   /**
    * Default authentication provider
    */
-  public static final String DEFAULT_AUTHENTICATION_PROVIDER = "org.apache.sqoop.security.Authorization.DefaultAuthenticationProvider";
+  public static final String DEFAULT_AUTHENTICATION_PROVIDER = "org.apache.sqoop.security.authorization.DefaultAuthenticationProvider";
 
   /**
    * Default authentication provider

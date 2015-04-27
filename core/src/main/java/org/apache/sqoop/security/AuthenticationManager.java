@@ -31,7 +31,7 @@ public class AuthenticationManager implements Reconfigurable {
   /**
    * Default authentication handler
    */
-  public static final String DEFAULT_AUTHENTICATION_HANDLER = "org.apache.sqoop.security.Authentication.SimpleAuthenticationHandler";
+  public static final String DEFAULT_AUTHENTICATION_HANDLER = "org.apache.sqoop.security.authentication.SimpleAuthenticationHandler";
 
 
   /**

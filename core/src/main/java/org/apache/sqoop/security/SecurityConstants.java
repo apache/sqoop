@@ -46,7 +46,7 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the sqoop authentication handler class.
-   * The default type is org.apache.sqoop.security.Authentication.SimpleAuthenticationHandler
+   * The default type is org.apache.sqoop.security.authentication.SimpleAuthenticationHandler
    * <tt>org.apache.sqoop.security.authentication.handler</tt>.
    */
   public static final String AUTHENTICATION_HANDLER =
@@ -110,7 +110,7 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the sqoop authorization handler class.
-   * The default type is org.apache.sqoop.security.Authorization.DefaultAuthorizationHandler
+   * The default type is org.apache.sqoop.security.authorization.DefaultAuthorizationHandler
    * <tt>org.apache.sqoop.security.authorization.handler</tt>.
    */
   public static final String AUTHORIZATION_HANDLER =
@@ -118,7 +118,7 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the sqoop authorization access controller class.
-   * The default type is org.apache.sqoop.security.Authorization.DefaultAuthorizationAccessController
+   * The default type is org.apache.sqoop.security.authorization.DefaultAuthorizationAccessController
    * <tt>org.apache.sqoop.security.authorization.access_controller</tt>.
    */
   public static final String AUTHORIZATION_ACCESS_CONTROLLER =
@@ -126,7 +126,7 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the sqoop authorization validator class.
-   * The default type is org.apache.sqoop.security.Authorization.DefaultAuthorizationValidator
+   * The default type is org.apache.sqoop.security.authorization.DefaultAuthorizationValidator
    * <tt>org.apache.sqoop.security.authorization.validator</tt>.
    */
   public static final String AUTHORIZATION_VALIDATOR =
@@ -134,7 +134,7 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the sqoop authentication provider class.
-   * The default type is org.apache.sqoop.security.Authorization.DefaultAuthenticationProvider
+   * The default type is org.apache.sqoop.security.authorization.DefaultAuthenticationProvider
    * <tt>org.apache.sqoop.security.authorization.authentication_provider</tt>.
    */
   public static final String AUTHENTICATION_PROVIDER =

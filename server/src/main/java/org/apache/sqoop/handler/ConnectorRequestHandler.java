@@ -33,7 +33,7 @@ import org.apache.sqoop.json.ConnectorsBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MResource;
-import org.apache.sqoop.security.Authorization.AuthorizationEngine;
+import org.apache.sqoop.security.authorization.AuthorizationEngine;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.RequestHandler;
