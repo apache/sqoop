@@ -919,7 +919,7 @@ public final class ConfigFiller {
     }
   }
 
-  static void errorMessage(String message) {
+  public static void errorMessage(String message) {
     println("Error message: @|red " + message + " |@");
   }
 

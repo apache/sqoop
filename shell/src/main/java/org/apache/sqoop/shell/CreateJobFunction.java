@@ -21,6 +21,7 @@ import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.ConfigDisplayer;
@@ -72,6 +73,18 @@ public class CreateJobFunction extends  SqoopFunction {
 
     ConsoleReader reader = new ConsoleReader();
     MJob job = client.createJob(fromLinkId, toLinkId);
+
+    MConnector fromConnector = client.getConnector(job.getFromConnectorId());
+    if (!fromConnector.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
+      errorMessage("Connector " + fromConnector.getUniqueName() + " does not support direction " + Direction.FROM);
+      return Status.ERROR;
+    }
+
+    MConnector toConnector = client.getConnector(job.getToConnectorId());
+    if (!toConnector.getSupportedDirections().isDirectionSupported(Direction.TO)) {
+      errorMessage("Connector " + toConnector.getUniqueName() + " does not support direction " + Direction.TO);
+      return Status.ERROR;
+    }
 
     ResourceBundle fromConfigBundle = client.getConnectorConfigBundle(
         job.getFromConnectorId());
