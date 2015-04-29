@@ -206,7 +206,15 @@ public abstract class ImportJobTestCase extends BaseSqoopTestCase {
    * execution).
    */
   protected void runImport(SqoopTool tool, String [] argv) throws IOException {
-    removeTableDir();
+    boolean cleanup = true;
+    runImport(cleanup, tool, argv);
+  }
+
+  private void runImport(boolean cleanup, SqoopTool tool,
+      String [] argv) throws IOException {
+    if (cleanup) {
+      removeTableDir();
+    }
 
     // run the tool through the normal entry-point.
     int ret;
@@ -232,6 +240,12 @@ public abstract class ImportJobTestCase extends BaseSqoopTestCase {
   /** run an import using the default ImportTool. */
   protected void runImport(String [] argv) throws IOException {
     runImport(new ImportTool(), argv);
+  }
+
+  protected void runImportAgain(String[] argv)
+      throws IOException {
+    boolean cleanup = false;
+    runImport(cleanup, new ImportTool(), argv);
   }
 
 }

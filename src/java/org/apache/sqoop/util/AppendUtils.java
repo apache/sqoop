@@ -177,7 +177,7 @@ public class AppendUtils {
 
       if (fileStatus.isDir()) {    // move all subdirectories
         // pass target dir as initial dest to prevent nesting inside preexisting dir
-        if (fs.rename(fileStatus.getPath(), targetDir)) {
+        if (!fs.exists(targetDir) && fs.rename(fileStatus.getPath(), targetDir)) {
           LOG.debug("Directory: " + sourceFilename + " renamed to: " + sourceFilename);
         } else {
           int dirNumber = 0;
