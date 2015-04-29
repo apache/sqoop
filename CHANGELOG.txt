@@ -236,6 +236,8 @@ Release 1.99.6
 
     SQOOP-2310: Sqoop2: fix a typo for Hadoop conf directory
 
+    SQOOP-2327: Sqoop2: Change package name from Authorization to authorization
+
   IMPROVEMENT
 
     SQOOP-1805: Sqoop2: GenericJdbcConnector: Delta read support
