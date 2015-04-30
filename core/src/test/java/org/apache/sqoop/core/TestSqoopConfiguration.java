@@ -162,5 +162,8 @@ public class TestSqoopConfiguration {
   public void testConfigurationInitSuccess() throws Exception {
     TestUtils.setupTestConfigurationWithExtraConfig(null, null);
     SqoopConfiguration.getInstance().initialize();
+
+    // Make sure "test" is in classpath.
+    Assert.assertNotNull(Thread.currentThread().getContextClassLoader().getResource("test_config.properties"));
   }
 }

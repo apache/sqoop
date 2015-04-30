@@ -483,15 +483,14 @@ Loading new connector say sqoop-foo-connector to the sqoop2, here are the steps 
 
 1. Create a ``sqoop-foo-connector.jar``. Make sure the jar contains the ``sqoopconnector.properties`` for it to be picked up by Sqoop
 
-2. Add this jar to the a folder on your installation machine and update the path to this folder in the sqoop.properties located under the ``server/conf`` directory under the Sqoop2  for the key ``org.apache.sqoop.connector.external.loadpath``
+2. Add this jar to the ``org.apache.sqoop.classpath.extra`` property in the sqoop.properties located under the ``server/conf`` directory.
 
 ::
 
+ # Sqoop application classpath
+ # ":" separated list of jars to be included in sqoop.
  #
- # External connectors load path
- # "/path/to/external/connectors/": Add all the connector JARs in the specified folder
- #
- org.apache.sqoop.connector.external.loadpath=/path/to/connector
+ org.apache.sqoop.classpath.extra=/path/to/connector.jar
 
 3. Start the Sqoop 2 server and while initializing the server this jar should be loaded into the Sqoop 2's class path and registered into the Sqoop 2 repository
 

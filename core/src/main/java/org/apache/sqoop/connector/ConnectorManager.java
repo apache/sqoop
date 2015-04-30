@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -161,11 +160,6 @@ public class ConnectorManager implements Reconfigurable {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Begin connector manager initialization");
     }
-
-    // add external connectors into the class path
-    // NOTE: class loading happens later in the ConnectorHandler
-    ConnectorManagerUtils.addExternalConnectorsJarsToClasspath(SqoopConfiguration.getInstance().getContext()
-        .getString(ConfigurationConstants.EXTERNAL_CONNECTOR_LOAD_PATH, StringUtils.EMPTY));
 
     List<URL> connectorConfigs = ConnectorManagerUtils.getConnectorConfigs();
 
