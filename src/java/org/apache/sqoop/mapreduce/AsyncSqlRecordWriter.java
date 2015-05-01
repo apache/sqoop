@@ -61,6 +61,8 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
   private AsyncSqlOutputFormat.AsyncSqlExecThread execThread;
   private boolean startedExecThread;
 
+  private boolean closed;
+
   public AsyncSqlRecordWriter(TaskAttemptContext context)
       throws ClassNotFoundException, SQLException {
     this.conf = context.getConfiguration();
@@ -82,6 +84,8 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
         connection, stmtsPerTx);
     this.execThread.setDaemon(true);
     this.startedExecThread = false;
+
+    this.closed = false;
   }
 
   /**
@@ -176,6 +180,15 @@ public abstract class AsyncSqlRecordWriter<K extends SqoopRecord, V>
   /** {@inheritDoc} */
   public void close(TaskAttemptContext context)
       throws IOException, InterruptedException {
+	// If any exception is thrown out in this method, mapreduce framework catches the exception and
+	// calls this method again in case the recorder hasn't bee closed properly. Without the
+	// protection below, it can make the main thread stuck in execThread.put since there is no
+	// receiver for the synchronous queue any more.
+	if (closed) {
+	  return;
+	}
+	closed = true;
+
     try {
       try {
         execUpdate(true, true);
