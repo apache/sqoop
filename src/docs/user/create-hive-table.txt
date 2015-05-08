@@ -50,7 +50,7 @@ Argument                      Description
 +\--hive-home <dir>+          Override +$HIVE_HOME+
 +\--hive-overwrite+           Overwrite existing data in the Hive table.
 +\--create-hive-table+        If set, then the job will fail if the target hive
-                              table exits. By default this property is false.
+                              table exists. By default this property is false.
 +\--hive-table <table-name>+  Sets the table name to use when importing \
                               to Hive.
 +\--table+                    The database table to read the \

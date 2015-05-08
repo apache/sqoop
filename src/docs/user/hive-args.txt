@@ -28,7 +28,7 @@ Argument                      Description
                               default delimiters if none are set.)
 +\--hive-overwrite+           Overwrite existing data in the Hive table.
 +\--create-hive-table+        If set, then the job will fail if the target hive
-                              table exits. By default this property is false.
+                              table exists. By default this property is false.
 +\--hive-table <table-name>+  Sets the table name to use when importing\
                               to Hive.
 +\--hive-drop-import-delims+  Drops '\n', '\r', and '\01' from string\

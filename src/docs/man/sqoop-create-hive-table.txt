@@ -35,7 +35,7 @@ Hive options
   Overwrites existing data in the hive table if it exists.
 
 --create-hive-table::
-  If set, then the job will fail if the target hive table exits.
+  If set, then the job will fail if the target hive table exists.
   By default this property is false.
 
 --hive-table (table-name)::

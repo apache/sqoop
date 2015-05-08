@@ -204,7 +204,7 @@ public class TestParquetImport extends ImportJobTestCase {
     createTableWithColTypes(types, vals);
 
     runImport(getOutputArgv(true, null));
-    runImportAgain(getOutputArgv(true, new String[]{"--append"}));
+    runImport(getOutputArgv(true, new String[]{"--append"}));
 
     DatasetReader<GenericRecord> reader = getReader();
     try {
@@ -226,7 +226,7 @@ public class TestParquetImport extends ImportJobTestCase {
 
     runImport(getOutputArgv(true, null));
     try {
-      runImportAgain(getOutputArgv(true, null));
+      runImport(getOutputArgv(true, null));
       fail("");
     } catch (IOException ex) {
       // ok

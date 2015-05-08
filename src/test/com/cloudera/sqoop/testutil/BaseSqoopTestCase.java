@@ -244,10 +244,11 @@ public abstract class BaseSqoopTestCase extends TestCase {
       } catch (IOException e) {
         LOG.warn(e);
       }
-    }
-    File s = new File(getWarehouseDir());
-    if (!s.delete()) {
-      LOG.warn("Can't delete " + s.getPath());
+    } else {
+      File s = new File(getWarehouseDir());
+      if (!s.delete()) {
+        LOG.warn("Cannot delete " + s.getPath());
+      }
     }
   }
 

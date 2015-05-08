@@ -26,7 +26,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
@@ -46,6 +45,9 @@ public final class ParquetJob {
 
   private static final String CONF_AVRO_SCHEMA = "parquetjob.avro.schema";
   static final String CONF_OUTPUT_CODEC = "parquetjob.output.codec";
+  enum WriteMode {
+    DEFAULT, APPEND, OVERWRITE
+  };
 
   public static Schema getAvroSchema(Configuration conf) {
     return new Schema.Parser().parse(conf.get(CONF_AVRO_SCHEMA));
@@ -71,14 +73,14 @@ public final class ParquetJob {
    * {@link org.apache.avro.generic.GenericRecord}.
    */
   public static void configureImportJob(Configuration conf, Schema schema,
-      String uri, boolean reuseExistingDataset, boolean overwrite) throws IOException {
+      String uri, WriteMode writeMode) throws IOException {
     Dataset dataset;
-    if (reuseExistingDataset || overwrite) {
-      try {
-        dataset = Datasets.load(uri);
-      } catch (DatasetNotFoundException ex) {
-        dataset = createDataset(schema, getCompressionType(conf), uri);
+    if (Datasets.exists(uri)) {
+      if (WriteMode.DEFAULT.equals(writeMode)) {
+        throw new IOException("Destination exists! " + uri);
       }
+
+      dataset = Datasets.load(uri);
       Schema writtenWith = dataset.getDescriptor().getSchema();
       if (!SchemaValidationUtil.canRead(writtenWith, schema)) {
         throw new IOException(
@@ -90,10 +92,14 @@ public final class ParquetJob {
     }
     conf.set(CONF_AVRO_SCHEMA, schema.toString());
 
-    if (overwrite) {
-      DatasetKeyOutputFormat.configure(conf).overwrite(dataset);
+    DatasetKeyOutputFormat.ConfigBuilder builder =
+        DatasetKeyOutputFormat.configure(conf);
+    if (WriteMode.OVERWRITE.equals(writeMode)) {
+      builder.overwrite(dataset);
+    } else if (WriteMode.APPEND.equals(writeMode)) {
+      builder.appendTo(dataset);
     } else {
-      DatasetKeyOutputFormat.configure(conf).writeTo(dataset);
+      builder.writeTo(dataset);
     }
   }
 

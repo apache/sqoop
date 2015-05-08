@@ -20,23 +20,25 @@ package com.cloudera.sqoop.hive;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.BaseSqoopTool;
 import com.cloudera.sqoop.tool.CodeGenTool;
@@ -44,6 +46,9 @@ import com.cloudera.sqoop.tool.CreateHiveTableTool;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
 import org.apache.commons.cli.ParseException;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetReader;
+import org.kitesdk.data.Datasets;
 
 /**
  * Test HiveImport capability after an import to HDFS.
@@ -53,11 +58,13 @@ public class TestHiveImport extends ImportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
       TestHiveImport.class.getName());
 
+  @Before
   public void setUp() {
     super.setUp();
     HiveImport.setTestMode(true);
   }
 
+  @After
   public void tearDown() {
     super.tearDown();
     HiveImport.setTestMode(false);
@@ -272,11 +279,47 @@ public class TestHiveImport extends ImportJobTestCase {
     setNumCols(3);
     String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
     String [] vals = { "'test'", "42", "'somestring'" };
-    String [] args_array = getArgv(false, null);
-    ArrayList<String> args = new ArrayList<String>(Arrays.asList(args_array));
-    args.add("--as-parquetfile");
-    runImportTest(TABLE_NAME, types, vals, "normalImportAsParquet.q", args.toArray(new String[0]),
-            new ImportTool());
+    String [] extraArgs = {"--as-parquetfile"};
+
+    runImportTest(TABLE_NAME, types, vals, "", getArgv(false, extraArgs),
+        new ImportTool());
+    verifyHiveDataset(TABLE_NAME, new Object[][]{{"test", 42, "somestring"}});
+  }
+
+  private void verifyHiveDataset(String tableName, Object[][] valsArray) {
+    String datasetUri = String.format("dataset:hive:default/%s",
+        tableName.toLowerCase());
+    assertTrue(Datasets.exists(datasetUri));
+    Dataset dataset = Datasets.load(datasetUri);
+    assertFalse(dataset.isEmpty());
+
+    DatasetReader<GenericRecord> reader = dataset.newReader();
+    try {
+      List<String> expectations = new ArrayList<String>();
+      if (valsArray != null) {
+        for (Object[] vals : valsArray) {
+          expectations.add(Arrays.toString(vals));
+        }
+      }
+
+      while (reader.hasNext() && expectations.size() > 0) {
+        String actual = Arrays.toString(
+            convertGenericRecordToArray(reader.next()));
+        assertTrue("Expect record: " + actual, expectations.remove(actual));
+      }
+      assertFalse(reader.hasNext());
+      assertEquals(0, expectations.size());
+    } finally {
+      reader.close();
+    }
+  }
+
+  private static Object[] convertGenericRecordToArray(GenericRecord record) {
+    Object[] result = new Object[record.getSchema().getFields().size()];
+    for (int i = 0; i < result.length; i++) {
+      result[i] = record.get(i);
+    }
+    return result;
   }
 
   /** Test that table is created in hive with no data import. */
@@ -310,6 +353,53 @@ public class TestHiveImport extends ImportJobTestCase {
     runImportTest(TABLE_NAME, types, vals,
         "createOverwriteImport.q", getCreateHiveTableArgs(extraArgs),
         new CreateHiveTableTool());
+  }
+
+  /**
+   * Test that table is created in hive and replaces the existing table if
+   * any.
+   */
+  @Test
+  public void testCreateOverwriteHiveImportAsParquet() throws IOException {
+    final String TABLE_NAME = "CREATE_OVERWRITE_HIVE_IMPORT_AS_PARQUET";
+    setCurTableName(TABLE_NAME);
+    setNumCols(3);
+    String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String [] vals = { "'test'", "42", "'somestring'" };
+    String [] extraArgs = {"--as-parquetfile"};
+    ImportTool tool = new ImportTool();
+
+    runImportTest(TABLE_NAME, types, vals, "", getArgv(false, extraArgs), tool);
+    verifyHiveDataset(TABLE_NAME, new Object[][]{{"test", 42, "somestring"}});
+
+    String [] valsToOverwrite = { "'test2'", "24", "'somestring2'" };
+    String [] extraArgsForOverwrite = {"--as-parquetfile", "--hive-overwrite"};
+    runImportTest(TABLE_NAME, types, valsToOverwrite, "",
+        getArgv(false, extraArgsForOverwrite), tool);
+    verifyHiveDataset(TABLE_NAME, new Object[][] {{"test2", 24, "somestring2"}});
+  }
+
+  /**
+   * Test that records are appended to an existing table.
+   */
+  @Test
+  public void testAppendHiveImportAsParquet() throws IOException {
+    final String TABLE_NAME = "APPEND_HIVE_IMPORT_AS_PARQUET";
+    setCurTableName(TABLE_NAME);
+    setNumCols(3);
+    String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String [] vals = { "'test'", "42", "'somestring'" };
+    String [] extraArgs = {"--as-parquetfile"};
+    String [] args = getArgv(false, extraArgs);
+    ImportTool tool = new ImportTool();
+
+    runImportTest(TABLE_NAME, types, vals, "", args, tool);
+    verifyHiveDataset(TABLE_NAME, new Object[][]{{"test", 42, "somestring"}});
+
+    String [] valsToAppend = { "'test2'", "4242", "'somestring2'" };
+    runImportTest(TABLE_NAME, types, valsToAppend, "", args, tool);
+    verifyHiveDataset(TABLE_NAME, new Object[][] {
+        {"test2", 4242, "somestring2"}, {"test", 42, "somestring"}});
   }
 
   /** Test that dates are coerced properly to strings. */
