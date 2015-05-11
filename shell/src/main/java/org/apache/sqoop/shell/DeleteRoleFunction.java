@@ -43,6 +43,7 @@ public class DeleteRoleFunction extends SqoopFunction {
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     String role = line.getOptionValue(Constants.OPT_ROLE);
     client.dropRole(new MRole(role));
+    client.clearCache();
     printlnResource(Constants.RES_DELETE_ROLE_SUCCESSFUL, role);
     return Status.OK;
   }
