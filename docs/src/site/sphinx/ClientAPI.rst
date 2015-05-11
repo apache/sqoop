@@ -198,12 +198,12 @@ In case of any WARNING AND ERROR status, user has to iterate the list of validat
      }
      for (MInput minput : inputlist) {
        if (minput.getValidationStatus() == Status.WARNING) {
-        for(Message message : config.getValidationMessages()) {
+        for(Message message : minput.getValidationMessages()) {
          System.out.println("Config Input Validation Warning: " + message.getMessage());
        }
      }
      else if (minput.getValidationStatus() == Status.ERROR) {
-       for(Message message : config.getValidationMessages()) {
+       for(Message message : minput.getValidationMessages()) {
         System.out.println("Config Input Validation Error: " + message.getMessage());
        }
       }
