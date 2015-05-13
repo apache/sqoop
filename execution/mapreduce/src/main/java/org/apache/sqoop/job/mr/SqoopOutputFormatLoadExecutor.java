@@ -137,6 +137,14 @@ public class SqoopOutputFormatLoadExecutor {
       // In almost all cases, the exception will be SqoopException,
       // because all exceptions are caught and propagated as
       // SqoopExceptions
+
+      //There are race conditions with exceptions where the free sema is
+      //no released.  So sense we are in single threaded mode at this point
+      //we can ask if there are availablePermits and release if needed
+      if (free.availablePermits() == 0) {
+        free.release();
+      }
+
       Throwable t = ex.getCause();
       if (t instanceof SqoopException) {
         throw (SqoopException) t;
@@ -144,6 +152,14 @@ public class SqoopOutputFormatLoadExecutor {
       //In the rare case, it was not a SqoopException
       Throwables.propagate(t);
     } catch (Exception ex) {
+
+      //There are race conditions with exceptions where the free sema is
+      //no released.  So sense we are in single threaded mode at this point
+      //we can ask if there are availablePermits and release if needed
+      if (free.availablePermits() == 0) {
+        free.release();
+      }
+
       throw new SqoopException(MRExecutionError.MAPRED_EXEC_0019, ex);
     }
   }

@@ -193,22 +193,31 @@ public class TestSqoopOutputFormatLoadExecutor {
     SqoopOutputFormatLoadExecutor executor = new SqoopOutputFormatLoadExecutor(jobContextMock,
         GoodContinuousLoader.class.getName(), getIDF(), getMatcher());
     RecordWriter<SqoopWritable, NullWritable> writer = executor.getRecordWriter();
-    IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
-    SqoopWritable writable = new SqoopWritable(dataFormat);
-    for (int i = 0; i < 10; i++) {
-      StringBuilder builder = new StringBuilder();
-      for (int count = 0; count < 100; count++) {
-        builder.append(String.valueOf(count));
-        if (count != 99) {
-          builder.append(",");
+
+    boolean exceptionThrown = false;
+
+    try {
+      IntermediateDataFormat<?> dataFormat = MRJobTestUtil.getTestIDF();
+      SqoopWritable writable = new SqoopWritable(dataFormat);
+      for (int i = 0; i < 10; i++) {
+        StringBuilder builder = new StringBuilder();
+        for (int count = 0; count < 100; count++) {
+          builder.append(String.valueOf(count));
+          if (count != 99) {
+            builder.append(",");
+          }
         }
+        dataFormat.setCSVTextData(builder.toString());
+        writer.write(writable, null);
       }
-      dataFormat.setCSVTextData(builder.toString());
-      writer.write(writable, null);
+    } catch (Throwable t) {
+      t.printStackTrace();
+      exceptionThrown = true;
     }
     writer.close(null);
     verify(jobContextMock, times(1)).getConfiguration();
     verify(jobContextMock, times(1)).getCounter(SqoopCounters.ROWS_WRITTEN);
+    Assert.assertFalse(exceptionThrown, "Exception Thrown during writing");
   }
 
   @Test(expectedExceptions = SqoopException.class)
