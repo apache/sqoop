@@ -20,6 +20,7 @@ package org.apache.sqoop.test.minicluster;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.core.ConfigurationConstants;
+import org.apache.sqoop.common.test.repository.RepositoryProviderFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,7 +105,7 @@ public abstract class SqoopMiniCluster {
    *
    * @throws IOException
    */
-  protected void prepareTemporaryPath() throws IOException {
+  protected void prepareTemporaryPath() throws Exception {
     File tmpDir = new File(getTemporaryPath());
     File configDir = new File(getConfigurationPath());
     File logDir = new File(getLogPath());
@@ -168,20 +169,8 @@ public abstract class SqoopMiniCluster {
     return properties;
   }
 
-  protected Map<String, String> getRepositoryConfiguration() {
-    Map<String, String> properties = new HashMap<String, String>();
-
-    properties.put("org.apache.sqoop.repository.provider", "org.apache.sqoop.repository.JdbcRepositoryProvider");
-    properties.put("org.apache.sqoop.repository.schema.immutable", "false");
-    properties.put("org.apache.sqoop.repository.jdbc.handler", "org.apache.sqoop.repository.derby.DerbyRepositoryHandler");
-    properties.put("org.apache.sqoop.repository.jdbc.transaction.isolation", "READ_COMMITTED");
-    properties.put("org.apache.sqoop.repository.jdbc.maximum.connections", "10");
-    properties.put("org.apache.sqoop.repository.jdbc.url=jdbc:derby:memory:myDB;create", "true");
-    properties.put("org.apache.sqoop.repository.jdbc.driver", "org.apache.derby.jdbc.EmbeddedDriver");
-    properties.put("org.apache.sqoop.repository.jdbc.user", "sa");
-    properties.put("org.apache.sqoop.repository.jdbc.password", "");
-
-    return properties;
+  protected Map<String, String> getRepositoryConfiguration() throws Exception {
+    return RepositoryProviderFactory.getRepositoryProperties();
   }
 
   protected Map<String, String> getSubmissionEngineConfiguration() {
