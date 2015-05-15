@@ -38,6 +38,7 @@ limitations under the License.
     <module>connector-hdfs</module>
     <module>connector-kite</module>
     <module>connector-kafka</module>
+    <module>connector-ftp</module>
     <module>connector-sftp</module>
     <!-- Uncomment and finish connectors after sqoop framework will become stable
     <module>connector-mysql-jdbc</module>
