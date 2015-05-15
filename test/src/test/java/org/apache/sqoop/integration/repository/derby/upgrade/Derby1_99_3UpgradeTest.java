@@ -17,8 +17,16 @@
  */
 package org.apache.sqoop.integration.repository.derby.upgrade;
 
+import org.apache.sqoop.model.MJob;
+import org.testng.annotations.Test;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * This version contains the following structures:
@@ -30,6 +38,8 @@ import java.util.Map;
  * Job IMPORT with name "Job2" and id 2
  * Job IMPORT with name "Job3" and id 3
  * Job EXPORT with name "Job4" and id 4
+ * Job EXPORT with name "nonunique" and id 5
+ * Job EXPORT with name "nonunique" and id 6
  * Link with id 4 has been disabled
  * Job with id 3 has been disabled
  * Job with id 1 has been run 5 times
@@ -48,7 +58,7 @@ public class Derby1_99_3UpgradeTest extends DerbyRepositoryUpgradeTest {
 
   @Override
   public int getNumberOfJobs() {
-    return 4;
+    return 6;
   }
 
   @Override
@@ -78,6 +88,15 @@ public class Derby1_99_3UpgradeTest extends DerbyRepositoryUpgradeTest {
 
   @Override
   public Integer[] getDeleteJobIds() {
-    return new Integer[] {1, 2, 3, 4};
+    return new Integer[] {1, 2, 3, 4, 5, 6};
+  }
+
+  @Test
+  public void testNonuniqueNames() throws Exception {
+    Set<String> jobNames = new TreeSet<String>();
+    for(MJob job : getClient().getJobs()) {
+      assertFalse(jobNames.contains(job.getName()));
+      jobNames.add(job.getName());
+    }
   }
 }

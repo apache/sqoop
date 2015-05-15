@@ -2653,18 +2653,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @param stmts Statements to close
    */
   public void closeStatements(Statement... stmts) {
-    if(stmts == null) {
-      return;
-    }
-    for (Statement stmt : stmts) {
-      if(stmt != null) {
-        try {
-          stmt.close();
-        } catch (SQLException ex) {
-          LOG.error("Exception during closing statement", ex);
-        }
-      }
-    }
+    CommonRepoUtils.closeStatements(stmts);
   }
 
   /**

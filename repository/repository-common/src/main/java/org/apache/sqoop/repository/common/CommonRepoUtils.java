@@ -17,7 +17,14 @@
  */
 package org.apache.sqoop.repository.common;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import org.apache.log4j.Logger;
+
 public class CommonRepoUtils {
+  public static final Logger LOG = Logger.getLogger(CommonRepoUtils.class);
+
   public static final String QUOTE_CHARACTER = "\"";
 
   public static final String escapeTableName(String tableName) {
@@ -57,6 +64,51 @@ public class CommonRepoUtils {
       return escapeSchemaName(schemaName) + "." + escapeConstraintName(constraintName);
     } else {
       return escapeConstraintName(constraintName);
+    }
+  }
+
+  /**
+   * Close all given statements.
+   *
+   * Any occurring exception is silently ignored and logged.
+   *
+   * @param stmts Statements to close
+   */
+  public static final void closeStatements(Statement ... stmts) {
+    if(stmts == null) {
+      return;
+    }
+
+    for (Statement stmt : stmts) {
+      if(stmt != null) {
+        try {
+          stmt.close();
+        } catch (SQLException ex) {
+          LOG.error("Exception during closing statement", ex);
+        }
+      }
+    }
+  }
+
+  /**
+   * Close all given Results set.
+   *
+   * Any occurring exception is silently ignored and logged.
+   *
+   * @param resultSets Result sets to close
+   */
+  public static final void closeResultSets(ResultSet... resultSets) {
+    if(resultSets == null) {
+      return;
+    }
+    for (ResultSet rs : resultSets) {
+      if(rs != null) {
+        try {
+          rs.close();
+        } catch(SQLException ex) {
+          LOG.error("Exception during closing result set", ex);
+        }
+      }
     }
   }
 }

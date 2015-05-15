@@ -54,6 +54,7 @@ import org.apache.sqoop.repository.JdbcRepositoryContext;
 import org.apache.sqoop.repository.common.CommonRepoConstants;
 import org.apache.sqoop.repository.common.CommonRepositoryHandler;
 import org.apache.sqoop.repository.common.CommonRepositorySchemaConstants;
+import org.apache.sqoop.repository.derby.upgrade.UniqueJobRename;
 
 /**
  * JDBC based repository handler for Derby database.
@@ -276,6 +277,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       renameConnectorToConfigurable(conn);
 
       // Add unique constraints on job and links for version 4 onwards
+      new UniqueJobRename(conn).execute();
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ADD_UNIQUE_CONSTRAINT_NAME, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_ADD_UNIQUE_CONSTRAINT_NAME, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ADD_UNIQUE_CONSTRAINT_NAME, conn);
