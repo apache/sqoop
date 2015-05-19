@@ -58,7 +58,7 @@ Database    version  +\--direct+ support? connect string matches
 ----------------------------------------------------------------
 HSQLDB      1.8.0+   No                   +jdbc:hsqldb:*//+
 MySQL       5.0+     Yes                  +jdbc:mysql://+
-Oracle      10.2.0+  No                   +jdbc:oracle:*//+
+Oracle      10.2.0+  Yes                  +jdbc:oracle:*//+
 PostgreSQL  8.3+     Yes (import only)    +jdbc:postgresql://+
 CUBRID      9.2+     NO                   +jdbc:cubrid:*+
 ----------------------------------------------------------------
