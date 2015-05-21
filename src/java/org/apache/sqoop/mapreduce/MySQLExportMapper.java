@@ -201,7 +201,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
     }
 
     if (0 != escapedBy) {
-      args.add("--escaped-by=0x" + Integer.toString(escapedBy, 16));
+      args.add("--fields-escaped-by=0x" + Integer.toString(escapedBy, 16));
     }
 
     // These two arguments are positional and must be last.
