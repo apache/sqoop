@@ -60,7 +60,7 @@ If you are keen on contributing to Sqoop and get your hands dirty building conne
 - `Developing a Sqoop Connector with Connector API <ConnectorDevelopment.html>`_
 - `Developing Sqoop application with REST API <RESTAPI.html>`_
 - `Developing Sqoop application using Sqoop Java Client API <ClientAPI.html>`_
-
+- `Repository <Repository.html>`_
 
 Administrator Guide
 --------------------
