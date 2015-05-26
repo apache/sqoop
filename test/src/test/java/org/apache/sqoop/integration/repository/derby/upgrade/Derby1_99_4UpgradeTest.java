@@ -33,6 +33,7 @@ import java.util.Map;
  * Job (-f 3 -t 1) with name "Export" and id 3
  * Job (-f 3 -t 1) with blank name and id 4
  * Job (-f 3 -t 1) with blank name and id 5
+ * Job (-f 1 -t 1) with name "SameConnector" and id 6
  * Job with id 1 has been executed 3 times
  * Job with id 2 has been executed 3 times
  * Job with id 3 has been executed 1 times
@@ -55,7 +56,7 @@ public class Derby1_99_4UpgradeTest extends DerbyRepositoryUpgradeTest {
 
   @Override
   public int getNumberOfJobs() {
-    return 5;
+    return 6;
   }
 
   @Override
@@ -86,6 +87,6 @@ public class Derby1_99_4UpgradeTest extends DerbyRepositoryUpgradeTest {
 
   @Override
   public Integer[] getDeleteJobIds() {
-    return new Integer[] {1, 2, 3, 4, 5};
+    return new Integer[] {1, 2, 3, 4, 5, 6};
   }
 }
