@@ -223,6 +223,8 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     args.add(DATABASE_USER);
     args.add("--where");
     args.add("id > 1");
+    args.add("-m");
+    args.add("1");
 
     if (isDirect) {
       args.add("--direct");
