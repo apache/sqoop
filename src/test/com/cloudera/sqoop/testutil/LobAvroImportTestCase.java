@@ -109,7 +109,7 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     args.add(getConnectString());
     args.add("--as-avrodatafile");
     args.add("--num-mappers");
-    args.add("2");
+    args.add("1");
 
     for (String arg : additionalArgs) {
       args.add(arg);
