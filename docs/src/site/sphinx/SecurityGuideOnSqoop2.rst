@@ -18,7 +18,7 @@
 Security Guide On Sqoop 2
 =========================
 
-Most Hadoop components, such as HDFS, Yarn, Hive, etc., have security frameworks, which support Simple, Kerberos and LDAP authentication. currently Sqoop 2 provides 2 types of authentication: simple and kerberos. The authentication module is pluggable, so more authentication types can be added.
+Most Hadoop components, such as HDFS, Yarn, Hive, etc., have security frameworks, which support Simple, Kerberos and LDAP authentication. currently Sqoop 2 provides 2 types of authentication: simple and kerberos. The authentication module is pluggable, so more authentication types can be added. Additionally, a new role based access control is introduced in Sqoop 1.99.6. We recommend to use this capability in multi tenant environments, so that malicious users can’t easily abuse your created link and job objects.
 
 Simple Authentication
 =====================
@@ -171,3 +171,69 @@ Users can create their own authentication modules. By performing the following s
 
 -	Modify configuration org.apache.sqoop.authentication.handler in <Sqoop Folder>/server/config/sqoop.properties and set it to the customized authentication handler class name.
 -	Restart the Sqoop server.
+
+Authorization
+=============
+
+Users, Groups, and Roles
+------------------------
+
+At the core of Sqoop's authorization system are users, groups, and roles. Roles allow administrators to give a name to a set of grants which can be easily reused. A role may be assigned to users, groups, and other roles. For example, consider a system with the following users and groups.
+
+::
+
+  <User>: <Groups>
+  user_all: group1, group2
+  user1: group1
+  user2: group2
+
+Sqoop roles must be created manually before being used, unlike users and groups. Users and groups are managed by the login system (Linux, LDAP or Kerberos). When a user wants to access one resource (connector, link, connector), the Sqoop2 server will determine the username of this user and the groups associated. That information is then used to determine if the user should have access to this resource being requested, by comparing the required privileges of the Sqoop operation to the user privileges using the following rules.
+
+- User privileges (Has the privilege been granted to the user?)
+- Group privileges (Does the user belong to any groups that the privilege has been granted to?)
+- Role privileges (Does the user or any of the groups that the user belongs to have a role that grants the privilege?)
+
+Administrator
+-------------
+
+There is a special user: administrator, which can’t be created, deleted by command. The only way to set administrator is to modify the configuration file. Administrator could run management commands to create/delete roles. However, administrator does not implicitly have all privileges. Administrator has to grant privilege to him/her if he/she needs to request the resource.
+
+Role management commands
+------------------------
+
+::
+
+  CREATE ROLE –role role_name
+  DROP ROLE –role role_name
+  SHOW ROLE
+
+- Only the administrator has privilege for this.
+
+Principal management commands
+-----------------------------
+
+::
+
+  GRANT ROLE --principal-type principal_type --principal principal_name --role role_name
+  REVOKE ROLE --principal-type principal_type --principal principal_name --role role_name
+  SHOW ROLE --principal-type principal_type --principal principal_name
+  SHOW PRINCIPAL --role role_name
+
+- principal_type: USER | GROUP | ROLE
+
+Privilege management commands
+-----------------------------
+
+::
+
+  GRANT PRIVILEGE --principal-type principal_type --principal principal_name --resource-type resource_type --resource resource_name --action action_name [--with-grant]
+  REVOKE PRIVILEGE --principal-type principal_type --principal principal_name [--resource-type resource_type --resource resource_name --action action_name] [--with-grant]
+  SHOW PRIVILEGE –principal-type principal_type –principal principal_name [--resource-type resource_type --resource resource_name --action action_name]
+
+- principal_type: USER | GROUP | ROLE
+- resource_type: CONNECTOR | LINK | JOB
+- action_type: ALL | READ | WRITE
+- With with-grant in GRANT PRIVILEGE command, this principal could grant his/her privilege to other users.
+- Without resource in REVOKE PRIVILEGE command, all privileges on this principal will be revoked.
+- With with-grant in REVOKE PRIVILEGE command, only grant privilege on this principal will be removed. This principal has the privilege to access this resource, but he/she could not grant his/her privilege to others.
+- Without resource in SHOW PRIVILEGE command, all privileges on this principal will be listed.
