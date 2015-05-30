@@ -34,6 +34,7 @@ import org.codehaus.cargo.container.deployable.WAR;
 import org.codehaus.cargo.container.installer.Installer;
 import org.codehaus.cargo.container.installer.ZipURLInstaller;
 import org.codehaus.cargo.container.property.ServletPropertySet;
+import org.codehaus.cargo.container.tomcat.TomcatPropertySet;
 import org.codehaus.cargo.generic.DefaultContainerFactory;
 import org.codehaus.cargo.generic.configuration.DefaultConfigurationFactory;
 
@@ -46,6 +47,7 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
 
   private InstalledLocalContainer container = null;
   private Integer port;
+  private Integer ajpPort;
 
   private static final Logger LOG = Logger.getLogger(TomcatSqoopMiniCluster.class);
 
@@ -53,12 +55,14 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
   public TomcatSqoopMiniCluster(String temporaryPath) throws Exception {
     super(temporaryPath);
     port = NetworkUtils.findAvailablePort();
+    ajpPort = NetworkUtils.findAvailablePort();
   }
 
   /** {@inheritDoc} */
   public TomcatSqoopMiniCluster(String temporaryPath, Configuration configuration) throws Exception {
     super(temporaryPath, configuration);
     port = NetworkUtils.findAvailablePort();
+    ajpPort = NetworkUtils.findAvailablePort();
   }
 
   /** {@inheritDoc} */
@@ -136,6 +140,7 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
 
     // Random port
     configuration.setProperty(ServletPropertySet.PORT, port.toString());
+    configuration.setProperty(TomcatPropertySet.AJP_PORT, ajpPort.toString());
 
     // Start Sqoop server
     LOG.info("Tomcat extract path: " + extractPath);
