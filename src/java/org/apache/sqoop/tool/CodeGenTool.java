@@ -93,8 +93,8 @@ public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
       String className = options.getClassName() != null ?
-          options.getClassName() : options.getTableName();
-      if (className.equalsIgnoreCase(options.getTableName())) {
+          options.getClassName() : tableName;
+      if (className.equalsIgnoreCase(tableName)) {
         className = "codegen_" + className;
         options.setClassName(className);
         LOG.info("Will generate java class as " + options.getClassName());
