@@ -47,9 +47,9 @@ public class ShowLinkFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_LINKS))
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_FROM)
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_LID)
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_LINK_LID))
-        .withLongOpt(Constants.OPT_FROM)
+        .withLongOpt(Constants.OPT_LID)
         .create(Constants.OPT_LID_CHAR));
   }
 
