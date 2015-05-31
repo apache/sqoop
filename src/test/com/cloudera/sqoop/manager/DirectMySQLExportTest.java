@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 
@@ -37,6 +38,9 @@ import org.junit.Before;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
 import com.cloudera.sqoop.mapreduce.MySQLExportMapper;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test the DirectMySQLManager implementation's exportJob() functionality.
@@ -219,6 +223,89 @@ public class DirectMySQLExportTest extends TestExport {
     }
   }
 
+  /**
+   * Test an authenticated export using mysqlimport.
+   */
+  public void testEscapedByExport() throws IOException, SQLException {
+    SqoopOptions options = new SqoopOptions(MySQLAuthTest.AUTH_CONNECT_STRING,
+        getTableName());
+    options.setUsername(MySQLAuthTest.AUTH_TEST_USER);
+    options.setPassword(MySQLAuthTest.AUTH_TEST_PASS);
+
+    manager = new DirectMySQLManager(options);
+
+    Connection connection = null;
+    Statement st = null;
+
+    String tableName = getTableName();
+
+    try {
+      connection = manager.getConnection();
+      connection.setAutoCommit(false);
+      st = connection.createStatement();
+
+      // create a target database table.
+      st.executeUpdate("DROP TABLE IF EXISTS " + tableName);
+      st.executeUpdate("CREATE TABLE " + tableName + " ("
+          + "id INT NOT NULL PRIMARY KEY, "
+          + "msg VARCHAR(24) NOT NULL, "
+          + "value VARCHAR(100) NOT NULL)");
+      connection.commit();
+
+      // Write a file containing a record to export.
+      Path tablePath = getTablePath();
+      Path filePath = new Path(tablePath, "datafile");
+      Configuration conf = new Configuration();
+      conf.set("fs.default.name", "file:///");
+
+      ColumnGenerator gen = new ColumnGenerator() {
+        public String getExportText(int rowNum) {
+          return "||" + rowNum;
+        }
+        public String getVerifyText(int rowNum) {
+          return "|" + rowNum;
+        }
+        public String getType() {
+          return "STRING";
+        }
+      };
+
+      FileSystem fs = FileSystem.get(conf);
+      fs.mkdirs(tablePath);
+      OutputStream os = fs.create(filePath);
+      BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+      w.write(getRecordLine(0, gen));
+      w.write(getRecordLine(1, gen));
+      w.write(getRecordLine(2, gen));
+      w.close();
+      os.close();
+
+      // run the export and verify that the results are good.
+      runExport(getArgv(true, 10, 10,
+          "--username", MySQLAuthTest.AUTH_TEST_USER,
+          "--password", MySQLAuthTest.AUTH_TEST_PASS,
+          "--connect", MySQLAuthTest.AUTH_CONNECT_STRING,
+          "--escaped-by", "|"));
+      verifyExport(3, connection);
+      verifyTableColumnContents(connection, tableName, "value", gen);
+    } catch (SQLException sqlE) {
+      LOG.error("Encountered SQL Exception: " + sqlE);
+      sqlE.printStackTrace();
+      fail("SQLException when accessing target table. " + sqlE);
+    } finally {
+      try {
+        if (null != st) {
+          st.close();
+        }
+
+        if (null != connection) {
+          connection.close();
+        }
+      } catch (SQLException sqlE) {
+        LOG.warn("Got SQLException when closing connection: " + sqlE);
+      }
+    }
+  }
 
   @Override
   public void testMultiMapTextExportWithStaging()
@@ -230,5 +317,19 @@ public class DirectMySQLExportTest extends TestExport {
   public void testMultiTransactionWithStaging()
     throws IOException, SQLException {
     // disable this test as staging is not supported in direct mode
+  }
+
+  private void verifyTableColumnContents(Connection connection,
+    String table, String column, ColumnGenerator gen)
+      throws IOException, SQLException {
+    Statement st = connection.createStatement();
+
+    // create a target database table.
+    assertTrue(st.execute("SELECT " + column + " FROM " + table));
+    ResultSet rs = st.getResultSet();
+
+    for (int row = 0; rs.next(); ++row) {
+      assertEquals(gen.getVerifyText(row), rs.getString(1));
+    }
   }
 }
