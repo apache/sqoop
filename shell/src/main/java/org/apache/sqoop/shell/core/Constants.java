@@ -469,6 +469,8 @@ public class Constants {
     "revoke.role_successful";
   public static final String RES_REVOKE_PRIVILEGE_SUCCESSFUL =
     "revoke.privilege_successful";
+  public static final String RES_REVOKE_ALL_PRIVILEGES_SUCCESSFUL =
+    "revoke.all_privileges_successful";
   public static final String RES_REVOKE_PRIVILEGE_SUCCESSFUL_WITH_GRANT =
     "revoke.privilege_successful_with_grant";
 

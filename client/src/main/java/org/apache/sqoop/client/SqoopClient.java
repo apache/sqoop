@@ -634,7 +634,8 @@ public class SqoopClient {
   }
 
   /**
-   * Revoke privileges on principals.
+   * Revoke privileges on principals and will revoke all privileges on principals
+   * if privileges is null.
    *
    * @param principals MPrincipal List
    * @param privileges MPrivilege List

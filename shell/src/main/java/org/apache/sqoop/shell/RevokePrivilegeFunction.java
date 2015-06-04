@@ -32,27 +32,26 @@ import static org.apache.sqoop.shell.ShellEnvironment.client;
 import static org.apache.sqoop.shell.ShellEnvironment.printlnResource;
 import static org.apache.sqoop.shell.ShellEnvironment.resourceString;
 
+import static org.apache.sqoop.shell.utils.ConfigFiller.errorMessage;
+
 public class RevokePrivilegeFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public RevokePrivilegeFunction() {
     this.addOption(OptionBuilder
         .withLongOpt(Constants.OPT_RESOURCE_TYPE)
         .withDescription(resourceString(Constants.RES_PROMPT_RESOURCE_TYPE))
-        .isRequired()
         .hasArg()
         .create()
     );
     this.addOption(OptionBuilder
         .withLongOpt(Constants.OPT_RESOURCE)
         .withDescription(resourceString(Constants.RES_PROMPT_RESOURCE))
-        .isRequired()
         .hasArg()
         .create()
     );
     this.addOption(OptionBuilder
         .withLongOpt(Constants.OPT_ACTION)
         .withDescription(resourceString(Constants.RES_PROMPT_ACTION))
-        .isRequired()
         .hasArg()
         .create(Constants.OPT_ACTION_CHAR)
     );
@@ -92,20 +91,44 @@ public class RevokePrivilegeFunction extends SqoopFunction {
   private Status revokePrivilege(String action, String resourceType, String resource,
                                  String principalType, String principal, boolean withGrant)
     throws IOException {
-    MResource resourceObject = new MResource(resource, resourceType);
-    MPrivilege privilegeObject = new MPrivilege(resourceObject, action, withGrant);
+    MPrivilege privilegeObject = null;
+    if (resource != null && !resource.isEmpty()
+        && resourceType != null && !resourceType.isEmpty()
+        && action != null && !action.isEmpty()) {
+      MResource resourceObject = new MResource(resource, resourceType);
+      privilegeObject = new MPrivilege(resourceObject, action, withGrant);
+    } else if ((resource == null || resource.isEmpty())
+        && (resourceType == null || resourceType.isEmpty())
+        && (action == null || action.isEmpty())) {
+      // revoke all privileges on the principal
+      privilegeObject = null;
+    } else if (resource == null || resource.isEmpty()) {
+      errorMessage("--resource isn't specified.");
+      return Status.ERROR;
+    } else if (resourceType == null || resourceType.isEmpty()) {
+      errorMessage("--resource-type isn't specified.");
+      return Status.ERROR;
+    } else if (action == null || action.isEmpty()) {
+      errorMessage("--action isn't specified.");
+      return Status.ERROR;
+    }
     MPrincipal principalObject = new MPrincipal(principal, principalType);
 
     client.revokePrivilege(
       Arrays.asList(principalObject),
-      Arrays.asList(privilegeObject));
+      privilegeObject == null ? null : Arrays.asList(privilegeObject));
 
     client.clearCache();
 
-    printlnResource(Constants.RES_REVOKE_PRIVILEGE_SUCCESSFUL,
-      action, resourceType + " " + resource,
-      ((withGrant) ? " " + resourceString(Constants.RES_REVOKE_PRIVILEGE_SUCCESSFUL_WITH_GRANT) : ""),
-      principalType + " " + principal);
+    if (privilegeObject != null) {
+      printlnResource(Constants.RES_REVOKE_PRIVILEGE_SUCCESSFUL,
+        action, resourceType + " " + resource,
+        ((withGrant) ? " " + resourceString(Constants.RES_REVOKE_PRIVILEGE_SUCCESSFUL_WITH_GRANT) : ""),
+        principalType + " " + principal);
+    } else {
+      printlnResource(Constants.RES_REVOKE_ALL_PRIVILEGES_SUCCESSFUL,
+        principalType + " " + principal);
+    }
 
     return Status.OK;
   }
