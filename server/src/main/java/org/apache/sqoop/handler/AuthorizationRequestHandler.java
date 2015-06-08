@@ -20,6 +20,9 @@ package org.apache.sqoop.handler;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.CommonRepositoryError;
+import org.apache.sqoop.repository.Repository;
+import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.json.*;
 import org.apache.sqoop.model.MPrincipal;
@@ -165,6 +168,38 @@ public class AuthorizationRequestHandler implements RequestHandler {
     }
   }
 
+  private void checkResourceExists(MResource resource) {
+    if (resource == null) {
+      return;
+    }
+
+    Boolean resourceExists = false;
+    Repository repository = RepositoryManager.getInstance().getRepository();
+    MResource.TYPE type = MResource.TYPE.valueOf(resource.getType());
+
+    if (type == MResource.TYPE.CONNECTOR) {
+      if (repository.findConnector(resource.getName()) != null) {
+        resourceExists = true;
+      }
+    } else if (type == MResource.TYPE.LINK) {
+      if (repository.findLink(resource.getName()) != null) {
+        resourceExists = true;
+      }
+    } else if (type == MResource.TYPE.JOB) {
+      if (repository.findJob(resource.getName()) != null) {
+        resourceExists = true;
+      }
+    } else {
+      // For MResource.Type.SERVER, it must exists
+      resourceExists = true;
+    }
+
+    if (!resourceExists) {
+      throw new SqoopException(CommonRepositoryError.COMMON_0058,
+          "Can't find resource " + resource.toString());
+    }
+  }
+
   private JsonBean getPrivilege(RequestContext ctx) {
     AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
@@ -180,6 +215,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
       if (resource_name != null && resource_type != null) {
         resource = new MResource(resource_name, resource_type);
       }
+      checkResourceExists(resource);
       manager.logAuditEvent(ctx.getUserName(),
               ctx.getRequest().getRemoteAddr(), "get", "privileges by principal", principal.toString());
       return new PrivilegesBean(handler.getPrivilegesByPrincipal(principal, resource));
@@ -271,6 +307,15 @@ public class AuthorizationRequestHandler implements RequestHandler {
     List<MPrincipal> principals = principalsBean.getPrincipals();
     // Get privilege object
     List<MPrivilege> privileges = privilegesBean == null ? null : privilegesBean.getPrivileges();
+
+    if (privileges != null) {
+      for (MPrivilege privilege : privileges) {
+        checkResourceExists(privilege.getResource());
+      }
+    } else if (isGrant){
+      throw new SqoopException(CommonRepositoryError.COMMON_0058,
+          "Resource can't be null");
+    }
 
     if (isGrant) {
       manager.logAuditEvent(ctx.getUserName(),
