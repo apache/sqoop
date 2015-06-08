@@ -901,5 +901,13 @@ limitations under the License.
         <role>Committer</role>
       </roles>
     </developer>
+    <developer>
+      <id>rzhou1</id>
+      <name>Richard Zhou</name>
+      <organization>Intel</organization>
+      <roles>
+        <role>Committer</role>
+      </roles>
+    </developer>
   </developers>
 </project>
