@@ -270,15 +270,7 @@ public class  ConfigUtils {
     Class klass = configuration.getClass();
 
     for(MConfig config : configs) {
-      Field configField;
-      try {
-        configField = klass.getDeclaredField(config.getName());
-      } catch (NoSuchFieldException e) {
-        throw new SqoopException(ModelError.MODEL_006,
-          "Missing field " + config.getName() + " on config class " + klass.getCanonicalName(), e);
-      }
-
-      configField = getFieldFromName(klass, config.getName());
+      Field configField = getFieldFromName(klass, config.getName());
       // We need to access this field even if it would be declared as private
       configField.setAccessible(true);
       Class<?> configClass = configField.getType();
