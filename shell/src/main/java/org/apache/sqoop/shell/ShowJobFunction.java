@@ -20,7 +20,9 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.apache.sqoop.validation.Status;
@@ -86,10 +88,33 @@ public class ShowJobFunction extends SqoopFunction {
     for(MJob job : jobs) {
       ids.add(String.valueOf(job.getPersistenceId()));
       names.add(job.getName());
-      fromConnectors.add(String.valueOf(
-          job.getFromConnectorId()));
-      toConnectors.add(String.valueOf(
-          job.getToConnectorId()));
+
+      // From link and connnector
+      String fromLinkName = "";
+      MLink fromLink = client.getLink(job.getFromLinkId());
+      if (fromLink != null) {
+        fromLinkName = fromLink.getName();
+      }
+      String fromConnectorName = "";
+      MConnector fromConnector = client.getConnector(job.getFromConnectorId());
+      if (fromConnector != null) {
+        fromConnectorName = fromConnector.getUniqueName();
+      }
+      fromConnectors.add(fromLinkName + " (" + fromConnectorName + ")");
+
+      // To link and connector
+      String toLinkName = "";
+      MLink toLink = client.getLink(job.getToLinkId());
+      if (toLink != null) {
+        toLinkName = toLink.getName();
+      }
+      String toConnnectorName = "";
+      MConnector toConnector = client.getConnector(job.getToConnectorId());
+      if (toConnector != null) {
+        toConnnectorName = toConnector.getUniqueName();
+      }
+      toConnectors.add(toLinkName + " (" + toConnnectorName + ")");
+
       availabilities.add(String.valueOf(job.getEnabled()));
     }
 
