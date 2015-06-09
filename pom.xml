@@ -909,5 +909,13 @@ limitations under the License.
         <role>Committer</role>
       </roles>
     </developer>
+    <developer>
+      <id>qxu</id>
+      <name>Qian Xu</name>
+      <organization>Intel</organization>
+      <roles>
+        <role>Committer</role>
+      </roles>
+    </developer>
   </developers>
 </project>
