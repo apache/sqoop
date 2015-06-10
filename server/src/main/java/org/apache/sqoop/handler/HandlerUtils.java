@@ -19,6 +19,8 @@ package org.apache.sqoop.handler;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.server.common.ServerError;
 
@@ -29,8 +31,9 @@ public class HandlerUtils {
     // NOTE: jobId is a fallback for older sqoop clients if any, since we want
     // to primarily use unique jobNames
     long jobId;
-    if (repository.findJob(identifier) != null) {
-      jobId = repository.findJob(identifier).getPersistenceId();
+    MJob job = repository.findJob(identifier);
+    if (job != null) {
+      jobId = job.getPersistenceId();
     } else {
       try {
         jobId = Long.valueOf(identifier);
@@ -49,8 +52,9 @@ public class HandlerUtils {
     // NOTE: linkId is a fallback for older sqoop clients if any, since we want
     // to primarily use unique linkNames
     long linkId;
-    if (repository.findLink(identifier) != null) {
-      linkId = repository.findLink(identifier).getPersistenceId();
+    MLink link = repository.findLink(identifier);
+    if (link != null) {
+      linkId = link.getPersistenceId();
     } else {
       try {
         linkId = Long.valueOf(identifier);
