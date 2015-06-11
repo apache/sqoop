@@ -52,6 +52,7 @@ import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.repository.JdbcRepositoryHandler;
+import org.apache.sqoop.repository.RepositoryError;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
@@ -100,7 +101,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Looking up connector: " + shortName);
     }
-    MConnector mc = null;
     PreparedStatement connectorFetchStmt = null;
     try {
       connectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable());
@@ -109,11 +109,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       List<MConnector> connectors = loadConnectors(connectorFetchStmt, conn);
 
       if (connectors.size() == 0) {
-        LOG.debug("No connector found by name: " + shortName);
+        LOG.debug("Looking up connector with name: " + shortName + ", no connector found");
         return null;
       } else if (connectors.size() == 1) {
-        LOG.debug("Looking up connector: " + shortName + ", found: " + mc);
-        return connectors.get(0);
+        MConnector mc = connectors.get(0);
+        LOG.debug("Looking up connector with name: " + shortName + ", found: " + mc);
+        return mc;
       } else {
         throw new SqoopException(CommonRepositoryError.COMMON_0002, shortName);
       }
@@ -578,13 +579,18 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
       List<MLink> links = loadLinks(linkFetchStmt, conn);
 
-      if (links.size() != 1) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0021, "Couldn't find"
-            + " link with id " + linkId);
+      if (links.size() == 0) {
+        LOG.debug("Looking up link with id: " + linkId + ", no link found");
+        return null;
+      } else if (links.size() == 1) {
+        // Return the first and only one link object with the given id
+        MLink link = links.get(0);
+        LOG.debug("Looking up link with id: " + linkId + ", found: " + link);
+        return link;
+      } else {
+        throw new SqoopException(CommonRepositoryError.COMMON_0021,
+            String.valueOf(linkId));
       }
-
-      // Return the first and only one link object with the given id
-      return links.get(0);
 
     } catch (SQLException ex) {
       logException(ex, linkId);
@@ -606,12 +612,17 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
       List<MLink> links = loadLinks(linkFetchStmt, conn);
 
-      if (links.size() != 1) {
+      if (links.size() == 0) {
+        LOG.debug("Looking up link with name: " + linkName + ", no link found");
         return null;
+      } else if (links.size() == 1) {
+        // Return the first and only one link object with the given name
+        MLink link = links.get(0);
+        LOG.debug("Looking up link with name: " + linkName + ", found: " + link);
+        return link;
+      } else {
+        throw new SqoopException(CommonRepositoryError.COMMON_0021, linkName);
       }
-
-      // Return the first and only one link object with the given name
-      return links.get(0);
 
     } catch (SQLException ex) {
       logException(ex, linkName);
@@ -873,13 +884,18 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
       List<MJob> jobs = loadJobs(stmt, conn);
 
-      if (jobs.size() != 1) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0027, "Couldn't find"
-            + " job with id " + jobId);
+      if (jobs.size() == 0) {
+        LOG.debug("Looking up job with id: " + jobId + ", no job found");
+        return null;
+      } else if (jobs.size() == 1) {
+        // Return the first and only one job object with the given id
+        MJob job = jobs.get(0);
+        LOG.debug("Looking up job with id: " + jobId + ", found: " + job);
+        return job;
+      } else {
+        throw new SqoopException(CommonRepositoryError.COMMON_0027,
+            String.valueOf(jobId));
       }
-
-      // Return the first and only one link object
-      return jobs.get(0);
 
     } catch (SQLException ex) {
       logException(ex, jobId);
@@ -901,12 +917,17 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
       List<MJob> jobs = loadJobs(stmt, conn);
 
-      if (jobs.size() != 1) {
+      if (jobs.size() == 0) {
+        LOG.debug("Looking up job with name: " + name + ", no job found");
         return null;
+      } else if (jobs.size() == 1) {
+        // Return the first and only one job object with the given id
+        MJob job = jobs.get(0);
+        LOG.debug("Looking up job with name: " + name + ", found: " + job);
+        return job;
+      } else {
+        throw new SqoopException(CommonRepositoryError.COMMON_0027, name);
       }
-
-      // Return the first and only one link object
-      return jobs.get(0);
 
     } catch (SQLException ex) {
       logException(ex, name);
@@ -2076,7 +2097,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
   @Override
   public MConfig findFromJobConfig(long jobId, String configName, Connection conn) {
-    MFromConfig fromConfigs = findJob(jobId, conn).getFromJobConfig();
+    MJob job = findJob(jobId, conn);
+    if (job == null) {
+      throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
+    }
+    MFromConfig fromConfigs = job.getFromJobConfig();
     if (fromConfigs != null) {
       MConfig config = fromConfigs.getConfig(configName);
       if (config == null) {
@@ -2089,7 +2114,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
   @Override
   public MConfig findToJobConfig(long jobId, String configName, Connection conn) {
-    MToConfig toConfigs = findJob(jobId, conn).getToJobConfig();
+    MJob job = findJob(jobId, conn);
+    if (job == null) {
+      throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
+    }
+    MToConfig toConfigs = job.getToJobConfig();
     if (toConfigs != null) {
       MConfig config = toConfigs.getConfig(configName);
       if (config == null) {
@@ -2102,7 +2131,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
   @Override
   public MConfig findDriverJobConfig(long jobId, String configName, Connection conn) {
-    MDriverConfig driverConfigs = findJob(jobId, conn).getDriverConfig();
+    MJob job = findJob(jobId, conn);
+    if (job == null) {
+      throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
+    }
+    MDriverConfig driverConfigs = job.getDriverConfig();
     if (driverConfigs != null) {
       MConfig config = driverConfigs.getConfig(configName);
       if (config == null) {
@@ -2115,7 +2148,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
   @Override
   public MConfig findLinkConfig(long linkId, String configName, Connection conn) {
-    MConfig driverConfig = findLink(linkId, conn).getConnectorLinkConfig(configName);
+    MLink link = findLink(linkId, conn);
+    if (link == null) {
+      throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid id: " + linkId);
+    }
+    MConfig driverConfig = link.getConnectorLinkConfig(configName);
     if (driverConfig == null) {
       throw new SqoopException(CommonRepositoryError.COMMON_0052, "for configName :" + configName);
     }

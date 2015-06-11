@@ -66,12 +66,7 @@ public class TestJobHandling extends DerbyTestCase {
   @Test
   public void testFindJob() throws Exception {
     // Let's try to find non existing job
-    try {
-      handler.findJob(1, derbyConnection);
-      fail();
-    } catch(SqoopException ex) {
-      assertEquals(CommonRepositoryError.COMMON_0027, ex.getErrorCode());
-    }
+    assertNull(handler.findJob(1, derbyConnection));
 
     loadJobsForLatestVersion();
 

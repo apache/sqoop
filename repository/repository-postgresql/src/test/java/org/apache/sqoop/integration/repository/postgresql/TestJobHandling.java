@@ -76,14 +76,14 @@ public class TestJobHandling extends PostgresqlTestCase {
     handler.createJob(getJob(JOB_B_NAME, connectorB, connectorA, linkB, linkA), provider.getConnection());
   }
 
-  @Test(expectedExceptions = SqoopException.class)
+  @Test
   public void testFindJobFail() throws Exception {
     for (MJob job : handler.findJobs(provider.getConnection())) {
       handler.deleteJob(job.getPersistenceId(), provider.getConnection());
     }
 
     // Let's try to find non existing job
-    handler.findJob(1, provider.getConnection());
+    assertNull(handler.findJob(1, provider.getConnection()));
   }
 
   @Test

@@ -58,12 +58,7 @@ public class TestLinkHandling extends DerbyTestCase {
   @Test
   public void testFindLink() throws Exception {
     // Let's try to find non existing link
-    try {
-      handler.findLink(1, getDerbyDatabaseConnection());
-      fail();
-    } catch(SqoopException ex) {
-      assertEquals(CommonRepositoryError.COMMON_0021, ex.getErrorCode());
-    }
+    assertNull(handler.findLink(1, getDerbyDatabaseConnection()));
 
     // Load prepared links into database
     loadLinksForLatestVersion();

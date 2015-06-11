@@ -111,8 +111,8 @@ public enum CommonRepositoryError implements ErrorCode {
   /** We can't restore link from repository **/
   COMMON_0020("Unable to load link from repository"),
 
-  /** We can't restore specific link from repository **/
-  COMMON_0021("Unable to load specific link from repository"),
+  /** The repository contains more than one link with same name or id **/
+  COMMON_0021("Invalid entity state - multiple links found"),
 
   /** We're unable to check if given link already exists */
   COMMON_0022("Unable to check if given link exists"),
@@ -129,8 +129,8 @@ public enum CommonRepositoryError implements ErrorCode {
   /** We're unable to check if given job already exists */
   COMMON_0026("Unable to check if given job exists"),
 
-  /** We can't restore specific job from repository **/
-  COMMON_0027("Unable to load specific job from repository"),
+  /** The repository contains more than one job with same name or id **/
+  COMMON_0027("Invalid entity state - multiple jobs found"),
 
   /** We can't restore job from repository **/
   COMMON_0028("Unable to load job from repository"),

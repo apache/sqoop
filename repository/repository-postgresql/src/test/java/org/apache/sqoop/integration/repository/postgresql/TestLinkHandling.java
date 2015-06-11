@@ -69,14 +69,14 @@ public class TestLinkHandling extends PostgresqlTestCase {
     handler.createLink(linkB, provider.getConnection());
   }
 
-  @Test(expectedExceptions = SqoopException.class)
+  @Test
   public void testFindLinkFail() {
     // Delete links
     for (MLink link : handler.findLinks(provider.getConnection())) {
       handler.deleteLink(link.getPersistenceId(), provider.getConnection());
     }
 
-    handler.findLink(1, provider.getConnection());
+    assertNull(handler.findLink(1, provider.getConnection()));
   }
 
   @Test
