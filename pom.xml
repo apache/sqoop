@@ -515,6 +515,7 @@ limitations under the License.
         <groupId>mysql</groupId>
         <artifactId>mysql-connector-java</artifactId>
         <version>${jdbc.mysql.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>postgresql</groupId>
