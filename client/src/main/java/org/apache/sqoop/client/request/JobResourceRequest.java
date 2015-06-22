@@ -48,27 +48,27 @@ public class JobResourceRequest extends ResourceRequest {
     super(token);
   }
 
-  public JobBean readByConnector(String serverUrl, Long cId) {
+  public JobBean readByConnector(String serverUrl, String cArg) {
     JobsBean bean = new JobsBean();
-    if (cId != null) {
-      String response = super.get(serverUrl + RESOURCE + "?cname=" + cId);
+    if (cArg != null) {
+      String response = super.get(serverUrl + RESOURCE + "?cname=" + cArg);
       JSONObject jsonObject = JSONUtils.parse(response);
       bean.restore(jsonObject);
     }
     return bean;
   }
 
-  public JobBean read(String serverUrl, Long jobId) {
+  public JobBean read(String serverUrl, String jobArg) {
     String response;
-    if (jobId == null) {
+    if (jobArg == null) {
       response = super.get(serverUrl + RESOURCE + "all");
     } else {
-      response = super.get(serverUrl + RESOURCE + jobId);
+      response = super.get(serverUrl + RESOURCE + jobArg);
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
     JobBean bean = new JobsBean();
-    if (jobId != null) {
+    if (jobArg != null) {
       bean = new JobBean();
     }
     bean.restore(jsonObject);
@@ -96,30 +96,30 @@ public class JobResourceRequest extends ResourceRequest {
     return validationBean;
   }
 
-  public void delete(String serverUrl, Long jobId) {
-    super.delete(serverUrl + RESOURCE + jobId);
+  public void delete(String serverUrl, String jobArg) {
+    super.delete(serverUrl + RESOURCE + jobArg);
   }
 
-  public void enable(String serverUrl, Long jobId, Boolean enabled) {
+  public void enable(String serverUrl, String jobArg, Boolean enabled) {
     if (enabled) {
-      super.put(serverUrl + RESOURCE + jobId + ENABLE, null);
+      super.put(serverUrl + RESOURCE + jobArg + ENABLE, null);
     } else {
-      super.put(serverUrl + RESOURCE + jobId + DISABLE, null);
+      super.put(serverUrl + RESOURCE + jobArg + DISABLE, null);
     }
   }
 
-  public SubmissionBean start(String serverUrl, Long jobId) {
-    String response = super.put(serverUrl + RESOURCE + jobId + START, null);
+  public SubmissionBean start(String serverUrl, String jobArg) {
+    String response = super.put(serverUrl + RESOURCE + jobArg + START, null);
     return createJobSubmissionResponse(response);
   }
 
-  public SubmissionBean stop(String serverUrl, Long jobId) {
-    String response = super.put(serverUrl + RESOURCE + jobId + STOP, null);
+  public SubmissionBean stop(String serverUrl, String jobArg) {
+    String response = super.put(serverUrl + RESOURCE + jobArg + STOP, null);
     return createJobSubmissionResponse(response);
   }
 
-  public SubmissionBean status(String serverUrl, Long jobId) {
-    String response = super.get(serverUrl + RESOURCE + jobId + STATUS);
+  public SubmissionBean status(String serverUrl, String jobArg) {
+    String response = super.get(serverUrl + RESOURCE + jobArg + STATUS);
     return createJobSubmissionResponse(response);
   }
 

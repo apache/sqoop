@@ -296,6 +296,7 @@ public class SqoopClient {
     return createLink(connector.getPersistenceId());
   }
 
+
   /**
    * Retrieve link for given id.
    *
@@ -303,7 +304,18 @@ public class SqoopClient {
    * @return
    */
   public MLink getLink(long linkId) {
-    return resourceRequests.readLink(linkId).getLinks().get(0);
+    //Cast long to string and pass (retained to prevent other functionality from breaking)
+    return resourceRequests.readLink(String.valueOf(linkId)).getLinks().get(0);
+  }
+
+  /**
+   * Retrieve link for given name.
+   *
+   * @param linkName Link name
+   * @return
+   */
+  public MLink getLink(String linkName) {
+    return resourceRequests.readLink(linkName).getLinks().get(0);
   }
 
   /**
@@ -336,13 +348,32 @@ public class SqoopClient {
   }
 
   /**
+   * Enable/disable link with given name
+   *
+   * @param linkName link name
+   * @param enabled Enable or disable
+   */
+  public void enableLink(String linkName, boolean enabled) {
+    resourceRequests.enableLink(linkName, enabled);
+  }
+
+  /**
    * Enable/disable link with given id
    *
    * @param linkId link id
    * @param enabled Enable or disable
    */
   public void enableLink(long linkId, boolean enabled) {
-    resourceRequests.enableLink(linkId, enabled);
+    resourceRequests.enableLink(String.valueOf(linkId), enabled);
+  }
+
+  /**
+   * Delete link with given name
+   *
+   * @param linkName link name
+   */
+  public void deleteLink(String linkName) {
+    resourceRequests.deleteLink(linkName);
   }
 
   /**
@@ -351,7 +382,29 @@ public class SqoopClient {
    * @param linkId link id
    */
   public void deleteLink(long linkId) {
-    resourceRequests.deleteLink(linkId);
+    resourceRequests.deleteLink(String.valueOf(linkId));
+  }
+
+  /**
+   * Create new job the for given links.
+   *
+   * @param fromLinkName From link name
+   * @param toLinkName To link name
+   * @return
+   */
+  public MJob createJob(String fromLinkName, String toLinkName) {
+    MLink fromLink = getLink(fromLinkName);
+    MLink toLink = getLink(toLinkName);
+
+    return new MJob(
+      fromLink.getConnectorId(),
+      toLink.getConnectorId(),
+      fromLink.getPersistenceId(),
+      toLink.getPersistenceId(),
+      getConnector(fromLink.getConnectorId()).getFromConfig(),
+      getConnector(toLink.getConnectorId()).getToConfig(),
+      getDriverConfig()
+    );
   }
 
   /**
@@ -366,13 +419,13 @@ public class SqoopClient {
     MLink toLink = getLink(toLinkId);
 
     return new MJob(
-      fromLink.getConnectorId(),
-      toLink.getConnectorId(),
-      fromLink.getPersistenceId(),
-      toLink.getPersistenceId(),
-      getConnector(fromLink.getConnectorId()).getFromConfig(),
-      getConnector(toLink.getConnectorId()).getToConfig(),
-      getDriverConfig()
+            fromLink.getConnectorId(),
+            toLink.getConnectorId(),
+            fromLink.getPersistenceId(),
+            toLink.getPersistenceId(),
+            getConnector(fromLink.getConnectorId()).getFromConfig(),
+            getConnector(toLink.getConnectorId()).getToConfig(),
+            getDriverConfig()
     );
   }
 
@@ -383,7 +436,18 @@ public class SqoopClient {
    * @return
    */
   public MJob getJob(long jobId) {
-    return resourceRequests.readJob(jobId).getJobs().get(0);
+    //Cast long to string and pass (retained to prevent other functionality from breaking)
+    return resourceRequests.readJob(String.valueOf(jobId)).getJobs().get(0);
+  }
+
+  /**
+   * Retrieve job for given name.
+   *
+   * @param jobName Job name
+   * @return
+   */
+  public MJob getJob(String jobName) {
+    return resourceRequests.readJob(jobName).getJobs().get(0);
   }
 
   /**
@@ -396,12 +460,21 @@ public class SqoopClient {
   }
 
   /**
-   * Retrieve list of all jobs by connector
+   * Retrieve list of all jobs by connector id
    *
    * @return
    */
   public List<MJob> getJobsByConnector(long cId) {
-    return resourceRequests.readJobsByConnector(cId).getJobs();
+    return resourceRequests.readJobsByConnector(String.valueOf(cId)).getJobs();
+  }
+
+  /**
+   * Retrieve list of all jobs by connector name
+   *
+   * @return
+   */
+  public List<MJob> getJobsByConnector(String cName) {
+    return resourceRequests.readJobsByConnector(cName).getJobs();
   }
 
   /**
@@ -424,22 +497,51 @@ public class SqoopClient {
   }
 
   /**
-   * Enable/disable job with given id
+   * Enable/disable job with given name
    *
-   * @param jid Job that is going to be enabled/disabled
+   * @param jName Job that is going to be enabled/disabled
    * @param enabled Enable or disable
    */
-  public void enableJob(long jid, boolean enabled) {
-    resourceRequests.enableJob(jid, enabled);
+  public void enableJob(String jName, boolean enabled) {
+    resourceRequests.enableJob(jName, enabled);
   }
 
   /**
-   * Delete job with given id.
+   * Enable/disable job with given id
+   *
+   * @param jId Job that is going to be enabled/disabled
+   * @param enabled Enable or disable
+   */
+  public void enableJob(long jId, boolean enabled) {
+    resourceRequests.enableJob(String.valueOf(jId), enabled);
+  }
+
+  /**
+   * Delete job with given name.
+   *
+   * @param jobName Job name
+   */
+  public void deleteJob(String jobName) {
+    resourceRequests.deleteJob(jobName);
+  }
+
+  /**
+   * Delete job with given id
    *
    * @param jobId Job id
    */
   public void deleteJob(long jobId) {
-    resourceRequests.deleteJob(jobId);
+    resourceRequests.deleteJob(String.valueOf(jobId));
+  }
+
+  /**
+   * Start job with given name.
+   *
+   * @param jobName Job name
+   * @return
+   */
+  public MSubmission startJob(String jobName) {
+    return resourceRequests.startJob(jobName).getSubmissions().get(0);
   }
 
   /**
@@ -449,20 +551,20 @@ public class SqoopClient {
    * @return
    */
   public MSubmission startJob(long jobId) {
-    return resourceRequests.startJob(jobId).getSubmissions().get(0);
+    return resourceRequests.startJob(String.valueOf(jobId)).getSubmissions().get(0);
   }
 
   /**
    * Method used for synchronous job submission.
    * Pass null to callback parameter if submission status is not required and after completion
    * job execution returns MSubmission which contains final status of submission.
-   * @param jobId - Job ID
+   * @param jobName - Job name
    * @param callback - User may set null if submission status is not required, else callback methods invoked
    * @param pollTime - Server poll time
    * @return MSubmission - Final status of job submission
    * @throws InterruptedException
    */
-  public MSubmission startJob(long jobId, SubmissionCallback callback, long pollTime)
+  public MSubmission startJob(String jobName, SubmissionCallback callback, long pollTime)
       throws InterruptedException {
     if(pollTime <= 0) {
       throw new SqoopException(ClientError.CLIENT_0002);
@@ -470,7 +572,7 @@ public class SqoopClient {
     //TODO(https://issues.apache.org/jira/browse/SQOOP-1652): address the submit/start/first terminology difference
     // What does first even mean in s distributed client/server model?
     boolean first = true;
-    MSubmission submission = resourceRequests.startJob(jobId).getSubmissions().get(0);
+    MSubmission submission = resourceRequests.startJob(jobName).getSubmissions().get(0);
     // what happens when the server fails, do we just say finished?
     while(submission.getStatus().isRunning()) {
       if(first) {
@@ -480,11 +582,18 @@ public class SqoopClient {
         invokeSubmissionCallback(callback, submission, SubmissionStatus.UPDATED);
       }
       Thread.sleep(pollTime);
-      submission = getJobStatus(jobId);
+
+      //Works with both name as well as id (in string form) as argument
+      submission = getJobStatus(jobName);
     }
     invokeSubmissionCallback(callback, submission, SubmissionStatus.FINISHED);
     return submission;
   }
+
+    public MSubmission startJob(long jobId, SubmissionCallback callback, long pollTime)
+            throws InterruptedException {
+      return startJob(String.valueOf(jobId), callback, pollTime);
+    }
 
   /**
    * Invokes the callback's methods with MSubmission object
@@ -513,13 +622,33 @@ public class SqoopClient {
   }
 
   /**
-   * stop job with given id.
+   * stop job with given name.
    *
-   * @param jid Job id
+   * @param jName Job name
    * @return
    */
-  public MSubmission stopJob(long jid) {
-    return resourceRequests.stopJob(jid).getSubmissions().get(0);
+  public MSubmission stopJob(String jName) {
+    return resourceRequests.stopJob(jName).getSubmissions().get(0);
+  }
+
+  /**
+   * stop job with given id.
+   *
+   * @param jId Job id
+   * @return
+   */
+  public MSubmission stopJob(long jId) {
+    return resourceRequests.stopJob(String.valueOf(jId)).getSubmissions().get(0);
+  }
+
+  /**
+   * Get status for given job name.
+   *
+   * @param jName Job name
+   * @return
+   */
+  public MSubmission getJobStatus(String jName) {
+    return resourceRequests.getJobStatus(jName).getSubmissions().get(0);
   }
 
   /**
@@ -529,7 +658,7 @@ public class SqoopClient {
    * @return
    */
   public MSubmission getJobStatus(long jid) {
-    return resourceRequests.getJobStatus(jid).getSubmissions().get(0);
+    return resourceRequests.getJobStatus(String.valueOf(jid)).getSubmissions().get(0);
   }
 
   /**
@@ -548,7 +677,17 @@ public class SqoopClient {
    * @return
    */
   public List<MSubmission> getSubmissionsForJob(long jobId) {
-    return resourceRequests.readSubmission(jobId).getSubmissions();
+    return resourceRequests.readSubmission(String.valueOf(jobId)).getSubmissions();
+  }
+
+  /**
+   * Retrieve list of submissions for given job name.
+   *
+   * @param jobName Job name
+   * @return
+   */
+  public List<MSubmission> getSubmissionsForJob(String jobName) {
+    return resourceRequests.readSubmission(jobName).getSubmissions();
   }
 
   /**

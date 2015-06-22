@@ -60,9 +60,11 @@ public class ShowJobFunction extends SqoopFunction {
     if (line.hasOption(Constants.OPT_ALL)) {
       showJobs(null);
     } else if (line.hasOption(Constants.OPT_CID)) {
-      showJobs(getLong(line, Constants.OPT_CID));
+      //showJobs(getLong(line, Constants.OPT_CID));
+      showJobs(line.getOptionValue(Constants.OPT_CID));
     } else if (line.hasOption(Constants.OPT_JID)) {
-      showJob(getLong(line, Constants.OPT_JID));
+      //showJob(getLong(line, Constants.OPT_JID));
+      showJob(line.getOptionValue(Constants.OPT_JID));
     } else {
       showSummary();
     }
@@ -121,12 +123,12 @@ public class ShowJobFunction extends SqoopFunction {
     TableDisplayer.display(header, ids, names, fromConnectors, toConnectors, availabilities);
   }
 
-  private void showJobs(Long id) {
+  private void showJobs(String jArg) {
     List<MJob> jobs;
-    if (id == null) {
+    if (jArg == null) {
       jobs = client.getJobs();
     } else {
-      jobs = client.getJobsByConnector(id);
+      jobs = client.getJobsByConnector(jArg);
     }
     printlnResource(Constants.RES_SHOW_PROMPT_JOBS_TO_SHOW, jobs.size());
 
@@ -135,8 +137,8 @@ public class ShowJobFunction extends SqoopFunction {
     }
   }
 
-  private void showJob(Long jid) {
-    MJob job = client.getJob(jid);
+  private void showJob(String jobArg) {
+    MJob job = client.getJob(jobArg);
     printlnResource(Constants.RES_SHOW_PROMPT_JOBS_TO_SHOW, 1);
 
     displayJob(job);

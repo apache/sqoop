@@ -51,7 +51,7 @@ public class ShowConnectorFunction extends SqoopFunction {
     if (line.hasOption(Constants.OPT_ALL)) {
       showConnectors();
     } else if (line.hasOption(Constants.OPT_CID)) {
-      showConnector(getLong(line, Constants.OPT_CID));
+      showConnector(line);
     } else {
       showSummary();
     }
@@ -96,8 +96,19 @@ public class ShowConnectorFunction extends SqoopFunction {
     }
   }
 
-  private void showConnector(Long cid) {
-    MConnector connector = client.getConnector(cid);
+  private void showConnector(CommandLine line) {
+    //Check if the command argument is a connector name
+    String connectorName = line.getOptionValue(Constants.OPT_CID);
+    MConnector connector = client.getConnector(connectorName);
+    if (null == connector) {
+      //Now check if command line argument is a connector id
+      //This works as getConnector(String...) does not throw an exception
+      Long cid  = getLong(line, Constants.OPT_CID);
+      connector = client.getConnector(cid);
+    }
+
+    //No null checks here - as before. This is because getConnector(long...)
+    //throws an exception if connector is not found.
 
     printlnResource(Constants.RES_SHOW_PROMPT_CONNECTORS_TO_SHOW, 1);
 

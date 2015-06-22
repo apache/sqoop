@@ -40,7 +40,8 @@ public class StopJobFunction extends SqoopFunction {
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_JID)) {
-      MSubmission submission = client.stopJob(getLong(line, Constants.OPT_JID));
+      //MSubmission submission = client.stopJob(getLong(line, Constants.OPT_JID));
+      MSubmission submission = client.stopJob(line.getOptionValue(Constants.OPT_JID));
       if(submission.getStatus().isFailure()) {
         SubmissionDisplayer.displayFooter(submission);
       } else {

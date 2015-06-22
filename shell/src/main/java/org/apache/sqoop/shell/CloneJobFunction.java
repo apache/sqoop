@@ -52,15 +52,15 @@ public class CloneJobFunction extends SqoopFunction {
 
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return cloneJob(getLong(line, Constants.OPT_JID), line.getArgList(), isInteractive);
+    return cloneJob(line.getOptionValue(Constants.OPT_JID), line.getArgList(), isInteractive);
   }
 
-  private Status cloneJob(Long jobId, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_CLONE_CLONING_JOB, jobId);
+  private Status cloneJob(String jobArg, List<String> args, boolean isInteractive) throws IOException {
+    printlnResource(Constants.RES_CLONE_CLONING_JOB, jobArg);
 
     ConsoleReader reader = new ConsoleReader();
 
-    MJob job = client.getJob(jobId);
+    MJob job = client.getJob(jobArg);
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(

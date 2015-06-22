@@ -58,7 +58,7 @@ public class ShowLinkFunction extends SqoopFunction {
     if (line.hasOption(Constants.OPT_ALL)) {
       showLinks();
     } else if (line.hasOption(Constants.OPT_LID)) {
-      showLink(getLong(line, Constants.OPT_LID));
+      showLink(line.getOptionValue(Constants.OPT_LID));
     } else {
       showSummary();
     }
@@ -103,8 +103,8 @@ public class ShowLinkFunction extends SqoopFunction {
     }
   }
 
-  private void showLink(Long xid) {
-    MLink link = client.getLink(xid);
+  private void showLink(String linkArg) {
+    MLink link = client.getLink(linkArg);
 
     printlnResource(Constants.RES_SHOW_PROMPT_LINKS_TO_SHOW, 1);
 

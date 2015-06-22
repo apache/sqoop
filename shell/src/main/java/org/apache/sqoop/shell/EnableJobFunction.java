@@ -42,7 +42,7 @@ public class EnableJobFunction extends SqoopFunction {
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
-    client.enableJob(getLong(line, Constants.OPT_JID), true);
+    client.enableJob(line.getOptionValue(Constants.OPT_JID), true);
     return Status.OK;
   }
 }

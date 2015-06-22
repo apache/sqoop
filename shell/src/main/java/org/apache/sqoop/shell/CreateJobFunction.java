@@ -62,17 +62,17 @@ public class CreateJobFunction extends  SqoopFunction {
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return createJob(getLong(line, Constants.OPT_FROM),
-                     getLong(line, Constants.OPT_TO),
+    return createJob(line.getOptionValue(Constants.OPT_FROM),
+                     line.getOptionValue(Constants.OPT_TO),
                      line.getArgList(),
                      isInteractive);
   }
 
-  private Status createJob(Long fromLinkId, Long toLinkId, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_CREATE_CREATING_JOB, fromLinkId, toLinkId);
+  private Status createJob(String fromLinkArg, String toLinkArg, List<String> args, boolean isInteractive) throws IOException {
+    printlnResource(Constants.RES_CREATE_CREATING_JOB, fromLinkArg, toLinkArg);
 
     ConsoleReader reader = new ConsoleReader();
-    MJob job = client.createJob(fromLinkId, toLinkId);
+    MJob job = client.createJob(fromLinkArg, toLinkArg);
 
     MConnector fromConnector = client.getConnector(job.getFromConnectorId());
     if (!fromConnector.getSupportedDirections().isDirectionSupported(Direction.FROM)) {

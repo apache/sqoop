@@ -38,14 +38,14 @@ public class SubmissionResourceRequest extends  ResourceRequest {
     super(token);
   }
 
-  public SubmissionsBean read(String serverUrl, Long jid) {
+  public SubmissionsBean read(String serverUrl, String jArg) {
     String response;
-    if (jid == null) {
+    if (jArg == null) {
       // all submissions
       response = super.get(serverUrl + RESOURCE);
     } else {
       // submission per job ( name preferred, we fall back to id)
-      response = super.get(serverUrl + RESOURCE + "?jname=" + jid);
+      response = super.get(serverUrl + RESOURCE + "?jname=" + jArg);
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     SubmissionsBean submissionBean = new SubmissionsBean();

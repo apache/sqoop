@@ -41,7 +41,7 @@ public class DeleteLinkFunction extends SqoopFunction {
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
-    client.deleteLink(getLong(line, Constants.OPT_LID));
+    client.deleteLink(line.getOptionValue(Constants.OPT_LID));
     return Status.OK;
   }
 }

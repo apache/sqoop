@@ -42,7 +42,7 @@ public class DeleteJobFunction extends SqoopFunction {
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
-    client.deleteJob(getLong(line, Constants.OPT_JID));
+    client.deleteJob(line.getOptionValue(Constants.OPT_JID));
     return Status.OK;
   }
 }

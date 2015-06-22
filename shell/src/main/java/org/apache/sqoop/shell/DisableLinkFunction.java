@@ -41,7 +41,7 @@ public class DisableLinkFunction extends SqoopFunction {
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
-    client.enableLink(getLong(line, Constants.OPT_LID), false);
+    client.enableLink(line.getOptionValue(Constants.OPT_LID), false);
     return Status.OK;
   }
 }

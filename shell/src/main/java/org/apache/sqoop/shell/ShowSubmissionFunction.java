@@ -48,13 +48,13 @@ public class ShowSubmissionFunction extends SqoopFunction {
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_DETAIL)) {
       if (line.hasOption(Constants.OPT_JID)) {
-        showSubmissions(getLong(line, Constants.OPT_JID));
+        showSubmissions(line.getOptionValue(Constants.OPT_JID));
       } else {
         showSubmissions(null);
       }
     } else {
       if (line.hasOption(Constants.OPT_JID)) {
-        showSummary(getLong(line, Constants.OPT_JID));
+        showSummary(line.getOptionValue(Constants.OPT_JID));
       } else {
         showSummary(null);
       }
@@ -63,12 +63,12 @@ public class ShowSubmissionFunction extends SqoopFunction {
     return Status.OK;
   }
 
-  private void showSummary(Long jid) {
+  private void showSummary(String jArg) {
     List<MSubmission> submissions;
-    if (jid == null) {
+    if (jArg == null) {
       submissions = client.getSubmissions();
     } else {
-      submissions = client.getSubmissionsForJob(jid);
+      submissions = client.getSubmissionsForJob(jArg);
     }
 
     List<String> header = new LinkedList<String>();
@@ -92,12 +92,12 @@ public class ShowSubmissionFunction extends SqoopFunction {
     TableDisplayer.display(header, jids, eids, status, dates);
   }
 
-  private void showSubmissions(Long jid) {
+  private void showSubmissions(String jArg) {
     List<MSubmission> submissions;
-    if (jid == null) {
+    if (jArg == null) {
       submissions = client.getSubmissions();
     } else {
-      submissions = client.getSubmissionsForJob(jid);
+      submissions = client.getSubmissionsForJob(jArg);
     }
 
     for (MSubmission submission : submissions) {

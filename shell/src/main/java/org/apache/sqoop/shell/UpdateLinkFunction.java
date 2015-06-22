@@ -52,16 +52,16 @@ public class UpdateLinkFunction extends SqoopFunction {
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return updateLink(getLong(line, Constants.OPT_LID), line.getArgList(), isInteractive);
+    return updateLink(line.getOptionValue(Constants.OPT_LID), line.getArgList(), isInteractive);
   }
 
-  private Status updateLink(Long linkId, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_SQOOP_UPDATING_LINK, linkId);
+  private Status updateLink(String linkArg, List<String> args, boolean isInteractive) throws IOException {
+    printlnResource(Constants.RES_SQOOP_UPDATING_LINK, linkArg);
 
     ConsoleReader reader = new ConsoleReader();
 
     // TODO(SQOOP-1634): using link config id, this call can be avoided
-    MLink link = client.getLink(linkId);
+    MLink link = client.getLink(linkArg);
 
     ResourceBundle connectorLinkConfigBundle = client.getConnectorConfigBundle(link.getConnectorId());
 

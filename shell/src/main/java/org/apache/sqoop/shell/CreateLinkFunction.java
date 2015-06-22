@@ -20,6 +20,7 @@ package org.apache.sqoop.shell;
 import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.LinkDynamicConfigOptions;
@@ -52,17 +53,40 @@ public class CreateLinkFunction extends SqoopFunction {
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return createLink(getLong(line, Constants.OPT_CID), line.getArgList(), isInteractive);
+    return createLink(line, line.getArgList(), isInteractive);
   }
 
-  private Status createLink(long connectorId, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_CREATE_CREATING_LINK, connectorId);
+  private Status createLink(CommandLine line, List<String> args, boolean isInteractive) throws IOException {
+
+    //Check if the command argument is a connector name
+    MLink link = null;
+    Long cid;
+    String connectorName = line.getOptionValue(Constants.OPT_CID);
+    MConnector connector = client.getConnector(connectorName);
+    if (null == connector) {
+      //Now check if command line argument is a connector id
+      //This works as getConnector(String...) does not throw an exception
+      cid = getLong(line, Constants.OPT_CID);
+      client.getConnector(cid);
+
+      //Would have thrown an exception before this if input was neither a valid name nor an id
+      //This will do an extra getConnector() call again inside createLink()
+      //but should not matter as connectors are cached
+      link = client.createLink(cid);
+      printlnResource(Constants.RES_CREATE_CREATING_LINK, cid);
+    }
+    else {
+      //Command line had connector name
+      //This will do an extra getConnector() call again inside createLink() but
+      //should not matter as connectors are cached
+      cid = connector.getPersistenceId();
+      link = client.createLink(connectorName);
+      printlnResource(Constants.RES_CREATE_CREATING_LINK, connectorName);
+    }
 
     ConsoleReader reader = new ConsoleReader();
 
-    MLink link = client.createLink(connectorId);
-
-    ResourceBundle connectorConfigBundle = client.getConnectorConfigBundle(connectorId);
+    ResourceBundle connectorConfigBundle = client.getConnectorConfigBundle(cid);
 
     Status status = Status.OK;
     if (isInteractive) {
@@ -85,8 +109,8 @@ public class CreateLinkFunction extends SqoopFunction {
     } else {
       LinkDynamicConfigOptions options = new LinkDynamicConfigOptions();
       options.prepareOptions(link);
-      CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
-      if (fillLink(line, link)) {
+      CommandLine linkoptsline = ConfigOptions.parseOptions(options, 0, args, false);
+      if (fillLink(linkoptsline, link)) {
         status = client.saveLink(link);
         if (!status.canProceed()) {
           printLinkValidationMessages(link);

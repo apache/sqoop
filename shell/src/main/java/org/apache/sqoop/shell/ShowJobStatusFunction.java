@@ -42,7 +42,7 @@ public class ShowJobStatusFunction extends SqoopFunction {
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_JID)) {
-      MSubmission submission = client.getJobStatus(getLong(line, Constants.OPT_JID));
+      MSubmission submission = client.getJobStatus(line.getOptionValue(Constants.OPT_JID));
       if(submission.getStatus().isFailure() || submission.getStatus().equals(SubmissionStatus.SUCCEEDED)) {
         SubmissionDisplayer.displayHeader(submission);
         SubmissionDisplayer.displayFooter(submission);

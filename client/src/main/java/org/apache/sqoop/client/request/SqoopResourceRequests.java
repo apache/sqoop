@@ -109,60 +109,60 @@ public class SqoopResourceRequests {
     return getLinkResourceRequest().create(serverUrl, link);
   }
 
-  public LinkBean readLink(Long linkId) {
-    return getLinkResourceRequest().read(serverUrl, linkId);
+  public LinkBean readLink(String linkArg) {
+    return getLinkResourceRequest().read(serverUrl, linkArg);
   }
 
   public ValidationResultBean updateLink(MLink link) {
     return getLinkResourceRequest().update(serverUrl, link);
   }
 
-  public void enableLink(Long lid, Boolean enabled) {
-    getLinkResourceRequest().enable(serverUrl, lid, enabled);
+  public void enableLink(String lArg, Boolean enabled) {
+    getLinkResourceRequest().enable(serverUrl, lArg, enabled);
   }
 
-  public void deleteLink(Long lid) {
-    getLinkResourceRequest().delete(serverUrl, lid);
+  public void deleteLink(String lArg) {
+    getLinkResourceRequest().delete(serverUrl, lArg);
   }
 
   public ValidationResultBean saveJob(MJob job) {
     return getJobResourceRequest().create(serverUrl, job);
   }
 
-  public JobBean readJob(Long jobId) {
-    return getJobResourceRequest().read(serverUrl, jobId);
+  public JobBean readJob(String jobArg) {
+    return getJobResourceRequest().read(serverUrl, jobArg);
   }
 
-  public JobBean readJobsByConnector(Long cId) {
-    return getJobResourceRequest().readByConnector(serverUrl, cId);
+  public JobBean readJobsByConnector(String cArg) {
+    return getJobResourceRequest().readByConnector(serverUrl, cArg);
   }
 
   public ValidationResultBean updateJob(MJob job) {
     return getJobResourceRequest().update(serverUrl, job);
   }
 
-  public void enableJob(Long jid, Boolean enabled) {
-    getJobResourceRequest().enable(serverUrl, jid, enabled);
+  public void enableJob(String jArg, Boolean enabled) {
+    getJobResourceRequest().enable(serverUrl, jArg, enabled);
   }
 
-  public void deleteJob(Long jid) {
-    getJobResourceRequest().delete(serverUrl, jid);
+  public void deleteJob(String jArg) {
+    getJobResourceRequest().delete(serverUrl, jArg);
   }
 
-  public SubmissionBean getJobStatus(Long jid) {
-    return getJobResourceRequest().status(serverUrl, jid);
+  public SubmissionBean getJobStatus(String jArg) {
+    return getJobResourceRequest().status(serverUrl, jArg);
   }
 
-  public SubmissionBean startJob(Long jid) {
-    return getJobResourceRequest().start(serverUrl, jid);
+  public SubmissionBean startJob(String jArg) {
+    return getJobResourceRequest().start(serverUrl, jArg);
   }
 
-  public SubmissionBean stopJob(Long jid) {
-    return getJobResourceRequest().stop(serverUrl, jid);
+  public SubmissionBean stopJob(String jArg) {
+    return getJobResourceRequest().stop(serverUrl, jArg);
   }
 
-  public SubmissionsBean readSubmission(Long jid) {
-    return getSubmissionResourceRequest().read(serverUrl, jid);
+  public SubmissionsBean readSubmission(String jArg) {
+    return getSubmissionResourceRequest().read(serverUrl, jArg);
   }
 
   public RolesBean readRoles() {

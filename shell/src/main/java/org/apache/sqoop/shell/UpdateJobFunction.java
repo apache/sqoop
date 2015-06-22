@@ -53,16 +53,16 @@ public class UpdateJobFunction extends SqoopFunction {
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return updateJob(getLong(line, Constants.OPT_JID), line.getArgList(), isInteractive);
+    return updateJob(line.getOptionValue(Constants.OPT_JID), line.getArgList(), isInteractive);
   }
 
-  private Status updateJob(Long jobId, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_SQOOP_UPDATING_JOB, jobId);
+  private Status updateJob(String jobArg, List<String> args, boolean isInteractive) throws IOException {
+    printlnResource(Constants.RES_SQOOP_UPDATING_JOB, jobArg);
 
     ConsoleReader reader = new ConsoleReader();
 
     // TODO(SQOOP-1634): using from/to and driver config id, this call can be avoided
-    MJob job = client.getJob(jobId);
+    MJob job = client.getJob(jobArg);
 
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
         job.getFromConnectorId());

@@ -53,15 +53,15 @@ public class CloneLinkFunction extends SqoopFunction {
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return cloneLink(getLong(line, Constants.OPT_LID), line.getArgList(), isInteractive);
+    return cloneLink(line.getOptionValue(Constants.OPT_LID), line.getArgList(), isInteractive);
   }
 
-  private Status cloneLink(Long connectionId, List<String> args, boolean isInteractive) throws IOException {
-    printlnResource(Constants.RES_CLONE_CLONING_LINK, connectionId);
+  private Status cloneLink(String linkArg, List<String> args, boolean isInteractive) throws IOException {
+    printlnResource(Constants.RES_CLONE_CLONING_LINK, linkArg);
 
     ConsoleReader reader = new ConsoleReader();
 
-    MLink connection = client.getLink(connectionId);
+    MLink connection = client.getLink(linkArg);
     // Remove persistent id as we're making a clone
     connection.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 

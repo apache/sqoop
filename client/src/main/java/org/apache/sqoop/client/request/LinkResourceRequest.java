@@ -44,17 +44,17 @@ public class LinkResourceRequest extends ResourceRequest {
     super(token);
   }
 
-  public LinkBean read(String serverUrl, Long linkId) {
+  public LinkBean read(String serverUrl, String linkArg) {
     String response;
-    if (linkId == null) {
+    if (linkArg == null) {
       response = super.get(serverUrl + LINK_RESOURCE + "all");
     } else {
-      response = super.get(serverUrl + LINK_RESOURCE + linkId);
+      response = super.get(serverUrl + LINK_RESOURCE + linkArg);
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
     LinkBean bean = new LinksBean();
-    if (linkId != null) {
+    if (linkArg != null) {
       bean = new LinkBean();
     }
     bean.restore(jsonObject);
@@ -81,15 +81,15 @@ public class LinkResourceRequest extends ResourceRequest {
     return validationBean;
   }
 
-  public void delete(String serverUrl, Long id) {
-     super.delete(serverUrl + LINK_RESOURCE + id);
+  public void delete(String serverUrl, String arg) {
+     super.delete(serverUrl + LINK_RESOURCE + arg);
   }
 
-  public void enable(String serverUrl, Long id, Boolean enabled) {
+  public void enable(String serverUrl, String lArg, Boolean enabled) {
     if (enabled) {
-      super.put(serverUrl + LINK_RESOURCE + id + ENABLE, null);
+      super.put(serverUrl + LINK_RESOURCE + lArg + ENABLE, null);
     } else {
-      super.put(serverUrl + LINK_RESOURCE + id + DISABLE, null);
+      super.put(serverUrl + LINK_RESOURCE + lArg + DISABLE, null);
     }
   }
 }
