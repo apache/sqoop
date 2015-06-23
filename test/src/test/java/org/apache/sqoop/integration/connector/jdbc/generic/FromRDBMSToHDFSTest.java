@@ -270,4 +270,54 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     // Clean up testing table
     dropTable();
   }
+
+  @Test
+  public void testAllowNullsWithOneExtractor() throws Exception {
+    //Integration test case for SQOOP-2382
+    //Server must not throw an exception when null values are allowed in the
+    //partitioning column and number of extractors is set to only 1
+
+    createAndLoadTableCities();
+
+    // RDBMS link
+    MLink rdbmsConnection = getClient().createLink("generic-jdbc-connector");
+    fillRdbmsLinkConfig(rdbmsConnection);
+    saveLink(rdbmsConnection);
+
+    // HDFS link
+    MLink hdfsConnection = getClient().createLink("hdfs-connector");
+    fillHdfsLink(hdfsConnection);
+    saveLink(hdfsConnection);
+
+    // Job creation
+    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+
+    // Set rdbms "FROM" config
+    fillRdbmsFromConfig(job, "id");
+
+    MConfigList configs = job.getFromJobConfig();
+    configs.getBooleanInput("fromJobConfig.allowNullValueInPartitionColumn").setValue(true);
+
+    // fill the hdfs "TO" config
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+    // driver config
+    MDriverConfig driverConfig = job.getDriverConfig();
+    driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(1);
+
+    saveJob(job);
+
+    executeJob(job);
+
+    // Assert correct output
+    assertTo(
+            "1,'USA','2004-10-23','San Francisco'",
+            "2,'USA','2004-10-24','Sunnyvale'",
+            "3,'Czech Republic','2004-10-25','Brno'",
+            "4,'USA','2004-10-26','Palo Alto'"
+    );
+
+    // Clean up testing table
+    dropTable();
+  }
+
 }

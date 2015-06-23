@@ -74,7 +74,12 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
       GenericJdbcPartition partition = new GenericJdbcPartition();
       partition.setConditions(partitionColumnName + " IS NULL");
       partitions.add(partition);
-      numberPartitions -= 1;
+      if (numberPartitions > 1) {
+        numberPartitions -= 1;
+      }
+      else {
+        context.setSkipMaxPartitionCheck(true);
+      }
     }
 
     switch (partitionColumnType) {

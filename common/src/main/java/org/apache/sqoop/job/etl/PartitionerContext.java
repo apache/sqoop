@@ -35,6 +35,8 @@ public class PartitionerContext extends TransferableContext {
 
   private Schema schema;
 
+  private boolean skipMaxPartitionCheck = false;
+
   public PartitionerContext(ImmutableContext context, long maxPartitions, Schema schema) {
     super(context);
     this.maxPartitions = maxPartitions;
@@ -51,6 +53,32 @@ public class PartitionerContext extends TransferableContext {
    */
   public long getMaxPartitions() {
     return maxPartitions;
+  }
+
+  /**
+   * Set flag indicating whether to skip check that number of splits
+   * < max extractors specified by user.
+   *
+   * Needed in case user specifies number of extractors as 1 as well as
+   * allows null values in partitioning column
+   *
+   * @return
+   */
+  public void setSkipMaxPartitionCheck(boolean skipMaxPartitionCheck) {
+    this.skipMaxPartitionCheck = skipMaxPartitionCheck;
+  }
+
+  /**
+   * Return flag indicating whether to skip the check that number of splits
+   * < max extractors specified by user.
+   *
+   * Needed in case user specifies number of extractors as 1 as well as
+   * allows null values in partitioning column
+   *
+   * @return
+   */
+  public boolean getSkipMaxPartitionCheck() {
+    return this.skipMaxPartitionCheck;
   }
 
   /**

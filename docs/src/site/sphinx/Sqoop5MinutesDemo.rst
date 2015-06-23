@@ -184,7 +184,9 @@ Next, we can use the two link Ids to associate the ``From`` and ``To`` for the j
     Loaders:(Optional) 2
     New job was successfully created with validation status OK  and persistent id 1
 
-Our new job object was created with assigned id 1.
+Our new job object was created with assigned id 1. Note that if null value is allowed for the partition column,
+at least 2 extractors are needed for Sqoop to carry out the data transfer. On specifying 1 extractor in this
+scenario, Sqoop shall ignore this setting and continue with 2 extractors.
 
 Start Job ( a.k.a Data transfer )
 =================================

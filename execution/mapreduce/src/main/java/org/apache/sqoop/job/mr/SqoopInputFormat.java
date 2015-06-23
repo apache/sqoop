@@ -80,7 +80,9 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
       splits.add(split);
     }
 
-    if(splits.size() > maxPartitions) {
+    //SQOOP-2382: Need to skip this check in case extractors is set to 1
+    // and null values are allowed in partitioning column
+    if(splits.size() > maxPartitions && (false == partitionerContext.getSkipMaxPartitionCheck())) {
       throw new SqoopException(MRExecutionError.MAPRED_EXEC_0025,
         String.format("Got %d, max was %d", splits.size(), maxPartitions));
     }
