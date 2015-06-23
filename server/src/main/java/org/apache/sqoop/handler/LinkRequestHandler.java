@@ -92,7 +92,7 @@ public class LinkRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String linkIdentifier = ctx.getLastURLElement();
     // support linkName or linkId for the api
-    long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier, repository);
+    long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier);
 
     // Authorization check
     AuthorizationEngine.deleteLink(String.valueOf(linkId));
@@ -152,7 +152,7 @@ public class LinkRequestHandler implements RequestHandler {
     if (!create) {
       String linkIdentifier = ctx.getLastURLElement();
       // support linkName or linkId for the api
-      long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier, repository);
+      long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier);
       if (postedLink.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
         MLink existingLink = repository.findLink(linkId);
         postedLink.setPersistenceId(existingLink.getPersistenceId());
@@ -233,7 +233,7 @@ public class LinkRequestHandler implements RequestHandler {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "link", identifier);
 
-      long linkId = HandlerUtils.getLinkIdFromIdentifier(identifier, repository);
+      long linkId = HandlerUtils.getLinkIdFromIdentifier(identifier);
       MLink link = repository.findLink(linkId);
 
       // Authorization check
@@ -271,7 +271,7 @@ public class LinkRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String linkIdentifier = elements[elements.length - 2];
-    long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier, repository);
+    long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier);
 
     // Authorization check
     AuthorizationEngine.enableDisableLink(String.valueOf(linkId));

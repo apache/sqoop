@@ -18,19 +18,21 @@
 package org.apache.sqoop.handler;
 
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.repository.Repository;
+import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.server.common.ServerError;
 
 public class HandlerUtils {
 
-  public static long getJobIdFromIdentifier(String identifier, Repository repository) {
+  public static long getJobIdFromIdentifier(String identifier) {
     // support jobName or jobId for the api
     // NOTE: jobId is a fallback for older sqoop clients if any, since we want
     // to primarily use unique jobNames
     long jobId;
+    Repository repository = RepositoryManager.getInstance().getRepository();
     MJob job = repository.findJob(identifier);
     if (job != null) {
       jobId = job.getPersistenceId();
@@ -47,11 +49,12 @@ public class HandlerUtils {
     return jobId;
   }
 
-  public static long getLinkIdFromIdentifier(String identifier, Repository repository) {
+  public static long getLinkIdFromIdentifier(String identifier) {
     // support linkName or linkId for the api
     // NOTE: linkId is a fallback for older sqoop clients if any, since we want
     // to primarily use unique linkNames
     long linkId;
+    Repository repository = RepositoryManager.getInstance().getRepository();
     MLink link = repository.findLink(identifier);
     if (link != null) {
       linkId = link.getPersistenceId();
@@ -70,8 +73,10 @@ public class HandlerUtils {
 
   public static long getConnectorIdFromIdentifier(String identifier) {
     long connectorId;
-    if (ConnectorManager.getInstance().getConnectorId(identifier) != null) {
-      connectorId = ConnectorManager.getInstance().getConnectorId(identifier);
+    Repository repository = RepositoryManager.getInstance().getRepository();
+    MConnector connector = repository.findConnector(identifier);
+    if (connector != null) {
+      connectorId = connector.getPersistenceId();
     } else {
       try {
         connectorId = Long.valueOf(identifier);

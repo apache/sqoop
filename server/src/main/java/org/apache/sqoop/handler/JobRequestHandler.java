@@ -138,7 +138,7 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     String jobIdentifier = ctx.getLastURLElement();
-    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
     AuthorizationEngine.deleteJob(String.valueOf(jobId));
@@ -210,7 +210,7 @@ public class JobRequestHandler implements RequestHandler {
     if (!create) {
       String jobIdentifier = ctx.getLastURLElement();
       // support jobName or jobId for the api
-      long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+      long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
       if (postedJob.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
         MJob existingJob = repository.findJob(jobId);
         postedJob.setPersistenceId(existingJob.getPersistenceId());
@@ -305,7 +305,7 @@ public class JobRequestHandler implements RequestHandler {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "job", connectorIdentifier);
 
-      long jobId = HandlerUtils.getJobIdFromIdentifier(connectorIdentifier, repository);
+      long jobId = HandlerUtils.getJobIdFromIdentifier(connectorIdentifier);
       MJob job = repository.findJob(jobId);
 
       // Authorization check
@@ -349,7 +349,7 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
     AuthorizationEngine.enableDisableJob(String.valueOf(jobId));
@@ -359,10 +359,9 @@ public class JobRequestHandler implements RequestHandler {
   }
 
   private JsonBean startJob(RequestContext ctx) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
     AuthorizationEngine.startJob(String.valueOf(jobId));
@@ -383,10 +382,9 @@ public class JobRequestHandler implements RequestHandler {
   }
 
   private JsonBean stopJob(RequestContext ctx) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
     AuthorizationEngine.stopJob(String.valueOf(jobId));
@@ -398,10 +396,9 @@ public class JobRequestHandler implements RequestHandler {
   }
 
   private JsonBean getJobStatus(RequestContext ctx) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
     AuthorizationEngine.statusJob(String.valueOf(jobId));

@@ -189,12 +189,6 @@ public class ConnectorManager implements Reconfigurable {
     }
   }
 
-  public synchronized Long getConnectorId(String connectorName) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
-    return repository.findConnector(connectorName) != null ? repository
-        .findConnector(connectorName).getPersistenceId() : null;
-  }
-
   private synchronized void registerConnectors(boolean autoUpgrade) {
     Repository repository = RepositoryManager.getInstance().getRepository();
 

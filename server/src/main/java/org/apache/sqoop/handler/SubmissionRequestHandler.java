@@ -25,7 +25,6 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.security.authorization.AuthorizationEngine;
 import org.apache.sqoop.server.RequestContext;
@@ -50,14 +49,13 @@ public class SubmissionRequestHandler implements RequestHandler {
           + ctx.getMethod());
     }
     String jobIdentifier = ctx.getLastURLElement();
-    Repository repository = RepositoryManager.getInstance().getRepository();
     // submissions per job are ordered by update time
     // hence the latest submission is on the top
     if (ctx.getParameterValue(JOB_NAME_QUERY_PARAM) != null) {
       jobIdentifier = ctx.getParameterValue(JOB_NAME_QUERY_PARAM);
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "submissionsByJob", jobIdentifier);
-        long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier, repository);
+        long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
         return getSubmissionsForJob(jobId);
     } else {
       // all submissions in the system
