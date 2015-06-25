@@ -20,7 +20,9 @@ package org.apache.sqoop;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -1214,6 +1216,7 @@ public class SqoopOptions implements Cloneable {
   protected void parseColumnMapping(String mapping,
           Properties output) {
     output.clear();
+
     String[] maps = mapping.split(",");
     for(String map : maps) {
       String[] details = map.split("=");
@@ -1221,7 +1224,15 @@ public class SqoopOptions implements Cloneable {
         throw new IllegalArgumentException("Malformed mapping.  "
             + "Column mapping should be the form key=value[,key=value]*");
       }
-      output.put(details[0], details[1]);
+
+      try {
+        output.put(
+            URLDecoder.decode(details[0], "UTF-8"),
+            URLDecoder.decode(details[1], "UTF-8"));
+      } catch (UnsupportedEncodingException e) {
+        throw new IllegalArgumentException("Encoding not supported. "
+            + "Column mapping should be UTF-8 encoding.");
+      }
     }
   }
 
