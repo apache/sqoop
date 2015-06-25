@@ -25,7 +25,8 @@ import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -323,14 +324,11 @@ public class HiveImport {
       subprocessSM = new SubprocessSecurityManager();
       subprocessSM.install();
 
-      // Create the argv for the Hive Cli Driver.
-      String [] argArray = new String[2];
-      argArray[0] = "-f";
-      argArray[1] = filename;
+      String[] argv = getHiveArgs("-f", filename);
 
       // And invoke the static method on this array.
-      Method mainMethod = cliDriverClass.getMethod("main", argArray.getClass());
-      mainMethod.invoke(null, (Object) argArray);
+      Method mainMethod = cliDriverClass.getMethod("main", String[].class);
+      mainMethod.invoke(null, (Object) argv);
 
     } catch (ClassNotFoundException cnfe) {
       // Hive is not on the classpath. Run externally.
@@ -377,17 +375,26 @@ public class HiveImport {
       throws IOException {
     // run Hive on the script and note the return code.
     String hiveExec = getHiveBinPath();
-    ArrayList<String> args = new ArrayList<String>();
-    args.add(hiveExec);
-    args.add("-f");
-    args.add(filename);
+
+    String[] argv = getHiveArgs(hiveExec, "-f", filename);
 
     LoggingAsyncSink logSink = new LoggingAsyncSink(LOG);
-    int ret = Executor.exec(args.toArray(new String[0]),
-        env.toArray(new String[0]), logSink, logSink);
+    int ret = Executor.exec(argv, env.toArray(new String[0]), logSink, logSink);
     if (0 != ret) {
       throw new IOException("Hive exited with status " + ret);
     }
+  }
+
+  private String[] getHiveArgs(String... args) {
+    List<String> newArgs = new LinkedList<String>();
+    newArgs.addAll(Arrays.asList(args));
+
+    if (System.getProperty("mapreduce.job.credentials.binary") != null) {
+      newArgs.add("--hiveconf");
+      newArgs.add("hive.metastore.sasl.enabled=true");
+    }
+
+    return newArgs.toArray(new String[newArgs.size()]);
   }
 }
 
