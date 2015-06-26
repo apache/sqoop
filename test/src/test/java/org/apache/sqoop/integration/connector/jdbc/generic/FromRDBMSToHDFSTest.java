@@ -103,14 +103,6 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
     executeJob(job);
 
-    // Wait until the job finish - this active waiting will be removed once
-    // Sqoop client API will get blocking support.
-    MSubmission submission;
-    do {
-      Thread.sleep(5000);
-      submission = getClient().getJobStatus(job.getPersistenceId());
-    } while(submission.getStatus().isRunning());
-
     // Assert correct output
     assertTo(
         "1,'The Gift of the Magi','ONE DOLLAR AND EIGHTY-SEVEN CENTS. THAT WAS ALL. AND SIXTY CENTS of it was in pennies. Pennies saved one and two at a time by bulldozing the grocer and the vegetable man and the butcher until ones cheeks burned with the silent imputation of parsimony that such close dealing implied. Three times Della counted it. One dollar and eighty-seven cents. And the next day would be Christmas.\\n\\nThere was clearly nothing left to do but flop down on the shabby little couch and howl. So Della did it. Which instigates the moral reflection that life is made up of sobs, sniffles, and smiles, with sniffles predominating.'",
@@ -148,14 +140,6 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveJob(job);
 
     executeJob(job);
-
-    // Wait until the job finish - this active waiting will be removed once
-    // Sqoop client API will get blocking support.
-    MSubmission submission;
-    do {
-      Thread.sleep(5000);
-      submission = getClient().getJobStatus(job.getPersistenceId());
-    } while(submission.getStatus().isRunning());
 
     // Assert correct output
     assertTo(
@@ -196,14 +180,6 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveJob(job);
 
     executeJob(job);
-
-    // Wait until the job finish - this active waiting will be removed once
-    // Sqoop client API will get blocking support.
-    MSubmission submission;
-    do {
-      Thread.sleep(5000);
-      submission = getClient().getJobStatus(job.getPersistenceId());
-    } while(submission.getStatus().isRunning());
 
     // Assert correct output
     assertTo(
@@ -250,14 +226,6 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveJob(job);
 
     executeJob(job);
-
-    // Wait until the job finish - this active waiting will be removed once
-    // Sqoop client API will get blocking support.
-    MSubmission submission;
-    do {
-      Thread.sleep(5000);
-      submission = getClient().getJobStatus(job.getPersistenceId());
-    } while(submission.getStatus().isRunning());
 
     // Assert correct output
     assertTo(
