@@ -60,8 +60,10 @@ public class IntegerSplitter implements DBSplitter  {
         return splits;
       }
 
+      long splitLimit = org.apache.sqoop.config.ConfigurationHelper.getSplitLimit(conf);
+
       // Get all the split points together.
-      List<Long> splitPoints = split(numSplits, minVal, maxVal);
+      List<Long> splitPoints = split(numSplits,splitLimit, minVal, maxVal);
       if (LOG.isDebugEnabled()) {
         LOG.debug(String.format("Splits: [%,28d to %,28d] into %d parts",
             minVal, maxVal, numSplits));
@@ -112,8 +114,15 @@ public class IntegerSplitter implements DBSplitter  {
      * [5, 8)
      * [8, 12)
      * [12, 18] note the closed interval for the last split.
+     *
+     * @param numSplits Number of split chunks.
+     * @param splitLimit Limit the split size.
+     * @param minVal Minimum value of the set to split.
+     * @param maxVal Maximum value of the set to split.
+     * @return Split values inside the set.
+     * @throws SQLException In case of SQL exception.
      */
-    public List<Long> split(long numSplits, long minVal, long maxVal)
+    public List<Long> split(long numSplits,long splitLimit, long minVal, long maxVal)
         throws SQLException {
 
       List<Long> splits = new ArrayList<Long>();
@@ -124,6 +133,20 @@ public class IntegerSplitter implements DBSplitter  {
       // and add 1 if the current split index is less than the < the remainder.
       // This is guaranteed to add up to remainder and not surpass the value.
       long splitSize = (maxVal - minVal) / numSplits;
+      double splitSizeDouble = ((double)maxVal - (double)minVal) / (double)numSplits;
+
+      if (splitLimit > 0 && splitSizeDouble > splitLimit) {
+        // If split size is greater than limit then do the same thing with larger
+        // amount of splits.
+         LOG.debug("Adjusting split size " + splitSize
+          + " because it's greater than limit " + splitLimit);
+        long newSplits = (maxVal - minVal) / splitLimit;
+        return split(newSplits != numSplits ? newSplits : newSplits + 1,
+         splitLimit, minVal, maxVal);
+      }
+      LOG.info("Split size: " + splitSize + "; Num splits: " + numSplits
+       + " from: " + minVal + " to: " + maxVal);
+
       long remainder = (maxVal - minVal) % numSplits;
       long curVal = minVal;
 

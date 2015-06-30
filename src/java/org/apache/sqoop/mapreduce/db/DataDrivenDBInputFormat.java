@@ -77,13 +77,27 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
    * into InputSplits.
    */
   protected DBSplitter getSplitter(int sqlDataType) {
+    return getSplitter(sqlDataType, 0);
+  }
+
+  /**
+   * @return the DBSplitter implementation to use to divide the table/query
+   * into InputSplits.
+   */
+  protected DBSplitter getSplitter(int sqlDataType, long splitLimit) {
     switch (sqlDataType) {
     case Types.NUMERIC:
     case Types.DECIMAL:
+      if(splitLimit >= 0) {
+        throw new IllegalArgumentException("split-limit is supported only with Integer and Date columns");
+      }
       return new BigDecimalSplitter();
 
     case Types.BIT:
     case Types.BOOLEAN:
+      if(splitLimit >= 0) {
+        throw new IllegalArgumentException("split-limit is supported only with Integer and Date columns");
+      }
       return new BooleanSplitter();
 
     case Types.INTEGER:
@@ -95,15 +109,24 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
     case Types.REAL:
     case Types.FLOAT:
     case Types.DOUBLE:
+      if(splitLimit >= 0) {
+        throw new IllegalArgumentException("split-limit is supported only with Integer and Date columns");
+      }
       return new FloatSplitter();
 
     case Types.NVARCHAR:
     case Types.NCHAR:
+      if(splitLimit >= 0) {
+        throw new IllegalArgumentException("split-limit is supported only with Integer and Date columns");
+      }
       return new NTextSplitter();
 
     case Types.CHAR:
     case Types.VARCHAR:
     case Types.LONGVARCHAR:
+      if(splitLimit >= 0) {
+         throw new IllegalArgumentException("split-limit is supported only with Integer and Date columns");
+      }
       return new TextSplitter();
 
     case Types.DATE:
@@ -114,6 +137,9 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
     default:
       // TODO: Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT, CLOB,
       // BLOB, ARRAY, STRUCT, REF, DATALINK, and JAVA_OBJECT.
+      if(splitLimit >= 0) {
+        throw new IllegalArgumentException("split-limit is supported only with Integer and Date columns");
+      }
       return null;
     }
   }
@@ -125,12 +151,15 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
     int targetNumTasks = ConfigurationHelper.getJobNumMaps(job);
     String boundaryQuery = getDBConf().getInputBoundingQuery();
 
+    long splitLimit = org.apache.sqoop.config.ConfigurationHelper
+      .getSplitLimit(job.getConfiguration());
     // If user do not forced us to use his boundary query and we don't have to
     // bacause there is only one mapper we will return single split that
     // separates nothing. This can be considerably more optimal for a large
     // table with no index.
     if (1 == targetNumTasks
-            && (boundaryQuery == null || boundaryQuery.isEmpty())) {
+            && (boundaryQuery == null || boundaryQuery.isEmpty())
+            && splitLimit <= 0) {
       List<InputSplit> singletonSplit = new ArrayList<InputSplit>();
       singletonSplit.add(new com.cloudera.sqoop.mapreduce.db.
           DataDrivenDBInputFormat.DataDrivenDBInputSplit("1=1", "1=1"));
@@ -160,7 +189,7 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
           sqlDataType = Types.BIGINT;
       }
 
-      DBSplitter splitter = getSplitter(sqlDataType);
+      DBSplitter splitter = getSplitter(sqlDataType, splitLimit);
       if (null == splitter) {
         throw new IOException("Sqoop does not have the splitter for the given"
           + " SQL data type. Please use either different split column (argument"

@@ -76,38 +76,38 @@ public class TestIntegerSplitter extends TestCase {
   }
 
   public void testEvenSplits() throws SQLException {
-    List<Long> splits = new IntegerSplitter().split(10, 0, 100);
+    List<Long> splits = new IntegerSplitter().split(10,-1, 0, 100);
     long [] expected = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, };
     assertLongArrayEquals(expected, toLongArray(splits));
   }
 
   public void testOddSplits() throws SQLException {
-    List<Long> splits = new IntegerSplitter().split(10, 0, 95);
+    List<Long> splits = new IntegerSplitter().split(10,-1, 0, 95);
     long [] expected = { 0, 10, 20, 30, 40, 50, 59, 68, 77, 86, 95, };
     assertLongArrayEquals(expected, toLongArray(splits));
   }
 
   public void testSingletonSplit() throws SQLException {
-    List<Long> splits = new IntegerSplitter().split(1, 5, 5);
+    List<Long> splits = new IntegerSplitter().split(1,-1, 5, 5);
     long [] expected = { 5, 5 };
     assertLongArrayEquals(expected, toLongArray(splits));
   }
 
   public void testSingletonSplit2() throws SQLException {
     // Same test, but overly-high numSplits
-    List<Long> splits = new IntegerSplitter().split(5, 5, 5);
+    List<Long> splits = new IntegerSplitter().split(5,-1, 5, 5);
     long [] expected = { 5, 5 };
     assertLongArrayEquals(expected, toLongArray(splits));
   }
 
   public void testTooManySplits() throws SQLException {
-    List<Long> splits = new IntegerSplitter().split(5, 3, 5);
+    List<Long> splits = new IntegerSplitter().split(5,-1, 3, 5);
     long [] expected = { 3, 4, 5, 5};
     assertLongArrayEquals(expected, toLongArray(splits));
   }
 
   public void testExactSplitsAsInterval() throws SQLException {
-    List<Long> splits = new IntegerSplitter().split(5, 1, 5);
+    List<Long> splits = new IntegerSplitter().split(5,-1, 1, 5);
     long [] expected = { 1, 2, 3, 4, 5, 5};
     assertLongArrayEquals(expected, toLongArray(splits));
   }
@@ -119,8 +119,32 @@ public class TestIntegerSplitter extends TestCase {
    * @throws SQLException
    */
   public void testBigIntSplits() throws SQLException {
-    List<Long> splits = new IntegerSplitter().split(4, 14,
+    List<Long> splits = new IntegerSplitter().split(4,-1, 14,
         7863696997872966707L);
     assertEquals(splits.size(), 5);
+  }
+
+  public void testEvenSplitsWithLimit() throws SQLException {
+    List<Long> splits = new IntegerSplitter().split(5, 10, 0, 100);
+    long [] expected = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+    assertLongArrayEquals(expected, toLongArray(splits));
+  }
+
+  public void testOddSplitsWithLimit() throws SQLException {
+    List<Long> splits = new IntegerSplitter().split(5, 10, 0, 95);
+    long [] expected = { 0, 10, 20, 30, 40, 50, 59, 68, 77, 86, 95};
+    assertLongArrayEquals(expected, toLongArray(splits));
+  }
+
+  public void testSplitWithBiggerLimit() throws SQLException {
+    List<Long> splits = new IntegerSplitter().split(10, 15, 0, 100);
+    long [] expected = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    assertLongArrayEquals(expected, toLongArray(splits));
+  }
+
+  public void testFractionalSplitWithLimit() throws SQLException {
+    List<Long> splits = new IntegerSplitter().split(5, 1, 1, 10);
+    long [] expected = {1,2, 3, 4, 5, 6, 7, 8, 9, 10, 10};
+    assertLongArrayEquals(expected, toLongArray(splits));
   }
 }

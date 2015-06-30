@@ -42,6 +42,10 @@ public class DateSplitter extends IntegerSplitter {
 
   private static final Log LOG = LogFactory.getLog(DateSplitter.class);
 
+  //Factor to convert the value to milliseconds.
+  //For Split limit we take input as seconds. So we need to convert to milliseconds
+  private static final long MS_IN_SEC = 1000L;
+
   public List<InputSplit> split(Configuration conf, ResultSet results,
       String colName) throws SQLException {
 
@@ -69,8 +73,11 @@ public class DateSplitter extends IntegerSplitter {
       return splits;
     }
 
+    // For split size we are using seconds. So we need to convert to milliseconds.
+    long splitLimit = org.apache.sqoop.config.ConfigurationHelper.getSplitLimit(conf) * MS_IN_SEC;
+
     // Gather the split point integers
-    List<Long> splitPoints = split(numSplits, minVal, maxVal);
+    List<Long> splitPoints = split(numSplits,splitLimit, minVal, maxVal);
     List<InputSplit> splits = new ArrayList<InputSplit>();
 
     // Turn the split points into a set of intervals.

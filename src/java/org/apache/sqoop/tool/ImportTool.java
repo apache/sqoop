@@ -661,6 +661,14 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
           .withDescription("Column of the table used to split work units")
           .withLongOpt(SPLIT_BY_ARG)
           .create());
+      importOpts
+        .addOption(OptionBuilder
+          .withArgName("size")
+          .hasArg()
+          .withDescription(
+            "Upper Limit of rows per split for split columns of Date/Time/Timestamp and integer types. For date or timestamp fields it is calculated in seconds. split-limit should be greater than 0")
+          .withLongOpt(SPLIT_LIMIT_ARG)
+          .create());
       importOpts.addOption(OptionBuilder.withArgName("where clause")
           .hasArg().withDescription("WHERE clause to use during import")
           .withLongOpt(WHERE_ARG)
@@ -885,6 +893,10 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
         if (in.hasOption(SPLIT_BY_ARG)) {
           out.setSplitByCol(in.getOptionValue(SPLIT_BY_ARG));
+        }
+
+        if (in.hasOption(SPLIT_LIMIT_ARG)) {
+            out.setSplitLimit(Integer.parseInt(in.getOptionValue(SPLIT_LIMIT_ARG)));
         }
 
         if (in.hasOption(WHERE_ARG)) {

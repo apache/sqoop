@@ -138,6 +138,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("codegen.auto.compile.dir") private boolean jarDirIsAuto;
   private String hadoopMapRedHome; // not serialized to metastore.
   @StoredAsProperty("db.split.column") private String splitByCol;
+  @StoredAsProperty("split.limit") private Integer splitLimit;
   @StoredAsProperty("db.where.clause") private String whereClause;
   @StoredAsProperty("db.query") private String sqlQuery;
   @StoredAsProperty("db.query.boundary") private String boundaryQuery;
@@ -1176,6 +1177,14 @@ public class SqoopOptions implements Cloneable {
 
   public void setSplitByCol(String splitBy) {
     this.splitByCol = splitBy;
+  }
+
+  public Integer getSplitLimit() {
+    return splitLimit;
+  }
+
+  public void setSplitLimit(Integer splitLimit) {
+    this.splitLimit = splitLimit;
   }
 
   public String getWhereClause() {

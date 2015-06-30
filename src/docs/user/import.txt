@@ -73,6 +73,9 @@ Argument                          Description
 +\--split-by <column-name>+       Column of the table used to split work\
                                   units.  Cannot be used with\
                                   +--autoreset-to-one-mapper+ option.
++\--split-limit <n>+              Upper Limit for each split size.\
+                                  This only applies to Integer and Date columns.\
+                                  For date or timestamp fields it is calculated in seconds.
 +\--autoreset-to-one-mapper+      Import should use one mapper if a table\
                                   has no primary key and no split-by column\
                                   is provided.  Cannot be used with\
@@ -210,6 +213,17 @@ For example, +\--split-by employee_id+. Sqoop cannot currently split on
 multi-column indices. If your table has no index column, or has a
 multi-column key, then you must also manually choose a splitting
 column.
+
+User can override the +\--num-mapers+ by using +\--split-limit+ option.
+Using the +\--split-limit+ parameter places a limit on the size of the split
+section created. If the size of the split created is larger than the size
+specified in this parameter, then the splits would be resized to fit within
+this limit, and the number of splits will change according to that.This
+affects actual number of mappers. If size of a split calculated based on
+provided +\--num-mappers+ parameter exceeds +\--split-limit+ parameter then actual
+number of mappers will be increased.If the value specified in +\--split-limit+
+parameter is 0 or negative, the parameter will be ignored altogether and
+the split size will be calculated according to the number of mappers.
 
 If a table does not have a primary key defined and the +--split-by <col>+
 is not provided, then import will fail unless the number

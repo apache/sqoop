@@ -213,6 +213,25 @@ public final class ConfigurationHelper {
     return ret;
   }
 
+  /**
+   * Stores in configuration the size of single hadoop input split.
+   *
+   * @param config Configuration to store the split size.
+   * @param splitLimit The size of single hadoop input split.
+   */
+  public static void setSplitLimit(Configuration config, long splitLimit) {
+      config.setLong(ConfigurationConstants.PROP_SPLIT_LIMIT, splitLimit);
+  }
+
+  /**
+   * Retrieves the size of single hadoop input split.
+   *
+   * @param config Configuration to retrieve the split size.
+   * @return Split size.
+   */
+  public static long getSplitLimit(Configuration config) {
+      return config.getInt(ConfigurationConstants.PROP_SPLIT_LIMIT, -1);
+  }
   public static boolean isLocalJobTracker(Configuration conf) {
     // If framework is set to YARN, then we can't be running in local mode
     if ("yarn".equalsIgnoreCase(conf

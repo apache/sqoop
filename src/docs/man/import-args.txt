@@ -42,6 +42,10 @@ include::import-common-args.txt[]
 --split-by (column-name)::
   Column of the table used to split the table for parallel import
 
+--split-limit (size)::
+  Upper Limit for each split size. Optimize Integer and Date columns.
+  For date or timestamp fields it is calculated in seconds.
+
 --table (table-name)::
   The table to import
 

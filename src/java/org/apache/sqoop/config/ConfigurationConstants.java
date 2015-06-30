@@ -95,6 +95,11 @@ public final class ConfigurationConstants {
    */
   public static final String MAPRED_DISTCACHE_CONF_PARAM = "tmpjars";
 
+  /**
+   * The Configuration property identifying the split size.
+   */
+  public static final String PROP_SPLIT_LIMIT = "split.limit";
+
   private ConfigurationConstants() {
     // Disable Explicit Object Creation
   }

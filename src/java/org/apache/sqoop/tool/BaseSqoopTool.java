@@ -82,6 +82,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String CLEAR_STAGING_TABLE_ARG = "clear-staging-table";
   public static final String COLUMNS_ARG = "columns";
   public static final String SPLIT_BY_ARG = "split-by";
+  public static final String SPLIT_LIMIT_ARG = "split-limit";
   public static final String WHERE_ARG = "where";
   public static final String HADOOP_HOME_ARG = "hadoop-home";
   public static final String HADOOP_MAPRED_HOME_ARG = "hadoop-mapred-home";

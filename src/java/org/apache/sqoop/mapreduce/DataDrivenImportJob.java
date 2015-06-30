@@ -320,6 +320,11 @@ public class DataDrivenImportJob extends ImportJobBase {
       job.getConfiguration().setLong(LargeObjectLoader.MAX_INLINE_LOB_LEN_KEY,
           options.getInlineLobLimit());
 
+      if (options.getSplitLimit() != null) {
+        org.apache.sqoop.config.ConfigurationHelper.setSplitLimit(
+          job.getConfiguration(), options.getSplitLimit());
+      }
+
       LOG.debug("Using InputFormat: " + inputFormatClass);
       job.setInputFormatClass(inputFormatClass);
     } finally {
