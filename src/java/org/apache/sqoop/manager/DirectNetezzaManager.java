@@ -64,6 +64,18 @@ public class DirectNetezzaManager extends NetezzaManager {
   public static final String NETEZZA_CTRL_CHARS_LONG_ARG =
       "ctrl-chars";
 
+
+  public static final String NETEZZA_CRIN_STRING_OPT =
+      "netezza.crin.string";
+  public static final String NETEZZA_CRIN_STRING_LONG_ARG =
+      "crin-string";
+
+
+  public static final String NETEZZA_IGNORE_ZERO_OPT =
+      "netezza.ignore.zero";
+  public static final String NETEZZA_IGNORE_ZERO_LONG_ARG =
+      "ignore-zero";
+
   public static final String NETEZZA_TRUNC_STRING_OPT =
       "netezza.trunc.string";
   public static final String NETEZZA_TRUNC_STRING_LONG_ARG =
@@ -268,6 +280,12 @@ public class DirectNetezzaManager extends NetezzaManager {
     netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_TRUNC_STRING_OPT)
       .withDescription("Truncate string to declared storage size")
       .withLongOpt(NETEZZA_TRUNC_STRING_LONG_ARG).create());
+    netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_CRIN_STRING_OPT)
+      .withDescription("Truncate string to declared storage size")
+      .withLongOpt(NETEZZA_CRIN_STRING_LONG_ARG).create());
+    netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_IGNORE_ZERO_OPT)
+      .withDescription("Truncate string to declared storage size")
+      .withLongOpt(NETEZZA_IGNORE_ZERO_LONG_ARG).create());
     return netezzaOpts;
   }
 
@@ -295,6 +313,12 @@ public class DirectNetezzaManager extends NetezzaManager {
 
     conf.setBoolean(NETEZZA_TRUNC_STRING_OPT,
       cmdLine.hasOption(NETEZZA_TRUNC_STRING_LONG_ARG));
+
+    conf.setBoolean(NETEZZA_CRIN_STRING_OPT,
+      cmdLine.hasOption(NETEZZA_CRIN_STRING_LONG_ARG));
+
+    conf.setBoolean(NETEZZA_IGNORE_ZERO_OPT,
+      cmdLine.hasOption(NETEZZA_IGNORE_ZERO_LONG_ARG));
 
     // Always true for Netezza direct mode access
     conf.setBoolean(NETEZZA_DATASLICE_ALIGNED_ACCESS_OPT, true);

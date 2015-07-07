@@ -381,31 +381,47 @@ Argument                              Description
                                       of data slices of a table or all\
                                       Default is "false" for standard mode\
                                       and "true" for direct mode.
-+--max-errors+                        Applicable only in direct mode.\
++--max-errors+                        Applicable only for direct mode export.\
                                       This option specifies the error threshold\
                                       per mapper while transferring data. If\
                                       the number of errors encountered exceed\
                                       this threshold then the job will fail.
                                       Default value is 1.
-+--log-dir+                           Applicable only in direct mode.\
++--log-dir+                           Applicable only for direct mode export.\
                                       Specifies the directory where Netezza\
                                       external table operation logs are stored\
                                       on the hadoop filesystem.  Logs are\
                                       stored under this directory with one\
                                       directory for the job and sub-directories\
                                       for each task number and attempt.\
-                                      Default value is the user home directory.
-+--trunc-string+                      Applicable only in direct mode.\
+                                      Default value is the user home directory.\
+                                      The nzlog and nzbad files will be under
+                                      (logdir)/job-id/job-attempt-id.
++--trunc-string+                      Applicable only for direct mode export.\
                                       Specifies whether the system \
                                       truncates strings to the declared\
                                       storage and loads the data. By default\
                                       truncation of strings is reported as an\
                                       error.
-+--ctrl-chars+                        Applicable only in direct mode.\
++--ctrl-chars+                        Applicable only for direct mode export.\
                                       Specifies whether control characters \
                                       (ASCII chars 1 - 31) can be allowed \
                                       to be part of char/nchar/varchar/nvarchar\
                                       columns.  Default is false.
++--crin-string+                       Applicable only for direct mode export.\
+                                      Specifies whether carriage return \
+                                      (ASCII char 13) can be allowed \
+                                      to be part of char/nchar/varchar/nvarchar\
+                                      columns.  Note that CR can no longer \
+                                      be a record delimiter with this option.\
+                                      Default is false.
++--ignore-zero+                       Applicable only for direct mode export.\
+                                      Specifies whether NUL character \
+                                      (ASCII char 0) should be scanned \
+                                      and ignored as part of the data loaded\
+                                      into char/nchar/varchar/nvarchar \
+                                      columns.\
+                                      Default is false.
 --------------------------------------------------------------------------------
 
 

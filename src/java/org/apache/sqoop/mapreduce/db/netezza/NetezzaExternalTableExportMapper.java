@@ -87,7 +87,10 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
         conf.getBoolean(DirectNetezzaManager.NETEZZA_CTRL_CHARS_OPT, false);
     boolean truncString =
         conf.getBoolean(DirectNetezzaManager.NETEZZA_TRUNC_STRING_OPT, false);
-
+    boolean ignoreZero =
+        conf.getBoolean(DirectNetezzaManager.NETEZZA_IGNORE_ZERO_OPT, false);
+    boolean crinString =
+        conf.getBoolean(DirectNetezzaManager.NETEZZA_CRIN_STRING_OPT, false);
     StringBuilder sqlStmt = new StringBuilder(2048);
 
     sqlStmt.append("INSERT INTO ");
@@ -96,12 +99,19 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     sqlStmt.append(fifoFile.getAbsolutePath());
     sqlStmt.append("' USING (REMOTESOURCE 'JDBC' ");
     sqlStmt.append(" BOOLSTYLE 'TRUE_FALSE' ");
-    sqlStmt.append(" CRINSTRING FALSE ");
+    if (crinString) {
+      sqlStmt.append(" CRINSTRING TRUE ");
+    } else {
+      sqlStmt.append(" CRINSTRING FALSE ");
+    }
     if (ctrlChars) {
       sqlStmt.append(" CTRLCHARS TRUE ");
     }
     if (truncString) {
       sqlStmt.append(" TRUNCSTRING TRUE ");
+    }
+    if (ignoreZero) {
+      sqlStmt.append(" IGNOREZERO TRUE ");
     }
     sqlStmt.append(" DELIMITER ");
     sqlStmt.append(Integer.toString(fd));
@@ -228,18 +238,24 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
         }
         cleanup(context);
       } finally {
-        recordWriter.close();
-        extTableThread.join();
+        try {
+          recordWriter.close();
+          extTableThread.join();
+        } catch (Exception e) {
+          LOG.debug("Exception cleaning up mapper operation : " + e.getMessage());
+        }
         counter.stopClock();
         LOG.info("Transferred " + counter.toString());
+        FileUploader.uploadFilesToDFS(taskAttemptDir.getAbsolutePath(),
+          localLogDir, logDir, context.getJobID().toString(),
+          conf);
+
         if (extTableThread.hasExceptions()) {
           extTableThread.printException();
           throw new IOException(extTableThread.getException());
         }
       }
-      FileUploader.uploadFilesToDFS(taskAttemptDir.getAbsolutePath(),
-        localLogDir, logDir, context.getJobID().toString(),
-        conf);
+
     }
   }
 
