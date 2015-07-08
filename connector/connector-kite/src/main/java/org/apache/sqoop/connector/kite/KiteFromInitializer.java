@@ -67,6 +67,7 @@ public class KiteFromInitializer extends Initializer<LinkConfiguration,
     jars.add(ClassUtils.jarForClass("parquet.org.codehaus.jackson.type.TypeReference"));
     jars.add(ClassUtils.jarForClass("parquet.bytes.CapacityByteArrayOutputStream"));
     jars.add(ClassUtils.jarForClass("parquet.encoding.Generator"));
+    jars.add(ClassUtils.jarForClass("au.com.bytecode.opencsv.CSVWriter"));
     if (fromJobConfig.fromJobConfig.uri.startsWith("dataset:hive")) {
       // @TODO(Abe): Remove a deps that aren't used?
       jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.conf.HiveConf"));
