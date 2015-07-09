@@ -163,7 +163,7 @@ limitations under the License.
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <excludedGroups>slow</excludedGroups>
-              <reportNameSuffix>slow</reportNameSuffix>
+              <reportNameSuffix>fast</reportNameSuffix>
             </configuration>
           </plugin>
         </plugins>
