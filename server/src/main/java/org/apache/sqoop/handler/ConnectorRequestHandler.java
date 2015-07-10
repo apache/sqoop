@@ -71,7 +71,7 @@ public class ConnectorRequestHandler implements RequestHandler {
           ctx.getRequest().getRemoteAddr(), "get", "connectors", "all");
 
       // Authorization check
-      connectors = AuthorizationEngine.filterResource(MResource.TYPE.CONNECTOR, connectors);
+      connectors = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.CONNECTOR, connectors);
 
       return new ConnectorsBean(connectors, configParamBundles);
 
@@ -89,7 +89,7 @@ public class ConnectorRequestHandler implements RequestHandler {
           ctx.getRequest().getRemoteAddr(), "get", "connector", String.valueOf(cIdentifier));
 
       // Authorization check
-      AuthorizationEngine.readConnector(String.valueOf(connector.getPersistenceId()));
+      AuthorizationEngine.readConnector(ctx.getUserName(), String.valueOf(connector.getPersistenceId()));
 
       return new ConnectorBean(Arrays.asList(connector), configParamBundles);
     }

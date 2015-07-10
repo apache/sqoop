@@ -141,7 +141,7 @@ public class JobRequestHandler implements RequestHandler {
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.deleteJob(String.valueOf(jobId));
+    AuthorizationEngine.deleteJob(ctx.getUserName(), String.valueOf(jobId));
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "job", jobIdentifier);
@@ -185,10 +185,10 @@ public class JobRequestHandler implements RequestHandler {
 
     // Authorization check
     if (create) {
-      AuthorizationEngine.createJob(String.valueOf(postedJob.getFromLinkId()),
+      AuthorizationEngine.createJob(ctx.getUserName(), String.valueOf(postedJob.getFromLinkId()),
               String.valueOf(postedJob.getToLinkId()));
     } else {
-      AuthorizationEngine.updateJob(String.valueOf(postedJob.getFromLinkId()),
+      AuthorizationEngine.updateJob(ctx.getUserName(), String.valueOf(postedJob.getFromLinkId()),
               String.valueOf(postedJob.getToLinkId()),
               String.valueOf(postedJob.getPersistenceId()));
     }
@@ -284,7 +284,7 @@ public class JobRequestHandler implements RequestHandler {
       List<MJob> jobList = repository.findJobsForConnector(connectorId);
 
       // Authorization check
-      jobList = AuthorizationEngine.filterResource(MResource.TYPE.JOB, jobList);
+      jobList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.JOB, jobList);
 
       jobBean = createJobsBean(jobList, locale);
     } else
@@ -296,7 +296,7 @@ public class JobRequestHandler implements RequestHandler {
       List<MJob> jobList = repository.findJobs();
 
       // Authorization check
-      jobList = AuthorizationEngine.filterResource(MResource.TYPE.JOB, jobList);
+      jobList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.JOB, jobList);
 
       jobBean = createJobsBean(jobList, locale);
     }
@@ -309,7 +309,7 @@ public class JobRequestHandler implements RequestHandler {
       MJob job = repository.findJob(jobId);
 
       // Authorization check
-      AuthorizationEngine.readJob(String.valueOf(job.getPersistenceId()));
+      AuthorizationEngine.readJob(ctx.getUserName(), String.valueOf(job.getPersistenceId()));
 
       jobBean = createJobBean(Arrays.asList(job), locale);
     }
@@ -352,7 +352,7 @@ public class JobRequestHandler implements RequestHandler {
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.enableDisableJob(String.valueOf(jobId));
+    AuthorizationEngine.enableDisableJob(ctx.getUserName(), String.valueOf(jobId));
 
     repository.enableJob(jobId, enabled);
     return JsonBean.EMPTY_BEAN;
@@ -364,7 +364,7 @@ public class JobRequestHandler implements RequestHandler {
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.startJob(String.valueOf(jobId));
+    AuthorizationEngine.startJob(ctx.getUserName(), String.valueOf(jobId));
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "submit", "job", String.valueOf(jobId));
@@ -387,7 +387,7 @@ public class JobRequestHandler implements RequestHandler {
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.stopJob(String.valueOf(jobId));
+    AuthorizationEngine.stopJob(ctx.getUserName(), String.valueOf(jobId));
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "stop", "job", String.valueOf(jobId));
@@ -401,7 +401,7 @@ public class JobRequestHandler implements RequestHandler {
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.statusJob(String.valueOf(jobId));
+    AuthorizationEngine.statusJob(ctx.getUserName(), String.valueOf(jobId));
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "status", "job", String.valueOf(jobId));

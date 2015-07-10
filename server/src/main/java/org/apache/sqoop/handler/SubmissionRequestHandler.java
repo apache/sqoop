@@ -56,28 +56,28 @@ public class SubmissionRequestHandler implements RequestHandler {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "submissionsByJob", jobIdentifier);
         long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
-        return getSubmissionsForJob(jobId);
+        return getSubmissionsForJob(jobId, ctx);
     } else {
       // all submissions in the system
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "submissions", "all");
-      return getSubmissions();
+      return getSubmissions(ctx);
     }
   }
 
-  private JsonBean getSubmissions() {
+  private JsonBean getSubmissions(RequestContext ctx) {
     List<MSubmission> submissions = RepositoryManager.getInstance().getRepository()
         .findSubmissions();
 
     //Authorization check
-    submissions = AuthorizationEngine.filterSubmission(submissions);
+    submissions = AuthorizationEngine.filterSubmission(ctx.getUserName(), submissions);
 
     return new SubmissionsBean(submissions);
   }
 
-  private JsonBean getSubmissionsForJob(long jid) {
+  private JsonBean getSubmissionsForJob(long jid, RequestContext ctx) {
     //Authorization check
-    AuthorizationEngine.statusJob(String.valueOf(jid));
+    AuthorizationEngine.statusJob(ctx.getUserName(), String.valueOf(jid));
 
     List<MSubmission> submissions = RepositoryManager.getInstance().getRepository()
         .findSubmissionsForJob(jid);
