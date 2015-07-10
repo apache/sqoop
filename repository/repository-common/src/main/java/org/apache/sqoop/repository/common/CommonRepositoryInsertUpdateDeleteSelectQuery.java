@@ -441,6 +441,11 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " TO_CONNECTOR"
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TO_LINK) + " = TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID);
 
+  //DML: Select all jobs with order
+  public static final String STMT_SELECT_JOB_ALL_WITH_ORDER =
+      STMT_SELECT_JOB_ALL +
+          " ORDER BY JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID);
+
   // DML: Select one specific job
   public static final String STMT_SELECT_JOB_SINGLE_BY_ID =
       STMT_SELECT_JOB_ALL +
@@ -824,8 +829,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
     return STMT_SELECT_JOBS_FOR_LINK_CHECK;
   }
 
-  public String getStmtSelectJobAll() {
-    return STMT_SELECT_JOB_ALL;
+  public String getStmtSelectJobAllWithOrder() {
+    return STMT_SELECT_JOB_ALL_WITH_ORDER;
   }
 
   public String getStmtSelectJobSingleById() {

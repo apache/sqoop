@@ -945,7 +945,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement stmt = null;
     try {
       stmt = conn
-          .prepareStatement(crudQueries.getStmtSelectJobAll());
+          .prepareStatement(crudQueries.getStmtSelectJobAllWithOrder());
       return loadJobs(stmt, conn);
     } catch (SQLException ex) {
       logException(ex);
