@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 
 import java.util.LinkedList;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 public class TestKiteConnectorUpgrader {
   private KiteConnectorUpgrader upgrader;

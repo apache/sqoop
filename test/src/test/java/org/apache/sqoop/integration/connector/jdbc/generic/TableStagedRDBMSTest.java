@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.test.db.TableName;

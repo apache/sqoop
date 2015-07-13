@@ -21,7 +21,7 @@ package org.apache.sqoop.connector.idf;
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.NULL_VALUE;
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
 import static org.testng.Assert.assertNull;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;

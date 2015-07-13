@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.model;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;

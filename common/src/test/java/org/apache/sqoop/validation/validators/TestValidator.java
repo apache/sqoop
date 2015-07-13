@@ -21,7 +21,7 @@ import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 /**
  *

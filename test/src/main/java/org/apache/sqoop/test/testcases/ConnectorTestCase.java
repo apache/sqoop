@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.test.testcases;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotSame;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -286,7 +286,8 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
       LOG.error("Submission has failed: " + finalSubmission.getError().getErrorSummary());
       LOG.error("Corresponding error details: " + finalSubmission.getError().getErrorDetails());
     }
-    assertEquals("Submission finished with error: " + finalSubmission.getError().getErrorSummary(), SubmissionStatus.SUCCEEDED, finalSubmission.getStatus());
+    assertEquals(SubmissionStatus.SUCCEEDED, finalSubmission.getStatus(),
+            "Submission finished with error: " + finalSubmission.getError().getErrorSummary());
   }
 
   /**

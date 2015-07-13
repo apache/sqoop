@@ -22,7 +22,7 @@ import org.apache.sqoop.json.util.SerializationError;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 

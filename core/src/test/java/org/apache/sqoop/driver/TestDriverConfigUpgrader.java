@@ -18,7 +18,7 @@
  */
 package org.apache.sqoop.driver;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import java.util.LinkedList;

@@ -23,7 +23,7 @@ import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 public class GenericJdbcExecutorTest {
   private final String table;
@@ -73,30 +73,28 @@ public class GenericJdbcExecutorTest {
   @Test
   public void testDeleteTableData() throws Exception {
     executor.deleteTableData(table);
-    assertEquals("Table " + table + " is expected to be empty.",
-      0, executor.getTableRowCount(table));
+    assertEquals(0, executor.getTableRowCount(table),
+            "Table " + table + " is expected to be empty.");
   }
 
   @Test
   public void testMigrateData() throws Exception {
-    assertEquals("Table " + emptyTable + " is expected to be empty.",
-      0, executor.getTableRowCount(emptyTable));
-    assertEquals("Table " + table + " is expected to have " +
-      NUMBER_OF_ROWS + " rows.", NUMBER_OF_ROWS,
-      executor.getTableRowCount(table));
+    assertEquals(0, executor.getTableRowCount(emptyTable),
+            "Table " + emptyTable + " is expected to be empty.");
+    assertEquals(NUMBER_OF_ROWS, executor.getTableRowCount(table),
+            "Table " + table + " is expected to have " + NUMBER_OF_ROWS + " rows.");
 
     executor.migrateData(table, emptyTable);
 
-    assertEquals("Table " + table + " is expected to be empty.", 0,
-      executor.getTableRowCount(table));
-    assertEquals("Table " + emptyTable + " is expected to have " +
-      NUMBER_OF_ROWS + " rows.", NUMBER_OF_ROWS,
-      executor.getTableRowCount(emptyTable));
+    assertEquals(0, executor.getTableRowCount(table),
+            "Table " + table + " is expected to be empty.");
+    assertEquals(NUMBER_OF_ROWS, executor.getTableRowCount(emptyTable),
+            "Table " + emptyTable + " is expected to have " + NUMBER_OF_ROWS + " rows.");
   }
 
   @Test
   public void testGetTableRowCount() throws Exception {
-    assertEquals("Table " + table + " is expected to be empty.",
-      NUMBER_OF_ROWS, executor.getTableRowCount(table));
+    assertEquals(NUMBER_OF_ROWS, executor.getTableRowCount(table),
+            "Table " + table + " is expected to be empty.");
   }
 }

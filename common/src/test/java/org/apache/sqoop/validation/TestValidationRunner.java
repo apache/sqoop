@@ -28,7 +28,7 @@ import org.apache.sqoop.validation.validators.NotNull;
 import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**

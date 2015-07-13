@@ -20,8 +20,8 @@ package org.apache.sqoop.connector.hdfs;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfig;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class TestLinkConfig {
   @Test
@@ -45,7 +45,7 @@ public class TestLinkConfig {
       LinkConfig.ConfigValidator validator = new LinkConfig.ConfigValidator();
       config.uri = uri;
       validator.validate(config);
-      assertTrue(uri, validator.getStatus().canProceed());
+      assertTrue(validator.getStatus().canProceed(), uri);
     }
   }
 
@@ -65,7 +65,7 @@ public class TestLinkConfig {
       LinkConfig.ConfigValidator validator = new LinkConfig.ConfigValidator();
       config.uri = uri;
       validator.validate(config);
-      assertFalse(uri, validator.getStatus().canProceed());
+      assertFalse(validator.getStatus().canProceed(), uri);
     }
   }
 }

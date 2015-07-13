@@ -20,7 +20,7 @@ package org.apache.sqoop.repository.derby;
 import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
 import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.*;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

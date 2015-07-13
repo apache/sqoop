@@ -19,7 +19,7 @@ package org.apache.sqoop.connector.hdfs;
 
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.job.mr;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 

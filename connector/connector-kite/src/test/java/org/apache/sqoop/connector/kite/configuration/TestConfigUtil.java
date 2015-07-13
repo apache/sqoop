@@ -19,7 +19,7 @@ package org.apache.sqoop.connector.kite.configuration;
 
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Test configuration objects.

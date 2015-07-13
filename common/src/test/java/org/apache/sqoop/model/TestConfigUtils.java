@@ -17,11 +17,12 @@
  */
 package org.apache.sqoop.model;
 
-import org.testng.annotations.Test;
 import org.testng.Assert;
-import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,17 +43,17 @@ public class TestConfigUtils {
     config.cConfig.enumeration = Enumeration.X;
 
     List<MConfig> configsByInstance = ConfigUtils.toConfigs(config);
-    AssertJUnit.assertEquals(getConfigs(), configsByInstance);
-    AssertJUnit.assertEquals("value", configsByInstance.get(0).getInputs().get(0).getValue());
-    AssertJUnit.assertEquals("X", configsByInstance.get(2).getInput("cConfig.enumeration").getValue());
+    assertEquals(getConfigs(), configsByInstance);
+    assertEquals("value", configsByInstance.get(0).getInputs().get(0).getValue());
+    assertEquals("X", configsByInstance.get(2).getInput("cConfig.enumeration").getValue());
 
     List<MConfig> configsByClass = ConfigUtils.toConfigs(TestConfiguration.class);
-    AssertJUnit.assertEquals(getConfigs(), configsByClass);
+    assertEquals(getConfigs(), configsByClass);
 
     List<MConfig> configsByBoth = ConfigUtils.toConfigs(TestConfiguration.class, config);
-    AssertJUnit.assertEquals(getConfigs(), configsByBoth);
-    AssertJUnit.assertEquals("value", configsByBoth.get(0).getInputs().get(0).getValue());
-    AssertJUnit.assertEquals("X", configsByBoth.get(2).getInput("cConfig.enumeration").getValue());
+    assertEquals(getConfigs(), configsByBoth);
+    assertEquals("value", configsByBoth.get(0).getInputs().get(0).getValue());
+    assertEquals("X", configsByBoth.get(2).getInput("cConfig.enumeration").getValue());
   }
 
   @Test(expectedExceptions = SqoopException.class)
@@ -81,7 +82,7 @@ public class TestConfigUtils {
     try {
       ConfigUtils.toConfigs(ConfigWithoutAnnotation.class);
     } catch (SqoopException ex) {
-      AssertJUnit.assertEquals(ModelError.MODEL_003, ex.getErrorCode());
+      assertEquals(ModelError.MODEL_003, ex.getErrorCode());
       return;
     }
 
@@ -93,7 +94,7 @@ public class TestConfigUtils {
     try {
       ConfigUtils.toConfigs(ConfigurationWithNonUniqueConfigNameAttribute.class);
     } catch (SqoopException ex) {
-      AssertJUnit.assertEquals(ModelError.MODEL_012, ex.getErrorCode());
+      assertEquals(ModelError.MODEL_012, ex.getErrorCode());
       return;
     }
 
@@ -105,7 +106,7 @@ public class TestConfigUtils {
     try {
       ConfigUtils.toConfigs(ConfigurationWithInvalidConfigNameAttribute.class);
     } catch (SqoopException ex) {
-      AssertJUnit.assertEquals(ModelError.MODEL_013, ex.getErrorCode());
+      assertEquals(ModelError.MODEL_013, ex.getErrorCode());
       return;
     }
     Assert.fail("Correct exception wasn't thrown");
@@ -116,7 +117,7 @@ public class TestConfigUtils {
     try {
       ConfigUtils.toConfigs(ConfigurationWithInvalidConfigNameAttributeLength.class);
     } catch (SqoopException ex) {
-      AssertJUnit.assertEquals(ModelError.MODEL_014, ex.getErrorCode());
+      assertEquals(ModelError.MODEL_014, ex.getErrorCode());
       return;
     }
     Assert.fail("Correct exception wasn't thrown");
@@ -130,7 +131,7 @@ public class TestConfigUtils {
       ConfigUtils.toConfigs(config);
       Assert.fail("We were expecting exception for unsupported type.");
     } catch (SqoopException ex) {
-      AssertJUnit.assertEquals(ModelError.MODEL_007, ex.getErrorCode());
+      assertEquals(ModelError.MODEL_007, ex.getErrorCode());
     }
   }
 
@@ -143,7 +144,7 @@ public class TestConfigUtils {
     TestConfiguration config = new TestConfiguration();
 
     ConfigUtils.fromConfigs(configs, config);
-    AssertJUnit.assertEquals("value", config.aConfig.a1);
+    assertEquals("value", config.aConfig.a1);
   }
 
   @Test
@@ -153,8 +154,8 @@ public class TestConfigUtils {
     ((MStringInput) configs.get(0).getInputs().get(0)).setValue("value");
 
     TestConfiguration config = (TestConfiguration) ConfigUtils.fromConfigs(configs,
-        TestConfiguration.class);
-    AssertJUnit.assertEquals("value", config.aConfig.a1);
+            TestConfiguration.class);
+    assertEquals("value", config.aConfig.a1);
   }
 
   @Test
@@ -168,7 +169,7 @@ public class TestConfigUtils {
     config.bConfig.b1 = "y";
 
     ConfigUtils.fromConfigs(configs, config);
-    AssertJUnit.assertEquals("value", config.aConfig.a1);
+    assertEquals("value", config.aConfig.a1);
     assertNull(config.aConfig.a2);
     assertNull(config.bConfig.b2);
     assertNull(config.bConfig.b2);
@@ -195,17 +196,17 @@ public class TestConfigUtils {
 
     ConfigUtils.fillValues(json, targetConfig);
 
-    AssertJUnit.assertEquals("A", targetConfig.aConfig.a1);
+    assertEquals("A", targetConfig.aConfig.a1);
     assertNull(targetConfig.aConfig.a2);
 
     assertNull(targetConfig.bConfig.b1);
-    AssertJUnit.assertEquals("B", targetConfig.bConfig.b2);
+    assertEquals("B", targetConfig.bConfig.b2);
 
-    AssertJUnit.assertEquals((Long) 4L, targetConfig.cConfig.longValue);
-    AssertJUnit.assertEquals(1, targetConfig.cConfig.map.size());
-    AssertJUnit.assertTrue(targetConfig.cConfig.map.containsKey("C"));
-    AssertJUnit.assertEquals("D", targetConfig.cConfig.map.get("C"));
-    AssertJUnit.assertEquals(Enumeration.X, targetConfig.cConfig.enumeration);
+    assertEquals((Long) 4L, targetConfig.cConfig.longValue);
+    assertEquals(1, targetConfig.cConfig.map.size());
+    assertTrue(targetConfig.cConfig.map.containsKey("C"));
+    assertEquals("D", targetConfig.cConfig.map.get("C"));
+    assertEquals(Enumeration.X, targetConfig.cConfig.enumeration);
   }
 
   /**

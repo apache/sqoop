@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
 import java.io.Reader;
 import java.io.StringReader;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 /**
  */

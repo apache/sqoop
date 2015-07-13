@@ -20,7 +20,7 @@ package org.apache.sqoop.driver;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;

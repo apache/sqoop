@@ -19,8 +19,7 @@ package org.apache.sqoop.utils;
 
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertArrayEquals;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -117,13 +116,13 @@ public class TestClassUtils {
   public void testGetEnumStrings() {
     assertNull(ClassUtils.getEnumStrings(A.class));
 
-    assertArrayEquals(
-      new String[]{"A", "B", "C"},
-      ClassUtils.getEnumStrings(EnumA.class)
+    assertEquals(
+            new String[]{"A", "B", "C"},
+            ClassUtils.getEnumStrings(EnumA.class)
     );
-    assertArrayEquals(
-      new String[]{"X", "Y"},
-      ClassUtils.getEnumStrings(EnumX.class)
+    assertEquals(
+            new String[]{"X", "Y"},
+            ClassUtils.getEnumStrings(EnumX.class)
     );
   }
 

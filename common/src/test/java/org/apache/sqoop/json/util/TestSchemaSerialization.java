@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.json.util;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;

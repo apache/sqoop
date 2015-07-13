@@ -20,7 +20,9 @@ package org.apache.sqoop.model;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test class for org.apache.sqoop.model.MEnumInput
@@ -36,7 +38,7 @@ public class TestMEnumInput {
     String[] values = { "value1", "value2" };
     MEnumInput input = new MEnumInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY, values);
     assertEquals("NAME", input.getName());
-    assertArrayEquals(values, input.getValues());
+    assertEquals(values, input.getValues());
     assertEquals(MInputType.ENUM, input.getType());
 
     MEnumInput input1 = new MEnumInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY, values);

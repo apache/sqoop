@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.testng.Assert.assertFalse;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 /**
  * This version contains the following structures:

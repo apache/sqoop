@@ -23,7 +23,7 @@ import org.apache.sqoop.test.testcases.TomcatTestCase;
 import org.apache.sqoop.json.VersionBean;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Basic test to check that server is working and returning correct version info.

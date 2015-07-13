@@ -19,7 +19,7 @@ package org.apache.sqoop.connector.hdfs;
 
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -148,7 +148,7 @@ public class TestExtractor extends TestHdfsBase {
     extractor.extract(context, emptyLinkConfig, emptyJobConfig, partition);
 
     for (int index = 0; index < NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE; ++index) {
-      assertTrue("Index " + (index + 1) + " was not visited", visited[index]);
+      assertTrue(visited[index], "Index " + (index + 1) + " was not visited");
     }
   }
 
@@ -205,7 +205,7 @@ public class TestExtractor extends TestHdfsBase {
     extractor.extract(context, emptyLinkConfig, fromJobConfiguration, partition);
 
     for (int index = 0; index < NUMBER_OF_FILES * NUMBER_OF_ROWS_PER_FILE; ++index) {
-      assertTrue("Index " + (index + 1) + " was not visited", visited[index]);
+      assertTrue(visited[index], "Index " + (index + 1) + " was not visited");
     }
   }
 }

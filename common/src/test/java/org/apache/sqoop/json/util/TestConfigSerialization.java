@@ -18,7 +18,7 @@
 package org.apache.sqoop.json.util;
 
 import static org.testng.Assert.assertFalse;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.HashMap;

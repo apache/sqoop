@@ -25,7 +25,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.testng.AssertJUnit;
+import org.testng.Assert;
 import org.testng.IObjectFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -40,6 +40,9 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 public class TestKiteExecutor {
 
@@ -124,14 +127,14 @@ public class TestKiteExecutor {
     // exercise & verify
     for (int i = 0; i < NUMBER_OF_ROWS; i++) {
       Object[] actual = executor.readRecord();
-      AssertJUnit.assertNotNull(actual);
-      AssertJUnit.assertEquals(2, actual.length);
-      AssertJUnit.assertEquals(1, actual[0]);
-      AssertJUnit.assertEquals("foo", actual[1]);
+      assertNotNull(actual);
+      assertEquals(2, actual.length);
+      assertEquals(1, actual[0]);
+      assertEquals("foo", actual[1]);
     }
     when(readerMock.hasNext()).thenReturn(false);
     Object[] actual = executor.readRecord();
-    AssertJUnit.assertNull(actual);
+    assertNull(actual);
   }
 
   @Test

@@ -22,7 +22,7 @@ import static org.apache.sqoop.connector.common.SqoopAvroUtils.createEnumSchema;
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.NULL_VALUE;
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
 import static org.testng.Assert.assertNull;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;

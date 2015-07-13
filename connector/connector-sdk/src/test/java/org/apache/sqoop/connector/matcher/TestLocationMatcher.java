@@ -23,7 +23,7 @@ import org.apache.sqoop.schema.Schema;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
+import static org.testng.Assert.assertEquals;
 
 public class TestLocationMatcher {
 
@@ -45,7 +45,7 @@ public class TestLocationMatcher {
     Object[] fields = SchemaFixture.createNotNullRecordForSchema1();
 
     Object[] actual = matcher.getMatchingData(fields);
-    assertArrayEquals(fields, actual);
+    assertEquals(fields, actual);
   }
 
   /**
@@ -59,7 +59,7 @@ public class TestLocationMatcher {
     Object[] fields = SchemaFixture.createNotNullRecordForSchema1();
 
     Object[] actual = matcher.getMatchingData(fields);
-    assertArrayEquals(fields, actual);
+    assertEquals(fields, actual);
   }
 
   /**
@@ -74,7 +74,7 @@ public class TestLocationMatcher {
     Object[] fields = new Object[] {"t1", "t2"};
 
     Object[] actual = matcher.getMatchingData(fields);
-    assertArrayEquals(new Object[] {"t1", "t2", null}, actual);
+    assertEquals(new Object[] {"t1", "t2", null}, actual);
   }
 
   /**

@@ -19,8 +19,7 @@ package org.apache.sqoop.job;
 
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.BYTE_FIELD_CHARSET;
 import static org.apache.sqoop.connector.common.SqoopIDFUtils.toText;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -142,17 +141,17 @@ public class TestMatching {
         DummyOutputFormat.class);
     if (from.getName().split("-")[1].equals("EMPTY")) {
       if (to.getName().split("-")[1].equals("EMPTY")) {
-        assertEquals("Job succeeded!", false, success);
+        assertEquals(false, success, "Job succeeded!");
       } else {
-        assertEquals("Job failed!", true, success);
+        assertEquals(true, success, "Job failed!");
       }
     } else {
       if (to.getName().split("-")[1].equals("EMPTY")) {
-        assertEquals("Job failed!", true, success);
+        assertEquals(true, success, "Job failed!");
       } else if (from.getName().split("-")[1].equals(to.getName().split("-")[1])) {
-        assertEquals("Job failed!", true, success);
+        assertEquals(true, success, "Job failed!");
       } else {
-        assertEquals("Job succeeded!", false, success);
+        assertEquals(false, success, "Job succeeded!");
       }
     }
   }
@@ -176,7 +175,7 @@ public class TestMatching {
     Object[] validateObj = dataFormat.getObjectData();
 
     assertEquals(testData, validateCSV);
-    assertArrayEquals(testObject, validateObj);
+    assertEquals(testObject, validateObj);
 
     // Setting data as Object
     dataFormat.setObjectData(testObject);
@@ -185,7 +184,7 @@ public class TestMatching {
     validateObj = dataFormat.getObjectData();
 
     assertEquals(testData, validateCSV);
-    assertArrayEquals(testObjectCopy, validateObj);
+    assertEquals(testObjectCopy, validateObj);
   }
 
   public static class DummyPartition extends Partition {

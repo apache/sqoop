@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import static org.testng.AssertJUnit.assertNull;
+import static org.testng.Assert.assertNull;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -36,7 +36,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 

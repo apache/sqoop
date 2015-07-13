@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -290,19 +290,19 @@ public class TestToInitializer {
     jobConfig.toJobConfig.shouldClearStageTable = false;
     ConfigValidationRunner validationRunner = new ConfigValidationRunner();
     ConfigValidationResult result = validationRunner.validate(jobConfig);
-    assertEquals("User should not specify clear stage table flag without " +
-      "specifying name of the stage table",
-      Status.ERROR,
-        result.getStatus());
+    assertEquals(Status.ERROR,
+        result.getStatus(),
+        "User should not specify clear stage table flag without " +
+        "specifying name of the stage table");
     assertTrue(result.getMessages().containsKey(
       "toJobConfig"));
 
     jobConfig.toJobConfig.shouldClearStageTable = true;
     result = validationRunner.validate(jobConfig);
-    assertEquals("User should not specify clear stage table flag without " +
-      "specifying name of the stage table",
-      Status.ERROR,
-        result.getStatus());
+    assertEquals(Status.ERROR,
+        result.getStatus(),
+        "User should not specify clear stage table flag without " +
+        "specifying name of the stage table");
     assertTrue(result.getMessages().containsKey(
       "toJobConfig"));
   }
@@ -320,8 +320,9 @@ public class TestToInitializer {
 
     ConfigValidationRunner validationRunner = new ConfigValidationRunner();
     ConfigValidationResult result = validationRunner.validate(jobConfig);
-    assertEquals("Stage table name cannot be specified without specifying " +
-      "table name", Status.ERROR, result.getStatus());
+    assertEquals(Status.ERROR, result.getStatus(),
+            "Stage table name cannot be specified without specifying " +
+            "table name");
     assertTrue(result.getMessages().containsKey(
       "toJobConfig"));
   }
@@ -348,8 +349,8 @@ public class TestToInitializer {
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
-    assertEquals("Stage table should have been cleared", 0,
-      executor.getTableRowCount(stageTableName));
+    assertEquals(0, executor.getTableRowCount(stageTableName),
+            "Stage table should have been cleared");
   }
 
   @Test

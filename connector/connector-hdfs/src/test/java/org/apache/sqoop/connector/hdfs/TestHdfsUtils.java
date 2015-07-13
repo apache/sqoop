@@ -26,8 +26,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
+import static org.testng.Assert.assertEquals;
 
 public class TestHdfsUtils {
 
@@ -87,7 +86,7 @@ public class TestHdfsUtils {
     };
 
     // No transformations
-    assertArrayEquals(toRecord, HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, fromRecord));
-    assertArrayEquals(fromRecord, HdfsUtils.formatRecord(linkConfiguration, toJobConfiguration, toRecord));
+    assertEquals(toRecord, HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, fromRecord));
+    assertEquals(fromRecord, HdfsUtils.formatRecord(linkConfiguration, toJobConfiguration, toRecord));
   }
 }

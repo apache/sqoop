@@ -24,7 +24,7 @@ import org.apache.sqoop.common.test.db.TableName;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 /**
@@ -67,7 +67,8 @@ public class ProviderAsserts {
       int i = 1;
       for(Object expectedValue : values) {
         Object actualValue = rs.getObject(i);
-        assertEquals("Columns do not match on position: " + i, expectedValue.toString(), actualValue.toString());
+        assertEquals(expectedValue.toString(), actualValue.toString(),
+                "Columns do not match on position: " + i);
         i++;
       }
 
