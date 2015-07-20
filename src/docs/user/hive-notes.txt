@@ -29,3 +29,10 @@ direct mapping (for example, +DATE+, +TIME+, and +TIMESTAMP+) will be coerced to
 +DOUBLE+. In these cases, Sqoop will emit a warning in its log messages
 informing you of the loss of precision.
 
+Parquet Support in Hive
+~~~~~~~~~~~~~~~~~~~~~~~
+
+In order to contact the Hive MetaStore from a MapReduce job, a delegation token will
+be fetched and passed. HIVE_CONF_DIR and HIVE_HOME must be set appropriately to add
+Hive to the runtime classpath. Otherwise, importing/exporting into Hive in Parquet
+format may not work.

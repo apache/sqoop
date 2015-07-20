@@ -31,6 +31,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -98,7 +99,7 @@ public class DataDrivenImportJob extends ImportJobBase {
       AvroJob.setMapOutputSchema(job.getConfiguration(), schema);
     } else if (options.getFileLayout()
         == SqoopOptions.FileLayout.ParquetFile) {
-      Configuration conf = job.getConfiguration();
+      JobConf conf = (JobConf)job.getConfiguration();
       // Kite SDK requires an Avro schema to represent the data structure of
       // target dataset. If the schema name equals to generated java class name,
       // the import will fail. So we use table name as schema name and add a
