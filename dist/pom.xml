@@ -76,6 +76,9 @@ limitations under the License.
                     <delete dir="target/sqoop-${project.version}"/>
                     <delete file="target/sqoop-${project.version}.tar.gz"/>
 
+                    <!-- Create dist dir -->
+                    <mkdir dir="target/sqoop-${project.version}"/>
+
                     <!-- Copy sources over -->
                     <copy todir="target/sqoop-${project.version}" includeEmptyDirs="false" flatten="false">
                       <fileset dir="../">
@@ -89,9 +92,6 @@ limitations under the License.
                         <exclude name="**/.settings/**" />
                       </fileset>
                     </copy>
-
-                    <!-- Create dist dir -->
-                    <mkdir dir="target/sqoop-${project.version}"/>
 
                     <!-- Create final distribution tar -->
                     <tar destfile="target/sqoop-${project.version}.tar.gz" compression="gzip">
@@ -138,17 +138,13 @@ limitations under the License.
                     <!-- Create dist dir -->
                     <mkdir dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}"/>
 
-                    <!-- Copy sources over -->
+                    <!-- Copy LICENSE, CHANGELOG, README and NOTICE over -->
                     <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}" includeEmptyDirs="false" flatten="false">
                       <fileset dir="../">
-                        <include name="**/*" />
-                        <exclude name="build/**" />
-                        <exclude name="**/target/**" />
-                        <exclude name=".git/**" />
-                        <exclude name="tags" />
-                        <exclude name="**/.project" />
-                        <exclude name="**/.classpath" />
-                        <exclude name="**/.settings/**" />
+                        <include name="**/LICENSE.txt" />
+                        <include name="**/CHANGELOG.txt" />
+                        <include name="**/README.txt" />
+                        <include name="**/NOTICE.txt" />
                       </fileset>
                     </copy>
 
