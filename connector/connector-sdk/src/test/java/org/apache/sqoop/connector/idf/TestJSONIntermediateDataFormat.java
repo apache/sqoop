@@ -26,6 +26,7 @@ import static org.testng.Assert.assertEquals;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Array;
 import org.apache.sqoop.schema.type.Binary;
@@ -90,9 +91,12 @@ public class TestJSONIntermediateDataFormat {
         + "','ENUM'," + csvArray + "," + map + ",true," + dateTime + "," + time + "," + date
         + ",13.44," + csvSet;
     dataFormat.setCSVTextData(csvText);
-    String jsonExpected = "{\"15\":[[11,12],[14,15]],\"13\":\"2014-10-01\",\"14\":13.44,\"11\":\"2014-10-01 12:00:00.000\","
+    // Different JDK version will have different order of the key/value pars as that is technically undefined
+    // Hence we're parsing the expected string and then serializing it back to string to get the JVM expected
+    // order. Future enhancement would be to provide assertJson().
+    String jsonExpected = JSONUtils.parse("{\"15\":[[11,12],[14,15]],\"13\":\"2014-10-01\",\"14\":13.44,\"11\":\"2014-10-01 12:00:00.000\","
         + "\"12\":\"12:59:59\",\"3\":\"54\",\"2\":34,\"1\":10,\"10\":true,\"7\":\"ENUM\",\"6\":\"10\",\"5\":\"kDY=\",\"4\":\"random data\","
-        + "\"9\":{\"testKey\":\"testValue\"},\"8\":[[11,11],[14,15]]}";
+        + "\"9\":{\"testKey\":\"testValue\"},\"8\":[[11,11],[14,15]]}").toJSONString();
     assertEquals(jsonExpected, dataFormat.getData().toJSONString());
   }
 
