@@ -138,8 +138,8 @@ limitations under the License.
 
   </dependencies>
 
-  <!-- Profiles for various supported Hadoop distributions -->
   <profiles>
+    <!-- Integration tests related profiles -->
     <profile>
       <id>fast</id>
 
@@ -196,6 +196,30 @@ limitations under the License.
             <configuration>
               <groups>slow</groups>
               <reportNameSuffix>slow</reportNameSuffix>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Run all groups that should run as part of precommit hook. That currently means ALL tests -->
+    <profile>
+      <id>precommit</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
             </configuration>
           </plugin>
         </plugins>
