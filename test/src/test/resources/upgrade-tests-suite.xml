@@ -20,6 +20,10 @@ limitations under the License.
 
 <suite name="UpgradeTests" verbose="2" parallel="false">
 
+  <listeners>
+    <listener class-name="org.apache.sqoop.test.testng.SqoopTestListener" />
+  </listeners>
+
   <test name="RepositoryTests">
     <packages>
       <package name="org.apache.sqoop.integration.repository.derby.upgrade"/>
