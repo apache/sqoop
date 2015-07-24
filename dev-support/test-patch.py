@@ -255,23 +255,24 @@ def find_all_files(top):
         for f in files:
             yield os.path.join(root, f)
 
-def mvn_test(result, output_dir, category):
-  run_mvn_test("test", "unit", result, output_dir, category)
+def mvn_test(result, output_dir):
+  run_mvn_test("test", "unit", result, output_dir)
 
-def mvn_integration(result, output_dir, category):
-  run_mvn_test("integration-test -pl test", "integration", result, output_dir, category)
+def mvn_integration(result, output_dir):
+  run_mvn_test("integration-test -pl test", "integration", result, output_dir)
 
-def run_mvn_test(command, test_type, result, output_dir, category):
-  command += " -P%s" % category
-  test_file_name = "%s_%s" % (test_type, category)
+def run_mvn_test(command, test_type, result, output_dir):
+  command += " -Pprecommit" # We need special test profile for precommit hook
+  test_file_name = "test_%s.txt" % (test_type)
+  test_output = "%s/%s" % (output_dir, test_file_name)
   test_results_dir = "test-results"
 
   # Execute the test run
-  rc = execute("mvn %s 1>%s/test_%s.txt 2>&1" % (command, output_dir, test_file_name))
+  rc = execute("mvn %s 1>%s 2>&1" % (command, test_output))
 
   # Test run statistics (number of executed/skipped tests)
   executed_tests = 0
-  fd = open("%s/test_%s.txt" % (output_dir, test_file_name))
+  fd = open(test_output)
   for line in fd:
     if "Tests run:" in line:
       matcher = re.search("^Tests run: ([0-9]+), Failures: ([0-9]+), Errors: ([0-9]+), Skipped: ([0-9]+), Time elapsed:", line)
@@ -281,12 +282,12 @@ def run_mvn_test(command, test_type, result, output_dir, category):
 
   # Based on whether they are
   if rc == 0:
-    result.success("All %s %s tests passed (executed %d tests)" % (category, test_type ,executed_tests) )
+    result.success("All %s tests passed (executed %d tests)" % (test_type ,executed_tests) )
   else:
-    archive_dir = os.path.join(output_dir, test_results_dir, test_type, category)
+    archive_dir = os.path.join(output_dir, test_results_dir, test_type)
     if not os.path.exists(archive_dir):
       os.makedirs(archive_dir)
-    result.error("Some of %s %s tests failed (%s, executed %d tests)" % (category, test_type, jenkins_file_link_for_jira("report", "test_%s.txt" % test_file_name), executed_tests))
+    result.error("Some of %s tests failed (%s, executed %d tests)" % (test_type, jenkins_file_link_for_jira("report", test_file_name), executed_tests))
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
@@ -300,7 +301,7 @@ def run_mvn_test(command, test_type, result, output_dir, category):
               failed_tests += [ matcher.groups()[0] ]
         fd.close()
     for failed_test in set(failed_tests):
-      result.error("Failed %s %s test: {{%s}}" % (category, test_type, failed_test))
+      result.error("Failed %s test: {{%s}}" % (test_type, failed_test))
 
 def clean_folder(folder):
   for the_file in os.listdir(folder):
@@ -470,10 +471,8 @@ static_test(result, patch_file, output_dir)
 mvn_rat(result, output_dir)
 mvn_install(result, output_dir)
 if run_tests:
-  mvn_test(result, output_dir, category="fast")
-  mvn_test(result, output_dir, category="slow")
-  mvn_integration(result, output_dir, category="fast")
-  mvn_integration(result, output_dir, category="slow")
+  mvn_test(result, output_dir)
+  mvn_integration(result, output_dir)
 else:
   result.info("patch applied and built but tests did not execute")
 
