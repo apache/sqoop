@@ -20,9 +20,19 @@ package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
 
+import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.FileReader;
+import org.apache.avro.file.SeekableInput;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.mapred.FsInput;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -30,7 +40,10 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.sqoop.avro.AvroUtil;
+import org.apache.sqoop.mapreduce.ExportJobBase.FileType;
 import org.apache.sqoop.util.Jars;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.JobBase;
 
@@ -114,19 +127,25 @@ public class MergeJob extends JobBase {
 
       FileOutputFormat.setOutputPath(job, new Path(options.getTargetDir()));
 
-      if (ExportJobBase.isSequenceFiles(jobConf, newPath)) {
-        job.setInputFormatClass(SequenceFileInputFormat.class);
-        job.setOutputFormatClass(SequenceFileOutputFormat.class);
-        job.setMapperClass(MergeRecordMapper.class);
-      } else {
-        job.setMapperClass(MergeTextMapper.class);
-        job.setOutputFormatClass(RawKeyTextOutputFormat.class);
+      FileType fileType = ExportJobBase.getFileType(jobConf, oldPath);
+      switch (fileType) {
+        case AVRO_DATA_FILE:
+          configueAvroMergeJob(conf, job, oldPath, newPath);
+          break;
+        case SEQUENCE_FILE:
+          job.setInputFormatClass(SequenceFileInputFormat.class);
+          job.setOutputFormatClass(SequenceFileOutputFormat.class);
+          job.setMapperClass(MergeRecordMapper.class);
+          job.setReducerClass(MergeReducer.class);
+          break;
+        default:
+          job.setMapperClass(MergeTextMapper.class);
+          job.setOutputFormatClass(RawKeyTextOutputFormat.class);
+          job.setReducerClass(MergeReducer.class);
       }
 
       jobConf.set("mapred.output.key.class", userClassName);
       job.setOutputValueClass(NullWritable.class);
-
-      job.setReducerClass(MergeReducer.class);
 
       // Set the intermediate data types.
       job.setMapOutputKeyClass(Text.class);
@@ -141,6 +160,23 @@ public class MergeJob extends JobBase {
     } catch (ClassNotFoundException cnfe) {
       throw new IOException(cnfe);
     }
+  }
+
+  private void configueAvroMergeJob(Configuration conf, Job job, Path oldPath, Path newPath)
+      throws IOException {
+    LOG.info("Trying to merge avro files");
+    final Schema oldPathSchema = AvroUtil.getAvroSchema(oldPath, conf);
+    final Schema newPathSchema = AvroUtil.getAvroSchema(newPath, conf);
+    if (oldPathSchema == null || newPathSchema == null || !oldPathSchema.equals(newPathSchema)) {
+      throw new IOException("Invalid schema for input directories. Schema for old data: ["
+          + oldPathSchema + "]. Schema for new data: [" + newPathSchema + "]");
+    }
+    LOG.debug("Avro Schema:" + oldPathSchema);
+    job.setInputFormatClass(AvroInputFormat.class);
+    job.setOutputFormatClass(AvroOutputFormat.class);
+    job.setMapperClass(MergeAvroMapper.class);
+    job.setReducerClass(MergeAvroReducer.class);
+    AvroJob.setOutputSchema(job.getConfiguration(), oldPathSchema);
   }
 }
 

@@ -42,6 +42,11 @@ public final class AvroJob {
     return Schema.parse(job.get(MAP_OUTPUT_SCHEMA, job.get(OUTPUT_SCHEMA)));
   }
 
+  /** Set a job's output key schema. */
+  public static void setOutputSchema(Configuration job, Schema s) {
+    job.set(OUTPUT_SCHEMA, s.toString());
+  }
+
   /** Return a job's output key schema. */
   public static Schema getOutputSchema(Configuration job) {
     return Schema.parse(job.get(OUTPUT_SCHEMA));

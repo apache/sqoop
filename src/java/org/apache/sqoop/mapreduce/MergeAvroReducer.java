@@ -19,22 +19,32 @@
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.mapred.AvroWrapper;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.sqoop.avro.AvroUtil;
 import com.cloudera.sqoop.lib.SqoopRecord;
 
-/**
- * Reducer for merge tool. Given records tagged as 'old' or 'new', emit
- * a new one if possible; otherwise, an old one.
- */
-public class MergeReducer
- extends MergeReducerBase<SqoopRecord, NullWritable> {
+public class MergeAvroReducer extends MergeReducerBase<AvroWrapper<GenericRecord>, NullWritable> {
+  private AvroWrapper<GenericRecord> wrapper;
+  private Schema schema;
+  private boolean bigDecimalFormatString;
 
   @Override
-  protected void writeRecord(SqoopRecord record, Context c)
+  protected void setup(Context context) throws IOException, InterruptedException {
+    wrapper = new AvroWrapper<GenericRecord>();
+    schema = AvroJob.getOutputSchema(context.getConfiguration());
+    bigDecimalFormatString = context.getConfiguration().getBoolean(
+        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT, ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+  }
+
+  @Override
+  protected void writeRecord(SqoopRecord record, Context context)
       throws IOException, InterruptedException {
-    c.write(record, NullWritable.get());
+    GenericRecord outKey = AvroUtil.toGenericRecord(record.getFieldMap(), schema,
+        bigDecimalFormatString);
+    wrapper.datum(outKey);
+    context.write(wrapper, NullWritable.get());
   }
 }
-

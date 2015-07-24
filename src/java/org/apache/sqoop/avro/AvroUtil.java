@@ -18,14 +18,26 @@
 package org.apache.sqoop.avro;
 
 import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.FileReader;
+import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericFixed;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.mapred.FsInput;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
 import org.apache.sqoop.orm.ClassWriter;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Date;
@@ -184,4 +196,35 @@ public final class AvroUtil {
     }
   }
 
+  /**
+   * Get the schema of AVRO files stored in a directory
+   */
+  public static Schema getAvroSchema(Path path, Configuration conf)
+      throws IOException {
+    FileSystem fs = path.getFileSystem(conf);
+    Path fileToTest;
+    if (fs.isDirectory(path)) {
+      FileStatus[] fileStatuses = fs.listStatus(path, new PathFilter() {
+        @Override
+        public boolean accept(Path p) {
+          String name = p.getName();
+          return !name.startsWith("_") && !name.startsWith(".");
+        }
+      });
+      if (fileStatuses.length == 0) {
+        return null;
+      }
+      fileToTest = fileStatuses[0].getPath();
+    } else {
+      fileToTest = path;
+    }
+
+    SeekableInput input = new FsInput(fileToTest, conf);
+    DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>();
+    FileReader<GenericRecord> fileReader = DataFileReader.openReader(input, reader);
+
+    Schema result = fileReader.getSchema();
+    fileReader.close();
+    return result;
+  }
 }
