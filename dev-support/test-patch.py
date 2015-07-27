@@ -350,6 +350,8 @@ parser.add_option("--file", dest="filename",
                   help="Test patch file", metavar="FILE")
 parser.add_option("--run-tests", dest="run_tests",
                   help="Run Tests", action="store_true")
+parser.add_option("--run-integration-tests", dest="run_integration_tests",
+                  help="Run Integration Tests", action="store_true")
 parser.add_option("--username", dest="username",
                   help="JIRA Username", metavar="USERNAME", default="flumeqa")
 parser.add_option("--output", dest="output_dir",
@@ -382,6 +384,7 @@ defect = options.defect
 username = options.username
 password = options.password
 run_tests = options.run_tests
+run_integration_tests = options.run_integration_tests
 post_results = options.post_results
 strip = options.strip
 patch_cmd = options.patch_cmd
@@ -470,10 +473,15 @@ git_apply(result, patch_cmd, patch_file, strip, output_dir)
 static_test(result, patch_file, output_dir)
 mvn_rat(result, output_dir)
 mvn_install(result, output_dir)
+# Unit tests are conditional
 if run_tests:
   mvn_test(result, output_dir)
+else:
+  result.info("Unit tests were skipped, please add --run-tests")
+# Integration tests are conditional
+if run_integration_tests:
   mvn_integration(result, output_dir)
 else:
-  result.info("patch applied and built but tests did not execute")
+  result.info("Integration tests were skipped, please add --run-integration-tests")
 
 result.exit_handler()
