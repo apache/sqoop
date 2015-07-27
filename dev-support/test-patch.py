@@ -393,7 +393,7 @@ class Result(object):
     self._items.append(ResultItem(ResultItem.WARNING, msg, bullets))
   def fatal(self, msg, bullets=[]):
     self.overall = "-1"
-    self._items.append(ResultItem(ResultsIem.FATAL, msg, bullets))
+    self._items.append(ResultItem(ResultItem.FATAL, msg, bullets))
     self.exit_handler()
     self.exit()
   def exit(self):
