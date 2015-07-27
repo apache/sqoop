@@ -749,6 +749,20 @@ limitations under the License.
         <version>2.5.2</version>
       </plugin>
 
+      <!-- Find bugs report can be executed with: mvn clean compile site -DskipTests -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+          <effort>Max</effort>
+          <threshold>Low</threshold>
+          <htmlOutput>true</htmlOutput>
+          <xmlOutput>true</xmlOutput>
+          <details>true</details>
+        </configuration>
+      </plugin>
+
       <!-- Turning off standard reports as they collide with sphinx -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
