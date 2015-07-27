@@ -261,13 +261,14 @@ def mvn_install(result, output_dir):
   else:
     result.fatal("failed to build with patch (exit code %d, %s)" % (rc, jenkins_file_link_for_jira("report", "install.txt")))
 
-def find_all_files(top):
+def find_all_files(top, fileRegExp=".*", dirRegExp=".*"):
     for root, dirs, files in os.walk(top):
         for f in files:
+          if re.search(fileRegExp, f) and re.search(dirRegExp, root):
             yield os.path.join(root, f)
 
 def mvn_test(result, output_dir):
-  run_mvn_test("test", "unit", result, output_dir)
+  run_mvn_test("cobertura:cobertura", "unit", result, output_dir)
 
 def mvn_integration(result, output_dir):
   run_mvn_test("integration-test -pl test", "integration", result, output_dir)
@@ -334,6 +335,46 @@ class ResultItem(object):
     self.message = message
     self.bullets = bullets
 
+def cobertura_get_percentage(fd):
+  for line in fd:
+    if "All Packages" in line:
+      matcher = re.search(".*>([0-9]+)%.*>([0-9]+)%.*", line)
+      if matcher:
+        fd.close()
+        return (int(matcher.groups()[0]), int(matcher.groups()[1]))
+  fd.close()
+  return (-1, -1)
+
+def cobertura_compare(result, output_dir, compare_url):
+  # Detailed report file
+  report = open("%s/%s" % (output_dir, "cobertura_report.txt"), "w+")
+  report.write("Cobertura compare report against %s\n\n" % compare_url)
+  # List of all modules for which the test coverage is worst then the compare base
+  lowers = []
+  # For each report that exists locally
+  for path in list(find_all_files(".", "^frame-summary\.html$")):
+    package = path.replace("/target/site/cobertura/frame-summary.html", "").replace("./", "")
+
+    (localLine, localBranch) = cobertura_get_percentage(open(path))
+    (compareLine, compareBranch) = cobertura_get_percentage(urllib2.urlopen("%s%s" % (compare_url, path)))
+
+    diffLine = localLine - compareLine
+    diffBranch = localBranch - compareBranch
+
+    report.write("Package %s: Line coverage %d (%d -> %d), Branch coverage %d (%d -> %d)\n" % (package, diffLine, compareLine, localLine, diffBranch, compareBranch, localBranch))
+
+    if diffLine < 0 or diffBranch < 0:
+      lowers.append("Package {{%s}} has lower test coverage: Line coverage decreased by %d%% (from %d%% to %d%%), Branch coverage decreased by %d%% (from %d%% to %d%%)" % (package, abs(diffLine), compareLine, localLine, abs(diffBranch), compareBranch, localBranch))
+
+  # Add to the JIRA summary report
+  if len(lowers) == 0:
+    result.success("Test coverage did not decreased (%s)" % jenkins_file_link_for_jira("report", "cobertura_report.txt"))
+  else:
+    result.warning("Test coverage has decreased (%s)" % jenkins_file_link_for_jira("report", "cobertura_report.txt"), lowers)
+
+  # Clean up
+  report.close()
+
 class Result(object):
   def __init__(self):
     self._items = []
@@ -383,6 +424,8 @@ parser.add_option("--patch-command", dest="patch_cmd", default="git apply",
                   help="Patch command such as `git apply' or `patch'", metavar="COMMAND")
 parser.add_option("-p", "--strip", dest="strip", default="1",
                   help="Remove <n> leading slashes from diff paths", metavar="N")
+parser.add_option("--cobertura", dest="cobertura",
+                  help="HTTP URL with past cobertura results that we should compare")
 
 (options, args) = parser.parse_args()
 if not (options.defect or options.filename):
@@ -490,6 +533,9 @@ mvn_install(result, output_dir)
 # Unit tests are conditional
 if run_tests:
   mvn_test(result, output_dir)
+  # And alternatively also run cobertura report
+  if options.cobertura:
+    cobertura_compare(result, output_dir, options.cobertura)
 else:
   result.info("Unit tests were skipped, please add --run-tests")
 # Integration tests are conditional
