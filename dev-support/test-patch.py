@@ -94,29 +94,42 @@ def jira_get_defect(result, defect, username, password):
   url = "%s/rest/api/2/issue/%s" % (BASE_JIRA_URL, defect)
   return jira_request(result, url, username, password, None, {}).read()
 
+def jira_color(level):
+  if level == ResultItem.INFO:
+    return "INFO:"
+  elif level == ResultItem.SUCCESS:
+    return "{color:green}SUCCESS:{color}"
+  elif level == ResultItem.ERROR:
+    return "{color:red}ERROR:{color}"
+  elif level == ResultItem.FATAL:
+    return "{color:red}ERROR:{color}"
+  elif level == ResultItem.WARNING:
+    return "{color:yellow}WARNING:{color}"
+  else:
+    return level
+
+
 def jira_generate_comment(result, branch):
   body =  [ "Testing file [%s|%s] against branch %s took %s." % (result.attachment.split('/')[-1] , result.attachment, branch, datetime.datetime.now() - result.start_time) ]
   body += [ "" ]
-  if result._fatal:
-    result._error = [ result._fatal ] + result._error
-  if result._error:
-    count = len(result._error)
-    if count == 1:
-      body += [ "{color:red}Overall:{color} -1 due to an error" ]
-    else:
-      body += [ "{color:red}Overall:{color} -1 due to %d errors" % (count) ]
-  else:
+
+  if result.overall == "+1":
     body += [ "{color:green}Overall:{color} +1 all checks pass" ]
+  else:
+    body += [ "{color:red}Overall:{color} -1 due to an error(s), see details below:" ]
   body += [ "" ]
-  for error in result._error:
-    body += [ "{color:red}ERROR:{color} %s" % (error.replace("\n", "\\n")) ]
-  for info in result._info:
-    body += [ "INFO: %s" % (info.replace("\n", "\\n")) ]
-  for success in result._success:
-    body += [ "{color:green}SUCCESS:{color} %s" % (success.replace("\n", "\\n")) ]
+
+  for item in result._items:
+    body += [ "%s %s" % (jira_color(item.level), item.message.replace("\n", "\\n")) ]
+    for bullet in item.bullets:
+      body += [ "* %s" % bullet ]
+    if len(item.bullets) > 0:
+      body += [ "\\n" ]
+
   if "BUILD_URL" in os.environ:
     body += [ "" ]
     body += [ "Console output is available %s." % (jenkins_link_for_jira("here", "console")) ]
+
   body += [ "" ]
   body += [ "This message is automatically generated." ]
   return "\\n".join(body)
@@ -202,11 +215,11 @@ def git_apply(result, cmd, patch_file, strip, output_dir):
       output = fh.read()
   if rc == 0:
     if output:
-      result.success("Patch applied, but there has been warnings:\n{code}%s{code}\n" % (output))
+      result.warning("Patch applied, but there has been warnings:\n{code}%s{code}\n" % (output))
     else:
       result.success("Patch applied correctly")
   else:
-    result.fatal("failed to apply patch (exit code %d):\n{code}%s{code}\n" % (rc, output))
+    result.fatal("Failed to apply patch (exit code %d):\n{code}%s{code}\n" % (rc, output))
 
 def static_test(result, patch_file, output_dir):
   output_file = "%s/static-test.txt" % (output_dir)
@@ -221,7 +234,7 @@ def mvn_clean(result, output_dir):
   if rc == 0:
     result.success("Clean was successful")
   else:
-    result.fatal("failed to clean project (exit code %d, %s)" % (rc, jenkins_file_link_for_jira("report", "clean.txt")))
+    result.fatal("Failed to clean project (exit code %d, %s)" % (rc, jenkins_file_link_for_jira("report", "clean.txt")))
 
 def mvn_rat(result, output_dir):
   rc = execute("mvn apache-rat:check 1>%s/rat.txt 2>&1" % output_dir)
@@ -237,11 +250,9 @@ def mvn_rat(result, output_dir):
           if "!?????" in line:
             matcher = re.search("\!\?\?\?\?\? (.*)$", line)
             if matcher:
-              incorrect_files += [ matcher.groups()[0] ]
+              incorrect_files += [ "{{%s}}" % (matcher.groups()[0]) ]
         fd.close()
-    for incorrect_file in set(incorrect_files):
-      result.error("File {{%s}} have missing licence header" % (incorrect_file))
-    result.error("Failed to run license check (exit code %d, %s)" % (rc, jenkins_file_link_for_jira("report", "rat.txt")))
+    result.error("Failed to run license check (exit code %d, %s)" % (rc, jenkins_file_link_for_jira("report", "rat.txt")), set(incorrect_files))
 
 def mvn_install(result, output_dir):
   rc = execute("mvn install -DskipTests 1>%s/install.txt 2>&1" % output_dir)
@@ -287,7 +298,6 @@ def run_mvn_test(command, test_type, result, output_dir):
     archive_dir = os.path.join(output_dir, test_results_dir, test_type)
     if not os.path.exists(archive_dir):
       os.makedirs(archive_dir)
-    result.error("Some of %s tests failed (%s, executed %d tests)" % (test_type, jenkins_file_link_for_jira("report", test_file_name), executed_tests))
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
@@ -298,10 +308,9 @@ def run_mvn_test(command, test_type, result, output_dir):
           if "<failure" in line or "<error" in line:
             matcher = re.search("TEST\-(.*).xml$", file_name)
             if matcher:
-              failed_tests += [ matcher.groups()[0] ]
+               failed_tests += [ "Test {{%s}}" % (matcher.groups()[0]) ]
         fd.close()
-    for failed_test in set(failed_tests):
-      result.error("Failed %s test: {{%s}}" % (test_type, failed_test))
+    result.error("Some of %s tests failed (%s, executed %d tests)" % (test_type, jenkins_file_link_for_jira("report", test_file_name), executed_tests), set(failed_tests))
 
 def clean_folder(folder):
   for the_file in os.listdir(folder):
@@ -312,32 +321,42 @@ def clean_folder(folder):
       except Exception, e:
           print e
 
+# Keep track of actions that we did with their results
+class ResultItem(object):
+  FATAL = "FATAL"
+  ERROR = "ERROR"
+  WARNING = "WARNING"
+  INFO = "INFO"
+  SUCCESS = "SUCCESS"
+
+  def __init__(self, level, message, bullets=[]):
+    self.level = level
+    self.message = message
+    self.bullets = bullets
+
 class Result(object):
   def __init__(self):
-    self._error = []
-    self._info = []
-    self._success = []
-    self._fatal = None
+    self._items = []
+    self.overall = "+1"
     self.exit_handler = None
     self.attachment = "Not Found"
     self.start_time = datetime.datetime.now()
-  def error(self, msg):
-    self._error.append(msg)
-  def info(self, msg):
-    self._info.append(msg)
-  def success(self, msg):
-    self._success.append(msg)
-  def fatal(self, msg):
-    self._fatal = msg
+  def error(self, msg, bullets=[]):
+    self.overall = "-1"
+    self._items.append(ResultItem(ResultItem.ERROR, msg, bullets))
+  def info(self, msg, bullets=[]):
+    self._items.append(ResultItem(ResultItem.INFO, msg, bullets))
+  def success(self, msg, bullets=[]):
+    self._items.append(ResultItem(ResultItem.SUCCESS, msg, bullets))
+  def warning(self, msg, bullets=[]):
+    self._items.append(ResultItem(ResultItem.WARNING, msg, bullets))
+  def fatal(self, msg, bullets=[]):
+    self.overall = "-1"
+    self._items.append(ResultItem(ResultsIem.FATAL, msg, bullets))
     self.exit_handler()
     self.exit()
   def exit(self):
     git_cleanup()
-    if self._fatal or self._error:
-      if tmp_dir:
-        print "INFO: output is located %s" % (tmp_dir)
-    elif tmp_dir:
-      shutil.rmtree(tmp_dir)
     sys.exit(0)
 
 usage = "usage: %prog [options]"
@@ -398,15 +417,10 @@ def log_and_exit():
   # Write down comment generated for jira (won't be posted)
   write_file("%s/jira-comment.txt" % output_dir, jira_generate_comment(result, branch).replace("\\n", "\n"))
 
-  if result._fatal:
-    print "FATAL: %s" % (result._fatal)
-  for error in result._error:
-    print "ERROR: %s" % (error)
-  for info in result._info:
-    print "INFO: %s" % (info)
-  for success in result._success:
-    print "SUCCESS: %s" % (success)
-  result.exit()
+  for item in result._items:
+    print "%s: %s" % (item.level, item.message)
+    for bullet in item.bullets:
+      print "* %s" % bullet
 
 result.exit_handler = log_and_exit
 
