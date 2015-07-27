@@ -60,7 +60,6 @@ limitations under the License.
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-site-plugin</artifactId>
-            <version>3.3</version>
 
             <!-- Configure generating documentation alongside with package -->
             <executions>
