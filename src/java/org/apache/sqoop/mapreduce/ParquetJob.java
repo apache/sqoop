@@ -28,6 +28,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.security.token.delegation.DelegationTokenIdentifier;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.Token;
+import org.apache.sqoop.hive.HiveConfig;
 import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -38,7 +39,6 @@ import org.kitesdk.data.spi.SchemaValidationUtil;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * Helper class for setting up a Parquet MapReduce job.
@@ -47,7 +47,6 @@ public final class ParquetJob {
 
   public static final Log LOG = LogFactory.getLog(ParquetJob.class.getName());
 
-  public static final String HIVE_CONF_CLASS = "org.apache.hadoop.hive.conf.HiveConf";
   public static final String HIVE_METASTORE_CLIENT_CLASS = "org.apache.hadoop.hive.metastore.HiveMetaStoreClient";
   public static final String HIVE_METASTORE_SASL_ENABLED = "hive.metastore.sasl.enabled";
   // Purposefully choosing the same token alias as the one Oozie chooses.
@@ -90,12 +89,12 @@ public final class ParquetJob {
   public static void configureImportJob(JobConf conf, Schema schema,
       String uri, WriteMode writeMode) throws IOException {
     Dataset dataset;
-    Configuration hiveConf = getHiveConf(conf);
+    Configuration hiveConf = HiveConfig.getHiveConf(conf);
 
     // Add hive delegation token only if we don't already have one.
     if (uri.startsWith("dataset:hive") && isSecureMetastore(hiveConf)) {
       // Copy hive configs to job config
-      addHiveConfigs(hiveConf, conf);
+      HiveConfig.addHiveConfigs(hiveConf, conf);
 
       if (conf.getCredentials().getToken(new Text(HIVE_METASTORE_TOKEN_ALIAS)) == null) {
         addHiveDelegationToken(conf);
@@ -145,25 +144,6 @@ public final class ParquetJob {
   }
 
   /**
-   * Dynamically create hive configuration object.
-   * @param conf
-   * @return
-   */
-  private static Configuration getHiveConf(Configuration conf) {
-    try {
-      Class HiveConfClass = Class.forName(HIVE_CONF_CLASS);
-      return ((Configuration)(HiveConfClass.getConstructor(Configuration.class, Class.class)
-          .newInstance(conf, Configuration.class)));
-    } catch (ClassNotFoundException ex) {
-      LOG.error("Could not load " + HIVE_CONF_CLASS
-          + ". Make sure HIVE_CONF_DIR is set correctly.");
-    } catch (Exception ex) {
-      LOG.error("Could not instantiate HiveConf instance.", ex);
-    }
-    return null;
-  }
-
-  /**
    * Add hive delegation token to credentials store.
    * @param conf
    */
@@ -182,9 +162,9 @@ public final class ParquetJob {
     }
 
     try {
-      HiveConfClass = Class.forName(HIVE_CONF_CLASS);
+      HiveConfClass = Class.forName(HiveConfig.HIVE_CONF_CLASS);
     } catch (ClassNotFoundException ex) {
-      LOG.error("Could not load " + HIVE_CONF_CLASS
+      LOG.error("Could not load " + HiveConfig.HIVE_CONF_CLASS
           + " when adding hive delegation token."
           + " Make sure HIVE_CONF_DIR is set correctly.", ex);
       throw new RuntimeException("Couldn't fetch delegation token.", ex);
@@ -207,17 +187,6 @@ public final class ParquetJob {
     } catch (Exception ex) {
       LOG.error("Couldn't fetch delegation token.", ex);
       throw new RuntimeException("Couldn't fetch delegation token.", ex);
-    }
-  }
-
-  /**
-   * Add hive conf to configuration object without overriding already set properties.
-   * @param hiveConf
-   * @param conf
-   */
-  private static void addHiveConfigs(Configuration hiveConf, Configuration conf) {
-    for (Map.Entry<String, String> item : hiveConf) {
-      conf.setIfUnset(item.getKey(), item.getValue());
     }
   }
 }
