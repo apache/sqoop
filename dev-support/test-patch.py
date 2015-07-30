@@ -104,7 +104,7 @@ def jira_color(level):
   elif level == ResultItem.FATAL:
     return "{color:red}ERROR:{color}"
   elif level == ResultItem.WARNING:
-    return "{color:yellow}WARNING:{color}"
+    return "{color:orange}WARNING:{color}"
   else:
     return level
 
@@ -363,7 +363,9 @@ def cobertura_compare(result, output_dir, compare_url):
 
     report.write("Package %s: Line coverage %d (%d -> %d), Branch coverage %d (%d -> %d)\n" % (package, diffLine, compareLine, localLine, diffBranch, compareBranch, localBranch))
 
-    if diffLine < 0 or diffBranch < 0:
+    # Cobertura's percentage calculation doesn't seem to be deterministic - it can do +/- 1% even without change a single line. The goal here is to highlight
+    # significant troubles when the coverage is diminished substantially, so we're simply workarounding that by ignoring 1% of difference.
+    if diffLine < -1 or diffBranch < -1:
       lowers.append("Package {{%s}} has lower test coverage: Line coverage decreased by %d%% (from %d%% to %d%%), Branch coverage decreased by %d%% (from %d%% to %d%%)" % (package, abs(diffLine), compareLine, localLine, abs(diffBranch), compareBranch, localBranch))
 
   # Add to the JIRA summary report
