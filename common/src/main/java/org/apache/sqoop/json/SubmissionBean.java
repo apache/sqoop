@@ -44,7 +44,9 @@ import org.json.simple.JSONObject;
 public class SubmissionBean implements JsonBean {
 
   private static final String SUBMISSION = "submission";
+  @Deprecated
   private static final String JOB = "job";
+  private static final String JOB_ID = "job-id";
   private static final String CREATION_USER = "creation-user";
   private static final String CREATION_DATE = "creation-date";
   private static final String LAST_UPDATE_USER = "last-udpate-user";
@@ -103,6 +105,7 @@ public class SubmissionBean implements JsonBean {
     JSONObject object = new JSONObject();
 
     object.put(JOB, submission.getJobId());
+    object.put(JOB_ID, submission.getJobId());
     object.put(STATUS, submission.getStatus().name());
     object.put(PROGRESS, submission.getProgress());
 
@@ -173,7 +176,11 @@ public class SubmissionBean implements JsonBean {
   private MSubmission restoreSubmission(Object obj) {
     JSONObject object = (JSONObject) obj;
     MSubmission submission = new MSubmission();
-    submission.setJobId((Long) object.get(JOB));
+    Long jobId = (Long) object.get(JOB_ID);
+    if (jobId == null) {
+      jobId = (Long) object.get(JOB);
+    }
+    submission.setJobId(jobId);
     submission.setStatus(SubmissionStatus.valueOf((String) object.get(STATUS)));
     submission.setProgress((Double) object.get(PROGRESS));
 
