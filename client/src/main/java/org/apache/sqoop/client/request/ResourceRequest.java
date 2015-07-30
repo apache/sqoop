@@ -183,6 +183,13 @@ public class ResourceRequest {
     return doHttpRequest(url, HttpMethod.DELETE);
   }
 
+  private static class SimpleConnectionConfigurator implements ConnectionConfigurator {
+    @Override
+    public HttpURLConnection configure(HttpURLConnection conn) throws IOException {
+      return conn;
+    }
+  }
+
   public Token<?>[] addDelegationTokens(String strURL, String renewer,
                                         Credentials credentials) throws IOException {
     Token<?>[] tokens = null;
@@ -190,13 +197,7 @@ public class ResourceRequest {
     Token<?> token = credentials.getToken(dtService);
     if (token == null) {
       URL url = new URL(strURL);
-      DelegationTokenAuthenticatedURL authUrl =
-              new DelegationTokenAuthenticatedURL(new ConnectionConfigurator() {
-                @Override
-                public HttpURLConnection configure(HttpURLConnection conn) throws IOException {
-                  return conn;
-                }
-              });
+      DelegationTokenAuthenticatedURL authUrl = new DelegationTokenAuthenticatedURL(new SimpleConnectionConfigurator());
       try {
         token = authUrl.getDelegationToken(url, authToken, renewer);
         if (token != null) {
