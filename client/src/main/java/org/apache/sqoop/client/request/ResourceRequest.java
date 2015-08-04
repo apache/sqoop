@@ -42,12 +42,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Locale;
 
 /**
  * Represents the sqoop REST resource requests
  */
 public class ResourceRequest {
+  /**
+   * Charset used for Sqoop 2 protocol
+   */
+  private static final Charset CHARSET = Charset.forName("UTF-8");
+
   private static final Logger LOG = Logger.getLogger(ResourceRequest.class);
   private DelegationTokenAuthenticatedURL.Token authToken;
 
@@ -79,7 +85,7 @@ public class ResourceRequest {
       if (method.equalsIgnoreCase(HttpMethod.PUT) || method.equalsIgnoreCase(HttpMethod.POST)) {
         conn.setDoOutput(true);
         data = data == null ? "" : data;
-        conn.setRequestProperty("Content-Length", Integer.toString(data.getBytes().length));
+        conn.setRequestProperty("Content-Length", Integer.toString(data.getBytes(CHARSET).length));
 //        Send request
         wr = new DataOutputStream(conn.getOutputStream());
         wr.writeBytes(data);
@@ -92,7 +98,7 @@ public class ResourceRequest {
       int responseCode = conn.getResponseCode();
 
       if (responseCode == HttpURLConnection.HTTP_OK) {
-        reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), CHARSET));
         String line = reader.readLine();
         while (line != null) {
           result.append(line);
@@ -115,7 +121,7 @@ public class ResourceRequest {
           ThrowableBean ex = new ThrowableBean();
 
           result = new StringBuilder();
-          reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+          reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), CHARSET));
           String line = reader.readLine();
           while (line != null) {
             result.append(line);
@@ -129,7 +135,7 @@ public class ResourceRequest {
           throw new SqoopException(ClientError.CLIENT_0001, ex.getThrowable());
         } else {
           result = new StringBuilder();
-          reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+          reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), CHARSET));
           String line;
           while ((line = reader.readLine()) != null) {
             result.append(line);
