@@ -182,14 +182,6 @@ def json_get_version(json):
 
   return versions
 
-def git_cleanup():
-  rc = execute("git clean -d -f", False)
-  if rc != 0:
-    print "ERROR: git clean failed"
-  rc = execute("git reset --hard HEAD", False)
-  if rc != 0:
-    print "ERROR: git reset failed"
-
 def git_checkout(result, branch):
   if not branch:
     result.fatal("Branch wasn't specified nor was correctly guessed")
@@ -399,7 +391,6 @@ class Result(object):
     self.exit_handler()
     self.exit()
   def exit(self):
-    git_cleanup()
     sys.exit(0)
 
 usage = "usage: %prog [options]"
