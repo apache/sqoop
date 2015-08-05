@@ -87,8 +87,8 @@ limitations under the License.
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compile.source>1.6</maven.compile.source>
-    <maven.compile.target>1.6</maven.compile.target>
+    <maven.compile.source>1.7</maven.compile.source>
+    <maven.compile.target>1.7</maven.compile.target>
     <commons-cli.version>1.2</commons-cli.version>
     <commons-dbcp.version>1.4</commons-dbcp.version>
     <commons-lang.version>2.5</commons-lang.version>
