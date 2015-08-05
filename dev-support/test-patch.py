@@ -269,7 +269,6 @@ def run_mvn_test(command, test_type, result, output_dir):
   command += " -Pprecommit" # We need special test profile for precommit hook
   test_file_name = "test_%s.txt" % (test_type)
   test_output = "%s/%s" % (output_dir, test_file_name)
-  test_results_dir = "test-results"
 
   # Execute the test run
   rc = execute("mvn %s 1>%s 2>&1" % (command, test_output))
@@ -288,14 +287,10 @@ def run_mvn_test(command, test_type, result, output_dir):
   if rc == 0:
     result.success("All %s tests passed (executed %d tests)" % (test_type ,executed_tests) )
   else:
-    archive_dir = os.path.join(output_dir, test_results_dir, test_type)
-    if not os.path.exists(archive_dir):
-      os.makedirs(archive_dir)
     failed_tests = []
     for path in list(find_all_files(".")):
       file_name = os.path.basename(path)
-      if file_name.startswith("TEST-") and file_name.endswith(".xml") and test_results_dir not in path:
-        shutil.copy(path, archive_dir)
+      if file_name.startswith("TEST-") and file_name.endswith(".xml"):
         fd = open(path)
         for line in fd:
           if "<failure" in line or "<error" in line:
