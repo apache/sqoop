@@ -389,7 +389,9 @@ public class HiveImport {
     List<String> newArgs = new LinkedList<String>();
     newArgs.addAll(Arrays.asList(args));
 
-    if (System.getProperty("mapreduce.job.credentials.binary") != null) {
+    HiveConfig.addHiveConfigs(HiveConfig.getHiveConf(configuration), configuration);
+
+    if (configuration.getBoolean(HiveConfig.HIVE_SASL_ENABLED, false)) {
       newArgs.add("--hiveconf");
       newArgs.add("hive.metastore.sasl.enabled=true");
     }
