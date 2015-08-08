@@ -35,6 +35,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.accumulo.AccumuloConstants;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
+import org.apache.sqoop.util.SqoopJsonUtil;
 import org.apache.sqoop.util.password.CredentialProviderHelper;
 import org.apache.sqoop.validation.AbortOnFailureHandler;
 import org.apache.sqoop.validation.AbsoluteValidationThreshold;
@@ -90,6 +91,9 @@ public class SqoopOptions implements Cloneable {
       return getMessage();
     }
   }
+
+  @StoredAsProperty("customtool.options.jsonmap")
+  private Map<String, String> customToolOptions;
 
   // TODO(aaron): Adding something here? Add a setter and a getter.  Add a
   // default value in initDefaults() if you need one.  If this value needs to
@@ -613,6 +617,9 @@ public class SqoopOptions implements Cloneable {
           } else if (typ.isEnum()) {
             f.set(this, Enum.valueOf(typ,
                 props.getProperty(propName, f.get(this).toString())));
+          }  else if (typ.equals(Map.class)) {
+            f.set(this,
+                SqoopJsonUtil.getMapforJsonString(props.getProperty(propName)));
           } else {
             throw new RuntimeException("Could not retrieve property "
                 + propName + " for type: " + typ);
@@ -731,6 +738,11 @@ public class SqoopOptions implements Cloneable {
                 f.get(this) == null ? "null" : f.get(this).toString());
           } else if (typ.isEnum()) {
             putProperty(props, propName, f.get(this).toString());
+          } else if (typ.equals(Map.class)) {
+            putProperty(
+                props,
+                propName,
+                SqoopJsonUtil.getJsonStringforMap((Map) f.get(this)));
           } else {
             throw new RuntimeException("Could not set property "
                 + propName + " for type: " + typ);
@@ -2563,5 +2575,13 @@ public class SqoopOptions implements Cloneable {
 
   public void setHCatalogPartitionValues(String hpvs) {
     this.hCatalogPartitionValues = hpvs;
+  }
+
+  public Map<String, String> getCustomToolOptions() {
+    return customToolOptions;
+  }
+
+  public void setCustomToolOptions(Map<String, String> customToolOptions) {
+    this.customToolOptions = customToolOptions;
   }
 }
