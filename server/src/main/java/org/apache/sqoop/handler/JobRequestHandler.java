@@ -368,12 +368,14 @@ public class JobRequestHandler implements RequestHandler {
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "submit", "job", String.valueOf(jobId));
-    // TODO(SQOOP-1638): This should be outsourced somewhere more suitable than
-    // here
+    // TODO(SQOOP-1638): This should be outsourced somewhere more suitable than here
+    // Current approach is to point JobManager to use /v1/job/notification/$JOB_ID/status
+    // and depend on the behavior of status that for running jobs will go to the cluster
+    // and fetch the latest state. We don't have notification first class
     if (JobManager.getInstance().getNotificationBaseUrl() == null) {
       String url = ctx.getRequest().getRequestURL().toString();
       JobManager.getInstance().setNotificationBaseUrl(
-          url.split("v1")[0] + "/v1/job/status/notification/");
+          url.split("v1")[0] + "/v1/job/notification/");
     }
 
     MSubmission submission = JobManager.getInstance()

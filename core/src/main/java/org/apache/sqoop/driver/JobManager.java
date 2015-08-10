@@ -355,7 +355,7 @@ public class JobManager implements Reconfigurable {
     jobRequest.setDriverConfig(driverConfig);
     jobRequest.setJobName(job.getName());
     jobRequest.setJobId(job.getPersistenceId());
-    jobRequest.setNotificationUrl(notificationBaseUrl + jobId);
+    jobRequest.setNotificationUrl(notificationBaseUrl + jobId + "/status");
     jobRequest.setIntermediateDataFormat(fromConnector.getIntermediateDataFormat(), Direction.FROM);
     jobRequest.setIntermediateDataFormat(toConnector.getIntermediateDataFormat(), Direction.TO);
 
