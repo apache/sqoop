@@ -63,9 +63,9 @@ public class TestFromInitializer {
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIGURATION);
 
-    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+    String fullTableName = executor.encloseIdentifier(schemaName) + "." + executor.encloseIdentifier(tableName);
     if (!executor.existTable(tableName)) {
-      executor.executeUpdate("CREATE SCHEMA " + executor.delimitIdentifier(schemaName));
+      executor.executeUpdate("CREATE SCHEMA " + executor.encloseIdentifier(schemaName));
       executor.executeUpdate("CREATE TABLE "
           + fullTableName
           + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
@@ -78,7 +78,7 @@ public class TestFromInitializer {
       }
     }
 
-    fullTableName = executor.delimitIdentifier(schemalessTableName);
+    fullTableName = executor.encloseIdentifier(schemalessTableName);
     if (!executor.existTable(schemalessTableName)) {
       executor.executeUpdate("CREATE TABLE "
           + fullTableName
@@ -130,10 +130,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName)
-            + " WHERE ${CONDITIONS}",
-        "ICOL,DCOL,VCOL",
-        "ICOL",
+        "SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "\"ICOL\", \"DCOL\", \"VCOL\"",
+        "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
         String.valueOf(START+NUMBER_OF_ROWS-1));
@@ -159,9 +158,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
-        "ICOL,DCOL,VCOL",
-        "ICOL",
+        "SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "\"ICOL\", \"DCOL\", \"VCOL\"",
+        "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
         String.valueOf(START+NUMBER_OF_ROWS-1));
@@ -189,9 +188,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
-        "ICOL,DCOL,VCOL",
-        "ICOL",
+        "SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "\"ICOL\", \"DCOL\", \"VCOL\"",
+        "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(1),
         String.valueOf(START+NUMBER_OF_ROWS-1));
@@ -218,10 +217,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT ICOL,VCOL FROM " + executor.delimitIdentifier(schemalessTableName)
-            + " WHERE ${CONDITIONS}",
+        "SELECT ICOL,VCOL FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
         tableColumns,
-        "ICOL",
+        "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
         String.valueOf(START+NUMBER_OF_ROWS-1));
@@ -246,10 +244,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName)
-            + " WHERE ${CONDITIONS}",
-        "ICOL,DCOL,VCOL",
-        "DCOL",
+        "SELECT * FROM " + schemalessTableName  + " WHERE ${CONDITIONS}",
+        "\"ICOL\", \"DCOL\", \"VCOL\"",
+        "\"DCOL\"",
         String.valueOf(Types.DOUBLE),
         String.valueOf((double)START),
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
@@ -276,9 +273,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
-        "ICOL,DCOL,VCOL",
-        "ICOL",
+        "SELECT * FROM " + schemalessTableName + " WHERE ${CONDITIONS}",
+        "\"ICOL\", \"DCOL\", \"VCOL\"",
+        "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
         String.valueOf((START+NUMBER_OF_ROWS-1)));
@@ -306,9 +303,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.delimitIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
-        "ICOL,DCOL,VCOL",
-        "ICOL",
+        "SELECT * FROM " + schemalessTableName + " WHERE ${CONDITIONS}",
+        "\"ICOL\", \"DCOL\", \"VCOL\"",
+        "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(1),
         String.valueOf((START+NUMBER_OF_ROWS-1)));
@@ -335,11 +332,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL FROM "
-            + "(SELECT * FROM " + executor.delimitIdentifier(schemalessTableName)
-            + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS",
+        "SELECT ICOL,VCOL FROM (" + schemalessTableSql + ") SQOOP_SUBQUERY_ALIAS",
         tableColumns,
-        "DCOL",
+        "\"DCOL\"",
         String.valueOf(Types.DOUBLE),
         String.valueOf((double)START),
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
@@ -351,7 +346,7 @@ public class TestFromInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
-    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+    String fullTableName = executor.encloseIdentifiers(schemaName, tableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -366,10 +361,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + fullTableName
-            + " WHERE ${CONDITIONS}",
-        "ICOL,DCOL,VCOL",
-        "ICOL",
+        "SELECT * FROM " + fullTableName + " WHERE ${CONDITIONS}",
+        "\"ICOL\", \"DCOL\", \"VCOL\"",
+        "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
         String.valueOf(START+NUMBER_OF_ROWS-1));
@@ -381,7 +375,7 @@ public class TestFromInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
-    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+    String fullTableName = executor.encloseIdentifiers(schemaName, tableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -397,10 +391,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT ICOL,VCOL FROM " + fullTableName
-            + " WHERE ${CONDITIONS}",
+        "SELECT ICOL,VCOL FROM " + fullTableName + " WHERE ${CONDITIONS}",
         tableColumns,
-        "ICOL",
+        "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
         String.valueOf(START+NUMBER_OF_ROWS-1));
@@ -411,8 +404,6 @@ public class TestFromInitializer {
   public void testTableSqlWithSchema() throws Exception {
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
-
-    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -428,10 +419,9 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + fullTableName
-            + " WHERE ${CONDITIONS}",
-        "ICOL,DCOL,VCOL",
-        "DCOL",
+        tableSql,
+        "\"ICOL\", \"DCOL\", \"VCOL\"",
+        "\"DCOL\"",
         String.valueOf(Types.DOUBLE),
         String.valueOf((double)START),
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
@@ -442,6 +432,8 @@ public class TestFromInitializer {
   public void testGetSchemaForTable() throws Exception {
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
+
+    String fullTableName = executor.encloseIdentifiers(schemaName, tableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -456,7 +448,7 @@ public class TestFromInitializer {
     Initializer initializer = new GenericJdbcFromInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
     Schema schema = initializer.getSchema(initializerContext, linkConfig, jobConfig);
-    assertEquals(getSchema(jobConfig.fromJobConfig.schemaName + "." + tableName), schema);
+    assertEquals(getSchema(fullTableName), schema);
   }
 
   @Test
@@ -487,8 +479,6 @@ public class TestFromInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
-    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
-
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
     jobConfig.fromJobConfig.schemaName = schemaName;
@@ -504,32 +494,32 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL FROM "
-            + "(SELECT * FROM " + fullTableName
-            + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS",
+        "SELECT ICOL,VCOL FROM (" + tableSql + ") SQOOP_SUBQUERY_ALIAS",
         tableColumns,
-        "DCOL",
+        "\"DCOL\"",
         String.valueOf(Types.DOUBLE),
         String.valueOf((double)START),
         String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
   }
 
-  private void verifyResult(MutableContext context,
-      String dataSql, String fieldNames,
-      String partitionColumnName, String partitionColumnType,
-      String partitionMinValue, String partitionMaxValue) {
-    assertEquals(dataSql, context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL));
-    assertEquals(fieldNames, context.getString(
-        Constants.JOB_ETL_FIELD_NAMES));
+  /**
+   * Asserts expected content inside the generated context.
+   *
+   * @param context Context that we're validating against
+   * @param dataSql Expected SQL fragment
+   * @param fieldNames All detected field names, they need to be properly escaped
+   * @param partitionColumnName Partition column name, it needs to be properly escaped
+   * @param partitionColumnType Partition column type
+   * @param partitionMinValue Minimal value for partitioning
+   * @param partitionMaxValue Maximal value for partitioning
+   */
+  private void verifyResult(MutableContext context, String dataSql, String fieldNames, String partitionColumnName, String partitionColumnType, String partitionMinValue, String partitionMaxValue) {
+    assertEquals(context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL), dataSql);
+    assertEquals(context.getString(Constants.JOB_ETL_FIELD_NAMES), fieldNames);
 
-    assertEquals(partitionColumnName, context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME));
-    assertEquals(partitionColumnType, context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE));
-    assertEquals(partitionMinValue, context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE));
-    assertEquals(partitionMaxValue, context.getString(
-        GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE));
+    assertEquals(context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME), partitionColumnName);
+    assertEquals(context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE), partitionColumnType);
+    assertEquals(context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE), partitionMinValue);
+    assertEquals(context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE), partitionMaxValue);
   }
 }

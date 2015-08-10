@@ -17,15 +17,11 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
-import static org.testng.Assert.assertTrue;
-
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.Test;
 
@@ -174,7 +170,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     MConfigList configs = job.getFromJobConfig();
     configs.getStringInput("fromJobConfig.sql").setValue("SELECT " + provider.escapeColumnName("id")
         + " FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}");
-    configs.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
+    configs.getStringInput("fromJobConfig.partitionColumn").setValue("id");
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
 
     saveJob(job);
@@ -217,7 +213,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
         "SELECT " + provider.escapeColumnName("id") + " as " + provider.escapeColumnName("i") + ", "
             + provider.escapeColumnName("id") + " as " + provider.escapeColumnName("j")
             + " FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}");
-    configs.getStringInput("fromJobConfig.partitionColumn").setValue(partitionColumn);
+    configs.getStringInput("fromJobConfig.partitionColumn").setValue("id");
     configs.getStringInput("fromJobConfig.boundaryQuery").setValue(
         "SELECT MIN(" + partitionColumn + "), MAX(" + partitionColumn + ") FROM "
             + provider.escapeTableName(getTableName().getTableName()));

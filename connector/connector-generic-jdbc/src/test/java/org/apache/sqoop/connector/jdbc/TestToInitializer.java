@@ -61,13 +61,13 @@ public class TestToInitializer {
   public void setUp() {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIGURATION);
 
-    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+    String fullTableName = executor.encloseIdentifier(schemaName) + "." + executor.encloseIdentifier(tableName);
     if (!executor.existTable(tableName)) {
-      executor.executeUpdate("CREATE SCHEMA " + executor.delimitIdentifier(schemaName));
+      executor.executeUpdate("CREATE SCHEMA " + executor.encloseIdentifier(schemaName));
       executor.executeUpdate("CREATE TABLE " + fullTableName + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
     }
 
-    fullTableName = executor.delimitIdentifier(schemalessTableName);
+    fullTableName = executor.encloseIdentifier(schemalessTableName);
     if (!executor.existTable(schemalessTableName)) {
       executor.executeUpdate("CREATE TABLE " + fullTableName + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20))");
     }
@@ -84,7 +84,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    String fullTableName = executor.delimitIdentifier(schemalessTableName);
+    String fullTableName = executor.encloseIdentifier(schemalessTableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -106,7 +106,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    String fullTableName = executor.delimitIdentifier(schemalessTableName);
+    String fullTableName = executor.encloseIdentifier(schemalessTableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -140,7 +140,7 @@ public class TestToInitializer {
     Initializer initializer = new GenericJdbcToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
-    verifyResult(context, "INSERT INTO " + executor.delimitIdentifier(schemalessTableName) + " VALUES (?,?,?)");
+    verifyResult(context, schemalessTableSql);
   }
 
   @Test
@@ -149,7 +149,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+    String fullTableName = executor.encloseIdentifiers(schemaName, tableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -172,7 +172,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    String fullTableName = executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+    String fullTableName = executor.encloseIdentifiers(schemaName, tableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -208,7 +208,7 @@ public class TestToInitializer {
     Initializer initializer = new GenericJdbcToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
-    verifyResult(context, "INSERT INTO " + executor.delimitIdentifier(tableName) + " VALUES (?,?,?)");
+    verifyResult(context, tableSql);
   }
 
   private void verifyResult(MutableContext context, String dataSql) {
@@ -255,7 +255,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    String fullStageTableName = executor.delimitIdentifier(stageTableName);
+    String fullStageTableName = executor.encloseIdentifier(stageTableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -333,7 +333,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    String fullStageTableName = executor.delimitIdentifier(stageTableName);
+    String fullStageTableName = executor.encloseIdentifier(stageTableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -359,7 +359,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    String fullStageTableName = executor.delimitIdentifier(stageTableName);
+    String fullStageTableName = executor.encloseIdentifier(stageTableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;

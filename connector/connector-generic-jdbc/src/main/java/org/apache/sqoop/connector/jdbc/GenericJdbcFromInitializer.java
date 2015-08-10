@@ -70,11 +70,11 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
   public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
     executor = new GenericJdbcExecutor(linkConfig);
 
-    String schemaName = fromJobConfig.fromJobConfig.tableName;
-    if(schemaName == null) {
+    String schemaName;
+    if(fromJobConfig.fromJobConfig.tableName != null) {
+      schemaName = executor.encloseIdentifiers(fromJobConfig.fromJobConfig.schemaName, fromJobConfig.fromJobConfig.tableName);
+    } else {
       schemaName = "Query";
-    } else if(fromJobConfig.fromJobConfig.schemaName != null) {
-      schemaName = fromJobConfig.fromJobConfig.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -135,11 +135,11 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     String partitionColumnName = jobConf.fromJobConfig.partitionColumn;
     // If it's not specified, we can use primary key of given table (if it's table based import)
     if (StringUtils.isBlank(partitionColumnName) && tableImport) {
-        partitionColumnName = executor.getPrimaryKey(jobConf.fromJobConfig.tableName);
+        partitionColumnName = executor.getPrimaryKey(jobConf.fromJobConfig.schemaName, jobConf.fromJobConfig.tableName);
     }
     // If we don't have partition column name, we will error out
     if (partitionColumnName != null) {
-      context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, partitionColumnName);
+      context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, executor.encloseIdentifier(partitionColumnName));
     } else {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0005);
     }
@@ -148,13 +148,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     // From fragment for subsequent queries
     String fromFragment;
     if(tableImport) {
-      String tableName = jobConf.fromJobConfig.tableName;
-      String schemaName = jobConf.fromJobConfig.schemaName;
-
-      fromFragment = executor.delimitIdentifier(tableName);
-      if(schemaName != null) {
-        fromFragment = executor.delimitIdentifier(schemaName) + "." + fromFragment;
-      }
+      fromFragment = executor.encloseIdentifiers(jobConf.fromJobConfig.schemaName, jobConf.fromJobConfig.tableName);
     } else {
       sb.setLength(0);
       sb.append("(");
@@ -169,7 +163,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     if(incrementalImport) {
       sb.setLength(0);
       sb.append("SELECT ");
-      sb.append("MAX(").append(jobConf.incrementalRead.checkColumn).append(") ");
+      sb.append("MAX(").append(executor.encloseIdentifier(jobConf.incrementalRead.checkColumn)).append(") ");
       sb.append("FROM ");
       sb.append(fromFragment);
 
@@ -199,15 +193,15 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     if (minMaxQuery == null) {
       sb.setLength(0);
       sb.append("SELECT ");
-      sb.append("MIN(").append(partitionColumnName).append("), ");
-      sb.append("MAX(").append(partitionColumnName).append(") ");
+      sb.append("MIN(").append(executor.encloseIdentifier(partitionColumnName)).append("), ");
+      sb.append("MAX(").append(executor.encloseIdentifier(partitionColumnName)).append(") ");
       sb.append("FROM ").append(fromFragment).append(" ");
 
       if(incrementalImport) {
         sb.append("WHERE ");
-        sb.append(jobConf.incrementalRead.checkColumn).append(" > ?");
+        sb.append(executor.encloseIdentifier(jobConf.incrementalRead.checkColumn)).append(" > ?");
         sb.append(" AND ");
-        sb.append(jobConf.incrementalRead.checkColumn).append(" <= ?");
+        sb.append(executor.encloseIdentifier(jobConf.incrementalRead.checkColumn)).append(" <= ?");
       }
 
       minMaxQuery = sb.toString();
@@ -263,16 +257,12 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     String tableSql = fromJobConfig.fromJobConfig.sql;
     String tableColumns = fromJobConfig.fromJobConfig.columns;
 
-    if (tableName != null && tableSql != null) {
-      // when both fromTable name and fromTable sql are specified:
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0007);
+    // Assertion that should be true based on our validations
+    assert (tableName != null && tableSql == null) || (tableName == null && tableSql != null);
 
-    } else if (tableName != null) {
-      // when fromTable name is specified:
-
+    if (tableName != null) {
       // For databases that support schemas (IE: postgresql).
-      String fullTableName = (schemaName == null) ? executor.delimitIdentifier(tableName) : executor.delimitIdentifier(schemaName) + "." + executor.delimitIdentifier(tableName);
+      String fullTableName = executor.encloseIdentifiers(schemaName, tableName);
 
       if (tableColumns == null) {
         StringBuilder builder = new StringBuilder();
@@ -282,10 +272,8 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
         builder.append(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
         dataSql = builder.toString();
 
-        String[] queryColumns = executor.getQueryColumns(dataSql.replace(
-            GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));
-        fieldNames = StringUtils.join(queryColumns, ',');
-
+        String[] queryColumns = executor.getQueryColumns(dataSql.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));
+        fieldNames = executor.columnList(queryColumns);
       } else {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT ");
@@ -298,29 +286,18 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
         fieldNames = tableColumns;
       }
-    } else if (tableSql != null) {
-      // when fromTable sql is specified:
-
+    } else {
       assert tableSql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
 
       if (tableColumns == null) {
         dataSql = tableSql;
 
-        String[] queryColumns = executor.getQueryColumns(dataSql.replace(
-            GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));
-        fieldNames = StringUtils.join(queryColumns, ',');
-
+        String[] queryColumns = executor.getQueryColumns(dataSql.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));
+        fieldNames = executor.columnList(queryColumns);
       } else {
-        String[] columns = StringUtils.split(tableColumns, ',');
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT ");
-        builder.append(executor.qualify(
-            columns[0], GenericJdbcConnectorConstants.SUBQUERY_ALIAS));
-        for (int i = 1; i < columns.length; i++) {
-          builder.append(",");
-          builder.append(executor.qualify(
-              columns[i], GenericJdbcConnectorConstants.SUBQUERY_ALIAS));
-        }
+        builder.append(tableColumns);
         builder.append(" FROM ");
         builder.append("(");
         builder.append(tableSql);
@@ -330,10 +307,6 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
         fieldNames = tableColumns;
       }
-    } else {
-      // when neither are specified:
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0008);
     }
 
     LOG.info("Using dataSql: " + dataSql);

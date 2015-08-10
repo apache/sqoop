@@ -18,46 +18,60 @@
 package org.apache.sqoop.connector.jdbc;
 
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.LinkConfig;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class GenericJdbcExecutorTest {
   private final String table;
   private final String emptyTable;
-  private final GenericJdbcExecutor executor;
+  private final String schema;
+  private GenericJdbcExecutor executor;
 
-  private static final int START = -50;
-  private static final int NUMBER_OF_ROWS = 974;
+  private static final int START = -10;
+  private static final int NUMBER_OF_ROWS = 20;
 
   public GenericJdbcExecutorTest() {
     table = getClass().getSimpleName().toUpperCase();
     emptyTable = table + "_EMPTY";
-    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIGURATION);
+    schema = table + "_SCHEMA";
   }
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
-    if(executor.existTable(emptyTable)) {
-      executor.executeUpdate("DROP TABLE " + emptyTable);
-    }
-    executor.executeUpdate("CREATE TABLE "
-      + emptyTable + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
-
-    if(executor.existTable(table)) {
-      executor.executeUpdate("DROP TABLE " + table);
-    }
-    executor.executeUpdate("CREATE TABLE "
-      + table + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
+    executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIGURATION);
+    executor.executeUpdate("CREATE SCHEMA " + executor.encloseIdentifier(schema));
+    executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifier(emptyTable )+ "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
+    executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifier(table) + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
+    executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifiers(schema, table) + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
 
     for (int i = 0; i < NUMBER_OF_ROWS; i++) {
       int value = START + i;
-      String sql = "INSERT INTO " + table
-        + " VALUES(" + value + ", '" + value + "')";
-      executor.executeUpdate(sql);
+      executor.executeUpdate("INSERT INTO " + executor.encloseIdentifier(table) + " VALUES(" + value + ", '" + value + "')");
+      executor.executeUpdate("INSERT INTO " + executor.encloseIdentifiers(schema, table) + " VALUES(" + value + ", '" + value + "')");
+    }
+  }
+
+  @AfterMethod
+  public void tearDown() throws SQLException {
+    executor.close();
+    try {
+      DriverManager.getConnection(GenericJdbcTestConstants.URL_DROP);
+    } catch(SQLException e) {
+      // Code 8006 means that the database has been successfully drooped
+      if(e.getErrorCode() != 45000 && e.getNextException().getErrorCode() == 8006) {
+        throw e;
+      }
+
     }
   }
 
@@ -68,6 +82,44 @@ public class GenericJdbcExecutorTest {
     link.linkConfig.connectionString = "jdbc:awesome:";
 
     new GenericJdbcExecutor(link);
+  }
+
+  @Test
+  public void testGetPrimaryKey() {
+    assertNull(executor.getPrimaryKey("non-existing-table"));
+    assertNull(executor.getPrimaryKey("non-existing-schema", "non-existing-table"));
+    assertNull(executor.getPrimaryKey("non-existing-catalog", "non-existing-schema", "non-existing-table"));
+
+    assertEquals(executor.getPrimaryKey(table), "ICOL");
+    assertEquals(executor.getPrimaryKey(schema, table), "ICOL");
+  }
+
+  @Test
+  public void testExistsTable() {
+    assertFalse(executor.existTable("non-existing-table"));
+    assertFalse(executor.existTable("non-existing-schema", "non-existing-table"));
+    assertFalse(executor.existTable("non-existing-catalog", "non-existing-schema", "non-existing-table"));
+
+    assertTrue(executor.existTable(table));
+    assertTrue(executor.existTable(schema, table));
+  }
+
+  @Test
+  public void testEncloseIdentifier() {
+    assertEquals(executor.encloseIdentifier("a"), "\"a\"");
+  }
+
+  @Test
+  public void testEncloseIdentifiers() {
+    assertEquals(executor.encloseIdentifiers("a"), "\"a\"");
+    assertEquals(executor.encloseIdentifiers(null, "a"), "\"a\"");
+    assertEquals(executor.encloseIdentifiers("a", "b"), "\"a\".\"b\"");
+  }
+
+  @Test
+  public void testColumnList() {
+    assertEquals(executor.columnList("a"), "\"a\"");
+    assertEquals(executor.columnList("a", "b"), "\"a\", \"b\"");
   }
 
   @Test

@@ -95,7 +95,7 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     // Set the rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
     MConfigList fromConfig = job.getFromJobConfig();
-    fromConfig.getStringInput("incrementalRead.checkColumn").setValue(provider.escapeColumnName(checkColumn));
+    fromConfig.getStringInput("incrementalRead.checkColumn").setValue(checkColumn);
     fromConfig.getStringInput("incrementalRead.lastValue").setValue(lastValue);
 
     // Fill hdfs "TO" config
@@ -149,8 +149,8 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     // Set the rdbms "FROM" config
     MConfigList fromConfig = job.getFromJobConfig();
     fromConfig.getStringInput("fromJobConfig.sql").setValue(query);
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName("id"));
-    fromConfig.getStringInput("incrementalRead.checkColumn").setValue(provider.escapeColumnName(checkColumn));
+    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue("id");
+    fromConfig.getStringInput("incrementalRead.checkColumn").setValue(checkColumn);
     fromConfig.getStringInput("incrementalRead.lastValue").setValue(lastValue);
 
     // Fill hdfs "TO" config

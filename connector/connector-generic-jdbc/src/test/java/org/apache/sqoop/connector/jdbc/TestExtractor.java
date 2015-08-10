@@ -63,12 +63,12 @@ public class TestExtractor {
 
     if (!executor.existTable(tableName)) {
       executor.executeUpdate("CREATE TABLE "
-          + executor.delimitIdentifier(tableName)
+          + executor.encloseIdentifier(tableName)
           + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20), DATECOL DATE)");
 
       for (int i = 0; i < NUMBER_OF_ROWS; i++) {
         int value = START + i;
-        String sql = "INSERT INTO " + executor.delimitIdentifier(tableName)
+        String sql = "INSERT INTO " + executor.encloseIdentifier(tableName)
             + " VALUES(" + value + ", " + value + ", '" + value + "', '2004-10-19')";
         executor.executeUpdate(sql);
       }
@@ -93,7 +93,7 @@ public class TestExtractor {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL,
-        "SELECT * FROM " + executor.delimitIdentifier(tableName) + " WHERE ${CONDITIONS}");
+        "SELECT * FROM " + executor.encloseIdentifier(tableName) + " WHERE ${CONDITIONS}");
 
     GenericJdbcPartition partition;
 
@@ -133,7 +133,7 @@ public class TestExtractor {
 
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL,
         "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL,SQOOP_SUBQUERY_ALIAS.DATECOL FROM " + "(SELECT * FROM "
-            + executor.delimitIdentifier(tableName) + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS");
+            + executor.encloseIdentifier(tableName) + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS");
 
     GenericJdbcPartition partition;
 
@@ -174,7 +174,7 @@ public class TestExtractor {
     context.setString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL,
         "SELECT SQOOP_SUBQUERY_ALIAS.ICOL,SQOOP_SUBQUERY_ALIAS.VCOL FROM " + "(SELECT * FROM "
-            + executor.delimitIdentifier(tableName) + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS");
+            + executor.encloseIdentifier(tableName) + " WHERE ${CONDITIONS}) SQOOP_SUBQUERY_ALIAS");
 
     GenericJdbcPartition partition = new GenericJdbcPartition();
 
@@ -192,12 +192,12 @@ public class TestExtractor {
   public void testNullValueExtracted() throws Exception {
 
     if (!executor.existTable(nullDataTableName)) {
-      executor.executeUpdate("CREATE TABLE " + executor.delimitIdentifier(nullDataTableName)
+      executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifier(nullDataTableName)
           + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20), DATECOL DATE)");
 
       for (int i = 0; i < NUMBER_OF_ROWS; i++) {
         int value = i;
-        String sql = "INSERT INTO " + executor.delimitIdentifier(nullDataTableName) + " VALUES(" + value + ",null,null,null)";
+        String sql = "INSERT INTO " + executor.encloseIdentifier(nullDataTableName) + " VALUES(" + value + ",null,null,null)";
         executor.executeUpdate(sql);
       }
     }
@@ -210,7 +210,7 @@ public class TestExtractor {
 
     FromJobConfiguration jobConfig = new FromJobConfiguration();
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL,
-        "SELECT * FROM " + executor.delimitIdentifier(nullDataTableName) + " WHERE ${CONDITIONS}");
+        "SELECT * FROM " + executor.encloseIdentifier(nullDataTableName) + " WHERE ${CONDITIONS}");
 
     Extractor extractor = new GenericJdbcExtractor();
     DummyNullDataWriter writer = new DummyNullDataWriter();

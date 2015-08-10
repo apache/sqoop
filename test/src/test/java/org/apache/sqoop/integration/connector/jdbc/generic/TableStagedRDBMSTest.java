@@ -65,7 +65,7 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
     // fill rdbms "TO" config here
     fillRdbmsToConfig(job);
     MConfigList configs = job.getToJobConfig();
-    configs.getStringInput("toJobConfig.stageTableName").setValue(provider.escapeTableName(stageTableName.getTableName()));
+    configs.getStringInput("toJobConfig.stageTableName").setValue(stageTableName.getTableName());
 
     // driver config
     MConfigList driverConfig = job.getDriverConfig();

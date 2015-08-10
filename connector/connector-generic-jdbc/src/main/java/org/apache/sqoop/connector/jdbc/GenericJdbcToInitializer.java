@@ -63,15 +63,10 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
   public Schema getSchema(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     executor = new GenericJdbcExecutor(linkConfig);
 
-    String schemaName = toJobConfig.toJobConfig.tableName;
-
+    String schemaName = executor.encloseIdentifiers(toJobConfig.toJobConfig.schemaName, toJobConfig.toJobConfig.tableName);
     if (schemaName == null) {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0019,
           "Table name extraction not supported yet.");
-    }
-
-    if(toJobConfig.toJobConfig.schemaName != null) {
-      schemaName = toJobConfig.toJobConfig.schemaName + "." + schemaName;
     }
 
     Schema schema = new Schema(schemaName);
@@ -147,10 +142,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
 
       // For databases that support schemas (IE: postgresql).
       final String tableInUse = stageEnabled ? stageTableName : tableName;
-      String fullTableName = (schemaName == null) ?
-        executor.delimitIdentifier(tableInUse) :
-        executor.delimitIdentifier(schemaName) +
-          "." + executor.delimitIdentifier(tableInUse);
+      String fullTableName = executor.encloseIdentifiers(schemaName, tableInUse);
 
       if (tableColumns == null) {
         String[] columns = executor.getQueryColumns("SELECT * FROM "

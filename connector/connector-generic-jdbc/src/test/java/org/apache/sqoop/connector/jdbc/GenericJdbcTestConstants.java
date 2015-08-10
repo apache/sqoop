@@ -32,6 +32,11 @@ public class GenericJdbcTestConstants {
   public static final String URL = "jdbc:derby:memory:TESTDB;create=true";
 
   /**
+   * URL to drop the in-memory database
+   */
+  public static final String URL_DROP = "jdbc:derby:memory:TESTDB;drop=true";
+
+  /**
    * Test link configuration
    */
   public static final LinkConfiguration LINK_CONFIGURATION = new LinkConfiguration();

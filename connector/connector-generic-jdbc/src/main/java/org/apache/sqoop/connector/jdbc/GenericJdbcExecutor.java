@@ -17,9 +17,9 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.LinkConfig;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.error.code.GenericJdbcConnectorError;
 import org.apache.sqoop.schema.Schema;
@@ -38,6 +38,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -112,6 +114,11 @@ public class GenericJdbcExecutor {
       logSQLException(e);
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0001, e);
     }
+
+    // Fill in defaults if they were not pre-entered by user
+    if(link.dialect.identifierEnclose == null) {
+      link.dialect.identifierEnclose = "\"";
+    }
   }
 
   public ResultSet executeQuery(String sql) {
@@ -144,14 +151,69 @@ public class GenericJdbcExecutor {
     }
   }
 
+  /**
+   *  Enclose given identifier based on the configuration from user.
+   *
+   * @param identifier Identifier to enclose
+   * @return Enclosed variant
+   */
+  public String encloseIdentifier(String identifier) {
+    assert identifier != null;
+    return link.dialect.identifierEnclose + identifier + link.dialect.identifierEnclose;
+  }
+
+  /**
+   * Enclose multiple identifiers and join them together to one string.
+   *
+   * Used to convert (schema, table) to string "schema"."table" needed for SQL queries.
+   *
+   * @param identifiers  Identifiers to enclose
+   * @return Enclose identifiers joined with "."
+   */
+  public String encloseIdentifiers(String ...identifiers) {
+    assert identifiers != null;
+
+    List<String> enclosedIdentifiers = new LinkedList<String>();
+    for(String identifier: identifiers) {
+      if(identifier != null) {
+        enclosedIdentifiers.add(encloseIdentifier(identifier));
+      }
+    }
+
+    return StringUtils.join(enclosedIdentifiers, ".");
+  }
+
+  /**
+   * Create column list fragment for SELECT SQL.
+   *
+   * For example for (id, text, date), will automatically escape the column
+   * names and return one string:
+   *   "id", "text", "date"
+   *
+   * This method won't work correctly if the column name contains an expression
+   * or anything else beyond just a column name.
+   *
+   * @param columnNames Column names to escape and join.
+   * @return
+   */
+  public String columnList(String ...columnNames) {
+    assert columnNames != null;
+
+    List<String> escapedColumns = new LinkedList<String>();
+    for(String column : columnNames) {
+      escapedColumns.add(encloseIdentifier(column));
+    }
+
+    return StringUtils.join(escapedColumns, ", ");
+  }
+
   public void deleteTableData(String tableName) {
     LOG.info("Deleting all the rows from: " + tableName);
-    executeUpdate("DELETE FROM " + tableName);
+    executeUpdate("DELETE FROM " + encloseIdentifier(tableName));
   }
 
   public void migrateData(String fromTable, String toTable) {
-    String insertQuery = "INSERT INTO " + toTable +
-      " SELECT * FROM " + fromTable;
+    String insertQuery = "INSERT INTO " + encloseIdentifier(toTable) + " SELECT * FROM " + encloseIdentifier(fromTable);
     Statement stmt = null;
     Boolean oldAutoCommit = null;
     try {
@@ -196,7 +258,7 @@ public class GenericJdbcExecutor {
   }
 
   public long getTableRowCount(String tableName) {
-    ResultSet resultSet = executeQuery("SELECT COUNT(1) FROM " + tableName);
+    ResultSet resultSet = executeQuery("SELECT COUNT(1) FROM " + encloseIdentifier(tableName));
     try {
       resultSet.next();
       return resultSet.getLong(1);
@@ -295,11 +357,26 @@ public class GenericJdbcExecutor {
     }
   }
 
-  public String getPrimaryKey(String table) {
+  /**
+   * Return primary key for given table.
+   *
+   * @param identifiers Identifiers that are used to build the table's name. Following
+   *                    variants are accepted:
+   *                    * (catalog, schema, table)
+   *                    * (schema, table)
+   *                    * (table)
+   *                    Return value of any combination is "undefined".
+   * @return Primary key's name
+   */
+  public String getPrimaryKey(String ...identifiers) {
+    int index = 0;
+    String catalog = identifiers.length >= 3 ? identifiers[index++] : null;
+    String schema = identifiers.length >= 2 ? identifiers[index++] : null;
+    String table = identifiers[index];
+
     try {
-      String[] splitNames = dequalify(table);
       DatabaseMetaData dbmd = connection.getMetaData();
-      ResultSet rs = dbmd.getPrimaryKeys(null, splitNames[0], splitNames[1]);
+      ResultSet rs = dbmd.getPrimaryKeys(catalog, schema, table);
 
       if (rs != null && rs.next()) {
         return rs.getString("COLUMN_NAME");
@@ -335,12 +412,26 @@ public class GenericJdbcExecutor {
     }
   }
 
-  public boolean existTable(String table) {
-    try {
-      String[] splitNames = dequalify(table);
+  /**
+   * Verifies existence of table in the database.
+   *
+   * @param identifiers Identifiers that are used to build the table's name. Following
+   *                    variants are accepted:
+   *                    * (catalog, schema, table)
+   *                    * (schema, table)
+   *                    * (table)
+   *                    Return value of any combination is "undefined".
+   * @return True if given table exists
+   */
+  public boolean existTable(String ...identifiers) {
+    int index = 0;
+    String catalog = identifiers.length >= 3 ? identifiers[index++] : null;
+    String schema = identifiers.length >= 2 ? identifiers[index++] : null;
+    String table = identifiers[index];
 
+    try {
       DatabaseMetaData dbmd = connection.getMetaData();
-      ResultSet rs = dbmd.getTables(null, splitNames[0], splitNames[1], null);
+      ResultSet rs = dbmd.getTables(catalog, schema, table, null);
 
       if (rs.next()) {
         return true;
@@ -352,36 +443,6 @@ public class GenericJdbcExecutor {
       logSQLException(e);
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0003, e);
     }
-  }
-
-  /*
-   * If not qualified already, the name will be added with the qualifier.
-   * If qualified already, old qualifier will be replaced.
-   */
-  public String qualify(String name, String qualifier) {
-    String[] splits = dequalify(name);
-    return qualifier + "." + splits[1];
-  }
-
-  /*
-   * Split the name into a qualifier (element 0) and a base (element 1).
-   */
-  public String[] dequalify(String name) {
-    String qualifier;
-    String base;
-    int dot = name.indexOf(".");
-    if (dot != -1) {
-      qualifier = name.substring(0, dot);
-      base = name.substring(dot + 1);
-    } else {
-      qualifier = null;
-      base = name;
-    }
-    return new String[] {qualifier, base};
-  }
-
-  public String delimitIdentifier(String name) {
-    return name;
   }
 
   public void close() {

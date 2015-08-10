@@ -72,8 +72,7 @@ public class TestLoader {
     executor = new GenericJdbcExecutor(GenericJdbcTestConstants.LINK_CONFIGURATION);
 
     if (!executor.existTable(tableName)) {
-      executor.executeUpdate("CREATE TABLE "
-          + executor.delimitIdentifier(tableName)
+      executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifier(tableName)
           + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20), DATECOL DATE, DATETIMECOL TIMESTAMP, TIMECOL TIME)");
     } else {
       executor.deleteTableData(tableName);
@@ -98,7 +97,7 @@ public class TestLoader {
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL,
-        "INSERT INTO " + executor.delimitIdentifier(tableName) + " VALUES (?,?,?,?,?,?)");
+        "INSERT INTO " + executor.encloseIdentifier(tableName) + " VALUES (?,?,?,?,?,?)");
 
 
     Loader loader = new GenericJdbcLoader();
@@ -112,7 +111,7 @@ public class TestLoader {
 
     int index = START;
     ResultSet rs = executor.executeQuery("SELECT * FROM "
-        + executor.delimitIdentifier(tableName) + " ORDER BY ICOL");
+        + executor.encloseIdentifier(tableName) + " ORDER BY ICOL");
     while (rs.next()) {
       assertEquals(index, rs.getObject(1));
       assertEquals((double) index, rs.getObject(2));

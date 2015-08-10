@@ -17,21 +17,17 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Config;
+import org.apache.sqoop.model.ConfigClass;
+import org.apache.sqoop.model.Input;
 
 /**
- *
+ * Enables user to configure various aspects of the way the JDBC Connector generates
+ * SQL queries.
  */
-@ConfigurationClass
-public class LinkConfiguration {
-
-  @Config public LinkConfig linkConfig;
-
-  @Config public SqlDialect dialect;
-
-  public LinkConfiguration() {
-    linkConfig = new LinkConfig();
-    dialect = new SqlDialect();
-  }
+@ConfigClass
+public class SqlDialect {
+  /**
+   * Character(s) that we should use to escape SQL identifiers (tables, column names, ...)
+   */
+  @Input(size = 5)  public String identifierEnclose;
 }

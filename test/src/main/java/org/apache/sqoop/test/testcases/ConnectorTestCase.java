@@ -132,13 +132,13 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
 
   protected void fillRdbmsFromConfig(MJob job, String partitionColumn) {
     MConfigList fromConfig = job.getFromJobConfig();
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
+    fromConfig.getStringInput("fromJobConfig.tableName").setValue(getTableName().getTableName());
+    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(partitionColumn);
   }
 
   protected void fillRdbmsToConfig(MJob job) {
     MConfigList toConfig = job.getToJobConfig();
-    toConfig.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
+    toConfig.getStringInput("toJobConfig.tableName").setValue(getTableName().getTableName());
   }
 
   protected void fillHdfsLink(MLink link) {
