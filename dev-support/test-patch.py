@@ -219,7 +219,7 @@ def static_test(result, patch_file, output_dir):
   if rc == 0:
     result.success("Patch add/modify test case")
   else:
-    result.error("Patch does not add/modifny any test case")
+    result.error("Patch does not add/modify any test case")
 
 def mvn_clean(result, output_dir):
   rc = execute("mvn clean 1>%s/clean.txt 2>&1" % output_dir)
