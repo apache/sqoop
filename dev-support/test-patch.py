@@ -27,6 +27,7 @@ import sys, os, re, urllib2, base64, subprocess, tempfile, shutil
 import json
 import datetime
 from optparse import OptionParser
+import xml.etree.ElementTree as ET
 
 tmp_dir = None
 BASE_JIRA_URL = 'https://issues.apache.org/jira'
@@ -260,7 +261,7 @@ def find_all_files(top, fileRegExp=".*", dirRegExp=".*"):
             yield os.path.join(root, f)
 
 def mvn_test(result, output_dir):
-  run_mvn_test("cobertura:cobertura", "unit", result, output_dir)
+  run_mvn_test("clean test site", "unit", result, output_dir) # Will run cobertura and findbugs as well
 
 def mvn_integration(result, output_dir):
   run_mvn_test("integration-test -pl test", "integration", result, output_dir)
@@ -364,6 +365,55 @@ def cobertura_compare(result, output_dir, compare_url):
   # Clean up
   report.close()
 
+def findbugs_get_bugs(fd):
+  root = ET.parse(fd).getroot()
+  bugs = {}
+  for file in root.findall("file"):
+    classname = file.attrib["classname"]
+    errors = len(list(file))
+    bugs[classname] = errors
+  fd.close()
+  return bugs
+
+def findbugs_compare(result, output_dir, compare_url):
+  # Detailed report file
+  report = open("%s/%s" % (output_dir, "findbugs_report.txt"), "w+")
+  report.write("Findbugs compare report against %s\n\n" % compare_url)
+
+  # Lines to be added to summary on JIRA
+  summary = []
+
+  # For each report that exists locally
+  for path in list(find_all_files(".", "^findbugs\.xml$")):
+    package = path.replace("/target/findbugs.xml", "").replace("./", "")
+    local = findbugs_get_bugs(open(path))
+    remote = findbugs_get_bugs(urllib2.urlopen("%s%s" % (compare_url, path)))
+    report.write("Processing package %s:\n" % (package))
+
+    # Identify the differences for each class
+    for classname, errors in local.iteritems():
+      report.write("* Class %s has %s errors.\n" % (classname, errors));
+      if classname in remote:
+        # This particular class is also known to our compare class
+        remoteErrors = remote[classname]
+        if(int(errors) > int(remoteErrors)):
+          summary.append("Package {{%s}}: Class {{%s}} increased number of findbugs warnings to %s (from %s)" % (package, classname, errors, remoteErrors))
+      else:
+        # This classes errors are completely new to us
+        summary.append("Package {{%s}}: Class {{%s}} introduced %s completely new findbugs warnings." % (package, classname, errors))
+
+    # Spacing between each package
+    report.write("\n")
+
+  # Add to JIRA summary
+  if len(summary) == 0:
+    result.success("No new findbugs warnings (%s)" % jenkins_file_link_for_jira("report", "findbugs_report.txt"))
+  else:
+    result.warning("New findbugs warnings (%s)" % jenkins_file_link_for_jira("report", "findbugs_report.txt"), summary)
+
+  # Finish detailed report
+  report.close()
+
 class Result(object):
   def __init__(self):
     self._items = []
@@ -413,7 +463,9 @@ parser.add_option("--patch-command", dest="patch_cmd", default="git apply",
 parser.add_option("-p", "--strip", dest="strip", default="1",
                   help="Remove <n> leading slashes from diff paths", metavar="N")
 parser.add_option("--cobertura", dest="cobertura",
-                  help="HTTP URL with past cobertura results that we should compare")
+                  help="HTTP URL with past cobertura results that we should compare against")
+parser.add_option("--findbugs", dest="findbugs",
+                  help="HTTP URL with past findbugs results that we should compare against")
 
 (options, args) = parser.parse_args()
 if not (options.defect or options.filename):
@@ -521,9 +573,12 @@ mvn_install(result, output_dir)
 # Unit tests are conditional
 if run_tests:
   mvn_test(result, output_dir)
-  # And alternatively also run cobertura report
+  # Cobertura report is conditional
   if options.cobertura:
     cobertura_compare(result, output_dir, options.cobertura)
+  # Findbugs report is also conditional
+  if options.findbugs:
+    findbugs_compare(result, output_dir, options.findbugs)
 else:
   result.info("Unit tests were skipped, please add --run-tests")
 # Integration tests are conditional
