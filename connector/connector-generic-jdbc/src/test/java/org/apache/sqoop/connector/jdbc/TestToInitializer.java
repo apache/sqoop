@@ -190,27 +190,6 @@ public class TestToInitializer {
     verifyResult(context, "INSERT INTO " + fullTableName + " (" + tableColumns + ") VALUES (?,?)");
   }
 
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testTableSqlWithSchema() throws Exception {
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-
-    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
-    jobConfig.toJobConfig.schemaName = schemaName;
-    jobConfig.toJobConfig.sql = tableSql;
-
-    MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
-
-    @SuppressWarnings("rawtypes")
-    Initializer initializer = new GenericJdbcToInitializer();
-    initializer.initialize(initializerContext, linkConfig, jobConfig);
-
-    verifyResult(context, tableSql);
-  }
-
   private void verifyResult(MutableContext context, String dataSql) {
     assertEquals(dataSql, context.getString(
         GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL));
