@@ -38,9 +38,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.AbstractMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Database executor that is based on top of JDBC spec.
@@ -366,24 +369,63 @@ public class GenericJdbcExecutor {
    *                    * (schema, table)
    *                    * (table)
    *                    Return value of any combination is "undefined".
-   * @return Primary key's name
+   * @return All columns that are consisting of tables primary key (in order)
    */
-  public String getPrimaryKey(String ...identifiers) {
+  public String[] getPrimaryKey(String ...identifiers) {
     int index = 0;
     String catalog = identifiers.length >= 3 ? identifiers[index++] : null;
     String schema = identifiers.length >= 2 ? identifiers[index++] : null;
     String table = identifiers[index];
 
+    /* Using the getPrimaryKeys call have few challenges that we're protecting ourselves against here:
+     *
+     * 1) Call to getPrimaryKeys() returns columns ordered by COLUMN_NAME and not by KEY_SEQ. Therefore
+     * we have to manually re-order them in order that make sense to us (e.g. by KEY_SEQ).
+     *
+     * 2) If we run the search with catalog and schema arguments set to NULL (e.g. we're searching only
+     * by table name), we'll get all tables with given name. This is a problem in case that users will have
+     * the same table name in multiple schemas (or catalogs). As we don't want users to force remembering
+     * what is the default catalog and schema name for their tables, we've chosen more defensive approach -
+     * we'll search only by table name and detect if we found two different tables, only in this case we'll
+     * error out requesting user to specify which schema we need to use.
+     */
+    List<AbstractMap.SimpleEntry<String, Short>> primaryKeyColumns = new LinkedList<>();
+    Set<String> catalogNames = new HashSet<>();
+    Set<String> schemaNames = new HashSet<>();
+
     try {
-      DatabaseMetaData dbmd = connection.getMetaData();
-      ResultSet rs = dbmd.getPrimaryKeys(catalog, schema, table);
+      ResultSet rs = connection.getMetaData().getPrimaryKeys(catalog, schema, table);
+      assert rs != null;
 
-      if (rs != null && rs.next()) {
-        return rs.getString("COLUMN_NAME");
-
-      } else {
-        return null;
+      // Load data from the getPrimaryKeys() call
+      while(rs.next()) {
+        primaryKeyColumns.add(new AbstractMap.SimpleEntry<>(
+          rs.getString("COLUMN_NAME"),
+          rs.getShort("KEY_SEQ")
+        ));
+        catalogNames.add(rs.getString("TABLE_CAT"));
+        schemaNames.add(rs.getString("TABLE_SCHEM"));
       }
+
+      // Verification
+      if(catalogNames.size() > 1 || schemaNames.size() > 1) {
+        throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0024,
+          "For search (" + catalog + ", " + schema + ", " + table + ") we found the table in catalogs [" + StringUtils.join(catalogNames, ", ") + "] and schemas [" + StringUtils.join(schemaNames, ", ") + "]");
+      }
+
+      // Few shortcuts so that we don't have run full loop
+      if(primaryKeyColumns.isEmpty()) {
+        return null;
+      } else if(primaryKeyColumns.size() == 1){
+        return new String[] {primaryKeyColumns.get(0).getKey()};
+      }
+
+      // Properly sort the columns by KEY_SEQ and return result
+      String [] ret = new String[primaryKeyColumns.size()];
+      for(AbstractMap.SimpleEntry<String, Short> entry : primaryKeyColumns) {
+        ret[entry.getValue() - 1] = entry.getKey();
+      }
+      return ret;
 
     } catch (SQLException e) {
       logSQLException(e);

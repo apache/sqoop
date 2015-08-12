@@ -89,6 +89,10 @@ public enum GenericJdbcConnectorError implements ErrorCode {
 
   GENERIC_JDBC_CONNECTOR_0023("Received error from the database"),
 
+  GENERIC_JDBC_CONNECTOR_0024("Multiple tables of the same name in different schema/catalog"),
+
+  GENERIC_JDBC_CONNECTOR_0025("No primary key"),
+
   ;
 
   private final String message;

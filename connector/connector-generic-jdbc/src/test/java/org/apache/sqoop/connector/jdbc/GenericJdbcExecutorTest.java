@@ -35,6 +35,7 @@ public class GenericJdbcExecutorTest {
   private final String table;
   private final String emptyTable;
   private final String schema;
+  private final String compoundPrimaryKeyTable;
   private GenericJdbcExecutor executor;
 
   private static final int START = -10;
@@ -44,6 +45,7 @@ public class GenericJdbcExecutorTest {
     table = getClass().getSimpleName().toUpperCase();
     emptyTable = table + "_EMPTY";
     schema = table + "_SCHEMA";
+    compoundPrimaryKeyTable = table + "_COMPOUND";
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -53,6 +55,7 @@ public class GenericJdbcExecutorTest {
     executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifier(emptyTable )+ "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
     executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifier(table) + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
     executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifiers(schema, table) + "(ICOL INTEGER PRIMARY KEY, VCOL VARCHAR(20))");
+    executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifier(compoundPrimaryKeyTable) + "(ICOL INTEGER, VCOL VARCHAR(20), PRIMARY KEY(VCOL, ICOL))");
 
     for (int i = 0; i < NUMBER_OF_ROWS; i++) {
       int value = START + i;
@@ -90,8 +93,14 @@ public class GenericJdbcExecutorTest {
     assertNull(executor.getPrimaryKey("non-existing-schema", "non-existing-table"));
     assertNull(executor.getPrimaryKey("non-existing-catalog", "non-existing-schema", "non-existing-table"));
 
-    assertEquals(executor.getPrimaryKey(table), "ICOL");
-    assertEquals(executor.getPrimaryKey(schema, table), "ICOL");
+    assertEquals(executor.getPrimaryKey(schema, table), new String[] {"ICOL"});
+    assertEquals(executor.getPrimaryKey(compoundPrimaryKeyTable), new String[] {"VCOL", "ICOL"});
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void TestGetPrimaryKeySameTableInMultipleSchemas() {
+    // Same table name exists in two schemas and therefore we should fail here
+    executor.getPrimaryKey(table);
   }
 
   @Test

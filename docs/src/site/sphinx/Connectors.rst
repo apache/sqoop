@@ -80,7 +80,7 @@ Inputs associated with the Job configuration for the FROM direction include:
 |                             |         | *Optional* Comma separated list of columns.                             |                                             |
 +-----------------------------+---------+-------------------------------------------------------------------------+---------------------------------------------+
 | Partition column name       | Map     | The column name used to partition the data transfer process.            | col1                                        |
-|                             |         | *Optional*.  Defaults to primary key of table.                          |                                             |
+|                             |         | *Optional*.  Defaults to table's first column of primary key.           |                                             |
 +-----------------------------+---------+-------------------------------------------------------------------------+---------------------------------------------+
 | Null value allowed for      | Boolean | True or false depending on whether NULL values are allowed in data      | true                                        |
 | the partition column        |         | of the Partition column. *Optional*.                                    |                                             |

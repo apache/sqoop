@@ -135,7 +135,15 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     String partitionColumnName = jobConf.fromJobConfig.partitionColumn;
     // If it's not specified, we can use primary key of given table (if it's table based import)
     if (StringUtils.isBlank(partitionColumnName) && tableImport) {
-        partitionColumnName = executor.getPrimaryKey(jobConf.fromJobConfig.schemaName, jobConf.fromJobConfig.tableName);
+      String [] primaryKeyColumns = executor.getPrimaryKey(jobConf.fromJobConfig.schemaName, jobConf.fromJobConfig.tableName);
+      LOG.info("Found primary key columns [" + StringUtils.join(primaryKeyColumns, ", ") + "]");
+      if(primaryKeyColumns == null) {
+        throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0025, "Please specify partition column.");
+      } else if (primaryKeyColumns.length > 1) {
+        LOG.warn("Table have compound primary key, for partitioner we're using only first column of the key: " + primaryKeyColumns[0]);
+      }
+
+      partitionColumnName = primaryKeyColumns[0];
     }
     // If we don't have partition column name, we will error out
     if (partitionColumnName != null) {
