@@ -252,6 +252,6 @@ public class MSubmission extends MAccountableEntity {
         + ", error=" + error + ", fromSchema=" + fromSchema + ", toSchema=" + toSchema + "]";
   }
 
-  public static MSubmission UNKNOWN = new MSubmission();
+  public final static MSubmission UNKNOWN = new MSubmission();
 
 }

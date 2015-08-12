@@ -30,7 +30,7 @@ import java.util.Date;
 @InterfaceStability.Unstable
 abstract public class MAccountableEntity extends MValidatedElement {
 
-  private final boolean DEFAULT_ENABLED = true;
+  private static final boolean DEFAULT_ENABLED = true;
 
   /**
    * The user who creates the entity

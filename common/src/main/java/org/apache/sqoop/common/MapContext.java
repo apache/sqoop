@@ -110,9 +110,9 @@ public class MapContext implements ImmutableContext {
    */
   public Map<String, String> getNestedProperties(String prefix) {
     Map<String, String> subProps = new HashMap<String, String>();
-    for (String key : options.keySet()) {
-      if (key.startsWith(prefix)) {
-        subProps.put(key.substring(prefix.length()), options.get(key));
+    for(Map.Entry<String, String> entry : options.entrySet()) {
+      if(entry.getKey().startsWith(prefix)) {
+        subProps.put(entry.getKey().substring(prefix.length()), entry.getKey());
       }
     }
 

@@ -181,4 +181,16 @@ public class MJob extends MAccountableEntity implements MClonable {
         && (job.getToJobConfig().equals(this.getToJobConfig()))
         && (job.getDriverConfig().equals(this.driverConfig));
   }
+
+  @Override
+  public int hashCode() {
+    int result = (int) (fromConnectorId ^ (fromConnectorId >>> 32));
+    result = 31 * result + (int) (toConnectorId ^ (toConnectorId >>> 32));
+    result = 31 * result + (int) (fromLinkId ^ (fromLinkId >>> 32));
+    result = 31 * result + (int) (toLinkId ^ (toLinkId >>> 32));
+    result = 31 * result + (fromConfig != null ? fromConfig.hashCode() : 0);
+    result = 31 * result + (toConfig != null ? toConfig.hashCode() : 0);
+    result = 31 * result + (driverConfig != null ? driverConfig.hashCode() : 0);
+    return result;
+  }
 }

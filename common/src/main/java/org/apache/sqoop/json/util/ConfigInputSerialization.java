@@ -188,7 +188,11 @@ public final class ConfigInputSerialization {
       }
 
       // Propagate config ID
-      mInput.setPersistenceId((Long)input.get(ConfigInputConstants.INPUT_ID));
+      Long id = (Long)input.get(ConfigInputConstants.INPUT_ID);
+      if(id == null) {
+        throw new SqoopException(SerializationError.SERIALIZATION_002, "Missing field: " + ConfigInputConstants.INPUT_ID);
+      }
+      mInput.setPersistenceId(id);
 
       // Propagate config optional value
       if(input.containsKey(ConfigInputConstants.CONFIG_INPUT_VALUE)) {

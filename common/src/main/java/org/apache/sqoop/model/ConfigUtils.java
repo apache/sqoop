@@ -473,14 +473,13 @@ public class  ConfigUtils {
 
     for(Field configField : klass.getDeclaredFields()) {
       configField.setAccessible(true);
-      String configName = configField.getName();
 
       // We're processing only config validations
       Config configAnnotation = configField.getAnnotation(Config.class);
       if(configAnnotation == null) {
         continue;
       }
-      configName = getConfigName(configField, configAnnotation, configNames);
+      String configName = getConfigName(configField, configAnnotation, configNames);
 
       try {
         configField.set(configuration, configField.getType().newInstance());
@@ -533,7 +532,7 @@ public class  ConfigUtils {
           } else if(type == Integer.class) {
             inputField.set(configValue, ((Long)jsonInputs.get(inputName)).intValue());
           } else if(type == Long.class) {
-            inputField.set(configValue, ((Long)jsonInputs.get(inputName)).longValue());
+            inputField.set(configValue, ((Long)jsonInputs.get(inputName)));
           } else if(type.isEnum()) {
             inputField.set(configValue, Enum.valueOf((Class<? extends Enum>) inputField.getType(), (String) jsonInputs.get(inputName)));
           } else if(type == Boolean.class) {

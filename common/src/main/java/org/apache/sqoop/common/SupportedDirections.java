@@ -120,4 +120,23 @@ public class SupportedDirections implements Comparable<SupportedDirections> {
 
     return hash - oHash;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    SupportedDirections that = (SupportedDirections) o;
+
+    if (from != that.from) return false;
+    return to == that.to;
+
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (from ? 1 : 0);
+    result = 31 * result + (to ? 1 : 0);
+    return result;
+  }
 }

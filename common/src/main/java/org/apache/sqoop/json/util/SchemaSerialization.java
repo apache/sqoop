@@ -21,6 +21,7 @@ import java.util.HashSet;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
@@ -278,7 +279,7 @@ public class SchemaSerialization {
       output = new Unknown(name).setJdbcType(jdbcType);
       break;
     default:
-      // TODO(Jarcec): Throw an exception of unsupported type?
+      throw new SqoopException(SerializationError.SERIALIZATION_002, "Invalid type: " + type);
     }
     output.setNullable(nullable);
 

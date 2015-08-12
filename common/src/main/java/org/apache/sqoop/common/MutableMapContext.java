@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class MutableMapContext extends MapContext implements Iterable<Map.Entry<String, String>>, MutableContext {
+public class MutableMapContext extends MapContext implements MutableContext {
 
   public MutableMapContext(Map<String, String> options) {
     super(options);

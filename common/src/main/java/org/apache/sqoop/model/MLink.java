@@ -109,4 +109,11 @@ public class MLink extends MAccountableEntity implements MClonable {
         && (mLink.getPersistenceId() == this.getPersistenceId())
         && (mLink.connectorLinkConfig.equals(this.connectorLinkConfig));
     }
+
+  @Override
+  public int hashCode() {
+    int result = (int) (connectorId ^ (connectorId >>> 32));
+    result = 31 * result + (connectorLinkConfig != null ? connectorLinkConfig.hashCode() : 0);
+    return result;
+  }
 }

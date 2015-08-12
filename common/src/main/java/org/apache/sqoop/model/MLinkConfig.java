@@ -43,15 +43,6 @@ public class MLinkConfig extends MConfigList {
   }
 
   @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-
-    return super.equals(other);
-  }
-
-  @Override
   public MLinkConfig clone(boolean cloneWithValue) {
     MLinkConfig copy = new MLinkConfig(super.clone(cloneWithValue).getConfigs());
     return copy;

@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.validation.validators;
 
+import com.google.common.base.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Status;
@@ -31,7 +33,7 @@ public class CSVURIValidator extends AbstractValidator<String> {
   // validate that given string is a comma-separated list of host:port
   @Override
   public void validate(String str) {
-    if(str != null && str != "") {
+    if(!Strings.isNullOrEmpty(str)) {
       String[] pairs = str.split("\\s*,\\s*");
       for (String pair: pairs) {
         String[] parts = pair.split("\\s*:\\s*");
