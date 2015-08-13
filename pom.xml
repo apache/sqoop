@@ -750,7 +750,7 @@ limitations under the License.
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.7</version>
+        <version>2.6</version>
       </plugin>
 
       <!-- Find bugs report can be executed with: mvn clean compile site -DskipTests -->
