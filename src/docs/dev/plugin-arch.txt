@@ -1,0 +1,184 @@
+
+////
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+Developing Sqoop Plugins
+------------------------
+Sqoop allows users to develop their own plugins. Users can develop their
+plugins as separate jars, deploy them in $SQOOP_LIB and register with
+sqoop. Infact, Sqoop architecture is a plugin based architecture and all
+the internal tools like import, export, merge etc are also supported as
+tool plugins. Users can also develop their own custom tool plugins. Once
+deployed and registered with sqoop, these plugins will work like any
+other internal tool. They will also get listed in the tools when you run
++sqoop help+ command.
+
+BaseSqoopTool - Base class for User defined Tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BaseSqoopTool is the base class for all Sqoop Tools. If you want to develop
+a cusom tool, you need to inherit your tool from BaseSqoopTool and override
+the following methods:
+
+- +public int run(SqoopOptions options)+ : This is the main method for the
+   tool and acts as entry point for execution for your custom tool.
+- +public void configureOptions(ToolOptions toolOptions)+ : Configures the
+   command-line arguments we expect to receive. You can also specify the
+   description of all the command line arguments. When a user executes
+   +sqoop help <your tool>+, the information which is provided in this
+   method will be output to the user.
+- +public void applyOptions(CommandLine in, SqoopOptions out)+ : parses all
+   options and populates SqoopOptions which acts as a data transfer object
+   during the complete execution.
+- +public void validateOptions(SqoopOptions options)+ : provide any
+   validations required for your options.
+
+Supporting User defined custom options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Sqoop parses the arguments which are passed by users and are stored in
+SqoopOptions object. This object then acts as data transfer object. This
+object is passed to various phases of processing like preprocessing before
+running the actual MapReduce, MapReduce phase and even postprocessing phase.
+This class has a lot of members. The options are parsed and populated in the
+respective member. Now lets say that a user creates a new user defined tool
+and this tool has some new options which don't map to any of the existing
+members of the SqoopOptions class. Either user can add a new member to
+SqoopOption class which means users will have to make changes in sqoop and
+compile it, which mght not be possible always for all users. Other option
+is to use +extraArgs+ member. This is a string array which contains the
+options for thirdparty tools which could be passed directly to the third
+party tool like mysqldump etc. This array string needs parsing every time
+to understand the parameters.
+The most elegant way of supporting custom options for user defined tool is
++customToolOptions+ map. This is a map member of SqoopOption class.
+Developer can parse the user defined parameters and populate this map with
+appropriate key/value pairs. When SqoopOption object is passed to various
+phases of processing these values will be readily available and parsing is
+not required for every access.
+Lets take an example to understand the usage better. Lets say you want to
+develop a custom tool to merge two hive tables and it will take the following
+parameters :
+
+- +--hive-updates-database+
+- +--hive-updates-table+
+- +--merge-keys+
+- +--retain-updates-tbl+
+
+None of these options are available in SqoopOption object. Tool Developer
+can override the +applyOptions+ method and in this method the user options
+can be parsed and populated in the customToolOptions map. Once that is done,
+SqoopOption object can be passed throughout program and these values will
+be available for users.
+
+These option names will be stored as keys and the values passed by users
+will be stored as values. Lets define these options as static finals :
+....
+  public static final String MERGE_KEYS = "merge-keys";
+  public static final String HIVE_UPDATES_TABLE = "hive-updates-table";
+  public static final String HIVE_UPDATES_TABLE_DB = "hive-updates-database";
+  public static final String RETAIN_UPDATES_TBL = "retain-updates-tbl";
+....
+
+A sample applyOptions example which parses the above said options and
+populates the customToolOptions map is below :
+....
+ public void applyOptions(CommandLine in, SqoopOptions out)
+    throws InvalidOptionsException {
+
+    if (in.hasOption(VERBOSE_ARG)) {
+      LoggingUtils.setDebugLevel();
+      log.debug("Enabled debug logging.");
+    }
+
+    if (in.hasOption(HELP_ARG)) {
+      ToolOptions toolOpts = new ToolOptions();
+      configureOptions(toolOpts);
+      printHelp(toolOpts);
+      throw new InvalidOptionsException("");
+    }
+
+    Map<String, String> mergeOptionsMap = new HashMap<String, String>();
+    if (in.hasOption(MERGE_KEYS)) {
+      mergeOptionsMap.put(MERGE_KEYS, in.getOptionValue(MERGE_KEYS));
+    }
+
+    if (in.hasOption(HIVE_UPDATES_TABLE)) {
+      mergeOptionsMap.put(HIVE_UPDATES_TABLE,
+        in.getOptionValue(HIVE_UPDATES_TABLE));
+    }
+
+    if (in.hasOption(HIVE_UPDATES_TABLE_DB)) {
+      mergeOptionsMap.put(HIVE_UPDATES_TABLE_DB,
+        in.getOptionValue(HIVE_UPDATES_TABLE_DB));
+    }
+
+    if (in.hasOption(RETAIN_UPDATES_TBL)) {
+      mergeOptionsMap.put(RETAIN_UPDATES_TBL, "");
+    }
+
+    if (in.hasOption(HIVE_TABLE_ARG)) {
+      out.setHiveTableName(in.getOptionValue(HIVE_TABLE_ARG));
+    }
+
+    if (in.hasOption(HIVE_DATABASE_ARG)) {
+      out.setHiveDatabaseName(in.getOptionValue(HIVE_DATABASE_ARG));
+    }
+
+    if (out.getCustomToolOptions() == null) {
+      out.setCustomToolOptions(mergeOptionsMap);
+    }
+  }
+....
+
+
+ToolPlugin - Base class for the plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Once the tool is developed, you need to wrap it with a plugin class and
+register that plugin class with Sqoop. Your plugin class should extend from
++org.apache.sqoop.tool.ToolPlugin+  and override +getTools()+ method.
+Example: Lets say that you have developed a tool called hive-merge which
+merges 2 hive tables and your Tool class is HiveMergeTool, the plugin
+implementation will look like
+....
+public class HiveMergePlugin extends ToolPlugin {
+
+  @Override
+  public List<ToolDesc> getTools() {
+    return Collections
+      .singletonList(new ToolDesc(
+        "hive-merge",
+        HiveMergeTool.class,
+        "This tool is used to perform the merge data from a tmp hive table into a destination hive table."));
+  }
+
+}
+....
+
+Registering User defined plugin with Sqoop
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Finally you need to copy your plugin jar to $SQOOP_LIB directory and register the
+plugin class with sqoop in sqoop-site.xml :
+....
+<property>
+    <name>sqoop.tool.plugins</name>
+    <value>com.expedia.sqoop.tool.HiveMergePlugin</value>
+    <description>A comma-delimited list of ToolPlugin implementations
+      which are consulted, in order, to register SqoopTool instances which
+      allow third-party tools to be used.
+    </description>
+  </property>
+....

@@ -48,5 +48,5 @@ include::compiling.txt[]
 
 include::api-reference.txt[]
 
-
+include::plugin-arch.txt[]
 
