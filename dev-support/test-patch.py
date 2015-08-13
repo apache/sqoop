@@ -61,6 +61,11 @@ def sqoop_guess_branch(versions):
 
   return branch
 
+# Open remote URL
+def open_url(url):
+  print "Opening URL: %s" % (url)
+  return urllib2.urlopen(url)
+
 # Verify supported branch
 def sqoop_verify_branch(branch):
   return branch in ("sqoop2", "SQOOP-1082", "SQOOP-1367",)
@@ -343,8 +348,16 @@ def cobertura_compare(result, output_dir, compare_url):
   for path in list(find_all_files(".", "^frame-summary\.html$")):
     package = path.replace("/target/site/cobertura/frame-summary.html", "").replace("./", "")
 
+    remoteIo = None
+    try:
+      remoteIo = open_url("%s%s" % (compare_url, path))
+    except urllib2.HTTPError:
+      report.write("Package %s: Base is missing" % (package))
+      summary.append("Package {{%p}}: Can't compare test coverage as base is missing." % (package))
+      continue
+
     (localLine, localBranch) = cobertura_get_percentage(open(path))
-    (compareLine, compareBranch) = cobertura_get_percentage(urllib2.urlopen("%s%s" % (compare_url, path)))
+    (compareLine, compareBranch) = cobertura_get_percentage(remoteIo)
 
     diffLine = localLine - compareLine
     diffBranch = localBranch - compareBranch
@@ -386,8 +399,17 @@ def findbugs_compare(result, output_dir, compare_url):
   # For each report that exists locally
   for path in list(find_all_files(".", "^findbugs\.xml$")):
     package = path.replace("/target/findbugs.xml", "").replace("./", "")
+
+    remoteIo = None
+    try:
+      remoteIo = open_url("%s%s" % (compare_url, path))
+    except urllib2.HTTPError:
+      report.write("Package %s: Base is missing" % (package))
+      summary.append("Package {{%p}}: Can't compare classes as base is missing." % (package))
+      continue
+
     local = findbugs_get_bugs(open(path))
-    remote = findbugs_get_bugs(urllib2.urlopen("%s%s" % (compare_url, path)))
+    remote = findbugs_get_bugs(remoteIo)
     report.write("Processing package %s:\n" % (package))
 
     # Identify the differences for each class
