@@ -736,6 +736,10 @@ limitations under the License.
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>2.18.1</version>
+          <configuration>
+            <!-- See SQOOP-2120 for details about use of -XX:-UseSplitVerifier -->
+            <argLine>-Xms512m -Xmx2g -XX:MaxPermSize=1024m -XX:-UseSplitVerifier</argLine>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

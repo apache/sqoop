@@ -99,6 +99,10 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
     Map<String, String> map = new HashMap<String, String>((Map) System.getProperties());
     container.setSystemProperties(map);
 
+    // Set the timeout for the container, the default value will cause the
+    // problem described in SQOOP-2474
+    container.setTimeout(600000L);
+
     // Propagate Hadoop jars to the container classpath
     // In real world, they would be installed manually by user
     List<String> extraClassPath = new LinkedList<String>();
