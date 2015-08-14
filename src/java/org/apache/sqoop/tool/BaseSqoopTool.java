@@ -40,6 +40,7 @@ import org.apache.sqoop.util.password.CredentialProviderHelper;
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
@@ -1398,7 +1399,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
 
     if (options.doHiveImport()
-        && options.isAppendMode()) {
+        && options.isAppendMode()
+        && !options.getIncrementalMode().equals(IncrementalMode.AppendRows)) {
       throw new InvalidOptionsException("Append mode for hive imports is not "
           + " yet supported. Please remove the parameter --append-mode");
     }

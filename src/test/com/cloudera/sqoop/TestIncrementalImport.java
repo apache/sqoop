@@ -19,6 +19,7 @@
 package com.cloudera.sqoop;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -29,9 +30,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -39,7 +38,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
-
+import org.apache.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.HsqldbManager;
 import com.cloudera.sqoop.manager.ManagerFactory;
@@ -1216,6 +1215,64 @@ public class TestIncrementalImport extends TestCase {
     runJob(TABLE_NAME);
     assertDirOfNumbers(TABLE_NAME, 20);
   }
+  
+	public void testIncrementalHiveAppendEmptyThenFull() throws Exception {
+		// This is to test Incremental Hive append feature. SQOOP-2470
+		final String TABLE_NAME = "incrementalHiveAppendEmptyThenFull";
+		Configuration conf = newConf();
+		conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY,
+				InstrumentHsqldbManagerFactory.class.getName());
+		clearDir(TABLE_NAME);
+		createIdTable(TABLE_NAME, 0);
+		List<String> args = new ArrayList<String>();
+		args.add("--connect");
+		args.add(SOURCE_DB_URL);
+		args.add("--table");
+		args.add(TABLE_NAME);
+		args.add("--warehouse-dir");
+		args.add(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+		args.add("--hive-import");
+		args.add("--hive-table");
+		args.add(TABLE_NAME + "hive");
+		args.add("--incremental");
+		args.add("append");
+		args.add("--check-column");
+		args.add("id");
+		args.add("-m");
+		args.add("1");
+		createJob(TABLE_NAME, args, conf);
+		HiveImport.setTestMode(true);
+		String hiveHome = org.apache.sqoop.SqoopOptions.getHiveHomeDefault();
+		assertNotNull("hive.home was not set", hiveHome);
+		String testDataPath = new Path(new Path(hiveHome), "scripts/"
+				+ "incrementalHiveAppendEmpty.q").toString();
+		System.clearProperty("expected.script");
+		System.setProperty("expected.script",
+				new File(testDataPath).getAbsolutePath());
+		runJob(TABLE_NAME);
+		assertDirOfNumbers(TABLE_NAME, 0);
+		// Now add some rows.
+		insertIdRows(TABLE_NAME, 0, 10);
+		String testDataPath10 = new Path(new Path(hiveHome), "scripts/"
+				+ "incrementalHiveAppend10.q").toString();
+		System.clearProperty("expected.script");
+		System.setProperty("expected.script",
+				new File(testDataPath10).getAbsolutePath());
+		System.getProperty("expected.script");
+		// Running the job a second time should import 10 rows.
+		runJob(TABLE_NAME);
+		assertDirOfNumbers(TABLE_NAME, 10);
+		// Add some more rows.
+		insertIdRows(TABLE_NAME, 10, 20);
+		String testDataPath20 = new Path(new Path(hiveHome), "scripts/"
+				+ "incrementalHiveAppend20.q").toString();
+		System.clearProperty("expected.script");
+		System.setProperty("expected.script",
+				new File(testDataPath20).getAbsolutePath());
+		// Import only those rows.
+		runJob(TABLE_NAME);
+		assertDirOfNumbers(TABLE_NAME, 20);
+	}
 
   // SQOOP-1890
   public void testTableNameWithSpecialCharacters() throws Exception {
