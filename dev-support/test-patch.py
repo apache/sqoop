@@ -266,7 +266,7 @@ def find_all_files(top, fileRegExp=".*", dirRegExp=".*"):
             yield os.path.join(root, f)
 
 def mvn_test(result, output_dir):
-  run_mvn_test("clean test site", "unit", result, output_dir) # Will run cobertura and findbugs as well
+  run_mvn_test("test site", "unit", result, output_dir) # Will run cobertura and findbugs as well
 
 def mvn_integration(result, output_dir):
   run_mvn_test("integration-test -pl test", "integration", result, output_dir)
