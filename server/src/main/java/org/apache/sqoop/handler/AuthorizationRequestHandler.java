@@ -133,7 +133,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
   }
 
   private JsonBean getRoles(RequestContext ctx) {
-    AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
+    AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
     String principal_name = ctx.getParameterValue(PRINCIPAL_NAME_QUERY_PARAM);
     String principal_type = ctx.getParameterValue(PRINCIPAL_TYPE_QUERY_PARAM);
@@ -153,7 +153,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
   }
 
   private JsonBean getPrincipal(RequestContext ctx) {
-    AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
+    AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
     String role_name = ctx.getParameterValue(ROLE_NAME_QUERY_PARAM);
 
@@ -201,7 +201,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
   }
 
   private JsonBean getPrivilege(RequestContext ctx) {
-    AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
+    AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
     String principal_name = ctx.getParameterValue(PRINCIPAL_NAME_QUERY_PARAM);
     String principal_type = ctx.getParameterValue(PRINCIPAL_TYPE_QUERY_PARAM);
@@ -225,7 +225,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
   }
 
   private JsonBean createRole(RequestContext ctx) {
-    AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
+    AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
 
     RoleBean bean = new RoleBean();
@@ -253,7 +253,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
   }
 
   private JsonBean grantRevokeRole(RequestContext ctx, boolean isGrant) {
-    AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
+    AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
 
     RolesBean rolesBean = new RolesBean();
@@ -285,7 +285,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
   }
 
   private JsonBean grantRevokePrivilege(RequestContext ctx, boolean isGrant) {
-    AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
+    AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
 
     PrincipalsBean principalsBean = new PrincipalsBean();
@@ -330,7 +330,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
   }
 
   private JsonBean dropRole(RequestContext ctx) {
-    AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
+    AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
 
     String[] urlElements = ctx.getUrlElements();

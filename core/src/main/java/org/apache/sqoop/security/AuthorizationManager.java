@@ -18,7 +18,6 @@
 package org.apache.sqoop.security;
 
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 
@@ -45,11 +44,6 @@ public class AuthorizationManager implements Reconfigurable {
   public static final String DEFAULT_SERVER_NAME = "SqoopServer1";
 
   /**
-   * Default authorization auto upgrade option value
-   */
-  protected static boolean DEFAULT_AUTO_UPGRADE = false;
-
-  /**
    * Private instance to singleton of this class.
    */
   private static AuthorizationManager instance;
@@ -60,6 +54,11 @@ public class AuthorizationManager implements Reconfigurable {
   static {
     instance = new AuthorizationManager();
   }
+
+  /**
+   * The private constructor for the singleton class,
+   */
+  private AuthorizationManager(){}
 
   /**
    * Return current instance.
@@ -83,16 +82,16 @@ public class AuthorizationManager implements Reconfigurable {
   }
 
   /**
-   * Private AuthenticiationHandler to singleton of this class.
+   * Private Authorization Handler to singleton of this class.
    */
-  private static AuthorizationHandler authorizationHandler;
+  private AuthorizationHandler authorizationHandler;
 
   /**
    * Return current authorization handler.
    *
    * @return Current authorization handler
    */
-  public static AuthorizationHandler getAuthorizationHandler() {
+  public AuthorizationHandler getAuthorizationHandler() {
     return authorizationHandler;
   }
 

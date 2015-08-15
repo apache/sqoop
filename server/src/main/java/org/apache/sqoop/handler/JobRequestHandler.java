@@ -147,7 +147,7 @@ public class JobRequestHandler implements RequestHandler {
         ctx.getRequest().getRemoteAddr(), "delete", "job", jobIdentifier);
     repository.deleteJob(jobId);
     MResource resource = new MResource(String.valueOf(jobId), MResource.TYPE.JOB);
-    AuthorizationManager.getAuthorizationHandler().removeResource(resource);
+    AuthorizationManager.getInstance().getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
   }
 

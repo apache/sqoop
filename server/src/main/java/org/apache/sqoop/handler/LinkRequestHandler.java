@@ -102,7 +102,7 @@ public class LinkRequestHandler implements RequestHandler {
 
     repository.deleteLink(linkId);
     MResource resource = new MResource(String.valueOf(linkId), MResource.TYPE.LINK);
-    AuthorizationManager.getAuthorizationHandler().removeResource(resource);
+    AuthorizationManager.getInstance().getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
   }
 

@@ -33,12 +33,6 @@ public class AuthenticationManager implements Reconfigurable {
    */
   public static final String DEFAULT_AUTHENTICATION_HANDLER = "org.apache.sqoop.security.authentication.SimpleAuthenticationHandler";
 
-
-  /**
-   * Default authentication auto upgrade option value
-   */
-  protected static boolean DEFAULT_AUTO_UPGRADE = false;
-
   /**
    * Private instance to singleton of this class.
    */
@@ -50,6 +44,11 @@ public class AuthenticationManager implements Reconfigurable {
   static {
     instance = new AuthenticationManager();
   }
+
+  /**
+   * The private constructor for the singleton class,
+   */
+  private AuthenticationManager(){}
 
   /**
    * Return current instance.
@@ -73,16 +72,16 @@ public class AuthenticationManager implements Reconfigurable {
   }
 
   /**
-   * Private AuthenticiationHandler to singleton of this class.
+   * Private Authentication Handler to singleton of this class.
    */
-  private static AuthenticationHandler authenticationHandler;
+  private AuthenticationHandler authenticationHandler;
 
   /**
    * Return current authentication handler.
    *
    * @return Current authentication handler
    */
-  public static AuthenticationHandler getAuthenticationHandler() {
+  public AuthenticationHandler getAuthenticationHandler() {
     return authenticationHandler;
   }
 

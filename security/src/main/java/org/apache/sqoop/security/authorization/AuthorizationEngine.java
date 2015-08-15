@@ -164,7 +164,7 @@ public class AuthorizationEngine {
   }
 
   private static void checkPrivilege(String doUserName, MPrivilege... privileges) {
-    AuthorizationHandler handler = AuthorizationManager.getAuthorizationHandler();
+    AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
 
     MPrincipal principal = new MPrincipal(doUserName, MPrincipal.TYPE.USER);
 
