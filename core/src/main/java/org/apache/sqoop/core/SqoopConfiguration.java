@@ -24,8 +24,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +38,8 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.error.code.CoreError;
+
+import static org.apache.sqoop.utils.ContextUtils.getUniqueStrings;
 
 /**
  * Configuration manager that loads Sqoop configuration.
@@ -230,9 +230,10 @@ public class SqoopConfiguration implements Reconfigurable {
   private synchronized void configureClassLoader(String classpathProperty) {
     LOG.info("Adding jars to current classloader from property: " + classpathProperty);
 
-    String classpath = getContext().getString(classpathProperty);
+    // CSV URL list separated by ":".
+    String paths = getContext().getString(classpathProperty);
 
-    if (StringUtils.isEmpty(classpath)) {
+    if (StringUtils.isEmpty(paths)) {
       LOG.debug("Property " + classpathProperty + " is null or empty. Not adding any extra jars.");
       return;
     }
@@ -242,11 +243,10 @@ public class SqoopConfiguration implements Reconfigurable {
       throw new SqoopException(CoreError.CORE_0009, "No thread context classloader to override.");
     }
 
-    // CSV URL list separated by ":".
-    Set<String> paths = new HashSet(Arrays.asList(classpath.split(":")));
+    Set<String> pathSet = getUniqueStrings(paths);
     List<URL> urls = new LinkedList<URL>();
 
-    for (String path : paths) {
+    for (String path : pathSet) {
       try {
         LOG.debug("Found jar in path: " + path);
         URL url = new File(path).toURI().toURL();
