@@ -20,8 +20,6 @@ package org.apache.sqoop.test.testcases;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotSame;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SubmissionCallback;
 import org.apache.sqoop.common.test.asserts.ProviderAsserts;
@@ -38,8 +36,6 @@ import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.data.ShortStories;
 import org.apache.sqoop.test.data.UbuntuReleases;
-import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
-import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.validation.Status;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
@@ -257,8 +253,8 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param link
    */
   protected void saveLink(MLink link) {
-    assertEquals(Status.OK, getClient().saveLink(link));
-    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, link.getPersistenceId());
+    assertEquals(getClient().saveLink(link), Status.OK);
+    assertNotSame(link.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
   }
 
  /**
@@ -269,8 +265,8 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param job
    */
  protected void saveJob(MJob job) {
-    assertEquals(Status.OK, getClient().saveJob(job));
-    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, job.getPersistenceId());
+    assertEquals(getClient().saveJob(job), Status.OK);
+   assertNotSame(job.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
   }
 
   /**
@@ -286,7 +282,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
       LOG.error("Submission has failed: " + finalSubmission.getError().getErrorSummary());
       LOG.error("Corresponding error details: " + finalSubmission.getError().getErrorDetails());
     }
-    assertEquals(SubmissionStatus.SUCCEEDED, finalSubmission.getStatus(),
+    assertEquals(finalSubmission.getStatus(), SubmissionStatus.SUCCEEDED,
             "Submission finished with error: " + finalSubmission.getError().getErrorSummary());
   }
 
