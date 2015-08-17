@@ -405,7 +405,7 @@ def findbugs_compare(result, output_dir, compare_url):
       remoteIo = open_url("%s%s" % (compare_url, path))
     except urllib2.HTTPError:
       report.write("Package %s: Base is missing" % (package))
-      summary.append("Package {{%p}}: Can't compare classes as base is missing." % (package))
+      summary.append("Package {{%s}}: Can't compare classes as base is missing." % (package))
       continue
 
     local = findbugs_get_bugs(open(path))
