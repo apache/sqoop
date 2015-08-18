@@ -71,9 +71,9 @@ public class ConnectorManagerUtils {
   }
 
   static boolean isConnectorJar(File file) {
-    try {
+    try (JarFile jarFile = new JarFile(file)) {
       @SuppressWarnings("resource")
-      JarEntry entry = new JarFile(file).getJarEntry(ConfigurationConstants.FILENAME_CONNECTOR_PROPERTIES);
+      JarEntry entry = jarFile.getJarEntry(ConfigurationConstants.FILENAME_CONNECTOR_PROPERTIES);
       return entry != null;
     } catch (IOException e) {
       throw new RuntimeException(e);

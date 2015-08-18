@@ -129,9 +129,7 @@ public class SqoopConfiguration implements Reconfigurable {
     }
 
     Properties bootstrapProperties = new Properties();
-    InputStream bootstrapPropStream = null;
-    try {
-      bootstrapPropStream = new FileInputStream(bootstrapConfig);
+    try (InputStream bootstrapPropStream = new FileInputStream(bootstrapConfig)) {
       bootstrapProperties.load(bootstrapPropStream);
     } catch (IOException ex) {
       throw new SqoopException(
@@ -267,11 +265,12 @@ public class SqoopConfiguration implements Reconfigurable {
 
   private synchronized void configureLogging() {
     Properties props = new Properties();
-    for (String key : config.keySet()) {
+    for (Map.Entry<String, String> entry : config.entrySet()) {
+      String key = entry.getKey();
       if (key.startsWith(ConfigurationConstants.PREFIX_LOG_CONFIG)) {
         String logConfigKey = key.substring(
             ConfigurationConstants.PREFIX_GLOBAL_CONFIG.length());
-        props.put(logConfigKey, config.get(key));
+        props.put(logConfigKey, entry.getValue());
       }
     }
 
