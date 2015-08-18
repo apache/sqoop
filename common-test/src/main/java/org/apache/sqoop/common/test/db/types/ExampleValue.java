@@ -24,21 +24,33 @@ public class ExampleValue {
   /**
    * Properly escaped value so that it can be used in INSERT statement.
    */
-  public final String insertStatement;
+  private String insertStatement;
 
   /**
    * Object value that should be returned from JDBC driver getObject().
    */
-  public final Object objectValue;
+  private Object objectValue;
 
   /**
    * Escaped string value that will be stored by HDFS connector.
    */
-  public final String escapedStringValue;
+  private String escapedStringValue;
 
   public ExampleValue(String insertStatement, Object objectValue, String escapedStringValue) {
     this.insertStatement = insertStatement;
     this.objectValue = objectValue;
     this.escapedStringValue = escapedStringValue;
+  }
+
+  public String getInsertStatement() {
+    return insertStatement;
+  }
+
+  public Object getObjectValue() {
+    return objectValue;
+  }
+
+  public String getEscapedStringValue() {
+    return escapedStringValue;
   }
 }

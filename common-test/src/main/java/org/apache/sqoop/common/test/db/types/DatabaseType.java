@@ -89,7 +89,7 @@ public class DatabaseType {
     String [] ret = new String[values.size()];
     int i = 0;
     for(ExampleValue value : values) {
-      ret[i++] = value.escapedStringValue;
+      ret[i++] = value.getEscapedStringValue();
     }
     return ret;
   }
