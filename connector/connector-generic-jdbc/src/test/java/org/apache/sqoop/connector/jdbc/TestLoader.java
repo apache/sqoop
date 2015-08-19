@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.jdbc;
 
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
@@ -110,19 +111,22 @@ public class TestLoader {
     loader.load(loaderContext, linkConfig, jobConfig);
 
     int index = START;
-    ResultSet rs = executor.executeQuery("SELECT * FROM "
-        + executor.encloseIdentifier(tableName) + " ORDER BY ICOL");
-    while (rs.next()) {
-      assertEquals(index, rs.getObject(1));
-      assertEquals((double) index, rs.getObject(2));
-      assertEquals(String.valueOf(index), rs.getObject(3));
-      assertEquals("2004-10-19", rs.getObject(4).toString());
-      assertEquals("2004-10-19 10:23:34.0", rs.getObject(5).toString());
-      assertEquals("11:33:59", rs.getObject(6).toString());
+    try (Statement statement = executor.getConnection().createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+         ResultSet rs = statement.executeQuery("SELECT * FROM "
+                 + executor.encloseIdentifier(tableName) + " ORDER BY ICOL");) {
+      while (rs.next()) {
+        assertEquals(index, rs.getObject(1));
+        assertEquals((double) index, rs.getObject(2));
+        assertEquals(String.valueOf(index), rs.getObject(3));
+        assertEquals("2004-10-19", rs.getObject(4).toString());
+        assertEquals("2004-10-19 10:23:34.0", rs.getObject(5).toString());
+        assertEquals("11:33:59", rs.getObject(6).toString());
 
-      index++;
+        index++;
+      }
+      assertEquals(numberOfRows, index - START);
     }
-    assertEquals(numberOfRows, index-START);
   }
 
   public class DummyReader extends DataReader {

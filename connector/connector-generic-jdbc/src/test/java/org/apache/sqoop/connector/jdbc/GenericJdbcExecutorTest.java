@@ -89,9 +89,9 @@ public class GenericJdbcExecutorTest {
 
   @Test
   public void testGetPrimaryKey() {
-    assertNull(executor.getPrimaryKey("non-existing-table"));
-    assertNull(executor.getPrimaryKey("non-existing-schema", "non-existing-table"));
-    assertNull(executor.getPrimaryKey("non-existing-catalog", "non-existing-schema", "non-existing-table"));
+    assertEquals(executor.getPrimaryKey("non-existing-table"), new String[] {});
+    assertEquals(executor.getPrimaryKey("non-existing-schema", "non-existing-table"), new String[] {});
+    assertEquals(executor.getPrimaryKey("non-existing-catalog", "non-existing-schema", "non-existing-table"), new String[] {});
 
     assertEquals(executor.getPrimaryKey(schema, table), new String[] {"ICOL"});
     assertEquals(executor.getPrimaryKey(compoundPrimaryKeyTable), new String[] {"VCOL", "ICOL"});

@@ -124,16 +124,8 @@ public class GenericJdbcExecutor {
     }
   }
 
-  public ResultSet executeQuery(String sql) {
-    try {
-      Statement statement = connection.createStatement(
-          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      return statement.executeQuery(sql);
-
-    } catch (SQLException e) {
-      logSQLException(e);
-      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
-    }
+  public Connection getConnection() {
+    return connection;
   }
 
   public PreparedStatement createStatement(String sql) {
@@ -261,29 +253,21 @@ public class GenericJdbcExecutor {
   }
 
   public long getTableRowCount(String tableName) {
-    ResultSet resultSet = executeQuery("SELECT COUNT(1) FROM " + encloseIdentifier(tableName));
-    try {
+    try (Statement statement = connection.createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+         ResultSet resultSet = statement.executeQuery("SELECT COUNT(1) FROM " + encloseIdentifier(tableName));) {
       resultSet.next();
       return resultSet.getLong(1);
     } catch(SQLException e) {
       throw new SqoopException(
         GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0004, e);
-    } finally {
-      try {
-        if(resultSet != null)
-          resultSet.close();
-      } catch(SQLException e) {
-        logSQLException(e, "Got SQLException while closing resultset.");
-      }
     }
   }
 
   public void executeUpdate(String sql) {
-    try {
-      Statement statement = connection.createStatement(
-          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try (Statement statement = connection.createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
       statement.executeUpdate(sql);
-
     } catch (SQLException e) {
       logSQLException(e);
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
@@ -415,7 +399,7 @@ public class GenericJdbcExecutor {
 
       // Few shortcuts so that we don't have run full loop
       if(primaryKeyColumns.isEmpty()) {
-        return null;
+        return new String[] {};
       } else if(primaryKeyColumns.size() == 1){
         return new String[] {primaryKeyColumns.get(0).getKey()};
       }
@@ -434,11 +418,9 @@ public class GenericJdbcExecutor {
   }
 
   public String[] getQueryColumns(String query) {
-    try {
-      Statement statement = connection.createStatement(
-          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-      ResultSet rs = statement.executeQuery(query);
-
+    try (Statement statement = connection.createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+         ResultSet rs = statement.executeQuery(query);) {
       ResultSetMetaData rsmd = rs.getMetaData();
       int count = rsmd.getColumnCount();
       String[] columns = new String[count];

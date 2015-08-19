@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.jdbc;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -70,12 +71,11 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     }
 
     Schema schema = new Schema(schemaName);
-    ResultSet rs = null;
-    ResultSetMetaData rsmt = null;
-    try {
-      rs = executor.executeQuery("SELECT * FROM " + schemaName + " WHERE 1 = 0");
+    try (Statement statement = executor.getConnection().createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+         ResultSet rs = statement.executeQuery("SELECT * FROM " + schemaName + " WHERE 1 = 0");) {
 
-      rsmt = rs.getMetaData();
+      ResultSetMetaData rsmt = rs.getMetaData();
       for (int i = 1 ; i <= rsmt.getColumnCount(); i++) {
         String columnName = rsmt.getColumnName(i);
 
@@ -93,14 +93,6 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
       return schema;
     } catch (SQLException e) {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0016, e);
-    } finally {
-      if(rs != null) {
-        try {
-          rs.close();
-        } catch (SQLException e) {
-          LOG.info("Ignoring exception while closing ResultSet", e);
-        }
-      }
     }
   }
 

@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.jdbc;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
@@ -50,11 +51,11 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
     LOG.info("Using query: " + query);
 
     rowsRead = 0;
-    ResultSet resultSet = executor.executeQuery(query);
-
     Schema schema = context.getSchema();
     Column[] schemaColumns = schema.getColumnsArray();
-    try {
+    try (Statement statement = executor.getConnection().createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+         ResultSet resultSet = statement.executeQuery(query);) {
       ResultSetMetaData metaData = resultSet.getMetaData();
       int columnCount = metaData.getColumnCount();
       if (schemaColumns.length != columnCount) {

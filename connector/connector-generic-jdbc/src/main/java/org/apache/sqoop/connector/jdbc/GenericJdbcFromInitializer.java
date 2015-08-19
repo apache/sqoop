@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -78,13 +79,11 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     }
 
     Schema schema = new Schema(schemaName);
-    ResultSet rs = null;
     ResultSetMetaData rsmt = null;
-    try {
-      rs = executor.executeQuery(
-        context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL)
-          .replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0")
-      );
+    try (Statement statement = executor.getConnection().createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+         ResultSet rs = statement.executeQuery(context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL)
+                 .replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));) {
 
       rsmt = rs.getMetaData();
       for (int i = 1 ; i <= rsmt.getColumnCount(); i++) {
@@ -103,13 +102,6 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     } catch (SQLException e) {
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0016, e);
     } finally {
-      if(rs != null) {
-        try {
-          rs.close();
-        } catch (SQLException e) {
-          LOG.info("Ignoring exception while closing ResultSet", e);
-        }
-      }
       if (executor != null) {
         executor.close();
       }
@@ -137,7 +129,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     if (StringUtils.isBlank(partitionColumnName) && tableImport) {
       String [] primaryKeyColumns = executor.getPrimaryKey(jobConf.fromJobConfig.schemaName, jobConf.fromJobConfig.tableName);
       LOG.info("Found primary key columns [" + StringUtils.join(primaryKeyColumns, ", ") + "]");
-      if(primaryKeyColumns == null) {
+      if(primaryKeyColumns.length == 0) {
         throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0025, "Please specify partition column.");
       } else if (primaryKeyColumns.length > 1) {
         LOG.warn("Table have compound primary key, for partitioner we're using only first column of the key: " + primaryKeyColumns[0]);
@@ -178,10 +170,9 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
       String incrementalNewMaxValueQuery = sb.toString();
       LOG.info("Incremental new max value query:  " + incrementalNewMaxValueQuery);
 
-      ResultSet rs = null;
-      try {
-        rs = executor.executeQuery(incrementalNewMaxValueQuery);
-
+      try (Statement statement = executor.getConnection().createStatement(
+              ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+           ResultSet rs = statement.executeQuery(incrementalNewMaxValueQuery);) {
         if (!rs.next()) {
           throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0022);
         }
@@ -189,10 +180,6 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
         incrementalMaxValue = rs.getString(1);
         context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE, incrementalMaxValue);
         LOG.info("New maximal value for incremental import is " + incrementalMaxValue);
-      } finally {
-        if(rs != null) {
-          rs.close();
-        }
       }
     }
 
