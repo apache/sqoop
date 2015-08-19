@@ -213,84 +213,13 @@ abstract public class DatabaseProvider {
    */
   public void executeUpdate(String query) {
     LOG.info("Executing query: " + query);
-    Statement stmt = null;
 
-    try {
-      stmt = databaseConnection.createStatement();
+    try (Statement stmt = databaseConnection.createStatement()) {
       stmt.executeUpdate(query);
     } catch (SQLException e) {
       LOG.error("Error in executing query", e);
       throw new RuntimeException("Error in executing query", e);
-    } finally {
-      try {
-        if(stmt != null) {
-          stmt.close();
-        }
-      } catch (SQLException e) {
-        LOG.info("Cant' close statement", e);
-      }
     }
-  }
-
-  /**
-   * Execute given query in a new statement object and return corresponding
-   * result set. Caller is responsible for closing both ResultSet and Statement
-   * object!
-   *
-   * @param query Query to execute
-   * @return Generated ResultSet
-   */
-  public ResultSet executeQuery(String query) {
-    LOG.info("Executing query: " + query);
-    Statement stmt = null;
-
-    try {
-      stmt = databaseConnection.createStatement();
-      return stmt.executeQuery(query);
-    } catch (SQLException e) {
-      LOG.error("Error in executing query", e);
-      throw new RuntimeException("Error in executing query", e);
-    }
-  }
-
-  /**
-   * Execute given insert query in a new statement object and return
-   * generated IDs.
-   *
-   * @param query Query to execute
-   * @return Generated ID.
-   */
-  public Long executeInsertQuery(String query, Object... args) {
-    LOG.info("Executing query: " + query);
-    ResultSet rs = null;
-
-    try {
-      PreparedStatement stmt = databaseConnection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
-      for (int i = 0; i < args.length; ++i) {
-        if (args[i] instanceof String) {
-          stmt.setString(i + 1, (String) args[i]);
-        } else if (args[i] instanceof Long) {
-          stmt.setLong(i + 1, (Long) args[i]);
-        } else if (args[i] instanceof Boolean) {
-          stmt.setBoolean(i + 1, (Boolean) args[i]);
-        } else {
-          stmt.setObject(i + 1, args[i]);
-        }
-      }
-
-      stmt.execute();
-      rs = stmt.getGeneratedKeys();
-      if (rs.next()) {
-        return rs.getLong(1);
-      }
-    } catch (SQLException e) {
-      LOG.error("Error in executing query", e);
-      throw new RuntimeException("Error in executing query", e);
-    } finally {
-      closeResultSetWithStatement(rs);
-    }
-
-    return -1L;
   }
 
   /**
@@ -366,22 +295,11 @@ abstract public class DatabaseProvider {
    * Return rows that match given conditions.
    *
    * @param tableName Table name
-   * @param conditions Conditions in form of double values - column name and value, for example: "id", 1 or "last_update_date", null
-   * @return ResultSet with given criteria
-   */
-  public ResultSet getRows(TableName tableName, Object []conditions) {
-    return getRows(tableName, true, conditions);
-  }
-
-  /**
-   * Return rows that match given conditions.
-   *
-   * @param tableName Table name
    * @param escapeValues Should the values be escaped based on their type or not
    * @param conditions Conditions in form of double values - column name and value, for example: "id", 1 or "last_update_date", null
    * @return ResultSet with given criteria
    */
-  public ResultSet getRows(TableName tableName, boolean escapeValues, Object []conditions) {
+  public String getRowsSql(TableName tableName, boolean escapeValues, Object []conditions) {
     // Columns are in form of two strings - name and value
     if(conditions.length % 2 != 0) {
       throw new RuntimeException("Incorrect number of parameters.");
@@ -410,7 +328,7 @@ abstract public class DatabaseProvider {
       sb.append(" WHERE ").append(StringUtils.join(conditionList, " AND "));
     }
 
-    return executeQuery(sb.toString());
+    return sb.toString();
   }
 
   /**
@@ -477,9 +395,7 @@ abstract public class DatabaseProvider {
     StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM ");
     sb.append(getTableFragment(tableName));
 
-    ResultSet rs = null;
-    try {
-      rs = executeQuery(sb.toString());
+    try (Statement stmt = databaseConnection.createStatement(); ResultSet rs = stmt.executeQuery(sb.toString())) {
       if(!rs.next()) {
         throw new RuntimeException("Row count query did not returned any rows.");
       }
@@ -488,25 +404,6 @@ abstract public class DatabaseProvider {
     } catch (SQLException e) {
       LOG.error("Can't get number of rows: ", e);
       throw new RuntimeException("Can't get number of rows: ", e);
-    } finally {
-      closeResultSetWithStatement(rs);
-    }
-  }
-
-  /**
-   * Close given result set (if not null) and associated statement.
-   *
-   * @param rs ResultSet to close.
-   */
-  public void closeResultSetWithStatement(ResultSet rs) {
-    if(rs != null) {
-      try {
-        Statement stmt = rs.getStatement();
-        rs.close();
-        stmt.close();
-      } catch (SQLException e) {
-        LOG.info("Ignoring exception: ", e);
-      }
     }
   }
 
@@ -531,10 +428,8 @@ abstract public class DatabaseProvider {
   public void dumpTable(TableName tableName) {
     String query = "SELECT * FROM " + getTableFragment(tableName);
     List<String> list = new LinkedList<String>();
-    ResultSet rs = null;
 
-    try {
-      rs = executeQuery(query);
+    try (Statement stmt = databaseConnection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
 
       // Header with column names
       ResultSetMetaData md = rs.getMetaData();
@@ -555,8 +450,6 @@ abstract public class DatabaseProvider {
 
     } catch (SQLException e) {
       LOG.info("Ignoring exception: ", e);
-    } finally {
-      closeResultSetWithStatement(rs);
     }
   }
 

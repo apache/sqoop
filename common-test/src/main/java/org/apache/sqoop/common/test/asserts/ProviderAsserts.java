@@ -23,6 +23,7 @@ import org.apache.sqoop.common.test.db.TableName;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -56,9 +57,8 @@ public class ProviderAsserts {
    * @param values Values that should be present in the table
    */
   public static void assertRow(DatabaseProvider provider, TableName tableName, boolean escapeValues, Object []conditions, Object ...values) {
-    ResultSet rs = null;
-    try {
-      rs = provider.getRows(tableName, escapeValues, conditions);
+    try (Statement stmt = provider.getConnection().createStatement();
+         ResultSet rs = stmt.executeQuery(provider.getRowsSql(tableName, escapeValues, conditions))) {
 
       if(! rs.next()) {
         fail("No rows found.");
@@ -78,8 +78,6 @@ public class ProviderAsserts {
     } catch (SQLException e) {
       LOG.error("Unexpected SQLException", e);
       fail("Unexpected SQLException: " + e);
-    } finally {
-      provider.closeResultSetWithStatement(rs);
     }
   }
 
