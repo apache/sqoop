@@ -28,11 +28,11 @@ public class DefaultTypeList extends DatabaseTypeList {
 
     // Integer type
     add(DatabaseType.builder("INT")
-        .addExample("-32768", new Integer(-32768), "-32768")
-        .addExample("-1", new Integer(-1), "-1")
-        .addExample("0", new Integer(0), "0")
-        .addExample("1", new Integer(1), "1")
-        .addExample("32767", new Integer(32767), "32767")
+        .addExample("-32768", Integer.valueOf(-32768), "-32768")
+        .addExample("-1", Integer.valueOf(-1), "-1")
+        .addExample("0", Integer.valueOf(0), "0")
+        .addExample("1", Integer.valueOf(1), "1")
+        .addExample("32767", Integer.valueOf(32767), "32767")
         .build());
   }
 }

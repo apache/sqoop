@@ -35,34 +35,34 @@ public class MySQLTypeList extends DatabaseTypeList{
 
     // Numeric types
     add(DatabaseType.builder("SMALLINT")
-        .addExample("-32768", new Integer(-32768), "-32768")
-        .addExample("-1", new Integer(-1), "-1")
-        .addExample("0", new Integer(0), "0")
-        .addExample("1", new Integer(1), "1")
-        .addExample("32767", new Integer(32767), "32767")
+        .addExample("-32768", Integer.valueOf(-32768), "-32768")
+        .addExample("-1", Integer.valueOf(-1), "-1")
+        .addExample("0", Integer.valueOf(0), "0")
+        .addExample("1", Integer.valueOf(1), "1")
+        .addExample("32767", Integer.valueOf(32767), "32767")
         .build());
     add(DatabaseType.builder("INT")
-        .addExample("-2147483648", new Integer(-2147483648), "-2147483648")
-        .addExample("-1", new Integer(-1), "-1")
-        .addExample("0", new Integer(0), "0")
-        .addExample("1", new Integer(1), "1")
-        .addExample("2147483647", new Integer(2147483647), "2147483647")
+        .addExample("-2147483648", Integer.valueOf(-2147483648), "-2147483648")
+        .addExample("-1", Integer.valueOf(-1), "-1")
+        .addExample("0", Integer.valueOf(0), "0")
+        .addExample("1", Integer.valueOf(1), "1")
+        .addExample("2147483647", Integer.valueOf(2147483647), "2147483647")
         .build());
     add(DatabaseType.builder("BIGINT")
-        .addExample("-9223372036854775808", new Long(-9223372036854775808L), "-9223372036854775808")
-        .addExample("-1", new Long(-1L), "-1")
-        .addExample("0", new Long(0L), "0")
-        .addExample("1", new Long(1L), "1")
-        .addExample("9223372036854775807", new Long(9223372036854775807L), "9223372036854775807")
+        .addExample("-9223372036854775808", Long.valueOf(-9223372036854775808L), "-9223372036854775808")
+        .addExample("-1", Long.valueOf(-1L), "-1")
+        .addExample("0", Long.valueOf(0L), "0")
+        .addExample("1", Long.valueOf(1L), "1")
+        .addExample("9223372036854775807", Long.valueOf(9223372036854775807L), "9223372036854775807")
         .build());
 
     // Floating points
     add(DatabaseType.builder("DOUBLE")
-        .addExample("-1.79769E+308", new Double(-1.79769E+308), "-1.79769E308")
-        .addExample("1.79769E+308", new Double(1.79769E+308), "1.79769E308")
-        .addExample("0", new Double(0), "0.0")
-        .addExample("2.225E-307", new Double(2.225E-307), "2.225E-307")
-        .addExample("-2.225E-307", new Double(-2.225E-307), "-2.225E-307")
+        .addExample("-1.79769E+308", Double.valueOf(-1.79769E+308), "-1.79769E308")
+        .addExample("1.79769E+308", Double.valueOf(1.79769E+308), "1.79769E308")
+        .addExample("0", Double.valueOf(0), "0.0")
+        .addExample("2.225E-307", Double.valueOf(2.225E-307), "2.225E-307")
+        .addExample("-2.225E-307", Double.valueOf(-2.225E-307), "-2.225E-307")
         .build());
 
     // Boolean

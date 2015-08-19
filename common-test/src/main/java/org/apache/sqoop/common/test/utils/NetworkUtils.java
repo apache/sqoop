@@ -84,7 +84,7 @@ public class NetworkUtils {
         LOG.debug("Attempt " + (i + 1) + " to access " + hostname + ":" + port);
         new Socket(InetAddress.getByName(hostname), port).close();
         return;
-      } catch (Exception e) {
+      } catch (RuntimeException | IOException e) {
         LOG.debug("Failed to connect to " + hostname + ":" + port, e);
       }
 

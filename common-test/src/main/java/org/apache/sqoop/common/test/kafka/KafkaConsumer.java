@@ -69,7 +69,7 @@ public class KafkaConsumer {
     Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
     for (String topic : topics) {
       // we need only single threaded consumers
-      topicCountMap.put(topic, new Integer(1));
+      topicCountMap.put(topic, Integer.valueOf(1));
     }
     consumerMap = consumer.createMessageStreams(topicCountMap);
   }

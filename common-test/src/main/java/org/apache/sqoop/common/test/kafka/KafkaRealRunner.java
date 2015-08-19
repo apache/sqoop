@@ -32,8 +32,8 @@ public class KafkaRealRunner extends KafkaRunnerBase {
   private static final Logger logger = LoggerFactory.getLogger(KafkaLocalRunner.class);
   private String kafkaServerUrl;
   private String zkConnectionString;
-  private final String KAFKA_SERVER_URL_PROPERTY = "sqoop.kafka.server.url";
-  private final String ZK_CONNECTION_STRING_PROPERTY = "sqoop.kafka.zookeeper.url";
+  private static final String KAFKA_SERVER_URL_PROPERTY = "sqoop.kafka.server.url";
+  private static final String ZK_CONNECTION_STRING_PROPERTY = "sqoop.kafka.zookeeper.url";
 
   public KafkaRealRunner() {
     logger.info("Setting up kafka to point to real cluster");
