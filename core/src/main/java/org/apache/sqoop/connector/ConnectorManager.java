@@ -196,8 +196,8 @@ public class ConnectorManager implements Reconfigurable {
     try {
       rtx = repository.getTransaction();
       rtx.begin();
-      for (String name : handlerMap.keySet()) {
-        ConnectorHandler handler = handlerMap.get(name);
+      for (Map.Entry<String, ConnectorHandler> entry : handlerMap.entrySet()) {
+        ConnectorHandler handler = entry.getValue();
         MConnector newConnector = handler.getConnectorConfigurable();
         MConnector registeredConnector = repository.registerConnector(newConnector, autoUpgrade);
         // Set the registered connector in the database to the connector configurable instance

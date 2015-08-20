@@ -159,7 +159,7 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider {
     private synchronized void loadSleepTime() {
       try {
         String value = configuration.get(PROPERTIES_PROVIDER_SLEEP);
-        sleepTime = Long.valueOf(value);
+        sleepTime = Long.parseLong(value);
       } catch(Exception e) {
         LOG.debug("Can't load sleeping period from configuration file,"
           + " using default value " + DEFAULT_SLEEP_TIME, e);

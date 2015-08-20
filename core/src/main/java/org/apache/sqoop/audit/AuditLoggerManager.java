@@ -63,15 +63,6 @@ public class AuditLoggerManager implements Reconfigurable {
     return instance;
   }
 
-  /**
-   * Allows to set instance in case that it's need.
-   *
-   * @param newInstance New instance
-   */
-  public void setInstance(AuditLoggerManager newInstance) {
-    instance = newInstance;
-  }
-
   public AuditLoggerManager() {
     loggers = new ArrayList<AuditLogger>();
   }
@@ -95,10 +86,11 @@ public class AuditLoggerManager implements Reconfigurable {
         AuditLoggerConstants.PREFIX_AUDITLOGGER_CONFIG);
 
     // Initialize audit loggers
-    for (String key : auditLoggerProps.keySet()) {
+    for (Map.Entry<String, String> entry : auditLoggerProps.entrySet()) {
+      String key = entry.getKey();
       if (key.endsWith(AuditLoggerConstants.SUFFIX_AUDITLOGGER_CLASS)) {
         String loggerName = key.substring(0, key.indexOf("."));
-        String loggerClassName = auditLoggerProps.get(key);
+        String loggerClassName = entry.getValue();
 
         if (loggerClassName == null || loggerClassName.trim().length() == 0) {
           throw new SqoopException(AuditLoggerError.AUDIT_0001,

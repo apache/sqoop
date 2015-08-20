@@ -729,7 +729,7 @@ public class JdbcRepository extends Repository {
    */
   @Override
   public void updateJobConfig(final long jobId, final MConfig config, final MConfigUpdateEntityType type) {
-    updateJobConfig(jobId, config, null);
+    updateJobConfig(jobId, config, type, null);
   }
   /**
    * {@inheritDoc}

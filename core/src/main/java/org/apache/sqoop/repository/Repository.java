@@ -459,11 +459,15 @@ public abstract class Repository {
   protected abstract void deleteLinkInputs(long linkId, RepositoryTransaction tx);
 
   private void deletelinksAndJobInputs(List<MLink> links, List<MJob> jobs, RepositoryTransaction tx) {
-    for (MJob job : jobs) {
-      deleteJobInputs(job.getPersistenceId(), tx);
+    if (jobs != null) {
+      for (MJob job : jobs) {
+        deleteJobInputs(job.getPersistenceId(), tx);
+      }
     }
-    for (MLink link : links) {
-      deleteLinkInputs(link.getPersistenceId(), tx);
+    if (links != null) {
+      for (MLink link : links) {
+        deleteLinkInputs(link.getPersistenceId(), tx);
+      }
     }
   }
 

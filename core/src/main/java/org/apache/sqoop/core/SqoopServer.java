@@ -19,6 +19,7 @@ package org.apache.sqoop.core;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.JobManager;
@@ -58,9 +59,9 @@ public class SqoopServer {
       Driver.getInstance().initialize();
       JobManager.getInstance().initialize();
       LOG.info("Sqoop server has successfully boot up");
-    } catch (Exception ex) {
-      LOG.error("Server startup failure", ex);
-      throw new RuntimeException("Failure in server initialization", ex);
+    } catch (RuntimeException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+      LOG.error("Server startup failure", e);
+      throw new RuntimeException("Failure in server initialization", e);
     }
   }
 }

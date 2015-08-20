@@ -279,7 +279,7 @@ public class JobManager implements Reconfigurable {
     prepareJob(jobRequest);
     // Make sure that this job id is not currently running and submit the job
     // only if it's not.
-    synchronized (getClass()) {
+    synchronized (JobManager.class) {
       MSubmission lastSubmission = RepositoryManager.getInstance().getRepository()
           .findLastSubmissionForJob(jobId);
       if (lastSubmission != null && lastSubmission.getStatus().isRunning()) {
@@ -561,8 +561,8 @@ public class JobManager implements Reconfigurable {
       }
 
       RepositoryManager.getInstance().getRepository().updateJob(job);
-    } catch(Exception ex) {
-      LOG.error("Exception when invoking destroyer on job success", ex);
+    } catch (RuntimeException e) {
+      LOG.error("RuntimeException when invoking destroyer on job success", e);
       submission.setStatus(SubmissionStatus.FAILED);
     }
   }

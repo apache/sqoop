@@ -18,6 +18,7 @@
 package org.apache.sqoop.repository;
 
 import java.sql.Connection;
+import java.util.Locale;
 
 public enum JdbcTransactionIsolation {
 
@@ -50,6 +51,6 @@ public enum JdbcTransactionIsolation {
     if (name == null || name.trim().length() == 0) {
       return null;
     }
-    return valueOf(name.trim().toUpperCase());
+    return valueOf(name.trim().toUpperCase(Locale.getDefault()));
   }
 }
