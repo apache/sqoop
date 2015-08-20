@@ -577,7 +577,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       String directionString = directions.remove(0);
       if (directionString != null && !directionString.isEmpty()) {
         Direction direction = Direction.valueOf(directionString);
-        runQuery(STMT_INSERT_SQ_CONFIG_DIRECTIONS, conn, configId, directionMap.get(direction));
+        runQuery(crudQueries.getStmtInsertSqConfigDirections(), conn, configId, directionMap.get(direction));
       }
     }
 
@@ -597,7 +597,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
 
     for (Long connectorId : connectorIds) {
       for (Long directionId : directionMap.values()) {
-        runQuery(STMT_INSERT_SQ_CONNECTOR_DIRECTIONS, conn, connectorId, directionId);
+        runQuery(crudQueries.getStmtInsertSqConnectorDirections(), conn, connectorId, directionId);
       }
     }
   }
@@ -737,7 +737,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
 
     PreparedStatement baseDriverStmt = null;
     try {
-      baseDriverStmt = conn.prepareStatement(STMT_INSERT_INTO_CONFIGURABLE,
+      baseDriverStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
           Statement.RETURN_GENERATED_KEYS);
       baseDriverStmt.setString(1, MDriver.DRIVER_NAME);
       baseDriverStmt.setString(2, Driver.getClassName());

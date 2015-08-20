@@ -17,47 +17,6 @@
  */
 package org.apache.sqoop.repository.common;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.common.DirectionError;
-import org.apache.sqoop.common.ImmutableContext;
-import org.apache.sqoop.common.MutableContext;
-import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.common.SupportedDirections;
-import org.apache.sqoop.driver.Driver;
-import org.apache.sqoop.error.code.CommonRepositoryError;
-import org.apache.sqoop.model.InputEditable;
-import org.apache.sqoop.model.MConfigUpdateEntityType;
-import org.apache.sqoop.model.MLongInput;
-import org.apache.sqoop.model.SubmissionError;
-import org.apache.sqoop.model.MBooleanInput;
-import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MConfigType;
-import org.apache.sqoop.model.MConfigurableType;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MDriver;
-import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MEnumInput;
-import org.apache.sqoop.model.MFromConfig;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MInputType;
-import org.apache.sqoop.model.MIntegerInput;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MLinkConfig;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.model.MToConfig;
-import org.apache.sqoop.repository.JdbcRepositoryHandler;
-import org.apache.sqoop.repository.RepositoryError;
-import org.apache.sqoop.submission.SubmissionStatus;
-import org.apache.sqoop.submission.counter.Counter;
-import org.apache.sqoop.submission.counter.CounterGroup;
-import org.apache.sqoop.submission.counter.Counters;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,6 +30,47 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.DirectionError;
+import org.apache.sqoop.common.ImmutableContext;
+import org.apache.sqoop.common.MutableContext;
+import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SupportedDirections;
+import org.apache.sqoop.driver.Driver;
+import org.apache.sqoop.error.code.CommonRepositoryError;
+import org.apache.sqoop.model.InputEditable;
+import org.apache.sqoop.model.MBooleanInput;
+import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigType;
+import org.apache.sqoop.model.MConfigUpdateEntityType;
+import org.apache.sqoop.model.MConfigurableType;
+import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDriver;
+import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MEnumInput;
+import org.apache.sqoop.model.MFromConfig;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MInputType;
+import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MLongInput;
+import org.apache.sqoop.model.MMapInput;
+import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.SubmissionError;
+import org.apache.sqoop.repository.JdbcRepositoryHandler;
+import org.apache.sqoop.repository.RepositoryError;
+import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.submission.counter.Counter;
+import org.apache.sqoop.submission.counter.CounterGroup;
+import org.apache.sqoop.submission.counter.Counters;
 
 /**
  * Set of methods required from each JDBC based repository.
@@ -197,7 +197,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     try {
       updateConnectorStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
-      deleteInputRelation = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_INPUT_RELATIONS_FOR_INPUT);
+      deleteInputRelation = conn.prepareStatement(crudQueries
+          .getStmtDeleteInputRelationsForInput());
       deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
       deleteConfigDirection = conn.prepareStatement(crudQueries.getStmtDeleteDirectionsForConfigurable());
       deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());
@@ -244,7 +245,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     PreparedStatement deleteInputRelation = null;
     try {
       updateDriverStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
-      deleteInputRelation = conn.prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_DELETE_INPUT_RELATIONS_FOR_INPUT);
+      deleteInputRelation = conn.prepareStatement(crudQueries
+          .getStmtDeleteInputRelationsForInput());
       deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
       deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());
       updateDriverStatement.setString(1, mDriver.getUniqueName());
@@ -2045,8 +2047,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   private void insertConfigInputRelationship(Long parent, Long child, Connection conn) {
     PreparedStatement baseInputRelationStmt = null;
     try {
-      baseInputRelationStmt = conn
-          .prepareStatement(CommonRepositoryInsertUpdateDeleteSelectQuery.STMT_INSERT_INTO_INPUT_RELATION);
+      baseInputRelationStmt = conn.prepareStatement(crudQueries
+          .getStmtInsertIntoInputRelation());
       baseInputRelationStmt.setLong(1, parent);
       baseInputRelationStmt.setLong(2, child);
       baseInputRelationStmt.executeUpdate();
