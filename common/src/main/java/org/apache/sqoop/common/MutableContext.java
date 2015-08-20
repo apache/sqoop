@@ -20,6 +20,8 @@ package org.apache.sqoop.common;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.Map;
+
 /**
  * Mutable addition to immutable context.
  */
@@ -58,4 +60,9 @@ public interface MutableContext extends ImmutableContext {
    * @param value New value
    */
   public void setBoolean(String key, boolean value);
+
+  /**
+   * Add all properties from given map to this context instance.
+   */
+  public void setAll(Map<String, String> map);
 }

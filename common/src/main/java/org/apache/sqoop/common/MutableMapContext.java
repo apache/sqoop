@@ -63,6 +63,11 @@ public class MutableMapContext extends MapContext implements MutableContext {
   }
 
   @Override
+  public void setAll(Map<String, String> map) {
+    getOptions().putAll(map);
+  }
+
+  @Override
   public Iterator<Map.Entry<String, String>> iterator() {
     return getOptions().entrySet().iterator();
   }
