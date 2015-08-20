@@ -26,6 +26,7 @@ import org.apache.sqoop.validation.validators.NotEmpty;
 import org.apache.sqoop.validation.validators.ClassAvailable;
 import org.apache.sqoop.validation.validators.StartsWith;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
@@ -54,8 +55,7 @@ public class LinkConfig {
     @Override
     public void validate(LinkConfig linkConfig) {
       // See if we can connect to the database
-      try {
-        DriverManager.getConnection(linkConfig.connectionString, linkConfig.username, linkConfig.password);
+      try (Connection tempConnection = DriverManager.getConnection(linkConfig.connectionString, linkConfig.username, linkConfig.password)) {
       } catch (SQLException e) {
         addMessage(Status.WARNING, "Can't connect to the database with given credentials: " + e.getMessage());
       }

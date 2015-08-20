@@ -37,7 +37,7 @@ import org.apache.sqoop.job.etl.PartitionerContext;
 
 public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJobConfiguration> {
 
-  private static final BigDecimal NUMERIC_MIN_INCREMENT = new BigDecimal(10000 * Double.MIN_VALUE);
+  private static final BigDecimal NUMERIC_MIN_INCREMENT = BigDecimal.valueOf(10000 * Double.MIN_VALUE);
 
 
   private long numberPartitions;
@@ -149,7 +149,8 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
         minDateValue = Time.valueOf(partitionMinValue).getTime();
         maxDateValue = Time.valueOf(partitionMaxValue).getTime();
         break;
-      case Types.TIMESTAMP:
+      // Here should be the type of Types.TIMESTAMP:
+      default:
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         minDateValue = Timestamp.valueOf(partitionMinValue).getTime();
         maxDateValue = Timestamp.valueOf(partitionMaxValue).getTime();
@@ -190,7 +191,8 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
           objUB = new Time(upperBound);
 
           break;
-        case Types.TIMESTAMP:
+        // Here should be the type of Types.TIMESTAMP:
+        default:
           objLB = new Timestamp(lowerBound);
           objUB = new Timestamp(upperBound);
           break;
@@ -211,7 +213,8 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
         objLB = new Time(upperBound);
         objUB = new Time(maxDateValue);
         break;
-      case Types.TIMESTAMP:
+      // Here should be the type of Types.TIMESTAMP:
+      default:
         objLB = new Timestamp(upperBound);
         objUB = new Timestamp(maxDateValue);
         break;
@@ -473,12 +476,9 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
   }
 
   private Boolean parseBooleanValue(String value) {
-    if (value == null) {
-      return null;
-    }
-    if (value.equals("1")) {
+    if ("1".equals(value)) {
       return Boolean.TRUE;
-    } else if (value.equals("0")) {
+    } else if ("0".equals(value)) {
       return Boolean.FALSE;
     } else {
       return Boolean.parseBoolean(value);
