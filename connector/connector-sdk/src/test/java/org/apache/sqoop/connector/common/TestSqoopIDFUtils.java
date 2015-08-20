@@ -328,16 +328,16 @@ public class TestSqoopIDFUtils {
     Decimal col = new Decimal("dd", 4, 2);
     assertTrue(toDecimal(text, col) instanceof BigDecimal);
     BigDecimal bd = (BigDecimal) toDecimal(text, col);
-    assertEquals("23.44", toCSVDecimal(bd));
+    assertEquals(toCSVDecimal(bd), "23.44");
   }
 
   @Test
   public void testToDecimaPoint2ReturnsDecimal() {
-    String text = "23.44444444";
+    String text = "123456.44444444";
     Decimal col = new Decimal("dd", 8, 2);
     assertTrue(toDecimal(text, col) instanceof BigDecimal);
     BigDecimal bd = (BigDecimal) toDecimal(text, col);
-    assertEquals("23.444444", toCSVDecimal(bd));
+    assertEquals(toCSVDecimal(bd), "123456.44");
   }
 
   @Test
@@ -346,7 +346,7 @@ public class TestSqoopIDFUtils {
     Decimal col = new Decimal("dd", null, null);
     assertTrue(toDecimal(text, col) instanceof BigDecimal);
     BigDecimal bd = (BigDecimal) toDecimal(text, col);
-    assertEquals("23.44444444", toCSVDecimal(bd));
+    assertEquals(toCSVDecimal(bd), "23.44444444");
   }
 
   @Test

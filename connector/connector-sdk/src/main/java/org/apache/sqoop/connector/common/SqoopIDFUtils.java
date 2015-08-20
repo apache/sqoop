@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
+import java.util.Collections;
 
 /**
  * Utility methods for connectors to encode data into the sqoop expected formats
@@ -68,7 +68,7 @@ public class SqoopIDFUtils {
   // implementation.
   public static final String BYTE_FIELD_CHARSET = "ISO-8859-1";
 
-  public static final Map<Character, String> ORIGINALS = new TreeMap<Character, String>();
+  private static final Map<Character, String> ORIGINALS = new TreeMap<Character, String>();
 
   public static final char CSV_SEPARATOR_CHARACTER = ',';
   public static final char ESCAPE_CHARACTER = '\\';
@@ -77,19 +77,19 @@ public class SqoopIDFUtils {
   private static final Map<Character, Character> REPLACEMENTS = new TreeMap<Character, Character>();
 
   static {
-    ORIGINALS.put(new Character((char)0x00), new String(new char[] { ESCAPE_CHARACTER, '0' }));
-    ORIGINALS.put(new Character((char)0x0A), new String(new char[] { ESCAPE_CHARACTER, 'n' }));
-    ORIGINALS.put(new Character((char)0x0D), new String(new char[] { ESCAPE_CHARACTER, 'r' }));
-    ORIGINALS.put(new Character((char)0x1A), new String(new char[] { ESCAPE_CHARACTER, 'Z' }));
-    ORIGINALS.put(new Character((char)0x22), new String(new char[] { ESCAPE_CHARACTER, '"' }));
-    ORIGINALS.put(new Character((char)0x27), new String(new char[] { ESCAPE_CHARACTER, '\'' }));
+    ORIGINALS.put(Character.valueOf((char)0x00), new String(new char[] { ESCAPE_CHARACTER, '0' }));
+    ORIGINALS.put(Character.valueOf((char)0x0A), new String(new char[] { ESCAPE_CHARACTER, 'n' }));
+    ORIGINALS.put(Character.valueOf((char)0x0D), new String(new char[] { ESCAPE_CHARACTER, 'r' }));
+    ORIGINALS.put(Character.valueOf((char)0x1A), new String(new char[] { ESCAPE_CHARACTER, 'Z' }));
+    ORIGINALS.put(Character.valueOf((char)0x22), new String(new char[] { ESCAPE_CHARACTER, '"' }));
+    ORIGINALS.put(Character.valueOf((char)0x27), new String(new char[] { ESCAPE_CHARACTER, '\'' }));
 
-    REPLACEMENTS.put('0', new Character((char)0x00));
-    REPLACEMENTS.put('n', new Character((char)0x0A));
-    REPLACEMENTS.put('r', new Character((char)0x0D));
-    REPLACEMENTS.put('Z', new Character((char)0x1A));
-    REPLACEMENTS.put('"', new Character((char)0x22));
-    REPLACEMENTS.put('\'', new Character((char)0x27));
+    REPLACEMENTS.put('0', Character.valueOf((char)0x00));
+    REPLACEMENTS.put('n', Character.valueOf((char)0x0A));
+    REPLACEMENTS.put('r', Character.valueOf((char)0x0D));
+    REPLACEMENTS.put('Z', Character.valueOf((char)0x1A));
+    REPLACEMENTS.put('"', Character.valueOf((char)0x22));
+    REPLACEMENTS.put('\'', Character.valueOf((char)0x27));
   }
 
   // http://www.joda.org/joda-time/key_format.html provides details on the
@@ -106,14 +106,15 @@ public class SqoopIDFUtils {
   public static final DateTimeFormatter tfWithFraction = DateTimeFormat.forPattern("HH:mm:ss.SSS");
   public static final DateTimeFormatter tfWithNoFraction = DateTimeFormat.forPattern("HH:mm:ss");
 
-  public static final String[] TRUE_BIT_VALUES = new String[] { "1", "true", "TRUE" };
-  public static final Set<String> TRUE_BIT_SET = new HashSet<String>(Arrays.asList(TRUE_BIT_VALUES));
-  public static final String[] FALSE_BIT_VALUES = new String[] { "0", "false", "FALSE" };
-  public static final Set<String> FALSE_BIT_SET = new HashSet<String>(Arrays.asList(FALSE_BIT_VALUES));
+  private static final String[] TRUE_BIT_VALUES = new String[] { "1", "true", "TRUE" };
+  public static final Set<String> TRUE_BIT_SET = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(TRUE_BIT_VALUES)));
+  private static final String[] FALSE_BIT_VALUES = new String[] { "0", "false", "FALSE" };
+  public static final Set<String> FALSE_BIT_SET = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(FALSE_BIT_VALUES)));
 
   // ******** Number Column Type utils***********
 
   public static boolean isInteger(Column column) {
+    assert column instanceof FixedPoint;
     Long byteSize = ((FixedPoint) column).getByteSize();
     Boolean signed = ((FixedPoint) column).isSigned();
 
@@ -129,15 +130,15 @@ public class SqoopIDFUtils {
   public static String toCSVFixedPoint(Object obj, Column column) {
     if (isInteger(column)) {
       if (obj instanceof Number) {
-        return new Integer(((Number)obj).intValue()).toString();
+        return Integer.toString(((Number) obj).intValue());
       } else {
-        return new Integer(obj.toString()).toString();
+        return Integer.valueOf(obj.toString()).toString();
       }
     } else {
       if (obj instanceof Number) {
-        return new Long(((Number)obj).longValue()).toString();
+        return Long.toString(((Number) obj).longValue());
       } else {
-        return new Long(obj.toString()).toString();
+        return Long.valueOf(obj.toString()).toString();
       }
     }
   }
@@ -153,6 +154,7 @@ public class SqoopIDFUtils {
   }
 
   public static String toCSVFloatingPoint(Object obj, Column column) {
+    assert column instanceof FloatingPoint;
     Long byteSize = ((FloatingPoint) column).getByteSize();
     if (byteSize != null && byteSize <= (Float.SIZE / Byte.SIZE)) {
       return ((Float) obj).toString();
@@ -163,6 +165,7 @@ public class SqoopIDFUtils {
 
   public static Object toFloatingPoint(String csvString, Column column) {
     Object returnValue;
+    assert column instanceof FloatingPoint;
     Long byteSize = ((FloatingPoint) column).getByteSize();
     if (byteSize != null && byteSize <= (Float.SIZE / Byte.SIZE)) {
       returnValue = Float.valueOf(csvString);
@@ -177,6 +180,7 @@ public class SqoopIDFUtils {
   }
 
   public static Object toDecimal(String csvString, Column column) {
+    assert column instanceof org.apache.sqoop.schema.type.Decimal;
     Integer precision = ((org.apache.sqoop.schema.type.Decimal) column).getPrecision();
     Integer scale = ((org.apache.sqoop.schema.type.Decimal) column).getScale();
     BigDecimal bd = null;
@@ -190,7 +194,7 @@ public class SqoopIDFUtils {
       // we have decided to use the default MathContext DEFAULT_ROUNDINGMODE
       // which is RoundingMode.HALF_UP,
       // we are aware that there may be some loss
-      bd.setScale(scale, RoundingMode.HALF_UP);
+      bd = bd.setScale(scale, RoundingMode.HALF_UP);
     }
     return bd;
   }
@@ -218,11 +222,14 @@ public class SqoopIDFUtils {
   // *********** DATE and TIME Column Type utils **********
 
   public static String toCSVDate(Object obj) {
+    assert obj instanceof org.joda.time.LocalDate;
     org.joda.time.LocalDate date = (org.joda.time.LocalDate) obj;
     return encloseWithQuotes(df.print(date));
   }
 
   public static String toCSVTime(Object obj, Column col) {
+    assert col instanceof org.apache.sqoop.schema.type.Time;
+    assert obj instanceof org.joda.time.LocalTime;
     if (((org.apache.sqoop.schema.type.Time) col).hasFraction()) {
       return encloseWithQuotes(tfWithFraction.print((org.joda.time.LocalTime) obj));
     } else {
@@ -241,6 +248,8 @@ public class SqoopIDFUtils {
   // *********** DATE TIME Column Type utils **********
 
   public static String toCSVLocalDateTime(Object obj, Column col) {
+    assert obj instanceof org.joda.time.LocalDateTime;
+    assert col instanceof org.apache.sqoop.schema.type.DateTime;
     org.joda.time.LocalDateTime localDateTime = (org.joda.time.LocalDateTime) obj;
     org.apache.sqoop.schema.type.DateTime column = (org.apache.sqoop.schema.type.DateTime) col;
     if (column.hasFraction()) {
@@ -251,6 +260,8 @@ public class SqoopIDFUtils {
   }
 
   public static String toCSVDateTime(Object obj, Column col) {
+    assert obj instanceof org.joda.time.DateTime;
+    assert col instanceof org.apache.sqoop.schema.type.DateTime;
     org.joda.time.DateTime dateTime = (org.joda.time.DateTime) obj;
     org.apache.sqoop.schema.type.DateTime column = (org.apache.sqoop.schema.type.DateTime) col;
     if (column.hasFraction() && column.hasTimezone()) {
@@ -267,7 +278,8 @@ public class SqoopIDFUtils {
   public static Object toDateTime(String csvString, Column column) {
     Object returnValue;
     String dateTime = removeQuotes(csvString);
-    org.apache.sqoop.schema.type.DateTime col = ((org.apache.sqoop.schema.type.DateTime) column);
+    assert column instanceof org.apache.sqoop.schema.type.DateTime;
+    org.apache.sqoop.schema.type.DateTime col = (org.apache.sqoop.schema.type.DateTime) column;
     if (col.hasFraction() && col.hasTimezone()) {
       // After calling withOffsetParsed method, a string
       // '2004-06-09T10:20:30-08:00' will create a datetime with a zone of
@@ -288,7 +300,8 @@ public class SqoopIDFUtils {
   public static Long toDateTimeInMillis(String csvString, Column column) {
     long returnValue;
     String dateTime = removeQuotes(csvString);
-    org.apache.sqoop.schema.type.DateTime col = ((org.apache.sqoop.schema.type.DateTime) column);
+    assert column instanceof org.apache.sqoop.schema.type.DateTime;
+    org.apache.sqoop.schema.type.DateTime col = (org.apache.sqoop.schema.type.DateTime) column;
     if (col.hasFraction() && col.hasTimezone()) {
       // After calling withOffsetParsed method, a string
       // '2004-06-09T10:20:30-08:00' will create a datetime with a zone of
@@ -370,6 +383,7 @@ public class SqoopIDFUtils {
   public static String toCSVList(Object[] list, Column column) {
     List<Object> elementList = new ArrayList<Object>();
     for (int n = 0; n < list.length; n++) {
+      assert column instanceof AbstractComplexListType;
       Column listType = ((AbstractComplexListType) column).getListType();
       // 2 level nesting supported
       if (isColumnListType(listType)) {
@@ -751,7 +765,7 @@ public class SqoopIDFUtils {
 
     if (csvArray.length != columns.length) {
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-          "The data " + csvArray + " has the wrong number of fields.");
+          "The data " + Arrays.toString(csvArray) + " has the wrong number of fields.");
     }
 
     Object[] objectArray = new Object[csvArray.length];

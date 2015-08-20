@@ -37,6 +37,7 @@ import org.json.simple.parser.ParseException;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -223,7 +224,7 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
     Column[] columns = schema.getColumnsArray();
 
     if (objectArray.length != columns.length) {
-      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001, "The data " + objectArray.toString()
+      throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001, "The data " + Arrays.toString(objectArray)
           + " has the wrong number of fields.");
     }
     JSONObject json = new JSONObject();
@@ -251,14 +252,12 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
         jsonObject.putAll(map);
         json.put(columns[i].getName(), jsonObject);
         break;
-      case ENUM:
-      case TEXT:
-        json.put(columns[i].getName(), objectArray[i]);
-        break;
       case BINARY:
       case UNKNOWN:
         json.put(columns[i].getName(), Base64.encodeBase64String((byte[]) objectArray[i]));
         break;
+      case ENUM:
+      case TEXT:
       case FIXED_POINT:
       case FLOATING_POINT:
       case DECIMAL:
@@ -363,13 +362,12 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
     }
     Column[] columns = schema.getColumnsArray();
     Object[] object = new Object[columns.length];
-
-    Set<String> jsonKeyNames = json.keySet();
-    for (String name : jsonKeyNames) {
-      Integer nameIndex = schema.getColumnNameIndex(name);
+    Set<Map.Entry<String,Object>> entrySet = json.entrySet();
+    for (Map.Entry<String,Object> entry : entrySet) {
+      Integer nameIndex = schema.getColumnNameIndex(entry.getKey());
       Column column = columns[nameIndex];
 
-      Object obj = json.get(name);
+      Object obj = entry.getValue();
       // null is a possible value
       if (obj == null && !column.isNullable()) {
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,

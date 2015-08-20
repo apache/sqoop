@@ -74,6 +74,7 @@ public class SqoopAvroUtils {
     switch (column.getType()) {
     case ARRAY:
     case SET:
+      assert column instanceof AbstractComplexListType;
       AbstractComplexListType listColumn = (AbstractComplexListType) column;
       return Schema.createArray(toAvroFieldType(listColumn.getListType()));
     case UNKNOWN:
@@ -93,20 +94,21 @@ public class SqoopAvroUtils {
     case ENUM:
       return createEnumSchema(column);
     case FIXED_POINT:
-      Long byteSize = ((FixedPoint) column).getByteSize();
       if (SqoopIDFUtils.isInteger(column)) {
         return Schema.create(Schema.Type.INT);
       } else {
         return Schema.create(Schema.Type.LONG);
       }
     case FLOATING_POINT:
-      byteSize = ((FloatingPoint) column).getByteSize();
+      assert column instanceof FloatingPoint;
+      Long byteSize = ((FloatingPoint) column).getByteSize();
       if (byteSize != null && byteSize <= (Float.SIZE/Byte.SIZE)) {
         return Schema.create(Schema.Type.FLOAT);
       } else {
         return Schema.create(Schema.Type.DOUBLE);
       }
     case MAP:
+      assert column instanceof org.apache.sqoop.schema.type.Map;
       org.apache.sqoop.schema.type.Map mapColumn = (org.apache.sqoop.schema.type.Map) column;
       return Schema.createArray(toAvroFieldType(mapColumn.getValue()));
     case TEXT:
@@ -117,6 +119,7 @@ public class SqoopAvroUtils {
   }
 
   public static Schema createEnumSchema(Column column) {
+    assert column instanceof org.apache.sqoop.schema.type.Enum;
     Set<String> options = ((org.apache.sqoop.schema.type.Enum) column).getOptions();
     List<String> listOptions = new ArrayList<String>(options);
     return Schema.createEnum(column.getName(), null, SQOOP_SCHEMA_NAMESPACE, listOptions);

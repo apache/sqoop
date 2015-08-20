@@ -120,6 +120,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
   public void write(DataOutput out) throws IOException {
     // do we need to write the schema?
     DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(avroSchema);
+    assert out instanceof DataOutputStream;
     BinaryEncoder encoder = EncoderFactory.get().directBinaryEncoder((DataOutputStream) out, null);
     writer.write(data, encoder);
   }
@@ -130,6 +131,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
   @Override
   public void read(DataInput in) throws IOException {
     DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(avroSchema);
+    assert in instanceof InputStream;
     Decoder decoder = DecoderFactory.get().binaryDecoder((InputStream) in, null);
     data = reader.read(null, decoder);
   }
@@ -238,7 +240,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
 
     if (objectArray.length != columns.length) {
       throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
-          "The data " + objectArray.toString() + " has the wrong number of fields.");
+          "The data " + Arrays.toString(objectArray) + " has the wrong number of fields.");
     }
     // get avro schema from sqoop schema
     GenericRecord avroObject = new GenericData.Record(avroSchema);
@@ -257,9 +259,6 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
       case SET:
         avroObject.put(columns[i].getName(), toList((Object[]) objectArray[i]));
         break;
-      case MAP:
-        avroObject.put(columns[i].getName(), objectArray[i]);
-        break;
       case ENUM:
         GenericData.EnumSymbol enumValue = new GenericData.EnumSymbol(createEnumSchema(columns[i]),
             (String) objectArray[i]);
@@ -272,6 +271,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
       case UNKNOWN:
         avroObject.put(columns[i].getName(), ByteBuffer.wrap((byte[]) objectArray[i]));
         break;
+      case MAP:
       case FIXED_POINT:
       case FLOATING_POINT:
         avroObject.put(columns[i].getName(), objectArray[i]);
@@ -298,7 +298,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
             .getTime());
         break;
       case BIT:
-        avroObject.put(columns[i].getName(), Boolean.valueOf((Boolean) objectArray[i]));
+        avroObject.put(columns[i].getName(), Boolean.valueOf(objectArray[i].toString()));
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
@@ -412,13 +412,12 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
       case SET:
         object[nameIndex] = toObjectArray((List<Object>) obj);
         break;
-      case MAP:
-        object[nameIndex] = obj;
-        break;
       case ENUM:
         // stored as enum symbol
       case TEXT:
         // stored as UTF8
+      case DECIMAL:
+          // stored as string
         object[nameIndex] = obj.toString();
         break;
       case BINARY:
@@ -426,14 +425,11 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
         // stored as byte buffer
         object[nameIndex] = getBytesFromByteBuffer(obj);
         break;
+      case MAP:
       case FIXED_POINT:
       case FLOATING_POINT:
         // stored as java objects in avro as well
         object[nameIndex] = obj;
-        break;
-      case DECIMAL:
-        // stored as string
-        object[nameIndex] = obj.toString();
         break;
       case DATE:
         Long dateInMillis = (Long) obj;
