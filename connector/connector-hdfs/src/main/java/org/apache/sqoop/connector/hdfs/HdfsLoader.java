@@ -72,7 +72,7 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
         if (codec instanceof Configurable) {
           ((Configurable) codec).setConf(conf);
         }
-      } catch (Exception e) {
+      } catch (RuntimeException|InstantiationException|IllegalAccessException e) {
         throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0004, codecname, e);
       }
     }

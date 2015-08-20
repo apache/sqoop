@@ -166,9 +166,6 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
       long maxSize, long minSizeNode, long minSizeRack,
       List<Partition> partitions) throws IOException {
 
-    // all blocks for all the files in input set
-    OneFileInfo[] files;
-
     // mapping from a rack name to the list of blocks it has
     HashMap<String, List<OneBlockInfo>> rackToBlocks =
                               new HashMap<String, List<OneBlockInfo>>();
@@ -181,14 +178,13 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
     HashMap<String, List<OneBlockInfo>> nodeToBlocks =
                               new HashMap<String, List<OneBlockInfo>>();
 
-    files = new OneFileInfo[paths.size()];
     if (paths.size() == 0) {
       return;
     }
 
     // populate all the blocks for all files
     for (int i = 0; i < paths.size(); i++) {
-      files[i] = new OneFileInfo(paths.get(i), conf, isSplitable(conf, paths.get(i)),
+      new OneFileInfo(paths.get(i), conf, isSplitable(conf, paths.get(i)),
                                  rackToBlocks, blockToNodes, nodeToBlocks,
                                  rackToNodes, maxSize);
     }

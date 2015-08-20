@@ -33,6 +33,7 @@ import org.apache.sqoop.etl.io.DataReader;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 /**
@@ -143,8 +144,8 @@ public class SftpConnectorClient {
       LOG.info("Opened OutputStream to path: " + path);
       String record;
       while ((record = reader.readTextRecord()) != null) {
-        out.write(record.getBytes());
-        out.write(("\n").getBytes());
+        out.write(record.getBytes(Charset.forName("UTF-8")));
+        out.write(("\n").getBytes(Charset.forName("UTF-8")));
         recordsWritten++;
       }
     } catch (Exception e) {

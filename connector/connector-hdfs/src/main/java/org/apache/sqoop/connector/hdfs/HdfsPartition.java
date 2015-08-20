@@ -46,10 +46,10 @@ public class HdfsPartition extends Partition {
       this.lenFiles += length;
     }
     this.numFiles = files.length;
-    this.files = files;
-    this.offsets = offsets;
-    this.lengths = lengths;
-    this.locations = locations;
+    this.files = files.clone();
+    this.offsets = offsets.clone();
+    this.lengths = lengths.clone();
+    this.locations = locations.clone();
   }
 
   public long getLengthOfFiles() {
@@ -70,10 +70,6 @@ public class HdfsPartition extends Partition {
 
   public long getLength(int i) {
     return lengths[i];
-  }
-
-  public String[] getLocations() {
-    return locations;
   }
 
   @Override

@@ -31,6 +31,7 @@ import org.apache.sqoop.etl.io.DataReader;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 /**
@@ -161,8 +162,8 @@ public class FtpConnectorClient {
         String record;
         while ((record = reader.readTextRecord()) != null) {
           LOG.info("Writing record to FTP server:" + record);
-          output.write(record.getBytes());
-          output.write(("\n").getBytes());
+          output.write(record.getBytes(Charset.forName("UTF-8")));
+          output.write(("\n").getBytes(Charset.forName("UTF-8")));
           recordsWritten++;
         }
 
