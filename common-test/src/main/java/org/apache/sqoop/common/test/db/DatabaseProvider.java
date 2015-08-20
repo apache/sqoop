@@ -467,4 +467,13 @@ abstract public class DatabaseProvider {
 
     return escapeSchemaName(tableName.getSchemaName()) + "." + escapeTableName(tableName.getTableName());
   }
+
+  /**
+   * Drop database, this should be implemented for the DatabaseProvider like:
+   * MySqlProvider.
+   *
+   * @param databaseName
+   */
+  public void dropDatabase(String databaseName) {
+  }
 }

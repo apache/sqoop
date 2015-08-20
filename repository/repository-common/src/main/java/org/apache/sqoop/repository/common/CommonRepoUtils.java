@@ -39,6 +39,10 @@ public class CommonRepoUtils {
     return QUOTE_CHARACTER + schemaName + QUOTE_CHARACTER;
   }
 
+  public static final String escapeDatabaseName(String databaseName) {
+    return QUOTE_CHARACTER + databaseName + QUOTE_CHARACTER;
+  }
+
   public static final String escapeConstraintName(String constraintName) {
     return QUOTE_CHARACTER + constraintName + QUOTE_CHARACTER;
   }

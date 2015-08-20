@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.common.test.db;
 
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.test.db.types.DatabaseTypeList;
 import org.apache.sqoop.common.test.db.types.MySQLTypeList;
 
@@ -27,6 +28,7 @@ import org.apache.sqoop.common.test.db.types.MySQLTypeList;
  * on the same box (localhost) that is access via sqoop/sqoop credentials.
  */
 public class MySQLProvider extends DatabaseProvider {
+  private static final Logger LOG = Logger.getLogger(MySQLProvider.class);
 
   public static final String DRIVER = "com.mysql.jdbc.Driver";
 
@@ -70,9 +72,19 @@ public class MySQLProvider extends DatabaseProvider {
     return escape(tableName);
   }
 
+  public String escapeDatabaseName(String databaseName) {
+    return escape(databaseName);
+  }
+
+  // the scheme name is the same as database name.
+  @Override
+  public boolean isSupportingScheme() {
+    return true;
+  }
+
   @Override
   public String escapeValueString(String value) {
-    return "\"" + value + "\"";
+    return escape(value);
   }
 
   @Override
@@ -84,7 +96,20 @@ public class MySQLProvider extends DatabaseProvider {
   public DatabaseTypeList getDatabaseTypes() {
     return new MySQLTypeList();
   }
+
+  @Override
+  public void dropDatabase(String databaseName) {
+    StringBuilder sb = new StringBuilder("DROP DATABASE ");
+    sb.append(escapeDatabaseName(databaseName));
+
+    try {
+      executeUpdate(sb.toString());
+    } catch (RuntimeException e) {
+      LOG.info("Ignoring exception: " + e);
+    }
+  }
+
   public String escape(String entity) {
-    return "`" + entity + "`";
+    return "\"" + entity + "\"";
   }
 }
