@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import java.util.Locale;
+
 /**
  * Model describing entire resource object which used in resource based authorization controller
  */
@@ -50,7 +52,7 @@ public class MResource {
    */
   public MResource(String name,
                    String typeName) {
-    this(name, TYPE.valueOf(typeName.toUpperCase()));
+    this(name, TYPE.valueOf(typeName.toUpperCase(Locale.getDefault())));
   }
 
   @Override

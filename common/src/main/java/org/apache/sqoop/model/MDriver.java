@@ -85,8 +85,7 @@ public final class MDriver extends Configurable {
 
   @Override
   public MDriver clone(boolean cloneWithValue) {
-    cloneWithValue = false;
-    MDriver copy = new MDriver(this.driverConfig.clone(cloneWithValue), this.version);
+    MDriver copy = new MDriver(this.driverConfig.clone(false), this.version);
     copy.setPersistenceId(this.getPersistenceId());
     return copy;
   }

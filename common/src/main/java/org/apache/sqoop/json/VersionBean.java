@@ -109,7 +109,10 @@ public class VersionBean implements JsonBean {
   }
 
   public String[] getSupportedAPIVersions() {
-    return this.supportedRestAPIVersions;
+    if (supportedRestAPIVersions == null) {
+      return new String[]{};
+    }
+    return supportedRestAPIVersions.clone();
   }
 
 }

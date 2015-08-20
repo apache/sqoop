@@ -116,7 +116,10 @@ public class Schema {
   }
 
   public Date getCreationDate() {
-    return creationDate;
+    if (creationDate != null) {
+      return new Date(creationDate.getTime());
+    }
+    return null;
   }
 
   public String getNote() {
@@ -129,7 +132,11 @@ public class Schema {
   }
 
   public Schema setCreationDate(Date creationDate) {
-    this.creationDate = creationDate;
+    if (creationDate != null) {
+      this.creationDate = new Date(creationDate.getTime());
+    } else {
+      this.creationDate = null;
+    }
     return this;
   }
 

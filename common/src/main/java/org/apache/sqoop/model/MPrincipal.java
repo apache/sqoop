@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import java.util.Locale;
+
 /**
  * Model describing entire principal object which used in principal based authorization controller
  */
@@ -50,7 +52,7 @@ public class MPrincipal {
    */
   public MPrincipal(String name,
                     String typeName) {
-    this(name, TYPE.valueOf(typeName.toUpperCase()));
+    this(name, TYPE.valueOf(typeName.toUpperCase(Locale.getDefault())));
   }
 
   @Override

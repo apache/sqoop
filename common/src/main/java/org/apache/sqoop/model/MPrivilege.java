@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.model;
 
+import java.util.Locale;
+
 /**
  * Model describing entire privilege object which used in privilege based authorization controller
  */
@@ -57,7 +59,7 @@ public class MPrivilege {
   public MPrivilege(MResource resource,
                     String actionName,
                     boolean with_grant_option) {
-    this(resource, ACTION.valueOf(actionName.toUpperCase()), with_grant_option);
+    this(resource, ACTION.valueOf(actionName.toUpperCase(Locale.getDefault())), with_grant_option);
   }
 
   @Override

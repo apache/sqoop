@@ -38,11 +38,18 @@ public class MEnumInput extends MInput<String> {
 
   public MEnumInput(String name, boolean sensitive, InputEditable editable, String overrides, String[] values) {
     super(name, sensitive, editable, overrides);
-    this.values = values;
+    if (values != null) {
+      this.values = values.clone();
+    } else {
+      this.values = null;
+    }
   }
 
   public String[] getValues() {
-    return values;
+    if (values != null) {
+      return values.clone();
+    }
+    return new String[]{};
   }
 
   @Override

@@ -95,11 +95,18 @@ abstract public class MAccountableEntity extends MValidatedElement {
   }
 
   public void setCreationDate(Date createDate) {
-    this.creationDate = createDate;
+    if (createDate != null) {
+      this.creationDate = new Date(createDate.getTime());
+    } else {
+      this.creationDate = null;
+    }
   }
 
   public Date getCreationDate() {
-    return creationDate;
+    if (creationDate != null) {
+      return new Date(creationDate.getTime());
+    }
+    return null;
   }
 
   public void setLastUpdateUser(String name) {
@@ -111,11 +118,18 @@ abstract public class MAccountableEntity extends MValidatedElement {
   }
 
   public void setLastUpdateDate(Date lastUpdateDate) {
-    this.lastUpdateDate = lastUpdateDate;
+    if (lastUpdateDate != null) {
+      this.lastUpdateDate = new Date(lastUpdateDate.getTime());
+    } else {
+      this.lastUpdateDate = null;
+    }
   }
 
   public Date getLastUpdateDate() {
-    return lastUpdateDate;
+    if (lastUpdateDate != null) {
+      return new Date(lastUpdateDate.getTime());
+    }
+    return null;
   }
 
   public void setEnabled(boolean enable) {

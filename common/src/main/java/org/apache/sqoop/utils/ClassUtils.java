@@ -145,7 +145,7 @@ public final class ClassUtils {
    */
   public static String[] getEnumStrings(Class klass) {
     if(!klass.isEnum()) {
-      return null;
+      return new String[]{};
     }
 
     ArrayList<String> values = new ArrayList<String>();
@@ -156,9 +156,9 @@ public final class ClassUtils {
       for(Object constant : klass.getEnumConstants()) {
         values.add((String) methodName.invoke(constant));
       }
-    } catch (Exception e) {
+    } catch (RuntimeException|NoSuchMethodException|IllegalAccessException|InvocationTargetException e) {
       LOG.error("Can't get list of values from enumeration " + klass.getCanonicalName(), e);
-      return null;
+      return new String[]{};
     }
 
     return values.toArray(new String[values.size()]);

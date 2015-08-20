@@ -114,7 +114,7 @@ public class TestClassUtils {
 
   @Test
   public void testGetEnumStrings() {
-    assertNull(ClassUtils.getEnumStrings(A.class));
+    assertEquals(new String[]{}, ClassUtils.getEnumStrings(A.class));
 
     assertEquals(
             new String[]{"A", "B", "C"},

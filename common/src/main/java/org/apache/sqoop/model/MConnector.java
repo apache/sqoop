@@ -137,21 +137,21 @@ public final class MConnector extends Configurable {
 
   public MConnector clone(boolean cloneWithValue) {
     // Connector never have any values filled
-    cloneWithValue = false;
+    boolean isCloneWithValue = false;
 
     MFromConfig fromConfig = this.getFromConfig();
     MToConfig toConfig = this.getToConfig();
 
     if (fromConfig != null) {
-      fromConfig = fromConfig.clone(cloneWithValue);
+      fromConfig = fromConfig.clone(isCloneWithValue);
     }
 
     if (toConfig != null) {
-      toConfig = toConfig.clone(cloneWithValue);
+      toConfig = toConfig.clone(isCloneWithValue);
     }
 
     MConnector copy = new MConnector(this.getUniqueName(), this.getClassName(), this.getVersion(),
-        this.getLinkConfig().clone(cloneWithValue), fromConfig, toConfig);
+        this.getLinkConfig().clone(isCloneWithValue), fromConfig, toConfig);
     copy.setPersistenceId(this.getPersistenceId());
     return copy;
   }

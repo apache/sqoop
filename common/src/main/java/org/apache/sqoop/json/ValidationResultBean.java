@@ -54,7 +54,10 @@ public class ValidationResultBean implements JsonBean {
   }
 
   public ConfigValidationResult[] getValidationResults() {
-    return results;
+    if (results == null) {
+      return new ConfigValidationResult[]{};
+    }
+    return results.clone();
   }
 
   public void setId(Long id) {
