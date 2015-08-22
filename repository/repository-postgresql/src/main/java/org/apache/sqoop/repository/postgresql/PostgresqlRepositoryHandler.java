@@ -55,7 +55,6 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
   @Override
   public synchronized void initialize(JdbcRepositoryContext ctx) {
     repoContext = ctx;
-    repoContext.getDataSource();
     LOG.info("PostgresqlRepositoryHandler initialized.");
   }
 
@@ -72,33 +71,30 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
    * @return
    */
   public int detectRepositoryVersion(Connection conn) {
-    ResultSet rs = null, metadataResultSet = null;
-    PreparedStatement stmt = null;
-
     // Select and return the version
     try {
       DatabaseMetaData md = conn.getMetaData();
-      metadataResultSet = md.getTables(null,
+      try (ResultSet metadataResultSet = md.getTables(null,
           CommonRepositorySchemaConstants.SCHEMA_SQOOP,
-          CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME, null);
+          CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME, null)){
 
-      if (metadataResultSet.next()) {
-        stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_SELECT_SYSTEM);
-        stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
-        rs = stmt.executeQuery();
+        if (metadataResultSet.next()) {
+          try (PreparedStatement stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_SELECT_SYSTEM)){
+            stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
+            try (ResultSet rs = stmt.executeQuery()){
 
-        if (!rs.next()) {
-          return 0;
+              if (!rs.next()) {
+                return 0;
+              }
+
+              return rs.getInt(1);
+            }
+          }
         }
-
-        return rs.getInt(1);
       }
     } catch (SQLException e) {
       LOG.info("Can't fetch repository structure version.", e);
       return 0;
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
 
     return 0;
@@ -144,24 +140,16 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
       runQuery(PostgresqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONTEXT, conn);
     }
 
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_DELETE_SYSTEM);
-      stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
-      stmt.executeUpdate();
+    try (PreparedStatement stmtDel = conn.prepareStatement(PostgresqlSchemaQuery.STMT_DELETE_SYSTEM);
+         PreparedStatement stmtInsert = conn.prepareStatement(PostgresqlSchemaQuery.STMT_INSERT_SYSTEM);) {
+      stmtDel.setString(1, CommonRepoConstants.SYSKEY_VERSION);
+      stmtDel.executeUpdate();
 
-      closeStatements(stmt);
-
-      stmt = conn.prepareStatement(PostgresqlSchemaQuery.STMT_INSERT_SYSTEM);
-      stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
-      stmt.setString(2, Integer.toString(PostgresqlRepoConstants.LATEST_POSTGRESQL_REPOSITORY_VERSION));
-      stmt.executeUpdate();
+      stmtInsert.setString(1, CommonRepoConstants.SYSKEY_VERSION);
+      stmtInsert.setString(2, Integer.toString(PostgresqlRepoConstants.LATEST_POSTGRESQL_REPOSITORY_VERSION));
+      stmtInsert.executeUpdate();
     } catch (SQLException e) {
       LOG.error("Can't persist the repository version", e);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
   }
 
