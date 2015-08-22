@@ -22,6 +22,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.test.hadoop.HadoopRunner;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -67,8 +72,7 @@ public class HdfsUtils {
    * Create HDFS file with given content.
    *
    * @param fs filesystem object
-   * @param directory Directory where the file should be created
-   * @param filename File name
+   * @param path path to file be created
    * @param lines Individual lines that should be written into the file
    * @throws IOException
    */

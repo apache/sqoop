@@ -52,4 +52,9 @@ public class InProcessSqoopMiniCluster extends SqoopMiniCluster {
     SqoopServer.destroy();
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public String getServerUrl() {
+    return "http://localhost:12000/sqoop";
+  }
 }

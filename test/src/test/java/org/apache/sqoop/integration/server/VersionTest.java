@@ -19,7 +19,10 @@ package org.apache.sqoop.integration.server;
 
 import org.apache.sqoop.client.request.VersionResourceRequest;
 import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.test.testcases.TomcatTestCase;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.json.VersionBean;
 import org.testng.annotations.Test;
 
@@ -28,12 +31,13 @@ import static org.testng.Assert.assertEquals;
 /**
  * Basic test to check that server is working and returning correct version info.
  */
-public class VersionTest extends TomcatTestCase {
+@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
+public class VersionTest extends SqoopTestCase {
 
   @Test
   public void testVersion() {
     VersionResourceRequest versionRequest = new VersionResourceRequest();
-    VersionBean versionBean = versionRequest.read(getServerUrl());
+    VersionBean versionBean = versionRequest.read(getSqoopServerUrl());
 
     assertEquals(versionBean.getBuildVersion(), VersionInfo.getBuildVersion());
     assertEquals(versionBean.getBuildDate(), VersionInfo.getBuildDate());

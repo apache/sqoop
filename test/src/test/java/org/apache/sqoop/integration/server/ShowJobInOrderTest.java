@@ -20,6 +20,10 @@ package org.apache.sqoop.integration.server;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.Test;
 
@@ -30,7 +34,8 @@ import static org.testng.Assert.assertEquals;
 /**
  * Ensure that jobs will be shown in order
  */
-public class ShowJobInOrderTest extends ConnectorTestCase {
+@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
+public class ShowJobInOrderTest extends SqoopTestCase {
 
   public ShowJobInOrderTest() {
   }
@@ -46,7 +51,7 @@ public class ShowJobInOrderTest extends ConnectorTestCase {
 
     // HDFS link
     MLink hdfsLink = getClient().createLink("hdfs-connector");
-    fillHdfsLink(hdfsLink);
+    fillHdfsLinkConfig(hdfsLink);
     saveLink(hdfsLink);
 
     // Job creation

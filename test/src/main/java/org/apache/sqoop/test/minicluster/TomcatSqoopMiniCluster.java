@@ -189,6 +189,7 @@ public class TomcatSqoopMiniCluster extends SqoopMiniCluster {
   /**
    * Return server URL.
    */
+  @Override
   public String getServerUrl() {
     // We're not doing any changes, so return default URL
     return "http://localhost:" + port + "/sqoop/";

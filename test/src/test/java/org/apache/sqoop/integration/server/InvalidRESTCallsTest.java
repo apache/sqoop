@@ -21,6 +21,11 @@ import org.apache.log4j.Logger;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
 import org.testng.ITest;
@@ -35,7 +40,8 @@ import java.nio.charset.Charset;
 
 import static org.testng.Assert.assertEquals;
 
-public class InvalidRESTCallsTest extends ConnectorTestCase implements ITest {
+@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
+public class InvalidRESTCallsTest extends SqoopTestCase {
 
   private static final Logger LOG = Logger.getLogger(InvalidRESTCallsTest.class);
 
@@ -120,10 +126,9 @@ public class InvalidRESTCallsTest extends ConnectorTestCase implements ITest {
   public void test() throws Exception {
     LOG.info("Start: " + getTestName());
 
-    URL url = new URL(getServerUrl() +  desc.rest);
+    URL url = new URL(getSqoopServerUrl() +  desc.rest);
     HttpURLConnection connection = new DelegationTokenAuthenticatedURL().openConnection(url, new DelegationTokenAuthenticatedURL.Token());
     connection.setRequestMethod(desc.method);
-
 
     if(desc.data != null) {
       connection.setDoOutput(true);

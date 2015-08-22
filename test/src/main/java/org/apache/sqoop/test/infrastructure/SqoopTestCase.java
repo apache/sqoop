@@ -21,9 +21,26 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.sqoop.client.SqoopClient;
+import org.apache.sqoop.client.SubmissionCallback;
+import org.apache.sqoop.common.test.db.DatabaseProvider;
+import org.apache.sqoop.common.test.db.TableName;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MPersistableEntity;
+import org.apache.sqoop.model.MSubmission;
+import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.test.data.Cities;
+import org.apache.sqoop.test.data.ShortStories;
+import org.apache.sqoop.test.data.UbuntuReleases;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.InfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.utils.HdfsUtils;
+import org.apache.sqoop.validation.Status;
 import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.ITestNGMethod;
@@ -38,6 +55,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotSame;
+
 /**
  * Use Infrastructure annotation to boot up miniclusters.
  * Order is built-in to code. Hadoop comes first, then
@@ -51,9 +71,31 @@ public class SqoopTestCase implements ITest {
   private static final Map<String, InfrastructureProvider> PROVIDERS
       = new HashMap<String, InfrastructureProvider>();
 
+  /**
+   * Default submission callbacks that are printing various status about the submission.
+   */
+  protected static SubmissionCallback DEFAULT_SUBMISSION_CALLBACKS = new SubmissionCallback() {
+    @Override
+    public void submitted(MSubmission submission) {
+      LOG.info("Submission submitted: " + submission);
+    }
+
+    @Override
+    public void updated(MSubmission submission) {
+      LOG.info("Submission updated: " + submission);
+    }
+
+    @Override
+    public void finished(MSubmission submission) {
+      LOG.info("Submission finished: " + submission);
+    }
+  };
+
   private static String suiteName;
 
   private String methodName;
+
+  private SqoopClient client;
 
   @BeforeSuite
   public static void findSuiteName(ITestContext context) {
@@ -79,6 +121,10 @@ public class SqoopTestCase implements ITest {
     // Find infrastructure provider classes to be used.
     Set<Class<? extends InfrastructureProvider>> providers = new HashSet<Class<? extends InfrastructureProvider>>();
     for (ITestNGMethod method : context.getSuite().getAllMethods()) {
+      LOG.debug("Looking up dependencies on method ("
+          + method.getConstructorOrMethod().getDeclaringClass().getCanonicalName()
+          + "#" + method.getConstructorOrMethod().getMethod().getName()
+          + ")");
       Infrastructure ann;
 
       // If the method has an infrastructure annotation, process it.
@@ -172,5 +218,242 @@ public class SqoopTestCase implements ITest {
   public static <T extends InfrastructureProvider> T getInfrastructureProvider(Class<T> providerClass) {
     InfrastructureProvider provider = PROVIDERS.get(providerClass.getCanonicalName());
     return ((T) provider);
+  }
+
+  /**
+   * Get the data directory for tests.
+   * @return
+   */
+  public String getMapreduceDirectory() {
+    return HdfsUtils.joinPathFragments(
+        getInfrastructureProvider(HadoopInfrastructureProvider.class).getInstance().getTestDirectory(),
+        getClass().getName(),
+        getTestName());
+  }
+
+  /**
+   * Fill RDBMS Link Configuration with infrastructure provider info.
+   * @param link
+   */
+  public void fillRdbmsLinkConfig(MLink link) {
+    DatabaseProvider provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
+
+    MConfigList configs = link.getConnectorLinkConfig();
+    configs.getStringInput("linkConfig.jdbcDriver").setValue(provider.getJdbcDriver());
+    configs.getStringInput("linkConfig.connectionString").setValue(provider.getConnectionUrl());
+    configs.getStringInput("linkConfig.username").setValue(provider.getConnectionUsername());
+    configs.getStringInput("linkConfig.password").setValue(provider.getConnectionPassword());
+  }
+
+  /**
+   * Fill RDBMS FROM Configuration with infrastructure provider info.
+   * @param job
+   * @param partitionColumn
+   */
+  public void fillRdbmsFromConfig(MJob job, String partitionColumn) {
+    DatabaseProvider provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
+
+    MConfigList fromConfig = job.getFromJobConfig();
+    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
+    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
+  }
+
+  /**
+   * Fill RDBMS TO Configuration with infrastructure provider info.
+   * @param job
+   */
+  public void fillRdbmsToConfig(MJob job) {
+    DatabaseProvider provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
+
+    MConfigList toConfig = job.getToJobConfig();
+    toConfig.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
+  }
+
+  /**
+   * Fill HDFS Link Configuration with infrastructure provider info.
+   * @param link
+   */
+  public void fillHdfsLinkConfig(MLink link) {
+    MConfigList configs = link.getConnectorLinkConfig();
+    configs.getStringInput("linkConfig.confDir").setValue(
+        getInfrastructureProvider(SqoopInfrastructureProvider.class).getInstance()
+            .getConfigurationPath());
+  }
+
+  /**
+   * Fill HDFS FROM Configuration with infrastructure provider info.
+   * @param job
+   */
+  public void fillHdfsFromConfig(MJob job) {
+    MConfigList fromConfig = job.getFromJobConfig();
+    fromConfig.getStringInput("fromJobConfig.inputDirectory").setValue(getMapreduceDirectory());
+  }
+
+  /**
+   * Fill HDFS TO Configuration with infrastructure provider info.
+   * @param job
+   * @param output
+   */
+  public void fillHdfsToConfig(MJob job, ToFormat output) {
+    MConfigList toConfig = job.getToJobConfig();
+    toConfig.getEnumInput("toJobConfig.outputFormat").setValue(output);
+    toConfig.getStringInput("toJobConfig.outputDirectory").setValue(getMapreduceDirectory());
+  }
+
+  public String getSqoopServerUrl() {
+    if (getInfrastructureProvider(SqoopInfrastructureProvider.class) == null) {
+      return null;
+    }
+
+    return getInfrastructureProvider(SqoopInfrastructureProvider.class).getInstance()
+        .getServerUrl();
+  }
+
+  /**
+   * Create a sqoop client
+   * @return SqoopClient
+   */
+  public SqoopClient getClient() {
+    if (client == null) {
+      String serverUrl = getSqoopServerUrl();
+
+      if (serverUrl != null) {
+        client = new SqoopClient(serverUrl);
+      }
+    }
+    return client;
+  }
+
+  /**
+   * Create link with asserts to make sure that it was created correctly.
+   *
+   * @param link
+   */
+  public void saveLink(MLink link) {
+    assertEquals(Status.OK, getClient().saveLink(link));
+    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, link.getPersistenceId());
+  }
+
+  /**
+   * Create job with asserts to make sure that it was created correctly.
+   *
+   * @param job
+   */
+  public void saveJob(MJob job) {
+    assertEquals(Status.OK, getClient().saveJob(job));
+    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, job.getPersistenceId());
+  }
+
+  /**
+   * Run job with given jid.
+   *
+   * @param jid Job id
+   * @throws Exception
+   */
+  public void executeJob(long jid) throws Exception {
+    MSubmission finalSubmission = getClient().startJob(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
+
+    if(finalSubmission.getStatus().isFailure()) {
+      LOG.error("Submission has failed: " + finalSubmission.getError().getErrorSummary());
+      LOG.error("Corresponding error details: " + finalSubmission.getError().getErrorDetails());
+    }
+    assertEquals(SubmissionStatus.SUCCEEDED, finalSubmission.getStatus(), "Submission finished with error: " + finalSubmission.getError().getErrorSummary());
+  }
+
+  /**
+   * Fetch table name to be used by this test.
+   * @return TableName
+   */
+  public TableName getTableName() {
+    return new TableName(getClass().getSimpleName());
+  }
+
+  /**
+   * Create table with table name for this test.
+   * @param primaryKey
+   * @param columns
+   */
+  public void createTable(String primaryKey, String ...columns) {
+    getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance()
+        .createTable(getTableName(), primaryKey, columns);
+  }
+
+  /**
+   * Drop table for this test.
+   */
+  public void dropTable() {
+    getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance()
+        .dropTable(getTableName());
+  }
+
+  /**
+   * Insert row into table for this test.
+   * @param values
+   */
+  public void insertRow(Object ...values) {
+    getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance()
+        .insertRow(getTableName(), values);
+  }
+
+  /**
+   * Insert row into table for this test.
+   * @param escapeValues
+   * @param values
+   */
+  public void insertRow(Boolean escapeValues, Object ...values) {
+    getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance()
+        .insertRow(getTableName(), escapeValues, values);
+  }
+
+  /**
+   * Fetch row count of table for this test.
+   * @return long count
+   */
+  public long rowCount() {
+    return getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance()
+        .rowCount(getTableName());
+  }
+
+  /**
+   * Dump the table for this test.
+   */
+  public void dumpTable() {
+    getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance()
+        .dumpTable(getTableName());
+  }
+
+  /**
+   * Create and load cities data.
+   */
+  public void createAndLoadTableCities() {
+    new Cities(getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance(), getTableName()).createTables().loadBasicData();
+  }
+
+  /**
+   * Create ubuntu releases table.
+   */
+  public void createTableUbuntuReleases() {
+    new UbuntuReleases(getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance(), getTableName()).createTables();
+  }
+
+  /**
+   * Create and load ubuntu releases data.
+   */
+  public void createAndLoadTableUbuntuReleases() {
+    new UbuntuReleases(getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance(), getTableName()).createTables().loadBasicData();
+  }
+
+  /**
+   * Create short stories table.
+   */
+  public void createTableShortStories() {
+    new ShortStories(getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance(), getTableName()).createTables();
+  }
+
+  /**
+   * Create and load short stories data.
+   */
+  public void createAndLoadTableShortStories() {
+    new ShortStories(getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance(), getTableName()).createTables().loadBasicData();
   }
 }

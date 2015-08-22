@@ -101,6 +101,11 @@ public abstract class SqoopMiniCluster {
   abstract public void stop() throws Exception;
 
   /**
+   * @return server URL (e.g. http://localhost:12000/sqoop)
+   */
+  abstract public String getServerUrl();
+
+  /**
    * Prepare temporary directory for starting Sqoop server.
    *
    * @throws IOException

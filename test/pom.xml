@@ -202,6 +202,21 @@ limitations under the License.
             </configuration>
           </execution>
           <execution>
+            <id>new-integration-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <suiteXmlFiles>
+                <suiteXmlFile>src/test/resources/new-integration-tests-suite.xml</suiteXmlFile>
+              </suiteXmlFiles>
+              <properties>
+                <suitename>new-integration-tests</suitename>
+              </properties>
+            </configuration>
+          </execution>
+          <execution>
             <id>upgrade-test</id>
             <goals>
               <goal>test</goal>

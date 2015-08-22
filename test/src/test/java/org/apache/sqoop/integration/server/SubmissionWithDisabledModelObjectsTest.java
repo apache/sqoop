@@ -18,14 +18,18 @@
 package org.apache.sqoop.integration.server;
 
 import org.apache.sqoop.client.ClientError;
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.error.code.DriverError;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
@@ -39,7 +43,8 @@ import static org.testng.Assert.fail;
  * Ensure that server will reject starting job when either job itself
  * or corresponding link is disabled.
  */
-public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
+@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
 
   private boolean enabledLink;
   private boolean enabledJob;
@@ -59,10 +64,18 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
     };
   }
 
+  @BeforeMethod
+  public void setupRdbmsTable() {
+    createAndLoadTableCities();
+  }
+
+  @AfterMethod
+  public void tearDownRdbmsTable() {
+    dropTable();
+  }
+
   @Test
   public void testWithDisabledObjects() throws Exception {
-    createAndLoadTableCities();
-
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
     fillRdbmsLinkConfig(rdbmsLink);
@@ -70,7 +83,7 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
 
     // HDFS link
     MLink hdfsLink = getClient().createLink("hdfs-connector");
-    fillHdfsLink(hdfsLink);
+    fillHdfsLinkConfig(hdfsLink);
     saveLink(hdfsLink);
 
     // Job creation
@@ -90,7 +103,7 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
 
     // Try to execute the job and verify that the it was not executed
     try {
-      executeJob(job);
+      executeJob(job.getPersistenceId());
       fail("Expected exception as the model classes are disabled.");
     } catch(SqoopException ex) {
       // Top level exception should be CLIENT_0001
@@ -109,8 +122,6 @@ public class SubmissionWithDisabledModelObjectsTest extends ConnectorTestCase {
       } else {
         fail("Unexpected expception retrieved from server " + cause);
       }
-    } finally {
-      dropTable();
     }
   }
 }

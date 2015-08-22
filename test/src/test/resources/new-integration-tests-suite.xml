@@ -18,15 +18,16 @@ limitations under the License.
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="IntegrationTests" verbose="2" parallel="false">
+<suite name="NewIntegrationTests" verbose="2" parallel="false">
 
   <listeners>
     <listener class-name="org.apache.sqoop.test.testng.SqoopTestListener" />
   </listeners>
 
-  <test name="ConnectorTests">
+  <test name="ServerTests">
     <packages>
-      <package name="org.apache.sqoop.integration.connector.*"/>
+      <package name="org.apache.sqoop.integration.server"/>
     </packages>
   </test>
+
 </suite>
