@@ -51,7 +51,7 @@ public class AuthorizationEngine {
           checkPrivilege(doUserName, getPrivilege(type, name, MPrivilege.ACTION.READ));
           // add valid resource
           return true;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
           //do not add into result if invalid resource
           return false;
         }
@@ -145,7 +145,7 @@ public class AuthorizationEngine {
           checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.READ));
           // add valid submission
           return true;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
           //do not add into result if invalid submission
           return false;
         }
@@ -176,12 +176,12 @@ public class AuthorizationEngine {
     for (MPrivilege privilege : privileges) {
       Repository repository = RepositoryManager.getInstance().getRepository();
       if (MResource.TYPE.LINK.name().equalsIgnoreCase(privilege.getResource().getType())) {
-        MLink link = repository.findLink(Long.valueOf(privilege.getResource().getName()));
+        MLink link = repository.findLink(Long.parseLong(privilege.getResource().getName()));
         if (!doUserName.equals(link.getCreationUser())) {
           privilegesNeedCheck.add(privilege);
         }
       } else if (MResource.TYPE.JOB.name().equalsIgnoreCase(privilege.getResource().getType())) {
-        MJob job = repository.findJob(Long.valueOf(privilege.getResource().getName()));
+        MJob job = repository.findJob(Long.parseLong(privilege.getResource().getName()));
         if (!doUserName.equals(job.getCreationUser())) {
           privilegesNeedCheck.add(privilege);
         }
