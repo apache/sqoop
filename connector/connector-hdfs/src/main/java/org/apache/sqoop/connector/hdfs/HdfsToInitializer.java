@@ -48,6 +48,8 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
 
     Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
     HdfsUtils.configurationToContext(configuration, context.getContext());
+    context.getContext().setAll(linkConfig.linkConfig.configOverrides);
+
     boolean appendMode = Boolean.TRUE.equals(jobConfig.toJobConfig.appendMode);
 
     // Verification that given HDFS directory either don't exists or is empty

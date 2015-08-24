@@ -64,6 +64,10 @@ public class MutableMapContext extends MapContext implements MutableContext {
 
   @Override
   public void setAll(Map<String, String> map) {
+    if(map == null) {
+      return;
+    }
+
     getOptions().putAll(map);
   }
 

@@ -95,6 +95,9 @@ public class TestMutableMapContext {
     assertEquals(context.getLong("long", -1), 1L);
     assertEquals(context.getInt("integer", -1), 13);
     assertEquals(context.getBoolean("boolean", false), true);
+
+    // Verify that we're resilient against null
+    context.setAll(null);
   }
 
 }

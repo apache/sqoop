@@ -1,4 +1,5 @@
 /**
+ * Created by jarcec on 8/18/15.
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,27 +18,30 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
-import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
+import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
 
-public class HdfsFromInitializer extends Initializer<LinkConfiguration, FromJobConfiguration> {
-  /**
-   * Initialize new submission based on given configuration properties. Any
-   * needed temporary values might be saved to context object and they will be
-   * promoted to all other part of the workflow automatically.
-   *
-   * @param context Initializer context object
-   * @param linkConfig link configuration object
-   * @param jobConfig FROM job configuration object
-   */
-  @Override
-  public void initialize(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration jobConfig) {
-    Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
-    HdfsUtils.configurationToContext(configuration, context.getContext());
-    context.getContext().setAll(linkConfig.linkConfig.configOverrides);
+public class TestFromInitializer {
+
+  @Test
+  public void testConfigOverrides() {
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+
+    linkConfig.linkConfig.uri = "file:///";
+    linkConfig.linkConfig.configOverrides.put("key", "value");
+
+    InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
+
+    Initializer initializer = new HdfsFromInitializer();
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    assertEquals(initializerContext.getString("key"), "value");
   }
 }
