@@ -30,6 +30,8 @@ import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
 
 import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,7 +85,7 @@ public class  ConfigUtils {
 
     // Iterate over all declared fields
     for (Field field : klass.getDeclaredFields()) {
-      field.setAccessible(true);
+      setFieldAccessibleWithAC(field);
 
       // Each field that should be part of user input should have Input
       // annotation.
@@ -127,7 +129,7 @@ public class  ConfigUtils {
 
     // Iterate over all declared fields
     for (Field field : klass.getDeclaredFields()) {
-      field.setAccessible(true);
+      setFieldAccessibleWithAC(field);
 
       String fieldName = field.getName();
       String inputName = configName + "." + fieldName;
@@ -272,7 +274,8 @@ public class  ConfigUtils {
     for(MConfig config : configs) {
       Field configField = getFieldFromName(klass, config.getName());
       // We need to access this field even if it would be declared as private
-      configField.setAccessible(true);
+      setFieldAccessibleWithAC(configField);
+
       Class<?> configClass = configField.getType();
       Object newValue = ClassUtils.instantiate(configClass);
 
@@ -299,7 +302,7 @@ public class  ConfigUtils {
         }
 
         // We need to access this field even if it would be declared as private
-        inputField.setAccessible(true);
+        setFieldAccessibleWithAC(inputField);
 
         try {
           if (input.isEmpty()) {
@@ -386,7 +389,7 @@ public class  ConfigUtils {
 
     // Iterate over all declared fields
     for (Field configField : klass.getDeclaredFields()) {
-      configField.setAccessible(true);
+      setFieldAccessibleWithAC(configField);
 
       // We're processing only config validations
       Config configAnnotation = configField.getAnnotation(Config.class);
@@ -407,7 +410,7 @@ public class  ConfigUtils {
 
       // Now process each input on the config
       for(Field inputField : configField.getType().getDeclaredFields()) {
-        inputField.setAccessible(true);
+        setFieldAccessibleWithAC(inputField);
         String inputName = inputField.getName();
 
         Object value;
@@ -472,7 +475,7 @@ public class  ConfigUtils {
     JSONObject jsonConfigs = JSONUtils.parse(json);
 
     for(Field configField : klass.getDeclaredFields()) {
-      configField.setAccessible(true);
+      setFieldAccessibleWithAC(configField);
 
       // We're processing only config validations
       Config configAnnotation = configField.getAnnotation(Config.class);
@@ -502,7 +505,7 @@ public class  ConfigUtils {
       }
 
       for(Field inputField : configField.getType().getDeclaredFields()) {
-        inputField.setAccessible(true);
+        setFieldAccessibleWithAC(inputField);
         String inputName = inputField.getName();
 
         Input inputAnnotation = inputField.getAnnotation(Input.class);
@@ -525,9 +528,12 @@ public class  ConfigUtils {
           } else if (type.isAssignableFrom(Map.class)) {
             Map<String, String> map = new HashMap<String, String>();
             JSONObject jsonObject = (JSONObject) jsonInputs.get(inputName);
-            for(Object key : jsonObject.keySet()) {
-              map.put((String)key, (String)jsonObject.get(key));
+
+            Set<Map.Entry<String, Object>> entrySet = jsonObject.entrySet();
+            for (Map.Entry<String, Object> entry : entrySet) {
+              map.put(entry.getKey(), (String)entry.getValue());
             }
+
             inputField.set(configValue, map);
           } else if(type == Integer.class) {
             inputField.set(configValue, ((Long)jsonInputs.get(inputName)).intValue());
@@ -635,7 +641,7 @@ public class  ConfigUtils {
 
   public static Object getFieldValue(Field field, Object object) {
     try {
-      field.setAccessible(true);
+      setFieldAccessibleWithAC(field);
       return field.get(object);
     } catch (IllegalAccessException e) {
       throw new SqoopException(ModelError.MODEL_015, e);
@@ -678,5 +684,16 @@ public class  ConfigUtils {
       }
     }
     return;
+  }
+
+  // The method setAccessible() requires a security permission check according to the FindBugs's rule (DP_DO_INSIDE_DO_PRIVILEGED)
+  private static void setFieldAccessibleWithAC(final Field field) {
+    AccessController.doPrivileged(new PrivilegedAction() {
+      @Override
+      public Object run() {
+        field.setAccessible(true);
+        return null;
+      }
+    });
   }
 }
