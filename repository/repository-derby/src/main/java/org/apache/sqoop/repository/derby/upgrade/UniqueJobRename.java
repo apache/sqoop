@@ -66,31 +66,23 @@ public class UniqueJobRename {
   public void execute() {
     Map<Long, String> idToNewNameMap = new TreeMap<Long, String>();
 
-    Statement fetchJobStmt = null;
-    PreparedStatement updateJobStmt = null;
-    ResultSet fetchJobResultSet = null;
-
     // Fetch all non-unique job IDs and Names.
     // Transform names.
-    try {
-      fetchJobStmt = conn.createStatement();
-      fetchJobResultSet = fetchJobStmt.executeQuery(QUERY_SELECT_JOBS_WITH_NON_UNIQUE_NAMES);
+    try (Statement fetchJobStmt = conn.createStatement();
+         ResultSet fetchJobResultSet = fetchJobStmt.executeQuery(QUERY_SELECT_JOBS_WITH_NON_UNIQUE_NAMES)) {
+
       while (fetchJobResultSet.next()) {
         idToNewNameMap.put(fetchJobResultSet.getLong(1), getNewName(fetchJobResultSet.getString(2)));
       }
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
-    } finally {
-      CommonRepoUtils.closeResultSets(fetchJobResultSet);
-      CommonRepoUtils.closeStatements(fetchJobStmt);
     }
 
+    try (PreparedStatement updateJobStmt = conn.prepareStatement(QUERY_UPDATE_JOB_NAME_BY_ID)) {
 
-    try {
-      updateJobStmt = conn.prepareStatement(QUERY_UPDATE_JOB_NAME_BY_ID);
-      for (Long jobId : idToNewNameMap.keySet()) {
-        updateJobStmt.setString(1, idToNewNameMap.get(jobId));
-        updateJobStmt.setLong(2, jobId);
+      for (Map.Entry<Long, String> entry : idToNewNameMap.entrySet()) {
+        updateJobStmt.setString(1, entry.getValue());
+        updateJobStmt.setLong(2, entry.getKey());
         updateJobStmt.addBatch();
       }
 
@@ -99,14 +91,11 @@ public class UniqueJobRename {
         if (count != 1) {
           throw new SqoopException(DerbyRepoError.DERBYREPO_0000,
               "Update count wrong when changing names for non-unique jobs. Update coutns are: "
-                  + StringUtils.join(Arrays.asList(counts), ","));
+                  + Arrays.toString(counts));
         }
       }
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
-    } finally {
-      CommonRepoUtils.closeResultSets(fetchJobResultSet);
-      CommonRepoUtils.closeStatements(fetchJobStmt);
     }
   }
 

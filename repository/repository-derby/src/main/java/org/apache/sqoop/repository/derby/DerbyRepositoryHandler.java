@@ -93,7 +93,6 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
   @Override
   public synchronized void initialize(JdbcRepositoryContext ctx) {
     repoContext = ctx;
-    repoContext.getDataSource();
     LOG.info("DerbyRepositoryHandler initialized.");
   }
 
@@ -119,8 +118,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
         LOG.debug("Attempting to shutdown embedded Derby using URL: "
             + shutDownUrl);
 
-        try {
-          DriverManager.getConnection(shutDownUrl);
+        try (Connection tempConnection = DriverManager.getConnection(shutDownUrl)) {
         } catch (SQLException ex) {
           // Shutdown for one db instance is expected to raise SQL STATE 45000
           if (ex.getErrorCode() != 45000) {
@@ -145,19 +143,14 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
    * @return
    */
   public int detectRepositoryVersion(Connection conn) {
-    ResultSet rs = null;
-    PreparedStatement stmt = null;
-
     // First release went out without system table, so we have to detect
     // this version differently.
-    try {
-      rs = conn.getMetaData().getTables(null, null, null, null);
+    try (ResultSet rs = conn.getMetaData().getTables(null, null, null, null)) {
 
       Set<String> tableNames = new HashSet<String>();
       while(rs.next()) {
         tableNames.add(rs.getString("TABLE_NAME"));
       }
-      closeResultSets(rs);
 
       LOG.debug("Detecting existing version of repository");
       boolean foundAll = true;
@@ -175,30 +168,25 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
 
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0006, e);
-    } finally {
-      closeResultSets(rs);
     }
 
     // Normal version detection, select and return the version
-    try {
+    try (PreparedStatement stmt = conn.prepareStatement(STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION)) {
       // NOTE: Since we can different types of version stored in system table, we renamed the
       // key name for the repository version from "version" to "repository.version" for clarity
-      stmt = conn.prepareStatement(STMT_SELECT_DEPRECATED_OR_NEW_SYSTEM_VERSION);
       stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
       stmt.setString(2, DerbyRepoConstants.SYSKEY_VERSION);
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()){
 
-      if(!rs.next()) {
-        return 0;
+        if (!rs.next()) {
+          return 0;
+        }
+
+        return rs.getInt(1);
       }
-
-      return rs.getInt(1);
     } catch (SQLException e) {
       LOG.info("Can't fetch repository structure version.", e);
       return 0;
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
   }
 
@@ -337,12 +325,10 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
    */
   private void migrateFromUnnamedConstraintsToNamedConstraints(Connection conn) {
     // Get unnamed constraints
-    PreparedStatement fetchUnnamedConstraintsStmt = null;
-    Statement dropUnnamedConstraintsStmt = null;
     Map<String, List<String>> autoConstraintNameMap = new TreeMap<String, List<String>>();
 
-    try {
-      fetchUnnamedConstraintsStmt = conn.prepareStatement(STMT_FETCH_TABLE_FOREIGN_KEYS);
+    try (PreparedStatement fetchUnnamedConstraintsStmt = conn.prepareStatement(STMT_FETCH_TABLE_FOREIGN_KEYS)) {
+
       for (String tableName : new String[] {
           DerbySchemaConstants.TABLE_SQ_FORM_NAME,
           CommonRepositorySchemaConstants.TABLE_SQ_INPUT_NAME,
@@ -363,34 +349,30 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
 
         if (fetchUnnamedConstraintsStmt.execute()) {
           LOG.info("QUERY(" + STMT_FETCH_TABLE_FOREIGN_KEYS + ") with args: [" + tableName + "]");
-          ResultSet rs = fetchUnnamedConstraintsStmt.getResultSet();
+          try (ResultSet rs = fetchUnnamedConstraintsStmt.getResultSet()) {
 
-          while (rs.next()) {
-            autoConstraintNames.add(rs.getString(1));
+            while (rs.next()) {
+              autoConstraintNames.add(rs.getString(1));
+            }
           }
-
-          rs.close();
         }
       }
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
-    } finally {
-      closeStatements(fetchUnnamedConstraintsStmt);
     }
 
     // Drop constraints
-    for (String tableName : autoConstraintNameMap.keySet()) {
-      for (String constraintName : autoConstraintNameMap.get(tableName)) {
+    for (Map.Entry<String, List<String>> entry : autoConstraintNameMap.entrySet()) {
+      for (String constraintName : entry.getValue()) {
         String query = DerbySchemaUpgradeQuery.getDropConstraintQuery(
-            SCHEMA_SQOOP, tableName, constraintName);
-        try {
-          dropUnnamedConstraintsStmt = conn.createStatement();
+            SCHEMA_SQOOP, entry.getKey(), constraintName);
+        try (Statement dropUnnamedConstraintsStmt = conn.createStatement()) {
+
           dropUnnamedConstraintsStmt.execute(query);
         } catch (SQLException e) {
           throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
         } finally {
           LOG.info("QUERY(" + query + ")");
-          closeStatements(dropUnnamedConstraintsStmt);
         }
       }
     }
@@ -547,14 +529,12 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
    */
   protected void updateDirections(Connection conn, Map<Direction, Long> directionMap) {
     // Remember directions
-    Statement fetchFormsStmt = null,
-              fetchConnectorsStmt = null;
     List<Long> connectorIds = new LinkedList<Long>();
     List<Long> configIds = new LinkedList<Long>();
     List<String> directions = new LinkedList<String>();
-    try {
-      fetchFormsStmt = conn.createStatement();
-      ResultSet rs = fetchFormsStmt.executeQuery(STMT_FETCH_CONFIG_DIRECTIONS);
+    try (Statement fetchFormsStmt = conn.createStatement();
+         ResultSet rs = fetchFormsStmt.executeQuery(STMT_FETCH_CONFIG_DIRECTIONS);) {
+
       while (rs.next()) {
         configIds.add(rs.getLong(1));
         directions.add(rs.getString(2));
@@ -562,8 +542,6 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       rs.close();
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
-    } finally {
-      closeStatements(fetchFormsStmt);
     }
 
     // Change Schema
@@ -582,17 +560,14 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
     }
 
     // Add connector directions
-    try {
-      fetchConnectorsStmt = conn.createStatement();
-      ResultSet rs = fetchConnectorsStmt.executeQuery(STMT_SELECT_CONNECTOR_ALL);
+    try (Statement fetchConnectorsStmt = conn.createStatement();
+         ResultSet rs = fetchConnectorsStmt.executeQuery(STMT_SELECT_CONNECTOR_ALL);) {
       while (rs.next()) {
         connectorIds.add(rs.getLong(1));
       }
       rs.close();
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0000, e);
-    } finally {
-      closeStatements(fetchConnectorsStmt);
     }
 
     for (Long connectorId : connectorIds) {
@@ -652,7 +627,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
         "output");
 
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR, conn,
-        new Long(hdfsConnectorId), "input", "output");
+        Long.valueOf(hdfsConnectorId), "input", "output");
     //update the names of the configs
     // 1. input ==> fromJobConfig
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_CONNECTOR_HDFS_FORM_NAME, conn,
@@ -677,15 +652,15 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DIRECTION_TO_NULL, conn,
         "throttling");
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_DRIVER_INDEX, conn,
-        new Long(0), "throttling");
+        Long.valueOf(0), "throttling");
 
     Long connectionId = createHdfsConnection(conn, hdfsConnectorId);
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION_COPY_SQB_FROM_CONNECTION, conn,
         "EXPORT");
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_FROM_CONNECTION, conn,
-        new Long(connectionId), "EXPORT");
+            connectionId, "EXPORT");
     runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_SQB_TO_CONNECTION, conn,
-        new Long(connectionId), "IMPORT");
+            connectionId, "IMPORT");
 
     runQuery(QUERY_UPGRADE_TABLE_SQ_FORM_UPDATE_TABLE_FROM_JOB_INPUT_NAMES, conn,
         "fromJobConfig", "fromJobConfig", Direction.FROM.toString());
@@ -735,10 +710,8 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       LOG.trace("Begin Driver loading.");
     }
 
-    PreparedStatement baseDriverStmt = null;
-    try {
-      baseDriverStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
-          Statement.RETURN_GENERATED_KEYS);
+    try (PreparedStatement baseDriverStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
+          Statement.RETURN_GENERATED_KEYS);) {
       baseDriverStmt.setString(1, MDriver.DRIVER_NAME);
       baseDriverStmt.setString(2, Driver.getClassName());
       baseDriverStmt.setString(3, "1");
@@ -749,16 +722,15 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0003, Integer.toString(baseDriverCount));
       }
 
-      ResultSet rsetDriverId = baseDriverStmt.getGeneratedKeys();
+      try (ResultSet rsetDriverId = baseDriverStmt.getGeneratedKeys()) {
 
-      if (!rsetDriverId.next()) {
-        throw new SqoopException(DerbyRepoError.DERBYREPO_0004);
+        if (!rsetDriverId.next()) {
+          throw new SqoopException(DerbyRepoError.DERBYREPO_0004);
+        }
+        return rsetDriverId.getLong(1);
       }
-      return rsetDriverId.getLong(1);
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0009, ex);
-    } finally {
-      closeStatements(baseDriverStmt);
     }
   }
 
@@ -785,12 +757,11 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       if (handler.getConnectorConfigurable().getPersistenceId() != -1) {
         return handler.getConnectorConfigurable().getPersistenceId();
       }
-      PreparedStatement baseConnectorStmt = null;
       if (handler.getUniqueName().equals(CONNECTOR_HDFS)) {
-        try {
-          baseConnectorStmt = conn.prepareStatement(
-              STMT_INSERT_INTO_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS,
-              Statement.RETURN_GENERATED_KEYS);
+        try (PreparedStatement baseConnectorStmt = conn.prepareStatement(
+                STMT_INSERT_INTO_CONNECTOR_WITHOUT_SUPPORTED_DIRECTIONS,
+                Statement.RETURN_GENERATED_KEYS)) {
+
           baseConnectorStmt.setString(1, handler.getConnectorConfigurable().getUniqueName());
           baseConnectorStmt.setString(2, handler.getConnectorConfigurable().getClassName());
           baseConnectorStmt.setString(3, "0");
@@ -805,8 +776,6 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
           }
         } catch (SQLException e) {
           throw new SqoopException(DerbyRepoError.DERBYREPO_0004);
-        } finally {
-          closeStatements(baseConnectorStmt);
         }
 
         break;
@@ -829,11 +798,9 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       LOG.trace("Creating HDFS link.");
     }
 
-    PreparedStatement stmt = null;
     int result;
-    try {
-      stmt = conn.prepareStatement(STMT_INSERT_CONNECTION,
-          Statement.RETURN_GENERATED_KEYS);
+    try (PreparedStatement stmt = conn.prepareStatement(STMT_INSERT_CONNECTION,
+            Statement.RETURN_GENERATED_KEYS)) {
       stmt.setString(1, CONNECTOR_HDFS);
       stmt.setLong(2, connectorId);
       stmt.setBoolean(3, true);
@@ -847,21 +814,20 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0003,
             Integer.toString(result));
       }
-      ResultSet rsetConnectionId = stmt.getGeneratedKeys();
+      try (ResultSet rsetConnectionId = stmt.getGeneratedKeys()) {
 
-      if (!rsetConnectionId.next()) {
-        throw new SqoopException(DerbyRepoError.DERBYREPO_0004);
+        if (!rsetConnectionId.next()) {
+          throw new SqoopException(DerbyRepoError.DERBYREPO_0004);
+        }
+
+        if (LOG.isTraceEnabled()) {
+          LOG.trace("Created HDFS connection.");
+        }
+
+        return rsetConnectionId.getLong(1);
       }
-
-      if (LOG.isTraceEnabled()) {
-        LOG.trace("Created HDFS connection.");
-      }
-
-      return rsetConnectionId.getLong(1);
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0005, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -876,11 +842,10 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       LOG.trace("Creating HDFS link.");
     }
 
-    PreparedStatement stmt = null;
     int result;
-    try {
+    try (PreparedStatement stmt = conn.prepareStatement(STMT_INSERT_INTO_FORM, Statement.RETURN_GENERATED_KEYS)) {
       short index = 0;
-      stmt = conn.prepareStatement(STMT_INSERT_INTO_FORM, Statement.RETURN_GENERATED_KEYS);
+
       stmt.setLong(1, connectorId);
       stmt.setString(2, "linkConfig");
       // it could also be set to the deprecated "CONNECTION"
@@ -890,20 +855,19 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       if (result != 1) {
         throw new SqoopException(DerbyRepoError.DERBYREPO_0003, Integer.toString(result));
       }
-      ResultSet rsetFormId = stmt.getGeneratedKeys();
+      try (ResultSet rsetFormId = stmt.getGeneratedKeys()) {
 
-      if (!rsetFormId.next()) {
-        throw new SqoopException(DerbyRepoError.DERBYREPO_0004);
-      }
+        if (!rsetFormId.next()) {
+          throw new SqoopException(DerbyRepoError.DERBYREPO_0004);
+        }
 
-      if (LOG.isTraceEnabled()) {
-        LOG.trace("Created HDFS connector link FORM.");
+        if (LOG.isTraceEnabled()) {
+          LOG.trace("Created HDFS connector link FORM.");
+        }
+        return rsetFormId.getLong(1);
       }
-      return rsetFormId.getLong(1);
     } catch (SQLException ex) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0005, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 

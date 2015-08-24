@@ -123,39 +123,32 @@ public class DerbyUpgradeGenericJdbcConnectorConfigAndInputNames {
   }
 
   private Long getConfigId(boolean direction, String ... args) {
-    PreparedStatement statement = null;
     String configIdQuery = (direction) ?
         DerbySchemaUpgradeQuery.QUERY_SELECT_CONFIG_ID_BY_NAME_AND_DIRECTION : DerbySchemaUpgradeQuery.QUERY_SELECT_CONFIG_ID_BY_NAME;
 
-    try {
-      statement = connection.prepareStatement(configIdQuery);
-
+    try (PreparedStatement statement = connection.prepareStatement(configIdQuery);) {
       for (int i = 0; i < args.length; ++i) {
         statement.setString(i + 1, args[i]);
       }
 
-      ResultSet configIdResultSet = statement.executeQuery();
+      try (ResultSet configIdResultSet = statement.executeQuery()) {
+        LOG.debug("QUERY(" + configIdQuery + ") with args [" + StringUtils.join(args, ",") + "] fetch size: " + configIdResultSet.getFetchSize());
 
-      LOG.debug("QUERY(" + configIdQuery + ") with args [" + StringUtils.join(args, ",") + "] fetch size: " + configIdResultSet.getFetchSize());
+        if (!configIdResultSet.next() || configIdResultSet.getFetchSize() != 1) {
+          return null;
+        }
 
-      if (!configIdResultSet.next() || configIdResultSet.getFetchSize() != 1) {
-        return null;
+        return configIdResultSet.getLong(1);
       }
-
-      return configIdResultSet.getLong(1);
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0002, e);
-    } finally {
-      handler.closeStatements(statement);
     }
   }
 
   private void renameConfig(long configId, String configName) {
-    PreparedStatement statement = null;
     String query = DerbySchemaUpgradeQuery.QUERY_UPDATE_TABLE_SQ_CONFIG_NAME;
 
-    try {
-      statement = connection.prepareStatement(query);
+    try (PreparedStatement statement = connection.prepareStatement(query)) {
       statement.setString(1, configName);
       statement.setLong(2, configId);
 
@@ -163,19 +156,15 @@ public class DerbyUpgradeGenericJdbcConnectorConfigAndInputNames {
       LOG.debug("QUERY(" + query + ") with args [" + configName + ", " + configId + "] update count: " + updateCount);
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0002, e);
-    } finally {
-      handler.closeStatements(statement);
     }
   }
 
   private void renameConfigInputs(long configId, Map<String, String> inputNameMap) {
-    PreparedStatement statement = null;
 
-    try {
-      statement = connection.prepareStatement(DerbySchemaUpgradeQuery.QUERY_UPDATE_TABLE_SQ_INPUT_SQI_NAME);
-
-      for (String inputName : inputNameMap.keySet()) {
-        statement.setString(1, inputNameMap.get(inputName));
+    try (PreparedStatement statement = connection.prepareStatement(DerbySchemaUpgradeQuery.QUERY_UPDATE_TABLE_SQ_INPUT_SQI_NAME)) {
+      for (Map.Entry<String, String> entry : inputNameMap.entrySet()) {
+        String inputName = entry.getKey();
+        statement.setString(1, entry.getValue());
         statement.setString(2, inputName);
         statement.setLong(3, configId);
         statement.addBatch();
@@ -189,8 +178,6 @@ public class DerbyUpgradeGenericJdbcConnectorConfigAndInputNames {
           + StringUtils.join(ArrayUtils.toObject(updateCounts), ","));
     } catch (SQLException e) {
       throw new SqoopException(DerbyRepoError.DERBYREPO_0002, e);
-    } finally {
-      handler.closeStatements(statement);
     }
   }
 }

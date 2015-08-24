@@ -19,6 +19,7 @@ package org.apache.sqoop.repository.derby;
 
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.*;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -182,18 +183,19 @@ public final class DerbySchemaConstants {
    */
   public static final Set<String> tablesV1;
   static {
-    tablesV1 = new HashSet<String>();
-    tablesV1.add(TABLE_SQ_CONNECTOR_NAME);
-    tablesV1.add(TABLE_SQ_CONNECTION_NAME);
-    tablesV1.add(TABLE_SQ_CONNECTION_INPUT_NAME);
-    tablesV1.add(TABLE_SQ_COUNTER_NAME);
-    tablesV1.add(TABLE_SQ_COUNTER_GROUP_NAME);
-    tablesV1.add(TABLE_SQ_COUNTER_SUBMISSION_NAME);
-    tablesV1.add(TABLE_SQ_FORM_NAME);
-    tablesV1.add(TABLE_SQ_INPUT_NAME);
-    tablesV1.add(TABLE_SQ_JOB_NAME);
-    tablesV1.add(TABLE_SQ_JOB_INPUT_NAME);
-    tablesV1.add(TABLE_SQ_SUBMISSION_NAME);
+    Set<String> tempTablesV1 = new HashSet<String>();
+    tempTablesV1.add(TABLE_SQ_CONNECTOR_NAME);
+    tempTablesV1.add(TABLE_SQ_CONNECTION_NAME);
+    tempTablesV1.add(TABLE_SQ_CONNECTION_INPUT_NAME);
+    tempTablesV1.add(TABLE_SQ_COUNTER_NAME);
+    tempTablesV1.add(TABLE_SQ_COUNTER_GROUP_NAME);
+    tempTablesV1.add(TABLE_SQ_COUNTER_SUBMISSION_NAME);
+    tempTablesV1.add(TABLE_SQ_FORM_NAME);
+    tempTablesV1.add(TABLE_SQ_INPUT_NAME);
+    tempTablesV1.add(TABLE_SQ_JOB_NAME);
+    tempTablesV1.add(TABLE_SQ_JOB_INPUT_NAME);
+    tempTablesV1.add(TABLE_SQ_SUBMISSION_NAME);
+    tablesV1 = Collections.unmodifiableSet(tempTablesV1);
   }
 
   private DerbySchemaConstants() {
