@@ -101,9 +101,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Looking up connector: " + shortName);
     }
-    PreparedStatement connectorFetchStmt = null;
-    try {
-      connectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable());
+    try (PreparedStatement connectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable())) {
       connectorFetchStmt.setString(1, shortName);
 
       List<MConnector> connectors = loadConnectors(connectorFetchStmt, conn);
@@ -122,8 +120,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, shortName);
       throw new SqoopException(CommonRepositoryError.COMMON_0001, shortName, ex);
-    } finally {
-      closeStatements(connectorFetchStmt);
     }
   }
 
@@ -132,17 +128,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public List<MConnector> findConnectors(Connection conn) {
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectConfigurableAllForType());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectConfigurableAllForType())) {
       stmt.setString(1, MConfigurableType.CONNECTOR.name());
 
       return loadConnectors(stmt, conn);
     } catch (SQLException ex) {
       logException(ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0041, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -164,9 +156,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public List<MJob> findJobsForConnector(long connectorId, Connection conn) {
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectAllJobsForConnectorConfigurable());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectAllJobsForConnectorConfigurable())) {
+
       stmt.setLong(1, connectorId);
       stmt.setLong(2, connectorId);
       return loadJobs(stmt, conn);
@@ -174,8 +165,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, connectorId);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -189,19 +178,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   private void updateConnectorAndDeleteConfigs(MConnector mConnector, Connection conn) {
-    PreparedStatement updateConnectorStatement = null;
-    PreparedStatement deleteConfig = null;
-    PreparedStatement deleteConfigDirection = null;
-    PreparedStatement deleteInput = null;
-    PreparedStatement deleteInputRelation = null;
-
-    try {
-      updateConnectorStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
-      deleteInputRelation = conn.prepareStatement(crudQueries
-          .getStmtDeleteInputRelationsForInput());
-      deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
-      deleteConfigDirection = conn.prepareStatement(crudQueries.getStmtDeleteDirectionsForConfigurable());
-      deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());
+    try (PreparedStatement updateConnectorStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
+         PreparedStatement deleteInputRelation = conn.prepareStatement(crudQueries
+            .getStmtDeleteInputRelationsForInput());
+         PreparedStatement deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
+         PreparedStatement deleteConfigDirection = conn.prepareStatement(crudQueries.getStmtDeleteDirectionsForConfigurable());
+         PreparedStatement deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());) {
 
       updateConnectorStatement.setString(1, mConnector.getUniqueName());
       updateConnectorStatement.setString(2, mConnector.getClassName());
@@ -224,8 +206,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException e) {
       logException(e, mConnector);
       throw new SqoopException(CommonRepositoryError.COMMON_0035, e);
-    } finally {
-      closeStatements(updateConnectorStatement, deleteConfig, deleteConfigDirection, deleteInput);
     }
   }
 
@@ -239,16 +219,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   private void updateDriverAndDeleteConfigs(MDriver mDriver, Connection conn) {
-    PreparedStatement updateDriverStatement = null;
-    PreparedStatement deleteConfig = null;
-    PreparedStatement deleteInput = null;
-    PreparedStatement deleteInputRelation = null;
-    try {
-      updateDriverStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
-      deleteInputRelation = conn.prepareStatement(crudQueries
-          .getStmtDeleteInputRelationsForInput());
-      deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
-      deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());
+    try (PreparedStatement updateDriverStatement = conn.prepareStatement(crudQueries.getStmtUpdateConfigurable());
+         PreparedStatement deleteInputRelation = conn.prepareStatement(crudQueries
+            .getStmtDeleteInputRelationsForInput());
+         PreparedStatement deleteInput = conn.prepareStatement(crudQueries.getStmtDeleteInputsForConfigurable());
+         PreparedStatement deleteConfig = conn.prepareStatement(crudQueries.getStmtDeleteConfigsForConfigurable());) {
+
       updateDriverStatement.setString(1, mDriver.getUniqueName());
       updateDriverStatement.setString(2, Driver.getClassName());
       updateDriverStatement.setString(3, mDriver.getVersion());
@@ -268,8 +244,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException e) {
       logException(e, mDriver);
       throw new SqoopException(CommonRepositoryError.COMMON_0040, e);
-    } finally {
-      closeStatements(updateDriverStatement, deleteConfig, deleteInput);
     }
   }
 
@@ -282,14 +256,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   private void insertConfigsForDriver(MDriver mDriver, Connection conn) {
     long driverId = mDriver.getPersistenceId();
-    PreparedStatement baseConfigStmt = null;
-    PreparedStatement baseInputStmt = null;
-    try {
-      baseConfigStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfig(),
-          Statement.RETURN_GENERATED_KEYS);
-
-      baseInputStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoInput(),
-          Statement.RETURN_GENERATED_KEYS);
+    try (PreparedStatement baseConfigStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfig(),
+            Statement.RETURN_GENERATED_KEYS);
+         PreparedStatement baseInputStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoInput(),
+            Statement.RETURN_GENERATED_KEYS);) {
 
       // Register a driver config as a job type with no direction
       registerConfigs(driverId, null, mDriver.getDriverConfig().getConfigs(),
@@ -297,8 +267,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     } catch (SQLException ex) {
       throw new SqoopException(CommonRepositoryError.COMMON_0011, mDriver.toString(), ex);
-    } finally {
-      closeStatements(baseConfigStmt, baseInputStmt);
     }
   }
 
@@ -308,56 +276,29 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public MDriver findDriver(String shortName, Connection conn) {
     LOG.debug("Looking up Driver and config ");
-    PreparedStatement driverFetchStmt = null;
-    PreparedStatement driverConfigFetchStmt = null;
-    PreparedStatement driverConfigInputFetchStmt = null;
-
     MDriver mDriver;
-    try {
-      driverFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable());
+    try (PreparedStatement driverFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable());
+         PreparedStatement driverConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+         PreparedStatement driverConfigInputFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectInput());) {
+
       driverFetchStmt.setString(1, shortName);
 
-      ResultSet rsDriverSet = driverFetchStmt.executeQuery();
-      if (!rsDriverSet.next()) {
-        return null;
+      try (ResultSet rsDriverSet = driverFetchStmt.executeQuery()) {
+        if (!rsDriverSet.next()) {
+          return null;
+        }
+        Long driverId = rsDriverSet.getLong(1);
+        String driverVersion = rsDriverSet.getString(4);
+
+        driverConfigFetchStmt.setLong(1, driverId);
+        List<MConfig> driverConfigs = new ArrayList<MConfig>();
+        loadDriverConfigs(driverConfigs, driverConfigFetchStmt, driverConfigInputFetchStmt, 1, conn);
+
+        mDriver = new MDriver(new MDriverConfig(driverConfigs), driverVersion);
+        mDriver.setPersistenceId(driverId);
       }
-      Long driverId = rsDriverSet.getLong(1);
-      String driverVersion = rsDriverSet.getString(4);
-
-      driverConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
-      driverConfigFetchStmt.setLong(1, driverId);
-
-      driverConfigInputFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectInput());
-      List<MConfig> driverConfigs = new ArrayList<MConfig>();
-      loadDriverConfigs(driverConfigs, driverConfigFetchStmt, driverConfigInputFetchStmt, 1, conn);
-
-      mDriver = new MDriver(new MDriverConfig(driverConfigs), driverVersion);
-      mDriver.setPersistenceId(driverId);
-
     } catch (SQLException ex) {
       throw new SqoopException(CommonRepositoryError.COMMON_0001, "Driver", ex);
-    } finally {
-      if (driverConfigFetchStmt != null) {
-        try {
-          driverConfigFetchStmt.close();
-        } catch (SQLException ex) {
-          LOG.error("Unable to close driver config fetch statement", ex);
-        }
-      }
-      if (driverConfigInputFetchStmt != null) {
-        try {
-          driverConfigInputFetchStmt.close();
-        } catch (SQLException ex) {
-          LOG.error("Unable to close driver input fetch statement", ex);
-        }
-      }
-      if (driverFetchStmt != null) {
-        try {
-          driverFetchStmt.close();
-        } catch (SQLException ex) {
-          LOG.error("Unable to close driver fetch statement", ex);
-        }
-      }
     }
 
     LOG.debug("Looked up Driver and config");
@@ -381,11 +322,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void createLink(MLink link, Connection conn) {
-    PreparedStatement stmt = null;
     int result;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtInsertLink(),
-          Statement.RETURN_GENERATED_KEYS);
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertLink(),
+          Statement.RETURN_GENERATED_KEYS)) {
+
       stmt.setString(1, link.getName());
       stmt.setLong(2, link.getConnectorId());
       stmt.setBoolean(3, link.getEnabled());
@@ -400,26 +340,24 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             Integer.toString(result));
       }
 
-      ResultSet rsetConnectionId = stmt.getGeneratedKeys();
+      try (ResultSet rsetConnectionId = stmt.getGeneratedKeys()) {
 
-      if (!rsetConnectionId.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        if (!rsetConnectionId.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
+
+        long connectionId = rsetConnectionId.getLong(1);
+
+        createInputValues(
+                crudQueries.getStmtInsertLinkInput(),
+                connectionId,
+                link.getConnectorLinkConfig().getConfigs(),
+                conn);
+        link.setPersistenceId(connectionId);
       }
-
-      long connectionId = rsetConnectionId.getLong(1);
-
-      createInputValues(
-          crudQueries.getStmtInsertLinkInput(),
-          connectionId,
-          link.getConnectorLinkConfig().getConfigs(),
-          conn);
-      link.setPersistenceId(connectionId);
-
     } catch (SQLException ex) {
       logException(ex, link);
       throw new SqoopException(CommonRepositoryError.COMMON_0016, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -428,16 +366,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void updateLink(MLink link, Connection conn) {
-    PreparedStatement deleteStmt = null;
-    PreparedStatement updateStmt = null;
-    try {
+    try (PreparedStatement deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteLinkInput());
+         PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateLink());) {
       // Firstly remove old values
-      deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteLinkInput());
       deleteStmt.setLong(1, link.getPersistenceId());
       deleteStmt.executeUpdate();
 
       // Update LINK_CONFIG table
-      updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateLink());
       updateStmt.setString(1, link.getName());
       updateStmt.setString(2, link.getLastUpdateUser());
       updateStmt.setTimestamp(3, new Timestamp(new Date().getTime()));
@@ -454,8 +389,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, link);
       throw new SqoopException(CommonRepositoryError.COMMON_0018, ex);
-    } finally {
-      closeStatements(deleteStmt, updateStmt);
     }
   }
 
@@ -464,23 +397,18 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public boolean existsLink(long linkId, Connection conn) {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectLinkCheckById());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectLinkCheckById())) {
       stmt.setLong(1, linkId);
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()) {
 
-      // Should be always valid in query with count
-      rs.next();
+        // Should be always valid in query with count
+        rs.next();
 
-      return rs.getLong(1) == 1;
+        return rs.getLong(1) == 1;
+      }
     } catch (SQLException ex) {
       logException(ex, linkId);
       throw new SqoopException(CommonRepositoryError.COMMON_0022, ex);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
   }
 
@@ -489,25 +417,19 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public boolean inUseLink(long linkId, Connection conn) {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
 
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectJobsForLinkCheck());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobsForLinkCheck())) {
       stmt.setLong(1, linkId);
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()) {
 
-      // Should be always valid in case of count(*) query
-      rs.next();
+        // Should be always valid in case of count(*) query
+        rs.next();
 
-      return rs.getLong(1) != 0;
-
+        return rs.getLong(1) != 0;
+      }
     } catch (SQLException e) {
       logException(e, linkId);
       throw new SqoopException(CommonRepositoryError.COMMON_0029, e);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
   }
 
@@ -516,18 +438,14 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void enableLink(long linkId, boolean enabled, Connection conn) {
-    PreparedStatement enableConn = null;
 
-    try {
-      enableConn = conn.prepareStatement(crudQueries.getStmtEnableLink());
+    try (PreparedStatement enableConn = conn.prepareStatement(crudQueries.getStmtEnableLink())) {
       enableConn.setBoolean(1, enabled);
       enableConn.setLong(2, linkId);
       enableConn.executeUpdate();
     } catch (SQLException ex) {
       logException(ex, linkId);
       throw new SqoopException(CommonRepositoryError.COMMON_0038, ex);
-    } finally {
-      closeStatements(enableConn);
     }
   }
 
@@ -536,18 +454,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void deleteLink(long linkId, Connection conn) {
-    PreparedStatement dltConn = null;
-
-    try {
+    try (PreparedStatement dltConn = conn.prepareStatement(crudQueries.getStmtDeleteLink())) {
       deleteLinkInputs(linkId, conn);
-      dltConn = conn.prepareStatement(crudQueries.getStmtDeleteLink());
       dltConn.setLong(1, linkId);
       dltConn.executeUpdate();
     } catch (SQLException ex) {
       logException(ex, linkId);
       throw new SqoopException(CommonRepositoryError.COMMON_0019, ex);
-    } finally {
-      closeStatements(dltConn);
     }
   }
 
@@ -556,16 +469,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void deleteLinkInputs(long id, Connection conn) {
-    PreparedStatement dltConnInput = null;
-    try {
-      dltConnInput = conn.prepareStatement(crudQueries.getStmtDeleteLinkInput());
+    try (PreparedStatement dltConnInput = conn.prepareStatement(crudQueries.getStmtDeleteLinkInput())) {
       dltConnInput.setLong(1, id);
       dltConnInput.executeUpdate();
     } catch (SQLException ex) {
       logException(ex, id);
       throw new SqoopException(CommonRepositoryError.COMMON_0019, ex);
-    } finally {
-      closeStatements(dltConnInput);
     }
   }
 
@@ -574,9 +483,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MLink findLink(long linkId, Connection conn) {
-    PreparedStatement linkFetchStmt = null;
-    try {
-      linkFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkSingle());
+    try (PreparedStatement linkFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkSingle())) {
       linkFetchStmt.setLong(1, linkId);
 
       List<MLink> links = loadLinks(linkFetchStmt, conn);
@@ -597,8 +504,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, linkId);
       throw new SqoopException(CommonRepositoryError.COMMON_0020, ex);
-    } finally {
-      closeStatements(linkFetchStmt);
     }
   }
 
@@ -607,9 +512,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MLink findLink(String linkName, Connection conn) {
-    PreparedStatement linkFetchStmt = null;
-    try {
-      linkFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkSingleByName());
+    try (PreparedStatement linkFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkSingleByName())) {
       linkFetchStmt.setString(1, linkName);
 
       List<MLink> links = loadLinks(linkFetchStmt, conn);
@@ -629,8 +532,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, linkName);
       throw new SqoopException(CommonRepositoryError.COMMON_0020, ex);
-    } finally {
-      closeStatements(linkFetchStmt);
     }
   }
 
@@ -639,17 +540,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public List<MLink> findLinks(Connection conn) {
-    PreparedStatement linksFetchStmt = null;
-    try {
-      linksFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkAll());
+    try (PreparedStatement linksFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkAll())) {
 
       return loadLinks(linksFetchStmt, conn);
-
     } catch (SQLException ex) {
       logException(ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0020, ex);
-    } finally {
-      closeStatements(linksFetchStmt);
     }
   }
 
@@ -658,16 +554,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public List<MLink> findLinksForConnector(long connectorId, Connection conn) {
-    PreparedStatement linkByConnectorFetchStmt = null;
-    try {
-      linkByConnectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkForConnectorConfigurable());
+    try (PreparedStatement linkByConnectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkForConnectorConfigurable())) {
+
       linkByConnectorFetchStmt.setLong(1, connectorId);
       return loadLinks(linkByConnectorFetchStmt, conn);
     } catch (SQLException ex) {
       logException(ex, connectorId);
       throw new SqoopException(CommonRepositoryError.COMMON_0020, ex);
-    } finally {
-      closeStatements(linkByConnectorFetchStmt);
     }
   }
 
@@ -675,10 +568,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   public void createJob(MJob job, Connection conn) {
-    PreparedStatement stmt = null;
     int result;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtInsertJob(), Statement.RETURN_GENERATED_KEYS);
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertJob(), Statement.RETURN_GENERATED_KEYS)) {
       stmt.setString(1, job.getName());
       stmt.setLong(2, job.getFromLinkId());
       stmt.setLong(3, job.getToLinkId());
@@ -694,37 +585,35 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             Integer.toString(result));
       }
 
-      ResultSet rsetJobId = stmt.getGeneratedKeys();
+      try (ResultSet rsetJobId = stmt.getGeneratedKeys()) {
 
-      if (!rsetJobId.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        if (!rsetJobId.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
+
+        long jobId = rsetJobId.getLong(1);
+
+        // from config for the job
+        createInputValues(crudQueries.getStmtInsertJobInput(),
+                jobId,
+                job.getFromJobConfig().getConfigs(),
+                conn);
+        // to config for the job
+        createInputValues(crudQueries.getStmtInsertJobInput(),
+                jobId,
+                job.getToJobConfig().getConfigs(),
+                conn);
+        // driver config per job
+        createInputValues(crudQueries.getStmtInsertJobInput(),
+                jobId,
+                job.getDriverConfig().getConfigs(),
+                conn);
+
+        job.setPersistenceId(jobId);
       }
-
-      long jobId = rsetJobId.getLong(1);
-
-      // from config for the job
-      createInputValues(crudQueries.getStmtInsertJobInput(),
-          jobId,
-          job.getFromJobConfig().getConfigs(),
-          conn);
-      // to config for the job
-      createInputValues(crudQueries.getStmtInsertJobInput(),
-          jobId,
-          job.getToJobConfig().getConfigs(),
-          conn);
-      // driver config per job
-      createInputValues(crudQueries.getStmtInsertJobInput(),
-          jobId,
-          job.getDriverConfig().getConfigs(),
-          conn);
-
-      job.setPersistenceId(jobId);
-
     } catch (SQLException ex) {
       logException(ex, job);
       throw new SqoopException(CommonRepositoryError.COMMON_0023, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -733,16 +622,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void updateJob(MJob job, Connection conn) {
-    PreparedStatement deleteStmt = null;
-    PreparedStatement updateStmt = null;
-    try {
+    try (PreparedStatement deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteJobInput());
+         PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJob());) {
       // Firstly remove old values
-      deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteJobInput());
       deleteStmt.setLong(1, job.getPersistenceId());
       deleteStmt.executeUpdate();
 
       // Update job table
-      updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJob());
       updateStmt.setString(1, job.getName());
       updateStmt.setString(2, job.getLastUpdateUser());
       updateStmt.setTimestamp(3, new Timestamp(new Date().getTime()));
@@ -767,8 +653,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, job);
       throw new SqoopException(CommonRepositoryError.COMMON_0024, ex);
-    } finally {
-      closeStatements(deleteStmt, updateStmt);
     }
   }
 
@@ -777,23 +661,18 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public boolean existsJob(long jobId, Connection conn) {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectJobCheckById());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobCheckById())) {
       stmt.setLong(1, jobId);
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()) {
 
-      // Should be always valid in query with count
-      rs.next();
+        // Should be always valid in query with count
+        rs.next();
 
-      return rs.getLong(1) == 1;
+        return rs.getLong(1) == 1;
+      }
     } catch (SQLException ex) {
       logException(ex, jobId);
       throw new SqoopException(CommonRepositoryError.COMMON_0026, ex);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
   }
 
@@ -822,18 +701,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void enableJob(long jobId, boolean enabled, Connection conn) {
-    PreparedStatement enableConn = null;
-
-    try {
-      enableConn = conn.prepareStatement(crudQueries.getStmtEnableJob());
+    try (PreparedStatement enableConn = conn.prepareStatement(crudQueries.getStmtEnableJob())) {
       enableConn.setBoolean(1, enabled);
       enableConn.setLong(2, jobId);
       enableConn.executeUpdate();
     } catch (SQLException ex) {
       logException(ex, jobId);
       throw new SqoopException(CommonRepositoryError.COMMON_0039, ex);
-    } finally {
-      closeStatements(enableConn);
     }
   }
 
@@ -842,16 +716,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void deleteJobInputs(long id, Connection conn) {
-    PreparedStatement dltInput = null;
-    try {
-      dltInput = conn.prepareStatement(crudQueries.getStmtDeleteJobInput());
+    try (PreparedStatement dltInput = conn.prepareStatement(crudQueries.getStmtDeleteJobInput())) {
       dltInput.setLong(1, id);
       dltInput.executeUpdate();
     } catch (SQLException ex) {
       logException(ex, id);
       throw new SqoopException(CommonRepositoryError.COMMON_0025, ex);
-    } finally {
-      closeStatements(dltInput);
     }
   }
 
@@ -860,17 +730,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void deleteJob(long jobId, Connection conn) {
-    PreparedStatement dlt = null;
-    try {
+    try (PreparedStatement dlt = conn.prepareStatement(crudQueries.getStmtDeleteJob())) {
       deleteJobInputs(jobId, conn);
-      dlt = conn.prepareStatement(crudQueries.getStmtDeleteJob());
       dlt.setLong(1, jobId);
       dlt.executeUpdate();
     } catch (SQLException ex) {
       logException(ex, jobId);
       throw new SqoopException(CommonRepositoryError.COMMON_0025, ex);
-    } finally {
-      closeStatements(dlt);
     }
   }
 
@@ -879,9 +745,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MJob findJob(long jobId, Connection conn) {
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectJobSingleById());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobSingleById())) {
       stmt.setLong(1, jobId);
 
       List<MJob> jobs = loadJobs(stmt, conn);
@@ -902,8 +766,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, jobId);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -912,9 +774,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MJob findJob(String name, Connection conn) {
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectJobSingleByName());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobSingleByName())) {
       stmt.setString(1, name);
 
       List<MJob> jobs = loadJobs(stmt, conn);
@@ -934,8 +794,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, name);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -944,16 +802,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public List<MJob> findJobs(Connection conn) {
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn
-          .prepareStatement(crudQueries.getStmtSelectJobAllWithOrder());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobAllWithOrder())) {
+
       return loadJobs(stmt, conn);
     } catch (SQLException ex) {
       logException(ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -962,11 +816,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void createSubmission(MSubmission submission, Connection conn) {
-    PreparedStatement stmt = null;
     int result;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtInsertSubmission(),
-          Statement.RETURN_GENERATED_KEYS);
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertSubmission(),
+          Statement.RETURN_GENERATED_KEYS)) {
       stmt.setLong(1, submission.getJobId());
       stmt.setString(2, submission.getStatus().name());
       stmt.setString(3, submission.getCreationUser());
@@ -984,30 +836,28 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             Integer.toString(result));
       }
 
-      ResultSet rsetSubmissionId = stmt.getGeneratedKeys();
+      try (ResultSet rsetSubmissionId = stmt.getGeneratedKeys()) {
 
-      if (!rsetSubmissionId.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        if (!rsetSubmissionId.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
+
+        long submissionId = rsetSubmissionId.getLong(1);
+
+        if (submission.getCounters() != null) {
+          createSubmissionCounters(submissionId, submission.getCounters(), conn);
+        }
+
+        createSubmissionContext(submissionId, submission.getFromConnectorContext(), ContextType.FROM, conn);
+        createSubmissionContext(submissionId, submission.getToConnectorContext(), ContextType.TO, conn);
+        createSubmissionContext(submissionId, submission.getDriverContext(), ContextType.DRIVER, conn);
+
+        // Save created persistence id
+        submission.setPersistenceId(submissionId);
       }
-
-      long submissionId = rsetSubmissionId.getLong(1);
-
-      if(submission.getCounters() != null) {
-        createSubmissionCounters(submissionId, submission.getCounters(), conn);
-      }
-
-      createSubmissionContext(submissionId, submission.getFromConnectorContext(), ContextType.FROM, conn);
-      createSubmissionContext(submissionId, submission.getToConnectorContext(), ContextType.TO, conn);
-      createSubmissionContext(submissionId, submission.getDriverContext(), ContextType.DRIVER, conn);
-
-      // Save created persistence id
-      submission.setPersistenceId(submissionId);
-
     } catch (SQLException ex) {
       logException(ex, submission);
       throw new SqoopException(CommonRepositoryError.COMMON_0031, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -1016,23 +866,18 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public boolean existsSubmission(long submissionId, Connection conn) {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionCheck());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionCheck())) {
       stmt.setLong(1, submissionId);
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()) {
 
-      // Should be always valid in query with count
-      rs.next();
+        // Should be always valid in query with count
+        rs.next();
 
-      return rs.getLong(1) == 1;
+        return rs.getLong(1) == 1;
+      }
     } catch (SQLException ex) {
       logException(ex, submissionId);
       throw new SqoopException(CommonRepositoryError.COMMON_0030, ex);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
   }
 
@@ -1041,11 +886,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void updateSubmission(MSubmission submission, Connection conn) {
-    PreparedStatement stmt = null;
-    PreparedStatement deleteStmt = null;
-    try {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtUpdateSubmission());
+         PreparedStatement deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteCounterSubmission());) {
       //  Update properties in main table
-      stmt = conn.prepareStatement(crudQueries.getStmtUpdateSubmission());
       stmt.setString(1, submission.getStatus().name());
       stmt.setString(2, submission.getLastUpdateUser());
       stmt.setTimestamp(3, new Timestamp(submission.getLastUpdateDate().getTime()));
@@ -1056,7 +899,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       stmt.executeUpdate();
 
       // Delete previous counters
-      deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteCounterSubmission());
       deleteStmt.setLong(1, submission.getPersistenceId());
       deleteStmt.executeUpdate();
 
@@ -1070,8 +912,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, submission);
       throw new SqoopException(CommonRepositoryError.COMMON_0032, ex);
-    } finally {
-      closeStatements(stmt, deleteStmt);
     }
   }
 
@@ -1080,17 +920,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void purgeSubmissions(Date threshold, Connection conn) {
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtPurgeSubmissions());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtPurgeSubmissions())) {
       stmt.setTimestamp(1, new Timestamp(threshold.getTime()));
       stmt.executeUpdate();
 
     } catch (SQLException ex) {
       logException(ex, threshold);
       throw new SqoopException(CommonRepositoryError.COMMON_0033, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -1100,28 +936,20 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public List<MSubmission> findUnfinishedSubmissions(Connection conn) {
     List<MSubmission> submissions = new LinkedList<MSubmission>();
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionUnfinished());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionUnfinished())) {
 
       for(SubmissionStatus status : SubmissionStatus.unfinished()) {
         stmt.setString(1, status.name());
-        rs = stmt.executeQuery();
+        try (ResultSet rs = stmt.executeQuery()) {
 
-        while(rs.next()) {
-          submissions.add(loadSubmission(rs, conn));
+          while (rs.next()) {
+            submissions.add(loadSubmission(rs, conn));
+          }
         }
-
-        rs.close();
-        rs = null;
       }
     } catch (SQLException ex) {
       logException(ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0034, ex);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
 
     return submissions;
@@ -1133,24 +961,14 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public List<MSubmission> findSubmissions(Connection conn) {
     List<MSubmission> submissions = new LinkedList<MSubmission>();
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissions());
-      rs = stmt.executeQuery();
-
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissions());
+         ResultSet rs = stmt.executeQuery();) {
       while(rs.next()) {
         submissions.add(loadSubmission(rs, conn));
       }
-
-      rs.close();
-      rs = null;
     } catch (SQLException ex) {
       logException(ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0036, ex);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
 
     return submissions;
@@ -1162,25 +980,17 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public List<MSubmission> findSubmissionsForJob(long jobId, Connection conn) {
     List<MSubmission> submissions = new LinkedList<MSubmission>();
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionsForJob());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionsForJob())) {
       stmt.setLong(1, jobId);
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()) {
 
-      while(rs.next()) {
-        submissions.add(loadSubmission(rs, conn));
+        while (rs.next()) {
+          submissions.add(loadSubmission(rs, conn));
+        }
       }
-
-      rs.close();
-      rs = null;
     } catch (SQLException ex) {
       logException(ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0037, ex);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
 
     return submissions;
@@ -1191,42 +1001,33 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MSubmission findLastSubmissionForJob(long jobId, Connection conn) {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionsForJob());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionsForJob())) {
+
       stmt.setLong(1, jobId);
       stmt.setMaxRows(1);
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()) {
 
-      if(!rs.next()) {
-        return null;
+        if (!rs.next()) {
+          return null;
+        }
+
+        return loadSubmission(rs, conn);
       }
-
-      return loadSubmission(rs, conn);
     } catch (SQLException ex) {
       logException(ex, jobId);
       throw new SqoopException(CommonRepositoryError.COMMON_0037, ex);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
   }
 
   private void insertConnectorDirection(Long connectorId, Direction direction, Connection conn)
       throws SQLException {
-    PreparedStatement stmt = null;
-
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtInsertSqConnectorDirections());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertSqConnectorDirections())) {
       stmt.setLong(1, connectorId);
       stmt.setLong(2, getDirection(direction, conn));
 
       if (stmt.executeUpdate() != 1) {
         throw new SqoopException(CommonRepositoryError.COMMON_0043);
       }
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -1242,10 +1043,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   private long insertAndGetConnectorId(MConnector mc, Connection conn) {
-    PreparedStatement baseConnectorStmt = null;
-    try {
-      baseConnectorStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
-          Statement.RETURN_GENERATED_KEYS);
+    try (PreparedStatement baseConnectorStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
+          Statement.RETURN_GENERATED_KEYS)) {
       baseConnectorStmt.setString(1, mc.getUniqueName());
       baseConnectorStmt.setString(2, mc.getClassName());
       baseConnectorStmt.setString(3, mc.getVersion());
@@ -1257,18 +1056,17 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             Integer.toString(baseConnectorCount));
       }
 
-      ResultSet rsetConnectorId = baseConnectorStmt.getGeneratedKeys();
+      try (ResultSet rsetConnectorId = baseConnectorStmt.getGeneratedKeys()) {
 
-      if (!rsetConnectorId.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        if (!rsetConnectorId.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
+        // connector configurable also have directions
+        insertConnectorDirections(rsetConnectorId.getLong(1), mc.getSupportedDirections(), conn);
+        return rsetConnectorId.getLong(1);
       }
-      // connector configurable also have directions
-      insertConnectorDirections(rsetConnectorId.getLong(1), mc.getSupportedDirections(), conn);
-      return rsetConnectorId.getLong(1);
     } catch (SQLException ex) {
       throw new SqoopException(CommonRepositoryError.COMMON_0011, mc.toString(), ex);
-    } finally {
-      closeStatements(baseConnectorStmt);
     }
   }
 
@@ -1281,15 +1079,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   private void insertConfigsForConnector(MConnector mc, Connection conn) {
     long connectorId = mc.getPersistenceId();
-    PreparedStatement baseConfigStmt = null;
-    PreparedStatement baseInputStmt = null;
-    try{
-      baseConfigStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfig(),
+    try (PreparedStatement baseConfigStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfig(),
           Statement.RETURN_GENERATED_KEYS);
-
-      baseInputStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoInput(),
-          Statement.RETURN_GENERATED_KEYS);
-
+         PreparedStatement baseInputStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoInput(),
+          Statement.RETURN_GENERATED_KEYS);) {
       // Register link type config
       registerConfigs(connectorId, null /* No direction for LINK type config */, mc.getLinkConfig()
           .getConfigs(), MConfigType.LINK.name(), baseConfigStmt, baseInputStmt, conn);
@@ -1306,16 +1099,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       throw new SqoopException(CommonRepositoryError.COMMON_0011,
           mc.toString(), ex);
-    } finally {
-      closeStatements(baseConfigStmt, baseInputStmt);
     }
   }
 
   private long insertAndGetDriverId(MDriver mDriver, Connection conn) {
-    PreparedStatement baseDriverStmt = null;
-    try {
-      baseDriverStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
-          Statement.RETURN_GENERATED_KEYS);
+    try (PreparedStatement baseDriverStmt = conn.prepareStatement(crudQueries.getStmtInsertIntoConfigurable(),
+          Statement.RETURN_GENERATED_KEYS)) {
       baseDriverStmt.setString(1, mDriver.getUniqueName());
       baseDriverStmt.setString(2, Driver.getClassName());
       baseDriverStmt.setString(3, mDriver.getVersion());
@@ -1326,28 +1115,24 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         throw new SqoopException(CommonRepositoryError.COMMON_0009, Integer.toString(baseDriverCount));
       }
 
-      ResultSet rsetDriverId = baseDriverStmt.getGeneratedKeys();
+      try (ResultSet rsetDriverId = baseDriverStmt.getGeneratedKeys()) {
 
-      if (!rsetDriverId.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        if (!rsetDriverId.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
+        return rsetDriverId.getLong(1);
       }
-      return rsetDriverId.getLong(1);
     } catch (SQLException ex) {
       throw new SqoopException(CommonRepositoryError.COMMON_0044, mDriver.toString(), ex);
-    } finally {
-      closeStatements(baseDriverStmt);
     }
   }
 
   private void createSubmissionContext(long submissionId, ImmutableContext context, ContextType contextType, Connection conn) throws SQLException {
-    PreparedStatement stmt = null;
-
     if(context == null) {
       return;
     }
 
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtInsertContext());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertContext())) {
       long contextTypeId = getContextType(contextType, conn);
 
       for(Map.Entry<String, String> entry: context) {
@@ -1360,74 +1145,53 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
         stmt.executeUpdate();
       }
-    } finally {
-      closeStatements(stmt);
     }
   }
 
   private long getContextType(ContextType type, Connection conn) throws SQLException {
-    PreparedStatement select = null;
-    PreparedStatement insert = null;
-    ResultSet rsSelect = null;
-    ResultSet rsInsert = null;
+    try (PreparedStatement select = conn.prepareStatement(crudQueries.getStmtSelectContextType());
+         PreparedStatement insert = conn.prepareStatement(crudQueries.getStmtInsertContextType(), Statement.RETURN_GENERATED_KEYS);) {
 
-    try {
-      select = conn.prepareStatement(crudQueries.getStmtSelectContextType());
       select.setString(1, type.toString());
 
-      rsSelect = select.executeQuery();
-
-      if(rsSelect.next()) {
-        return rsSelect.getLong(1);
+      try (ResultSet rsSelect = select.executeQuery()) {
+        if (rsSelect.next()) {
+          return rsSelect.getLong(1);
+        }
       }
 
-      insert = conn.prepareStatement(crudQueries.getStmtInsertContextType(), Statement.RETURN_GENERATED_KEYS);
       insert.setString(1, type.toString());
       insert.executeUpdate();
 
-      rsInsert = insert.getGeneratedKeys();
-
-      if (!rsInsert.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+      try (ResultSet rsInsert = insert.getGeneratedKeys()) {
+        if (!rsInsert.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
+        return rsInsert.getLong(1);
       }
-
-      return rsInsert.getLong(1);
-    } finally {
-      closeResultSets(rsSelect, rsInsert);
-      closeStatements(select, insert);
     }
   }
 
   private long getContextProperty(String property, Connection conn) throws SQLException {
-    PreparedStatement select = null;
-    PreparedStatement insert = null;
-    ResultSet rsSelect = null;
-    ResultSet rsInsert = null;
+    try (PreparedStatement select = conn.prepareStatement(crudQueries.getStmtSelectContextProperty());
+         PreparedStatement insert = conn.prepareStatement(crudQueries.getStmtInsertContextProperty(), Statement.RETURN_GENERATED_KEYS);) {
 
-    try {
-      select = conn.prepareStatement(crudQueries.getStmtSelectContextProperty());
       select.setString(1, property);
-
-      rsSelect = select.executeQuery();
-
-      if(rsSelect.next()) {
-        return rsSelect.getLong(1);
+      try (ResultSet rsSelect = select.executeQuery()) {
+        if (rsSelect.next()) {
+          return rsSelect.getLong(1);
+        }
       }
 
-      insert = conn.prepareStatement(crudQueries.getStmtInsertContextProperty(), Statement.RETURN_GENERATED_KEYS);
       insert.setString(1, property);
       insert.executeUpdate();
 
-      rsInsert = insert.getGeneratedKeys();
-
-      if (!rsInsert.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+      try (ResultSet rsInsert = insert.getGeneratedKeys()) {
+        if (!rsInsert.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
+        return rsInsert.getLong(1);
       }
-
-      return rsInsert.getLong(1);
-    } finally {
-      closeResultSets(rsSelect, rsInsert);
-      closeStatements(select, insert);
     }
   }
 
@@ -1440,11 +1204,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @throws java.sql.SQLException
    */
   private void createSubmissionCounters(long submissionId, Counters counters, Connection conn) throws SQLException {
-    PreparedStatement stmt = null;
-
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtInsertCounterSubmission());
-
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertCounterSubmission())) {
       for(CounterGroup group : counters) {
         long groupId = getCounterGroupId(group, conn);
 
@@ -1459,8 +1219,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           stmt.executeUpdate();
         }
       }
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -1473,35 +1231,24 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @throws java.sql.SQLException
    */
   private long getCounterGroupId(CounterGroup group, Connection conn) throws SQLException {
-    PreparedStatement select = null;
-    PreparedStatement insert = null;
-    ResultSet rsSelect = null;
-    ResultSet rsInsert = null;
-
-    try {
-      select = conn.prepareStatement(crudQueries.getStmtSelectCounterGroup());
+    try (PreparedStatement select = conn.prepareStatement(crudQueries.getStmtSelectCounterGroup());
+         PreparedStatement insert = conn.prepareStatement(crudQueries.getStmtInsertCounterGroup(), Statement.RETURN_GENERATED_KEYS);) {
       select.setString(1, group.getName());
 
-      rsSelect = select.executeQuery();
-
-      if(rsSelect.next()) {
-        return rsSelect.getLong(1);
+      try (ResultSet rsSelect = select.executeQuery()) {
+        if (rsSelect.next()) {
+          return rsSelect.getLong(1);
+        }
       }
-
-      insert = conn.prepareStatement(crudQueries.getStmtInsertCounterGroup(), Statement.RETURN_GENERATED_KEYS);
       insert.setString(1, group.getName());
       insert.executeUpdate();
 
-      rsInsert = insert.getGeneratedKeys();
-
-      if (!rsInsert.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+      try (ResultSet rsInsert = insert.getGeneratedKeys()) {
+        if (!rsInsert.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
+        return rsInsert.getLong(1);
       }
-
-      return rsInsert.getLong(1);
-    } finally {
-      closeResultSets(rsSelect, rsInsert);
-      closeStatements(select, insert);
     }
   }
 
@@ -1514,35 +1261,26 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @throws java.sql.SQLException
    */
   private long getCounterId(Counter counter, Connection conn) throws SQLException {
-    PreparedStatement select = null;
-    PreparedStatement insert = null;
-    ResultSet rsSelect = null;
-    ResultSet rsInsert = null;
+    try (PreparedStatement select = conn.prepareStatement(crudQueries.getStmtSelectCounter());
+         PreparedStatement insert = conn.prepareStatement(crudQueries.getStmtInsertCounter(), Statement.RETURN_GENERATED_KEYS);) {
 
-    try {
-      select = conn.prepareStatement(crudQueries.getStmtSelectCounter());
       select.setString(1, counter.getName());
-
-      rsSelect = select.executeQuery();
-
-      if(rsSelect.next()) {
-        return rsSelect.getLong(1);
+      try (ResultSet rsSelect = select.executeQuery()) {
+        if (rsSelect.next()) {
+          return rsSelect.getLong(1);
+        }
       }
 
-      insert = conn.prepareStatement(crudQueries.getStmtInsertCounter(), Statement.RETURN_GENERATED_KEYS);
       insert.setString(1, counter.getName());
       insert.executeUpdate();
 
-      rsInsert = insert.getGeneratedKeys();
+      try (ResultSet rsInsert = insert.getGeneratedKeys()) {
+        if (!rsInsert.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        }
 
-      if (!rsInsert.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0010);
+        return rsInsert.getLong(1);
       }
-
-      return rsInsert.getLong(1);
-    } finally {
-      closeResultSets(rsSelect, rsInsert);
-      closeStatements(select, insert);
     }
   }
 
@@ -1581,135 +1319,96 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   }
 
   private MutableContext loadContextSubmission(long submissionId, ContextType type, Connection conn) throws SQLException {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectContext());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectContext())) {
       stmt.setLong(1, submissionId);
       stmt.setLong(2, getContextType(type, conn));
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()) {
 
-      MutableContext context = new MutableMapContext();
+        MutableContext context = new MutableMapContext();
 
-      while (rs.next()) {
-        String key = rs.getString(1);
-        String value = rs.getString(2);
+        while (rs.next()) {
+          String key = rs.getString(1);
+          String value = rs.getString(2);
 
-        context.setString(key, value);
+          context.setString(key, value);
+        }
+
+        return context;
       }
-
-      return context;
-    } finally {
-      closeStatements(stmt);
-      closeResultSets(rs);
     }
   }
 
   private Counters loadCountersSubmission(long submissionId, Connection conn) throws SQLException {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectCounterSubmission());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectCounterSubmission())) {
       stmt.setLong(1, submissionId);
-      rs = stmt.executeQuery();
+      try (ResultSet rs = stmt.executeQuery()) {
 
-      Counters counters = new Counters();
+        Counters counters = new Counters();
 
-      while (rs.next()) {
-        String groupName = rs.getString(1);
-        String counterName = rs.getString(2);
-        long value = rs.getLong(3);
+        while (rs.next()) {
+          String groupName = rs.getString(1);
+          String counterName = rs.getString(2);
+          long value = rs.getLong(3);
 
-        CounterGroup group = counters.getCounterGroup(groupName);
-        if (group == null) {
-          group = new CounterGroup(groupName);
-          counters.addCounterGroup(group);
+          CounterGroup group = counters.getCounterGroup(groupName);
+          if (group == null) {
+            group = new CounterGroup(groupName);
+            counters.addCounterGroup(group);
+          }
+
+          group.addCounter(new Counter(counterName, value));
         }
 
-        group.addCounter(new Counter(counterName, value));
+        if (counters.isEmpty()) {
+          return null;
+        } else {
+          return counters;
+        }
       }
-
-      if (counters.isEmpty()) {
-        return null;
-      } else {
-        return counters;
-      }
-    } finally {
-      closeStatements(stmt);
-      closeResultSets(rs);
     }
   }
 
   private Long getDirection(Direction direction, Connection conn) throws SQLException {
-    PreparedStatement directionStmt = null;
-    ResultSet rs = null;
-
-    try {
-      directionStmt = conn.prepareStatement(crudQueries.getStmtSelectSqdIdBySqdName());
+    try (PreparedStatement directionStmt = conn.prepareStatement(crudQueries.getStmtSelectSqdIdBySqdName())) {
       directionStmt.setString(1, direction.toString());
-      rs = directionStmt.executeQuery();
+      try (ResultSet rs = directionStmt.executeQuery()) {
 
-      rs.next();
-      return rs.getLong(1);
-    } finally {
-      if (rs != null) {
-        closeResultSets(rs);
-      }
-      if (directionStmt != null) {
-        closeStatements(directionStmt);
+        rs.next();
+        return rs.getLong(1);
       }
     }
   }
 
   private Direction getDirection(long directionId, Connection conn) throws SQLException {
-    PreparedStatement directionStmt = null;
-    ResultSet rs = null;
-
-    try {
-      directionStmt = conn.prepareStatement(crudQueries.getStmtSelectSqdNameBySqdId());
+    try (PreparedStatement directionStmt = conn.prepareStatement(crudQueries.getStmtSelectSqdNameBySqdId())) {
       directionStmt.setLong(1, directionId);
-      rs = directionStmt.executeQuery();
+      try (ResultSet rs = directionStmt.executeQuery()) {
 
-      rs.next();
-      return Direction.valueOf(rs.getString(1));
-    } finally {
-      if (rs != null) {
-        closeResultSets(rs);
-      }
-      if (directionStmt != null) {
-        closeStatements(directionStmt);
+        rs.next();
+        return Direction.valueOf(rs.getString(1));
       }
     }
   }
 
   private SupportedDirections findConnectorSupportedDirections(long connectorId, Connection conn) throws SQLException {
-    PreparedStatement connectorDirectionsStmt = null;
-    ResultSet rs = null;
-
     boolean from = false, to = false;
 
-    try {
-      connectorDirectionsStmt = conn.prepareStatement(crudQueries.getStmtSelectSqConnectorDirections());
+    try (PreparedStatement connectorDirectionsStmt = conn.prepareStatement(crudQueries.getStmtSelectSqConnectorDirections())) {
+
       connectorDirectionsStmt.setLong(1, connectorId);
-      rs = connectorDirectionsStmt.executeQuery();
+      try (ResultSet rs = connectorDirectionsStmt.executeQuery()) {
 
-      while(rs.next()) {
-        switch(getDirection(rs.getLong(2), conn)) {
-          case FROM:
-            from = true;
-            break;
+        while (rs.next()) {
+          switch (getDirection(rs.getLong(2), conn)) {
+            case FROM:
+              from = true;
+              break;
 
-          case TO:
-            to = true;
-            break;
+            case TO:
+              to = true;
+              break;
+          }
         }
-      }
-    } finally {
-      if (rs != null) {
-        closeResultSets(rs);
-      }
-      if (connectorDirectionsStmt != null) {
-        closeStatements(connectorDirectionsStmt);
       }
     }
 
@@ -1718,14 +1417,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
   private List<MConnector> loadConnectors(PreparedStatement stmt, Connection conn) throws SQLException {
     List<MConnector> connectors = new ArrayList<MConnector>();
-    ResultSet rsConnectors = null;
-    PreparedStatement connectorConfigFetchStmt = null;
-    PreparedStatement connectorConfigInputFetchStmt = null;
 
-    try {
-      rsConnectors = stmt.executeQuery();
-      connectorConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
-      connectorConfigInputFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectInput());
+    try (ResultSet rsConnectors = stmt.executeQuery();
+         PreparedStatement connectorConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+         PreparedStatement connectorConfigInputFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectInput());) {
 
       while(rsConnectors.next()) {
         long connectorId = rsConnectors.getLong(1);
@@ -1758,9 +1453,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
         connectors.add(mc);
       }
-    } finally {
-      closeResultSets(rsConnectors);
-      closeStatements(connectorConfigFetchStmt, connectorConfigInputFetchStmt);
     }
     return connectors;
   }
@@ -1769,15 +1461,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
                                 Connection conn)
       throws SQLException {
     List<MLink> links = new ArrayList<MLink>();
-    ResultSet rsConnection = null;
-    PreparedStatement connectorConfigFetchStatement = null;
-    PreparedStatement connectorConfigInputStatement = null;
 
-    try {
-      rsConnection = stmt.executeQuery();
-
-      connectorConfigFetchStatement = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
-      connectorConfigInputStatement = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());
+    try (ResultSet rsConnection = stmt.executeQuery();
+         PreparedStatement connectorConfigFetchStatement = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+         PreparedStatement connectorConfigInputStatement = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());) {
 
       while(rsConnection.next()) {
         long id = rsConnection.getLong(1);
@@ -1810,9 +1497,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
         links.add(link);
       }
-    } finally {
-      closeResultSets(rsConnection);
-      closeStatements(connectorConfigFetchStatement, connectorConfigInputStatement);
     }
 
     return links;
@@ -1822,21 +1506,16 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
                               Connection conn)
       throws SQLException {
     List<MJob> jobs = new ArrayList<MJob>();
-    ResultSet rsJob = null;
-    PreparedStatement fromConfigFetchStmt = null;
-    PreparedStatement toConfigFetchStmt = null;
-    PreparedStatement driverConfigfetchStmt = null;
-    PreparedStatement jobInputFetchStmt = null;
 
-    try {
-      rsJob = stmt.executeQuery();
+    try (ResultSet rsJob = stmt.executeQuery();
+         PreparedStatement fromConfigFetchStmt  = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+         PreparedStatement toConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+         PreparedStatement driverConfigfetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
+         PreparedStatement jobInputFetchStmt = conn.prepareStatement(crudQueries.getStmtFetchJobInput());) {
+
       // Note: Job does not hold a explicit reference to the driver since every
       // job has the same driver
       long driverId = this.findDriver(MDriver.DRIVER_NAME, conn).getPersistenceId();
-      fromConfigFetchStmt  = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
-      toConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
-      driverConfigfetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
-      jobInputFetchStmt = conn.prepareStatement(crudQueries.getStmtFetchJobInput());
 
       while(rsJob.next()) {
         long fromConnectorId = rsJob.getLong(1);
@@ -1894,9 +1573,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
         jobs.add(job);
       }
-    } finally {
-      closeResultSets(rsJob);
-      closeStatements(fromConfigFetchStmt, toConfigFetchStmt, driverConfigfetchStmt, jobInputFetchStmt);
     }
 
     return jobs;
@@ -1904,16 +1580,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
   private void registerConfigDirection(Long configId, Direction direction, Connection conn)
       throws SQLException {
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtInsertSqConfigDirections());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertSqConfigDirections())) {
       stmt.setLong(1, configId);
       stmt.setLong(2, getDirection(direction, conn));
       if (stmt.executeUpdate() != 1) {
         throw new SqoopException(CommonRepositoryError.COMMON_0042);
       }
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -1949,37 +1621,38 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         throw new SqoopException(CommonRepositoryError.COMMON_0012,
             Integer.toString(baseConfigCount));
       }
-      ResultSet rsetConfigId = baseConfigStmt.getGeneratedKeys();
-      if (!rsetConfigId.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0013);
-      }
-
-      long configId = rsetConfigId.getLong(1);
-      config.setPersistenceId(configId);
-
-      if (direction != null) {
-        registerConfigDirection(configId, direction, conn);
-      }
-
-      // Insert all the inputs
-      List<MInput<?>> inputs = config.getInputs();
-      registerConfigInputs(config, inputs, baseInputStmt);
-      // validate all the input relations
-      Map<Long, List<String>> inputRelationships = new HashMap<Long, List<String>>();
-      for (MInput<?> input : inputs) {
-        List<String> inputOverrides = validateAndGetOverridesAttribute(input, config);
-        if (inputOverrides != null && inputOverrides.size() > 0) {
-          inputRelationships.put(input.getPersistenceId(), inputOverrides);
+      try (ResultSet rsetConfigId = baseConfigStmt.getGeneratedKeys()) {
+        if (!rsetConfigId.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0013);
         }
-      }
 
-      // Insert all input relations
-      if (inputRelationships != null && inputRelationships.size() > 0) {
-        for (Map.Entry<Long, List<String>> entry : inputRelationships.entrySet()) {
-          List<String> children = entry.getValue();
-          for (String child : children) {
-            Long childId = config.getInput(child).getPersistenceId();
-            insertConfigInputRelationship(entry.getKey(), childId, conn);
+        long configId = rsetConfigId.getLong(1);
+        config.setPersistenceId(configId);
+
+        if (direction != null) {
+          registerConfigDirection(configId, direction, conn);
+        }
+
+        // Insert all the inputs
+        List<MInput<?>> inputs = config.getInputs();
+        registerConfigInputs(config, inputs, baseInputStmt);
+        // validate all the input relations
+        Map<Long, List<String>> inputRelationships = new HashMap<Long, List<String>>();
+        for (MInput<?> input : inputs) {
+          List<String> inputOverrides = validateAndGetOverridesAttribute(input, config);
+          if (inputOverrides != null && inputOverrides.size() > 0) {
+            inputRelationships.put(input.getPersistenceId(), inputOverrides);
+          }
+        }
+
+        // Insert all input relations
+        if (inputRelationships.size() > 0) {
+          for (Map.Entry<Long, List<String>> entry : inputRelationships.entrySet()) {
+            List<String> children = entry.getValue();
+            for (String child : children) {
+              Long childId = config.getInput(child).getPersistenceId();
+              insertConfigInputRelationship(entry.getKey(), childId, conn);
+            }
           }
         }
       }
@@ -2034,29 +1707,27 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             Integer.toString(baseInputCount));
       }
 
-      ResultSet rsetInputId = baseInputStmt.getGeneratedKeys();
-      if (!rsetInputId.next()) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0015);
-      }
+      try (ResultSet rsetInputId = baseInputStmt.getGeneratedKeys()) {
+        if (!rsetInputId.next()) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0015);
+        }
 
-      long inputId = rsetInputId.getLong(1);
-      input.setPersistenceId(inputId);
+        long inputId = rsetInputId.getLong(1);
+        input.setPersistenceId(inputId);
+      }
     }
   }
 
   private void insertConfigInputRelationship(Long parent, Long child, Connection conn) {
-    PreparedStatement baseInputRelationStmt = null;
-    try {
-      baseInputRelationStmt = conn.prepareStatement(crudQueries
-          .getStmtInsertIntoInputRelation());
+    try (PreparedStatement baseInputRelationStmt = conn.prepareStatement(crudQueries
+            .getStmtInsertIntoInputRelation())) {
+
       baseInputRelationStmt.setLong(1, parent);
       baseInputRelationStmt.setLong(2, child);
       baseInputRelationStmt.executeUpdate();
 
     } catch (SQLException ex) {
       throw new SqoopException(CommonRepositoryError.COMMON_0047, ex);
-    } finally {
-      closeStatements(baseInputRelationStmt);
     }
   }
 
@@ -2166,10 +1837,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType type,
       Connection conn) {
     List<MInput<?>> inputs = config.getInputs();
-    PreparedStatement updateStmt = null;
 
-    try {
-      updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJobInput());
+    try (PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJobInput())) {
       for (MInput<?> input : inputs) {
         if (input.isEmpty()) {
           continue;
@@ -2183,8 +1852,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, jobId);
       throw new SqoopException(CommonRepositoryError.COMMON_0053, ex);
-    } finally {
-      closeStatements(updateStmt);
     }
   }
 
@@ -2203,9 +1870,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType type,
       Connection conn) {
     List<MInput<?>> inputs = config.getInputs();
-    PreparedStatement updateStmt = null;
-    try {
-      updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateLinkInput());
+    try (PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateLinkInput());) {
       for (MInput<?> input : inputs) {
         if (input.isEmpty()) {
           continue;
@@ -2219,8 +1884,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, linkId);
       throw new SqoopException(CommonRepositoryError.COMMON_0054, ex);
-    } finally {
-      closeStatements(updateStmt);
     }
   }
 
@@ -2250,132 +1913,123 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
                                 int configPosition, Connection conn) throws SQLException {
 
     // Get list of structures from database
-    ResultSet rsetConfig = configFetchStatement.executeQuery();
-    while (rsetConfig.next()) {
-      long configId = rsetConfig.getLong(1);
-      Long fromConnectorId = rsetConfig.getLong(2);
-      String configName = rsetConfig.getString(3);
-      String configTYpe = rsetConfig.getString(4);
-      int configIndex = rsetConfig.getInt(5);
-      List<MInput<?>> configInputs = new ArrayList<MInput<?>>();
+    try (ResultSet rsetConfig = configFetchStatement.executeQuery()) {
+      while (rsetConfig.next()) {
+        long configId = rsetConfig.getLong(1);
+        Long fromConnectorId = rsetConfig.getLong(2);
+        String configName = rsetConfig.getString(3);
+        String configTYpe = rsetConfig.getString(4);
+        int configIndex = rsetConfig.getInt(5);
+        List<MInput<?>> configInputs = new ArrayList<MInput<?>>();
 
-      MConfig mDriverConfig = new MConfig(configName, configInputs);
-      mDriverConfig.setPersistenceId(configId);
+        MConfig mDriverConfig = new MConfig(configName, configInputs);
+        mDriverConfig.setPersistenceId(configId);
 
-      inputFetchStmt.setLong(configPosition, configId);
+        inputFetchStmt.setLong(configPosition, configId);
 
-      ResultSet rsetInput = inputFetchStmt.executeQuery();
-      while (rsetInput.next()) {
-        long inputId = rsetInput.getLong(1);
-        String inputName = rsetInput.getString(2);
-        long inputConfig = rsetInput.getLong(3);
-        short inputIndex = rsetInput.getShort(4);
-        String inputType = rsetInput.getString(5);
-        boolean inputSensitivity = rsetInput.getBoolean(6);
-        short inputStrLength = rsetInput.getShort(7);
-        String editable = rsetInput.getString(8);
-        InputEditable editableEnum = editable != null ? InputEditable.valueOf(editable)
-            : InputEditable.ANY;
-        // get the overrides value from the SQ_INPUT_RELATION table
-        String overrides = getOverrides(inputId, conn);
-        String inputEnumValues = rsetInput.getString(9);
-        String value = rsetInput.getString(10);
+        try (ResultSet rsetInput = inputFetchStmt.executeQuery()) {
+          while (rsetInput.next()) {
+            long inputId = rsetInput.getLong(1);
+            String inputName = rsetInput.getString(2);
+            long inputConfig = rsetInput.getLong(3);
+            short inputIndex = rsetInput.getShort(4);
+            String inputType = rsetInput.getString(5);
+            boolean inputSensitivity = rsetInput.getBoolean(6);
+            short inputStrLength = rsetInput.getShort(7);
+            String editable = rsetInput.getString(8);
+            InputEditable editableEnum = editable != null ? InputEditable.valueOf(editable)
+                    : InputEditable.ANY;
+            // get the overrides value from the SQ_INPUT_RELATION table
+            String overrides = getOverrides(inputId, conn);
+            String inputEnumValues = rsetInput.getString(9);
+            String value = rsetInput.getString(10);
 
-        MInputType mit = MInputType.valueOf(inputType);
-        MInput input = null;
-        switch (mit) {
-     case STRING:
-            input = new MStringInput(inputName, inputSensitivity, editableEnum,  overrides, inputStrLength);
-            break;
-          case MAP:
-            input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides);
-            break;
-          case BOOLEAN:
-            input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
-            break;
-          case INTEGER:
-            input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
-            break;
-          case LONG:
-            input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides);
-            break;
-          case ENUM:
-            input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides, inputEnumValues.split(","));
-            break;
-          default:
-            throw new SqoopException(CommonRepositoryError.COMMON_0003,
-                "input-" + inputName + ":" + inputId + ":"
-                    + "config-" + inputConfig + ":" + mit.name());
+            MInputType mit = MInputType.valueOf(inputType);
+            MInput input = null;
+            switch (mit) {
+              case STRING:
+                input = new MStringInput(inputName, inputSensitivity, editableEnum, overrides, inputStrLength);
+                break;
+              case MAP:
+                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case BOOLEAN:
+                input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case INTEGER:
+                input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case LONG:
+                input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case ENUM:
+                input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides, inputEnumValues.split(","));
+                break;
+              default:
+                throw new SqoopException(CommonRepositoryError.COMMON_0003,
+                        "input-" + inputName + ":" + inputId + ":"
+                                + "config-" + inputConfig + ":" + mit.name());
+            }
+
+            // Set persistent ID
+            input.setPersistenceId(inputId);
+
+            // Set value
+            if (value == null) {
+              input.setEmpty();
+            } else {
+              input.restoreFromUrlSafeValueString(value);
+            }
+
+            if (mDriverConfig.getInputs().size() != inputIndex) {
+              throw new SqoopException(CommonRepositoryError.COMMON_0006,
+                      "config: " + mDriverConfig
+                              + "; input: " + input
+                              + "; index: " + inputIndex
+                              + "; expected: " + mDriverConfig.getInputs().size()
+              );
+            }
+
+            mDriverConfig.getInputs().add(input);
+          }
         }
-
-        // Set persistent ID
-        input.setPersistenceId(inputId);
-
-        // Set value
-        if(value == null) {
-          input.setEmpty();
-        } else {
-          input.restoreFromUrlSafeValueString(value);
-        }
-
-        if (mDriverConfig.getInputs().size() != inputIndex) {
-          throw new SqoopException(CommonRepositoryError.COMMON_0006,
-              "config: " + mDriverConfig
-                  + "; input: " + input
-                  + "; index: " + inputIndex
-                  + "; expected: " + mDriverConfig.getInputs().size()
+        if (mDriverConfig.getInputs().size() == 0) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0005,
+                  "owner-" + fromConnectorId
+                          + "; config: " + mDriverConfig
           );
         }
 
-        mDriverConfig.getInputs().add(input);
-      }
-
-      if (mDriverConfig.getInputs().size() == 0) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0005,
-            "owner-" + fromConnectorId
-                + "; config: " + mDriverConfig
-        );
-      }
-
-      MConfigType configType = MConfigType.valueOf(configTYpe);
-      switch (configType) {
-        case JOB:
-          if (driverConfig.size() != configIndex) {
-            throw new SqoopException(CommonRepositoryError.COMMON_0007,
-                "owner-" + fromConnectorId
-                    + "; config: " + configType
-                    + "; index: " + configIndex
-                    + "; expected: " + driverConfig.size()
-            );
-          }
-          driverConfig.add(mDriverConfig);
-          break;
-        case CONNECTION:
-          // do nothing
-           break;
-        default:
-          throw new SqoopException(CommonRepositoryError.COMMON_0004,
-              "connector-" + fromConnectorId + ":" + configType);
+        MConfigType configType = MConfigType.valueOf(configTYpe);
+        switch (configType) {
+          case JOB:
+            if (driverConfig.size() != configIndex) {
+              throw new SqoopException(CommonRepositoryError.COMMON_0007,
+                      "owner-" + fromConnectorId
+                              + "; config: " + configType
+                              + "; index: " + configIndex
+                              + "; expected: " + driverConfig.size()
+              );
+            }
+            driverConfig.add(mDriverConfig);
+            break;
+          case CONNECTION:
+            // do nothing
+            break;
+          default:
+            throw new SqoopException(CommonRepositoryError.COMMON_0004,
+                    "connector-" + fromConnectorId + ":" + configType);
+        }
       }
     }
   }
 
   private Direction findConfigDirection(long configId, Connection conn) throws SQLException {
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-
-    try {
-      stmt = conn.prepareStatement(crudQueries.getStmtSelectSqConfigDirections());
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSqConfigDirections())) {
       stmt.setLong(1, configId);
-      rs = stmt.executeQuery();
-      rs.next();
-      return getDirection(rs.getLong(2), conn);
-    } finally {
-      if (rs != null) {
-        closeResultSets(rs);
-      }
-      if (stmt != null) {
-        closeStatements(stmt);
+      try (ResultSet rs = stmt.executeQuery()) {
+        rs.next();
+        return getDirection(rs.getLong(2), conn);
       }
     }
   }
@@ -2399,139 +2053,141 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
                                        int configPosition, Connection conn) throws SQLException {
 
     // Get list of structures from database
-    ResultSet rsetConfig = configFetchStmt.executeQuery();
-    while (rsetConfig.next()) {
-      long configId = rsetConfig.getLong(1);
-      Long configConnectorId = rsetConfig.getLong(2);
-      String configName = rsetConfig.getString(3);
-      String configType = rsetConfig.getString(4);
-      int configIndex = rsetConfig.getInt(5);
-      List<MInput<?>> configInputs = new ArrayList<MInput<?>>();
+    try (ResultSet rsetConfig = configFetchStmt.executeQuery()) {
+      while (rsetConfig.next()) {
+        long configId = rsetConfig.getLong(1);
+        Long configConnectorId = rsetConfig.getLong(2);
+        String configName = rsetConfig.getString(3);
+        String configType = rsetConfig.getString(4);
+        int configIndex = rsetConfig.getInt(5);
+        List<MInput<?>> configInputs = new ArrayList<MInput<?>>();
 
-      MConfig config = new MConfig(configName, configInputs);
-      config.setPersistenceId(configId);
+        MConfig config = new MConfig(configName, configInputs);
+        config.setPersistenceId(configId);
 
-      inputFetchStmt.setLong(configPosition, configId);
+        inputFetchStmt.setLong(configPosition, configId);
 
-      ResultSet rsetInput = inputFetchStmt.executeQuery();
-      while (rsetInput.next()) {
-        long inputId = rsetInput.getLong(1);
-        String inputName = rsetInput.getString(2);
-        long inputConfig = rsetInput.getLong(3);
-        short inputIndex = rsetInput.getShort(4);
-        String inputType = rsetInput.getString(5);
-        boolean inputSensitivity = rsetInput.getBoolean(6);
-        short inputStrLength = rsetInput.getShort(7);
-        String editable = rsetInput.getString(8);
-        InputEditable editableEnum = editable != null ? InputEditable.valueOf(editable)
-            : InputEditable.ANY;
-        // get the overrides value from the SQ_INPUT_RELATION table
-        String overrides = getOverrides(inputId, conn);
-        String inputEnumValues = rsetInput.getString(9);
-        String value = rsetInput.getString(10);
+        try (ResultSet rsetInput = inputFetchStmt.executeQuery()) {
+          while (rsetInput.next()) {
+            long inputId = rsetInput.getLong(1);
+            String inputName = rsetInput.getString(2);
+            long inputConfig = rsetInput.getLong(3);
+            short inputIndex = rsetInput.getShort(4);
+            String inputType = rsetInput.getString(5);
+            boolean inputSensitivity = rsetInput.getBoolean(6);
+            short inputStrLength = rsetInput.getShort(7);
+            String editable = rsetInput.getString(8);
+            InputEditable editableEnum = editable != null ? InputEditable.valueOf(editable)
+                    : InputEditable.ANY;
+            // get the overrides value from the SQ_INPUT_RELATION table
+            String overrides = getOverrides(inputId, conn);
+            String inputEnumValues = rsetInput.getString(9);
+            String value = rsetInput.getString(10);
 
-        MInputType mit = MInputType.valueOf(inputType);
+            MInputType mit = MInputType.valueOf(inputType);
 
-        MInput<?> input = null;
-        switch (mit) {
-        case STRING:
-          input = new MStringInput(inputName, inputSensitivity, editableEnum, overrides,
-              inputStrLength);
-          break;
-        case MAP:
-          input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides);
-          break;
-        case BOOLEAN:
-          input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
-          break;
-        case INTEGER:
-          input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
-          break;
-        case LONG:
-          input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides);
-          break;
-        case ENUM:
-          input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides,
-              inputEnumValues.split(","));
-          break;
-        default:
-          throw new SqoopException(CommonRepositoryError.COMMON_0003, "input-" + inputName + ":"
-              + inputId + ":" + "config-" + inputConfig + ":" + mit.name());
+            MInput<?> input = null;
+            switch (mit) {
+              case STRING:
+                input = new MStringInput(inputName, inputSensitivity, editableEnum, overrides,
+                        inputStrLength);
+                break;
+              case MAP:
+                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case BOOLEAN:
+                input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case INTEGER:
+                input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case LONG:
+                input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case ENUM:
+                input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides,
+                        inputEnumValues.split(","));
+                break;
+              default:
+                throw new SqoopException(CommonRepositoryError.COMMON_0003, "input-" + inputName + ":"
+                        + inputId + ":" + "config-" + inputConfig + ":" + mit.name());
+            }
+
+            // Set persistent ID
+            input.setPersistenceId(inputId);
+
+            // Set value
+            if (value == null) {
+              input.setEmpty();
+            } else {
+              input.restoreFromUrlSafeValueString(value);
+            }
+
+            if (config.getInputs().size() != inputIndex) {
+              throw new SqoopException(CommonRepositoryError.COMMON_0006,
+                      "config: " + config
+                              + "; input: " + input
+                              + "; index: " + inputIndex
+                              + "; expected: " + config.getInputs().size()
+              );
+            }
+
+            config.getInputs().add(input);
+          }
         }
 
-        // Set persistent ID
-        input.setPersistenceId(inputId);
-
-        // Set value
-        if(value == null) {
-          input.setEmpty();
-        } else {
-          input.restoreFromUrlSafeValueString(value);
-        }
-
-        if (config.getInputs().size() != inputIndex) {
-          throw new SqoopException(CommonRepositoryError.COMMON_0006,
-              "config: " + config
-                  + "; input: " + input
-                  + "; index: " + inputIndex
-                  + "; expected: " + config.getInputs().size()
+        if (config.getInputs().size() == 0) {
+          throw new SqoopException(CommonRepositoryError.COMMON_0005,
+                  "connector-" + configConnectorId
+                          + "; config: " + config
           );
         }
 
-        config.getInputs().add(input);
-      }
+        MConfigType mConfigType = MConfigType.valueOf(configType);
+        switch (mConfigType) {
+          case CONNECTION:
+          case LINK:
+            if (linkConfig.size() != configIndex) {
+              throw new SqoopException(CommonRepositoryError.COMMON_0007,
+                      "connector-" + configConnectorId
+                              + "; config: " + config
+                              + "; index: " + configIndex
+                              + "; expected: " + linkConfig.size()
+              );
+            }
+            linkConfig.add(config);
+            break;
+          case JOB:
+            Direction type = findConfigDirection(configId, conn);
+            List<MConfig> jobConfigs;
+            switch (type) {
+              case FROM:
+                jobConfigs = fromConfig;
+                break;
 
-      if (config.getInputs().size() == 0) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0005,
-            "connector-" + configConnectorId
-                + "; config: " + config
-        );
-      }
+              case TO:
+                jobConfigs = toConfig;
+                break;
 
-      MConfigType mConfigType = MConfigType.valueOf(configType);
-      switch (mConfigType) {
-        case CONNECTION:
-        case LINK:
-          if (linkConfig.size() != configIndex) {
-            throw new SqoopException(CommonRepositoryError.COMMON_0007,
-                "connector-" + configConnectorId
-                    + "; config: " + config
-                    + "; index: " + configIndex
-                    + "; expected: " + linkConfig.size()
-            );
-          }
-          linkConfig.add(config);
-          break;
-        case JOB:
-          Direction type = findConfigDirection(configId, conn);
-          List<MConfig> jobConfigs;
-          switch(type) {
-            case FROM:
-              jobConfigs = fromConfig;
-              break;
+              default:
+                throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
+            }
 
-            case TO:
-              jobConfigs = toConfig;
-              break;
+            if (jobConfigs.size() != configIndex) {
+              throw new SqoopException(CommonRepositoryError.COMMON_0007,
+                      "connector-" + configConnectorId
+                              + "; config: " + config
+                              + "; index: " + configIndex
+                              + "; expected: " + jobConfigs.size()
+              );
+            }
 
-            default:
-              throw new SqoopException(DirectionError.DIRECTION_0000, "Direction: " + type);
-          }
-
-          if (jobConfigs.size() != configIndex) {
-            throw new SqoopException(CommonRepositoryError.COMMON_0007,
-                "connector-" + configConnectorId
-                    + "; config: " + config
-                    + "; index: " + configIndex
-                    + "; expected: " + jobConfigs.size()
-            );
-          }
-
-          jobConfigs.add(config);
-          break;
-        default:
-          throw new SqoopException(CommonRepositoryError.COMMON_0004,
-              "connector-" + configConnectorId + ":" + config);
+            jobConfigs.add(config);
+            break;
+          default:
+            throw new SqoopException(CommonRepositoryError.COMMON_0004,
+                    "connector-" + configConnectorId + ":" + config);
+        }
       }
     }
   }
@@ -2543,61 +2199,38 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   private String getOverrides(long inputId, Connection conn) {
 
-    PreparedStatement overridesStmt = null;
-    PreparedStatement inputStmt = null;
-
-    ResultSet rsOverride = null;
-    ResultSet rsInput = null;
-
     List<String> overrides = new ArrayList<String>();
-    try {
-      overridesStmt = conn.prepareStatement(crudQueries.getStmtSelectInputOverrides());
-      inputStmt = conn.prepareStatement(crudQueries.getStmtSelectInputById());
+    try (PreparedStatement overridesStmt = conn.prepareStatement(crudQueries.getStmtSelectInputOverrides());
+         PreparedStatement inputStmt = conn.prepareStatement(crudQueries.getStmtSelectInputById());) {
       overridesStmt.setLong(1, inputId);
-      rsOverride = overridesStmt.executeQuery();
+      try (ResultSet rsOverride = overridesStmt.executeQuery()) {
 
-      while (rsOverride.next()) {
-        long overrideId = rsOverride.getLong(1);
-        inputStmt.setLong(1, overrideId);
-        rsInput = inputStmt.executeQuery();
-        if(rsInput.next()) {
-         overrides.add(rsInput.getString(2));
+        while (rsOverride.next()) {
+          long overrideId = rsOverride.getLong(1);
+          inputStmt.setLong(1, overrideId);
+          try (ResultSet rsInput = inputStmt.executeQuery()) {
+            if (rsInput.next()) {
+              overrides.add(rsInput.getString(2));
+            }
+          }
         }
-      }
-      if (overrides != null && overrides.size() > 0) {
-        return StringUtils.join(overrides, ",");
-      } else {
-        return StringUtils.EMPTY;
-
+        if (overrides.size() > 0) {
+          return StringUtils.join(overrides, ",");
+        } else {
+          return StringUtils.EMPTY;
+        }
       }
     } catch (SQLException ex) {
       logException(ex, inputId);
       throw new SqoopException(CommonRepositoryError.COMMON_0048, ex);
-    } finally {
-      if (rsOverride != null) {
-        closeResultSets(rsOverride);
-      }
-      if (rsInput != null) {
-        closeResultSets(rsInput);
-      }
-
-      if (overridesStmt != null) {
-        closeStatements(overridesStmt);
-      }
-      if (inputStmt != null) {
-        closeStatements(inputStmt);
-      }
     }
   }
 
   private void createInputValues(String query, long id, List<MConfig> configs, Connection conn)
       throws SQLException {
-    PreparedStatement stmt = null;
     int result;
 
-    try {
-      stmt = conn.prepareStatement(query);
-
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
       for (MConfig config : configs) {
         for (MInput<?> input : config.getInputs()) {
           // Skip empty values as we're not interested in storing those in db
@@ -2614,8 +2247,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           }
         }
       }
-    } finally {
-      closeStatements(stmt);
     }
   }
 
@@ -2629,10 +2260,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @param args Long, String, or Object arguments
    */
   protected void runQuery(String query, Connection conn, Object... args) {
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn.prepareStatement(query);
-
+    try (PreparedStatement stmt = conn.prepareStatement(query);) {
       for (int i = 0; i < args.length; ++i) {
         if (args[i] instanceof String) {
           stmt.setString(i + 1, (String)args[i]);
@@ -2644,12 +2272,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       }
 
       if (stmt.execute()) {
-        ResultSet rset = stmt.getResultSet();
-        int count = 0;
-        while (rset.next()) {
-          count++;
+        try (ResultSet rset = stmt.getResultSet()) {
+          int count = 0;
+          while (rset.next()) {
+            count++;
+          }
+          LOG.info("QUERY(" + query + ") produced unused resultset with " + count + " rows");
         }
-        LOG.info("QUERY(" + query + ") produced unused resultset with "+ count + " rows");
       } else {
         int updateCount = stmt.getUpdateCount();
         LOG.info("QUERY(" + query + ") Update count: " + updateCount);
@@ -2657,8 +2286,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       LOG.error("Can't execute query: " + query, ex);
       throw new SqoopException(CommonRepositoryError.COMMON_0000, query, ex);
-    } finally {
-      closeStatements(stmt);
     }
   }
 
