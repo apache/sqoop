@@ -26,7 +26,7 @@ System Requirement
 Java
 ----
 
-Sqoop written in Java and using version 1.6. You can `download java <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_ and install. Locate JAVA_HOME to installed directroy, e.g. export JAVA_HOME=/usr/lib/jvm/jdk1.6.0_32.
+Sqoop has been developped and test only with JDK from `Oracle <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_ and we require at least version 7 (we're not supporting JDK 1.6 and older releases).
 
 Maven
 -----
