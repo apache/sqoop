@@ -82,8 +82,7 @@ public class MySqlRepositoryHandler extends CommonRepositoryHandler {
    * @return
    */
   public int detectRepositoryVersion(Connection conn) {
-    ResultSet rs = null, metadataResultSet = null;
-    PreparedStatement stmt = null;
+    ResultSet metadataResultSet = null;
 
     // Select and return the version
     try {
@@ -93,22 +92,21 @@ public class MySqlRepositoryHandler extends CommonRepositoryHandler {
           CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME, null);
 
       if (metadataResultSet.next()) {
-        stmt = conn.prepareStatement(MySqlSchemaQuery.STMT_SELECT_SYSTEM);
-        stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
-        rs = stmt.executeQuery();
+        try (PreparedStatement stmt = conn.prepareStatement(MySqlSchemaQuery.STMT_SELECT_SYSTEM)){
+          stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
+          try (ResultSet rs = stmt.executeQuery()){
 
-        if (!rs.next()) {
-          return 0;
+            if (!rs.next()) {
+              return 0;
+            }
+
+            return rs.getInt(1);
+          }
         }
-
-        return rs.getInt(1);
       }
     } catch (SQLException e) {
       LOG.info("Can't fetch repository structure version.", e);
       return 0;
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
 
     return 0;
@@ -154,10 +152,8 @@ public class MySqlRepositoryHandler extends CommonRepositoryHandler {
     }
 
     ResultSet rs = null;
-    PreparedStatement stmt = null;
-    try {
-      stmt = conn
-          .prepareStatement(MySqlSchemaQuery.STMT_INSERT_ON_DUPLICATE_KEY_SYSTEM);
+    try (PreparedStatement stmt = conn
+            .prepareStatement(MySqlSchemaQuery.STMT_INSERT_ON_DUPLICATE_KEY_SYSTEM);) {
       stmt.setString(1, CommonRepoConstants.SYSKEY_VERSION);
       stmt.setString(2,
           Integer.toString(MySqlRepoConstants.LATEST_MYSQL_REPOSITORY_VERSION));
@@ -166,9 +162,6 @@ public class MySqlRepositoryHandler extends CommonRepositoryHandler {
       stmt.executeUpdate();
     } catch (SQLException e) {
       LOG.error("Can't persist the repository version", e);
-    } finally {
-      closeResultSets(rs);
-      closeStatements(stmt);
     }
   }
 
