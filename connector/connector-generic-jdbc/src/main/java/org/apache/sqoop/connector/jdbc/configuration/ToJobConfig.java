@@ -22,6 +22,7 @@ import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.NotEmpty;
 
 /**
  *
@@ -31,11 +32,8 @@ public class ToJobConfig {
   @Input(size = 50)
   public String schemaName;
 
-  @Input(size = 2000)
+  @Input(size = 2000, validators = { @Validator(NotEmpty.class)})
   public String tableName;
-
-  @Input(size = 50)
-  public String sql;
 
   @Input(size = 50)
   public String columns;
@@ -49,16 +47,6 @@ public class ToJobConfig {
   public static class ConfigValidator extends AbstractValidator<ToJobConfig> {
     @Override
     public void validate(ToJobConfig config) {
-      if (config.tableName == null && config.sql == null) {
-        addMessage(Status.ERROR, "Either table name or SQL must be specified");
-      }
-      if (config.tableName != null && config.sql != null) {
-        addMessage(Status.ERROR, "Both table name and SQL cannot be specified");
-      }
-      if (config.tableName == null && config.stageTableName != null) {
-        addMessage(Status.ERROR,
-            "Stage table name cannot be specified without specifying table name");
-      }
       if (config.stageTableName == null && config.shouldClearStageTable != null) {
         addMessage(Status.ERROR,
             "Should Clear stage table cannot be specified without specifying the name of the stage table.");

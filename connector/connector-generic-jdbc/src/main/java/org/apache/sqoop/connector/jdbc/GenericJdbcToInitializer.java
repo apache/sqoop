@@ -65,10 +65,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     executor = new GenericJdbcExecutor(linkConfig);
 
     String schemaName = executor.encloseIdentifiers(toJobConfig.toJobConfig.schemaName, toJobConfig.toJobConfig.tableName);
-    if (schemaName == null) {
-      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0019,
-          "Table name extraction not supported yet.");
-    }
+    assert schemaName != null;
 
     Schema schema = new Schema(schemaName);
     try (Statement statement = executor.getConnection().createStatement(
@@ -106,86 +103,55 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
       false : toJobConfig.toJobConfig.shouldClearStageTable;
     final boolean stageEnabled =
       stageTableName != null && stageTableName.length() > 0;
-    String tableSql = toJobConfig.toJobConfig.sql;
     String tableColumns = toJobConfig.toJobConfig.columns;
 
-    if (tableName != null && tableSql != null) {
-      // when both fromTable name and fromTable sql are specified:
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0007);
+    // when fromTable name is specified:
+    if(stageEnabled) {
+      LOG.info("Stage has been enabled.");
+      LOG.info("Use stageTable: " + stageTableName + " with clearStageTable: " + clearStageTable);
 
-    } else if (tableName != null) {
-      // when fromTable name is specified:
-      if(stageEnabled) {
-        LOG.info("Stage has been enabled.");
-        LOG.info("Use stageTable: " + stageTableName +
-          " with clearStageTable: " + clearStageTable);
-
-        if(clearStageTable) {
-          executor.deleteTableData(stageTableName);
-        } else {
-          long stageRowCount = executor.getTableRowCount(stageTableName);
-          if(stageRowCount > 0) {
-            throw new SqoopException(
-              GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0017);
-          }
-        }
-      }
-
-      // For databases that support schemas (IE: postgresql).
-      final String tableInUse = stageEnabled ? stageTableName : tableName;
-      String fullTableName = executor.encloseIdentifiers(schemaName, tableInUse);
-
-      if (tableColumns == null) {
-        String[] columns = executor.getQueryColumns("SELECT * FROM "
-            + fullTableName + " WHERE 1 = 0");
-        StringBuilder builder = new StringBuilder();
-        builder.append("INSERT INTO ");
-        builder.append(fullTableName);
-        builder.append(" VALUES (?");
-        for (int i = 1; i < columns.length; i++) {
-          builder.append(",?");
-        }
-        builder.append(")");
-        dataSql = builder.toString();
-
+      if(clearStageTable) {
+        executor.deleteTableData(stageTableName);
       } else {
-        String[] columns = StringUtils.split(tableColumns, ',');
-        StringBuilder builder = new StringBuilder();
-        builder.append("INSERT INTO ");
-        builder.append(fullTableName);
-        builder.append(" (");
-        builder.append(tableColumns);
-        builder.append(") VALUES (?");
-        for (int i = 1; i < columns.length; i++) {
-          builder.append(",?");
+        long stageRowCount = executor.getTableRowCount(stageTableName);
+        if(stageRowCount > 0) {
+          throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0017, "Found rows: " + stageRowCount);
         }
-        builder.append(")");
-        dataSql = builder.toString();
       }
-    } else if (tableSql != null) {
-      // when fromTable sql is specified:
-
-      if (tableSql.indexOf(
-          GenericJdbcConnectorConstants.SQL_PARAMETER_MARKER) == -1) {
-        // make sure parameter marker is in the specified sql
-        throw new SqoopException(
-            GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0013);
-      }
-
-      if (tableColumns == null) {
-        dataSql = tableSql;
-      } else {
-        throw new SqoopException(
-            GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0014);
-      }
-    } else {
-      // when neither are specified:
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0008);
     }
 
-    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL,
-        dataSql);
+    // For databases that support schemas (IE: postgresql).
+    final String tableInUse = stageEnabled ? stageTableName : tableName;
+    String fullTableName = executor.encloseIdentifiers(schemaName, tableInUse);
+
+    if (tableColumns == null) {
+      String[] columns = executor.getQueryColumns("SELECT * FROM " + fullTableName + " WHERE 1 = 0");
+      StringBuilder builder = new StringBuilder();
+      builder.append("INSERT INTO ");
+      builder.append(fullTableName);
+      builder.append(" VALUES (?");
+      for (int i = 1; i < columns.length; i++) {
+        builder.append(",?");
+      }
+      builder.append(")");
+      dataSql = builder.toString();
+
+    } else {
+      String[] columns = StringUtils.split(tableColumns, ',');
+      StringBuilder builder = new StringBuilder();
+      builder.append("INSERT INTO ");
+      builder.append(fullTableName);
+      builder.append(" (");
+      builder.append(tableColumns);
+      builder.append(") VALUES (?");
+      for (int i = 1; i < columns.length; i++) {
+        builder.append(",?");
+      }
+      builder.append(")");
+      dataSql = builder.toString();
+    }
+
+    LOG.info("Using query to insert data: " + dataSql);
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL, dataSql);
   }
 }

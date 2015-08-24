@@ -42,14 +42,6 @@ public enum GenericJdbcConnectorError implements ErrorCode {
   /** No boundaries are found for partition column. */
   GENERIC_JDBC_CONNECTOR_0006("No boundaries are found for partition column"),
 
-  /** The table name and the table sql cannot be specify together. */
-  GENERIC_JDBC_CONNECTOR_0007("The table name and the table sql "
-      + "cannot be specified together"),
-
-  /** Neither the table name nor the table sql are specified. */
-  GENERIC_JDBC_CONNECTOR_0008("Neither the table name nor the table sql "
-      + "are specified"),
-
   /** No substitute token in the specified sql. */
   GENERIC_JDBC_CONNECTOR_0010("No substitute token in the specified sql"),
 
@@ -78,8 +70,6 @@ public enum GenericJdbcConnectorError implements ErrorCode {
 
   GENERIC_JDBC_CONNECTOR_0018("Error occurred while transferring data from " +
     "stage table to destination table."),
-
-  GENERIC_JDBC_CONNECTOR_0019("Table name extraction not supported."),
 
   GENERIC_JDBC_CONNECTOR_0020("Unknown direction."),
 

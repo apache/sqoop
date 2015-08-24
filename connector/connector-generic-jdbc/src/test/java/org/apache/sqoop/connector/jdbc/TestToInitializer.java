@@ -40,8 +40,6 @@ public class TestToInitializer {
   private final String tableName;
   private final String schemalessTableName;
   private final String stageTableName;
-  private final String tableSql;
-  private final String schemalessTableSql;
   private final String tableColumns;
 
   private GenericJdbcExecutor executor;
@@ -50,10 +48,7 @@ public class TestToInitializer {
     schemaName = getClass().getSimpleName().toUpperCase() + "SCHEMA";
     tableName = getClass().getSimpleName().toUpperCase() + "TABLEWITHSCHEMA";
     schemalessTableName = getClass().getSimpleName().toUpperCase() + "TABLE";
-    stageTableName = getClass().getSimpleName().toUpperCase() +
-      "_STAGE_TABLE";
-    tableSql = "INSERT INTO " + tableName + " VALUES (?,?,?)";
-    schemalessTableSql = "INSERT INTO " + schemalessTableName + " VALUES (?,?,?)";
+    stageTableName = getClass().getSimpleName().toUpperCase() + "_STAGE_TABLE";
     tableColumns = "ICOL,VCOL";
   }
 
@@ -121,26 +116,6 @@ public class TestToInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context, "INSERT INTO " + fullTableName + " (" + tableColumns + ") VALUES (?,?)");
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testTableSql() throws Exception {
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-
-    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
-    jobConfig.toJobConfig.sql = schemalessTableSql;
-
-    MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
-
-    @SuppressWarnings("rawtypes")
-    Initializer initializer = new GenericJdbcToInitializer();
-    initializer.initialize(initializerContext, linkConfig, jobConfig);
-
-    verifyResult(context, schemalessTableSql);
   }
 
   @Test
@@ -282,26 +257,6 @@ public class TestToInitializer {
         result.getStatus(),
         "User should not specify clear stage table flag without " +
         "specifying name of the stage table");
-    assertTrue(result.getMessages().containsKey(
-      "toJobConfig"));
-  }
-
-  @Test
-  public void testStageTableWithoutTable() throws Exception {
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-
-    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
-    //specifying stage table without specifying table name
-    jobConfig.toJobConfig.stageTableName = stageTableName;
-    jobConfig.toJobConfig.sql = "";
-
-    ConfigValidationRunner validationRunner = new ConfigValidationRunner();
-    ConfigValidationResult result = validationRunner.validate(jobConfig);
-    assertEquals(Status.ERROR, result.getStatus(),
-            "Stage table name cannot be specified without specifying " +
-            "table name");
     assertTrue(result.getMessages().containsKey(
       "toJobConfig"));
   }
