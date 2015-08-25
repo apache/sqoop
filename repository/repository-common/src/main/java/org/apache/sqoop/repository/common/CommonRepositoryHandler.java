@@ -622,19 +622,19 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void updateJob(MJob job, Connection conn) {
-    try (PreparedStatement deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteJobInput());
-         PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJob());) {
-      // Firstly remove old values
-      deleteStmt.setLong(1, job.getPersistenceId());
-      deleteStmt.executeUpdate();
-
-      // Update job table
+    try (PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJob());
+         PreparedStatement deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteJobInput());) {
+      // Firstly update job table
       updateStmt.setString(1, job.getName());
       updateStmt.setString(2, job.getLastUpdateUser());
       updateStmt.setTimestamp(3, new Timestamp(new Date().getTime()));
 
       updateStmt.setLong(4, job.getPersistenceId());
       updateStmt.executeUpdate();
+
+      // Secondly remove old values
+      deleteStmt.setLong(1, job.getPersistenceId());
+      deleteStmt.executeUpdate();
 
       // And reinsert new values
       createInputValues(crudQueries.getStmtInsertJobInput(),
