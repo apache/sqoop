@@ -40,6 +40,7 @@ import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
 
 public class ConnectorRequestHandler implements RequestHandler {
+  private static final long serialVersionUID = 1L;
 
   private static final Logger LOG = Logger.getLogger(ConnectorRequestHandler.class);
 

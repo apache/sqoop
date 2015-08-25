@@ -34,6 +34,7 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
 */
 @SuppressWarnings("serial")
 public class JobsServlet extends SqoopProtocolServlet {
+  private static final long serialVersionUID = 1L;
 
   private RequestHandler jobRequestHandler;
 

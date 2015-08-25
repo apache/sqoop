@@ -33,6 +33,7 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
 */
 @SuppressWarnings("serial")
 public class LinksServlet extends SqoopProtocolServlet {
+  private static final long serialVersionUID = 1L;
 
   private RequestHandler linkRequestHandler;
 

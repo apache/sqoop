@@ -35,6 +35,7 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
  */
 @SuppressWarnings("serial")
 public class ConfigurableServlet extends SqoopProtocolServlet {
+  private static final long serialVersionUID = 1L;
 
   private RequestHandler configurableRequestHandler;
   private static String CONNECTOR_CONFIGURABLE = "connector";

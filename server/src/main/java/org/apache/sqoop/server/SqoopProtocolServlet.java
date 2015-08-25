@@ -35,6 +35,7 @@ import org.apache.sqoop.json.JsonBean;
 
 @SuppressWarnings("serial")
 public class SqoopProtocolServlet extends HttpServlet {
+  private static final long serialVersionUID = 1L;
 
   private static final Logger LOG =
       Logger.getLogger(SqoopProtocolServlet.class);

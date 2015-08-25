@@ -57,6 +57,7 @@ import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONObject;
 
 public class JobRequestHandler implements RequestHandler {
+  private static final long serialVersionUID = 1L;
 
   /** enum for representing the actions supported on the job resource*/
   enum JobAction {

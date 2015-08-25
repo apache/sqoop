@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class AuthorizationRequestHandler implements RequestHandler {
-
+  private static final long serialVersionUID = 1L;
   /**
    * enum for representing the actions supported on the authorization
    */

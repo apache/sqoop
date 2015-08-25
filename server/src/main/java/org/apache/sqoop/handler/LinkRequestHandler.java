@@ -48,6 +48,7 @@ import org.apache.sqoop.validation.ConfigValidationResult;
 import org.json.simple.JSONObject;
 
 public class LinkRequestHandler implements RequestHandler {
+  private static final long serialVersionUID = 1L;
 
   private static final Logger LOG = Logger.getLogger(LinkRequestHandler.class);
 

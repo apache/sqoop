@@ -38,7 +38,7 @@ public class HandlerUtils {
       jobId = job.getPersistenceId();
     } else {
       try {
-        jobId = Long.valueOf(identifier);
+        jobId = Long.parseLong(identifier);
       } catch (NumberFormatException ex) {
         // this means name nor Id existed and we want to throw a user friendly
         // message than a number format exception
@@ -60,7 +60,7 @@ public class HandlerUtils {
       linkId = link.getPersistenceId();
     } else {
       try {
-        linkId = Long.valueOf(identifier);
+        linkId = Long.parseLong(identifier);
       } catch (NumberFormatException ex) {
         // this means name nor Id existed and we want to throw a user friendly
         // message than a number format exception
@@ -79,7 +79,7 @@ public class HandlerUtils {
       connectorId = connector.getPersistenceId();
     } else {
       try {
-        connectorId = Long.valueOf(identifier);
+        connectorId = Long.parseLong(identifier);
       } catch (NumberFormatException ex) {
         // this means name nor Id existed and we want to throw a user friendly
         // message than a number format exception

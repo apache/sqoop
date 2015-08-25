@@ -20,7 +20,7 @@ package org.apache.sqoop.server;
 
 import org.apache.sqoop.json.JsonBean;
 
-public interface RequestHandler {
+public interface RequestHandler extends java.io.Serializable {
 
   static final String CONNECTOR_NAME_QUERY_PARAM = "cname";
   static final String JOB_NAME_QUERY_PARAM = "jname";

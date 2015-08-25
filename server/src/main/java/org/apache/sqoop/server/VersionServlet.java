@@ -26,6 +26,7 @@ import org.apache.sqoop.json.JsonBean;
  */
 @SuppressWarnings("serial")
 public class VersionServlet extends SqoopProtocolServlet {
+  private static final long serialVersionUID = 1L;
 
   private RequestHandler versionRequestHandler;
 

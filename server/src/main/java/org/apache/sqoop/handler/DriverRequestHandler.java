@@ -29,6 +29,7 @@ import org.apache.sqoop.server.RequestContext.Method;
 import org.apache.sqoop.server.common.ServerError;
 
 public class DriverRequestHandler implements RequestHandler {
+  private static final long serialVersionUID = 1L;
 
   private static final Logger LOG =
       Logger.getLogger(DriverRequestHandler.class);
