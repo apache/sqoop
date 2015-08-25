@@ -23,7 +23,9 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.test.utils.NetworkUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 /**
@@ -131,7 +133,11 @@ public abstract class MetastoreServerRunner {
 
   private void printConfig() {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    config.logVars(new PrintStream(baos));
-    LOG.debug("Hive server runner configuration:\n" + baos.toString());
+    try {
+      config.logVars(new PrintStream(baos.toString("UTF-8"), "UTF-8"));
+      LOG.debug("Hive server runner configuration:\n" + baos.toString("UTF-8"));
+    } catch (UnsupportedEncodingException |FileNotFoundException e) {
+      LOG.warn("Error to print the Hive server runner configuration.", e);
+    }
   }
 }

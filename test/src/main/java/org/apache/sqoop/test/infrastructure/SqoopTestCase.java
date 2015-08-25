@@ -74,7 +74,7 @@ public class SqoopTestCase implements ITest {
   /**
    * Default submission callbacks that are printing various status about the submission.
    */
-  protected static SubmissionCallback DEFAULT_SUBMISSION_CALLBACKS = new SubmissionCallback() {
+  protected static final SubmissionCallback DEFAULT_SUBMISSION_CALLBACKS = new SubmissionCallback() {
     @Override
     public void submitted(MSubmission submission) {
       LOG.info("Submission submitted: " + submission);

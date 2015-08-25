@@ -50,12 +50,7 @@ public class HadoopRealClusterRunner extends HadoopRunner {
     LOG.debug("Config path is: " + configPath);
 
     File dir = new File(configPath);
-    String [] files = dir.list(new FilenameFilter() {
-      @Override
-      public boolean accept(File dir, String name) {
-        return name.endsWith("-site.xml");
-      }
-    });
+    String [] files = dir.list(new HRCRRilenameFilter());
 
     if(files == null) {
       throw new FileNotFoundException("Hadoop config files not found: " + configPath);
@@ -81,4 +76,10 @@ public class HadoopRealClusterRunner extends HadoopRunner {
 
   }
 
+  private static class HRCRRilenameFilter implements FilenameFilter {
+    @Override
+    public boolean accept(File dir, String name) {
+      return name.endsWith("-site.xml");
+    }
+  }
 }

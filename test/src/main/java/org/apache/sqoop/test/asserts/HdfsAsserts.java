@@ -28,6 +28,7 @@ import org.apache.sqoop.test.utils.HdfsUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -57,15 +58,14 @@ public class HdfsAsserts {
 
     Path[] files = HdfsUtils.getOutputMapreduceFiles(fs, directory);
     for(Path file : files) {
-      BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(file)));
-
-      String line;
-      while ((line = br.readLine()) != null) {
-        if (!setLines.remove(line)) {
-          notFound.add(line);
+      try (BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(file), Charset.forName("UTF-8")))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+          if (!setLines.remove(line)) {
+            notFound.add(line);
+          }
         }
       }
-      br.close();
     }
 
     if(!setLines.isEmpty() || !notFound.isEmpty()) {

@@ -32,6 +32,7 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 
 /**
@@ -43,7 +44,7 @@ public class HdfsUtils {
 
   private static final char PATH_SEPARATOR = '/';
 
-  public static PathFilter filterHiddenFiles = new PathFilter() {
+  public static final PathFilter filterHiddenFiles = new PathFilter() {
     @Override
     public boolean accept(Path path) {
       String fileName = path.getName();
@@ -77,12 +78,13 @@ public class HdfsUtils {
    * @throws IOException
    */
   public static void createFile(FileSystem fs, String path, String ...lines) throws IOException {
-    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(new Path(path), true)));
-    for (String line : lines) {
-      writer.write(line);
-      writer.newLine();
+    try (BufferedWriter writer = new BufferedWriter(
+            new OutputStreamWriter(fs.create(new Path(path), true), Charset.forName("UTF-8")))) {
+      for (String line : lines) {
+        writer.write(line);
+        writer.newLine();
+      }
     }
-    writer.close();
   }
 
   /**

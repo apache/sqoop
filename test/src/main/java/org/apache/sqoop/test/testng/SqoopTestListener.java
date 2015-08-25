@@ -18,12 +18,14 @@
 package org.apache.sqoop.test.testng;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Sqoop specific listener that will print name of each particular test that being run.
@@ -31,14 +33,22 @@ import java.io.PrintStream;
  * Particularly suitable for integration tests that generally takes long time to finish.
  */
 public class SqoopTestListener extends TestListenerAdapter {
-
+  private static final Logger LOG = Logger.getLogger(SqoopTestListener.class);
   /**
    * Sqoop tests are generally running with redirectTestOutputToFile=true which means
    * that System.out is redirected to file. That is unpleasant as output user is suppose
    * to see is not available on the console. Hence instead of System.out we're using
    * directly the STDOUT file descriptor.
    */
-  static PrintStream ps = new PrintStream(new FileOutputStream(FileDescriptor.out));
+  static PrintStream ps;
+
+  static {
+    try {
+      ps = new PrintStream(new FileOutputStream(FileDescriptor.out), false, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      LOG.warn("Error when initialize the SqoopTestListener.", e);
+    }
+  }
 
 
   @Override

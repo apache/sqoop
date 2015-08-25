@@ -59,17 +59,20 @@ public class CompressionUtils {
       LOG.info("Untaring file: " + entry.getName());
 
       if (entry.isDirectory()) {
-        (new File( HdfsUtils.joinPathFragments(targetDirectory, entry.getName()))).mkdirs();
+        File targetFile = new File( HdfsUtils.joinPathFragments(targetDirectory, entry.getName()));
+        if (!targetFile.mkdirs()) {
+          LOG.warn("Failed to create folder:" + targetFile.getAbsolutePath());
+        }
       } else {
         int count;
         byte data[] = new byte[BUFFER_SIZE];
 
         FileOutputStream fos = new FileOutputStream(HdfsUtils.joinPathFragments(targetDirectory, entry.getName()));
-        BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER_SIZE);
-        while ((count = in.read(data, 0, BUFFER_SIZE)) != -1) {
-          dest.write(data, 0, count);
+        try (BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER_SIZE)) {
+          while ((count = in.read(data, 0, BUFFER_SIZE)) != -1) {
+            dest.write(data, 0, count);
+          }
         }
-        dest.close();
       }
     }
     in.close();
