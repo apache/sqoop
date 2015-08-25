@@ -149,7 +149,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
         toIDF.setObjectData(matcher.getMatchingData(fromIDF.getObjectData()));
         // NOTE: We do not use the reducer to do the writing (a.k.a LOAD in ETL). Hence the mapper sets up the writable
         context.write(writable, NullWritable.get());
-      } catch (Exception e) {
+      } catch (RuntimeException | IOException | InterruptedException e) {
         throw new SqoopException(MRExecutionError.MAPRED_EXEC_0013, e);
       }
     }

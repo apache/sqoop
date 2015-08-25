@@ -55,7 +55,7 @@ public class SqoopNullOutputFormat extends OutputFormat<SqoopWritable, NullWrita
     return new SqoopDestroyerOutputCommitter();
   }
 
-  class SqoopDestroyerOutputCommitter extends OutputCommitter {
+  private static class SqoopDestroyerOutputCommitter extends OutputCommitter {
     @Override
     public void setupJob(JobContext jobContext) {
     }

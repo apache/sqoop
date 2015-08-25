@@ -35,6 +35,12 @@ public class SqoopSplit extends InputSplit implements Writable {
 
   private Partition partition;
 
+  public SqoopSplit() {}
+
+  public SqoopSplit(Partition partition) {
+    this.partition = partition;
+  }
+
   public void setPartition(Partition partition) {
     this.partition = partition;
   }

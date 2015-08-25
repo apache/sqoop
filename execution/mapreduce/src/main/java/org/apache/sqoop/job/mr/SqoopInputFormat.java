@@ -75,8 +75,7 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     List<InputSplit> splits = new LinkedList<InputSplit>();
     for (Partition partition : partitions) {
       LOG.debug("Partition: " + partition);
-      SqoopSplit split = new SqoopSplit();
-      split.setPartition(partition);
+      SqoopSplit split = new SqoopSplit(partition);
       splits.add(split);
     }
 

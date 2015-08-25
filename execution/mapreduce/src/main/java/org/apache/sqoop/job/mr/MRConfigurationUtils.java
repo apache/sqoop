@@ -31,7 +31,9 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 import org.json.simple.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 /**
@@ -89,12 +91,12 @@ public final class MRConfigurationUtils {
     switch (type) {
       case FROM:
         job.getConfiguration().set(MR_JOB_CONFIG_CLASS_FROM_CONNECTOR_LINK, obj.getClass().getName());
-        job.getCredentials().addSecretKey(MR_JOB_CONFIG_FROM_CONNECTOR_LINK_KEY, ConfigUtils.toJson(obj).getBytes());
+        job.getCredentials().addSecretKey(MR_JOB_CONFIG_FROM_CONNECTOR_LINK_KEY, ConfigUtils.toJson(obj).getBytes(Charset.forName("UTF-8")));
         break;
 
       case TO:
         job.getConfiguration().set(MR_JOB_CONFIG_CLASS_TO_CONNECTOR_LINK, obj.getClass().getName());
-        job.getCredentials().addSecretKey(MR_JOB_CONFIG_TO_CONNECTOR_LINK_KEY, ConfigUtils.toJson(obj).getBytes());
+        job.getCredentials().addSecretKey(MR_JOB_CONFIG_TO_CONNECTOR_LINK_KEY, ConfigUtils.toJson(obj).getBytes(Charset.forName("UTF-8")));
         break;
     }
   }
@@ -109,12 +111,12 @@ public final class MRConfigurationUtils {
     switch (type) {
       case FROM:
         job.getConfiguration().set(MR_JOB_CONFIG_CLASS_FROM_CONNECTOR_JOB, obj.getClass().getName());
-        job.getCredentials().addSecretKey(MR_JOB_CONFIG_FROM_JOB_CONFIG_KEY, ConfigUtils.toJson(obj).getBytes());
+        job.getCredentials().addSecretKey(MR_JOB_CONFIG_FROM_JOB_CONFIG_KEY, ConfigUtils.toJson(obj).getBytes(Charset.forName("UTF-8")));
         break;
 
       case TO:
         job.getConfiguration().set(MR_JOB_CONFIG_CLASS_TO_CONNECTOR_JOB, obj.getClass().getName());
-        job.getCredentials().addSecretKey(MR_JOB_CONFIG_TO_JOB_CONFIG_KEY, ConfigUtils.toJson(obj).getBytes());
+        job.getCredentials().addSecretKey(MR_JOB_CONFIG_TO_JOB_CONFIG_KEY, ConfigUtils.toJson(obj).getBytes(Charset.forName("UTF-8")));
         break;
     }
   }
@@ -128,7 +130,7 @@ public final class MRConfigurationUtils {
    */
   public static void setDriverConfig(Job job, Object obj) {
     job.getConfiguration().set(MR_JOB_CONFIG_DRIVER_CONFIG_CLASS, obj.getClass().getName());
-    job.getCredentials().addSecretKey(MR_JOB_CONFIG_DRIVER_CONFIG_KEY, ConfigUtils.toJson(obj).getBytes());
+    job.getCredentials().addSecretKey(MR_JOB_CONFIG_DRIVER_CONFIG_KEY, ConfigUtils.toJson(obj).getBytes(Charset.forName("UTF-8")));
   }
 
   /**
@@ -142,10 +144,10 @@ public final class MRConfigurationUtils {
       String jsonSchema =  SchemaSerialization.extractSchema(schema).toJSONString();
       switch (type) {
         case FROM:
-          job.getCredentials().addSecretKey(SCHEMA_FROM_KEY,jsonSchema.getBytes());
+          job.getCredentials().addSecretKey(SCHEMA_FROM_KEY,jsonSchema.getBytes(Charset.forName("UTF-8")));
           return;
         case TO:
-          job.getCredentials().addSecretKey(SCHEMA_TO_KEY, jsonSchema.getBytes());
+          job.getCredentials().addSecretKey(SCHEMA_TO_KEY, jsonSchema.getBytes(Charset.forName("UTF-8")));
           return;
     }
   }
@@ -156,6 +158,7 @@ public final class MRConfigurationUtils {
    * @return Configuration object
    */
   public static Object getConnectorLinkConfig(Direction type, Configuration configuration) {
+    assert configuration instanceof JobConf;
     switch (type) {
       case FROM:
         return loadConfiguration((JobConf) configuration, MR_JOB_CONFIG_CLASS_FROM_CONNECTOR_LINK, MR_JOB_CONFIG_FROM_CONNECTOR_LINK_KEY);
@@ -174,6 +177,7 @@ public final class MRConfigurationUtils {
    * @return Configuration object
    */
   public static Object getConnectorJobConfig(Direction type, Configuration configuration) {
+    assert configuration instanceof JobConf;
     switch (type) {
       case FROM:
         return loadConfiguration((JobConf) configuration, MR_JOB_CONFIG_CLASS_FROM_CONNECTOR_JOB, MR_JOB_CONFIG_FROM_JOB_CONFIG_KEY);
@@ -192,6 +196,7 @@ public final class MRConfigurationUtils {
    * @return Configuration object
    */
   public static Object getDriverConfig(Configuration configuration) {
+    assert configuration instanceof JobConf;
     return loadConfiguration((JobConf) configuration, MR_JOB_CONFIG_DRIVER_CONFIG_CLASS, MR_JOB_CONFIG_DRIVER_CONFIG_KEY);
   }
 
@@ -204,6 +209,7 @@ public final class MRConfigurationUtils {
    * @param configuration MapReduce configuration object
    */
   public static Schema getConnectorSchema(Direction type, Configuration configuration) {
+    assert configuration instanceof JobConf;
     switch (type) {
       case FROM:
         return getSchemaFromBytes(((JobConf) configuration).getCredentials().getSecretKey(SCHEMA_FROM_KEY));
@@ -228,7 +234,7 @@ public final class MRConfigurationUtils {
       return null;
     }
 
-    JSONObject jsonSchema = JSONUtils.parse(new String(bytes));
+    JSONObject jsonSchema = JSONUtils.parse(new String(bytes, Charset.forName("UTF-8")));
     return SchemaSerialization.restoreSchema(jsonSchema);
   }
 
@@ -248,7 +254,7 @@ public final class MRConfigurationUtils {
       return null;
     }
 
-    String json = new String(configuration.getCredentials().getSecretKey(valueProperty));
+    String json = new String(configuration.getCredentials().getSecretKey(valueProperty), Charset.forName("UTF-8"));
 
     // Fill it with JSON data
     ConfigUtils.fillValues(json, object);
@@ -262,15 +268,14 @@ public final class MRConfigurationUtils {
   }
 
   public static void configureLogging() {
-    try {
+    try (InputStream resourceAsStream =
+                 SqoopMapper.class.getResourceAsStream("/META-INF/log4j.properties")) {
       Properties props = new Properties();
-      InputStream resourceAsStream =
-          SqoopMapper.class.getResourceAsStream("/META-INF/log4j.properties");
       props.load(resourceAsStream);
       PropertyConfigurator.configure(props);
-    } catch (Exception e) {
+    } catch (RuntimeException | IOException e) {
       System.err.println("Encountered exception while configuring logging " +
-        "for sqoop: " + e);
+              "for sqoop: " + e);
     }
   }
 }

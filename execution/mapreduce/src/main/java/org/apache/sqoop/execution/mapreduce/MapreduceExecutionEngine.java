@@ -46,6 +46,7 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
   }
 
   public void prepareJob(JobRequest jobRequest) {
+    assert jobRequest instanceof MRJobRequest;
     MRJobRequest mrJobRequest = (MRJobRequest)jobRequest;
 
     // Add jar dependencies
