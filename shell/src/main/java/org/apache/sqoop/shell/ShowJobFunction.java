@@ -39,6 +39,8 @@ import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
  */
 @SuppressWarnings("serial")
 public class ShowJobFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public ShowJobFunction() {
     this.addOption(OptionBuilder

@@ -32,6 +32,8 @@ import java.util.Arrays;
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 public class GrantPrivilegeFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public GrantPrivilegeFunction() {
     this.addOption(OptionBuilder

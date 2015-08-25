@@ -180,16 +180,22 @@ public final class ConfigFiller {
     // Based on the input type, let's perconfig specific load
     switch (input.getType()) {
     case STRING:
+      assert input instanceof MStringInput;
       return fillInputString(prefix, (MStringInput) input, line);
     case INTEGER:
+      assert input instanceof MIntegerInput;
       return fillInputInteger(prefix, (MIntegerInput) input, line);
     case LONG:
+      assert input instanceof MLongInput;
       return fillInputLong(prefix, (MLongInput) input, line);
     case BOOLEAN:
+      assert input instanceof MBooleanInput;
       return fillInputBoolean(prefix, (MBooleanInput) input, line);
     case MAP:
+      assert input instanceof MMapInput;
       return fillInputMap(prefix, (MMapInput) input, line);
     case ENUM:
+      assert input instanceof MEnumInput;
       return fillInputEnum(prefix, (MEnumInput) input, line);
     default:
       println("Unsupported data type " + input.getType());

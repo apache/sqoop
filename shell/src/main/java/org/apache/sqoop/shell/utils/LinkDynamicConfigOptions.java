@@ -26,6 +26,7 @@ import org.apache.sqoop.model.MLink;
  */
 @SuppressWarnings("serial")
 public class LinkDynamicConfigOptions extends DynamicConfigOptions<MLink> {
+  private static final long serialVersionUID = 1L;
 
   @SuppressWarnings("static-access")
   @Override

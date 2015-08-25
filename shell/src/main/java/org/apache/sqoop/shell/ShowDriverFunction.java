@@ -30,6 +30,8 @@ import org.apache.sqoop.validation.Status;
  */
 @SuppressWarnings("serial")
 public class ShowDriverFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   public ShowDriverFunction() {
   }
 

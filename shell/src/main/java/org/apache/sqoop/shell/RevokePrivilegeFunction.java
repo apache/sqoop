@@ -35,6 +35,8 @@ import static org.apache.sqoop.shell.ShellEnvironment.resourceString;
 import static org.apache.sqoop.shell.utils.ConfigFiller.errorMessage;
 
 public class RevokePrivilegeFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public RevokePrivilegeFunction() {
     this.addOption(OptionBuilder

@@ -39,6 +39,8 @@ import static org.apache.sqoop.shell.utils.ConfigFiller.*;
  */
 @SuppressWarnings("serial")
 public class CloneLinkFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public CloneLinkFunction() {
     this.addOption(OptionBuilder

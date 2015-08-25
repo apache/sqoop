@@ -31,8 +31,8 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 @SuppressWarnings("serial")
 public class ShowVersionFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
   private VersionResourceRequest versionRequest;
-
 
   @SuppressWarnings("static-access")
   public ShowVersionFunction() {

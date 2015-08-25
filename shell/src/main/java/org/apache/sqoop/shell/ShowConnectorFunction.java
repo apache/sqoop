@@ -33,6 +33,7 @@ import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
 
 @SuppressWarnings("serial")
 public class ShowConnectorFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
 
   @SuppressWarnings("static-access")
   public ShowConnectorFunction() {

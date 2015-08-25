@@ -31,6 +31,8 @@ import static org.apache.sqoop.shell.ShellEnvironment.resourceString;
 
 @SuppressWarnings("serial")
 public class CreateRoleFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public CreateRoleFunction() {
     this.addOption(OptionBuilder

@@ -29,6 +29,8 @@ import org.apache.sqoop.validation.Status;
 
 @SuppressWarnings("serial")
 public class StopJobFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public StopJobFunction() {
     this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)

@@ -27,6 +27,7 @@ import org.apache.sqoop.model.MJob;
  */
 @SuppressWarnings("serial")
 public class JobDynamicConfigOptions extends DynamicConfigOptions<MJob> {
+  private static final long serialVersionUID = 1L;
 
   @SuppressWarnings("static-access")
   @Override

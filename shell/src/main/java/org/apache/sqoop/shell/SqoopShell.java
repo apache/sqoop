@@ -17,10 +17,8 @@
  */
 package org.apache.sqoop.shell;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -54,7 +52,7 @@ public final class SqoopShell {
   /**
    * Hash of commands that we want to have in history in all cases.
    */
-  public final static HashSet<String> commandsToKeep;
+  private final static HashSet<String> commandsToKeep;
 
   static {
     commandsToKeep = new HashSet<String>();
@@ -149,26 +147,27 @@ public final class SqoopShell {
    * @throws IOException
    */
   private static void interpretFileContent(File script, Groovysh shell) throws IOException {
-    BufferedReader in = new BufferedReader(new FileReader(script));
-    String line;
+    try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(script), Charset.forName("UTF-8")))) {
+      String line;
 
-    // Iterate over all lines and executed them one by one
-    while ((line = in.readLine()) != null) {
+      // Iterate over all lines and executed them one by one
+      while ((line = in.readLine()) != null) {
 
-      // Skip comments and empty lines as we don't need to interpret those
-      if(line.isEmpty() || line.startsWith("#")) {
-        continue;
-      }
+        // Skip comments and empty lines as we don't need to interpret those
+        if (line.isEmpty() || line.startsWith("#")) {
+          continue;
+        }
 
-      // Render shell and command to get user perception that it was run as usual
-      print(shell.renderPrompt());
-      println(line);
+        // Render shell and command to get user perception that it was run as usual
+        print(shell.renderPrompt());
+        println(line);
 
-      // Manually trigger command line parsing
-      Object result = shell.execute(line);
+        // Manually trigger command line parsing
+        Object result = shell.execute(line);
 
-      if (result == null) {
-        break;
+        if (result == null) {
+          break;
+        }
       }
     }
   }

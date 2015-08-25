@@ -29,6 +29,7 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
  */
 @SuppressWarnings("serial")
 public class DisableJobFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
 
   @SuppressWarnings("static-access")
   public DisableJobFunction() {

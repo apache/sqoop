@@ -33,13 +33,14 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
  */
 public final class SubmissionDisplayer {
 
-  private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+  private final static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss z";
 
   /**
    * On job submission, displays the initial job info
    * @param submission
    */
   public static void displayHeader(MSubmission submission) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
     println("@|bold "+ resourceString(Constants.RES_SUBMISSION_SUBMISSION_DETAIL) +"|@");
 
     print(resourceString(Constants.RES_SUBMISSION_JOB_ID)+": ");
@@ -84,6 +85,7 @@ public final class SubmissionDisplayer {
    * @param submission
    */
   public static void displayProgress(MSubmission submission) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
     StringBuilder sb = new StringBuilder();
     if(submission.getStatus().isRunning()) {
       sb.append(dateFormat.format(submission.getLastUpdateDate())+": @|green "+submission.getStatus()+ " |@");
@@ -106,6 +108,7 @@ public final class SubmissionDisplayer {
    * @param submission
    */
   public static void displayFooter(MSubmission submission) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
     if (submission.getStatus().toString().equals(SubmissionStatus.SUCCEEDED.toString())) {
       println(dateFormat.format(submission.getLastUpdateDate())+": @|green "+submission.getStatus()+ " |@");
       Counters counters = submission.getCounters();

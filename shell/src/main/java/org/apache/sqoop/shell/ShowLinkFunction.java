@@ -41,6 +41,8 @@ import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
  */
 @SuppressWarnings("serial")
 public class ShowLinkFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public ShowLinkFunction() {
     this.addOption(OptionBuilder
@@ -142,7 +144,7 @@ public class ShowLinkFunction extends SqoopFunction {
     for (String connectorId : connectorIds) {
       if (!connectorIdToName.containsKey(connectorId)) {
         try {
-          MConnector connector = client.getConnector(Long.valueOf(connectorId));
+          MConnector connector = client.getConnector(Long.parseLong(connectorId));
           if (connector != null) {
             connectorIdToName.put(connectorId, connector.getUniqueName());
           }

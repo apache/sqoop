@@ -29,6 +29,8 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
  */
 @SuppressWarnings("serial")
 public class DeleteLinkFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public DeleteLinkFunction() {
     this.addOption(OptionBuilder

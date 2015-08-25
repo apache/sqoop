@@ -41,6 +41,8 @@ import static org.apache.sqoop.shell.utils.ConfigFiller.*;
  */
 @SuppressWarnings("serial")
 public class CreateJobFunction extends  SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   @SuppressWarnings("static-access")
   public CreateJobFunction() {
     this.addOption(OptionBuilder

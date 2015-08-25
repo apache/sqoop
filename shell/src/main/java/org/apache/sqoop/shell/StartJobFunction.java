@@ -34,6 +34,7 @@ import org.apache.sqoop.validation.Status;
 
 @SuppressWarnings("serial")
 public class StartJobFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
   public static final Logger LOG = Logger.getLogger(StartJobFunction.class);
 
   @SuppressWarnings("static-access")
@@ -53,27 +54,10 @@ public class StartJobFunction extends SqoopFunction {
     // Poll until finished
     if (line.hasOption(Constants.OPT_SYNCHRONOUS) && line.hasOption(Constants.OPT_JID)) {
       long pollTimeout = getPollTimeout();
-      SubmissionCallback callback = new SubmissionCallback() {
-        @Override
-        public void submitted(MSubmission submission) {
-          SubmissionDisplayer.displayHeader(submission);
-          SubmissionDisplayer.displayProgress(submission);
-        }
-
-        @Override
-        public void updated(MSubmission submission) {
-          SubmissionDisplayer.displayProgress(submission);
-        }
-
-        @Override
-        public void finished(MSubmission submission) {
-          SubmissionDisplayer.displayFooter(submission);
-        }
-      };
 
       try {
         //client.startJob(getLong(line, Constants.OPT_JID), callback, pollTimeout);
-        client.startJob(line.getOptionValue(Constants.OPT_JID), callback, pollTimeout);
+        client.startJob(line.getOptionValue(Constants.OPT_JID), new SJFCallback(), pollTimeout);
       } catch (InterruptedException e) {
         throw new SqoopException(ShellError.SHELL_0007, e);
       }
@@ -91,5 +75,23 @@ public class StartJobFunction extends SqoopFunction {
     }
 
     return Status.OK;
+  }
+
+  private static class SJFCallback implements SubmissionCallback {
+    @Override
+    public void submitted(MSubmission submission) {
+      SubmissionDisplayer.displayHeader(submission);
+      SubmissionDisplayer.displayProgress(submission);
+    }
+
+    @Override
+    public void updated(MSubmission submission) {
+      SubmissionDisplayer.displayProgress(submission);
+    }
+
+    @Override
+    public void finished(MSubmission submission) {
+      SubmissionDisplayer.displayFooter(submission);
+    }
   }
 }

@@ -29,6 +29,8 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
  */
 @SuppressWarnings("serial")
 public class ShowOptionFunction extends SqoopFunction {
+  private static final long serialVersionUID = 1L;
+
   /**
    * Construct new object.
    */
