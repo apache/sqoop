@@ -92,13 +92,12 @@ public class RepositoryLoadTool extends ConfiguredTool {
       String inputFileName = line.getOptionValue('i');
 
       LOG.info("Reading JSON from file" + inputFileName);
-      InputStream input = new FileInputStream(inputFileName);
-      String jsonTxt = IOUtils.toString(input, Charsets.UTF_8);
-      JSONObject json = JSONUtils.parse(jsonTxt);
-      boolean res = load(json);
-      input.close();
-      return res;
-
+      try (InputStream input = new FileInputStream(inputFileName)) {
+        String jsonTxt = IOUtils.toString(input, Charsets.UTF_8);
+        JSONObject json = JSONUtils.parse(jsonTxt);
+        boolean res = load(json);
+        return res;
+      }
     } catch (FileNotFoundException e) {
       LOG.error("Repository dump file not found:", e);
       System.out.println("Input file not found. Please check Server logs for details.");
@@ -464,15 +463,5 @@ public class RepositoryLoadTool extends ConfiguredTool {
     }
 
     return submissionsJsonArray;
-  }
-
-  private JSONArray updateIdUsingMap(JSONArray jsonArray, HashMap<Long, Long> idMap, String fieldName) {
-    for (Object obj : jsonArray) {
-      JSONObject object = (JSONObject) obj;
-
-      object.put(fieldName, idMap.get(object.get(fieldName)));
-    }
-
-    return jsonArray;
   }
 }

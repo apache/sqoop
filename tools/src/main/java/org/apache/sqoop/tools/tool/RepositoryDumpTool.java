@@ -17,9 +17,11 @@
  */
 package org.apache.sqoop.tools.tool;
 
+
 import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Iterator;
 import java.util.List;
 
@@ -73,7 +75,7 @@ public class RepositoryDumpTool extends ConfiguredTool {
         skipSensitive = false;
       }
 
-      BufferedWriter output = new BufferedWriter(new FileWriter(outputFileName));
+      BufferedWriter output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileName), "UTF-8"));
       LOG.info("Writing JSON repository dump to file " + outputFileName);
       dump(skipSensitive).writeJSONString(output);
       output.flush();
