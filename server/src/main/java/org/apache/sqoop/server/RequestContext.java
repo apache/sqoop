@@ -20,7 +20,9 @@ package org.apache.sqoop.server;
 import org.apache.hadoop.security.authentication.client.PseudoAuthenticator;
 import org.apache.hadoop.security.token.delegation.web.HttpUserGroupInformation;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.security.AuthenticationManager;
+import org.apache.sqoop.security.SecurityConstants;
 import org.apache.sqoop.server.common.ServerError;
 
 import javax.servlet.http.HttpServletRequest;
@@ -121,10 +123,18 @@ public class RequestContext {
    * @return Name of user sending the request
    */
   public String getUserName() {
+    String userName;
     if (AuthenticationManager.getInstance().getAuthenticationHandler().isSecurityEnabled()) {
-      return HttpUserGroupInformation.get().getShortUserName();
+      userName = HttpUserGroupInformation.get().getShortUserName();
     } else {
-      return request.getParameter(PseudoAuthenticator.USER_NAME);
+      userName = request.getParameter(PseudoAuthenticator.USER_NAME);
     }
+
+    if (userName == null || userName.trim().isEmpty()) {
+      userName = SqoopConfiguration.getInstance().getContext().getString(
+          SecurityConstants.AUTHENTICATION_DEFAULT_USER,
+          SecurityConstants.AUTHENTICATION_DEFAULT_USER_DEFAULT);
+    }
+    return userName;
   }
 }

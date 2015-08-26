@@ -64,7 +64,10 @@ public enum SecurityError implements ErrorCode {
   AUTH_0013("Unable to get principal from http request"),
 
   /** Authorization Exception, used by authorization implementation, etc. Sentry. */
-  AUTH_0014("Authorization exception");
+  AUTH_0014("Authorization exception"),
+
+  /** Don't support to grant/remoke privileges for default user. */
+  AUTH_0015("Cannot grant/revoke privileges for default user");
 
   private final String message;
 

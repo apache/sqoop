@@ -67,6 +67,15 @@ public final class SecurityConstants {
           PREFIX_AUTHENTICATION_CONFIG + "kerberos.";
 
   /**
+   * The config specifies the default user.
+   */
+  public static final String AUTHENTICATION_DEFAULT_USER =
+      PREFIX_AUTHENTICATION_CONFIG + "default.user";
+
+  public static final String AUTHENTICATION_DEFAULT_USER_DEFAULT =
+      "sqoop.anonymous.user";
+
+  /**
    * The config specifies the kerberos principal.
    * <tt>org.apache.sqoop.security.authentication.kerberos.principal</tt>.
    */

@@ -20,6 +20,7 @@ package org.apache.sqoop.handler;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
@@ -31,6 +32,7 @@ import org.apache.sqoop.model.MResource;
 import org.apache.sqoop.model.MRole;
 import org.apache.sqoop.security.AuthorizationHandler;
 import org.apache.sqoop.security.AuthorizationManager;
+import org.apache.sqoop.security.SecurityConstants;
 import org.apache.sqoop.security.SecurityError;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
@@ -307,6 +309,15 @@ public class AuthorizationRequestHandler implements RequestHandler {
     List<MPrincipal> principals = principalsBean.getPrincipals();
     // Get privilege object
     List<MPrivilege> privileges = privilegesBean == null ? null : privilegesBean.getPrivileges();
+
+    String defaultUser = SqoopConfiguration.getInstance().getContext().getString(
+        SecurityConstants.AUTHENTICATION_DEFAULT_USER,
+        SecurityConstants.AUTHENTICATION_DEFAULT_USER_DEFAULT);
+    for (MPrincipal principal : principals) {
+      if (defaultUser.equals(principal.getName())) {
+        throw new SqoopException(SecurityError.AUTH_0015);
+      }
+    }
 
     if (privileges != null) {
       for (MPrivilege privilege : privileges) {
