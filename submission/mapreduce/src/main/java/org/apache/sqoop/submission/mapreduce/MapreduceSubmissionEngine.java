@@ -91,12 +91,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
 
     // Git list of files ending with "-site.xml" (configuration files)
     File dir = new File(configDirectory);
-    String [] files = dir.list(new FilenameFilter() {
-      @Override
-      public boolean accept(File dir, String name) {
-        return name.endsWith("-site.xml");
-      }
-    });
+    String [] files = dir.list(new MRSubmissionFilenameFilter());
 
     if(files == null) {
       throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0002,
@@ -158,6 +153,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
   @Override
   public boolean submit(JobRequest mrJobRequest) {
     // We're supporting only map reduce jobs
+    assert mrJobRequest instanceof MRJobRequest;
     MRJobRequest request = (MRJobRequest) mrJobRequest;
 
     // Clone global configuration
@@ -255,7 +251,7 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         submitToCluster(request, job);
       }
       LOG.debug("Executed new map-reduce job with id " + job.getJobID().toString());
-    } catch (Exception e) {
+    } catch (RuntimeException|IOException|ClassNotFoundException|InterruptedException e) {
       SubmissionError error = new SubmissionError();
       error.setErrorSummary(e.toString());
       StringWriter writer = new StringWriter();
@@ -495,4 +491,10 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         || "local".equals(globalConfiguration.get("mapred.job.tracker"));
   }
 
+  private static class MRSubmissionFilenameFilter implements FilenameFilter {
+    @Override
+    public boolean accept(File dir, String name) {
+      return name.endsWith("-site.xml");
+    }
+  }
 }
