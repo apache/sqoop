@@ -191,6 +191,19 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
+  public MConnector findConnector(final long id) {
+    return (MConnector) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findConnector(id, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public MConnector findConnector(final String shortName) {
     return (MConnector) doWithConnection(new DoWithConnection() {
       @Override

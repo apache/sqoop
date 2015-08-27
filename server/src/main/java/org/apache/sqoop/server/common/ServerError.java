@@ -39,6 +39,8 @@ public enum ServerError implements ErrorCode {
   /** Invalid entity requested */
   SERVER_0005("Invalid entity requested"),
 
+  /** Entity requested doesn't exist*/
+  SERVER_0006("Entity requested doesn't exist"),
   ;
 
   private final String message;

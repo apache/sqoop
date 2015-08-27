@@ -104,6 +104,15 @@ public abstract class Repository {
   public abstract MDriver registerDriver(MDriver mDriverConfig, boolean autoUpgrade);
 
   /**
+   * Search for connector with given id in repository.
+   *
+   * @param id Connector id
+   * @return null if connector is not yet registered in repository or
+   *   loaded representation.
+   */
+  public abstract MConnector findConnector(long id);
+
+  /**
    * Search for connector with given name in repository.
    *
    * And return corresponding entity structure.

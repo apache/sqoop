@@ -97,29 +97,56 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
+  public MConnector findConnector(long connectorId, Connection conn) {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Looking up connector: " + connectorId);
+    }
+    try (PreparedStatement connectorFetchStmt = conn
+        .prepareStatement(crudQueries.getStmtSelectFromConfigurableById())) {
+      connectorFetchStmt.setLong(1, connectorId);
+
+      return findConnectorInternal(connectorFetchStmt, conn,
+          String.valueOf(connectorId));
+    } catch (SQLException ex) {
+      logException(ex, connectorId);
+      throw new SqoopException(CommonRepositoryError.COMMON_0001,
+          String.valueOf(connectorId), ex);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public MConnector findConnector(String shortName, Connection conn) {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Looking up connector: " + shortName);
     }
-    try (PreparedStatement connectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable())) {
+
+    try (PreparedStatement connectorFetchStmt = conn
+        .prepareStatement(crudQueries.getStmtSelectFromConfigurableByName())) {
       connectorFetchStmt.setString(1, shortName);
 
-      List<MConnector> connectors = loadConnectors(connectorFetchStmt, conn);
-
-      if (connectors.size() == 0) {
-        LOG.debug("Looking up connector with name: " + shortName + ", no connector found");
-        return null;
-      } else if (connectors.size() == 1) {
-        MConnector mc = connectors.get(0);
-        LOG.debug("Looking up connector with name: " + shortName + ", found: " + mc);
-        return mc;
-      } else {
-        throw new SqoopException(CommonRepositoryError.COMMON_0002, shortName);
-      }
-
+      return findConnectorInternal(connectorFetchStmt, conn, shortName);
     } catch (SQLException ex) {
       logException(ex, shortName);
       throw new SqoopException(CommonRepositoryError.COMMON_0001, shortName, ex);
+    }
+  }
+
+  private MConnector findConnectorInternal(PreparedStatement stmt,
+      Connection conn, String connectorIdentifier) throws SQLException {
+    List<MConnector> connectors = loadConnectors(stmt, conn);
+
+    if (connectors.size() == 0) {
+      LOG.debug("Looking up connector: " + connectorIdentifier + ", no connector found");
+      return null;
+    } else if (connectors.size() == 1) {
+      MConnector mc = connectors.get(0);
+      LOG.debug("Looking up connector: " + connectorIdentifier + ", found: " + mc);
+      return mc;
+    } else {
+      throw new SqoopException(CommonRepositoryError.COMMON_0002, connectorIdentifier);
     }
   }
 
@@ -277,7 +304,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   public MDriver findDriver(String shortName, Connection conn) {
     LOG.debug("Looking up Driver and config ");
     MDriver mDriver;
-    try (PreparedStatement driverFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurable());
+    try (PreparedStatement driverFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectFromConfigurableByName());
          PreparedStatement driverConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
          PreparedStatement driverConfigInputFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectInput());) {
 
@@ -483,24 +510,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MLink findLink(long linkId, Connection conn) {
-    try (PreparedStatement linkFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkSingle())) {
+    try (PreparedStatement linkFetchStmt = conn.prepareStatement(crudQueries
+        .getStmtSelectLinkSingleById())) {
       linkFetchStmt.setLong(1, linkId);
 
-      List<MLink> links = loadLinks(linkFetchStmt, conn);
-
-      if (links.size() == 0) {
-        LOG.debug("Looking up link with id: " + linkId + ", no link found");
-        return null;
-      } else if (links.size() == 1) {
-        // Return the first and only one link object with the given id
-        MLink link = links.get(0);
-        LOG.debug("Looking up link with id: " + linkId + ", found: " + link);
-        return link;
-      } else {
-        throw new SqoopException(CommonRepositoryError.COMMON_0021,
-            String.valueOf(linkId));
-      }
-
+      return findLinkInternal(linkFetchStmt, conn, String.valueOf(linkId));
     } catch (SQLException ex) {
       logException(ex, linkId);
       throw new SqoopException(CommonRepositoryError.COMMON_0020, ex);
@@ -512,26 +526,32 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MLink findLink(String linkName, Connection conn) {
-    try (PreparedStatement linkFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkSingleByName())) {
+    try (PreparedStatement linkFetchStmt = conn.prepareStatement(crudQueries
+        .getStmtSelectLinkSingleByName())) {
       linkFetchStmt.setString(1, linkName);
 
-      List<MLink> links = loadLinks(linkFetchStmt, conn);
-
-      if (links.size() == 0) {
-        LOG.debug("Looking up link with name: " + linkName + ", no link found");
-        return null;
-      } else if (links.size() == 1) {
-        // Return the first and only one link object with the given name
-        MLink link = links.get(0);
-        LOG.debug("Looking up link with name: " + linkName + ", found: " + link);
-        return link;
-      } else {
-        throw new SqoopException(CommonRepositoryError.COMMON_0021, linkName);
-      }
-
+      return findLinkInternal(linkFetchStmt, conn, linkName);
     } catch (SQLException ex) {
       logException(ex, linkName);
       throw new SqoopException(CommonRepositoryError.COMMON_0020, ex);
+    }
+  }
+
+  private MLink findLinkInternal(PreparedStatement stmt, Connection conn,
+      String linkIdentifier) throws SQLException {
+    List<MLink> links = loadLinks(stmt, conn);
+
+    if (links.size() == 0) {
+      LOG.debug("Looking up link: " + linkIdentifier + ", no link found");
+      return null;
+    } else if (links.size() == 1) {
+      // Return the first and only one link object with the given name or id
+      MLink link = links.get(0);
+      LOG.debug("Looking up link: " + linkIdentifier + ", found: " + link);
+      return link;
+    } else {
+      throw new SqoopException(CommonRepositoryError.COMMON_0021,
+          linkIdentifier);
     }
   }
 
@@ -745,24 +765,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MJob findJob(long jobId, Connection conn) {
-    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobSingleById())) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries
+        .getStmtSelectJobSingleById())) {
       stmt.setLong(1, jobId);
 
-      List<MJob> jobs = loadJobs(stmt, conn);
-
-      if (jobs.size() == 0) {
-        LOG.debug("Looking up job with id: " + jobId + ", no job found");
-        return null;
-      } else if (jobs.size() == 1) {
-        // Return the first and only one job object with the given id
-        MJob job = jobs.get(0);
-        LOG.debug("Looking up job with id: " + jobId + ", found: " + job);
-        return job;
-      } else {
-        throw new SqoopException(CommonRepositoryError.COMMON_0027,
-            String.valueOf(jobId));
-      }
-
+      return findJobInternal(stmt, conn, String.valueOf(jobId));
     } catch (SQLException ex) {
       logException(ex, jobId);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
@@ -774,26 +781,31 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public MJob findJob(String name, Connection conn) {
-    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobSingleByName())) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries
+        .getStmtSelectJobSingleByName())) {
       stmt.setString(1, name);
 
-      List<MJob> jobs = loadJobs(stmt, conn);
-
-      if (jobs.size() == 0) {
-        LOG.debug("Looking up job with name: " + name + ", no job found");
-        return null;
-      } else if (jobs.size() == 1) {
-        // Return the first and only one job object with the given id
-        MJob job = jobs.get(0);
-        LOG.debug("Looking up job with name: " + name + ", found: " + job);
-        return job;
-      } else {
-        throw new SqoopException(CommonRepositoryError.COMMON_0027, name);
-      }
-
+      return findJobInternal(stmt, conn, name);
     } catch (SQLException ex) {
       logException(ex, name);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
+    }
+  }
+
+  private MJob findJobInternal(PreparedStatement stmt, Connection conn,
+      String jobIdentifier) throws SQLException {
+    List<MJob> jobs = loadJobs(stmt, conn);
+
+    if (jobs.size() == 0) {
+      LOG.debug("Looking up job: " + jobIdentifier + ", no job found");
+      return null;
+    } else if (jobs.size() == 1) {
+      // Return the first and only one job object with the given name or id
+      MJob job = jobs.get(0);
+      LOG.debug("Looking up job: " + jobIdentifier + ", found: " + job);
+      return job;
+    } else {
+      throw new SqoopException(CommonRepositoryError.COMMON_0027, jobIdentifier);
     }
   }
 

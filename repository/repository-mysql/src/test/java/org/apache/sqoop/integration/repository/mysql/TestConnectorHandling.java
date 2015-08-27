@@ -30,7 +30,25 @@ import org.testng.annotations.Test;
 public class TestConnectorHandling extends MySqlTestCase {
 
   @Test
-  public void testFindConnector() throws Exception {
+  public void testFindConnectorById() throws Exception {
+    // On empty repository, no connectors should be there
+    assertNull(handler.findConnector(1L, provider.getConnection()));
+
+    // Register a single connector
+    handler.registerConnector(
+        getConnector("A", "org.apache.sqoop.test.A", "1.0-test", true, true),
+        provider.getConnection());
+
+    // Retrieve it and compare with original
+    MConnector connector = handler.findConnector(1L, provider.getConnection());
+    assertNotNull(connector);
+    assertEquals(
+        getConnector("A", "org.apache.sqoop.test.A", "1.0-test", true, true),
+        connector);
+  }
+
+  @Test
+  public void testFindConnectorByName() throws Exception {
     // On empty repository, no connectors should be there
     assertNull(handler.findConnector("A", provider.getConnection()));
 

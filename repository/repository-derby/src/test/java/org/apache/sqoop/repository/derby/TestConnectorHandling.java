@@ -44,7 +44,22 @@ public class TestConnectorHandling extends DerbyTestCase {
   }
 
   @Test
-  public void testFindConnector() throws Exception {
+  public void testFindConnectorById() throws Exception {
+    // On empty repository, no connectors should be there
+    assertNull(handler.findConnector(1L, getDerbyDatabaseConnection()));
+    // Load connector into repository
+    addConnectorA();
+    // Retrieve it
+    MConnector connector = handler.findConnector(1L, getDerbyDatabaseConnection());
+    assertNotNull(connector);
+    // Get original structure
+    MConnector original = getConnector();
+    // And compare them
+    assertEquals(original, connector);
+  }
+
+  @Test
+  public void testFindConnectorByName() throws Exception {
     // On empty repository, no connectors should be there
     assertNull(handler.findConnector("A", getDerbyDatabaseConnection()));
     // Load connector into repository

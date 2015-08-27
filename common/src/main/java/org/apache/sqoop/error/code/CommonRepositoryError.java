@@ -28,8 +28,8 @@ public enum CommonRepositoryError implements ErrorCode {
   /** The system was unable to query the repository for given entity */
   COMMON_0001("Unable to retrieve entity data"),
 
-  /** The repository contains more than one connector with same name */
-  COMMON_0002("Invalid entity state - multiple connectors with name"),
+  /** The repository contains more than one connector with same name or id*/
+  COMMON_0002("Invalid entity state - multiple connectors found"),
 
   /** The system does not support the given input type.*/
   COMMON_0003("Unknown input type encountered"),

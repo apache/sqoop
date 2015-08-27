@@ -42,6 +42,17 @@ public abstract class JdbcRepositoryHandler {
   public abstract void initialize(JdbcRepositoryContext repoContext);
 
   /**
+   * Search for connector with given id in repository.
+   * And return corresponding connector entity.
+   *
+   * @param connectorId Connector id
+   * @param conn JDBC link for querying repository.
+   * @return null if connector is not yet registered in repository or
+   *   loaded representation.
+   */
+  public abstract MConnector findConnector(long connectorId, Connection conn);
+
+  /**
    * Search for connector with given name in repository.
    * And return corresponding connector entity.
    *
