@@ -39,6 +39,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 @Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
 public class InvalidRESTCallsTest extends SqoopTestCase {
@@ -68,6 +70,16 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
     // Verify HTTP response code
     public void assertResponseCode(int expected) throws Exception {
       assertEquals(connection.getResponseCode(), expected);
+    }
+
+    // Assert given exception from server
+    public void assertServerException(String errorClass, String errorCode) throws Exception {
+      // On exception, the error trace can't be null
+      assertNotNull(error);
+
+      // We're not parsing entire JSON, but rather just looking for sub-strings that are of particular interest
+      assertTrue(error.contains("error-code-class\":\"" + errorClass));
+      assertTrue(error.contains("error-code\":\"" + errorCode));
     }
   }
 
@@ -101,7 +113,8 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
     new TestDescription("Invalid post request", "version", "POST", "Random text", new Validator() {
       @Override
       void validate() throws Exception {
-        assertResponseCode(405);
+        assertResponseCode(500);
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0002");
       }}),
   };
 

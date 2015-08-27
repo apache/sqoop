@@ -32,6 +32,7 @@ import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.common.SqoopResponseCode;
 import org.apache.sqoop.error.code.CoreError;
 import org.apache.sqoop.json.JsonBean;
+import org.apache.sqoop.server.common.ServerError;
 
 @SuppressWarnings("serial")
 public class SqoopProtocolServlet extends HttpServlet {
@@ -160,26 +161,18 @@ public class SqoopProtocolServlet extends HttpServlet {
   }
 
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
-    super.doGet(ctx.getRequest(), ctx.getResponse());
-
-    return null;
+    throw new SqoopException(ServerError.SERVER_0002, ctx.getMethod() + " for " + ctx.getPath());
   }
 
   protected JsonBean handlePostRequest(RequestContext ctx) throws Exception {
-    super.doPost(ctx.getRequest(), ctx.getResponse());
-
-    return null;
+    throw new SqoopException(ServerError.SERVER_0002, ctx.getMethod() + " for " + ctx.getPath());
   }
 
   protected JsonBean handlePutRequest(RequestContext ctx) throws Exception {
-    super.doPut(ctx.getRequest(), ctx.getResponse());
-
-    return null;
+    throw new SqoopException(ServerError.SERVER_0002, ctx.getMethod() + " for " + ctx.getPath());
   }
 
   protected JsonBean handleDeleteRequest(RequestContext ctx) throws Exception {
-    super.doDelete(ctx.getRequest(), ctx.getResponse());
-
-    return null;
+    throw new SqoopException(ServerError.SERVER_0002, ctx.getMethod() + " for " + ctx.getPath());
   }
 }
