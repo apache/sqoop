@@ -30,6 +30,8 @@ import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.validators.AbstractValidator;
 
 import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,7 +77,7 @@ public class ConfigValidationRunner {
 
     // Iterate over all declared config and call their validators
     for (Field field : config.getClass().getDeclaredFields()) {
-      field.setAccessible(true);
+      AccessController.doPrivileged(new CVRPrivilegeAction(field));
 
       Config configAnnotation = ConfigUtils.getConfigAnnotation(field, false);
       if(configAnnotation == null) {
@@ -177,5 +179,17 @@ public class ConfigValidationRunner {
     return instance;
   }
 
+  private static class CVRPrivilegeAction implements PrivilegedAction {
+    Field field;
 
+    CVRPrivilegeAction(Field field) {
+      this.field = field;
+    }
+
+    @Override
+    public Object run() {
+      field.setAccessible(true);
+      return null;
+    }
+  }
 }

@@ -25,6 +25,7 @@ import org.json.simple.JSONObject;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public class VersionBean implements JsonBean, java.io.Serializable {
+  private static final long serialVersionUID = 1L;
 
   public static final String BUILD_VERSION = "build-version";
   public static final String SOURCE_REVISION = "source-revision";
