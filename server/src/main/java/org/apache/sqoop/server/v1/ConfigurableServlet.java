@@ -37,21 +37,16 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
 public class ConfigurableServlet extends SqoopProtocolServlet {
   private static final long serialVersionUID = 1L;
 
-  private RequestHandler configurableRequestHandler;
   private static String CONNECTOR_CONFIGURABLE = "connector";
-  private static String DRIVER_CONFIGURABLE = "connector";
 
   public ConfigurableServlet() {
-    // be default
-    configurableRequestHandler = new DriverRequestHandler();
   }
 
   @Override
   protected JsonBean handleGetRequest(RequestContext ctx) throws Exception {
+    RequestHandler configurableRequestHandler = new DriverRequestHandler();
     if (ctx.getPath().contains(CONNECTOR_CONFIGURABLE)) {
       configurableRequestHandler = new ConnectorRequestHandler();
-    } else if (ctx.getPath().contains(DRIVER_CONFIGURABLE)) {
-      configurableRequestHandler = new DriverRequestHandler();
     }
     return configurableRequestHandler.handleEvent(ctx);
   }
