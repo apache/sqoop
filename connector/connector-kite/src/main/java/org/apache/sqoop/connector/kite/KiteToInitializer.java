@@ -78,6 +78,7 @@ public class KiteToInitializer extends Initializer<LinkConfiguration,
     if (toJobConfig.toJobConfig.uri.startsWith("dataset:hive")) {
       // @TODO(Abe): Remove a deps that aren't used?
       jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.conf.HiveConf"));
+      jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.ql.io.HiveOutputFormat"));
       jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.serde2.SerDe"));
       jars.add(ClassUtils.jarForClass("org.kitesdk.data.spi.hive.MetaStoreUtil"));
       jars.add(ClassUtils.jarForClass("org.kitesdk.compat.DynConstructors"));
