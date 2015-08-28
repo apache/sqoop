@@ -281,7 +281,7 @@ public final class DerbySchemaUpgradeQuery {
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " DROP CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQB_SQN_TO_NAME);
 
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_TO_SQ_LINK = "RENAME TABLE "
-      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_NAME) + " TO SQ_LINK";
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_NAME) + " TO " + TABLE_SQ_LINK_NAME;
 
   // column only renames for SQ_CONNECTION
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_COLUMN_1 = "RENAME COLUMN "
@@ -312,7 +312,7 @@ public final class DerbySchemaUpgradeQuery {
 
   // table rename for CONNECTION_INPUT -> LINK_INPUT
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_TO_SQ_LINK_INPUT = "RENAME TABLE "
-      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_INPUT_NAME) + " TO SQ_LINK_INPUT";
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTION_INPUT_NAME) + " TO " + TABLE_SQ_LINK_INPUT_NAME;
   // column renames for SQ_CONNECTION_INPUT
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTION_INPUT_COLUMN_1 = "RENAME COLUMN "
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + "." + CommonRepoUtils.escapeColumnName(COLUMN_SQNI_CONNECTION) + " TO " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK);
@@ -335,7 +335,7 @@ public final class DerbySchemaUpgradeQuery {
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME) + " DROP CONSTRAINT " + CommonRepoUtils.getConstraintName(SCHEMA_SQOOP, CONSTRAINT_SQI_SQF_NAME);
 
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_TO_SQ_CONFIG = "RENAME TABLE "
-      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_FORM_NAME) + " TO SQ_CONFIG";
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_FORM_NAME) + " TO " + TABLE_SQ_CONFIG_NAME;
 
   // column and constraint renames for SQ_FORM
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_FORM_COLUMN_1 = "RENAME COLUMN "
@@ -418,7 +418,7 @@ public final class DerbySchemaUpgradeQuery {
 
   // rename
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONNECTOR_TO_SQ_CONFIGURABLE = "RENAME TABLE "
-      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " TO SQ_CONFIGURABLE";
+      + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONNECTOR_NAME) + " TO " + TABLE_SQ_CONFIGURABLE_NAME;
 
   public static final String QUERY_UPGRADE_RENAME_TABLE_SQ_CONFIG_COLUMN_1 = "RENAME COLUMN "
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME) + "." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONNECTOR) + " TO " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE);
