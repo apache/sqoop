@@ -385,7 +385,7 @@ public class HiveImport {
     }
   }
 
-  private String[] getHiveArgs(String... args) {
+  private String[] getHiveArgs(String... args) throws IOException {
     List<String> newArgs = new LinkedList<String>();
     newArgs.addAll(Arrays.asList(args));
 

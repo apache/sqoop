@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class HiveConfig {
@@ -36,8 +37,9 @@ public class HiveConfig {
    * Dynamically create hive configuration object.
    * @param conf
    * @return
+   * @throws IOException if instantiate HiveConf failed.
    */
-  public static Configuration getHiveConf(Configuration conf) {
+  public static Configuration getHiveConf(Configuration conf) throws IOException {
     try {
       Class HiveConfClass = Class.forName(HIVE_CONF_CLASS);
       return ((Configuration)(HiveConfClass.getConstructor(Configuration.class, Class.class)
@@ -45,11 +47,11 @@ public class HiveConfig {
     } catch (ClassNotFoundException ex) {
       LOG.error("Could not load " + HIVE_CONF_CLASS
           + ". Make sure HIVE_CONF_DIR is set correctly.");
+      throw new IOException(ex);
     } catch (Exception ex) {
       LOG.error("Could not instantiate HiveConf instance.", ex);
+      throw new IOException(ex);
     }
-
-    return null;
   }
 
   /**

@@ -89,15 +89,17 @@ public final class ParquetJob {
   public static void configureImportJob(JobConf conf, Schema schema,
       String uri, WriteMode writeMode) throws IOException {
     Dataset dataset;
-    Configuration hiveConf = HiveConfig.getHiveConf(conf);
 
     // Add hive delegation token only if we don't already have one.
-    if (uri.startsWith("dataset:hive") && isSecureMetastore(hiveConf)) {
-      // Copy hive configs to job config
-      HiveConfig.addHiveConfigs(hiveConf, conf);
+    if (uri.startsWith("dataset:hive")) {
+      Configuration hiveConf = HiveConfig.getHiveConf(conf);
+      if (isSecureMetastore(hiveConf)) {
+        // Copy hive configs to job config
+        HiveConfig.addHiveConfigs(hiveConf, conf);
 
-      if (conf.getCredentials().getToken(new Text(HIVE_METASTORE_TOKEN_ALIAS)) == null) {
-        addHiveDelegationToken(conf);
+        if (conf.getCredentials().getToken(new Text(HIVE_METASTORE_TOKEN_ALIAS)) == null) {
+          addHiveDelegationToken(conf);
+        }
       }
     }
 
