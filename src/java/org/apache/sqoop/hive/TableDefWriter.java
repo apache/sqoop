@@ -239,14 +239,14 @@ public class TableDefWriter {
    */
   public String getPartitionkey(String partitionKey){
        String[] partitionKeys = partitionKey.split(",");
-       StringBuilder sb = new StringBuilder("PARTITIONED BY(");
+       StringBuilder sb = new StringBuilder(" PARTITIONED BY(");
        for (int i=0;i<partitionKeys.length;i++){
           String key = partitionKeys[i];
           if(key.trim()!=""){
-              sb.append(key).append("STRING,");
+              sb.append(key).append(" STRING,");
           }
        }
-       sb = new StringBuilder(sb.substring(1));
+       sb = new StringBuilder(sb.substring(0,sb.length()-1));
        sb.append(")");
        LOG.debug("CREATE TABLE PATTITIONS STATEMENT:"+sb.toString());
        return sb.toString();
@@ -261,7 +261,7 @@ public class TableDefWriter {
    * @throws Exception
    */
   public String getPartitionsValue(){
-       StringBuilder sb = new StringBuilder("PARTITION(");
+       StringBuilder sb = new StringBuilder(" PARTITION(");
        String key = options.getHivePartitionKey();
        String value = options.getHivePartitionValue();
        String[] keys = key.split(",");
@@ -270,7 +270,7 @@ public class TableDefWriter {
            sb.append(keys[i]).append("='")
              .append(values[i]).append("',");
        }
-       sb = new StringBuilder(sb.substring(1));
+       sb = new StringBuilder(sb.substring(0,sb.length()-1));
        sb.append(")");
        LOG.debug("the partition value string: "+sb.toString());
        return sb.toString();
