@@ -19,7 +19,12 @@
 package org.apache.sqoop.tool;
 
 import java.io.IOException;
+import java.lang.Boolean;
+import java.lang.String;
+import java.lang.System;
+import java.util.*;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -78,28 +83,34 @@ public class ImportAllTablesTool extends com.cloudera.sqoop.tool.ImportTool {
   public int run(SqoopOptions options) {
     HiveImport hiveImport = null;
     Set<String> excludes = new HashSet<String>();
+    //save import successful tableName
+    Set<String> successTable = new HashSet<String>();
+    //save import failed tableName
+    Set<String> failedTable = new HashSet<String>();
+    //save import status
+    boolean importStatus = true;
 
     if (!init(options)) {
       return 1;
     }
 
-    try {
-      if (options.doHiveImport()) {
-        hiveImport = new HiveImport(options, manager, options.getConf(), false);
-      }
+    if (options.doHiveImport()) {
+      hiveImport = new HiveImport(options, manager, options.getConf(), false);
+    }
 
-      if (options.getAllTablesExclude() != null) {
-        excludes.addAll(Arrays.asList(options.getAllTablesExclude().split(",")));
-      }
+    if (options.getAllTablesExclude() != null) {
+      excludes.addAll(Arrays.asList(options.getAllTablesExclude().split(",")));
+    }
 
-      String [] tables = manager.listTables();
-      if (null == tables) {
-        System.err.println("Could not retrieve tables list from server");
-        LOG.error("manager.listTables() returned null");
-        return 1;
-      } else {
-        int numMappers = options.getNumMappers();
-        for (String tableName : tables) {
+    String [] tables = manager.listTables();
+    if (null == tables) {
+      System.err.println("Could not retrieve tables list from server");
+      LOG.error("manager.listTables() returned null");
+      return 1;
+    } else {
+      int numMappers = options.getNumMappers();
+      for (String tableName : tables) {
+        try {
           if (excludes.contains(tableName)) {
             System.out.println("Skipping table: " + tableName);
           } else {
@@ -109,30 +120,56 @@ public class ImportAllTablesTool extends com.cloudera.sqoop.tool.ImportTool {
              */
             options.setNumMappers(numMappers);
             importTable(options, tableName, hiveImport);
+            successTable.add(tableName);
           }
+        } catch (IOException ioe) {
+          LOG.error("Encountered IOException running import job: "
+                  + ioe.toString());
+          importStatus = false;
+          failedTable.add(tableName);
+          continue;
+          /*
+          if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
+            throw new RuntimeException(ioe);
+          } else {
+            return 1;
+          }*/
+        } catch (ImportException ie) {
+          LOG.error("Error during import: " + ie.toString());
+          importStatus = false;
+          failedTable.add(tableName);
+          continue;
+          /*
+          if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
+            throw new RuntimeException(ie);
+          } else {
+            return 1;
+          }*/
+        } finally {
+          destroy(options);
         }
       }
-    } catch (IOException ioe) {
-      LOG.error("Encountered IOException running import job: "
-          + ioe.toString());
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ioe);
-      } else {
-        return 1;
-      }
-    } catch (ImportException ie) {
-      LOG.error("Error during import: " + ie.toString());
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ie);
-      } else {
-        return 1;
-      }
-    } finally {
-      destroy(options);
     }
 
-    return 0;
+    if(importStatus){
+      return 0;
+    }else {
+       System.out.println("############################## import successed table name#####################################");
+       echoTool(successTable);
+       System.out.println("############################## import failed table name   #####################################");
+       echoTool(failedTable);
+       return 1;
+    }
   }
 
+  /**
+   * print collect
+   */
+  public void echoTool(Collection<String> collection) {
+    java.util.Iterator iterator = collection.iterator();
+    while(iterator.hasNext()){
+      System.out.print("  "+iterator.next());
+    }
+  }
 }
 

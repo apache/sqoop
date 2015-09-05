@@ -20,6 +20,9 @@ package org.apache.sqoop.hive;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.Exception;
+import java.lang.String;
+import java.lang.StringBuilder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Date;
@@ -199,9 +202,12 @@ public class TableDefWriter {
     }
 
     if (partitionKey != null) {
+      sb.append(getPartitionkey(partitionKey));
+      /*
       sb.append("PARTITIONED BY (")
         .append(partitionKey)
         .append(" STRING) ");
+      */
      }
 
     sb.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '");
@@ -224,6 +230,53 @@ public class TableDefWriter {
   }
 
   /**
+   *
+   * @param partitionKey  Multiple partition key separated by a comma.
+   * @return the partitionkey string
+   * for example: PARTITIONED BY(id string,name string).....
+   * email: pan.lu@baifendian.com
+   * @throws Exception
+   */
+  public String getPartitionkey(String partitionKey){
+       String[] partitionKeys = partitionKey.split(",");
+       StringBuilder sb = new StringBuilder("PARTITIONED BY(");
+       for (int i=0;i<partitionKeys.length;i++){
+          String key = partitionKeys[i];
+          if(key.trim()!=""){
+              sb.append(key).append("STRING,");
+          }
+       }
+       sb = new StringBuilder(sb.substring(1));
+       sb.append(")");
+       LOG.debug("CREATE TABLE PATTITIONS STATEMENT:"+sb.toString());
+       return sb.toString();
+  }
+
+
+  /**
+   *
+   * @return the partition value string.
+   * for example:PARTITION (id="1",name="123")
+   * email: pan.lu@baifendian.com
+   * @throws Exception
+   */
+  public String getPartitionsValue(){
+       StringBuilder sb = new StringBuilder("PARTITION(");
+       String key = options.getHivePartitionKey();
+       String value = options.getHivePartitionValue();
+       String[] keys = key.split(",");
+       String[] values = key.split(",");
+       for(int i=0;i<keys.length;i++){
+           sb.append(keys[i]).append("='")
+             .append(values[i]).append("',");
+       }
+       sb = new StringBuilder(sb.substring(1));
+       sb.append(")");
+       LOG.debug("the partition value string: "+sb.toString());
+       return sb.toString();
+  }
+
+  /**
    * @return the LOAD DATA statement to import the data in HDFS into hive.
    */
   public String getLoadDataStmt() throws IOException {
@@ -243,10 +296,13 @@ public class TableDefWriter {
     sb.append('`');
 
     if (options.getHivePartitionKey() != null) {
+      sb.append(getPartitionsValue());
+      /*
       sb.append(" PARTITION (")
         .append(options.getHivePartitionKey())
         .append("='").append(options.getHivePartitionValue())
         .append("')");
+      */
     }
 
     LOG.debug("Load statement: " + sb.toString());

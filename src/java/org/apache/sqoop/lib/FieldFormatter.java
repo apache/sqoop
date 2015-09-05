@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public final class FieldFormatter {
 
-  private static final Pattern REPLACE_PATTERN = Pattern.compile("\\n|\\r|\01");
+  private static final Pattern REPLACE_PATTERN = Pattern.compile("\\n|\\r|\\t|\01");
 
   /**
    * This drops all default Hive delimiters from the string and passes it on.

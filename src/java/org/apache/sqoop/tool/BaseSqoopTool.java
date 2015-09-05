@@ -511,13 +511,13 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       .create());
     hiveOpts.addOption(OptionBuilder
         .withDescription("Drop Hive record \\0x01 and row delimiters "
-          + "(\\n\\r) from imported string fields")
+          + "(\\n\\t\\r) from imported string fields")
         .withLongOpt(HIVE_DROP_DELIMS_ARG)
         .create());
     hiveOpts.addOption(OptionBuilder
         .hasArg()
         .withDescription("Replace Hive record \\0x01 and row delimiters "
-            + "(\\n\\r) from imported string fields with user-defined string")
+            + "(\\n\\t\\r) from imported string fields with user-defined string")
         .withLongOpt(HIVE_DELIMS_REPLACEMENT_ARG)
         .create());
     hiveOpts.addOption(OptionBuilder.withArgName("partition-key")

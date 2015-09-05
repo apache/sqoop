@@ -1331,13 +1331,13 @@ public class ClassWriter {
 
       if (javaType.equals("String") && options.doHiveDropDelims()) {
         sb.append("    // special case for strings hive, dropping"
-            + "delimiters \\n,\\r,\\01 from strings\n");
+            + "delimiters \\n,\\t,\\r,\\01 from strings\n");
         sb.append("    __sb.append(FieldFormatter.hiveStringDropDelims("
             + stringExpr + ", delimiters));\n");
       } else if (javaType.equals("String")
           && options.getHiveDelimsReplacement() != null) {
         sb.append("    // special case for strings hive, replacing "
-            + "delimiters \\n,\\r,\\01 with '"
+            + "delimiters \\n,\\t,\\r,\\01 with '"
             + options.getHiveDelimsReplacement() + "' from strings\n");
         sb.append("    __sb.append(FieldFormatter.hiveStringReplaceDelims("
             + stringExpr + ", \"" + options.getHiveDelimsReplacement() + "\", "
