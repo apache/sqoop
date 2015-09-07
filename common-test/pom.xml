@@ -74,6 +74,11 @@ limitations under the License.
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+    </dependency>
   </dependencies>
 
   <profiles>

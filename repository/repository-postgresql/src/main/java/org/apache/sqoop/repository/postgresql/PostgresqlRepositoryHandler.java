@@ -35,6 +35,7 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.TreeMap;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
 public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
   private static final Logger LOG =
       Logger.getLogger(PostgresqlRepositoryHandler.class);

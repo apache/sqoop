@@ -48,6 +48,8 @@ import java.util.Set;
 /**
  * Database executor that is based on top of JDBC spec.
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings({
+        "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"})
 public class GenericJdbcExecutor {
 
   private static final Logger LOG = Logger.getLogger(GenericJdbcExecutor.class);

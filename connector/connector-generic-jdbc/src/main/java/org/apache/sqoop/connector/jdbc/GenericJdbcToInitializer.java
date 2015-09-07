@@ -37,6 +37,7 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.utils.ClassUtils;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
 public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJobConfiguration> {
 
   private GenericJdbcExecutor executor;

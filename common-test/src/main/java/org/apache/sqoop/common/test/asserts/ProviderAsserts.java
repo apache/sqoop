@@ -31,6 +31,7 @@ import static org.testng.Assert.fail;
 /**
  * Database provider related asserts.
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
 public class ProviderAsserts {
 
   private static final Logger LOG = Logger.getLogger(ProviderAsserts.class);

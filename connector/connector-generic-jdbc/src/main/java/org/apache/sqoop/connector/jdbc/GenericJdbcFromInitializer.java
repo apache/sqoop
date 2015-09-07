@@ -39,6 +39,8 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.utils.ClassUtils;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings({
+        "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"})
 public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, FromJobConfiguration> {
 
   private static final Logger LOG =

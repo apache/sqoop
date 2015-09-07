@@ -41,6 +41,7 @@ import java.util.Map;
  *
  * This class is intended to handle the updates to the Generic JDBC Connector.
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
 public class DerbyUpgradeGenericJdbcConnectorConfigAndInputNames {
   private static final Logger LOG =
       Logger.getLogger(DerbyUpgradeGenericJdbcConnectorConfigAndInputNames.class);

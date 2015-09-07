@@ -61,6 +61,8 @@ import org.apache.sqoop.repository.derby.upgrade.UniqueJobRename;
  *
  * Repository implementation for Derby database.
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings({
+        "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"})
 public class DerbyRepositoryHandler extends CommonRepositoryHandler {
 
   private static final Logger LOG =

@@ -40,6 +40,7 @@ import java.util.List;
  * supported database server have it's own concrete implementation that fills
  * the gaps in database differences.
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
 abstract public class DatabaseProvider {
 
   private static final Logger LOG = Logger.getLogger(DatabaseProvider.class);

@@ -75,6 +75,7 @@ import org.apache.sqoop.submission.counter.Counters;
 /**
  * Set of methods required from each JDBC based repository.
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
 public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
   private static final Logger LOG =
