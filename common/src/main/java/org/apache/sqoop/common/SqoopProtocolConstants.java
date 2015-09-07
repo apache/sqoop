@@ -33,8 +33,10 @@ public final class SqoopProtocolConstants {
   public static final String HEADER_SQOOP_INTERNAL_ERROR_MESSAGE =
       "sqoop-internal-error-message";
 
+  public static final String charset = "UTF-8";
+
   public static final String JSON_CONTENT_TYPE =
-      "application/json; charset=\"UTF-8\"";
+      "application/json; charset=\"" + charset + "\"";
 
   private SqoopProtocolConstants() {
     // Disable explicit object creation

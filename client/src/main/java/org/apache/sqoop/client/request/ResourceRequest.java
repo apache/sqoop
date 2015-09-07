@@ -52,7 +52,7 @@ public class ResourceRequest {
   /**
    * Charset used for Sqoop 2 protocol
    */
-  private static final Charset CHARSET = Charset.forName("UTF-8");
+  private static final Charset CHARSET = Charset.forName(SqoopProtocolConstants.charset);
 
   private static final Logger LOG = Logger.getLogger(ResourceRequest.class);
   private DelegationTokenAuthenticatedURL.Token authToken;
@@ -64,11 +64,12 @@ public class ResourceRequest {
   public ResourceRequest(DelegationTokenAuthenticatedURL.Token token) {
     this.authToken = token == null ? new DelegationTokenAuthenticatedURL.Token() : token;
   }
-  protected String doHttpRequest(String strURL, String method) {
+
+  private String doHttpRequest(String strURL, String method) {
     return doHttpRequest(strURL, method, "");
   }
 
-  protected String doHttpRequest(String strURL, String method, String data) {
+  private String doHttpRequest(String strURL, String method, String data) {
     DataOutputStream wr = null;
     BufferedReader reader = null;
     try {
@@ -85,10 +86,11 @@ public class ResourceRequest {
       if (method.equalsIgnoreCase(HttpMethod.PUT) || method.equalsIgnoreCase(HttpMethod.POST)) {
         conn.setDoOutput(true);
         data = data == null ? "" : data;
-        conn.setRequestProperty("Content-Length", Integer.toString(data.getBytes(CHARSET).length));
+        byte[] dataBytes = data.getBytes(CHARSET);
+        conn.setRequestProperty("Content-Length", Integer.toString(dataBytes.length));
 //        Send request
         wr = new DataOutputStream(conn.getOutputStream());
-        wr.writeBytes(data);
+        wr.write(dataBytes);
         wr.flush();
         wr.close();
       }
