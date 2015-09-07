@@ -429,7 +429,7 @@ Inputs associated with the Job configuration for the FROM direction include:
 **Notes**
 =========
 
-1. The URI and the authority from the link configuration will be merged to create a complete dataset URI internally.
+1. The URI and the authority from the link configuration will be merged to create a complete dataset URI internally. If the given dataset URI contains authority, the authority from the link configuration will be ignored.
 2. Only *hdfs* and *hive* are supported currently.
 
 **TO Job Configuration**
@@ -450,7 +450,7 @@ Inputs associated with the Job configuration for the TO direction include:
 **Notes**
 =========
 
-1. The URI and the authority from the link configuration will be merged to create a complete dataset URI internally.
+1. The URI and the authority from the link configuration will be merged to create a complete dataset URI internally. If the given dataset URI contains authority, the authority from the link configuration will be ignored.
 2. Only *hdfs* and *hive* are supported currently.
 
 -----------
