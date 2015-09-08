@@ -51,7 +51,7 @@ public class TestJobManager {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
-    jobManager = new JobManager();
+    jobManager = JobManager.getInstance();
     connectorMgrMock = mock(ConnectorManager.class);
     sqoopConnectorMock = mock(SqoopConnector.class);
     ConnectorManager.setInstance(connectorMgrMock);

@@ -63,7 +63,7 @@ public class AuditLoggerManager implements Reconfigurable {
     return instance;
   }
 
-  public AuditLoggerManager() {
+  private AuditLoggerManager() {
     loggers = new ArrayList<AuditLogger>();
   }
 
@@ -122,10 +122,11 @@ public class AuditLoggerManager implements Reconfigurable {
   }
 
   public synchronized void destroy() {
+    loggers = null;
     LOG.trace("Begin audit logger manager destroy");
   }
 
-  public void logAuditEvent(String username,
+  public synchronized void logAuditEvent(String username,
       String ip, String operation, String objectType, String objectId) {
     for (AuditLogger logger : loggers) {
       logger.logAuditEvent(username, ip, operation, objectType, objectId);
@@ -133,7 +134,7 @@ public class AuditLoggerManager implements Reconfigurable {
   }
 
   @Override
-  public void configurationChanged() {
+  public synchronized void configurationChanged() {
     LOG.info("Begin audit logger manager reconfiguring");
     initializeLoggers();
     LOG.info("Audit logger manager reconfigured");

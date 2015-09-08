@@ -68,6 +68,11 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   /**
+   * The private constructor for the singleton class.
+   */
+  private ConnectorManager() {}
+
+  /**
    * Return current instance.
    *
    * @return Current instance

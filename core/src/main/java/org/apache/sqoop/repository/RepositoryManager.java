@@ -49,6 +49,11 @@ public class RepositoryManager implements Reconfigurable {
   }
 
   /**
+   * The private constructor for the singleton class.
+   */
+  private RepositoryManager() {}
+
+  /**
    * Return current instance.
    *
    * @return Current instance

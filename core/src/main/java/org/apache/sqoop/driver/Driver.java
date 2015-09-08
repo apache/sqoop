@@ -110,7 +110,7 @@ public class Driver implements Reconfigurable {
       return JobConfiguration.class;
   }
 
-  public Driver() {
+  private Driver() {
     List<MConfig> driverConfig = ConfigUtils.toConfigs(getDriverJobConfigurationClass());
     mDriver = new MDriver(new MDriverConfig(driverConfig), DriverBean.CURRENT_DRIVER_VERSION);
 

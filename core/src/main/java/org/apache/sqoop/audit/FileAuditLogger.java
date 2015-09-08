@@ -41,22 +41,10 @@ public class FileAuditLogger extends AuditLogger {
    */
   private Logger logger;
 
-  /**
-   * Configurations for this audit logger
-   */
-  private Map<String, String> config;
-
-  /**
-   * Properties to setup logger
-   */
-  private Properties props;
-
-  public FileAuditLogger() {
-    this.props = new Properties();
-  }
+  public FileAuditLogger() {}
 
   public void initialize() {
-    config = getLoggerConfig();
+    Map<String, String> config = getLoggerConfig();
 
     String outputFile = config.get(FILE);
     if (outputFile == null) {
@@ -66,6 +54,7 @@ public class FileAuditLogger extends AuditLogger {
     // setup logger
     String appender = "log4j.appender." + getLoggerName() + APPENDER_SURFIX;
     LOG.warn("appender: " + appender);
+    Properties props = new Properties();
     props.put(appender, "org.apache.log4j.RollingFileAppender");
     props.put(appender + ".File", outputFile);
     props.put(appender + ".layout", "org.apache.log4j.PatternLayout");

@@ -73,6 +73,11 @@ public class JobManager implements Reconfigurable {
   }
 
   /**
+   * The private constructor for the singleton class.
+   */
+  private JobManager() {}
+
+  /**
    * Return current instance.
    *
    * @return Current instance

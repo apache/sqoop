@@ -46,7 +46,7 @@ public class AuthenticationManager implements Reconfigurable {
   }
 
   /**
-   * The private constructor for the singleton class,
+   * The private constructor for the singleton class.
    */
   private AuthenticationManager(){}
 

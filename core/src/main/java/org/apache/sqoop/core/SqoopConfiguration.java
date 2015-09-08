@@ -69,6 +69,11 @@ public class SqoopConfiguration implements Reconfigurable {
   }
 
   /**
+   * The private constructor for the singleton class.
+   */
+  private SqoopConfiguration() {}
+
+  /**
    * Return current instance.
    *
    * @return Current instance
