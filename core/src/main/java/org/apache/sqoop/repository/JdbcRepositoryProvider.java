@@ -37,7 +37,7 @@ import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.utils.ClassUtils;
 
-
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("IS2_INCONSISTENT_SYNC")
 public class JdbcRepositoryProvider implements RepositoryProvider {
 
   private static final Logger LOG = Logger.getLogger(JdbcRepositoryProvider.class);

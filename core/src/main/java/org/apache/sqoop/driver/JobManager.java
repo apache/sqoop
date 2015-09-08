@@ -51,6 +51,7 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.utils.ClassUtils;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("IS2_INCONSISTENT_SYNC")
 public class JobManager implements Reconfigurable {
   /**
    * Logger object.

@@ -30,6 +30,7 @@ import org.apache.sqoop.validation.Status;
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 @SuppressWarnings("serial")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("SE_BAD_FIELD")
 public class ShowVersionFunction extends SqoopFunction {
   private static final long serialVersionUID = 1L;
   private VersionResourceRequest versionRequest;

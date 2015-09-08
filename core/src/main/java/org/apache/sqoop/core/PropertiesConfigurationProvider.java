@@ -35,6 +35,7 @@ import org.apache.sqoop.error.code.CoreError;
 
 import static org.apache.sqoop.core.ConfigurationConstants.PROPERTIES_PROVIDER_SLEEP;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("IS2_INCONSISTENT_SYNC")
 public class PropertiesConfigurationProvider implements ConfigurationProvider {
 
   private static final Logger LOG =

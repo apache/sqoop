@@ -46,6 +46,7 @@ import static org.apache.sqoop.utils.ContextUtils.getUniqueStrings;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("IS2_INCONSISTENT_SYNC")
 public class SqoopConfiguration implements Reconfigurable {
 
   /**

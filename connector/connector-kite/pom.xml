@@ -71,6 +71,10 @@ limitations under the License.
       <artifactId>powermock-api-mockito</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>net.sourceforge.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+    </dependency>
 
     <!-- Kite required modules -->
     <dependency>

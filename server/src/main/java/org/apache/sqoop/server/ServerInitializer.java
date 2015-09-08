@@ -28,6 +28,7 @@ import javax.servlet.ServletContextListener;
  * Initializes the Sqoop server. This listener is also responsible for
  * cleaning up any resources occupied by the server during the system shutdown.
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("DM_EXIT")
 public class ServerInitializer implements ServletContextListener {
 
   private static final Logger LOG = Logger.getLogger(ServerInitializer.class);

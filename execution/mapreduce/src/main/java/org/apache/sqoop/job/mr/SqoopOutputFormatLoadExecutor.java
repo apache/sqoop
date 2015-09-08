@@ -46,6 +46,7 @@ import org.apache.sqoop.submission.counter.SqoopCounters;
 import org.apache.sqoop.job.io.SqoopWritable;
 import org.apache.sqoop.utils.ClassUtils;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
 public class SqoopOutputFormatLoadExecutor {
 
   public static final Logger LOG =

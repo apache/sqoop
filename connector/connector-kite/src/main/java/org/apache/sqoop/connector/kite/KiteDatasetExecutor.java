@@ -47,6 +47,7 @@ import java.util.UUID;
  * The class arranges to perform dataset operations (without thread safety
  * guarantee).
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
 public class KiteDatasetExecutor {
 
   private final Dataset<GenericRecord> dataset;

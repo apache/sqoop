@@ -46,6 +46,7 @@ import java.util.Set;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
 public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObject> {
 
   // need this default constructor for reflection magic used in execution engine
