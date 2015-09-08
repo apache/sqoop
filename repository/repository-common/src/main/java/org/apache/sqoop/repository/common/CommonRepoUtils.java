@@ -27,6 +27,8 @@ public class CommonRepoUtils {
 
   public static final String QUOTE_CHARACTER = "\"";
 
+  public static final String SINGLE_QUOTO_CHARACTER = "\'";
+
   public static final String escapeTableName(String tableName) {
     return QUOTE_CHARACTER + tableName + QUOTE_CHARACTER;
   }
@@ -45,6 +47,10 @@ public class CommonRepoUtils {
 
   public static final String escapeConstraintName(String constraintName) {
     return QUOTE_CHARACTER + constraintName + QUOTE_CHARACTER;
+  }
+
+  public static final String escapeLiteralString(String literalString) {
+    return SINGLE_QUOTO_CHARACTER + literalString + SINGLE_QUOTO_CHARACTER;
   }
 
   public static final String getTableName(String schemaName, String tableName) {

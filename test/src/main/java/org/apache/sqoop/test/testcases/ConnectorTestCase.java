@@ -36,6 +36,7 @@ import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.data.ShortStories;
 import org.apache.sqoop.test.data.UbuntuReleases;
+import org.apache.sqoop.test.utils.SqoopUtils;
 import org.apache.sqoop.validation.Status;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
@@ -253,6 +254,7 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param link
    */
   protected void saveLink(MLink link) {
+    SqoopUtils.fillObjectName(link);
     assertEquals(getClient().saveLink(link), Status.OK);
     assertNotSame(link.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
   }
@@ -265,7 +267,8 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
    * @param job
    */
  protected void saveJob(MJob job) {
-    assertEquals(getClient().saveJob(job), Status.OK);
+   SqoopUtils.fillObjectName(job);
+   assertEquals(getClient().saveJob(job), Status.OK);
    assertNotSame(job.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
   }
 

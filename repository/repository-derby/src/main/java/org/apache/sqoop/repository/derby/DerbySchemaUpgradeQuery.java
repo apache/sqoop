@@ -633,6 +633,35 @@ public final class DerbySchemaUpgradeQuery {
         + QUERY_SELECT_DIRECTION_CONFIG_BY_DIRECTION_NAME
       + ")";
 
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_UPDATE_COLUMN_SQ_LINK_NAME =
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+        + " SET " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME)
+        + " = " + CommonRepoUtils.escapeLiteralString("link_") + " || "
+        + "TRIM(CHAR(" + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + "))"
+        + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " IS NULL";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_ALTER_COLUMN_SQ_LINK_NAME_NOT_NULL =
+      "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+        + " ALTER COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME)
+        + " NOT NULL";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_COLUMN_SQB_NAME =
+      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+        + " SET " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME)
+        + " = " + CommonRepoUtils.escapeLiteralString("job_") + " || "
+        + "TRIM(CHAR(" + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + "))"
+        + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " IS NULL";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_ALTER_COLUMN_SQB_NAME_NOT_NULL =
+      "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+        + " ALTER COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME)
+        + " NOT NULL";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ALTER_COLUMN_SQB_NAME_NOT_NULL =
+      "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
+        + " ALTER COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
+        + " NOT NULL";
+
   private DerbySchemaUpgradeQuery() {
     // Disable explicit object creation
   }

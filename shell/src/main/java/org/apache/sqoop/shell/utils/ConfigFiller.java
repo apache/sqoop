@@ -888,7 +888,13 @@ public final class ConfigFiller {
       nameInput.setValue(name);
     }
 
-    fillInputStringWithBundle(nameInput, reader, getResourceBundle());
+    do {
+      fillInputStringWithBundle(nameInput, reader, getResourceBundle());
+      if (StringUtils.isEmpty(nameInput.getValue())) {
+        errorMessage(nameInput, "Job name or link name cannot be null");
+        continue;
+      }
+    } while (false);
 
     return nameInput.getValue();
   }
