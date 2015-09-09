@@ -46,10 +46,6 @@ limitations under the License.
       <artifactId>sqoop-repository-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.sourceforge.findbugs</groupId>
-      <artifactId>annotations</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <scope>test</scope>

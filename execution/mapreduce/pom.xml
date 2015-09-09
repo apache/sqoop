@@ -72,12 +72,7 @@ limitations under the License.
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
-    <dependency>
-      <groupId>net.sourceforge.findbugs</groupId>
-      <artifactId>annotations</artifactId>
-    </dependency>
     <!-- See profiles for Hadoop specific dependencies -->
-
   </dependencies>
 
   <build>

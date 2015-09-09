@@ -57,10 +57,6 @@ limitations under the License.
       <groupId>org.apache.sqoop</groupId>
       <artifactId>connector-sdk</artifactId>
     </dependency>
-    <dependency>
-      <groupId>net.sourceforge.findbugs</groupId>
-      <artifactId>annotations</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
