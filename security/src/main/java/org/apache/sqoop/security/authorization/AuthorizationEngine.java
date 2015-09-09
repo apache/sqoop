@@ -20,10 +20,6 @@ package org.apache.sqoop.security.authorization;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.security.UserGroupInformation;
-import org.apache.hadoop.security.token.delegation.web.HttpUserGroupInformation;
-import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.*;
 import org.apache.sqoop.repository.Repository;
@@ -37,7 +33,20 @@ import java.util.List;
 
 public class AuthorizationEngine {
 
-  private static final Logger LOG = Logger.getLogger(AuthorizationEngine.class);
+  private static String getResourceName(MResource.TYPE resourceType, long resourceId) {
+    Repository repository = RepositoryManager.getInstance().getRepository();
+
+    switch (resourceType) {
+    case CONNECTOR:
+      return repository.findConnector(resourceId).getUniqueName();
+    case LINK:
+      return repository.findLink(resourceId).getName();
+    case JOB:
+      return repository.findJob(resourceId).getName();
+    }
+
+    return null;
+  }
 
   /**
    * Filter resources, get all valid resources from all resources
@@ -47,7 +56,7 @@ public class AuthorizationEngine {
       @Override
       public boolean apply(T input) {
         try {
-          String name = String.valueOf(input.getPersistenceId());
+          String name = getResourceName(type, input.getPersistenceId());
           checkPrivilege(doUserName, getPrivilege(type, name, MPrivilege.ACTION.READ));
           // add valid resource
           return true;
@@ -63,74 +72,73 @@ public class AuthorizationEngine {
   /**
    * Connector related function
    */
-  public static void readConnector(String doUserName, String connectorId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.CONNECTOR, connectorId, MPrivilege.ACTION.READ));
+  public static void readConnector(String doUserName, String connectorName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.CONNECTOR, connectorName, MPrivilege.ACTION.READ));
   }
 
   /**
    * Link related function
    */
-  public static void readLink(String doUserName, String linkId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.LINK, linkId, MPrivilege.ACTION.READ));
+  public static void readLink(String doUserName, String linkName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.LINK, linkName, MPrivilege.ACTION.READ));
   }
 
-  public static void createLink(String doUserName, String connectorId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.CONNECTOR, connectorId, MPrivilege.ACTION.READ));
+  public static void createLink(String doUserName, String connectorName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.CONNECTOR, connectorName, MPrivilege.ACTION.READ));
   }
 
-  public static void updateLink(String doUserName, String connectorId, String linkId) throws SqoopException {
-    MPrivilege privilege1 = getPrivilege(MResource.TYPE.CONNECTOR, connectorId, MPrivilege.ACTION.READ);
-    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkId, MPrivilege.ACTION.WRITE);
+  public static void updateLink(String doUserName, String connectorName, String linkName) throws SqoopException {
+    MPrivilege privilege1 = getPrivilege(MResource.TYPE.CONNECTOR, connectorName, MPrivilege.ACTION.READ);
+    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkName, MPrivilege.ACTION.WRITE);
     checkPrivilege(doUserName, privilege1, privilege2);
   }
 
-  public static void deleteLink(String doUserName, String linkId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.LINK, linkId, MPrivilege.ACTION.WRITE));
+  public static void deleteLink(String doUserName, String linkName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.LINK, linkName, MPrivilege.ACTION.WRITE));
   }
 
-  public static void enableDisableLink(String doUserName, String linkId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.LINK, linkId, MPrivilege.ACTION.WRITE));
+  public static void enableDisableLink(String doUserName, String linkName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.LINK, linkName, MPrivilege.ACTION.WRITE));
   }
 
   /**
    * Job related function
    */
-  public static void readJob(String doUserName, String jobId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.READ));
+  public static void readJob(String doUserName, String jobName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.READ));
   }
 
-  public static void createJob(String doUserName, String linkId1, String linkId2) throws SqoopException {
-    MPrivilege privilege1 = getPrivilege(MResource.TYPE.LINK, linkId1, MPrivilege.ACTION.READ);
-    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkId2, MPrivilege.ACTION.READ);
+  public static void createJob(String doUserName, String linkName1, String linkName2) throws SqoopException {
+    MPrivilege privilege1 = getPrivilege(MResource.TYPE.LINK, linkName1, MPrivilege.ACTION.READ);
+    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkName2, MPrivilege.ACTION.READ);
     checkPrivilege(doUserName, privilege1, privilege2);
   }
 
-  public static void updateJob(String doUserName, String linkId1, String linkId2, String jobId) throws SqoopException {
-    MPrivilege privilege1 = getPrivilege(MResource.TYPE.LINK, linkId1, MPrivilege.ACTION.READ);
-    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkId2, MPrivilege.ACTION.READ);
-    MPrivilege privilege3 = getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE);
+  public static void updateJob(String doUserName, String linkName1, String linkName2, String jobName) throws SqoopException {
+    MPrivilege privilege1 = getPrivilege(MResource.TYPE.LINK, linkName1, MPrivilege.ACTION.READ);
+    MPrivilege privilege2 = getPrivilege(MResource.TYPE.LINK, linkName2, MPrivilege.ACTION.READ);
+    MPrivilege privilege3 = getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.WRITE);
     checkPrivilege(doUserName, privilege1, privilege2, privilege3);
   }
 
-  public static void deleteJob(String doUserName, String jobId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE));
+  public static void deleteJob(String doUserName, String jobName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.WRITE));
   }
 
-  public static void enableDisableJob(String doUserName, String jobId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE));
+  public static void enableDisableJob(String doUserName, String jobName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.WRITE));
   }
 
-  public static void startJob(String doUserName, String jobId) throws SqoopException {
-    ;
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE));
+  public static void startJob(String doUserName, String jobName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.WRITE));
   }
 
-  public static void stopJob(String doUserName, String jobId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.WRITE));
+  public static void stopJob(String doUserName, String jobName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.WRITE));
   }
 
-  public static void statusJob(String doUserName, String jobId) throws SqoopException {
-    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.READ));
+  public static void statusJob(String doUserName, String jobName) throws SqoopException {
+    checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.READ));
   }
 
   /**
@@ -141,8 +149,8 @@ public class AuthorizationEngine {
       @Override
       public boolean apply(MSubmission input) {
         try {
-          String jobId = String.valueOf(input.getJobId());
-          checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobId, MPrivilege.ACTION.READ));
+          String jobName = getResourceName(MResource.TYPE.JOB, input.getJobId());
+          checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.READ));
           // add valid submission
           return true;
         } catch (RuntimeException e) {
@@ -158,9 +166,9 @@ public class AuthorizationEngine {
    * Help function
    */
   private static MPrivilege getPrivilege(MResource.TYPE resourceType,
-                                         String resourceId,
+                                         String resourceName,
                                          MPrivilege.ACTION privilegeAction) {
-    return new MPrivilege(new MResource(resourceId, resourceType), privilegeAction, false);
+    return new MPrivilege(new MResource(resourceName, resourceType), privilegeAction, false);
   }
 
   private static void checkPrivilege(String doUserName, MPrivilege... privileges) {
@@ -176,12 +184,12 @@ public class AuthorizationEngine {
     for (MPrivilege privilege : privileges) {
       Repository repository = RepositoryManager.getInstance().getRepository();
       if (MResource.TYPE.LINK.name().equalsIgnoreCase(privilege.getResource().getType())) {
-        MLink link = repository.findLink(Long.parseLong(privilege.getResource().getName()));
+        MLink link = repository.findLink(privilege.getResource().getName());
         if (!doUserName.equals(link.getCreationUser())) {
           privilegesNeedCheck.add(privilege);
         }
       } else if (MResource.TYPE.JOB.name().equalsIgnoreCase(privilege.getResource().getType())) {
-        MJob job = repository.findJob(Long.parseLong(privilege.getResource().getName()));
+        MJob job = repository.findJob(privilege.getResource().getName());
         if (!doUserName.equals(job.getCreationUser())) {
           privilegesNeedCheck.add(privilege);
         }

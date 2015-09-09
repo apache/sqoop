@@ -90,7 +90,7 @@ public class ConnectorRequestHandler implements RequestHandler {
           ctx.getRequest().getRemoteAddr(), "get", "connector", String.valueOf(cIdentifier));
 
       // Authorization check
-      AuthorizationEngine.readConnector(ctx.getUserName(), String.valueOf(connector.getPersistenceId()));
+      AuthorizationEngine.readConnector(ctx.getUserName(), connector.getUniqueName());
 
       return new ConnectorBean(Arrays.asList(connector), configParamBundles);
     }

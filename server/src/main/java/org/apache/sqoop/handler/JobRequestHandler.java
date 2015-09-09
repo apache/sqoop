@@ -140,14 +140,15 @@ public class JobRequestHandler implements RequestHandler {
 
     String jobIdentifier = ctx.getLastURLElement();
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
+    String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.deleteJob(ctx.getUserName(), String.valueOf(jobId));
+    AuthorizationEngine.deleteJob(ctx.getUserName(), jobName);
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "job", jobIdentifier);
     repository.deleteJob(jobId);
-    MResource resource = new MResource(String.valueOf(jobId), MResource.TYPE.JOB);
+    MResource resource = new MResource(jobName, MResource.TYPE.JOB);
     AuthorizationManager.getInstance().getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
   }
@@ -186,12 +187,14 @@ public class JobRequestHandler implements RequestHandler {
 
     // Authorization check
     if (create) {
-      AuthorizationEngine.createJob(ctx.getUserName(), String.valueOf(postedJob.getFromLinkId()),
-              String.valueOf(postedJob.getToLinkId()));
+      AuthorizationEngine.createJob(ctx.getUserName(),
+          HandlerUtils.getLinkNameFromIdentifier(String.valueOf(postedJob.getFromLinkId())),
+          HandlerUtils.getLinkNameFromIdentifier(String.valueOf(postedJob.getToLinkId())));
     } else {
-      AuthorizationEngine.updateJob(ctx.getUserName(), String.valueOf(postedJob.getFromLinkId()),
-              String.valueOf(postedJob.getToLinkId()),
-              String.valueOf(postedJob.getPersistenceId()));
+      AuthorizationEngine.updateJob(ctx.getUserName(),
+          HandlerUtils.getLinkNameFromIdentifier(String.valueOf(postedJob.getFromLinkId())),
+          HandlerUtils.getLinkNameFromIdentifier(String.valueOf(postedJob.getToLinkId())),
+          HandlerUtils.getJobNameFromIdentifier(String.valueOf(postedJob.getPersistenceId())));
     }
 
     // Verify that user is not trying to spoof us
@@ -306,12 +309,12 @@ public class JobRequestHandler implements RequestHandler {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "job", connectorIdentifier);
 
-      long jobId = HandlerUtils.getJobIdFromIdentifier(connectorIdentifier);
-      MJob job = repository.findJob(jobId);
+      String jobName = HandlerUtils.getJobNameFromIdentifier(connectorIdentifier);
 
       // Authorization check
-      AuthorizationEngine.readJob(ctx.getUserName(), String.valueOf(job.getPersistenceId()));
+      AuthorizationEngine.readJob(ctx.getUserName(), jobName);
 
+      MJob job = repository.findJob(jobName);
       jobBean = createJobBean(Arrays.asList(job), locale);
     }
     return jobBean;
@@ -351,9 +354,10 @@ public class JobRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
+    String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.enableDisableJob(ctx.getUserName(), String.valueOf(jobId));
+    AuthorizationEngine.enableDisableJob(ctx.getUserName(), jobName);
 
     repository.enableJob(jobId, enabled);
     return JsonBean.EMPTY_BEAN;
@@ -363,9 +367,10 @@ public class JobRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
+    String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.startJob(ctx.getUserName(), String.valueOf(jobId));
+    AuthorizationEngine.startJob(ctx.getUserName(), jobName);
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "submit", "job", String.valueOf(jobId));
@@ -388,9 +393,10 @@ public class JobRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
+    String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.stopJob(ctx.getUserName(), String.valueOf(jobId));
+    AuthorizationEngine.stopJob(ctx.getUserName(), jobName);
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "stop", "job", String.valueOf(jobId));
@@ -402,9 +408,10 @@ public class JobRequestHandler implements RequestHandler {
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
     long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
+    String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
 
     // Authorization check
-    AuthorizationEngine.statusJob(ctx.getUserName(), String.valueOf(jobId));
+    AuthorizationEngine.statusJob(ctx.getUserName(), jobName);
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "status", "job", String.valueOf(jobId));
