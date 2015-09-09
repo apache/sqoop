@@ -43,10 +43,12 @@ public class TestMConfigList {
         StringUtils.EMPTY, (short) 3);
     MEnumInput enumInput = new MEnumInput("Config2.D", false, InputEditable.ANY, StringUtils.EMPTY,
         new String[] { "I", "V" });
+    MListInput listInput = new MListInput("Config2.E", false, InputEditable.ANY, StringUtils.EMPTY);
 
     inputs = new ArrayList<MInput<?>>();
     inputs.add(stringInput);
     inputs.add(enumInput);
+    inputs.add(listInput);
     configs.add(new MConfig("Config2", inputs));
 
     MConfigList config = new MConfigList(configs, MConfigType.JOB);
@@ -54,5 +56,6 @@ public class TestMConfigList {
     assertEquals(mapInput, config.getMapInput("Config1.B"));
     assertEquals(stringInput, config.getStringInput("Config2.C"));
     assertEquals(enumInput, config.getEnumInput("Config2.D"));
+    assertEquals(listInput, config.getListInput("Config2.E"));
   }
 }

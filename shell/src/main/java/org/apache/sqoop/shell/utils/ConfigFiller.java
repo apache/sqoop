@@ -29,6 +29,7 @@ import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MJob;
@@ -39,6 +40,7 @@ import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -197,10 +199,42 @@ public final class ConfigFiller {
     case ENUM:
       assert input instanceof MEnumInput;
       return fillInputEnum(prefix, (MEnumInput) input, line);
+    case LIST:
+      assert input instanceof MListInput;
+      return fillInputList(prefix, (MListInput) input, line);
     default:
       println("Unsupported data type " + input.getType());
       return true;
     }
+  }
+
+  /**
+   * Load CLI options for list type.
+   *
+   * Parses elements that take the config "<element1>&<element2>&...".
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param input Input that we should read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  private static boolean fillInputList(String prefix,
+                                       MListInput input,
+                                       CommandLine line)
+                                       throws IOException {
+    String opt = ConfigOptions.getOptionKey(prefix, input);
+    if (line.hasOption(opt)) {
+      String value = line.getOptionValue(opt);
+      List<String> values = new LinkedList<String>();
+      for (String element : value.split("&")) {
+        values.add(element);
+      }
+      input.setValue(values);
+    } else {
+      input.setEmpty();
+    }
+    return true;
   }
 
   /**
@@ -503,9 +537,77 @@ public final class ConfigFiller {
         return fillInputMapWithBundle((MMapInput) input, reader, bundle);
       case ENUM:
         return fillInputEnumWithBundle((MEnumInput) input, reader, bundle);
+      case LIST:
+        return fillInputListWithBundle((MListInput) input, reader, bundle);
       default:
         println("Unsupported data type " + input.getType());
         return true;
+    }
+  }
+
+  /**
+   * Load user input for list type.
+   *
+   * This implementation will load one element at a time. If user did not
+   * enter anything (empty input) finish loading and return from function.
+   *
+   * @param input Input that we should read or edit
+   * @param reader Associated console reader
+   * @param bundle Resource bundle
+   * @return True if user wish to continue with loading additional inputs
+   * @throws IOException
+   */
+  private static boolean fillInputListWithBundle(MListInput input,
+                                       ConsoleReader reader,
+                                       ResourceBundle bundle)
+                                       throws IOException {
+    // Special prompt in List case
+    println(bundle.getString(input.getLabelKey()) + ": ");
+
+    // Internal loading list
+    List<String> values = input.getValue();
+    if(values == null) {
+      values = new LinkedList<String>();
+    }
+
+    String userTyped;
+
+    while(true) {
+      // Print all current items in each iteration
+      // However do not printout if this input contains sensitive information.
+      println("There are currently " + values.size() + " values in the list:");
+      if (!input.isSensitive()) {
+        for(String value : values) {
+          println(value);
+        }
+      }
+
+      // Special prompt for List element
+      reader.printString("element# ");
+      reader.flushConsole();
+
+      if(input.isSensitive()) {
+        userTyped = reader.readLine('*');
+      } else {
+        userTyped = reader.readLine();
+      }
+
+      if(userTyped == null) {
+        // Finish loading and return back to Sqoop shell
+        return false;
+      } else if(userTyped.isEmpty()) {
+        // User has finished loading data to List input, either set input empty
+        // if there are no elements or propagate elements to the input
+        if(values.size() == 0) {
+          input.setEmpty();
+        } else {
+          input.setValue(values);
+        }
+        return true;
+      } else {
+        values.add(userTyped);
+      }
+
     }
   }
 

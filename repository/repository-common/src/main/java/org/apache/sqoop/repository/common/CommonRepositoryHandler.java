@@ -59,6 +59,7 @@ import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
@@ -1978,6 +1979,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
               case ENUM:
                 input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides, inputEnumValues.split(","));
                 break;
+              case LIST:
+                input = new MListInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
               default:
                 throw new SqoopException(CommonRepositoryError.COMMON_0003,
                         "input-" + inputName + ":" + inputId + ":"
@@ -2120,6 +2124,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
               case ENUM:
                 input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides,
                         inputEnumValues.split(","));
+                break;
+              case LIST:
+                input = new MListInput(inputName, inputSensitivity, editableEnum, overrides);
                 break;
               default:
                 throw new SqoopException(CommonRepositoryError.COMMON_0003, "input-" + inputName + ":"

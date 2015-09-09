@@ -167,6 +167,8 @@ public class  ConfigUtils {
         } else if (type.isEnum()) {
           input = new MEnumInput(inputName, sensitive, editable, overrides,
               ClassUtils.getEnumStrings(type));
+        } else if (type.isAssignableFrom(List.class)) {
+          input = new MListInput(inputName, sensitive, editable, overrides);
         } else {
           throw new SqoopException(ModelError.MODEL_004, "Unsupported type "
               + type.getName() + " for input " + fieldName);

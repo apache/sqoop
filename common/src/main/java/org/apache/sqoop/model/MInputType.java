@@ -48,5 +48,8 @@ public enum MInputType {
   /** Long input type */
   LONG,
 
+  /** List input type */
+  LIST,
+
   ;
 }

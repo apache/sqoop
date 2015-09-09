@@ -29,6 +29,7 @@ import org.apache.sqoop.model.MConfigType;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
@@ -180,6 +181,10 @@ public final class ConfigInputSerialization {
       case ENUM: {
         String values = (String) input.get(ConfigInputConstants.CONFIG_INPUT_ENUM_VALUES);
         mInput = new MEnumInput(name, sensitive.booleanValue(), editable, overrides, values.split(","));
+        break;
+      }
+      case LIST: {
+        mInput = new MListInput(name, sensitive.booleanValue(), editable, overrides);
         break;
       }
       default:

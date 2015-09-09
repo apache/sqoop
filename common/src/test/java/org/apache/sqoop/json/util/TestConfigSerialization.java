@@ -36,6 +36,7 @@ import org.apache.sqoop.model.MConfigType;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
+import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
@@ -126,6 +127,9 @@ public class TestConfigSerialization {
     Map<String, String> map = new HashMap<String, String>();
     map.put("A", "B");
 
+    List<String> list = new LinkedList<String>();
+    list.add("C");
+
     // Fill config with all values
     MConfig config = getConfig();
     config.getStringInput("String").setValue("A");
@@ -133,6 +137,7 @@ public class TestConfigSerialization {
     config.getIntegerInput("Integer").setValue(1);
     config.getBooleanInput("Boolean").setValue(true);
     config.getEnumInput("Enum").setValue("YES");
+    config.getListInput("List").setValue(list);
 
     // Serialize that into JSON
     JSONObject jsonObject = ConfigInputSerialization.extractConfig(config, MConfigType.JOB,  false);
@@ -168,6 +173,7 @@ public class TestConfigSerialization {
     assertEquals(1, (int)retrieved.getIntegerInput("Integer").getValue());
     assertEquals(true, retrieved.getBooleanInput("Boolean").getValue().booleanValue());
     assertEquals("YES", retrieved.getEnumInput("Enum").getValue());
+    assertEquals(list, retrieved.getListInput("List").getValue());
   }
 
   protected MConfig getMapConfig() {
@@ -209,6 +215,9 @@ public class TestConfigSerialization {
     inputs.add(input);
 
     input = new MEnumInput("Enum", false, InputEditable.ANY, StringUtils.EMPTY, new String[] {"YES", "NO"});
+    inputs.add(input);
+
+    input = new MListInput("List", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
 
     return new MConfig("c", inputs);

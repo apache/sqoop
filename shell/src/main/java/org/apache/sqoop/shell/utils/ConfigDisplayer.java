@@ -40,6 +40,7 @@ import org.apache.sqoop.model.MInputType;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
@@ -202,6 +203,9 @@ public final class ConfigDisplayer {
             case ENUM:
               displayInputEnum((MEnumInput) input);
               break;
+            case LIST:
+              displayInputList((MListInput) input);
+              break;
             default:
               print("\n%s " + input.getType(), resourceString(Constants.RES_CONFIG_DISPLAYER_UNSUPPORTED_DATATYPE));
               return;
@@ -270,6 +274,19 @@ public final class ConfigDisplayer {
    */
   private static void displayInputEnum(MEnumInput input) {
     print(input.getValue());
+  }
+
+  /**
+   * Display content of List input
+   *
+   * @param input List input
+   */
+  private static void displayInputList(MListInput input) {
+    for (String element : input.getValue()) {
+      println();
+      print("      ");
+      print(element);
+    }
   }
 
   private ConfigDisplayer() {
