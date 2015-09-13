@@ -98,7 +98,7 @@ public class TestMMapInput {
    */
   @Test
   public void testNamedElement() {
-    MStringInput input1 = new MStringInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY, (short) 5);
+    MMapInput input1 = new MMapInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
   }

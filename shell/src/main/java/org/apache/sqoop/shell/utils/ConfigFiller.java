@@ -288,10 +288,13 @@ public final class ConfigFiller {
     if (line.hasOption(opt)) {
       String value = line.getOptionValue(opt);
       Map<String, String> values = new HashMap<String, String>();
+      String[] keyValue = null;
       String[] entries = value.split("&");
       for (String entry : entries) {
         if (entry.contains("=")) {
-          String[] keyValue = entry.split("=");
+          keyValue = entry.split("=", 2);
+        }
+        if (keyValue != null && keyValue.length == 2) {
           values.put(keyValue[0], keyValue[1]);
         } else {
           errorMessage(input, "Don't know what to do with " + entry);
@@ -757,7 +760,11 @@ public final class ConfigFiller {
         // try to remove entry that user specified.
         if(userTyped.contains("=")) {
           String []keyValue = userTyped.split("=", 2);
-          values.put(handleUserInput(keyValue[0]), handleUserInput(keyValue[1]));
+          if (keyValue.length == 2) {
+            values.put(handleUserInput(keyValue[0]), handleUserInput(keyValue[1]));
+          } else {
+            errorMessage("Don't know what to do with " + userTyped);
+          }
         } else {
           String key = handleUserInput(userTyped);
           if(values.containsKey(key)) {

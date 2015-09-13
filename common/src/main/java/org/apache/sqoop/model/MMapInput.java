@@ -48,7 +48,7 @@ public final class MMapInput extends MInput<Map<String, String>> {
         vsb.append("&");
       }
       vsb.append(UrlSafeUtils.urlEncode(entry.getKey())).append("=");
-      vsb.append(entry.getValue() != null ? UrlSafeUtils.urlEncode(entry.getValue()): null);
+      vsb.append(entry.getValue() != null ? UrlSafeUtils.urlEncode(entry.getValue()): "");
     }
     return vsb.toString();
   }
@@ -64,10 +64,13 @@ public final class MMapInput extends MInput<Map<String, String>> {
         for (String pair : valuePairs) {
           String[] nameAndVal = pair.split("=");
           if (nameAndVal.length > 0) {
-            String name = nameAndVal[0];
+            String name = UrlSafeUtils.urlDecode(nameAndVal[0]);
             String value = null;
             if (nameAndVal.length > 1) {
               value = nameAndVal[1];
+            }
+            if (value != null) {
+              value = UrlSafeUtils.urlDecode(value);
             }
 
             valueMap.put(name, value);
