@@ -33,6 +33,7 @@ import org.apache.sqoop.model.MAccountableEntity;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDateTimeInput;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MInput;
@@ -206,6 +207,9 @@ public final class ConfigDisplayer {
             case LIST:
               displayInputList((MListInput) input);
               break;
+            case DATETIME:
+              displayInputDateTime((MDateTimeInput) input);
+              break;
             default:
               print("\n%s " + input.getType(), resourceString(Constants.RES_CONFIG_DISPLAYER_UNSUPPORTED_DATATYPE));
               return;
@@ -287,6 +291,15 @@ public final class ConfigDisplayer {
       print("      ");
       print(element);
     }
+  }
+
+  /**
+   * Display content of DateTime input
+   *
+   * @param input DateTime input
+   */
+  private static void displayInputDateTime(MDateTimeInput input) {
+    print(input.getValue());
   }
 
   private ConfigDisplayer() {

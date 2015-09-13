@@ -49,6 +49,7 @@ import org.apache.sqoop.model.MConfigType;
 import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MConfigurableType;
 import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.model.MDateTimeInput;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MEnumInput;
@@ -1982,6 +1983,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
               case LIST:
                 input = new MListInput(inputName, inputSensitivity, editableEnum, overrides);
                 break;
+              case DATETIME:
+                input = new MDateTimeInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
               default:
                 throw new SqoopException(CommonRepositoryError.COMMON_0003,
                         "input-" + inputName + ":" + inputId + ":"
@@ -2127,6 +2131,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
                 break;
               case LIST:
                 input = new MListInput(inputName, inputSensitivity, editableEnum, overrides);
+                break;
+              case DATETIME:
+                input = new MDateTimeInput(inputName, inputSensitivity, editableEnum, overrides);
                 break;
               default:
                 throw new SqoopException(CommonRepositoryError.COMMON_0003, "input-" + inputName + ":"

@@ -51,5 +51,8 @@ public enum MInputType {
   /** List input type */
   LIST,
 
+  /** DateTime input type */
+  DATETIME
+
   ;
 }

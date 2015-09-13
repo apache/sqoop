@@ -27,6 +27,7 @@ import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.ConfigValidationRunner;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.ConfigValidationResult;
+import org.joda.time.DateTime;
 import org.json.simple.JSONObject;
 
 import java.lang.reflect.Field;
@@ -169,6 +170,8 @@ public class  ConfigUtils {
               ClassUtils.getEnumStrings(type));
         } else if (type.isAssignableFrom(List.class)) {
           input = new MListInput(inputName, sensitive, editable, overrides);
+        } else if (type == DateTime.class) {
+          input = new MDateTimeInput(inputName, sensitive, editable, overrides);
         } else {
           throw new SqoopException(ModelError.MODEL_004, "Unsupported type "
               + type.getName() + " for input " + fieldName);

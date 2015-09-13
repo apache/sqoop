@@ -23,6 +23,7 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
+import org.apache.sqoop.model.MDateTimeInput;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigType;
@@ -185,6 +186,10 @@ public final class ConfigInputSerialization {
       }
       case LIST: {
         mInput = new MListInput(name, sensitive.booleanValue(), editable, overrides);
+        break;
+      }
+      case DATETIME: {
+        mInput = new MDateTimeInput(name, sensitive.booleanValue(), editable, overrides);
         break;
       }
       default:

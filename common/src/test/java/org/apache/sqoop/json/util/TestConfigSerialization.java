@@ -33,6 +33,7 @@ import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigType;
+import org.apache.sqoop.model.MDateTimeInput;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
@@ -40,6 +41,7 @@ import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.joda.time.DateTime;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -130,6 +132,8 @@ public class TestConfigSerialization {
     List<String> list = new LinkedList<String>();
     list.add("C");
 
+    DateTime dt = new DateTime(12345678L);
+
     // Fill config with all values
     MConfig config = getConfig();
     config.getStringInput("String").setValue("A");
@@ -138,6 +142,7 @@ public class TestConfigSerialization {
     config.getBooleanInput("Boolean").setValue(true);
     config.getEnumInput("Enum").setValue("YES");
     config.getListInput("List").setValue(list);
+    config.getDateTimeInput("DateTime").setValue(dt);
 
     // Serialize that into JSON
     JSONObject jsonObject = ConfigInputSerialization.extractConfig(config, MConfigType.JOB,  false);
@@ -174,6 +179,7 @@ public class TestConfigSerialization {
     assertEquals(true, retrieved.getBooleanInput("Boolean").getValue().booleanValue());
     assertEquals("YES", retrieved.getEnumInput("Enum").getValue());
     assertEquals(list, retrieved.getListInput("List").getValue());
+    assertEquals(dt, retrieved.getDateTimeInput("DateTime").getValue());
   }
 
   protected MConfig getMapConfig() {
@@ -218,6 +224,9 @@ public class TestConfigSerialization {
     inputs.add(input);
 
     input = new MListInput("List", false, InputEditable.ANY, StringUtils.EMPTY);
+    inputs.add(input);
+
+    input = new MDateTimeInput("DateTime", false, InputEditable.ANY, StringUtils.EMPTY);
     inputs.add(input);
 
     return new MConfig("c", inputs);

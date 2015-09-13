@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
+import org.apache.sqoop.model.MDateTimeInput;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MConfig;
@@ -38,6 +39,7 @@ import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MValidatedElement;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
+import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -202,10 +204,62 @@ public final class ConfigFiller {
     case LIST:
       assert input instanceof MListInput;
       return fillInputList(prefix, (MListInput) input, line);
+    case DATETIME:
+      assert input instanceof MDateTimeInput;
+      return fillInputDateTime(prefix, (MDateTimeInput) input, line);
     default:
       println("Unsupported data type " + input.getType());
       return true;
     }
+  }
+
+  /**
+   * Load CLI options for datetime type.
+   *
+   * Supports the following two types of format:
+   * <ul>
+   * <li> ISO8601 format (yyyy-MM-ddTHH:mm:ss.SSSZZ)
+   * <li> Long which represents the milliseconds from 1970-01-01T00:00:00Z
+   * </ul>
+   *
+   * @param prefix placed at the beginning of the CLI option key
+   * @param input Input that we should read or edit
+   * @param line CLI options container
+   * @return
+   * @throws IOException
+   */
+  private static boolean fillInputDateTime(String prefix,
+                                       MDateTimeInput input,
+                                       CommandLine line)
+                                       throws IOException {
+    String opt = ConfigOptions.getOptionKey(prefix, input);
+    if (line.hasOption(opt)) {
+      DateTime dt = parseDateTime(line.getOptionValue(opt));
+      if (dt == null) {
+        errorMessage(input, "Input is not valid DateTime format");
+        return false;
+      }
+      input.setValue(dt);
+    } else {
+      input.setEmpty();
+    }
+    return true;
+  }
+
+  private static DateTime parseDateTime(String value) {
+    DateTime dt = null;
+    try {
+      dt = DateTime.parse(value);
+    } catch (IllegalArgumentException iae) {
+      // value is not valid ISO8601 format
+      try {
+        long a  = Long.parseLong(value);
+        dt = new DateTime(a);
+      } catch (NumberFormatException nfe) {
+        // value is not numeric string
+      }
+    }
+    return dt;
   }
 
   /**
@@ -542,10 +596,64 @@ public final class ConfigFiller {
         return fillInputEnumWithBundle((MEnumInput) input, reader, bundle);
       case LIST:
         return fillInputListWithBundle((MListInput) input, reader, bundle);
+      case DATETIME:
+        return fillInputDateTimeWithBundle((MDateTimeInput) input, reader, bundle);
       default:
         println("Unsupported data type " + input.getType());
         return true;
     }
+  }
+
+  /**
+   * Load user input for datetime type.
+   *
+   * This implementation supports the following two types of format:
+   * <ul>
+   * <li> ISO8601 format (yyyy-MM-ddTHH:mm:ss.SSSZZ)
+   * <li> Long which represents the milliseconds from 1970-01-01T00:00:00Z
+   * </ul>
+   *
+   * If user did not enter anything (empty input) finish loading and return from function.
+   *
+   * @param input Input that we should read or edit
+   * @param reader Associated console reader
+   * @param bundle Resource bundle
+   * @return True if user wish to continue with loading additional inputs
+   * @throws IOException
+   */
+  private static boolean fillInputDateTimeWithBundle(MDateTimeInput input,
+                                                     ConsoleReader reader,
+                                                     ResourceBundle bundle)
+                                                     throws IOException {
+    generatePrompt(reader, bundle, input);
+
+    if (!input.isEmpty() && !input.isSensitive()) {
+      reader.putString(input.getValue().toString());
+    }
+
+    // Get the data
+    String userTyped;
+    if (input.isSensitive()) {
+      userTyped = reader.readLine('*');
+    } else {
+      userTyped = reader.readLine();
+    }
+
+    if (userTyped == null) {
+      return false;
+    } else if (userTyped.isEmpty()) {
+      input.setEmpty();
+    } else {
+      DateTime dt = parseDateTime(userTyped);
+      if (dt == null) {
+        errorMessage("Input is not a valid DateTime");
+        return fillInputDateTimeWithBundle(input, reader, bundle);
+      }
+
+      input.setValue(dt);
+    }
+
+    return true;
   }
 
   /**
