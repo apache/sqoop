@@ -34,4 +34,14 @@ public class TestSqoopOptions extends TestCase {
       }
     }.testParseColumnMapping();
   }
+
+  public void testColumnNameCaseInsensitive() {
+    SqoopOptions opts = new SqoopOptions();
+    opts.setColumns(new String[]{ "AAA", "bbb" });
+    assertEquals("AAA", opts.getColumnNameCaseInsensitive("aAa"));
+    assertEquals("bbb", opts.getColumnNameCaseInsensitive("BbB"));
+    assertEquals(null, opts.getColumnNameCaseInsensitive("notFound"));
+    opts.setColumns(null);
+    assertEquals(null, opts.getColumnNameCaseInsensitive("noColumns"));
+  }
 }

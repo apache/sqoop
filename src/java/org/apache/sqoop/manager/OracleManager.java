@@ -980,7 +980,7 @@ public class OracleManager
       }
     }
 
-    return columns.toArray(new String[columns.size()]);
+    return filterSpecifiedColumnNames(columns.toArray(new String[columns.size()]));
   }
 
   @Override

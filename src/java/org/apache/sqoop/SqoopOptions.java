@@ -1175,6 +1175,17 @@ public class SqoopOptions implements Cloneable {
     }
   }
 
+  public String getColumnNameCaseInsensitive(String col){
+    if (null != columns) {
+      for(String columnName : columns) {
+        if(columnName.equalsIgnoreCase(col)) {
+          return columnName;
+        }
+      }
+    }
+    return null;
+  }
+
   public void setColumns(String [] cols) {
     if (null == cols) {
       this.columns = null;

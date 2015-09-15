@@ -404,4 +404,26 @@ public class TestAvroExport extends ExportJobTestCase {
     }
   }
 
+  public void testSpecifiedColumnsAsAvroFields()  throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+    ColumnGenerator[] gens = new ColumnGenerator[] {
+      colGenerator(000, Schema.create(Schema.Type.INT), 100, "INTEGER"), //col0
+      colGenerator(111, Schema.create(Schema.Type.INT), 100, "INTEGER"), //col1
+      colGenerator(222, Schema.create(Schema.Type.INT), 100, "INTEGER"), //col2
+      colGenerator(333, Schema.create(Schema.Type.INT), 100, "INTEGER")  //col3
+    };
+    createAvroFile(0, TOTAL_RECORDS, gens);
+    createTable(gens);
+    runExport(getArgv(true, 10, 10, newStrArray(null, "-m", "" + 1, "--columns", "id,msg,col1,col2")));
+    verifyExport(TOTAL_RECORDS);
+    assertColValForRowId(0, "col0", null);
+    assertColValForRowId(0, "col1", 111);
+    assertColValForRowId(0, "col2", 222);
+    assertColValForRowId(0, "col3", null);
+    assertColValForRowId(9, "col0", null);
+    assertColValForRowId(9, "col1", 111);
+    assertColValForRowId(9, "col2", 222);
+    assertColValForRowId(9, "col3", null);
+  }
+
 }

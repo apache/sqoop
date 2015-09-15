@@ -113,7 +113,26 @@ public abstract class SqlManager
   /** {@inheritDoc} */
   public String[] getColumnNames(String tableName) {
     String stmt = getColNamesQuery(tableName);
-    return getColumnNamesForRawQuery(stmt);
+    return filterSpecifiedColumnNames(getColumnNamesForRawQuery(stmt));
+  }
+
+  /**
+  * Utilize the --columns option, if specified.
+  * @param columns
+  * @return the subset of columns which were specified by --columns option.
+  */
+  protected String[] filterSpecifiedColumnNames(String[] columns) {
+    if (options.getColumns() == null) {
+      return columns;
+    }
+    List<String> colNames = new ArrayList<String>();
+    for (String col : columns) {
+      String userColName = options.getColumnNameCaseInsensitive(col);
+      if (userColName != null) {
+        colNames.add(userColName);
+      }
+    }
+    return colNames.toArray(new String[colNames.size()]);
   }
 
   @Override

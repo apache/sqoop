@@ -97,12 +97,16 @@ public class JdbcExportJob extends ExportJobBase {
       columnTypeInts = connManager.getColumnTypesForProcedure(
           options.getCall());
     }
+    String[] specifiedColumns = options.getColumns();
     MapWritable columnTypes = new MapWritable();
     for (Map.Entry<String, Integer> e : columnTypeInts.entrySet()) {
-      Text columnName = new Text(e.getKey());
-      Text columnText = new Text(
-          connManager.toJavaType(tableName, e.getKey(), e.getValue()));
-      columnTypes.put(columnName, columnText);
+      String column = e.getKey();
+      column = (specifiedColumns == null) ? column : options.getColumnNameCaseInsensitive(column);
+      if (column != null) {
+        Text columnName = new Text(column);
+        Text columnType = new Text(connManager.toJavaType(tableName, column, e.getValue()));
+        columnTypes.put(columnName, columnType);
+      }
     }
     DefaultStringifier.store(job.getConfiguration(), columnTypes,
         AvroExportMapper.AVRO_COLUMN_TYPES_MAP);

@@ -180,7 +180,7 @@ public abstract class CatalogQueryManager
       }
     }
 
-    return columns.toArray(new String[columns.size()]);
+    return filterSpecifiedColumnNames(columns.toArray(new String[columns.size()]));
   }
 
   protected abstract String getPrimaryKeyQuery(String tableName);
