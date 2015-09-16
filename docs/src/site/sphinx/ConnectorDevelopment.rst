@@ -121,7 +121,7 @@ Initializer and Destroyer
 .. _Initializer:
 .. _Destroyer:
 
-Initializer is instantiated before the submission of sqoop job to the execution engine and doing preparations such as connecting to the data source, creating temporary tables or adding dependent jar files. Initializers are executed as the first step in the sqoop job lifecyle. Here is the ``Initializer`` API.
+Initializer is instantiated before the submission of sqoop job to the execution engine and doing preparations such as connecting to the data source, creating temporary tables or adding dependent jar files. Initializers are executed as the first step in the sqoop job lifecyle. All interactions within an initializer are assumed to occur within a single thread, so state can be maintained between method calls (such as database connections). Here is the ``Initializer`` API.
 ::
 
   public abstract void initialize(InitializerContext context, LinkConfiguration linkConfiguration,

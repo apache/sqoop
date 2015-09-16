@@ -28,6 +28,9 @@ import org.apache.sqoop.schema.Schema;
 /**
  * This allows connector to define initialization work for execution,
  * for example, context configuration.
+ *
+ * All method invocations on an instance of Initializer can be assumed
+ * to come from the same process.
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
