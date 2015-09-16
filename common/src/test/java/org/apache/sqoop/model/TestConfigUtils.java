@@ -23,6 +23,8 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.SqoopException;
+import org.joda.time.DateTime;
 
 /**
  * Test config utils
@@ -183,6 +186,8 @@ public class TestConfigUtils {
     config.cConfig.longValue = 4L;
     config.cConfig.map.put("C", "D");
     config.cConfig.enumeration = Enumeration.X;
+    config.cConfig.list.addAll(Arrays.asList("E", "F"));
+    config.cConfig.dt = new DateTime(10000);
 
     String json = ConfigUtils.toJson(config);
 
@@ -207,6 +212,9 @@ public class TestConfigUtils {
     assertTrue(targetConfig.cConfig.map.containsKey("C"));
     assertEquals("D", targetConfig.cConfig.map.get("C"));
     assertEquals(Enumeration.X, targetConfig.cConfig.enumeration);
+    assertEquals("E", targetConfig.cConfig.list.get(0));
+    assertEquals("F", targetConfig.cConfig.list.get(1));
+    assertEquals(10000, targetConfig.cConfig.dt.getMillis());
   }
 
   /**
@@ -240,6 +248,8 @@ public class TestConfigUtils {
     inputs.add(new MMapInput("cConfig.map", false, InputEditable.ANY, StringUtils.EMPTY));
     inputs.add(new MEnumInput("cConfig.enumeration", false, InputEditable.ANY, StringUtils.EMPTY,
         new String[] { "X", "Y" }));
+    inputs.add(new MListInput("cConfig.list", false, InputEditable.ANY, StringUtils.EMPTY));
+    inputs.add(new MDateTimeInput("cConfig.dt", false, InputEditable.ANY, StringUtils.EMPTY));
     ret.add(new MConfig("cConfig", inputs));
 
     return ret;
@@ -421,9 +431,14 @@ public class TestConfigUtils {
     Map<String, String> map;
     @Input
     Enumeration enumeration;
+    @Input
+    List<String> list;
+    @Input
+    DateTime dt;
 
     public CConfig() {
       map = new HashMap<String, String>();
+      list = new LinkedList<String>();
     }
   }
 

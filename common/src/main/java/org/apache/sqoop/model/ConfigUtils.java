@@ -453,7 +453,11 @@ public class  ConfigUtils {
             jsonConfig.put(inputName, value.toString());
           } else if(type == Boolean.class) {
             jsonConfig.put(inputName, value);
-          }else {
+          } else if (type.isAssignableFrom(List.class)) {
+            jsonConfig.put(inputName, value);
+          } else if (type.isAssignableFrom(DateTime.class) ) {
+            jsonConfig.put(inputName, ((DateTime) value).getMillis());
+          } else {
             throw new SqoopException(ModelError.MODEL_004,
               "Unsupported type " + type.getName() + " for input " + configName + "." + inputName);
           }
@@ -548,7 +552,11 @@ public class  ConfigUtils {
             inputField.set(configValue, Enum.valueOf((Class<? extends Enum>) inputField.getType(), (String) jsonInputs.get(inputName)));
           } else if(type == Boolean.class) {
             inputField.set(configValue, (Boolean) jsonInputs.get(inputName));
-          }else {
+          } else if (type.isAssignableFrom(List.class)) {
+            inputField.set(configValue, (List)jsonInputs.get(inputName));
+          } else if (type.isAssignableFrom(DateTime.class)) {
+            inputField.set(configValue, new DateTime((long)jsonInputs.get(inputName)));
+          } else {
             throw new SqoopException(ModelError.MODEL_004,
               "Unsupported type " + type.getName() + " for input " + configName + "." + inputName);
           }
