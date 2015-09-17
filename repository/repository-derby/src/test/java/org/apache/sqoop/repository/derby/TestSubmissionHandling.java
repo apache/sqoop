@@ -242,7 +242,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     submission.getError().setErrorSummary(errorSummary + "morethan150");
 
     handler.createSubmission(submission, getDerbyDatabaseConnection());
-    List<MSubmission> submissions = handler.findSubmissionsForJob(1, getDerbyDatabaseConnection());
+    List<MSubmission> submissions = handler.findSubmissionsForJob("JA0", getDerbyDatabaseConnection());
     assertNotNull(submissions);
 
     assertEquals(errorDetail, submissions.get(0).getError().getErrorDetails());
@@ -333,16 +333,16 @@ public class TestSubmissionHandling extends DerbyTestCase {
     loadSubmissions();
     assertCountForTable("SQOOP.SQ_SUBMISSION", 5);
 
-    handler.deleteJob(1, getDerbyDatabaseConnection());
+    handler.deleteJob("JA0", getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 3);
 
-    handler.deleteJob(2, getDerbyDatabaseConnection());
+    handler.deleteJob("JB0", getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 2);
 
-    handler.deleteJob(3, getDerbyDatabaseConnection());
+    handler.deleteJob("JC0", getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 1);
 
-    handler.deleteJob(4, getDerbyDatabaseConnection());
+    handler.deleteJob("JD0", getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_SUBMISSION", 0);
   }
 }

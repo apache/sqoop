@@ -34,7 +34,6 @@ import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
@@ -169,19 +168,19 @@ public abstract class Repository {
   public abstract void updateLink(final MLink link, RepositoryTransaction tx);
 
   /**
-   * Enable or disable Link with given id from the repository
+   * Enable or disable Link with given name from the repository
    *
-   * @param id Link object that is going to be enabled or disabled
+   * @param linkName Link object that is going to be enabled or disabled
    * @param enabled enable or disable
    */
-  public abstract void enableLink(long id, boolean enabled);
+  public abstract void enableLink(String linkName, boolean enabled);
 
   /**
-   * Delete Link with given id from the repository.
+   * Delete Link with given name from the repository.
    *
-   * @param id Link object that should be removed from repository
+   * @param linkName Link object that should be removed from repository
    */
-  public abstract void deleteLink(long id);
+  public abstract void deleteLink(String linkName);
 
   /**
    * Find link with given id in repository.
@@ -201,10 +200,10 @@ public abstract class Repository {
 
   /**
    * Retrieve links which use the given connector.
-   * @param connectorId Connector id whose links should be fetched
+   * @param connectorName Connector name whose links should be fetched
    * @return List of MLink that use <code>connectorId</code>.
    */
-  public abstract List<MLink> findLinksForConnector(long connectorId);
+  public abstract List<MLink> findLinksForConnector(String connectorName);
 
   /**
    * Get all Link objects.
@@ -242,19 +241,19 @@ public abstract class Repository {
   public abstract void updateJob(MJob job, RepositoryTransaction tx);
 
   /**
-   * Enable or disable job with given id from entity repository
+   * Enable or disable job with given name from entity repository
    *
-   * @param id Job object that is going to be enabled or disabled
+   * @param jobName Job object that is going to be enabled or disabled
    * @param enabled Enable or disable
    */
-  public abstract void enableJob(long id, boolean enabled);
+  public abstract void enableJob(String jobName, boolean enabled);
 
   /**
-   * Delete job with given id from entity repository.
+   * Delete job with given name from entity repository.
    *
-   * @param id Job id that should be removed
+   * @param jobName Job name that should be removed
    */
-  public abstract void deleteJob(long id);
+  public abstract void deleteJob(String jobName);
 
   /**
    * Find job object with given id.
@@ -323,90 +322,19 @@ public abstract class Repository {
   public abstract List<MSubmission> findSubmissions();
 
   /**
-   * Return all submissions for given jobId.
+   * Return all submissions for given jobName.
    *
    * @return List of of submissions
    */
-  public abstract List<MSubmission> findSubmissionsForJob(long jobId);
+  public abstract List<MSubmission> findSubmissionsForJob(String jobName);
 
   /**
-   * Find last submission for given jobId.
+   * Find last submission for given jobName.
    *
-   * @param jobId Job id
+   * @param jobName Job name
    * @return Most recent submission
    */
-  public abstract MSubmission findLastSubmissionForJob(long jobId);
-
- /**
-  * fetch the job config for the FROM type for the given name
-  * @param jobId id of the job
-  * @param configName name of the config unique to this job and type
-  * @return config object
-  */
-  public abstract MConfig findFromJobConfig(long jobId, String configName);
-
-
-  /**
-   * fetch the job config for the TO type for the given name
-   * @param jobId id of the job
-   * @param configName name of the config unique to this job and type
-   * @return config object
-   */
-  public abstract MConfig findToJobConfig(long jobId, String configName);
-
-
-  /**
-   * fetch the job config for the DRIVER type for the given name
-   * @param jobId id of the job
-   * @param configName name of the config unique to this job and type
-   * @return config object
-   */
-  public abstract MConfig findDriverJobConfig(long jobId, String configName);
-
-
-  /**
-   * fetch the link config for the link type for the given name
-   * @param linkId id of the link
-   * @param configName name of the config unique to this link and type
-   * @return config object
-   */
-  public abstract MConfig findLinkConfig(long linkId, String configName);
-
-
-  /**
-   * Update the config object for the job
-   * @param jobId id of the job
-   * @param config name of the config
-   * @param updateEntityType entity type updating the link config
-   */
-  public abstract void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType updateEntityType);
-
-  /**
-   * Update the config object for the job
-   * @param jobId id of the job
-   * @param config name of the config
-   * @param updateEntityType entity type updating the link config
-   * @param tx database transaction
-   */
-  public abstract void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType updateEntityType,  RepositoryTransaction tx);
-
-
-  /**
-   * Update the config object for the link
-   * @param linkId id of the link
-   * @param config name of the config
-   * @param updateEntityType entity type updating the link config
-   */
-  public abstract void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType updateEntityType);
-
-  /**
-   * Update the config object for the link
-   * @param linkId id of the link
-   * @param config name of the config
-   * @param updateEntityType entity type updating the link config
-   * @param tx database transaction
-   */
-  public abstract void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType updateEntityType, RepositoryTransaction tx);
+  public abstract MSubmission findLastSubmissionForJob(String jobName);
 
 
   /*********************Configurable Upgrade APIs ******************************/
@@ -449,40 +377,40 @@ public abstract class Repository {
 
   /**
    * Delete all inputs for a job
-   * @param jobId The id of the job whose inputs are to be deleted.
+   * @param jobName The name of the job whose inputs are to be deleted.
    * @param tx A transaction on the repository. This
    *           method will not call <code>begin, commit,
    *           rollback or close on this transaction.</code>
    */
-  protected abstract void deleteJobInputs(long jobId, RepositoryTransaction tx);
+  protected abstract void deleteJobInputs(String jobName, RepositoryTransaction tx);
 
   /**
    * Delete all inputs for a link
-   * @param linkId The id of the link whose inputs are to be
+   * @param linkName The name of the link whose inputs are to be
    *                     deleted.
    * @param tx The repository transaction to use to push the data to the
    *           repository. If this is null, a new transaction will be created.
    *           method will not call begin, commit,
    *           rollback or close on this transaction.
    */
-  protected abstract void deleteLinkInputs(long linkId, RepositoryTransaction tx);
+  protected abstract void deleteLinkInputs(String linkName, RepositoryTransaction tx);
 
   private void deletelinksAndJobInputs(List<MLink> links, List<MJob> jobs, RepositoryTransaction tx) {
     if (jobs != null) {
       for (MJob job : jobs) {
-        deleteJobInputs(job.getPersistenceId(), tx);
+        deleteJobInputs(job.getName(), tx);
       }
     }
     if (links != null) {
       for (MLink link : links) {
-        deleteLinkInputs(link.getPersistenceId(), tx);
+        deleteLinkInputs(link.getName(), tx);
       }
     }
   }
 
   private void deleteJobInputsOnly(List<MJob> jobs, RepositoryTransaction tx) {
     for (MJob job : jobs) {
-      deleteJobInputs(job.getPersistenceId(), tx);
+      deleteJobInputs(job.getName(), tx);
     }
   }
 
@@ -513,7 +441,7 @@ public abstract class Repository {
       // 1. Get an upgrader for the connector
       ConnectorConfigurableUpgrader upgrader = connector.getConfigurableUpgrader();
       // 2. Get all links associated with the connector.
-      List<MLink> existingLinksByConnector = findLinksForConnector(connectorId);
+      List<MLink> existingLinksByConnector = findLinksForConnector(connectorName);
       // 3. Get all jobs associated with the connector.
       List<MJob> existingJobsByConnector = findJobsForConnector(connectorId);
       // -- BEGIN TXN --

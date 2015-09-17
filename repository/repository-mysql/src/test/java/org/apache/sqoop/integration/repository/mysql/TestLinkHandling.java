@@ -69,7 +69,7 @@ public class TestLinkHandling extends MySqlTestCase {
   public void testFindLinkFail() {
     // Delete links
     for (MLink link : handler.findLinks(provider.getConnection())) {
-      handler.deleteLink(link.getPersistenceId(), provider.getConnection());
+      handler.deleteLink(link.getName(), provider.getConnection());
     }
 
     assertNull(handler.findLink(1, provider.getConnection()));
@@ -120,7 +120,7 @@ public class TestLinkHandling extends MySqlTestCase {
 
     // Delete links
     for (MLink link : handler.findLinks(provider.getConnection())) {
-      handler.deleteLink(link.getPersistenceId(), provider.getConnection());
+      handler.deleteLink(link.getName(), provider.getConnection());
     }
 
     // Load empty list on empty repository
@@ -131,45 +131,43 @@ public class TestLinkHandling extends MySqlTestCase {
   @Test
   public void testFindLinksByConnector() throws Exception {
     List<MLink> list;
-    Long connectorId = handler.findConnector("A", provider.getConnection())
-        .getPersistenceId();
 
     // Load all two links on loaded repository
-    list = handler.findLinksForConnector(connectorId, provider.getConnection());
+    list = handler.findLinksForConnector("A", provider.getConnection());
     assertEquals(1, list.size());
     assertEquals(LINK_A_NAME, list.get(0).getName());
 
     // Delete links
     for (MLink link : handler.findLinks(provider.getConnection())) {
-      handler.deleteLink(link.getPersistenceId(), provider.getConnection());
+      handler.deleteLink(link.getName(), provider.getConnection());
     }
 
     // Load empty list on empty repository
-    list = handler.findLinksForConnector(connectorId, provider.getConnection());
+    list = handler.findLinksForConnector("A", provider.getConnection());
     assertEquals(0, list.size());
   }
 
   @Test
   public void testFindLinksByNonExistingConnector() throws Exception {
-    List<MLink> list = handler.findLinksForConnector(11,
+    List<MLink> list = handler.findLinksForConnector("NONEXISTCONNECTOR",
         provider.getConnection());
     assertEquals(0, list.size());
   }
 
   @Test
   public void testExistsLink() throws Exception {
-    assertTrue(handler.existsLink(1, provider.getConnection()));
-    assertTrue(handler.existsLink(2, provider.getConnection()));
-    assertFalse(handler.existsLink(3, provider.getConnection()));
+    assertTrue(handler.existsLink(LINK_A_NAME, provider.getConnection()));
+    assertTrue(handler.existsLink(LINK_B_NAME, provider.getConnection()));
+    assertFalse(handler.existsLink("NONEXISTLINK", provider.getConnection()));
 
     // Delete links
     for (MLink link : handler.findLinks(provider.getConnection())) {
-      handler.deleteLink(link.getPersistenceId(), provider.getConnection());
+      handler.deleteLink(link.getName(), provider.getConnection());
     }
 
-    assertFalse(handler.existsLink(1, provider.getConnection()));
-    assertFalse(handler.existsLink(2, provider.getConnection()));
-    assertFalse(handler.existsLink(3, provider.getConnection()));
+    assertFalse(handler.existsLink(LINK_A_NAME, provider.getConnection()));
+    assertFalse(handler.existsLink(LINK_B_NAME, provider.getConnection()));
+    assertFalse(handler.existsLink("NONEXISTLINK", provider.getConnection()));
   }
 
   @Test
@@ -214,7 +212,7 @@ public class TestLinkHandling extends MySqlTestCase {
 
   @Test
   public void testInUseLink() throws Exception {
-    assertFalse(handler.inUseLink(1, provider.getConnection()));
+    assertFalse(handler.inUseLink(LINK_A_NAME, provider.getConnection()));
 
     // Create job and submission and make that job in use to make sure link is
     // in use.
@@ -227,7 +225,7 @@ public class TestLinkHandling extends MySqlTestCase {
     MSubmission submission = getSubmission(job, SubmissionStatus.RUNNING);
     handler.createSubmission(submission, provider.getConnection());
 
-    assertTrue(handler.inUseLink(linkA.getPersistenceId(),
+    assertTrue(handler.inUseLink(linkA.getName(),
         provider.getConnection()));
   }
 
@@ -266,14 +264,14 @@ public class TestLinkHandling extends MySqlTestCase {
   @Test
   public void testEnableAndDisableLink() throws Exception {
     // disable link 1
-    handler.enableLink(1, false, provider.getConnection());
+    handler.enableLink(LINK_A_NAME, false, provider.getConnection());
 
     MLink retrieved = handler.findLink(1, provider.getConnection());
     assertNotNull(retrieved);
     assertEquals(false, retrieved.getEnabled());
 
     // enable link 1
-    handler.enableLink(1, true, provider.getConnection());
+    handler.enableLink(LINK_A_NAME, true, provider.getConnection());
 
     retrieved = handler.findLink(1, provider.getConnection());
     assertNotNull(retrieved);
@@ -282,13 +280,13 @@ public class TestLinkHandling extends MySqlTestCase {
 
   @Test
   public void testDeleteLink() throws Exception {
-    handler.deleteLink(1, provider.getConnection());
+    handler.deleteLink(LINK_A_NAME, provider.getConnection());
     Assert
         .assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK")), 1);
     Assert.assertEquals(
         provider.rowCount(new TableName("SQOOP", "SQ_LINK_INPUT")), 2);
 
-    handler.deleteLink(2, provider.getConnection());
+    handler.deleteLink(LINK_B_NAME, provider.getConnection());
     Assert
         .assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_LINK")), 0);
     Assert.assertEquals(

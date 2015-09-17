@@ -91,8 +91,8 @@ public enum RepositoryError implements ErrorCode {
   /** link that we're trying to update is not yet saved **/
   JDBCREPO_0016("Cannot update link that was not yet created"),
 
-  /** Invalid link id **/
-  JDBCREPO_0017("Given link id is invalid"),
+  /** Invalid link name **/
+  JDBCREPO_0017("Given link name is invalid"),
 
   /** Job that we're trying to create is already saved in repository **/
   JDBCREPO_0018("Cannot create job that was already created"),
@@ -100,11 +100,11 @@ public enum RepositoryError implements ErrorCode {
   /** Job that we're trying to update is not yet saved **/
   JDBCREPO_0019("Cannot update job that was not yet created"),
 
-  /** Invalid job id **/
-  JDBCREPO_0020("Given job id is invalid"),
+  /** Invalid job name **/
+  JDBCREPO_0020("Given job name is invalid"),
 
-  /** link ID is in use **/
-  JDBCREPO_0021("Given link id is in use"),
+  /** link name is in use **/
+  JDBCREPO_0021("Given link name is in use"),
 
   /** Job ID is in use **/
   JDBCREPO_0022("Given job id is in use"),

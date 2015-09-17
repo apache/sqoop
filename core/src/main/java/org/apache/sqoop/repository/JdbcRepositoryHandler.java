@@ -21,8 +21,6 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
@@ -84,11 +82,11 @@ public abstract class JdbcRepositoryHandler {
 
   /**
    * Retrieve links which use the given connector.
-   * @param connectorId Connector ID whose links should be fetched
+   * @param connectorName Connector name whose links should be fetched
    * @param conn JDBC link for querying repository
    * @return List of MLinks that use <code>connectorID</code>.
    */
-  public abstract List<MLink> findLinksForConnector(long connectorId, Connection conn);
+  public abstract List<MLink> findLinksForConnector(String connectorName, Connection conn);
 
   /**
    * Retrieve jobs which use the given link.
@@ -209,46 +207,46 @@ public abstract class JdbcRepositoryHandler {
   /**
    * Check if given link exists in repository.
    *
-   * @param linkId Link id
+   * @param linkName Link name
    * @param conn Connection to the repository
    * @return True if the link exists
    */
-  public abstract boolean existsLink(long linkId, Connection conn);
+  public abstract boolean existsLink(String linkName, Connection conn);
 
   /**
-   * Check if given Connection id is referenced somewhere and thus can't
+   * Check if given link is referenced somewhere and thus can't
    * be removed.
    *
-   * @param linkId Link id
+   * @param linkName Link name
    * @param conn Connection to the repository
    * @return
    */
-  public abstract boolean inUseLink(long linkId, Connection conn);
+  public abstract boolean inUseLink(String linkName, Connection conn);
 
   /**
-   * Enable or disable link with given id from the repository
+   * Enable or disable link with given name from the repository
    *
-   * @param linkId Link object that is going to be enabled or disabled
+   * @param linkName Link object that is going to be enabled or disabled
    * @param enabled Enable or disable
    * @param conn Connection to the repository
    */
-  public abstract void enableLink(long linkId, boolean enabled, Connection conn);
+  public abstract void enableLink(String linkName, boolean enabled, Connection conn);
 
   /**
-   * Delete link with given id from the repository.
+   * Delete link with given name from the repository.
    *
-   * @param linkId Link object that should be removed from repository
+   * @param linkName Link object that should be removed from repository
    * @param conn Connection to the repository
    */
-  public abstract void deleteLink(long linkId, Connection conn);
+  public abstract void deleteLink(String linkName, Connection conn);
 
   /**
-   * Delete the input values for the link with given id from the
+   * Delete the input values for the link with given name from the
    * repository.
-   * @param linkId Link object whose inputs should be removed from repository
+   * @param linkName Link object whose inputs should be removed from repository
    * @param conn Connection to the repository
    */
-  protected abstract void deleteLinkInputs(long linkId, Connection conn);
+  protected abstract void deleteLinkInputs(String linkName, Connection conn);
 
   /**
    * Find link with given id in repository.
@@ -299,45 +297,45 @@ public abstract class JdbcRepositoryHandler {
   /**
    * Check if given job exists in the repository.
    *
-   * @param jobId Job id
+   * @param jobName Job name
    * @param conn Connection to the repository
    * @return True if the job exists
    */
-  public abstract boolean existsJob(long jobId, Connection conn);
+  public abstract boolean existsJob(String jobName, Connection conn);
 
   /**
-   * Check if given job id is referenced somewhere and thus can't
+   * Check if given job is referenced somewhere and thus can't
    * be removed.
    *
-   * @param jobId Job id
+   * @param jobName Job name
    * @param conn Connection to the repository
    * @return
    */
-  public abstract boolean inUseJob(long jobId, Connection conn);
+  public abstract boolean inUseJob(String jobName, Connection conn);
 
   /**
-   * Enable or disable job with given id from the repository
+   * Enable or disable job with given name from the repository
    *
-   * @param jobId Job id
+   * @param jobName Job name
    * @param enabled Enable or disable
    * @param conn Connection to the repository
    */
-  public abstract void enableJob(long jobId, boolean enabled, Connection conn);
+  public abstract void enableJob(String jobName, boolean enabled, Connection conn);
 
   /**
-   * Delete the input values for the job with given id from the repository.
-   * @param id Job object whose inputs should be removed from repository
+   * Delete the input values for the job with given name from the repository.
+   * @param jobName Job object whose inputs should be removed from repository
    * @param conn Connection to the repository
    */
-  protected abstract void deleteJobInputs(long id, Connection conn);
+  protected abstract void deleteJobInputs(String jobName, Connection conn);
   /**
-   * Delete job with given id from the repository. This method will
+   * Delete job with given name from the repository. This method will
    * delete all inputs for this job also.
    *
-   * @param jobId Job object that should be removed from repository
+   * @param jobName Job object that should be removed from repository
    * @param conn Connection to the repository
    */
-  public abstract void deleteJob(long jobId, Connection conn);
+  public abstract void deleteJob(String jobName, Connection conn);
 
   /**
    * Find job with given id in repository.
@@ -414,77 +412,20 @@ public abstract class JdbcRepositoryHandler {
   public abstract List<MSubmission> findSubmissions(Connection conn);
 
   /**
-   * Return list of submissions from the repository for given jobId.
-   * @param jobId Job id
+   * Return list of submissions from the repository for given jobName.
+   * @param jobName Job name
    * @param conn Connection to the repository
    * @return List of submissions
    */
-  public abstract List<MSubmission> findSubmissionsForJob(long jobId, Connection conn);
+  public abstract List<MSubmission> findSubmissionsForJob(String jobName, Connection conn);
 
   /**
-   * Find last submission for given jobId.
+   * Find last submission for given jobName.
    *
-   * @param jobId Job id
+   * @param jobName Job name
    * @param conn Connection to the repository
    * @return Most recent submission
    */
-  public abstract MSubmission findLastSubmissionForJob(long jobId, Connection conn);
-
-  /**
-   * fetch the job config for the FROM type for the given name
-   * @param jobId id of the job
-   * @param configName name of the config unique to this job and type
-   * @param conn Connection to the repository
-   * @return config object
-   */
-   public abstract MConfig findFromJobConfig(long jobId, String configName, Connection con);
-
-
-   /**
-    * fetch the job config for the TO type for the given name
-    * @param jobId id of the job
-    * @param configName name of the config unique to this job and type
-    * @param conn Connection to the repository
-    * @return config object
-    */
-   public abstract MConfig findToJobConfig(long jobId, String configName, Connection con);
-
-
-   /**
-    * fetch the job config for the DRIVER type for the given name
-    * @param jobId id of the job
-    * @param configName name of the config unique to this job and type
-    * @param conn Connection to the repository
-    * @return config object
-    */
-   public abstract MConfig findDriverJobConfig(long jobId, String configName, Connection con);
-
-
-   /**
-    * fetch the link config for the link type for the given name
-    * @param linkId id of the link
-    * @param configName name of the config unique to this link and type
-    * @param conn Connection to the repository
-    * @return config object
-    */
-   public abstract MConfig findLinkConfig(long linkId, String configName, Connection con);
-
-   /**
-    * Update the config object for the job
-    * @param jobId id of the job
-    * @param config name of the config
-    * @param type entity type updating the link config
-    * @param conn Connection to the repository
-    */
-   public abstract void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType type,  Connection con);
-
-   /**
-    * Update the config object for the link
-    * @param linkId id of the link
-    * @param config name of the config
-    * @param type entity type updating the link config
-    * @param conn Connection to the repository
-    */
-   public abstract void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType type, Connection con);
+  public abstract MSubmission findLastSubmissionForJob(String jobName, Connection conn);
 
 }

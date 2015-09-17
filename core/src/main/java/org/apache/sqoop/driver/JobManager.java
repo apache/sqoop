@@ -277,7 +277,7 @@ public class JobManager implements Reconfigurable {
     LOG.info("Submission manager initialized: OK");
   }
 
-  public MSubmission start(long jobId, HttpEventContext ctx) {
+  public MSubmission start(long jobId, String jobName, HttpEventContext ctx) {
 
     MSubmission mSubmission = createJobSubmission(ctx, jobId);
     JobRequest jobRequest = createJobRequest(jobId, mSubmission);
@@ -287,7 +287,7 @@ public class JobManager implements Reconfigurable {
     // only if it's not.
     synchronized (JobManager.class) {
       MSubmission lastSubmission = RepositoryManager.getInstance().getRepository()
-          .findLastSubmissionForJob(jobId);
+          .findLastSubmissionForJob(jobName);
       if (lastSubmission != null && lastSubmission.getStatus().isRunning()) {
         throw new SqoopException(DriverError.DRIVER_0002, "Job with id " + jobId);
       }
@@ -606,10 +606,10 @@ public class JobManager implements Reconfigurable {
         request.getJobConfig(Direction.TO));
   }
 
-  public MSubmission stop(long jobId, HttpEventContext ctx) {
+  public MSubmission stop(long jobId, String jobName, HttpEventContext ctx) {
 
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MSubmission mSubmission = repository.findLastSubmissionForJob(jobId);
+    MSubmission mSubmission = repository.findLastSubmissionForJob(jobName);
 
     if (mSubmission == null || !mSubmission.getStatus().isRunning()) {
       throw new SqoopException(DriverError.DRIVER_0003, "Job with id " + jobId
@@ -626,9 +626,9 @@ public class JobManager implements Reconfigurable {
     return mSubmission;
   }
 
-  public MSubmission status(long jobId) {
+  public MSubmission status(long jobId, String jobName) {
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MSubmission mSubmission = repository.findLastSubmissionForJob(jobId);
+    MSubmission mSubmission = repository.findLastSubmissionForJob(jobName);
 
     if (mSubmission == null) {
       return new MSubmission(jobId, new Date(), SubmissionStatus.NEVER_EXECUTED);

@@ -23,8 +23,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
@@ -307,9 +305,9 @@ public class JdbcRepository extends Repository {
         if (!link.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0016);
         }
-        if (!handler.existsLink(link.getPersistenceId(), conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid id: "
-              + link.getPersistenceId());
+        if (!handler.existsLink(link.getName(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid name: "
+              + link.getName());
         }
 
         handler.updateLink(link, conn);
@@ -322,16 +320,16 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void enableLink(final long linkId, final boolean enabled) {
+  public void enableLink(final String linkName, final boolean enabled) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if(!handler.existsLink(linkId, conn)) {
+        if(!handler.existsLink(linkName, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0017,
-            "Invalid id: " + linkId);
+            "Invalid name: " + linkName);
         }
 
-        handler.enableLink(linkId, enabled, conn);
+        handler.enableLink(linkName, enabled, conn);
         return null;
       }
     });
@@ -341,20 +339,20 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void deleteLink(final long linkId) {
+  public void deleteLink(final String linkName) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if(!handler.existsLink(linkId, conn)) {
+        if(!handler.existsLink(linkName, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0017,
-            "Invalid id: " + linkId);
+            "Invalid name: " + linkName);
         }
-        if(handler.inUseLink(linkId, conn)) {
+        if(handler.inUseLink(linkName, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0021,
-            "Id in use: " + linkId);
+            "Name in use: " + linkName);
         }
 
-        handler.deleteLink(linkId, conn);
+        handler.deleteLink(linkName, conn);
         return null;
       }
     });
@@ -405,11 +403,11 @@ public class JdbcRepository extends Repository {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public List<MLink> findLinksForConnector(final long connectorId) {
+  public List<MLink> findLinksForConnector(final String connectorName) {
     return (List<MLink>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.findLinksForConnector(connectorId, conn);
+        return handler.findLinksForConnector(connectorName, conn);
       }
     });
   }
@@ -451,7 +449,7 @@ public class JdbcRepository extends Repository {
        if(!job.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0019);
         }
-        if(!handler.existsJob(job.getPersistenceId(), conn)) {
+        if(!handler.existsJob(job.getName(), conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0020,
             "Invalid id: " + job.getPersistenceId());
         }
@@ -466,16 +464,16 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void enableJob(final long id, final boolean enabled) {
+  public void enableJob(final String jobName, final boolean enabled) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if(!handler.existsJob(id, conn)) {
+        if(!handler.existsJob(jobName, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0020,
-            "Invalid id: " + id);
+            "Invalid name: " + jobName);
         }
 
-        handler.enableJob(id, enabled, conn);
+        handler.enableJob(jobName, enabled, conn);
         return null;
       }
     });
@@ -485,18 +483,18 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public void deleteJob(final long id) {
+  public void deleteJob(final String jobName) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if (!handler.existsJob(id, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + id);
+        if (!handler.existsJob(jobName, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobName);
         }
-        if (handler.inUseJob(id, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0022, "Id in use: " + id);
+        if (handler.inUseJob(jobName, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0022, "Name in use: " + jobName);
         }
 
-        handler.deleteJob(id, conn);
+        handler.deleteJob(jobName, conn);
         return null;
       }
     });
@@ -643,15 +641,15 @@ public class JdbcRepository extends Repository {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public List<MSubmission> findSubmissionsForJob(final long jobId) {
+  public List<MSubmission> findSubmissionsForJob(final String jobName) {
     return (List<MSubmission>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        if(!handler.existsJob(jobId, conn)) {
+        if(!handler.existsJob(jobName, conn)) {
           throw new SqoopException(RepositoryError.JDBCREPO_0020,
-            "Invalid id: " + jobId);
+            "Invalid name: " + jobName);
         }
-        return handler.findSubmissionsForJob(jobId, conn);
+        return handler.findSubmissionsForJob(jobName, conn);
       }
     });
   }
@@ -660,148 +658,35 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MSubmission findLastSubmissionForJob(final long jobId) {
+  public MSubmission findLastSubmissionForJob(final String jobName) {
     return (MSubmission) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
-        if (!handler.existsJob(jobId, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
+        if (!handler.existsJob(jobName, conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid name: " + jobName);
         }
-        return handler.findLastSubmissionForJob(jobId, conn);
+        return handler.findLastSubmissionForJob(jobName, conn);
       }
     });
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public MConfig findFromJobConfig(final long jobId, final String configName) {
-    return (MConfig) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) {
-        if (!handler.existsJob(jobId, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
-        }
-        return handler.findFromJobConfig(jobId, configName, conn);
-      }
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MConfig findToJobConfig(final long jobId, final String configName) {
-    return (MConfig) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) {
-        if (!handler.existsJob(jobId, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
-        }
-        return handler.findToJobConfig(jobId, configName, conn);
-      }
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MConfig findDriverJobConfig(final long jobId, final String configName) {
-    return (MConfig) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) {
-        if (!handler.existsJob(jobId, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
-        }
-        return handler.findDriverJobConfig(jobId, configName, conn);
-      }
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MConfig findLinkConfig(final long linkId, final String configName) {
-    return (MConfig) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) {
-        if (!handler.existsLink(linkId, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid id: " + linkId);
-        }
-        return handler.findLinkConfig(linkId, configName, conn);
-      }
-    });
-  }
-
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void updateJobConfig(final long jobId, final MConfig config, final MConfigUpdateEntityType type) {
-    updateJobConfig(jobId, config, type, null);
-  }
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void updateJobConfig(final long jobId, final MConfig config, final MConfigUpdateEntityType type, RepositoryTransaction tx) {
-    doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) {
-        if (!handler.existsJob(jobId, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
-        }
-        handler.updateJobConfig(jobId, config, type, conn);
-        return null;
-      }
-    }, (JdbcRepositoryTransaction) tx);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void updateLinkConfig(final long linkId, final MConfig config, final MConfigUpdateEntityType type) {
-    updateLinkConfig(linkId, config, type, null);
-  }
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void updateLinkConfig(final long linkId, final MConfig config, final MConfigUpdateEntityType type, RepositoryTransaction tx) {
-    doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) {
-        if (!handler.existsLink(linkId, conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid id: " + linkId);
-        }
-        handler.updateLinkConfig(linkId, config, type,  conn);
-        return null;
-      }
-    }, (JdbcRepositoryTransaction) tx);
-  }
-
-  @Override
-  protected void deleteJobInputs(final long jobID, RepositoryTransaction tx) {
+  protected void deleteJobInputs(final String jobName, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.deleteJobInputs(jobID, conn);
+        handler.deleteJobInputs(jobName, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);
   }
 
   @Override
-  protected void deleteLinkInputs(final long linkId, RepositoryTransaction tx) {
+  protected void deleteLinkInputs(final String linkName, RepositoryTransaction tx) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        handler.deleteLinkInputs(linkId, conn);
+        handler.deleteLinkInputs(linkName, conn);
         return null;
       }
     }, (JdbcRepositoryTransaction) tx);

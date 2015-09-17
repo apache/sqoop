@@ -75,14 +75,13 @@ public class SubmissionRequestHandler implements RequestHandler {
   }
 
   private JsonBean getSubmissionsForJob(String jobIdentifier, RequestContext ctx) {
-    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
     String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
 
     //Authorization check
     AuthorizationEngine.statusJob(ctx.getUserName(), jobName);
 
     List<MSubmission> submissions = RepositoryManager.getInstance().getRepository()
-        .findSubmissionsForJob(jobId);
+        .findSubmissionsForJob(jobName);
 
     return new SubmissionsBean(submissions);
   }

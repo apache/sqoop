@@ -139,7 +139,6 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     String jobIdentifier = ctx.getLastURLElement();
-    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
     String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
 
     // Authorization check
@@ -147,7 +146,7 @@ public class JobRequestHandler implements RequestHandler {
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "job", jobIdentifier);
-    repository.deleteJob(jobId);
+    repository.deleteJob(jobName);
     MResource resource = new MResource(jobName, MResource.TYPE.JOB);
     AuthorizationManager.getInstance().getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
@@ -322,19 +321,19 @@ public class JobRequestHandler implements RequestHandler {
 
   private JobBean createJobBean(List<MJob> jobs, Locale locale) {
     JobBean jobBean = new JobBean(jobs);
-    addJob(jobs, locale, jobBean);
+    addConnectorConfigBundle(jobBean, locale);
     return jobBean;
   }
 
   private JobsBean createJobsBean(List<MJob> jobs, Locale locale) {
     JobsBean jobsBean = new JobsBean(jobs);
-    addJob(jobs, locale, jobsBean);
+    addConnectorConfigBundle(jobsBean, locale);
     return jobsBean;
   }
 
-  private void addJob(List<MJob> jobs, Locale locale, JobBean bean) {
+  private void addConnectorConfigBundle(JobBean bean, Locale locale) {
     // Add associated resources into the bean
-    for (MJob job : jobs) {
+    for (MJob job : bean.getJobs()) {
       long fromConnectorId = job.getFromConnectorId();
       long toConnectorId = job.getToConnectorId();
       // replace it only if it does not already exist
@@ -353,13 +352,12 @@ public class JobRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String jobIdentifier = elements[elements.length - 2];
-    long jobId = HandlerUtils.getJobIdFromIdentifier(jobIdentifier);
     String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
 
     // Authorization check
     AuthorizationEngine.enableDisableJob(ctx.getUserName(), jobName);
 
-    repository.enableJob(jobId, enabled);
+    repository.enableJob(jobName, enabled);
     return JsonBean.EMPTY_BEAN;
   }
 
@@ -385,7 +383,7 @@ public class JobRequestHandler implements RequestHandler {
     }
 
     MSubmission submission = JobManager.getInstance()
-        .start(jobId, prepareRequestEventContext(ctx));
+        .start(jobId, jobName, prepareRequestEventContext(ctx));
     return new SubmissionBean(submission);
   }
 
@@ -400,7 +398,7 @@ public class JobRequestHandler implements RequestHandler {
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "stop", "job", String.valueOf(jobId));
-    MSubmission submission = JobManager.getInstance().stop(jobId, prepareRequestEventContext(ctx));
+    MSubmission submission = JobManager.getInstance().stop(jobId, jobName, prepareRequestEventContext(ctx));
     return new SubmissionBean(submission);
   }
 
@@ -415,7 +413,7 @@ public class JobRequestHandler implements RequestHandler {
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "status", "job", String.valueOf(jobId));
-    MSubmission submission = JobManager.getInstance().status(jobId);
+    MSubmission submission = JobManager.getInstance().status(jobId, jobName);
 
     return new SubmissionBean(submission);
   }

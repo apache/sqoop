@@ -22,24 +22,18 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MDriver;
-import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.model.MToConfig;
-import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -150,19 +144,19 @@ public class TestJobHandling extends DerbyTestCase {
   @Test
   public void testExistsJob() throws Exception {
     // There shouldn't be anything on empty repository
-    assertFalse(handler.existsJob(1, derbyConnection));
-    assertFalse(handler.existsJob(2, derbyConnection));
-    assertFalse(handler.existsJob(3, derbyConnection));
-    assertFalse(handler.existsJob(4, derbyConnection));
-    assertFalse(handler.existsJob(5, derbyConnection));
+    assertFalse(handler.existsJob("JA0", derbyConnection));
+    assertFalse(handler.existsJob("JB0", derbyConnection));
+    assertFalse(handler.existsJob("JC0", derbyConnection));
+    assertFalse(handler.existsJob("JD0", derbyConnection));
+    assertFalse(handler.existsJob("NONEXISTJOB", derbyConnection));
 
     loadJobsForLatestVersion();
 
-    assertTrue(handler.existsJob(1, derbyConnection));
-    assertTrue(handler.existsJob(2, derbyConnection));
-    assertTrue(handler.existsJob(3, derbyConnection));
-    assertTrue(handler.existsJob(4, derbyConnection));
-    assertFalse(handler.existsJob(5, derbyConnection));
+    assertTrue(handler.existsJob("JA0", derbyConnection));
+    assertTrue(handler.existsJob("JB0", derbyConnection));
+    assertTrue(handler.existsJob("JC0", derbyConnection));
+    assertTrue(handler.existsJob("JD0", derbyConnection));
+    assertFalse(handler.existsJob("NONEXISTJOB", derbyConnection));
   }
 
   @Test
@@ -170,10 +164,10 @@ public class TestJobHandling extends DerbyTestCase {
     loadJobsForLatestVersion();
     loadSubmissions();
 
-    assertTrue(handler.inUseJob(1, derbyConnection));
-    assertFalse(handler.inUseJob(2, derbyConnection));
-    assertFalse(handler.inUseJob(3, derbyConnection));
-    assertFalse(handler.inUseJob(4, derbyConnection));
+    assertTrue(handler.inUseJob("JA0", derbyConnection));
+    assertFalse(handler.inUseJob("JB0", derbyConnection));
+    assertFalse(handler.inUseJob("JC0", derbyConnection));
+    assertFalse(handler.inUseJob("JD0", derbyConnection));
   }
 
   @Test
@@ -295,14 +289,14 @@ public class TestJobHandling extends DerbyTestCase {
     loadJobsForLatestVersion();
 
     // disable job 1
-    handler.enableJob(1, false, derbyConnection);
+    handler.enableJob("JA0", false, derbyConnection);
 
     MJob retrieved = handler.findJob(1, derbyConnection);
     assertNotNull(retrieved);
     assertEquals(false, retrieved.getEnabled());
 
     // enable job 1
-    handler.enableJob(1, true, derbyConnection);
+    handler.enableJob("JA0", true, derbyConnection);
 
     retrieved = handler.findJob(1, derbyConnection);
     assertNotNull(retrieved);
@@ -313,148 +307,21 @@ public class TestJobHandling extends DerbyTestCase {
   public void testDeleteJob() throws Exception {
     loadJobsForLatestVersion();
 
-    handler.deleteJob(1, derbyConnection);
+    handler.deleteJob("JA0", derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 3);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 18);
 
-    handler.deleteJob(2, derbyConnection);
+    handler.deleteJob("JB0", derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 2);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 12);
 
-    handler.deleteJob(3, derbyConnection);
+    handler.deleteJob("JC0", derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 1);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 6);
 
-    handler.deleteJob(4, derbyConnection);
+    handler.deleteJob("JD0", derbyConnection);
     assertCountForTable("SQOOP.SQ_JOB", 0);
     assertCountForTable("SQOOP.SQ_JOB_INPUT", 0);
-  }
-
-  @Test
-  public void testUpdateJobConfig() throws Exception {
-    loadJobsForLatestVersion();
-
-    assertCountForTable("SQOOP.SQ_JOB", 4);
-    assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
-    MJob job = handler.findJob(1, derbyConnection);
-
-    List<MConfig> fromConfigs = job.getFromJobConfig().getConfigs();
-    MConfig fromConfig = fromConfigs.get(0).clone(false);
-    MConfig newFromConfig = new MConfig(fromConfig.getName(), fromConfig.getInputs());
-
-    ((MStringInput) newFromConfig.getInputs().get(0)).setValue("FromJobConfigUpdated");
-
-    handler.updateJobConfig(job.getPersistenceId(), newFromConfig, MConfigUpdateEntityType.USER,
-        derbyConnection);
-
-    MJob updatedJob = handler.findJob(1, derbyConnection);
-    MFromConfig newFromConfigs = updatedJob.getFromJobConfig();
-    assertEquals(2, newFromConfigs.getConfigs().size());
-    MConfig updatedFromConfig = newFromConfigs.getConfigs().get(0);
-    assertEquals("FromJobConfigUpdated", updatedFromConfig.getInputs().get(0).getValue());
-
-    List<MConfig> toConfigs = job.getToJobConfig().getConfigs();
-    MConfig toConfig = toConfigs.get(0).clone(false);
-    MConfig newToConfig = new MConfig(toConfig.getName(), toConfig.getInputs());
-
-    ((MStringInput) newToConfig.getInputs().get(0)).setValue("ToJobConfigUpdated");
-
-    handler.updateJobConfig(job.getPersistenceId(), newToConfig, MConfigUpdateEntityType.USER,
-        derbyConnection);
-
-    updatedJob = handler.findJob(1, derbyConnection);
-    MToConfig newToConfigs = updatedJob.getToJobConfig();
-    assertEquals(2, newToConfigs.getConfigs().size());
-    MConfig updatedToConfig = newToConfigs.getConfigs().get(0);
-    assertEquals("ToJobConfigUpdated", updatedToConfig.getInputs().get(0).getValue());
-  }
-
-  @Test(expectedExceptions = SqoopException.class)
-  public void testIncorrectEntityCausingConfigUpdate() throws Exception {
-    loadJobsForLatestVersion();
-
-    assertCountForTable("SQOOP.SQ_JOB", 4);
-    assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
-    MJob job = handler.findJob(1, derbyConnection);
-
-    List<MConfig> fromConfigs = job.getFromJobConfig().getConfigs();
-    MConfig fromConfig = fromConfigs.get(0).clone(false);
-    MConfig newFromConfig = new MConfig(fromConfig.getName(), fromConfig.getInputs());
-    HashMap<String, String> newMap = new HashMap<String, String>();
-    newMap.put("1", "foo");
-    newMap.put("2", "bar");
-
-    ((MMapInput) newFromConfig.getInputs().get(1)).setValue(newMap);
-
-    handler.updateJobConfig(job.getPersistenceId(), newFromConfig, MConfigUpdateEntityType.USER,
-        derbyConnection);
-  }
-
-  @Test
-  public void testFindAndUpdateJobConfig() throws Exception {
-    loadJobsForLatestVersion();
-    MJob job = handler.findJob(1, derbyConnection);
-
-    assertCountForTable("SQOOP.SQ_JOB", 4);
-    assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
-    MConfig fromConfig = handler.findFromJobConfig(1, "C1JOB1", derbyConnection);
-    assertEquals("Value5", fromConfig.getInputs().get(0).getValue());
-    assertNull(fromConfig.getInputs().get(1).getValue());
-
-    MConfig toConfig = handler.findToJobConfig(1, "C2JOB2", derbyConnection);
-    assertEquals("Value11", toConfig.getInputs().get(0).getValue());
-    assertNull(toConfig.getInputs().get(1).getValue());
-    HashMap<String, String> newMap = new HashMap<String, String>();
-    newMap.put("1UPDATED", "foo");
-    newMap.put("2UPDATED", "bar");
-    ((MStringInput) toConfig.getInputs().get(0)).setValue("test");
-    ((MMapInput) toConfig.getInputs().get(1)).setValue(newMap);
-
-    handler.updateJobConfig(job.getPersistenceId(), toConfig, MConfigUpdateEntityType.USER,
-        derbyConnection);
-    assertEquals("test", toConfig.getInputs().get(0).getValue());
-    assertEquals(newMap, toConfig.getInputs().get(1).getValue());
-
-    MConfig driverConfig = handler.findDriverJobConfig(1, "d1", derbyConnection);
-    assertEquals("Value13", driverConfig.getInputs().get(0).getValue());
-    assertNull(driverConfig.getInputs().get(1).getValue());
-  }
-
-  @Test(expectedExceptions = SqoopException.class)
-  public void testNonExistingFromConfigFetch() throws Exception {
-    loadJobsForLatestVersion();
-
-    assertCountForTable("SQOOP.SQ_JOB", 4);
-    assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
-    handler.findFromJobConfig(1, "Non-ExistingC1JOB1", derbyConnection);
-  }
-
-  @Test(expectedExceptions = SqoopException.class)
-  public void testNonExistingToConfigFetch() throws Exception {
-    loadJobsForLatestVersion();
-
-    assertCountForTable("SQOOP.SQ_JOB", 4);
-    assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
-    handler.findToJobConfig(1, "Non-ExistingC2JOB1", derbyConnection);
-  }
-
-  @Test(expectedExceptions = SqoopException.class)
-  public void testNonExistingDriverConfigFetch() throws Exception {
-    loadJobsForLatestVersion();
-
-    assertCountForTable("SQOOP.SQ_JOB", 4);
-    assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
-    handler.findDriverJobConfig(1, "Non-Existingd1", derbyConnection);
-  }
-
-  @Test(expectedExceptions = SqoopException.class)
-  public void testNonExistingJobConfig() throws Exception {
-    loadJobsForLatestVersion();
-
-    assertCountForTable("SQOOP.SQ_JOB", 4);
-    assertCountForTable("SQOOP.SQ_JOB_INPUT", 24);
-    // 11 does not exist
-    handler.findDriverJobConfig(11, "Non-d1", derbyConnection);
   }
 
   public MJob getJob() {

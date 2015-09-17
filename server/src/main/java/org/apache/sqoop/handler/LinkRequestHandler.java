@@ -93,7 +93,6 @@ public class LinkRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String linkIdentifier = ctx.getLastURLElement();
     // support linkName or linkId for the api
-    long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier);
     String linkName = HandlerUtils.getLinkNameFromIdentifier(linkIdentifier);
 
     // Authorization check
@@ -102,7 +101,7 @@ public class LinkRequestHandler implements RequestHandler {
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "delete", "link", linkIdentifier);
 
-    repository.deleteLink(linkId);
+    repository.deleteLink(linkName);
     MResource resource = new MResource(linkName, MResource.TYPE.LINK);
     AuthorizationManager.getInstance().getAuthorizationHandler().removeResource(resource);
     return JsonBean.EMPTY_BEAN;
@@ -156,9 +155,9 @@ public class LinkRequestHandler implements RequestHandler {
     if (!create) {
       String linkIdentifier = ctx.getLastURLElement();
       // support linkName or linkId for the api
-      long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier);
+      String linkName = HandlerUtils.getLinkNameFromIdentifier(linkIdentifier);
       if (postedLink.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
-        MLink existingLink = repository.findLink(linkId);
+        MLink existingLink = repository.findLink(linkName);
         postedLink.setPersistenceId(existingLink.getPersistenceId());
       }
     }
@@ -207,8 +206,8 @@ public class LinkRequestHandler implements RequestHandler {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "linksByConnector", identifier);
       if (repository.findConnector(identifier) != null) {
-        long connectorId = repository.findConnector(identifier).getPersistenceId();
-        List<MLink> linkList = repository.findLinksForConnector(connectorId);
+        String connectorName = repository.findConnector(identifier).getUniqueName();
+        List<MLink> linkList = repository.findLinksForConnector(connectorName);
 
         // Authorization check
         linkList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.LINK, linkList);
@@ -237,8 +236,8 @@ public class LinkRequestHandler implements RequestHandler {
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "link", identifier);
 
-      long linkId = HandlerUtils.getLinkIdFromIdentifier(identifier);
-      MLink link = repository.findLink(linkId);
+      String linkName = HandlerUtils.getLinkNameFromIdentifier(identifier);
+      MLink link = repository.findLink(linkName);
 
       // Authorization check
       AuthorizationEngine.readLink(ctx.getUserName(), link.getName());
@@ -250,19 +249,19 @@ public class LinkRequestHandler implements RequestHandler {
 
   private LinkBean createLinkBean(List<MLink> links, Locale locale) {
     LinkBean linkBean = new LinkBean(links);
-    addLink(links, locale, linkBean);
+    addConnectorConfigBundle(locale, linkBean);
     return linkBean;
   }
 
   private LinksBean createLinksBean(List<MLink> links, Locale locale) {
     LinksBean linksBean = new LinksBean(links);
-    addLink(links, locale, linksBean);
+    addConnectorConfigBundle(locale, linksBean);
     return linksBean;
   }
 
-  private void addLink(List<MLink> links, Locale locale, LinkBean bean) {
+  private void addConnectorConfigBundle(Locale locale, LinkBean bean) {
     // Add associated resources into the bean
-    for (MLink link : links) {
+    for (MLink link : bean.getLinks()) {
       long connectorId = link.getConnectorId();
       if (!bean.hasConnectorConfigBundle(connectorId)) {
         bean.addConnectorConfigBundle(connectorId, ConnectorManager.getInstance()
@@ -275,13 +274,12 @@ public class LinkRequestHandler implements RequestHandler {
     Repository repository = RepositoryManager.getInstance().getRepository();
     String[] elements = ctx.getUrlElements();
     String linkIdentifier = elements[elements.length - 2];
-    long linkId = HandlerUtils.getLinkIdFromIdentifier(linkIdentifier);
     String linkName = HandlerUtils.getLinkNameFromIdentifier(linkIdentifier);
 
     // Authorization check
     AuthorizationEngine.enableDisableLink(ctx.getUserName(), linkName);
 
-    repository.enableLink(linkId, enabled);
+    repository.enableLink(linkName, enabled);
     return JsonBean.EMPTY_BEAN;
   }
 }

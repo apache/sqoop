@@ -46,7 +46,6 @@ import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigType;
-import org.apache.sqoop.model.MConfigUpdateEntityType;
 import org.apache.sqoop.model.MConfigurableType;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDateTimeInput;
@@ -68,7 +67,6 @@ import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.repository.JdbcRepositoryHandler;
-import org.apache.sqoop.repository.RepositoryError;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
@@ -396,7 +394,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    */
   @Override
   public void updateLink(MLink link, Connection conn) {
-    try (PreparedStatement deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteLinkInput());
+    try (PreparedStatement deleteStmt = conn.prepareStatement(crudQueries.getStmtDeleteLinkInputByLinkId());
          PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateLink());) {
       // Firstly remove old values
       deleteStmt.setLong(1, link.getPersistenceId());
@@ -426,9 +424,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public boolean existsLink(long linkId, Connection conn) {
-    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectLinkCheckById())) {
-      stmt.setLong(1, linkId);
+  public boolean existsLink(String linkName, Connection conn) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectLinkCheckByName())) {
+      stmt.setString(1, linkName);
       try (ResultSet rs = stmt.executeQuery()) {
 
         // Should be always valid in query with count
@@ -437,7 +435,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         return rs.getLong(1) == 1;
       }
     } catch (SQLException ex) {
-      logException(ex, linkId);
+      logException(ex, linkName);
       throw new SqoopException(CommonRepositoryError.COMMON_0022, ex);
     }
   }
@@ -446,10 +444,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public boolean inUseLink(long linkId, Connection conn) {
+  public boolean inUseLink(String linkName, Connection conn) {
 
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobsForLinkCheck())) {
-      stmt.setLong(1, linkId);
+      stmt.setString(1, linkName);
       try (ResultSet rs = stmt.executeQuery()) {
 
         // Should be always valid in case of count(*) query
@@ -458,7 +456,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         return rs.getLong(1) != 0;
       }
     } catch (SQLException e) {
-      logException(e, linkId);
+      logException(e, linkName);
       throw new SqoopException(CommonRepositoryError.COMMON_0029, e);
     }
   }
@@ -467,14 +465,14 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void enableLink(long linkId, boolean enabled, Connection conn) {
+  public void enableLink(String linkName, boolean enabled, Connection conn) {
 
     try (PreparedStatement enableConn = conn.prepareStatement(crudQueries.getStmtEnableLink())) {
       enableConn.setBoolean(1, enabled);
-      enableConn.setLong(2, linkId);
+      enableConn.setString(2, linkName);
       enableConn.executeUpdate();
     } catch (SQLException ex) {
-      logException(ex, linkId);
+      logException(ex, linkName);
       throw new SqoopException(CommonRepositoryError.COMMON_0038, ex);
     }
   }
@@ -483,13 +481,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void deleteLink(long linkId, Connection conn) {
+  public void deleteLink(String linkName, Connection conn) {
     try (PreparedStatement dltConn = conn.prepareStatement(crudQueries.getStmtDeleteLink())) {
-      deleteLinkInputs(linkId, conn);
-      dltConn.setLong(1, linkId);
+      deleteLinkInputs(linkName, conn);
+      dltConn.setString(1, linkName);
       dltConn.executeUpdate();
     } catch (SQLException ex) {
-      logException(ex, linkId);
+      logException(ex, linkName);
       throw new SqoopException(CommonRepositoryError.COMMON_0019, ex);
     }
   }
@@ -498,12 +496,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void deleteLinkInputs(long id, Connection conn) {
-    try (PreparedStatement dltConnInput = conn.prepareStatement(crudQueries.getStmtDeleteLinkInput())) {
-      dltConnInput.setLong(1, id);
+  public void deleteLinkInputs(String linkName, Connection conn) {
+    try (PreparedStatement dltConnInput = conn.prepareStatement(crudQueries.getStmtDeleteLinkInputByLinkName())) {
+      dltConnInput.setString(1, linkName);
       dltConnInput.executeUpdate();
     } catch (SQLException ex) {
-      logException(ex, id);
+      logException(ex, linkName);
       throw new SqoopException(CommonRepositoryError.COMMON_0019, ex);
     }
   }
@@ -576,13 +574,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public List<MLink> findLinksForConnector(long connectorId, Connection conn) {
+  public List<MLink> findLinksForConnector(String connectorName, Connection conn) {
     try (PreparedStatement linkByConnectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkForConnectorConfigurable())) {
 
-      linkByConnectorFetchStmt.setLong(1, connectorId);
+      linkByConnectorFetchStmt.setString(1, connectorName);
       return loadLinks(linkByConnectorFetchStmt, conn);
     } catch (SQLException ex) {
-      logException(ex, connectorId);
+      logException(ex, connectorName);
       throw new SqoopException(CommonRepositoryError.COMMON_0020, ex);
     }
   }
@@ -656,7 +654,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       updateStmt.executeUpdate();
 
       // Secondly remove old values
-      deleteStmt.setLong(1, job.getPersistenceId());
+      deleteStmt.setString(1, job.getName());
       deleteStmt.executeUpdate();
 
       // And reinsert new values
@@ -683,9 +681,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public boolean existsJob(long jobId, Connection conn) {
-    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobCheckById())) {
-      stmt.setLong(1, jobId);
+  public boolean existsJob(String jobName, Connection conn) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobCheckByName())) {
+      stmt.setString(1, jobName);
       try (ResultSet rs = stmt.executeQuery()) {
 
         // Should be always valid in query with count
@@ -694,7 +692,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         return rs.getLong(1) == 1;
       }
     } catch (SQLException ex) {
-      logException(ex, jobId);
+      logException(ex, jobName);
       throw new SqoopException(CommonRepositoryError.COMMON_0026, ex);
     }
   }
@@ -703,8 +701,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public boolean inUseJob(long jobId, Connection conn) {
-    MSubmission submission = findLastSubmissionForJob(jobId, conn);
+  public boolean inUseJob(String jobName, Connection conn) {
+    MSubmission submission = findLastSubmissionForJob(jobName, conn);
 
     // We have no submissions and thus job can't be in use
     if (submission == null) {
@@ -723,13 +721,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void enableJob(long jobId, boolean enabled, Connection conn) {
+  public void enableJob(String jobName, boolean enabled, Connection conn) {
     try (PreparedStatement enableConn = conn.prepareStatement(crudQueries.getStmtEnableJob())) {
       enableConn.setBoolean(1, enabled);
-      enableConn.setLong(2, jobId);
+      enableConn.setString(2, jobName);
       enableConn.executeUpdate();
     } catch (SQLException ex) {
-      logException(ex, jobId);
+      logException(ex, jobName);
       throw new SqoopException(CommonRepositoryError.COMMON_0039, ex);
     }
   }
@@ -738,12 +736,12 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void deleteJobInputs(long id, Connection conn) {
+  public void deleteJobInputs(String jobName, Connection conn) {
     try (PreparedStatement dltInput = conn.prepareStatement(crudQueries.getStmtDeleteJobInput())) {
-      dltInput.setLong(1, id);
+      dltInput.setString(1, jobName);
       dltInput.executeUpdate();
     } catch (SQLException ex) {
-      logException(ex, id);
+      logException(ex, jobName);
       throw new SqoopException(CommonRepositoryError.COMMON_0025, ex);
     }
   }
@@ -752,13 +750,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public void deleteJob(long jobId, Connection conn) {
+  public void deleteJob(String jobName, Connection conn) {
     try (PreparedStatement dlt = conn.prepareStatement(crudQueries.getStmtDeleteJob())) {
-      deleteJobInputs(jobId, conn);
-      dlt.setLong(1, jobId);
+      deleteJobInputs(jobName, conn);
+      dlt.setString(1, jobName);
       dlt.executeUpdate();
     } catch (SQLException ex) {
-      logException(ex, jobId);
+      logException(ex, jobName);
       throw new SqoopException(CommonRepositoryError.COMMON_0025, ex);
     }
   }
@@ -993,10 +991,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public List<MSubmission> findSubmissionsForJob(long jobId, Connection conn) {
+  public List<MSubmission> findSubmissionsForJob(String jobName, Connection conn) {
     List<MSubmission> submissions = new LinkedList<MSubmission>();
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionsForJob())) {
-      stmt.setLong(1, jobId);
+      stmt.setString(1, jobName);
       try (ResultSet rs = stmt.executeQuery()) {
 
         while (rs.next()) {
@@ -1015,10 +1013,10 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public MSubmission findLastSubmissionForJob(long jobId, Connection conn) {
+  public MSubmission findLastSubmissionForJob(String jobName, Connection conn) {
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSubmissionsForJob())) {
 
-      stmt.setLong(1, jobId);
+      stmt.setString(1, jobName);
       stmt.setMaxRows(1);
       try (ResultSet rs = stmt.executeQuery()) {
 
@@ -1029,7 +1027,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         return loadSubmission(rs, conn);
       }
     } catch (SQLException ex) {
-      logException(ex, jobId);
+      logException(ex, jobName);
       throw new SqoopException(CommonRepositoryError.COMMON_0037, ex);
     }
   }
@@ -1781,125 +1779,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       children.add(override);
     }
     return children;
-  }
-
-  @Override
-  public MConfig findFromJobConfig(long jobId, String configName, Connection conn) {
-    MJob job = findJob(jobId, conn);
-    if (job == null) {
-      throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
-    }
-    MFromConfig fromConfigs = job.getFromJobConfig();
-    if (fromConfigs != null) {
-      MConfig config = fromConfigs.getConfig(configName);
-      if (config == null) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0049, "for configName :" + configName);
-      }
-      return config;
-    }
-    throw new SqoopException(CommonRepositoryError.COMMON_0049, "for configName :" + configName);
-  }
-
-  @Override
-  public MConfig findToJobConfig(long jobId, String configName, Connection conn) {
-    MJob job = findJob(jobId, conn);
-    if (job == null) {
-      throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
-    }
-    MToConfig toConfigs = job.getToJobConfig();
-    if (toConfigs != null) {
-      MConfig config = toConfigs.getConfig(configName);
-      if (config == null) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0050, "for configName :" + configName);
-      }
-      return config;
-    }
-    throw new SqoopException(CommonRepositoryError.COMMON_0050, "for configName :" + configName);
-  }
-
-  @Override
-  public MConfig findDriverJobConfig(long jobId, String configName, Connection conn) {
-    MJob job = findJob(jobId, conn);
-    if (job == null) {
-      throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid id: " + jobId);
-    }
-    MDriverConfig driverConfigs = job.getDriverConfig();
-    if (driverConfigs != null) {
-      MConfig config = driverConfigs.getConfig(configName);
-      if (config == null) {
-        throw new SqoopException(CommonRepositoryError.COMMON_0051, "for configName :" + configName);
-      }
-      return config;
-    }
-    throw new SqoopException(CommonRepositoryError.COMMON_0051, "for configName :" + configName);
-  }
-
-  @Override
-  public MConfig findLinkConfig(long linkId, String configName, Connection conn) {
-    MLink link = findLink(linkId, conn);
-    if (link == null) {
-      throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid id: " + linkId);
-    }
-    MConfig driverConfig = link.getConnectorLinkConfig(configName);
-    if (driverConfig == null) {
-      throw new SqoopException(CommonRepositoryError.COMMON_0052, "for configName :" + configName);
-    }
-    return driverConfig;
-  }
-
-  @SuppressWarnings("resource")
-  @Override
-  public void updateJobConfig(long jobId, MConfig config, MConfigUpdateEntityType type,
-      Connection conn) {
-    List<MInput<?>> inputs = config.getInputs();
-
-    try (PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateJobInput())) {
-      for (MInput<?> input : inputs) {
-        if (input.isEmpty()) {
-          continue;
-        }
-        validateEditableConstraints(type, input);
-        updateStmt.setString(1, input.getUrlSafeValueString());
-        updateStmt.setLong(2, input.getPersistenceId());
-        updateStmt.setLong(3, jobId);
-        updateStmt.executeUpdate();
-      }
-    } catch (SQLException ex) {
-      logException(ex, jobId);
-      throw new SqoopException(CommonRepositoryError.COMMON_0053, ex);
-    }
-  }
-
-  private void validateEditableConstraints(MConfigUpdateEntityType type, MInput<?> input) {
-    if (input.getEditable().equals(InputEditable.CONNECTOR_ONLY)
-        && type.equals(MConfigUpdateEntityType.USER)) {
-      throw new SqoopException(CommonRepositoryError.COMMON_0055);
-    }
-    if (input.getEditable().equals(InputEditable.USER_ONLY)
-        && type.equals(MConfigUpdateEntityType.CONNECTOR)) {
-      throw new SqoopException(CommonRepositoryError.COMMON_0056);
-    }
-  }
-
-  @Override
-  public void updateLinkConfig(long linkId, MConfig config, MConfigUpdateEntityType type,
-      Connection conn) {
-    List<MInput<?>> inputs = config.getInputs();
-    try (PreparedStatement updateStmt = conn.prepareStatement(crudQueries.getStmtUpdateLinkInput());) {
-      for (MInput<?> input : inputs) {
-        if (input.isEmpty()) {
-          continue;
-        }
-        validateEditableConstraints(type, input);
-        updateStmt.setString(1, input.getUrlSafeValueString());
-        updateStmt.setLong(2, input.getPersistenceId());
-        updateStmt.setLong(3, linkId);
-        updateStmt.executeUpdate();
-      }
-    } catch (SQLException ex) {
-      logException(ex, linkId);
-      throw new SqoopException(CommonRepositoryError.COMMON_0054, ex);
-    }
   }
 
   /**

@@ -127,30 +127,34 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   public ResourceBundle getResourceBundle(long connectorId, Locale locale) {
-    ConnectorHandler handler = handlerMap.get(idToNameMap.get(connectorId));
+    return getResourceBundle(idToNameMap.get(connectorId), locale);
+  }
+
+  public ResourceBundle getResourceBundle(String connectorName, Locale locale) {
+    ConnectorHandler handler = handlerMap.get(connectorName);
     return handler.getSqoopConnector().getBundle(locale);
   }
 
   public MConnector getConnectorConfigurable(long connectorId) {
-    ConnectorHandler handler = handlerMap.get(idToNameMap.get(connectorId));
-    if (handler == null) {
+    String connectorName = idToNameMap.get(connectorId);
+    if (connectorName == null) {
       throw new SqoopException(CommonRepositoryError.COMMON_0057, "Couldn't find"
-              + " connector with id " + connectorId);
+          + " connector with id " + connectorId);
     }
-    return handler.getConnectorConfigurable();
+    return getConnectorConfigurable(connectorName);
   }
 
   public MConnector getConnectorConfigurable(String connectorName) {
     ConnectorHandler handler = handlerMap.get(connectorName);
     if (handler == null) {
-      return null;
+      throw new SqoopException(CommonRepositoryError.COMMON_0057, "Couldn't find"
+          + " connector with name " + connectorName);
     }
     return handler.getConnectorConfigurable();
   }
 
   public SqoopConnector getSqoopConnector(long connectorId) {
-    ConnectorHandler handler = handlerMap.get(idToNameMap.get(connectorId));
-    return handler.getSqoopConnector();
+    return getSqoopConnector(idToNameMap.get(connectorId));
   }
 
   public SqoopConnector getSqoopConnector(String uniqueName) {

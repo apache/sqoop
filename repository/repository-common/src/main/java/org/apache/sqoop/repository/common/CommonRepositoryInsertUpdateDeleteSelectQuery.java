@@ -277,25 +277,24 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
   private static final String STMT_ENABLE_LINK =
       "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " SET "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ENABLED) + " = ? "
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
-
-
-  // UPDATE the LINK Input
-  private static final String STMT_UPDATE_LINK_INPUT =
-      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " SET "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE) + " = ? "
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + " = ?"
-          + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " = ?";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
 
   // DML: Delete rows from link input table
-  private static final String STMT_DELETE_LINK_INPUT =
+  private static final String STMT_DELETE_LINK_INPUT_BY_NAME =
+      "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK)
+          + " IN (SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?)";
+
+  private static final String STMT_DELETE_LINK_INPUT_BY_ID =
       "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + " = ?";
 
   // DML: Delete row from link table
   private static final String STMT_DELETE_LINK =
       "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
 
   // DML: Select all links
   private static final String STMT_SELECT_LINK_ALL =
@@ -332,12 +331,14 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = ?";
+          + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + " = ?";
 
   // DML: Check if given link exists
-  private static final String STMT_SELECT_LINK_CHECK_BY_ID =
+  private static final String STMT_SELECT_LINK_CHECK_BY_NAME =
       "SELECT count(*) FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
 
   /**
    * *******JOB TABLE *************
@@ -374,38 +375,34 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
   private static final String STMT_ENABLE_JOB =
       "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " SET "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ENABLED) + " = ? "
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
-
-  // UPDATE the JOB Input
-  private static final String STMT_UPDATE_JOB_INPUT =
-      "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME) + " SET "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE) + " = ? "
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + " = ?"
-          + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " = ?";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?";
 
   // DML: Delete rows from job input table
   private static final String STMT_DELETE_JOB_INPUT =
       "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + " = ?";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB)
+          + " IN (SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?)";
 
   // DML: Delete row from job table
   private static final String STMT_DELETE_JOB =
       "DELETE FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?";
 
   // DML: Check if given job exists
-  private static final String STMT_SELECT_JOB_CHECK_BY_ID =
+  private static final String STMT_SELECT_JOB_CHECK_BY_NAME =
       "SELECT count(*) FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?";
 
   // DML: Check if there are jobs for given link
   private static final String STMT_SELECT_JOBS_FOR_LINK_CHECK =
       "SELECT"
           + " count(*)"
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
-          + " JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ? ";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ? ";
 
   //DML: Select all jobs
   private static final String STMT_SELECT_JOB_ALL =
@@ -537,7 +534,9 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " = ?"
+          + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?"
           + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " DESC";
 
   // DML: Select context type
@@ -747,12 +746,12 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
     return STMT_ENABLE_LINK;
   }
 
-  public String getStmtUpdateLinkInput() {
-    return STMT_UPDATE_LINK_INPUT;
+  public String getStmtDeleteLinkInputByLinkId() {
+    return STMT_DELETE_LINK_INPUT_BY_ID;
   }
 
-  public String getStmtDeleteLinkInput() {
-    return STMT_DELETE_LINK_INPUT;
+  public String getStmtDeleteLinkInputByLinkName() {
+    return STMT_DELETE_LINK_INPUT_BY_NAME;
   }
 
   public String getStmtDeleteLink() {
@@ -775,8 +774,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
     return STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE;
   }
 
-  public String getStmtSelectLinkCheckById() {
-    return STMT_SELECT_LINK_CHECK_BY_ID;
+  public String getStmtSelectLinkCheckByName() {
+    return STMT_SELECT_LINK_CHECK_BY_NAME;
   }
 
   public String getStmtInsertJob() {
@@ -795,10 +794,6 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
     return STMT_ENABLE_JOB;
   }
 
-  public String getStmtUpdateJobInput() {
-    return STMT_UPDATE_JOB_INPUT;
-  }
-
   public String getStmtDeleteJobInput() {
     return STMT_DELETE_JOB_INPUT;
   }
@@ -807,8 +802,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
     return STMT_DELETE_JOB;
   }
 
-  public String getStmtSelectJobCheckById() {
-    return STMT_SELECT_JOB_CHECK_BY_ID;
+  public String getStmtSelectJobCheckByName() {
+    return STMT_SELECT_JOB_CHECK_BY_NAME;
   }
 
   public String getStmtSelectJobsForLinkCheck() {

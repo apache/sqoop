@@ -79,7 +79,7 @@ public class TestJobHandling extends PostgresqlTestCase {
   @Test
   public void testFindJobFail() throws Exception {
     for (MJob job : handler.findJobs(provider.getConnection())) {
-      handler.deleteJob(job.getPersistenceId(), provider.getConnection());
+      handler.deleteJob(job.getName(), provider.getConnection());
     }
 
     // Let's try to find non existing job
@@ -128,7 +128,7 @@ public class TestJobHandling extends PostgresqlTestCase {
 
     // Delete jobs
     for (MJob job : handler.findJobs(provider.getConnection())) {
-      handler.deleteJob(job.getPersistenceId(), provider.getConnection());
+      handler.deleteJob(job.getName(), provider.getConnection());
     }
 
     // Load all two links on loaded repository
@@ -154,19 +154,19 @@ public class TestJobHandling extends PostgresqlTestCase {
 
   @Test
   public void testExistsJob() throws Exception {
-    assertTrue(handler.existsJob(1, provider.getConnection()));
-    assertTrue(handler.existsJob(2, provider.getConnection()));
-    assertFalse(handler.existsJob(3, provider.getConnection()));
+    assertTrue(handler.existsJob(JOB_A_NAME, provider.getConnection()));
+    assertTrue(handler.existsJob(JOB_B_NAME, provider.getConnection()));
+    assertFalse(handler.existsJob("NONEXISTJOB", provider.getConnection()));
 
     // Delete jobs
     for (MJob job : handler.findJobs(provider.getConnection())) {
-      handler.deleteJob(job.getPersistenceId(), provider.getConnection());
+      handler.deleteJob(job.getName(), provider.getConnection());
     }
 
     // There shouldn't be anything on empty repository
-    assertFalse(handler.existsJob(1, provider.getConnection()));
-    assertFalse(handler.existsJob(2, provider.getConnection()));
-    assertFalse(handler.existsJob(3, provider.getConnection()));
+    assertFalse(handler.existsJob(JOB_A_NAME, provider.getConnection()));
+    assertFalse(handler.existsJob(JOB_B_NAME, provider.getConnection()));
+    assertFalse(handler.existsJob("NONEXISTJOB", provider.getConnection()));
   }
 
   @Test
@@ -174,9 +174,9 @@ public class TestJobHandling extends PostgresqlTestCase {
     MSubmission submission = getSubmission(handler.findJob(1, provider.getConnection()), SubmissionStatus.RUNNING);
     handler.createSubmission(submission, provider.getConnection());
 
-    assertTrue(handler.inUseJob(1, provider.getConnection()));
-    assertFalse(handler.inUseJob(2, provider.getConnection()));
-    assertFalse(handler.inUseJob(3, provider.getConnection()));
+    assertTrue(handler.inUseJob(JOB_A_NAME, provider.getConnection()));
+    assertFalse(handler.inUseJob(JOB_B_NAME, provider.getConnection()));
+    assertFalse(handler.inUseJob("NONEXISTJOB", provider.getConnection()));
   }
 
   @Test
@@ -263,14 +263,14 @@ public class TestJobHandling extends PostgresqlTestCase {
   @Test
   public void testEnableAndDisableJob() throws Exception {
     // disable job 1
-    handler.enableJob(1, false, provider.getConnection());
+    handler.enableJob(JOB_A_NAME, false, provider.getConnection());
 
     MJob retrieved = handler.findJob(1, provider.getConnection());
     assertNotNull(retrieved);
     assertEquals(false, retrieved.getEnabled());
 
     // enable job 1
-    handler.enableJob(1, true, provider.getConnection());
+    handler.enableJob(JOB_A_NAME, true, provider.getConnection());
 
     retrieved = handler.findJob(1, provider.getConnection());
     assertNotNull(retrieved);
@@ -279,11 +279,11 @@ public class TestJobHandling extends PostgresqlTestCase {
 
   @Test
   public void testDeleteJob() throws Exception {
-    handler.deleteJob(1, provider.getConnection());
+    handler.deleteJob(JOB_A_NAME, provider.getConnection());
     Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB")), 1);
     Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB_INPUT")), 6);
 
-    handler.deleteJob(2, provider.getConnection());
+    handler.deleteJob(JOB_B_NAME, provider.getConnection());
     Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB")), 0);
     Assert.assertEquals(provider.rowCount(new TableName("SQOOP", "SQ_JOB_INPUT")), 0);
   }

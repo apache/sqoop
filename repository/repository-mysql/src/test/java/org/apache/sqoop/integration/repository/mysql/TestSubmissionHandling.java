@@ -291,7 +291,7 @@ public class TestSubmissionHandling extends MySqlTestCase {
     submission.getError().setErrorSummary(errorSummary + "morethan150");
 
     handler.createSubmission(submission, provider.getConnection());
-    List<MSubmission> submissions = handler.findSubmissionsForJob(1,
+    List<MSubmission> submissions = handler.findSubmissionsForJob(JOB_A_NAME,
         provider.getConnection());
     assertNotNull(submissions);
 
@@ -395,11 +395,11 @@ public class TestSubmissionHandling extends MySqlTestCase {
     Assert.assertEquals(
         provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 4);
 
-    handler.deleteJob(jobA.getPersistenceId(), provider.getConnection());
+    handler.deleteJob(jobA.getName(), provider.getConnection());
     Assert.assertEquals(
         provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 2);
 
-    handler.deleteJob(jobB.getPersistenceId(), provider.getConnection());
+    handler.deleteJob(jobB.getName(), provider.getConnection());
     Assert.assertEquals(
         provider.rowCount(new TableName("SQOOP", "SQ_SUBMISSION")), 0);
   }
