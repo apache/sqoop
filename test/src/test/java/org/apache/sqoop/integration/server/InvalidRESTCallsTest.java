@@ -116,6 +116,41 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
         assertResponseCode(500);
         assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0002");
       }}),
+
+    // End point /v1/connector
+    new TestDescription("Get all connectors", "v1/connector/all", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(200);
+      }}),
+    new TestDescription("Get connector by ID", "v1/connector/1", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(200);
+      }}),
+    new TestDescription("Get connector by name", "v1/connector/generic-jdbc-connector", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(200);
+      }}),
+    new TestDescription("Get connector by non-existing ID", "v1/connector/666", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(500);
+        assertServerException("org.apache.sqoop.error.code.CommonRepositoryError", "COMMON_0057");
+      }}),
+    new TestDescription("Get connector by non-existing name", "v1/connector/jarcecs-cool-connector", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(500);
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0005");
+      }}),
+    new TestDescription("Invalid post request", "v1/connector", "POST", "Random data", new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(500);
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0002");
+      }}),
   };
 
   @DataProvider(name="invalid-rest-calls-test", parallel=false)
@@ -158,6 +193,8 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
     LOG.info("error = " + desc.validator.error);
     LOG.info("input = " + desc.validator.input);
     desc.validator.validate();
+
+    LOG.info("End: " + getTestName());
   }
 
 }
