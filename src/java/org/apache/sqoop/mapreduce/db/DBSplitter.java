@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.sqoop.validation.ValidationException;
 
 /**
  * DBSplitter will generate DBInputSplits to use with DataDrivenDBInputFormat.
@@ -40,5 +41,5 @@ public interface DBSplitter {
    * type), determine a set of splits that span the given values.
    */
   List<InputSplit> split(Configuration conf, ResultSet results, String colName)
-      throws SQLException;
+      throws SQLException, ValidationException;
 }

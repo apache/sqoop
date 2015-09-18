@@ -51,7 +51,7 @@ import com.cloudera.sqoop.mapreduce.db.DateSplitter;
 import com.cloudera.sqoop.mapreduce.db.FloatSplitter;
 import com.cloudera.sqoop.mapreduce.db.IntegerSplitter;
 import com.cloudera.sqoop.mapreduce.db.TextSplitter;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit;
+import org.apache.sqoop.validation.ValidationException;
 
 /**
  * A InputFormat that reads input data from an SQL table.
@@ -197,8 +197,12 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
           + " type: " + sqlDataType);
       }
 
-      return splitter.split(job.getConfiguration(), results,
-          getDBConf().getInputOrderBy());
+      try {
+        return splitter.split(job.getConfiguration(), results,
+                  getDBConf().getInputOrderBy());
+      } catch (ValidationException e) {
+        throw new IOException(e);
+      }
     } catch (SQLException e) {
       throw new IOException(e);
     } finally {

@@ -24,6 +24,8 @@ import java.util.List;
 import com.cloudera.sqoop.mapreduce.db.TextSplitter;
 
 import junit.framework.TestCase;
+import junit.framework.Test;
+import org.apache.sqoop.validation.ValidationException;
 
 /**
  * Test that the TextSplitter implementation creates a sane set of splits.
@@ -113,7 +115,7 @@ public class TestTextSplitter extends TestCase {
     assertEquals("AVeryLon", out);
   }
 
-  public void testAlphabetSplit() throws SQLException {
+  public void testAlphabetSplit() throws SQLException, ValidationException {
     // This should give us 25 splits, one per letter.
     TextSplitter splitter = new TextSplitter();
     List<String> splits = splitter.split(25, "A", "Z", "");
@@ -123,7 +125,18 @@ public class TestTextSplitter extends TestCase {
     assertArrayEquals(expected, splits.toArray(new String [0]));
   }
 
-  public void testCommonPrefix() throws SQLException {
+    public void testAlphabetSplitWhenMinStringGreaterThanMaxString() throws SQLException {
+        TextSplitter splitter = new TextSplitter();
+        try {
+            splitter.split(4, "Z", "A", "");
+            fail();
+        } catch (ValidationException e) {
+            // expected
+            assertTrue(true);
+        }
+    }
+
+  public void testCommonPrefix() throws SQLException, ValidationException {
     // Splits between 'Hand' and 'Hardy'
     TextSplitter splitter = new TextSplitter();
     List<String> splits = splitter.split(5, "nd", "rdy", "Ha");

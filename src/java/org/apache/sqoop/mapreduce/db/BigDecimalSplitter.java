@@ -31,6 +31,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.mapreduce.db.DBSplitter;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
+import org.apache.sqoop.validation.ValidationException;
 
 /**
  * Implement DBSplitter over BigDecimal values.
@@ -39,7 +40,7 @@ public class BigDecimalSplitter implements DBSplitter  {
   private static final Log LOG = LogFactory.getLog(BigDecimalSplitter.class);
 
   public List<InputSplit> split(Configuration conf, ResultSet results,
-      String colName) throws SQLException {
+      String colName) throws SQLException, ValidationException {
 
     BigDecimal minVal = results.getBigDecimal(1);
     BigDecimal maxVal = results.getBigDecimal(2);
@@ -140,7 +141,12 @@ public class BigDecimalSplitter implements DBSplitter  {
       curVal = curVal.add(splitSize);
     }
 
-    if (splits.get(splits.size() - 1).compareTo(maxVal) != 0
+    /*
+     * If the sort order and collation of the char columns differ we can have
+     * a situation where minVal > maxVal and splits can be empty list.
+     */
+
+    if ((splits.size() > 1 && splits.get(splits.size() - 1).compareTo(maxVal) != 0)
         || splits.size() == 1) {
       // We didn't end on the maxVal. Add that to the end of the list.
       splits.add(maxVal);
