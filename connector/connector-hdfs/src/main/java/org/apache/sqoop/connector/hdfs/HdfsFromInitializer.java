@@ -18,13 +18,25 @@
 package org.apache.sqoop.connector.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.IncrementalType;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
+import org.apache.log4j.Logger;
+
+import java.io.IOException;
 
 
 public class HdfsFromInitializer extends Initializer<LinkConfiguration, FromJobConfiguration> {
+
+  public static final Logger LOG = Logger.getLogger(HdfsFromInitializer.class);
+
   /**
    * Initialize new submission based on given configuration properties. Any
    * needed temporary values might be saved to context object and they will be
@@ -36,8 +48,44 @@ public class HdfsFromInitializer extends Initializer<LinkConfiguration, FromJobC
    */
   @Override
   public void initialize(InitializerContext context, LinkConfiguration linkConfig, FromJobConfiguration jobConfig) {
+    assert jobConfig.incremental != null;
+
     Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
     HdfsUtils.configurationToContext(configuration, context.getContext());
     context.getContext().setAll(linkConfig.linkConfig.configOverrides);
+
+    boolean incremental = jobConfig.incremental.incrementalType != null && jobConfig.incremental.incrementalType == IncrementalType.NEW_FILES;
+
+    // In case of incremental import, we need to persist the highest last modified
+    try {
+      FileSystem fs = FileSystem.get(configuration);
+      Path path = new Path(jobConfig.fromJobConfig.inputDirectory);
+      LOG.info("Input directory: " + path.toString());
+
+      if(!fs.exists(path)) {
+        throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Input directory doesn't exists");
+      }
+
+      if(fs.isFile(path)) {
+        throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Input directory is a file");
+      }
+
+      if(incremental) {
+        LOG.info("Detected incremental import");
+        long maxModifiedTime = -1;
+        FileStatus[] fileStatuses = fs.listStatus(path);
+        for(FileStatus status : fileStatuses) {
+          if(maxModifiedTime < status.getModificationTime()) {
+            maxModifiedTime = status.getModificationTime();
+          }
+        }
+
+        LOG.info("Maximal age of file is: " + maxModifiedTime);
+        context.getContext().setLong(HdfsConstants.MAX_IMPORT_DATE, maxModifiedTime);
+      }
+    } catch (IOException e) {
+      throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Unexpected exception", e);
+    }
+
   }
 }

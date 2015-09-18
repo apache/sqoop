@@ -38,8 +38,10 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.hadoop.net.NodeBase;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.IncrementalType;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.job.etl.Partition;
@@ -51,6 +53,8 @@ import org.apache.sqoop.job.etl.PartitionerContext;
  * org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat.
  */
 public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfiguration> {
+
+  public static final Logger LOG = Logger.getLogger(HdfsPartitioner.class);
 
   public static final String SPLIT_MINSIZE_PERNODE =
       "mapreduce.input.fileinputformat.split.minsize.per.node";
@@ -70,6 +74,8 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
   public List<Partition> getPartitions(PartitionerContext context,
                                        LinkConfiguration linkConfiguration,
                                        FromJobConfiguration fromJobConfig) {
+    assert fromJobConfig.incremental != null;
+
     Configuration conf = new Configuration();
     HdfsUtils.contextToConfiguration(context.getContext(), conf);
 
@@ -118,6 +124,11 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
                               "size per rack " + minSizeRack);
       }
 
+      // Incremental import related options
+      boolean incremental = fromJobConfig.incremental.incrementalType != null && fromJobConfig.incremental.incrementalType == IncrementalType.NEW_FILES;
+      long lastImportedDate = fromJobConfig.incremental.lastImportedDate != null ? fromJobConfig.incremental.lastImportedDate.getMillis() : -1;
+      long maxImportDate = context.getLong(HdfsConstants.MAX_IMPORT_DATE, -1);
+
       // all the files in input set
       String indir = fromJobConfig.fromJobConfig.inputDirectory;
       FileSystem fs = FileSystem.get(conf);
@@ -125,7 +136,19 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
       List<Path> paths = new LinkedList<Path>();
       for(FileStatus status : fs.listStatus(new Path(indir))) {
         if(!status.isDir()) {
-          paths.add(status.getPath());
+          if(incremental) {
+            long modifiedDate = status.getModificationTime();
+            if(lastImportedDate < modifiedDate && modifiedDate <= maxImportDate) {
+              LOG.info("Will process input file: " + status.getPath() + " with modification date " + modifiedDate);
+              paths.add(status.getPath());
+            } else {
+              LOG.info("Skipping input file: " + status.getPath() + " with modification date " + modifiedDate);
+            }
+          } else {
+            // Without incremental mode, we're processing all files
+            LOG.info("Will process input file: " + status.getPath());
+            paths.add(status.getPath());
+          }
         }
       }
 

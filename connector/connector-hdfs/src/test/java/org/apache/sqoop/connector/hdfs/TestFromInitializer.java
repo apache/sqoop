@@ -18,30 +18,77 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
+import com.google.common.io.Files;
+import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.hdfs.configuration.IncrementalType;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.testng.annotations.Test;
 
+import java.io.File;
+
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class TestFromInitializer {
 
+  Initializer<LinkConfiguration, FromJobConfiguration> initializer;
+  InitializerContext initializerContext;
+  LinkConfiguration linkConfig;
+  FromJobConfiguration jobConfig;
+  MutableContext context;
+
+  public TestFromInitializer() {
+    linkConfig = new LinkConfiguration();
+    jobConfig = new FromJobConfiguration();
+    context = new MutableMapContext();
+    initializer = new HdfsFromInitializer();
+    initializerContext = new InitializerContext(context);
+  }
+
   @Test
   public void testConfigOverrides() {
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    FromJobConfiguration jobConfig = new FromJobConfiguration();
-
     linkConfig.linkConfig.uri = "file:///";
     linkConfig.linkConfig.configOverrides.put("key", "value");
+    jobConfig.fromJobConfig.inputDirectory = "/tmp";
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
-
-    Initializer initializer = new HdfsFromInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     assertEquals(initializerContext.getString("key"), "value");
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testFailIfInputDirectoryDoNotExists() {
+    jobConfig.fromJobConfig.inputDirectory = "/tmp/this/directory/definitely/do/not/exists";
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testFailIfInputDirectoryIsFile() throws Exception {
+    File workDir = Files.createTempDir();
+    File inputFile = File.createTempFile("part-01-", ".txt", workDir);
+    inputFile.createNewFile();
+
+    jobConfig.fromJobConfig.inputDirectory = inputFile.getAbsolutePath();
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+  }
+
+  @Test
+  public void testIncremental() throws Exception {
+    File workDir = Files.createTempDir();
+    File.createTempFile("part-01-", ".txt", workDir).createNewFile();
+    File.createTempFile("part-02-", ".txt", workDir).createNewFile();
+
+    jobConfig.fromJobConfig.inputDirectory = workDir.getAbsolutePath();
+    jobConfig.incremental.incrementalType = IncrementalType.NEW_FILES;
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    // Max import date must be defined if we are running incremental
+    assertNotNull(context.getString(HdfsConstants.MAX_IMPORT_DATE));
   }
 }

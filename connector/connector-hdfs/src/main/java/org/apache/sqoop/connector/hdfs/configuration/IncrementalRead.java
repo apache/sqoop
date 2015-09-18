@@ -17,19 +17,26 @@
  */
 package org.apache.sqoop.connector.hdfs.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Config;
+import org.apache.sqoop.model.ConfigClass;
+import org.apache.sqoop.model.Input;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.joda.time.DateTime;
 
-@ConfigurationClass
-public class FromJobConfiguration {
+@ConfigClass
+public class IncrementalRead {
+  @Input
+  public IncrementalType incrementalType;
 
-  @Config public FromJobConfig fromJobConfig;
+  @Input
+  public DateTime lastImportedDate;
 
-  @Config public IncrementalRead incremental;
-
-  public FromJobConfiguration() {
-    fromJobConfig = new FromJobConfig();
-    incremental = new IncrementalRead();
+  public static class ConfigValidator extends AbstractValidator<IncrementalRead> {
+    @Override
+    public void validate(IncrementalRead conf) {
+      if(conf.incrementalType != IncrementalType.NEW_FILES && conf.lastImportedDate != null) {
+        addMessage(Status.ERROR, "Can't specify last imported date without enabling incremental import.");
+      }
+    }
   }
-
 }

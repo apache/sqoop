@@ -34,7 +34,7 @@ public enum HdfsConnectorError implements ErrorCode{
   GENERIC_HDFS_CONNECTOR_0005("Error occurs during loader run"),
   GENERIC_HDFS_CONNECTOR_0006("Unknown job type"),
 
-  GENERIC_HDFS_CONNECTOR_0007("Invalid output directory"),
+  GENERIC_HDFS_CONNECTOR_0007("Invalid input/output directory"),
 
   GENERIC_HDFS_CONNECTOR_0008("Error occurs during destroyer run"),
 

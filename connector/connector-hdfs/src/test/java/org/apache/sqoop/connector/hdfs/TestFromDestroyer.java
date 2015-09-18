@@ -17,33 +17,36 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
-import org.apache.log4j.Logger;
+import org.apache.sqoop.common.MutableContext;
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
+import org.testng.annotations.Test;
 import org.joda.time.DateTime;
 
-public class HdfsFromDestroyer extends Destroyer<LinkConfiguration, FromJobConfiguration> {
+import static org.testng.AssertJUnit.assertEquals;
 
-  private static final Logger LOG = Logger.getLogger(HdfsFromDestroyer.class);
+public class TestFromDestroyer {
 
-  /**
-   * Callback to clean up after job execution.
-   *
-   * @param context Destroyer context
-   * @param linkConfig link configuration object
-   * @param jobConfig FROM job configuration object
-   */
-  @Override
-  public void destroy(DestroyerContext context, LinkConfiguration linkConfig, FromJobConfiguration jobConfig) {
-    LOG.info("Running HDFS connector destroyer");
+  Destroyer<LinkConfiguration, FromJobConfiguration> destroyer;
+  LinkConfiguration linkConfig;
+  FromJobConfiguration jobConfig;
+  MutableContext context;
+
+  public TestFromDestroyer() {
+    linkConfig = new LinkConfiguration();
+    jobConfig = new FromJobConfiguration();
+    context = new MutableMapContext();
+    destroyer = new HdfsFromDestroyer();
   }
 
-  @Override
-  public void updateConfiguration(DestroyerContext context, LinkConfiguration linkConfiguration, FromJobConfiguration jobConfiguration) {
-    LOG.info("Updating HDFS connector options");
-    long epoch = context.getLong(HdfsConstants.MAX_IMPORT_DATE, -1);
-    jobConfiguration.incremental.lastImportedDate = epoch == -1 ? null : new DateTime(epoch);
+  @Test
+  public void testUpdateConfiguration() {
+    DateTime dt = new DateTime();
+    context.setLong(HdfsConstants.MAX_IMPORT_DATE, dt.getMillis());
+    destroyer.updateConfiguration(new DestroyerContext(context, true, null), linkConfig, jobConfig);
+    assertEquals(jobConfig.incremental.lastImportedDate, dt);
   }
 }
