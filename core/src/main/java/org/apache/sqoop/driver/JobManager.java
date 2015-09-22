@@ -50,6 +50,7 @@ import org.apache.sqoop.request.HttpEventContext;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.utils.ClassUtils;
+import org.apache.sqoop.utils.UrlSafeUtils;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings("IS2_INCONSISTENT_SYNC")
 public class JobManager implements Reconfigurable {
@@ -277,10 +278,14 @@ public class JobManager implements Reconfigurable {
     LOG.info("Submission manager initialized: OK");
   }
 
-  public MSubmission start(long jobId, String jobName, HttpEventContext ctx) {
-
-    MSubmission mSubmission = createJobSubmission(ctx, jobId);
-    JobRequest jobRequest = createJobRequest(jobId, mSubmission);
+  public MSubmission start(String jobName, HttpEventContext ctx) {
+    MJob job = RepositoryManager.getInstance().getRepository()
+        .findJob(jobName);
+    if (!job.getEnabled()) {
+      throw new SqoopException(DriverError.DRIVER_0009, "Job: " + jobName);
+    }
+    MSubmission mSubmission = createJobSubmission(ctx, job.getPersistenceId());
+    JobRequest jobRequest = createJobRequest(mSubmission, job);
     // Bootstrap job to execute in the configured execution engine
     prepareJob(jobRequest);
     // Make sure that this job id is not currently running and submit the job
@@ -289,7 +294,7 @@ public class JobManager implements Reconfigurable {
       MSubmission lastSubmission = RepositoryManager.getInstance().getRepository()
           .findLastSubmissionForJob(jobName);
       if (lastSubmission != null && lastSubmission.getStatus().isRunning()) {
-        throw new SqoopException(DriverError.DRIVER_0002, "Job with id " + jobId);
+        throw new SqoopException(DriverError.DRIVER_0002, "Job with name " + jobName);
       }
       // NOTE: the following is a blocking call
       boolean success = submissionEngine.submit(jobRequest);
@@ -305,10 +310,7 @@ public class JobManager implements Reconfigurable {
     return mSubmission;
   }
 
-  private JobRequest createJobRequest(long jobId, MSubmission submission) {
-    // get job
-    MJob job = getJob(jobId);
-
+  private JobRequest createJobRequest(MSubmission submission, MJob job) {
     // get from/to connections for the job
     MLink fromConnection = getLink(job.getFromLinkId());
     MLink toConnection = getLink(job.getToLinkId());
@@ -361,7 +363,7 @@ public class JobManager implements Reconfigurable {
     jobRequest.setDriverConfig(driverConfig);
     jobRequest.setJobName(job.getName());
     jobRequest.setJobId(job.getPersistenceId());
-    jobRequest.setNotificationUrl(notificationBaseUrl + jobId + "/status");
+    jobRequest.setNotificationUrl(notificationBaseUrl + UrlSafeUtils.urlPathEncode(job.getName()) + "/status");
     jobRequest.setIntermediateDataFormat(fromConnector.getIntermediateDataFormat(), Direction.FROM);
     jobRequest.setIntermediateDataFormat(toConnector.getIntermediateDataFormat(), Direction.TO);
 
@@ -440,8 +442,8 @@ public class JobManager implements Reconfigurable {
     MLink link = RepositoryManager.getInstance().getRepository()
         .findLink(linkId);
     if (!link.getEnabled()) {
-      throw new SqoopException(DriverError.DRIVER_0010, "Connection id: "
-          + link.getPersistenceId());
+      throw new SqoopException(DriverError.DRIVER_0010, "Connection: "
+          + link.getName());
     }
     return link;
   }
@@ -453,7 +455,7 @@ public class JobManager implements Reconfigurable {
     }
 
     if (!job.getEnabled()) {
-      throw new SqoopException(DriverError.DRIVER_0009, "Job id: " + job.getPersistenceId());
+      throw new SqoopException(DriverError.DRIVER_0009, "Job: " + job.getName());
     }
     return job;
   }
@@ -606,13 +608,13 @@ public class JobManager implements Reconfigurable {
         request.getJobConfig(Direction.TO));
   }
 
-  public MSubmission stop(long jobId, String jobName, HttpEventContext ctx) {
+  public MSubmission stop(String jobName, HttpEventContext ctx) {
 
     Repository repository = RepositoryManager.getInstance().getRepository();
     MSubmission mSubmission = repository.findLastSubmissionForJob(jobName);
 
     if (mSubmission == null || !mSubmission.getStatus().isRunning()) {
-      throw new SqoopException(DriverError.DRIVER_0003, "Job with id " + jobId
+      throw new SqoopException(DriverError.DRIVER_0003, "Job with name " + jobName
           + " is not running hence cannot stop");
     }
     submissionEngine.stop(mSubmission.getExternalJobId());
@@ -626,12 +628,12 @@ public class JobManager implements Reconfigurable {
     return mSubmission;
   }
 
-  public MSubmission status(long jobId, String jobName) {
+  public MSubmission status(String jobName) {
     Repository repository = RepositoryManager.getInstance().getRepository();
     MSubmission mSubmission = repository.findLastSubmissionForJob(jobName);
 
     if (mSubmission == null) {
-      return new MSubmission(jobId, new Date(), SubmissionStatus.NEVER_EXECUTED);
+      return null;
     }
     // If the submission is in running state, let's update it
     if (mSubmission.getStatus().isRunning()) {
@@ -647,7 +649,7 @@ public class JobManager implements Reconfigurable {
    *
    * @param submission Submission to update
    */
-  public void updateSubmission(MSubmission submission) {
+  private void updateSubmission(MSubmission submission) {
     // We're expecting that this method will be called only if we think that the submission is still running
     assert submission.getStatus().isRunning();
 

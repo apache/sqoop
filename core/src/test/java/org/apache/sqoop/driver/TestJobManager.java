@@ -115,8 +115,8 @@ public class TestJobManager {
     MLink testConnection = new MLink(123l, null);
     testConnection.setPersistenceId(1234);
     testConnection.setEnabled(false);
-    SqoopException exception = new SqoopException(DriverError.DRIVER_0010, "Connection id: "
-        + testConnection.getPersistenceId());
+    SqoopException exception = new SqoopException(DriverError.DRIVER_0010, "Connection: "
+        + testConnection.getName());
 
     MLink mConnectionSpy = org.mockito.Mockito.spy(testConnection);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
@@ -147,8 +147,8 @@ public class TestJobManager {
     MJob testJob = job(123l, 456l);
     testJob.setEnabled(false);
     testJob.setPersistenceId(1111);
-    SqoopException exception = new SqoopException(DriverError.DRIVER_0009, "Job id: "
-        + testJob.getPersistenceId());
+    SqoopException exception = new SqoopException(DriverError.DRIVER_0009, "Job: "
+        + testJob.getName());
 
     MJob mJobSpy = org.mockito.Mockito.spy(testJob);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);

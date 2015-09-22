@@ -32,7 +32,7 @@ public enum DriverError implements ErrorCode {
 
   DRIVER_0003("Given job is not running"),
 
-  DRIVER_0004("Unknown job id"),
+  DRIVER_0004("Unknown job"),
 
   DRIVER_0005("Unsupported job type"),
 

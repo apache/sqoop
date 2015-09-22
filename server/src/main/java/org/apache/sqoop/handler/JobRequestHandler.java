@@ -19,6 +19,7 @@ package org.apache.sqoop.handler;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -52,6 +53,7 @@ import org.apache.sqoop.security.AuthorizationManager;
 import org.apache.sqoop.server.RequestContext;
 import org.apache.sqoop.server.RequestHandler;
 import org.apache.sqoop.server.common.ServerError;
+import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.validation.ConfigValidationResult;
 import org.apache.sqoop.validation.Status;
 import org.json.simple.JSONObject;
@@ -383,7 +385,7 @@ public class JobRequestHandler implements RequestHandler {
     }
 
     MSubmission submission = JobManager.getInstance()
-        .start(jobId, jobName, prepareRequestEventContext(ctx));
+        .start(jobName, prepareRequestEventContext(ctx));
     return new SubmissionBean(submission);
   }
 
@@ -398,7 +400,7 @@ public class JobRequestHandler implements RequestHandler {
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "stop", "job", String.valueOf(jobId));
-    MSubmission submission = JobManager.getInstance().stop(jobId, jobName, prepareRequestEventContext(ctx));
+    MSubmission submission = JobManager.getInstance().stop(jobName, prepareRequestEventContext(ctx));
     return new SubmissionBean(submission);
   }
 
@@ -413,7 +415,10 @@ public class JobRequestHandler implements RequestHandler {
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
         ctx.getRequest().getRemoteAddr(), "status", "job", String.valueOf(jobId));
-    MSubmission submission = JobManager.getInstance().status(jobId, jobName);
+    MSubmission submission = JobManager.getInstance().status(jobName);
+    if (submission == null) {
+      submission = new MSubmission(jobId, new Date(), SubmissionStatus.NEVER_EXECUTED);
+    }
 
     return new SubmissionBean(submission);
   }
