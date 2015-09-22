@@ -24,6 +24,7 @@ import org.apache.sqoop.json.JobsBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.utils.UrlSafeUtils;
 import org.json.simple.JSONObject;
 
 /**
@@ -51,7 +52,7 @@ public class JobResourceRequest extends ResourceRequest {
   public JobBean readByConnector(String serverUrl, String cArg) {
     JobsBean bean = new JobsBean();
     if (cArg != null) {
-      String response = super.get(serverUrl + RESOURCE + "?cname=" + cArg);
+      String response = super.get(serverUrl + RESOURCE + "?cname=" + UrlSafeUtils.urlEncode(cArg));
       JSONObject jsonObject = JSONUtils.parse(response);
       bean.restore(jsonObject);
     }
@@ -63,7 +64,7 @@ public class JobResourceRequest extends ResourceRequest {
     if (jobArg == null) {
       response = super.get(serverUrl + RESOURCE + "all");
     } else {
-      response = super.get(serverUrl + RESOURCE + jobArg);
+      response = super.get(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(jobArg));
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
@@ -97,29 +98,29 @@ public class JobResourceRequest extends ResourceRequest {
   }
 
   public void delete(String serverUrl, String jobArg) {
-    super.delete(serverUrl + RESOURCE + jobArg);
+    super.delete(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(jobArg));
   }
 
   public void enable(String serverUrl, String jobArg, Boolean enabled) {
     if (enabled) {
-      super.put(serverUrl + RESOURCE + jobArg + ENABLE, null);
+      super.put(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(jobArg) + ENABLE, null);
     } else {
-      super.put(serverUrl + RESOURCE + jobArg + DISABLE, null);
+      super.put(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(jobArg) + DISABLE, null);
     }
   }
 
   public SubmissionBean start(String serverUrl, String jobArg) {
-    String response = super.put(serverUrl + RESOURCE + jobArg + START, null);
+    String response = super.put(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(jobArg) + START, null);
     return createJobSubmissionResponse(response);
   }
 
   public SubmissionBean stop(String serverUrl, String jobArg) {
-    String response = super.put(serverUrl + RESOURCE + jobArg + STOP, null);
+    String response = super.put(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(jobArg) + STOP, null);
     return createJobSubmissionResponse(response);
   }
 
   public SubmissionBean status(String serverUrl, String jobArg) {
-    String response = super.get(serverUrl + RESOURCE + jobArg + STATUS);
+    String response = super.get(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(jobArg) + STATUS);
     return createJobSubmissionResponse(response);
   }
 

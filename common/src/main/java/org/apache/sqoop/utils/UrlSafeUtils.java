@@ -49,6 +49,23 @@ public final class UrlSafeUtils {
     }
   }
 
+  public static String urlPathEncode(String path) {
+    try {
+      //return URLEncoder.encode(path, ENCODING_UTF8).replaceAll("\\+", "%20");
+      return URLEncoder.encode(URLEncoder.encode(path, ENCODING_UTF8), ENCODING_UTF8);
+    } catch (UnsupportedEncodingException uee) {
+      throw new RuntimeException(uee);
+    }
+  }
+
+  public static String urlPathDecode(String path) {
+    try {
+      //return URLDecoder.decode(path.replaceAll("%20", "\\+"), ENCODING_UTF8);
+      return URLDecoder.decode(URLDecoder.decode(path, ENCODING_UTF8), ENCODING_UTF8);
+    } catch (UnsupportedEncodingException uee) {
+      throw new RuntimeException(uee);
+    }
+  }
 
   private UrlSafeUtils() {
     // Disable explicit object creation

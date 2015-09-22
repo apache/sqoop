@@ -23,6 +23,7 @@ import org.apache.sqoop.model.MPrincipal;
 import org.apache.sqoop.model.MPrivilege;
 import org.apache.sqoop.model.MResource;
 import org.apache.sqoop.model.MRole;
+import org.apache.sqoop.utils.UrlSafeUtils;
 import org.json.simple.JSONObject;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public class AuthorizationResourceRequest extends ResourceRequest {
   }
 
   public void dropRole(String serverUrl, MRole role) {
-    super.delete(serverUrl + RESOURCE + ROLES + "/" + role.getName());
+    super.delete(serverUrl + RESOURCE + ROLES + "/" + UrlSafeUtils.urlPathEncode(role.getName()));
   }
 
   public void grantRevokeRole(String serverUrl, List<MRole> roles, List<MPrincipal> principals, boolean isGrant) {
@@ -86,8 +87,8 @@ public class AuthorizationResourceRequest extends ResourceRequest {
 
   public RolesBean readRolesByPrincipal(String serverUrl, MPrincipal principal) {
     String response = super.get(serverUrl + RESOURCE + ROLES
-            + "?principal_name=" + principal.getName()
-            + "&principal_type=" + principal.getType());
+            + "?principal_name=" + UrlSafeUtils.urlEncode(principal.getName())
+            + "&principal_type=" + UrlSafeUtils.urlEncode(principal.getType()));
     JSONObject jsonObject = JSONUtils.parse(response);
     RolesBean bean = new RolesBean();
     bean.restore(jsonObject);
@@ -96,7 +97,7 @@ public class AuthorizationResourceRequest extends ResourceRequest {
 
   public PrincipalsBean readPrincipalsByRole(String serverUrl, MRole role) {
     String response = super.get(serverUrl + RESOURCE + PRINCIPALS
-            + "?role_name=" + role.getName());
+            + "?role_name=" + UrlSafeUtils.urlEncode(role.getName()));
     JSONObject jsonObject = JSONUtils.parse(response);
     PrincipalsBean bean = new PrincipalsBean();
     bean.restore(jsonObject);
@@ -123,11 +124,11 @@ public class AuthorizationResourceRequest extends ResourceRequest {
 
   public PrivilegesBean readPrivilegesByPrincipal(String serverUrl, MPrincipal principal, MResource resource) {
     String url = serverUrl + RESOURCE + PRIVILEGES
-            + "?principal_name=" + principal.getName()
-            + "&principal_type=" + principal.getType();
+            + "?principal_name=" + UrlSafeUtils.urlEncode(principal.getName())
+            + "&principal_type=" + UrlSafeUtils.urlEncode(principal.getType());
     if (resource != null) {
-      url += "&resource_name=" + resource.getName();
-      url += "&resource_type=" + resource.getType();
+      url += "&resource_name=" + UrlSafeUtils.urlEncode(resource.getName());
+      url += "&resource_type=" + UrlSafeUtils.urlEncode(resource.getType());
     }
     String response = super.get(url);
     JSONObject jsonObject = JSONUtils.parse(response);

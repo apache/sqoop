@@ -24,6 +24,7 @@ import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.security.AuthenticationManager;
 import org.apache.sqoop.security.SecurityConstants;
 import org.apache.sqoop.server.common.ServerError;
+import org.apache.sqoop.utils.UrlSafeUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,14 +87,18 @@ public class RequestContext {
   public String getLastURLElement() {
     String uri = getRequest().getRequestURI();
     int slash = uri.lastIndexOf('/');
-    return uri.substring(slash + 1);
+    return UrlSafeUtils.urlPathDecode(uri.substring(slash + 1));
   }
 
   /**
    * Return all elements in the url as an array
    */
   public String[] getUrlElements() {
-    return getRequest().getRequestURI().split("/");
+    String[] elements = getRequest().getRequestURI().split("/");
+    for(int i = 0; i < elements.length; i++) {
+      elements[i] = UrlSafeUtils.urlPathDecode(elements[i]);
+    }
+    return elements;
   }
 
   /**
@@ -101,7 +106,11 @@ public class RequestContext {
    */
   public String getParameterValue(String name) {
     String[] values = getRequest().getParameterValues(name);
-    return values != null ? values[0] : null;
+    String value = values != null ? values[0] : null;
+    if (value != null) {
+      value = UrlSafeUtils.urlDecode(value);
+    }
+    return value;
   }
 
   /**

@@ -20,6 +20,7 @@ package org.apache.sqoop.client.request;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.SubmissionsBean;
+import org.apache.sqoop.utils.UrlSafeUtils;
 import org.json.simple.JSONObject;
 
 /**
@@ -45,7 +46,7 @@ public class SubmissionResourceRequest extends  ResourceRequest {
       response = super.get(serverUrl + RESOURCE);
     } else {
       // submission per job ( name preferred, we fall back to id)
-      response = super.get(serverUrl + RESOURCE + "?jname=" + jArg);
+      response = super.get(serverUrl + RESOURCE + "?jname=" + UrlSafeUtils.urlEncode(jArg));
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     SubmissionsBean submissionBean = new SubmissionsBean();

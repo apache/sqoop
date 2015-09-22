@@ -23,6 +23,7 @@ import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.utils.UrlSafeUtils;
 import org.json.simple.JSONObject;
 
 /**
@@ -49,7 +50,7 @@ public class LinkResourceRequest extends ResourceRequest {
     if (linkArg == null) {
       response = super.get(serverUrl + LINK_RESOURCE + "all");
     } else {
-      response = super.get(serverUrl + LINK_RESOURCE + linkArg);
+      response = super.get(serverUrl + LINK_RESOURCE + UrlSafeUtils.urlPathEncode(linkArg));
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
@@ -82,7 +83,7 @@ public class LinkResourceRequest extends ResourceRequest {
   }
 
   public void delete(String serverUrl, String arg) {
-     super.delete(serverUrl + LINK_RESOURCE + arg);
+     super.delete(serverUrl + LINK_RESOURCE + UrlSafeUtils.urlPathEncode(arg));
   }
 
   public void enable(String serverUrl, String lArg, Boolean enabled) {
