@@ -137,7 +137,7 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("org.apache.sqoop.error.code.CommonRepositoryError", "COMMON_0057");
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0006");
       }}),
     new TestDescription("Get connector by non-existing name", "v1/connector/jarcecs-cool-connector", "GET", null, new Validator() {
       @Override
