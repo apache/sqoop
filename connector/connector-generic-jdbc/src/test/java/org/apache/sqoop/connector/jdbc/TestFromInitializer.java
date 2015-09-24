@@ -314,34 +314,6 @@ public class TestFromInitializer {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testTableSqlWithTableColumns() throws Exception {
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    FromJobConfiguration jobConfig = new FromJobConfiguration();
-
-    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
-    jobConfig.fromJobConfig.sql = schemalessTableSql;
-    jobConfig.fromJobConfig.columns = tableColumns;
-    jobConfig.fromJobConfig.partitionColumn = "DCOL";
-
-    MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
-
-    @SuppressWarnings("rawtypes")
-    Initializer initializer = new GenericJdbcFromInitializer();
-    initializer.initialize(initializerContext, linkConfig, jobConfig);
-
-    verifyResult(context,
-        "SELECT ICOL,VCOL FROM (" + schemalessTableSql + ") SQOOP_SUBQUERY_ALIAS",
-        tableColumns,
-        "\"DCOL\"",
-        String.valueOf(Types.DOUBLE),
-        String.valueOf((double)START),
-        String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
   public void testTableNameWithSchema() throws Exception {
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
@@ -471,35 +443,6 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
     Schema schema = initializer.getSchema(initializerContext, linkConfig, jobConfig);
     assertEquals(getSchema("Query"), schema);
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testTableSqlWithTableColumnsWithSchema() throws Exception {
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    FromJobConfiguration jobConfig = new FromJobConfiguration();
-
-    linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
-    linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
-    jobConfig.fromJobConfig.schemaName = schemaName;
-    jobConfig.fromJobConfig.sql = tableSql;
-    jobConfig.fromJobConfig.columns = tableColumns;
-    jobConfig.fromJobConfig.partitionColumn = "DCOL";
-
-    MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
-
-    @SuppressWarnings("rawtypes")
-    Initializer initializer = new GenericJdbcFromInitializer();
-    initializer.initialize(initializerContext, linkConfig, jobConfig);
-
-    verifyResult(context,
-        "SELECT ICOL,VCOL FROM (" + tableSql + ") SQOOP_SUBQUERY_ALIAS",
-        tableColumns,
-        "\"DCOL\"",
-        String.valueOf(Types.DOUBLE),
-        String.valueOf((double)START),
-        String.valueOf((double)(START+NUMBER_OF_ROWS-1)));
   }
 
   /**

@@ -285,25 +285,10 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
       }
     } else {
       assert tableSql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
+      dataSql = tableSql;
 
-      if (tableColumns == null) {
-        dataSql = tableSql;
-
-        String[] queryColumns = executor.getQueryColumns(dataSql.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));
-        fieldNames = executor.columnList(queryColumns);
-      } else {
-        StringBuilder builder = new StringBuilder();
-        builder.append("SELECT ");
-        builder.append(tableColumns);
-        builder.append(" FROM ");
-        builder.append("(");
-        builder.append(tableSql);
-        builder.append(") ");
-        builder.append(GenericJdbcConnectorConstants.SUBQUERY_ALIAS);
-        dataSql = builder.toString();
-
-        fieldNames = tableColumns;
-      }
+      String[] queryColumns = executor.getQueryColumns(dataSql.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));
+      fieldNames = executor.columnList(queryColumns);
     }
 
     LOG.info("Using dataSql: " + dataSql);
