@@ -210,10 +210,12 @@ public class TestLinkHandling extends DerbyTestCase {
     loadLinksForLatestVersion();
 
     assertFalse(handler.inUseLink("CA", getDerbyDatabaseConnection()));
+    assertFalse(handler.inUseLink("CB", getDerbyDatabaseConnection()));
 
     loadJobsForLatestVersion();
 
     assertTrue(handler.inUseLink("CA", getDerbyDatabaseConnection()));
+    assertTrue(handler.inUseLink("CB", getDerbyDatabaseConnection()));
   }
 
   @Test

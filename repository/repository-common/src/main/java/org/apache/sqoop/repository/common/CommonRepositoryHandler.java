@@ -448,6 +448,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobsForLinkCheck())) {
       stmt.setString(1, linkName);
+      stmt.setString(2, linkName);
       try (ResultSet rs = stmt.executeQuery()) {
 
         // Should be always valid in case of count(*) query

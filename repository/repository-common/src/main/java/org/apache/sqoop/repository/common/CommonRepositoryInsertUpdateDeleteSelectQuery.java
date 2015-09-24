@@ -397,12 +397,18 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   // DML: Check if there are jobs for given link
   private static final String STMT_SELECT_JOBS_FOR_LINK_CHECK =
-      "SELECT"
-          + " count(*)"
+      "SELECT SUM(CNT) FROM ("
+          + " SELECT count(*) as CNT"
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
           + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
-          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ? ";
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ? "
+          + " UNION ALL"
+          + " SELECT count(*) as CNT"
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TO_LINK) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ? ) as JOB_COUNT";
 
   //DML: Select all jobs
   private static final String STMT_SELECT_JOB_ALL =

@@ -668,7 +668,7 @@ abstract public class DerbyTestCase {
     case 7:
       for (String name : new String[] { "JA", "JB", "JC", "JD" }) {
         runQuery("INSERT INTO SQOOP.SQ_JOB(SQB_NAME, SQB_FROM_LINK, SQB_TO_LINK)" + " VALUES('"
-            + name + index + "', 1, 1)");
+            + name + index + "', 1, 2)");
       }
 
       // Odd IDs inputs have values

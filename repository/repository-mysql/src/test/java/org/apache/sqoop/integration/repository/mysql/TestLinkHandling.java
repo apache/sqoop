@@ -217,15 +217,19 @@ public class TestLinkHandling extends MySqlTestCase {
     // Create job and submission and make that job in use to make sure link is
     // in use.
     MLink linkA = handler.findLink(LINK_A_NAME, provider.getConnection());
+    MLink linkB = handler.findLink(LINK_B_NAME, provider.getConnection());
     MJob job = getJob("Job-A",
         handler.findConnector("A", provider.getConnection()),
-        handler.findConnector("B", provider.getConnection()), linkA,
-        handler.findLink(LINK_B_NAME, provider.getConnection()));
+        handler.findConnector("B", provider.getConnection()),
+        linkA,
+        linkB);
     handler.createJob(job, provider.getConnection());
     MSubmission submission = getSubmission(job, SubmissionStatus.RUNNING);
     handler.createSubmission(submission, provider.getConnection());
 
     assertTrue(handler.inUseLink(linkA.getName(),
+        provider.getConnection()));
+    assertTrue(handler.inUseLink(linkB.getName(),
         provider.getConnection()));
   }
 
