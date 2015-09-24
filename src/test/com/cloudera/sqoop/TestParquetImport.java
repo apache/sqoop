@@ -78,6 +78,31 @@ public class TestParquetImport extends ImportJobTestCase {
     return args.toArray(new String[args.size()]);
   }
 
+  protected String[] getOutputQueryArgv(boolean includeHadoopFlags, String[] extraArgs) {
+    ArrayList<String> args = new ArrayList<String>();
+
+    if (includeHadoopFlags) {
+      CommonArgs.addHadoopFlags(args);
+    }
+
+    args.add("--query");
+    args.add("SELECT * FROM " + getTableName() + " WHERE $CONDITIONS");
+    args.add("--connect");
+    args.add(HsqldbTestServer.getUrl());
+    args.add("--target-dir");
+    args.add(getWarehouseDir() + "/" + getTableName());
+    args.add("--m");
+    args.add("1");
+    args.add("--split-by");
+    args.add("INTFIELD1");
+    args.add("--as-parquetfile");
+    if (extraArgs != null) {
+      args.addAll(Arrays.asList(extraArgs));
+    }
+
+    return args.toArray(new String[args.size()]);
+  }
+
   public void testSnappyCompression() throws IOException {
     runParquetImportTest("snappy");
   }
@@ -192,6 +217,24 @@ public class TestParquetImport extends ImportJobTestCase {
       assertTrue(reader.hasNext());
       GenericRecord record1 = reader.next();
       assertNull(record1.get("DATA_COL0"));
+      assertFalse(reader.hasNext());
+    } finally {
+      reader.close();
+    }
+  }
+
+  public void testQueryImport() throws IOException, SQLException {
+    String [] types = { "INT" };
+    String [] vals = { "1" };
+    createTableWithColTypes(types, vals);
+
+    runImport(getOutputQueryArgv(true, null));
+
+    DatasetReader<GenericRecord> reader = getReader();
+    try {
+      assertTrue(reader.hasNext());
+      GenericRecord record1 = reader.next();
+      assertEquals(1, record1.get("DATA_COL0"));
       assertFalse(reader.hasNext());
     } finally {
       reader.close();
