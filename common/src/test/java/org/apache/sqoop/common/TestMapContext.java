@@ -23,6 +23,7 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static junit.framework.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -40,6 +41,9 @@ public class TestMapContext {
     options.put("testkey", "testvalue");
     MapContext mc = new MapContext(options);
     Assert.assertEquals("testvalue", mc.getString("testkey"));
+
+    MapContext nullMc = new MapContext(null);
+    assertNull(nullMc.getString("random.key.property"));
   }
 
   /**

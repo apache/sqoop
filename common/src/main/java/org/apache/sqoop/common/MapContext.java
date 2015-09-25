@@ -36,7 +36,7 @@ public class MapContext implements ImmutableContext {
   private final Map<String, String> options;
 
   public MapContext(Map<String, String> options) {
-    this.options = options;
+    this.options = options == null ? new HashMap<String, String>() : options;
   }
 
   protected Map<String, String> getOptions() {

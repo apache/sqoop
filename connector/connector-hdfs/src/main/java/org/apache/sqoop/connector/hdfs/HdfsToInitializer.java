@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
@@ -47,8 +48,8 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
     assert jobConfig.toJobConfig.outputDirectory != null;
 
     Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
+    HdfsUtils.contextToConfiguration(new MapContext(linkConfig.linkConfig.configOverrides), configuration);
     HdfsUtils.configurationToContext(configuration, context.getContext());
-    context.getContext().setAll(linkConfig.linkConfig.configOverrides);
 
     boolean appendMode = Boolean.TRUE.equals(jobConfig.toJobConfig.appendMode);
 

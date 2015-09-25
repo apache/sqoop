@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.IncrementalType;
@@ -51,8 +52,8 @@ public class HdfsFromInitializer extends Initializer<LinkConfiguration, FromJobC
     assert jobConfig.incremental != null;
 
     Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
+    HdfsUtils.contextToConfiguration(new MapContext(linkConfig.linkConfig.configOverrides), configuration);
     HdfsUtils.configurationToContext(configuration, context.getContext());
-    context.getContext().setAll(linkConfig.linkConfig.configOverrides);
 
     boolean incremental = jobConfig.incremental.incrementalType != null && jobConfig.incremental.incrementalType == IncrementalType.NEW_FILES;
 

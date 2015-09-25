@@ -50,6 +50,10 @@ public class TestMutableMapContext {
     assertEquals(context.getLong("long", -1), 1L);
     assertEquals(context.getInt("integer", -1), 13);
     assertEquals(context.getBoolean("boolean", false), true);
+
+    context = new MutableMapContext(null);
+    context.setString("key", "value");
+    assertEquals(context.getString("key"), "value");
   }
 
   @Test
