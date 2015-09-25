@@ -74,18 +74,6 @@ limitations under the License.
     <url-pattern>/v1/connector/*</url-pattern>
   </servlet-mapping>
 
-  <!-- Connectors servlet -->
-  <servlet>
-    <servlet-name>v1.ConnectorsServlet</servlet-name>
-    <servlet-class>org.apache.sqoop.server.v1.ConnectorServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>v1.ConnectorsServlet</servlet-name>
-    <url-pattern>/v1/connectors/*</url-pattern>
-  </servlet-mapping>
-
   <!-- Driver servlet -->
   <servlet>
     <servlet-name>v1.DriverServlet</servlet-name>
