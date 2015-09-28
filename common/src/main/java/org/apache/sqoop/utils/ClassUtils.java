@@ -17,10 +17,14 @@
  */
 package org.apache.sqoop.utils;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
@@ -32,6 +36,29 @@ public final class ClassUtils {
 
   private static final Logger LOG = Logger.getLogger(ClassUtils.class);
 
+  private static final Map<ClassLoader, Map<String, WeakReference<Class<?>>>>
+    CACHE_CLASSES = new WeakHashMap<ClassLoader, Map<String, WeakReference<Class<?>>>>();
+
+  /**
+   * Sentinel value to store negative cache results in {@link #CACHE_CLASSES}.
+   */
+  private static final Class<?> NEGATIVE_CACHE_SENTINEL =
+    NegativeCacheSentinel.class;
+
+  private static ClassLoader defaultClassLoader;
+  static {
+    defaultClassLoader = Thread.currentThread().getContextClassLoader();
+    if (defaultClassLoader == null) {
+      defaultClassLoader = ClassUtils.class.getClassLoader();
+    }
+  }
+
+  /**
+   * A unique class which is used as a sentinel value in the caching
+   * for loadClass.
+   */
+  private static abstract class NegativeCacheSentinel {}
+
   /**
    * Load class by given name and return corresponding Class object.
    *
@@ -42,30 +69,58 @@ public final class ClassUtils {
    * @return Class instance or NULL
    */
   public static Class<?> loadClass(String className) {
+    return loadClassWithClassLoader(className, defaultClassLoader);
+  }
+
+  /**
+   * Load class by given name and classLoader.
+   *
+   * This method will return null in case that the class is not found, no
+   * exception will be rised.
+   *
+   * @param className Name of class
+   * @param loader classLoader to load the given class
+   * @return Class instance or NULL
+   */
+  public static Class<?> loadClassWithClassLoader(String className, ClassLoader loader) {
     if(className == null) {
       return null;
     }
 
-    Class<?> klass = null;
-    try {
-      klass = Class.forName(className);
-    } catch (ClassNotFoundException ex) {
-      LOG.debug("Exception while loading class: " + className, ex);
-    }
-
-    if (klass == null) {
-      // Try the context class loader if one exists
-      ClassLoader ctxLoader = Thread.currentThread().getContextClassLoader();
-      if (ctxLoader != null) {
-        try {
-          klass = ctxLoader.loadClass(className);
-        } catch (ClassNotFoundException ex) {
-          LOG.debug("Exception while load class: " + className, ex);
-        }
+    Map<String, WeakReference<Class<?>>> map;
+    synchronized (CACHE_CLASSES) {
+      map = CACHE_CLASSES.get(loader);
+      if (map == null) {
+        map = Collections.synchronizedMap(
+          new WeakHashMap<String, WeakReference<Class<?>>>());
+        CACHE_CLASSES.put(loader, map);
       }
     }
 
-    return klass;
+    Class<?> klass = null;
+    WeakReference<Class<?>> ref = map.get(className);
+    if (ref != null) {
+      klass = ref.get();
+    }
+
+    if (klass == null) {
+      try {
+        klass = Class.forName(className, true, loader);
+      } catch (ClassNotFoundException ex) {
+        // Leave a marker that the class isn't found
+        map.put(className, new WeakReference<Class<?>>(NEGATIVE_CACHE_SENTINEL));
+        LOG.debug("Exception while loading class: " + className, ex);
+        return null;
+      }
+      // two putters can race here, but they'll put the same class
+      map.put(className, new WeakReference<Class<?>>(klass));
+      return klass;
+    } else if (klass == NEGATIVE_CACHE_SENTINEL) {
+      return null; // not found
+    } else {
+      // cache hit
+      return klass;
+    }
   }
 
   /**
@@ -79,7 +134,20 @@ public final class ClassUtils {
    * @return Instance of new class or NULL in case of any error
    */
   public static Object instantiate(String className, Object ... args) {
-    return instantiate(loadClass(className), args);
+    return instantiateWithClassLoader(className, defaultClassLoader, args);
+  }
+
+  /**
+   * Create instance of given class and given parameters.
+   *
+   * @param className Class name
+   * @param loader classLoader to load the given class
+   * @param args Objects that should be passed as constructor arguments
+   * @return Instance of new class or NULL in case of any error
+   */
+  public static Object instantiateWithClassLoader(String className,
+      ClassLoader loader, Object... args) {
+    return instantiate(loadClassWithClassLoader(className, loader), args);
   }
 
   /**
@@ -123,7 +191,18 @@ public final class ClassUtils {
    * @return Path on local filesystem to jar where given jar is present
    */
   public static String jarForClass(String className) {
-    Class klass = loadClass(className);
+    return jarForClassWithClassLoader(className, defaultClassLoader);
+  }
+
+  /**
+   * Return jar path for given class.
+   *
+   * @param className Class name
+   * @param loader classLoader to load the given class
+   * @return Path on local filesystem to jar where given jar is present
+   */
+  public static String jarForClassWithClassLoader(String className, ClassLoader loader) {
+    Class klass = loadClassWithClassLoader(className, loader);
     return jarForClass(klass);
   }
 

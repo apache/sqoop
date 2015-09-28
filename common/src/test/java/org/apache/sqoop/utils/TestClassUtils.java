@@ -17,9 +17,12 @@
  */
 package org.apache.sqoop.utils;
 
+import java.util.Arrays;
+
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -32,6 +35,13 @@ public class TestClassUtils {
   public void testLoadClass() {
     assertNull(ClassUtils.loadClass("A"));
     assertEquals(A.class, ClassUtils.loadClass(A.class.getName()));
+  }
+
+  @Test
+  public void testLoadClassWithClassLoader() throws Exception {
+    String classpath = ClassUtils.jarForClass(A.class);
+    assertNotEquals(A.class, ClassUtils.loadClassWithClassLoader(A.class.getName(),
+        new ConnectorClassLoader(classpath, getClass().getClassLoader(), Arrays.asList("java."))));
   }
 
   @Test
