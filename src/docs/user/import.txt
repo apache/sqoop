@@ -330,6 +330,19 @@ $ sqoop import ... --map-column-java id=String,value=Integer
 
 Sqoop will rise exception in case that some configured mapping will not be used.
 
+Schema name handling
+^^^^^^^^^^^^^^^^^^^^
+
+When sqoop imports data from an enterprise store, table and column names
+may have characters that are not valid Java identifier characters or
+Avro/Parquet identifiers.  To address this, sqoop translates these characters
+to _ as part of the schema creation.  Any column name starting with an _
+(underscore) character will be translated to have two underscore characters.
+For example _AVRO will be converted to __AVRO.
+
+In the case of HCatalog imports, column names are converted to lower case when
+mapped to HCatalog columns.  This may change in future.
+
 Incremental Imports
 ^^^^^^^^^^^^^^^^^^^
 

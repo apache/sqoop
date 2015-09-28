@@ -227,6 +227,27 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals("AVRO1", 1987, record1.get("AVRO1"));
   }
 
+  public void testNonIdentCharactersInColumnName() throws IOException {
+    String [] names = { "test_a-v+r/o" };
+    String [] types = { "INT" };
+    String [] vals = { "2015" };
+    createTableWithColTypesAndNames(names, types, vals);
+
+    runImport(getOutputArgv(true, null));
+
+    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+    DataFileReader<GenericRecord> reader = read(outputFile);
+    Schema schema = reader.getSchema();
+    assertEquals(Schema.Type.RECORD, schema.getType());
+    List<Field> fields = schema.getFields();
+    assertEquals(types.length, fields.size());
+
+    checkField(fields.get(0), "TEST_A_V_R_O", Type.INT);
+
+    GenericRecord record1 = reader.next();
+    assertEquals("TEST_A_V_R_O", 2015, record1.get("TEST_A_V_R_O"));
+  }
+
   private void checkField(Field field, String name, Type type) {
     assertEquals(name, field.name());
     assertEquals(Schema.Type.UNION, field.schema().getType());

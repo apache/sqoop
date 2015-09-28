@@ -274,7 +274,7 @@ public class ClassWriter {
      * column "9isLegalInSql" was translated into "_9isLegalInSql" in original
      * code and will translate to same "_9isLegalInSql" now. However it would
      * be translated to "__9isLegalInSql" (notice that there are two "_" at the
-     * begging) if we would use output.startsWith instead.
+     * beginning) if we would use output.startsWith instead.
      */
     } else if (candidate.startsWith("_")) {
       return "_" + output;
@@ -1062,7 +1062,7 @@ public class ClassWriter {
    * @param sb - StringBuilder to append code to
    */
   private void generateSetField(Map<String, Integer> columnTypes,
-      String [] colNames, StringBuilder sb) {
+      String [] colNames, String [] rawColNames, StringBuilder sb) {
 
     int numberOfMethods =
             this.getNumberOfMethods(colNames, maxColumnsPerMethod);
@@ -1083,9 +1083,9 @@ public class ClassWriter {
       }
     } else {
       boolean first = true;
-      for (String colName : colNames) {
-        int sqlType = columnTypes.get(colName);
-        String javaType = toJavaType(colName, sqlType);
+      for (int i = 0; i < colNames.length; i++) {
+        int sqlType = columnTypes.get(colNames[i]);
+        String javaType = toJavaType(colNames[i], sqlType);
         if (null == javaType) {
           continue;
         } else {
@@ -1093,8 +1093,8 @@ public class ClassWriter {
             sb.append("    else");
           }
 
-          sb.append("    if (\"" + colName + "\".equals(__fieldName)) {\n");
-          sb.append("      this." + colName + " = (" + javaType
+          sb.append("    if (\"" + rawColNames[i] + "\".equals(__fieldName)) {\n");
+          sb.append("      this." + colNames[i] + " = (" + javaType
               + ") __fieldVal;\n");
           sb.append("    }\n");
           first = false;
@@ -1108,7 +1108,7 @@ public class ClassWriter {
     sb.append("  }\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      myGenerateSetField(columnTypes, colNames, sb, i, maxColumnsPerMethod);
+      myGenerateSetField(columnTypes, colNames, rawColNames, sb, i, maxColumnsPerMethod);
     }
   }
 
@@ -1121,7 +1121,7 @@ public class ClassWriter {
    * @param size - number of columns per method
    */
   private void myGenerateSetField(Map<String, Integer> columnTypes,
-                                  String[] colNames, StringBuilder sb,
+                                  String[] colNames, String[] rawColNames, StringBuilder sb,
                                   int methodNumber, int size) {
     sb.append("  public boolean setField" + methodNumber
             + "(String __fieldName, Object __fieldVal) {\n");
@@ -1130,6 +1130,7 @@ public class ClassWriter {
     for (int i = methodNumber * size;
          i < topBoundary(colNames, methodNumber, size); ++i) {
       String colName = colNames[i];
+      String rawColName = rawColNames[i];
       int sqlType = columnTypes.get(colName);
       String javaType = toJavaType(colName, sqlType);
       if (null == javaType) {
@@ -1139,7 +1140,7 @@ public class ClassWriter {
           sb.append("    else");
         }
 
-        sb.append("    if (\"" + colName + "\".equals(__fieldName)) {\n");
+        sb.append("    if (\"" + rawColName + "\".equals(__fieldName)) {\n");
         sb.append("      this." + colName + " = (" + javaType
             + ") __fieldVal;\n");
         sb.append("      return true;\n");
@@ -1160,7 +1161,7 @@ public class ClassWriter {
    * @param sb - StringBuilder to append code to
    */
   private void generateGetFieldMap(Map<String, Integer> columnTypes,
-      String [] colNames, StringBuilder sb) {
+      String [] colNames, String [] rawColNames, StringBuilder sb) {
     int numberOfMethods =
             this.getNumberOfMethods(colNames, maxColumnsPerMethod);
 
@@ -1172,14 +1173,14 @@ public class ClassWriter {
         sb.append("    this.getFieldMap" + i + "(__sqoop$field_map);\n");
       }
     } else {
-      myGenerateGetFieldMap(columnTypes, colNames, sb, 0,
+      myGenerateGetFieldMap(columnTypes, colNames, rawColNames, sb, 0,
               maxColumnsPerMethod, false);
     }
     sb.append("    return __sqoop$field_map;\n");
     sb.append("  }\n\n");
 
     for (int i = 0; i < numberOfMethods; ++i) {
-      myGenerateGetFieldMap(columnTypes, colNames, sb, i,
+      myGenerateGetFieldMap(columnTypes, colNames, rawColNames, sb, i,
               maxColumnsPerMethod, true);
     }
   }
@@ -1194,7 +1195,7 @@ public class ClassWriter {
    * @param wrapInMethod - wrap body in a method.
    */
   private void myGenerateGetFieldMap(Map<String, Integer> columnTypes,
-                                     String[] colNames, StringBuilder sb,
+                                     String[] colNames, String[] rawColNames, StringBuilder sb,
                                      int methodNumber, int size,
                                      boolean wrapInMethod) {
     if (wrapInMethod) {
@@ -1204,9 +1205,8 @@ public class ClassWriter {
 
     for (int i = methodNumber * size;
          i < topBoundary(colNames, methodNumber, size); ++i) {
-      String colName = colNames[i];
-      sb.append("    __sqoop$field_map.put(\"" + colName + "\", this."
-          + colName + ");\n");
+      sb.append("    __sqoop$field_map.put(\"" + rawColNames[i] + "\", this."
+          + colNames[i] + ");\n");
     }
 
     if (wrapInMethod) {
@@ -1618,7 +1618,7 @@ public class ClassWriter {
    * @return a list of column names in the same order which are
    * cleaned up to be used as identifiers in the generated Java class.
    */
-  private String [] cleanColNames(String [] colNames) {
+  public static String [] cleanColNames(String [] colNames) {
     String [] cleanedColNames = new String[colNames.length];
     for (int i = 0; i < colNames.length; i++) {
       String col = colNames[i];
@@ -1734,7 +1734,7 @@ public class ClassWriter {
 
     // Generate the Java code.
     StringBuilder sb = generateClassForColumns(columnTypes,
-        cleanedColNames, cleanedDbWriteColNames);
+        cleanedColNames, cleanedDbWriteColNames, colNames);
     // Write this out to a file in the jar output directory.
     // We'll move it to the user-visible CodeOutputDir after compiling.
     String codeOutDir = options.getJarOutputDir();
@@ -1811,7 +1811,18 @@ public class ClassWriter {
       // These column names were provided by the user. They may not be in
       // the same case as the keys in the columnTypes map. So make sure
       // we add the appropriate aliases in that map.
-      for (String userColName : colNames) {
+      // We also have to strip surrounding quotes if any.
+      String[] fixedColNames = new String[colNames.length];
+      for (int i = 0; i < colNames.length; ++i) {
+        String userColName = colNames[i];
+
+        // Remove surrounding quotes if any
+        int len = userColName.length();
+        if (len > 2 && userColName.charAt(0) == '"' &&  userColName.charAt(len -1) == '"') {
+          userColName = userColName.substring(1, len -1);
+        }
+
+        fixedColNames[i] = userColName;
         for (Map.Entry<String, Integer> typeEntry : columnTypes.entrySet()) {
           String typeColName = typeEntry.getKey();
           if (typeColName.equalsIgnoreCase(userColName)
@@ -1824,6 +1835,7 @@ public class ClassWriter {
           }
         }
       }
+      colNames = fixedColNames;
     }
     return colNames;
   }
@@ -1846,7 +1858,7 @@ public class ClassWriter {
    */
   private StringBuilder generateClassForColumns(
       Map<String, Integer> columnTypes,
-      String [] colNames, String [] dbWriteColNames) {
+      String [] colNames, String [] dbWriteColNames, String [] rawColNames) {
     if (colNames.length ==0) {
       throw new IllegalArgumentException("Attempted to generate class with "
           + "no columns!");
@@ -1919,8 +1931,8 @@ public class ClassWriter {
     generateToString(columnTypes, colNames, sb);
     generateParser(columnTypes, colNames, sb);
     generateCloneMethod(columnTypes, colNames, sb);
-    generateGetFieldMap(columnTypes, colNames, sb);
-    generateSetField(columnTypes, colNames, sb);
+    generateGetFieldMap(columnTypes, colNames, rawColNames, sb);
+    generateSetField(columnTypes, colNames, rawColNames, sb);
 
     // TODO(aaron): Generate hashCode(), compareTo(), equals() so it can be a
     // WritableComparable

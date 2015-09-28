@@ -448,7 +448,7 @@ public final class HCatalogTestUtils {
    * @return the name of the column
    */
   public static String forIdx(int idx) {
-    return "col" + idx;
+    return "COL" + idx;
   }
 
   public static ColumnGenerator colGenerator(final String name,
@@ -657,10 +657,10 @@ public final class HCatalogTestUtils {
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
     sb.append(tableName);
-    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
+    sb.append(" (ID INT NOT NULL PRIMARY KEY, MSG VARCHAR(64)");
     int colNum = 0;
     for (ColumnGenerator gen : extraCols) {
-      sb.append(", " + forIdx(colNum++) + " " + gen.getDBTypeString());
+      sb.append(", \"" + gen.getName() + "\" " + gen.getDBTypeString());
     }
     sb.append(")");
     String cmd = sb.toString();
@@ -674,13 +674,12 @@ public final class HCatalogTestUtils {
     sb.append("INSERT INTO ");
     sb.append(tableName);
     sb.append(" (id, msg");
-    int colNum = 0;
     for (int i = 0; i < extraCols.length; ++i) {
-      sb.append(", " + forIdx(colNum++));
+      sb.append(", \"").append(extraCols[i].getName()).append('"');
     }
     sb.append(") VALUES ( ?, ?");
     for (int i = 0; i < extraCols.length; ++i) {
-      sb.append(",?");
+      sb.append(", ?");
     }
     sb.append(")");
     String s = sb.toString();
@@ -809,7 +808,7 @@ public final class HCatalogTestUtils {
             break;
         }
         hCatTblCols
-          .add(new HCatFieldSchema(gen.getName(), tInfo, ""));
+          .add(new HCatFieldSchema(gen.getName().toLowerCase(), tInfo, ""));
       }
     }
     HCatSchema hCatTblSchema = new HCatSchema(hCatTblCols);
@@ -840,7 +839,7 @@ public final class HCatalogTestUtils {
             break;
         }
         hCatPartCols
-          .add(new HCatFieldSchema(gen.getName(), tInfo, ""));
+          .add(new HCatFieldSchema(gen.getName().toLowerCase(), tInfo, ""));
       }
     }
     HCatSchema hCatPartSchema = new HCatSchema(hCatPartCols);
@@ -875,7 +874,7 @@ public final class HCatalogTestUtils {
             break;
         }
         hCatPartCols
-          .add(new HCatFieldSchema(gen.getName(), tInfo, ""));
+          .add(new HCatFieldSchema(gen.getName().toLowerCase(), tInfo, ""));
       }
     }
     HCatSchema hCatPartSchema = new HCatSchema(hCatPartCols);

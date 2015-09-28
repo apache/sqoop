@@ -258,7 +258,11 @@ public class HCatalogImportTest extends ImportJobTestCase {
       for (ColumnGenerator col : cols) {
         String name = col.getName().toLowerCase();
         expectedVal = col.getHCatValue(i);
-        actualVal = rec.get(name, schema);
+        try {
+          actualVal = rec.get(name, schema);
+        } catch (Exception e) {
+          throw new IOException("Unable to get value for field " + name + " from hcat record", e);
+        }
         LOG.info("Validating field: " + name + " (expected = "
           + expectedVal + ", actual = " + actualVal + ")");
         HCatalogTestUtils.assertEquals(expectedVal, actualVal);
@@ -320,7 +324,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
       colNames[0] = "ID";
       colNames[1] = "MSG";
       for (int i = 0; i < cols.length; ++i) {
-        colNames[2 + i] = cols[i].getName().toUpperCase();
+        colNames[2 + i] =  cols[i].getName().toUpperCase();
       }
     }
     String[] importArgs;
@@ -849,5 +853,31 @@ public class HCatalogImportTest extends ImportJobTestCase {
       LOG.debug("Caught expected exception while running "
         + " create-hcatalog-table with pre-existing table test", e);
     }
+  }
+  public void testTableWithNonIdentColChars() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+      HCatalogTestUtils.colGenerator("A-B+C*D/E",
+        "tinyint", Types.INTEGER, HCatFieldSchema.Type.INT, 0, 0, 10,
+        10, KeyType.NOT_A_KEY),
+    };
+    List<String> addlArgsArray = new ArrayList<String>();
+    setExtraArgs(addlArgsArray);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null);
+  }
+  public void testTableCreationWithNonIdentColChars() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+      HCatalogTestUtils.colGenerator("A-B+C*D/E",
+        "tinyint", Types.INTEGER, HCatFieldSchema.Type.INT, 0, 0, 10,
+        10, KeyType.NOT_A_KEY),
+    };
+    List<String> addlArgsArray = new ArrayList<String>();
+    addlArgsArray.add("--create-hcatalog-table");
+    setExtraArgs(addlArgsArray);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+      null, true, false);
   }
 }

@@ -21,12 +21,15 @@ package com.cloudera.sqoop;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.file.DataFileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
@@ -199,6 +202,31 @@ public class TestParquetImport extends ImportJobTestCase {
       assertTrue(reader.hasNext());
       GenericRecord record1 = reader.next();
       assertEquals("__NAME", 1987, record1.get("__NAME"));
+      assertFalse(reader.hasNext());
+    } finally {
+      reader.close();
+    }
+  }
+
+  public void testNonIdentCharactersInColumnName() throws IOException {
+    String [] names = { "test_p-a+r/quet" };
+    String [] types = { "INT" };
+    String [] vals = { "2015" };
+    createTableWithColTypesAndNames(names, types, vals);
+
+    runImport(getOutputArgv(true, null));
+
+    Schema schema = getSchema();
+    assertEquals(Type.RECORD, schema.getType());
+    List<Field> fields = schema.getFields();
+    assertEquals(types.length, fields.size());
+    checkField(fields.get(0), "TEST_P_A_R_QUET", Type.INT);
+
+    DatasetReader<GenericRecord> reader = getReader();
+    try {
+      assertTrue(reader.hasNext());
+      GenericRecord record1 = reader.next();
+      assertEquals("TEST_P_A_R_QUET", 2015, record1.get("TEST_P_A_R_QUET"));
       assertFalse(reader.hasNext());
     } finally {
       reader.close();

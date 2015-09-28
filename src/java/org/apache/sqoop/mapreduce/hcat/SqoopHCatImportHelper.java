@@ -112,7 +112,8 @@ public class SqoopHCatImportHelper {
       hCatFullTableSchema.append(hfs);
     }
     fieldCount = hCatFullTableSchema.size();
-    lobLoader = new LargeObjectLoader(conf, new Path(jobInfo.getTableInfo().getTableLocation()));
+    lobLoader = new LargeObjectLoader(conf, new Path(jobInfo.getTableInfo()
+      .getTableLocation()));
     bigDecimalFormatString = conf.getBoolean(
       ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
       ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
@@ -179,7 +180,12 @@ public class SqoopHCatImportHelper {
       if (skip) {
         continue;
       }
-      HCatFieldSchema hfs = hCatFullTableSchema.get(hfn);
+      HCatFieldSchema hfs = null;
+      try {
+        hfs = hCatFullTableSchema.get(hfn);
+      } catch (Exception e) {
+        throw new IOException("Unable to lookup " + hfn + " in the hcat schema");
+      }
       if (debugHCatImportMapper) {
         LOG.debug("SqoopRecordVal: field = " + key + " Val " + val
           + " of type " + (val == null ? null : val.getClass().getName())

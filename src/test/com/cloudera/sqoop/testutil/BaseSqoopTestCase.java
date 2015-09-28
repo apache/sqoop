@@ -317,7 +317,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
         conn = getManager().getConnection();
 
         for (int i = 0; i < colTypes.length; i++) {
-          columnDefStr += colNames[i] + " " + colTypes[i];
+          columnDefStr += '"' + colNames[i].toUpperCase() + '"' + " " + colTypes[i];
           if (i < colTypes.length - 1) {
             columnDefStr += ", ";
           }
@@ -349,7 +349,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
         String columnListStr = "";
         String valueListStr = "";
         for (int i = 0; i < colTypes.length; i++) {
-          columnListStr += colNames[i];
+          columnListStr += '"' + colNames[i].toUpperCase() + '"';
           valueListStr += vals[count * colTypes.length + i];
           if (i < colTypes.length - 1) {
             columnListStr += ", ";

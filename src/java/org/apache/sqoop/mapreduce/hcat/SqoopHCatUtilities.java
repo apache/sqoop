@@ -387,10 +387,15 @@ public final class SqoopHCatUtilities {
 
     List<HCatFieldSchema> outputFieldList = new ArrayList<HCatFieldSchema>();
     for (String col : dbColumnNames) {
-      HCatFieldSchema hfs = hCatFullTableSchema.get(col);
-      if (hfs == null) {
-        throw new IOException("Database column " + col + " not found in "
-          + " hcatalog table.");
+      try {
+        HCatFieldSchema hfs = hCatFullTableSchema.get(col);
+        if (hfs == null) {
+          throw new IOException("Database column " + col + " not found in "
+              + " hcatalog table.");
+        }
+      } catch (Exception e) {
+        throw new IOException("Caught Exception checking database column " + col + " in "
+            + " hcatalog table.", e);
       }
       boolean skip=false;
       if (hCatStaticPartitionKeys != null) {
@@ -482,6 +487,20 @@ public final class SqoopHCatUtilities {
       } else {
         colNames = connManager.getColumnNamesForQuery(options.getSqlQuery());
       }
+    } else {
+      String[] fixedColNames = new String[colNames.length];
+      for (int i = 0; i < colNames.length; ++i) {
+        String userColName = colNames[i];
+
+        // Remove surrounding quotes if any
+        int len = userColName.length();
+        if (len > 2 && userColName.charAt(0) == '"' &&  userColName.charAt(len -1) == '"') {
+          userColName = userColName.substring(1, len -1);
+        }
+
+        fixedColNames[i] = userColName;
+      }
+      colNames = fixedColNames;
     }
 
     dbColumnNames = new String[colNames.length];

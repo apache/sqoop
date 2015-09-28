@@ -514,10 +514,10 @@ public class TestIncrementalImport extends TestCase {
       args.add("append");
       if (!appendTimestamp) {
         args.add("--check-column");
-        args.add("id");
+        args.add("ID");
       } else {
         args.add("--check-column");
-        args.add("last_modified");
+        args.add("LAST_MODIFIED");
       }
     } else {
       args.add("--incremental");
@@ -526,7 +526,7 @@ public class TestIncrementalImport extends TestCase {
       args.add("LAST_MODIFIED");
     }
     args.add("--columns");
-    args.add("id");
+    args.add("ID");
     args.add("-m");
     args.add("1");
 
@@ -557,10 +557,10 @@ public class TestIncrementalImport extends TestCase {
       args.add("append");
       if (!appendTimestamp) {
         args.add("--check-column");
-        args.add("id");
+        args.add("ID");
       } else {
         args.add("--check-column");
-        args.add("last_modified");
+        args.add("LAST_MODIFIED");
       }
     } else {
       args.add("--incremental");
