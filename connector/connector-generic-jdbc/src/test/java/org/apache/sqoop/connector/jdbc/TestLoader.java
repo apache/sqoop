@@ -74,7 +74,7 @@ public class TestLoader {
 
     if (!executor.existTable(tableName)) {
       executor.executeUpdate("CREATE TABLE " + executor.encloseIdentifier(tableName)
-          + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20), DATECOL DATE, DATETIMECOL TIMESTAMP, TIMECOL TIME)");
+          + "(ICOL INTEGER PRIMARY KEY, DCOL DOUBLE, VCOL VARCHAR(20), DATECOL DATE, DATETIMECOL TIMESTAMP, TIMECOL TIME , LOCALDATETIMECOL TIMESTAMP)");
     } else {
       executor.deleteTableData(tableName);
     }
@@ -98,7 +98,7 @@ public class TestLoader {
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_TO_DATA_SQL,
-        "INSERT INTO " + executor.encloseIdentifier(tableName) + " VALUES (?,?,?,?,?,?)");
+        "INSERT INTO " + executor.encloseIdentifier(tableName) + " VALUES (?,?,?,?,?,?,?)");
 
 
     Loader loader = new GenericJdbcLoader();
@@ -106,7 +106,7 @@ public class TestLoader {
     Schema schema = new Schema("TestLoader");
     schema.addColumn(new FixedPoint("c1", 2L, true)).addColumn(new Decimal("c2", 5, 2))
         .addColumn(new Text("c3")).addColumn(new Date("c4"))
-        .addColumn(new DateTime("c5", false, false)).addColumn(new Time("c6", false));
+        .addColumn(new DateTime("c5", false, false)).addColumn(new Time("c6", false)).addColumn(new DateTime("c7", false, false));
     LoaderContext loaderContext = new LoaderContext(context, reader, schema);
     loader.load(loaderContext, linkConfig, jobConfig);
 
@@ -122,7 +122,7 @@ public class TestLoader {
         assertEquals("2004-10-19", rs.getObject(4).toString());
         assertEquals("2004-10-19 10:23:34.0", rs.getObject(5).toString());
         assertEquals("11:33:59", rs.getObject(6).toString());
-
+        assertEquals("2004-10-19 10:23:34.0", rs.getObject(7).toString());
         index++;
       }
       assertEquals(numberOfRows, index - START);
@@ -136,6 +136,7 @@ public class TestLoader {
     public Object[] readArrayRecord() {
       LocalDate jodaDate= new LocalDate(2004, 10, 19);
       org.joda.time.DateTime jodaDateTime= new org.joda.time.DateTime(2004, 10, 19, 10, 23, 34);
+      org.joda.time.LocalDateTime LocalJodaDateTime= new org.joda.time.LocalDateTime(2004, 10, 19, 10, 23, 34);
       LocalTime time= new LocalTime(11, 33, 59);
 
       if (index < numberOfRows) {
@@ -145,7 +146,8 @@ public class TestLoader {
             String.valueOf(START+index),
             jodaDate,
             jodaDateTime,
-            time};
+            time,
+            LocalJodaDateTime};
         index++;
         return array;
       } else {

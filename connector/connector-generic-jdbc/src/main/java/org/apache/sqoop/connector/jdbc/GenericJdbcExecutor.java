@@ -301,7 +301,12 @@ public class GenericJdbcExecutor {
           break;
         case DATE_TIME:
           // convert the JODA date time to sql date
-          DateTime dateTime = (DateTime) array[i];
+          DateTime dateTime = null;
+          if (array[i] instanceof org.joda.time.LocalDateTime) {
+            dateTime = ((org.joda.time.LocalDateTime) array[i]).toDateTime();
+          } else {
+            dateTime = (DateTime) array[i];
+          }
           Timestamp timestamp = new Timestamp(dateTime.getMillis());
           preparedStatement.setObject(i + 1, timestamp);
           break;
