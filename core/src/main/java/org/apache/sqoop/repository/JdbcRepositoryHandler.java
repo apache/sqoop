@@ -81,12 +81,31 @@ public abstract class JdbcRepositoryHandler {
 
 
   /**
+   * Retrieve links which use the given connector and derive their structure
+   * entirely from the repository.
+   * @param connectorName Connector name whose links should be fetched
+   * @param conn JDBC link for querying repository
+   * @return List of MLinks that use <code>connectorID</code>.
+   */
+  public abstract List<MLink> findLinksForConnectorUpgrade(String connectorName, Connection conn);
+
+  /**
    * Retrieve links which use the given connector.
    * @param connectorName Connector name whose links should be fetched
    * @param conn JDBC link for querying repository
    * @return List of MLinks that use <code>connectorID</code>.
    */
   public abstract List<MLink> findLinksForConnector(String connectorName, Connection conn);
+
+  /**
+   * Retrieve jobs which use the given link and derive their structure
+   * entirely from the repository.
+   *
+   * @param connectorId Connector ID whose jobs should be fetched
+   * @param conn JDBC link for querying repository
+   * @return List of MJobs that use <code>linkID</code>.
+   */
+  public abstract List<MJob> findJobsForConnectorUpgrade(long c, Connection conn);
 
   /**
    * Retrieve jobs which use the given link.

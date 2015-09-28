@@ -45,8 +45,6 @@ public class TestSubmissionHandling extends DerbyTestCase {
     super.setUp();
 
     handler = new DerbyRepositoryHandler();
-    // We always needs schema for this test case
-    super.createOrUpgradeSchemaForLatestVersion();
 
     // We always needs connector and framework structures in place
     loadConnectorAndDriverConfig();

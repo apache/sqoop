@@ -137,7 +137,7 @@ public class TestLinkHandling extends PostgresqlTestCase {
     List<MLink> list;
 
     // Load all two links on loaded repository
-    list = handler.findLinksForConnector("A", provider.getConnection());
+    list = handler.findLinksForConnectorUpgrade("A", provider.getConnection());
     assertEquals(1, list.size());
     assertEquals(LINK_A_NAME, list.get(0).getName());
 
@@ -147,13 +147,13 @@ public class TestLinkHandling extends PostgresqlTestCase {
     }
 
     // Load empty list on empty repository
-    list = handler.findLinksForConnector("A", provider.getConnection());
+    list = handler.findLinksForConnectorUpgrade("A", provider.getConnection());
     assertEquals(0, list.size());
   }
 
   @Test
   public void testFindLinksByNonExistingConnector() throws Exception {
-    List<MLink> list = handler.findLinksForConnector("NONEXISTCONNECTOR", provider.getConnection());
+    List<MLink> list = handler.findLinksForConnectorUpgrade("NONEXISTCONNECTOR", provider.getConnection());
     assertEquals(0, list.size());
   }
 

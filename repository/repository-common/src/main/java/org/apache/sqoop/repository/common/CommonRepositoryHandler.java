@@ -40,11 +40,13 @@ import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
+import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MConfigType;
 import org.apache.sqoop.model.MConfigurableType;
 import org.apache.sqoop.model.MConnector;
@@ -177,6 +179,23 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     }
     mc.setPersistenceId(insertAndGetConnectorId(mc, conn));
     insertConfigsForConnector(mc, conn);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<MJob> findJobsForConnectorUpgrade(long connectorId, Connection conn) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectAllJobsForConnectorConfigurable())) {
+
+      stmt.setLong(1, connectorId);
+      stmt.setLong(2, connectorId);
+      return loadJobsForUpgrade(stmt, conn);
+
+    } catch (SQLException ex) {
+      logException(ex, connectorId);
+      throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
+    }
   }
 
   /**
@@ -575,7 +594,23 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public List<MLink> findLinksForConnector(String connectorName, Connection conn) {
+  public List<MLink> findLinksForConnectorUpgrade(String connectorName, Connection conn) {
+    try (PreparedStatement linkByConnectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkForConnectorConfigurable())) {
+
+      linkByConnectorFetchStmt.setString(1, connectorName);
+      return loadLinksForUpgrade(linkByConnectorFetchStmt, conn);
+    } catch (SQLException ex) {
+      logException(ex, connectorName);
+      throw new SqoopException(CommonRepositoryError.COMMON_0020, ex);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<MLink> findLinksForConnector(String connectorName,
+                                                  Connection conn) {
     try (PreparedStatement linkByConnectorFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectLinkForConnectorConfigurable())) {
 
       linkByConnectorFetchStmt.setString(1, connectorName);
@@ -1471,8 +1506,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     return connectors;
   }
 
-  private List<MLink> loadLinks(PreparedStatement stmt,
-                                Connection conn)
+  private List<MLink> loadLinksForUpgrade(PreparedStatement stmt,
+                                          Connection conn)
       throws SQLException {
     List<MLink> links = new ArrayList<MLink>();
 
@@ -1516,7 +1551,48 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     return links;
   }
 
-  private List<MJob> loadJobs(PreparedStatement stmt,
+  private List<MLink> loadLinks(PreparedStatement stmt,
+                                Connection conn)
+    throws SQLException {
+    List<MLink> links = new ArrayList<MLink>();
+
+    try (ResultSet rsConnection = stmt.executeQuery();
+         PreparedStatement configStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfiguration());
+         PreparedStatement inputStmt = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());
+    ) {
+      while(rsConnection.next()) {
+        long id = rsConnection.getLong(1);
+        String name = rsConnection.getString(2);
+        long connectorId = rsConnection.getLong(3);
+        boolean enabled = rsConnection.getBoolean(4);
+        String creationUser = rsConnection.getString(5);
+        Date creationDate = rsConnection.getTimestamp(6);
+        String updateUser = rsConnection.getString(7);
+        Date lastUpdateDate = rsConnection.getTimestamp(8);
+        String connectorName = rsConnection.getString(9);
+
+        MLinkConfig connectorLinkConfig = ConnectorManager.getInstance().getConnectorConfigurable(connectorName).getLinkConfig().clone(false);
+        configStmt.setLong(1, connectorId);
+        inputStmt.setLong(1, id);
+        loadInputsForConfigs(connectorLinkConfig, configStmt, inputStmt);
+        MLink link = new MLink(connectorId, connectorLinkConfig);
+
+        link.setPersistenceId(id);
+        link.setName(name);
+        link.setCreationUser(creationUser);
+        link.setCreationDate(creationDate);
+        link.setLastUpdateUser(updateUser);
+        link.setLastUpdateDate(lastUpdateDate);
+        link.setEnabled(enabled);
+
+        links.add(link);
+      }
+    }
+
+    return links;
+  }
+
+  private List<MJob> loadJobsForUpgrade(PreparedStatement stmt,
                               Connection conn)
       throws SQLException {
     List<MJob> jobs = new ArrayList<MJob>();
@@ -1591,6 +1667,82 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     return jobs;
   }
+
+  private List<MJob> loadJobs(PreparedStatement stmt,
+                              Connection conn)
+    throws SQLException {
+    List<MJob> jobs = new ArrayList<MJob>();
+
+    try (ResultSet rsJob = stmt.executeQuery();
+         PreparedStatement driverConfigfetchStmt = conn.prepareStatement
+           (crudQueries.getStmtSelectConfigForConfigurable());
+         PreparedStatement configStmt = conn.prepareStatement(crudQueries
+           .getStmtSelectConfigForConfiguration());
+         PreparedStatement jobInputFetchStmt = conn.prepareStatement(crudQueries.getStmtFetchJobInput());
+         PreparedStatement inputStmt = conn.prepareStatement(crudQueries
+           .getStmtFetchLinkInput())
+    ) {
+
+      // Note: Job does not hold a explicit reference to the driver since every
+      // job has the same driver
+      long driverId = this.findDriver(MDriver.DRIVER_NAME, conn).getPersistenceId();
+
+      while(rsJob.next()) {
+        long fromConnectorId = rsJob.getLong(1);
+        long toConnectorId = rsJob.getLong(2);
+        long id = rsJob.getLong(3);
+        String name = rsJob.getString(4);
+        long fromLinkId = rsJob.getLong(5);
+        long toLinkId = rsJob.getLong(6);
+        boolean enabled = rsJob.getBoolean(7);
+        String createBy = rsJob.getString(8);
+        Date creationDate = rsJob.getTimestamp(9);
+        String updateBy = rsJob.getString(10);
+        Date lastUpdateDate = rsJob.getTimestamp(11);
+        String fromConnectorName = rsJob.getString(12);
+        String toConnectorName = rsJob.getString(13);
+
+
+        driverConfigfetchStmt.setLong(1, driverId);
+        jobInputFetchStmt.setLong(1, id);
+
+        LOG.debug("building config for linkid: " + fromLinkId);
+        MFromConfig mFromConfig = ConnectorManager.getInstance().getConnectorConfigurable(fromConnectorName).clone(false).getFromConfig();
+        configStmt.setLong(1, fromConnectorId);
+        inputStmt.setLong(1, fromLinkId);
+        loadInputsForConfigs(mFromConfig, configStmt, jobInputFetchStmt);
+
+        LOG.debug("building config for linkid: " + toLinkId);
+        MToConfig mToConfig = ConnectorManager.getInstance().getConnectorConfigurable(toConnectorName).clone(false).getToConfig();
+        configStmt.setLong(1, toConnectorId);
+        loadInputsForConfigs(mToConfig, configStmt, jobInputFetchStmt);
+
+        List<MConfig> driverConfig = new ArrayList<MConfig>();
+
+        loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2, conn);
+
+        MJob job = new MJob(
+          fromConnectorId, toConnectorId,
+          fromLinkId, toLinkId,
+          new MFromConfig(mFromConfig.getConfigs()),
+          new MToConfig(mToConfig.getConfigs()),
+          new MDriverConfig(driverConfig));
+
+        job.setPersistenceId(id);
+        job.setName(name);
+        job.setCreationUser(createBy);
+        job.setCreationDate(creationDate);
+        job.setLastUpdateUser(updateBy);
+        job.setLastUpdateDate(lastUpdateDate);
+        job.setEnabled(enabled);
+
+        jobs.add(job);
+      }
+    }
+
+    return jobs;
+  }
+
 
   private void registerConfigDirection(Long configId, Direction direction, Connection conn)
       throws SQLException {
@@ -1931,6 +2083,36 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       try (ResultSet rs = stmt.executeQuery()) {
         rs.next();
         return getDirection(rs.getLong(2), conn);
+      }
+    }
+  }
+
+
+  private void loadInputsForConfigs(MConfigList mConfigList, PreparedStatement configStmt, PreparedStatement inputStmt) throws SQLException {
+    for (MConfig mConfig : mConfigList.getConfigs()) {
+      configStmt.setString(2, mConfig.getName());
+      ResultSet configResults = configStmt.executeQuery();
+
+      while (configResults.next()) {
+        long configId = configResults.getLong(1);
+        String configName = configResults.getString(3);
+        inputStmt.setLong(2, configId);
+        ResultSet inputResults = inputStmt.executeQuery();
+
+        while (inputResults.next()) {
+          long inputId = inputResults.getLong(1);
+          String inputName = inputResults.getString(2);
+          String value = inputResults.getString(10);
+          if (mConfig.getName().equals(configName) && mConfig.getInputNames().contains(inputName)) {
+            MInput mInput = mConfig.getInput(inputName);
+            mInput.setPersistenceId(inputId);
+            if (value == null) {
+              mInput.setEmpty();
+            } else {
+              mInput.restoreFromUrlSafeValueString(value);
+            }
+          }
+        }
       }
     }
   }

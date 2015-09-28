@@ -124,6 +124,18 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = ? "
           + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_INDEX);
 
+    private static final String STMT_SELECT_CONFIG_FOR_CONFIGURATION =
+      "SELECT "
+        + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + ", "
+        + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + ", "
+        + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + ", "
+        + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_TYPE) + ", "
+        + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_INDEX)
+        + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
+        + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = ? "
+        + " AND " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + " = ? "
+        + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_INDEX);
+
 
   //DML: Insert into config
   private static final String STMT_INSERT_INTO_CONFIG =
@@ -306,8 +318,12 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_USER) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_DATE) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE)
-          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME);
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID);
+
 
   // DML: Select one specific link by name by id
   private static final String STMT_SELECT_LINK_SINGLE_BY_ID =
@@ -329,7 +345,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_USER) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CREATION_DATE) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_USER) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE)
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_UPDATE_DATE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
           + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID)
@@ -423,12 +440,18 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_USER) + ", "
           + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_CREATION_DATE) + ", "
           + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_USER) + ", "
-          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE)
+          + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE) + ", "
+          + "FROM_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
+          + "TO_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " JOB"
           + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " FROM_CONNECTOR"
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + " = FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
           + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " TO_CONNECTOR"
-          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TO_LINK) + " = TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID);
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_TO_LINK) + " = TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
+          + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME) + " FROM_CONF_NAME"
+          + " ON FROM_CONNECTOR. " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = FROM_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID)
+          + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME) + " TO_CONF_NAME"
+          + " ON TO_CONNECTOR. " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = TO_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID);
 
   //DML: Select all jobs with order
   private static final String STMT_SELECT_JOB_ALL_WITH_ORDER =
@@ -702,6 +725,10 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   public String getStmtSelectConfigForConfigurable() {
     return STMT_SELECT_CONFIG_FOR_CONFIGURABLE;
+  }
+
+  public String getStmtSelectConfigForConfiguration() {
+      return STMT_SELECT_CONFIG_FOR_CONFIGURATION;
   }
 
   public String getStmtInsertIntoConfig() {

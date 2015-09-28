@@ -199,6 +199,14 @@ public abstract class Repository {
   public abstract MLink findLink(String name);
 
   /**
+   * Retrieve links which use the given connector deriving their structure
+   * entirely from the repository.
+   * @param connectorName Connector name whose links should be fetched
+   * @return List of MLink that use <code>connectorId</code>.
+   */
+  public abstract List<MLink> findLinksForConnectorUpgrade(String connectorName);
+
+  /**
    * Retrieve links which use the given connector.
    * @param connectorName Connector name whose links should be fetched
    * @return List of MLink that use <code>connectorId</code>.
@@ -277,6 +285,15 @@ public abstract class Repository {
    * @return List of all jobs in the repository
    */
   public abstract List<MJob> findJobs();
+
+  /**
+   * Retrieve jobs which use the given link deriving structure entirely from
+   * the repository (rather than the connector itself).
+   *
+   * @param connectorId Connector ID whose jobs should be fetched
+   * @return List of MJobs that use <code>linkID</code>.
+   */
+  public abstract List<MJob> findJobsForConnectorUpgrade(long connectorId);
 
   /**
    * Retrieve jobs which use the given link.
@@ -441,9 +458,9 @@ public abstract class Repository {
       // 1. Get an upgrader for the connector
       ConnectorConfigurableUpgrader upgrader = connector.getConfigurableUpgrader();
       // 2. Get all links associated with the connector.
-      List<MLink> existingLinksByConnector = findLinksForConnector(connectorName);
+      List<MLink> existingLinksByConnector = findLinksForConnectorUpgrade(connectorName);
       // 3. Get all jobs associated with the connector.
-      List<MJob> existingJobsByConnector = findJobsForConnector(connectorId);
+      List<MJob> existingJobsByConnector = findJobsForConnectorUpgrade(connectorId);
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();

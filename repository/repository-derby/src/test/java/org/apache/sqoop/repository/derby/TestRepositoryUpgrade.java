@@ -21,6 +21,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 import org.testng.annotations.BeforeMethod;
@@ -32,7 +33,10 @@ public class TestRepositoryUpgrade extends DerbyTestCase {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
-    super.setUp();
+    // Create link to the database
+    Class.forName(DERBY_DRIVER).newInstance();
+    connection = DriverManager.getConnection(getStartJdbcUrl());
+
     handler = new TestDerbyRepositoryHandler();
   }
 

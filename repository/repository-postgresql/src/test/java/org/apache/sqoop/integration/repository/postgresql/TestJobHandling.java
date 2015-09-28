@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.integration.repository.postgresql;
 
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MConfig;
@@ -138,9 +137,9 @@ public class TestJobHandling extends PostgresqlTestCase {
 
   @Test
   public void testFindJobsByConnector() throws Exception {
-    List<MJob> list = handler.findJobsForConnector(
-        handler.findConnector("A", provider.getConnection()).getPersistenceId(),
-        provider.getConnection());
+    List<MJob> list = handler.findJobsForConnectorUpgrade(
+      handler.findConnector("A", provider.getConnection()).getPersistenceId(),
+      provider.getConnection());
     assertEquals(2, list.size());
     assertEquals(JOB_A_NAME, list.get(0).getName());
     assertEquals(JOB_B_NAME, list.get(1).getName());
@@ -148,7 +147,8 @@ public class TestJobHandling extends PostgresqlTestCase {
 
   @Test
   public void testFindJobsForNonExistingConnector() throws Exception {
-    List<MJob> list = handler.findJobsForConnector(11, provider.getConnection());
+    List<MJob> list = handler.findJobsForConnectorUpgrade(11, provider
+      .getConnection());
     assertEquals(0, list.size());
   }
 

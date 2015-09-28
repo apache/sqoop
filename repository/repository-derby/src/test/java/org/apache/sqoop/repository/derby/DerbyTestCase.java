@@ -17,39 +17,30 @@
  */
 package org.apache.sqoop.repository.derby;
 
-import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
-import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
-import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.*;
-import static org.testng.Assert.assertEquals;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.core.SqoopConfiguration;
+import org.apache.sqoop.core.TestUtils;
 import org.apache.sqoop.json.DriverBean;
-import org.apache.sqoop.model.InputEditable;
-import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MConnector;
-import org.apache.sqoop.model.MDriver;
-import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MFromConfig;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MLinkConfig;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.*;
+import org.apache.sqoop.repository.JdbcRepositoryProvider;
+import org.apache.sqoop.repository.RepoConfigurationConstants;
+import org.apache.sqoop.repository.RepositoryManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+
+import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+
+import static org.apache.sqoop.repository.derby.DerbySchemaCreateQuery.*;
+import static org.apache.sqoop.repository.derby.DerbySchemaInsertUpdateDeleteSelectQuery.STMT_INSERT_DIRECTION;
+import static org.apache.sqoop.repository.derby.DerbySchemaUpgradeQuery.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Abstract class with convenience methods for testing derby repository.
@@ -60,13 +51,42 @@ abstract public class DerbyTestCase {
 
   public static final String JDBC_URL = "jdbc:derby:memory:myDB";
 
-  private Connection connection;
+  protected Connection connection;
+
+  ConnectorManager mockConnectorManager;
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     // Create link to the database
     Class.forName(DERBY_DRIVER).newInstance();
     connection = DriverManager.getConnection(getStartJdbcUrl());
+
+    Properties testProperties = new Properties();
+    testProperties.setProperty(RepoConfigurationConstants
+      .SYSCFG_REPO_PROVIDER, JdbcRepositoryProvider.class.getCanonicalName());
+    testProperties.setProperty(RepoConfigurationConstants.SYSCFG_REPO_JDBC_HANDLER, DerbyRepositoryHandler.class.getCanonicalName());
+    testProperties.setProperty(RepoConfigurationConstants
+      .SYSCFG_REPO_JDBC_TX_ISOLATION, "serializable");
+    testProperties.setProperty(RepoConfigurationConstants
+      .SYSCFG_REPO_JDBC_MAX_CONN, "10");
+    testProperties.setProperty(RepoConfigurationConstants
+      .SYSCFG_REPO_JDBC_URL, getJdbcUrl());
+    testProperties.setProperty(RepoConfigurationConstants
+      .SYSCFG_REPO_JDBC_DRIVER, DERBY_DRIVER);
+    TestUtils.setupTestConfigurationWithExtraConfig(null, testProperties);
+
+    // We always needs schema for this test case
+    createOrUpgradeSchemaForLatestVersion();
+
+    SqoopConfiguration.getInstance().initialize();
+    RepositoryManager.getInstance().initialize();
+
+    mockConnectorManager = mock(ConnectorManager.class);
+
+    when(mockConnectorManager.getConnectorConfigurable(1L)).thenReturn(getConnector());
+    when(mockConnectorManager.getConnectorConfigurable("A")).thenReturn(getConnector());
+
+    ConnectorManager.setInstance(mockConnectorManager);
   }
 
   @AfterMethod(alwaysRun = true)
@@ -447,18 +467,18 @@ abstract public class DerbyTestCase {
       // First config
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
+          + " VALUES('A.I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
+          + " VALUES('A.I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
 
       // Second config
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
+          + " VALUES('A.I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30, 'CONNECTOR_ONLY')");
       runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
           + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
+          + " VALUES('A.I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
     }
 
   }
@@ -468,7 +488,7 @@ abstract public class DerbyTestCase {
     runInsertQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
         + "VALUES('A', 'org.apache.sqoop.test.A', '1.0-test', 'CONNECTOR')");
 
-    for (String connector : new String[] { "1" }) {
+    String connector = "1";
       // Directions
       runInsertQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS(SQCD_CONNECTOR, SQCD_DIRECTION)"
           + "VALUES(" + connector + ", 1)");
@@ -477,7 +497,7 @@ abstract public class DerbyTestCase {
 
       // connector configs with connectorId as 1
       // all config names have to be unique per type
-      int index = 0;
+      Long index = 1L;
       for (String direction : new String[] { null, "1", "2" }) {
 
         String type;
@@ -486,7 +506,7 @@ abstract public class DerbyTestCase {
         } else {
           type = "JOB";
         }
-        String configName = "C1" + type + index;
+        String configName = type + index;
         configId = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
             + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) " + "VALUES("
             + connector + ", '" + configName + "', '" + type + "', 0)");
@@ -496,7 +516,11 @@ abstract public class DerbyTestCase {
               + "(SQ_CFG_DIR_CONFIG, SQ_CFG_DIR_DIRECTION) " + "VALUES(" + configId + ", "
               + direction + ")");
         }
-        configName = "C2" + type + index;
+
+        loadInputsForConfigVersion4(configName, index);
+
+        index++;
+        configName = type + index;
         configId = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
             + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) " + "VALUES("
             + connector + ", '" + configName + "', '" + type + "', 1)");
@@ -506,47 +530,50 @@ abstract public class DerbyTestCase {
               + "(SQ_CFG_DIR_CONFIG, SQ_CFG_DIR_DIRECTION) " + "VALUES(" + configId + ", "
               + direction + ")");
         }
+
+        loadInputsForConfigVersion4(configName, index);
+
         index++;
-      }
     }
 
     // insert a driver
     runInsertQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
         + "VALUES('SqoopDriver', 'org.apache.sqoop.driver.Driver', '1.0-test', 'DRIVER')");
 
-    // driver config with driverId as 2
-    for (String type : new String[] { "JOB" }) {
-      runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
-          + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) " + "VALUES(2"
-          + ", 'd1', '" + type + "', 0)");
-      runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
-          + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) " + "VALUES(2"
-          + ", 'd2', '" + type + "', 1)");
-    }
+    Long driverIndex1 = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
+        + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) " + "VALUES(2"
+        + ", 'DRIVER1', 'JOB', 0)");
+    Long driverIndex2 = runInsertQuery("INSERT INTO SQOOP.SQ_CONFIG"
+        + "(SQ_CFG_CONFIGURABLE, SQ_CFG_NAME, SQ_CFG_TYPE, SQ_CFG_INDEX) " + "VALUES(2"
+        + ", 'DRIVER2', 'JOB', 1)");
 
-    // Input entries
-    // Connector LINK config: 0-3
-    // Connector job (FROM) config: 4-7
-    // Connector job (TO) config: 8-11
-    // Driver JOB config: 12-15
-    for (int i = 0; i < 4; i++) {
-      // First config inputs with config ids 1,3, 5, 7
-      runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I1', " + (i * 2 + 1) + ", 0, 'STRING', false, 30, 'USER_ONLY')");
-      runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I2', " + (i * 2 + 1) + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
-
-      // Second config inputs with config ids 2, 4,,6 8
-      runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I3', " + (i * 2 + 2) + ", 0, 'STRING', false, 30, 'USER_ONLY')");
-      runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
-          + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
-          + " VALUES('I4', " + (i * 2 + 2) + ", 1, 'MAP', false, 30, 'USER_ONLY')");
-    }
+    loadInputsForConfigVersion4("DRIVER1", driverIndex1);
+    loadInputsForConfigVersion4("DRIVER2", driverIndex2);
   }
+
+  private void loadInputsForConfigVersion4(String configName, Long configFK) throws Exception {
+    //this configuration corresponds to what is generated by getConfigs
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+      + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+      + " VALUES('" + configName + ".I1', " + configFK + ", 0, 'STRING', false, 30, 'USER_ONLY')");
+
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+      + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+      + " VALUES('" + configName + ".I2', " + configFK + ", 1, 'MAP', false, 30, 'CONNECTOR_ONLY')");
+
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+      + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+      + " VALUES('" + configName + ".I3', " + configFK + ", 2, 'INTEGER', false, 30, 'ANY')");
+
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+      + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_STRLENGTH, SQI_EDITABLE)"
+      + " VALUES('" + configName + ".I4', " + configFK + ", 3, 'BOOLEAN', false, 30, 'USER_ONLY')");
+
+    runInsertQuery("INSERT INTO SQOOP.SQ_INPUT"
+      + "(SQI_NAME, SQI_CONFIG, SQI_INDEX, SQI_TYPE, SQI_STRMASK, SQI_EDITABLE, SQI_ENUMVALS)"
+      + " VALUES('" + configName + ".I5', " + configFK + ", 4, 'ENUM', false, 'ANY', 'YES,NO')");
+  }
+
 
   /**
    *Load testing connector and driver config into repository.
@@ -584,7 +611,7 @@ abstract public class DerbyTestCase {
    *         system version (2 or 4)
    *@throws Exception
    */
-  public void loadConnectionsOrLinks(int version) throws Exception {
+  public void  loadConnectionsOrLinks(int version) throws Exception {
     switch (version) {
     case 2:
       // Insert two connections - CA and CB
@@ -610,7 +637,7 @@ abstract public class DerbyTestCase {
       runQuery("INSERT INTO SQOOP.SQ_LINK(SQ_LNK_NAME, SQ_LNK_CONFIGURABLE) " + "VALUES('CB', 1)");
 
       for (String ci : new String[] { "1", "2" }) {
-        for (String i : new String[] { "1", "3", "13", "15" }) {
+        for (String i : new String[] { "1", "6", "11", "16", "21", "26" }) {
           runQuery("INSERT INTO SQOOP.SQ_LINK_INPUT"
               + "(SQ_LNKI_LINK, SQ_LNKI_INPUT, SQ_LNKI_VALUE) " + "VALUES(" + ci + ", " + i
               + ", 'Value" + i + "')");
@@ -671,14 +698,9 @@ abstract public class DerbyTestCase {
             + name + index + "', 1, 2)");
       }
 
-      // Odd IDs inputs have values
+      // Every fifth input has a value (1 and 6 are LINK inputs, so not used here)
       for (String ci : new String[] { "1", "2", "3", "4" }) {
-        for (String i : new String[] { "5", "9", "13" }) {
-          runQuery("INSERT INTO SQOOP.SQ_JOB_INPUT" + "(SQBI_JOB, SQBI_INPUT, SQBI_VALUE) "
-              + "VALUES(" + ci + ", " + i + ", 'Value" + i + "')");
-        }
-
-        for (String i : new String[] { "7", "11", "15" }) {
+        for (String i : new String[] { "11", "16", "21", "26", "31", "36"  }) {
           runQuery("INSERT INTO SQOOP.SQ_JOB_INPUT" + "(SQBI_JOB, SQBI_INPUT, SQBI_VALUE) "
               + "VALUES(" + ci + ", " + i + ", 'Value" + i + "')");
         }
@@ -727,8 +749,9 @@ abstract public class DerbyTestCase {
     // Insert two configurable - CB and CB
     runInsertQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
         + "VALUES('CB', 'org.apache.sqoop.test.B', '1.0-test', 'CONNECTOR')");
-    runInsertQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, SQC_VERSION, SQC_TYPE)"
-        + "VALUES('CB', 'org.apache.sqoop.test.B', '1.0-test', 'CONNECTOR')");
+    runInsertQuery("INSERT INTO SQOOP.SQ_CONFIGURABLE(SQC_NAME, SQC_CLASS, " +
+      "SQC_VERSION, SQC_TYPE)"
+      + "VALUES('CB', 'org.apache.sqoop.test.B', '1.0-test', 'CONNECTOR')");
 
   }
 
@@ -830,8 +853,9 @@ abstract public class DerbyTestCase {
         + "VALUES('B', 'org.apache.sqoop.test.B', '1.0-test', 'CONNECTOR')");
     runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS (SQCD_CONNECTOR, SQCD_DIRECTION) VALUES ("
         + connectorId + ", 1)");
-    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS (SQCD_CONNECTOR, SQCD_DIRECTION) VALUES ("
-        + connectorId + ", 2)");
+    runQuery("INSERT INTO SQOOP.SQ_CONNECTOR_DIRECTIONS (SQCD_CONNECTOR, " +
+      "SQCD_DIRECTION) VALUES ("
+      + connectorId + ", 2)");
   }
 
   /**
@@ -960,51 +984,63 @@ abstract public class DerbyTestCase {
   }
 
   protected MLinkConfig getLinkConfig() {
-    return new MLinkConfig(getConfigs("l1", "l2"));
+    return new MLinkConfig(getConfigs("LINK1", "LINK2"));
   }
 
   protected MFromConfig getFromConfig() {
-    return new MFromConfig(getConfigs("from1", "from2"));
+    return new MFromConfig(getConfigs("JOB3", "JOB4"));
   }
 
   protected MFromConfig getBadFromConfig() {
-    return new MFromConfig(getBadConfigs("from1", "from2"));
+    return new MFromConfig(getBadConfigs("FROM1", "FROM2"));
   }
 
   protected MFromConfig getMultipleOverridesFromConfig() {
-    return new MFromConfig(getMultipleOverrideConfigs("from1", "from2"));
+    return new MFromConfig(getMultipleOverrideConfigs("FROM1", "FROM2"));
   }
 
   protected MFromConfig getNonExistentOverridesFromConfig() {
-    return new MFromConfig(getBadConfigsWithNonExistingInputOverrides("from1", "from2"));
+    return new MFromConfig(getBadConfigsWithNonExistingInputOverrides("FROM1", "FROM2"));
   }
 
   protected MToConfig getToConfig() {
-    return new MToConfig(getConfigs("to1", "to2"));
+    return new MToConfig(getConfigs("JOB5", "JOB6"));
   }
 
   protected MDriverConfig getDriverConfig() {
-    return new MDriverConfig(getConfigs("d1", "d2"));
+    return new MDriverConfig(getConfigs("DRIVER1", "DRIVER2"));
   }
 
   protected MDriverConfig getBadDriverConfig() {
-    return new MDriverConfig(getBadConfigsWithSelfOverrides("d1", "d2"));
+    return new MDriverConfig(getBadConfigsWithSelfOverrides("DRIVER1", "DRIVER2"));
   }
 
   protected List<MConfig> getConfigs(String configName1, String configName2) {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    MInput input = new MStringInput("I1", false, InputEditable.ANY, "I2", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I2", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5");
+    inputs.add(input);
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName1, inputs));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I3", false, InputEditable.ANY, "I4", (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I4", false, InputEditable.USER_ONLY, "I3");
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    inputs.add(input);
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName2, inputs));
 
@@ -1016,16 +1052,28 @@ abstract public class DerbyTestCase {
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
     // I1 overrides another user_only attribute, hence a bad config
-    MInput input = new MStringInput("I1", false, InputEditable.USER_ONLY, "I2", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I4", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I2", false, InputEditable.USER_ONLY, "I1");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5");
+    inputs.add(input);
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName1, inputs));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    inputs.add(input);
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName2, inputs));
 
@@ -1037,16 +1085,28 @@ abstract public class DerbyTestCase {
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
     // I1 overrides another user_only attribute, hence a bad config
-    MInput input = new MStringInput("I1", false, InputEditable.USER_ONLY, "I2", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I4", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I2", false, InputEditable.USER_ONLY, "I2");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5");
+    inputs.add(input);
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, configName1 + ".I4");
+    inputs.add(input);
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName1, inputs));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    inputs.add(input);
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName2, inputs));
 
@@ -1057,19 +1117,28 @@ abstract public class DerbyTestCase {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    // I1 overrides another user_only attribute, hence a bad config
-    MInput input = new MStringInput("I1", false, InputEditable.USER_ONLY, "I2", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I2", false, InputEditable.ANY, "I1,I3");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I1," + configName1 + ".I3");
     inputs.add(input);
-    input = new MMapInput("I3", false, InputEditable.CONNECTOR_ONLY, "I1");
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName1, inputs));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    inputs.add(input);
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName2, inputs));
 
@@ -1081,17 +1150,29 @@ abstract public class DerbyTestCase {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    // I1 overrides another user_only attribute, hence a bad config
-    MInput input = new MStringInput("I1", false, InputEditable.USER_ONLY, "I2", (short) 30);
+    // I2 overrides a nonexistant input
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I2", false, InputEditable.USER_ONLY, "Foo");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".FOO");
+    inputs.add(input);
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName1, inputs));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I3", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I4", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    inputs.add(input);
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    inputs.add(input);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    inputs.add(input);
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
     inputs.add(input);
     configs.add(new MConfig(configName2, inputs));
 
@@ -1138,7 +1219,7 @@ abstract public class DerbyTestCase {
    */
   protected void assertCountForTable(String table, long expected) throws Exception {
     long count = countForTable(table);
-    assertEquals(expected, count);
+    assertEquals(count, expected);
   }
 
   /**

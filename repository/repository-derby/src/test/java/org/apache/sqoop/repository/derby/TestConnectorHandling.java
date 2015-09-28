@@ -18,15 +18,17 @@
 package org.apache.sqoop.repository.derby;
 
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.model.MConnector;
+import org.apache.sqoop.repository.RepositoryManager;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.*;
 
 /**
  * Test connector methods on Derby repository.
@@ -39,8 +41,14 @@ public class TestConnectorHandling extends DerbyTestCase {
   public void setUp() throws Exception {
     super.setUp();
     handler = new DerbyRepositoryHandler();
-    // We always needs schema for this test case
-    createOrUpgradeSchemaForLatestVersion();
+  }
+
+  @AfterMethod(alwaysRun = true)
+  public void tearDown() throws Exception {
+    super.tearDown();
+
+    SqoopConfiguration.getInstance().destroy();
+    RepositoryManager.getInstance().destroy();
   }
 
   @Test
@@ -48,7 +56,8 @@ public class TestConnectorHandling extends DerbyTestCase {
     // On empty repository, no connectors should be there
     assertNull(handler.findConnector(1L, getDerbyDatabaseConnection()));
     // Load connector into repository
-    addConnectorA();
+    loadConnectorAndDriverConfig();
+    when(mockConnectorManager.getConnectorConfigurable(1L)).thenReturn(getConnector());
     // Retrieve it
     MConnector connector = handler.findConnector(1L, getDerbyDatabaseConnection());
     assertNotNull(connector);
@@ -63,7 +72,8 @@ public class TestConnectorHandling extends DerbyTestCase {
     // On empty repository, no connectors should be there
     assertNull(handler.findConnector("A", getDerbyDatabaseConnection()));
     // Load connector into repository
-    addConnectorA();
+    loadConnectorAndDriverConfig();
+    when(mockConnectorManager.getConnectorConfigurable(1L)).thenReturn(getConnector());
     // Retrieve it
     MConnector connector = handler.findConnector("A", getDerbyDatabaseConnection());
     assertNotNull(connector);
@@ -99,8 +109,8 @@ public class TestConnectorHandling extends DerbyTestCase {
     // Now check content in corresponding tables
     assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 6);
-    assertCountForTable("SQOOP.SQ_INPUT", 12);
-    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 9);
+    assertCountForTable("SQOOP.SQ_INPUT", 30);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 30);
 
 
     // Registered connector should be easily recovered back
@@ -138,8 +148,8 @@ public class TestConnectorHandling extends DerbyTestCase {
     // Now check content in corresponding tables
     assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 4);
-    assertCountForTable("SQOOP.SQ_INPUT", 8);
-    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 6);
+    assertCountForTable("SQOOP.SQ_INPUT", 20);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 20);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
@@ -159,8 +169,8 @@ public class TestConnectorHandling extends DerbyTestCase {
     // Now check content in corresponding tables
     assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 4);
-    assertCountForTable("SQOOP.SQ_INPUT", 8);
-    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 6);
+    assertCountForTable("SQOOP.SQ_INPUT", 20);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 20);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());
@@ -180,8 +190,8 @@ public class TestConnectorHandling extends DerbyTestCase {
     // Now check content in corresponding tables
     assertCountForTable("SQOOP.SQ_CONFIGURABLE", 1);
     assertCountForTable("SQOOP.SQ_CONFIG", 2);
-    assertCountForTable("SQOOP.SQ_INPUT", 4);
-    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 3);
+    assertCountForTable("SQOOP.SQ_INPUT", 10);
+    assertCountForTable("SQOOP.SQ_INPUT_RELATION", 10);
 
     // Registered connector should be easily recovered back
     MConnector retrieved = handler.findConnector("A", getDerbyDatabaseConnection());

@@ -39,8 +39,6 @@ public class TestDriverHandling extends DerbyTestCase {
   public void setUp() throws Exception {
     super.setUp();
     handler = new DerbyRepositoryHandler();
-    // We always needs schema for this test case
-    createOrUpgradeSchemaForLatestVersion();
   }
 
   @Test

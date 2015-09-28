@@ -403,6 +403,20 @@ public class JdbcRepository extends Repository {
    */
   @SuppressWarnings("unchecked")
   @Override
+  public List<MLink> findLinksForConnectorUpgrade(final String connectorName) {
+    return (List<MLink>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findLinksForConnectorUpgrade(connectorName, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  @Override
   public List<MLink> findLinksForConnector(final String connectorName) {
     return (List<MLink>) doWithConnection(new DoWithConnection() {
       @Override
@@ -537,6 +551,20 @@ public class JdbcRepository extends Repository {
       @Override
       public Object doIt(Connection conn) {
         return handler.findJobs(conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MJob> findJobsForConnectorUpgrade(final long connectorId) {
+    return (List<MJob>) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.findJobsForConnectorUpgrade(connectorId, conn);
       }
     });
   }

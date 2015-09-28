@@ -55,8 +55,6 @@ public class TestInputTypes extends DerbyTestCase {
     super.setUp();
 
     handler = new DerbyRepositoryHandler();
-    // We always needs schema for this test case
-    createOrUpgradeSchemaForLatestVersion();
   }
 
   /**
@@ -101,22 +99,22 @@ public class TestInputTypes extends DerbyTestCase {
     // Connection object with all various values
     MLink link = new MLink(connector.getPersistenceId(), connector.getLinkConfig());
     MLinkConfig linkConfig = link.getConnectorLinkConfig();
-    assertEquals(linkConfig.getStringInput("l1.I1").getEditable(), InputEditable.ANY);
-    assertEquals(linkConfig.getStringInput("l1.I1").getOverrides(), "l1.I2");
-    assertEquals(linkConfig.getMapInput("l1.I2").getEditable(), InputEditable.CONNECTOR_ONLY);
-    assertEquals(linkConfig.getMapInput("l1.I2").getOverrides(), "l1.I5");
-    assertEquals(linkConfig.getIntegerInput("l1.I3").getEditable(), InputEditable.ANY);
-    assertEquals(linkConfig.getIntegerInput("l1.I3").getOverrides(), "l1.I1");
-    assertEquals(linkConfig.getBooleanInput("l1.I4").getEditable(), InputEditable.USER_ONLY);
-    assertEquals(linkConfig.getBooleanInput("l1.I4").getOverrides(), "");
-    assertEquals(linkConfig.getEnumInput("l1.I5").getEditable(), InputEditable.ANY);
-    assertEquals(linkConfig.getEnumInput("l1.I5").getOverrides(), "l1.I4,l1.I3");
+    assertEquals(linkConfig.getStringInput("LINK1.I1").getEditable(), InputEditable.USER_ONLY);
+    assertEquals(linkConfig.getStringInput("LINK1.I1").getOverrides(), "LINK1.I2");
+    assertEquals(linkConfig.getMapInput("LINK1.I2").getEditable(), InputEditable.CONNECTOR_ONLY);
+    assertEquals(linkConfig.getMapInput("LINK1.I2").getOverrides(), "LINK1.I5");
+    assertEquals(linkConfig.getIntegerInput("LINK1.I3").getEditable(), InputEditable.ANY);
+    assertEquals(linkConfig.getIntegerInput("LINK1.I3").getOverrides(), "LINK1.I1");
+    assertEquals(linkConfig.getBooleanInput("LINK1.I4").getEditable(), InputEditable.USER_ONLY);
+    assertEquals(linkConfig.getBooleanInput("LINK1.I4").getOverrides(), "");
+    assertEquals(linkConfig.getEnumInput("LINK1.I5").getEditable(), InputEditable.ANY);
+    assertEquals(linkConfig.getEnumInput("LINK1.I5").getOverrides(), "LINK1.I4,LINK1.I3");
 
-    linkConfig.getStringInput("l1.I1").setValue("A");
-    linkConfig.getMapInput("l1.I2").setValue(map);
-    linkConfig.getIntegerInput("l1.I3").setValue(1);
-    linkConfig.getBooleanInput("l1.I4").setValue(true);
-    linkConfig.getEnumInput("l1.I5").setValue("YES");
+    linkConfig.getStringInput("LINK1.I1").setValue("A");
+    linkConfig.getMapInput("LINK1.I2").setValue(map);
+    linkConfig.getIntegerInput("LINK1.I3").setValue(1);
+    linkConfig.getBooleanInput("LINK1.I4").setValue(true);
+    linkConfig.getEnumInput("LINK1.I5").setValue("YES");
 
     // Create the link in repository
     handler.createLink(link, getDerbyDatabaseConnection());
@@ -125,50 +123,13 @@ public class TestInputTypes extends DerbyTestCase {
     // Retrieve created link
     MLink retrieved = handler.findLink(link.getPersistenceId(), getDerbyDatabaseConnection());
     linkConfig = retrieved.getConnectorLinkConfig();
-    assertEquals("A", linkConfig.getStringInput("l1.I1").getValue());
-    assertEquals(map, linkConfig.getMapInput("l1.I2").getValue());
-    assertEquals(1, (int) linkConfig.getIntegerInput("l1.I3").getValue());
-    assertEquals(true, (boolean) linkConfig.getBooleanInput("l1.I4").getValue());
-    assertEquals("YES", linkConfig.getEnumInput("l1.I5").getValue());
-    assertEquals(linkConfig.getEnumInput("l1.I5").getEditable(), InputEditable.ANY);
-    assertEquals(linkConfig.getEnumInput("l1.I5").getOverrides(), "l1.I4,l1.I3");
+    assertEquals("A", linkConfig.getStringInput("LINK1.I1").getValue());
+    assertEquals(map, linkConfig.getMapInput("LINK1.I2").getValue());
+    assertEquals(1, (int) linkConfig.getIntegerInput("LINK1.I3").getValue());
+    assertEquals(true, (boolean) linkConfig.getBooleanInput("LINK1.I4").getValue());
+    assertEquals("YES", linkConfig.getEnumInput("LINK1.I5").getValue());
+    assertEquals(linkConfig.getEnumInput("LINK1.I5").getEditable(), InputEditable.ANY);
+    assertEquals(linkConfig.getEnumInput("LINK1.I5").getOverrides(), "LINK1.I4,LINK1.I3");
 
-  }
-
-  /**
-   * Overriding parent method to get forms with all supported data types.
-   *
-   * @return Forms with all data types
-   */
-  @Override
-  protected List<MConfig> getConfigs(String configName1, String configName2) {
-    List<MConfig> configs = new LinkedList<MConfig>();
-
-    List<MInput<?>> inputs;
-    MInput input;
-
-    inputs = new LinkedList<MInput<?>>();
-
-    input = new MStringInput(configName1 + ".I1", false, InputEditable.ANY, configName1 + ".I2",
-        (short) 30);
-    inputs.add(input);
-
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1
-        + ".I5");
-    inputs.add(input);
-
-    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
-    inputs.add(input);
-
-    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY,
-        StringUtils.EMPTY);
-    inputs.add(input);
-
-    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4,"
-        + configName1 + ".I3", new String[] { "YES", "NO" });
-    inputs.add(input);
-
-    configs.add(new MConfig(configName1, inputs));
-    return configs;
   }
 }

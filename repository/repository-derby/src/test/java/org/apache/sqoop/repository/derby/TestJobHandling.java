@@ -22,6 +22,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -51,8 +52,7 @@ public class TestJobHandling extends DerbyTestCase {
     super.setUp();
     derbyConnection = getDerbyDatabaseConnection();
     handler = new DerbyRepositoryHandler();
-    // We always needs create/ upgrade schema for this test case
-    createOrUpgradeSchemaForLatestVersion();
+
     loadConnectorAndDriverConfig();
     loadLinksForLatestVersion();
   }
@@ -73,23 +73,23 @@ public class TestJobHandling extends DerbyTestCase {
 
     configs = firstJob.getFromJobConfig().getConfigs();
     assertEquals(2, configs.size());
-    assertEquals("Value5", configs.get(0).getInputs().get(0).getValue());
+    assertEquals("Value11", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
-    assertEquals("Value5", configs.get(0).getInputs().get(0).getValue());
+    assertEquals("Value16", configs.get(1).getInputs().get(0).getValue());
     assertNull(configs.get(1).getInputs().get(1).getValue());
 
     configs = firstJob.getToJobConfig().getConfigs();
     assertEquals(2, configs.size());
-    assertEquals("Value9", configs.get(0).getInputs().get(0).getValue());
+    assertEquals("Value21", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
-    assertEquals("Value9", configs.get(0).getInputs().get(0).getValue());
+    assertEquals("Value26", configs.get(1).getInputs().get(0).getValue());
     assertNull(configs.get(1).getInputs().get(1).getValue());
 
     configs = firstJob.getDriverConfig().getConfigs();
     assertEquals(2, configs.size());
-    assertEquals("Value13", configs.get(0).getInputs().get(0).getValue());
+    assertEquals("Value31", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
-    assertEquals("Value15", configs.get(1).getInputs().get(0).getValue());
+    assertEquals("Value36", configs.get(1).getInputs().get(0).getValue());
     assertNull(configs.get(1).getInputs().get(1).getValue());
   }
 
@@ -112,7 +112,7 @@ public class TestJobHandling extends DerbyTestCase {
   }
 
   @Test
-  public void testFindJobsByConnector() throws Exception {
+  public void testFindJobsForConnector() throws Exception {
     List<MJob> list;
     // Load empty list on empty repository
     list = handler.findJobs(derbyConnection);
@@ -130,6 +130,24 @@ public class TestJobHandling extends DerbyTestCase {
   }
 
   @Test
+  public void testFindJobsByConnectorForUpgrade() throws Exception {
+    List<MJob> list;
+    // Load empty list on empty repository
+    list = handler.findJobs(derbyConnection);
+    assertEquals(0, list.size());
+    loadJobsForLatestVersion();
+
+    // Load all 4 jobs on loaded repository
+    list = handler.findJobsForConnectorUpgrade(1, derbyConnection);
+    assertEquals(4, list.size());
+
+    assertEquals("JA0", list.get(0).getName());
+    assertEquals("JB0", list.get(1).getName());
+    assertEquals("JC0", list.get(2).getName());
+    assertEquals("JD0", list.get(3).getName());
+  }
+
+  @Test
   public void testFindJobsForNonExistingConnector() throws Exception {
     List<MJob> list;
     // Load empty list on empty repository
@@ -137,7 +155,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals(0, list.size());
     loadJobsForLatestVersion();
 
-    list = handler.findJobsForConnector(11, derbyConnection);
+    list = handler.findJobsForConnectorUpgrade(11, derbyConnection);
     assertEquals(0, list.size());
   }
 

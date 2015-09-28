@@ -22,6 +22,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.List;
 
@@ -45,8 +46,7 @@ public class TestLinkHandling extends DerbyTestCase {
     super.setUp();
 
     handler = new DerbyRepositoryHandler();
-    // We always needs schema for this test case
-    createOrUpgradeSchemaForLatestVersion();
+
     // We always needs connector and framework structures in place
     loadConnectorAndDriverConfig();
   }
@@ -70,7 +70,7 @@ public class TestLinkHandling extends DerbyTestCase {
     configs = linkA.getConnectorLinkConfig().getConfigs();
     assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
-    assertEquals("Value3", configs.get(1).getInputs().get(0).getValue());
+    assertEquals("Value6", configs.get(1).getInputs().get(0).getValue());
     assertNull(configs.get(1).getInputs().get(1).getValue());
   }
 
@@ -92,7 +92,7 @@ public class TestLinkHandling extends DerbyTestCase {
     configs = linkA.getConnectorLinkConfig().getConfigs();
     assertEquals("Value1", configs.get(0).getInputs().get(0).getValue());
     assertNull(configs.get(0).getInputs().get(1).getValue());
-    assertEquals("Value3", configs.get(1).getInputs().get(0).getValue());
+    assertEquals("Value6", configs.get(1).getInputs().get(0).getValue());
     assertNull(configs.get(1).getInputs().get(1).getValue());
   }
 
@@ -125,7 +125,27 @@ public class TestLinkHandling extends DerbyTestCase {
     loadLinksForLatestVersion();
 
     // Load all two links on loaded repository
-    list = handler.findLinksForConnector("A", getDerbyDatabaseConnection());
+    list = handler.findLinksForConnector("A",
+      getDerbyDatabaseConnection());
+    assertEquals(2, list.size());
+
+    assertEquals("CA", list.get(0).getName());
+    assertEquals("CB", list.get(1).getName());
+  }
+
+  @Test
+  public void testFindLinksByConnectorForUpgrade() throws Exception {
+    List<MLink> list;
+
+    // Load empty list on empty repository
+    list = handler.findLinks(getDerbyDatabaseConnection());
+    assertEquals(0, list.size());
+
+    loadLinksForLatestVersion();
+
+    // Load all two links on loaded repository
+    list = handler.findLinksForConnectorUpgrade("A",
+      getDerbyDatabaseConnection());
     assertEquals(2, list.size());
 
     assertEquals("CA", list.get(0).getName());
@@ -141,7 +161,8 @@ public class TestLinkHandling extends DerbyTestCase {
 
     loadLinksForLatestVersion();
 
-    list = handler.findLinksForConnector("NONEXISTCONNECTOR", getDerbyDatabaseConnection());
+    list = handler.findLinksForConnectorUpgrade("NONEXISTCONNECTOR",
+      getDerbyDatabaseConnection());
     assertEquals(0, list.size());
   }
 
@@ -238,7 +259,7 @@ public class TestLinkHandling extends DerbyTestCase {
 
     assertEquals(1, link.getPersistenceId());
     assertCountForTable("SQOOP.SQ_LINK", 2);
-    assertCountForTable("SQOOP.SQ_LINK_INPUT", 6);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 8);
 
     MLink retrieved = handler.findLink(1, getDerbyDatabaseConnection());
     assertEquals("name", link.getName());
@@ -275,7 +296,7 @@ public class TestLinkHandling extends DerbyTestCase {
 
     handler.deleteLink("CA", getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_LINK", 1);
-    assertCountForTable("SQOOP.SQ_LINK_INPUT", 4);
+    assertCountForTable("SQOOP.SQ_LINK_INPUT", 6);
 
     handler.deleteLink("CB", getDerbyDatabaseConnection());
     assertCountForTable("SQOOP.SQ_LINK", 0);
