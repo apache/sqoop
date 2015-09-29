@@ -35,6 +35,7 @@ public class ConfigInputConstants {
   public static final String CONFIG_INPUT_NAME = "name";
   public static final String CONFIG_INPUT_TYPE = "type";
   public static final String CONFIG_INPUT_SENSITIVE = "sensitive";
+  public static final String CONFIG_INPUT_SENSITIVE_KEY_PATTERN = "sensitive-pattern";
   public static final String CONFIG_INPUT_SIZE = "size";
   public static final String CONFIG_INPUT_EDITABLE = "editable";
   public static final String CONFIG_INPUT_OVERRIDES = "overrides";

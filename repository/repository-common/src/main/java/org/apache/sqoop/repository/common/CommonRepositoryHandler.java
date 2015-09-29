@@ -1998,7 +1998,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
                 input = new MStringInput(inputName, inputSensitivity, editableEnum, overrides, inputStrLength);
                 break;
               case MAP:
-                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides, StringUtils.EMPTY);
                 break;
               case BOOLEAN:
                 input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
@@ -2176,7 +2176,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
                         inputStrLength);
                 break;
               case MAP:
-                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides, StringUtils.EMPTY);
                 break;
               case BOOLEAN:
                 input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);

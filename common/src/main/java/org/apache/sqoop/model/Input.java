@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
@@ -43,6 +44,15 @@ public @interface Input {
   boolean sensitive() default false;
 
   /**
+   * If this input is a map, keys matching this regular expression will be
+   * treated as sensitive. Sqoop will ensure that values associated with the
+   * sensitive keys will not be easily accessible.
+   *
+   * @return The regular expression that matches sensitive fields
+   */
+  String sensitiveKeyPattern() default StringUtils.EMPTY;
+
+  /**
    * Indicates the entity that can edit the input's values, all inputs are
    * created/deleted only by the connector code, other entities do not have
    * access to either create/delete an input
@@ -63,7 +73,7 @@ public @interface Input {
    * separated list of other inputs in the config class. It validates the
    * attribute value obeys the expected conditions
    */
-  String overrides() default "";
+  String overrides() default StringUtils.EMPTY;
 
   /**
    * List of validators associated with this input.

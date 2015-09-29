@@ -117,10 +117,34 @@ public class TestConfigSerialization {
     String serializedJson = jsonObject.toJSONString();
 
     // Replace map value with a fake string to force exception
-    String badSerializedJson = serializedJson.replace("{\"A\":\"B\"}", "\"nonsensical string\"");
+    String badSerializedJson = serializedJson.replace("{\"A\":\"B\"}",
+      "\"nonsensical string\"");
     System.out.println(badSerializedJson);
     JSONObject retrievedJson = JSONUtils.parse(badSerializedJson);
     ConfigInputSerialization.restoreConfig(retrievedJson);
+  }
+
+  @Test
+  public void testMapDataTypeSensitiveKeys() {
+    MConfig config = getMapConfig();
+
+    // Inserted values
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("A", "B");
+    config.getMapInput("Map").setValue(map);
+
+    // Serialize
+    JSONObject jsonObject = ConfigInputSerialization.extractConfig(config, MConfigType.JOB, true);
+    String serializedJson = jsonObject.toJSONString();
+
+    // Map with sensitive values redacted
+    Map<String, String> sensitiveMap = new HashMap<String, String>();
+    sensitiveMap.put("A", MMapInput.SENSITIVE_VALUE_PLACEHOLDER);
+
+    // Deserialize
+    JSONObject retrievedJson = JSONUtils.parse(serializedJson);
+    MConfig retrieved = ConfigInputSerialization.restoreConfig(retrievedJson);
+    assertEquals(sensitiveMap, retrieved.getMapInput("Map").getValue());
   }
 
   @Test
@@ -188,7 +212,7 @@ public class TestConfigSerialization {
 
     inputs = new LinkedList<MInput<?>>();
 
-    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY, "A");
     inputs.add(input);
 
     return new MConfig("c", inputs);
@@ -208,7 +232,7 @@ public class TestConfigSerialization {
     input = new MStringInput("String", false, InputEditable.ANY, StringUtils.EMPTY, (short)30);
     inputs.add(input);
 
-    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
     inputs.add(input);
 
     input = new MIntegerInput("Integer", false, InputEditable.ANY, StringUtils.EMPTY);

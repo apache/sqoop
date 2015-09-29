@@ -32,7 +32,7 @@ public class TestMConfigList {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     MIntegerInput intInput = new MIntegerInput("Config1.A", false, InputEditable.ANY, StringUtils.EMPTY);
-    MMapInput mapInput = new MMapInput("Config1.B", false, InputEditable.ANY, StringUtils.EMPTY);
+    MMapInput mapInput = new MMapInput("Config1.B", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
 
     List<MInput<?>> inputs = new ArrayList<MInput<?>>();
     inputs.add(intInput);

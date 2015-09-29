@@ -151,14 +151,14 @@ abstract public class PostgresqlTestCase {
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
     MInput<?> input = new MStringInput("I1", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
     inputs.add(input);
-    input = new MMapInput("I2", false, InputEditable.ANY, "I1");
+    input = new MMapInput("I2", false, InputEditable.ANY, "I1", StringUtils.EMPTY);
     inputs.add(input);
     configs.add(new MConfig(configName1, inputs));
 
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput("I3", false, InputEditable.ANY, "I4", (short) 30);
     inputs.add(input);
-    input = new MMapInput("I4", false, InputEditable.ANY, "I3");
+    input = new MMapInput("I4", false, InputEditable.ANY, "I3", StringUtils.EMPTY);
     inputs.add(input);
     configs.add(new MConfig(configName2, inputs));
 

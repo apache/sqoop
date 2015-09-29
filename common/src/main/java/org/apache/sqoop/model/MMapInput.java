@@ -20,7 +20,9 @@ package org.apache.sqoop.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.utils.UrlSafeUtils;
@@ -29,8 +31,13 @@ import org.apache.sqoop.utils.UrlSafeUtils;
 @InterfaceStability.Unstable
 public final class MMapInput extends MInput<Map<String, String>> {
 
-  public MMapInput(String name, boolean sensitive, InputEditable editable, String overrides) {
+  public static final String SENSITIVE_VALUE_PLACEHOLDER = StringUtils.EMPTY;
+
+  private final String sensitiveKeyPattern;
+
+  public MMapInput(String name, boolean sensitive, InputEditable editable, String overrides, String sensitiveKeyPattern) {
     super(name, sensitive, editable, overrides);
+    this.sensitiveKeyPattern = sensitiveKeyPattern;
   }
 
   @Override
@@ -117,7 +124,7 @@ public final class MMapInput extends MInput<Map<String, String>> {
 
   @Override
   public MMapInput clone(boolean cloneWithValue) {
-    MMapInput copy = new MMapInput(getName(), isSensitive(), getEditable(), getOverrides());
+    MMapInput copy = new MMapInput(getName(), isSensitive(), getEditable(), getOverrides(), getSensitiveKeyPattern());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue && this.getValue() != null) {
       Map<String, String> copyMap = new HashMap<String, String>();
@@ -128,5 +135,24 @@ public final class MMapInput extends MInput<Map<String, String>> {
       copy.setValue(copyMap);
     }
     return copy;
+  }
+
+  public String getSensitiveKeyPattern() {
+    return sensitiveKeyPattern;
+  }
+
+  public Map<String, String> getNonsenstiveValue() {
+    if (isEmpty()) return null;
+
+    Map<String, String> nonsensitveValue = new HashMap<>();
+    Pattern sensitivePattern = Pattern.compile(getSensitiveKeyPattern());
+    for (Map.Entry<String, String> entry : getValue().entrySet()) {
+      if (sensitivePattern.matcher(entry.getKey()).matches()){
+        nonsensitveValue.put(entry.getKey(), SENSITIVE_VALUE_PLACEHOLDER);
+      } else {
+        nonsensitveValue.put(entry.getKey(), entry.getValue());
+      }
+    }
+    return nonsensitveValue;
   }
 }

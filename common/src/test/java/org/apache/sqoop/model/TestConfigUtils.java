@@ -245,7 +245,7 @@ public class TestConfigUtils {
     // Config C
     inputs = new LinkedList<MInput<?>>();
     inputs.add(new MLongInput("cConfig.longValue", false, InputEditable.ANY, StringUtils.EMPTY));
-    inputs.add(new MMapInput("cConfig.map", false, InputEditable.ANY, StringUtils.EMPTY));
+    inputs.add(new MMapInput("cConfig.map", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY));
     inputs.add(new MEnumInput("cConfig.enumeration", false, InputEditable.ANY, StringUtils.EMPTY,
         new String[] { "X", "Y" }));
     inputs.add(new MListInput("cConfig.list", false, InputEditable.ANY, StringUtils.EMPTY));

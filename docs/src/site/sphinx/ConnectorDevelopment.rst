@@ -401,6 +401,11 @@ Inputs associated with the link configuration include:
 +-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
 | sensitive                   | Boolean |Describes if the input value should be hidden from display             |@Input(sensitive = true) public String password  |
 +-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
+| sensitiveKeyPattern         | String  |If the config paramteter is a map, this java regular expression        |@Input(sensitiveKeyPattern = ".*sensitive")      |
+|                             |         |(http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html)|public Map<String, String> sensitiveMap          |
+|                             |         |will be used to decide which keys are hidden from display.             |                                                 |
+|                             |         |                                                                       |                                                 |
++-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
 | editable                    | Enum    |Describes the roles that can edit the value of this input              |@Input(editable = ANY) public String value       |
 +-----------------------------+---------+-----------------------------------------------------------------------+-------------------------------------------------+
 | overrides                   | String  |Describes a list of other inputs this input can override in this config|@Input(overrides ="value") public String lvalue  |

@@ -69,7 +69,7 @@ public class TestMConfig {
   public void testGetInputs() {
     MIntegerInput intInput = new MIntegerInput("Config.A", false, InputEditable.ANY, StringUtils.EMPTY );
     MLongInput longInput = new MLongInput("Config.A1", false, InputEditable.ANY, StringUtils.EMPTY );
-    MMapInput mapInput = new MMapInput("Config.B", false, InputEditable.ANY, StringUtils.EMPTY );
+    MMapInput mapInput = new MMapInput("Config.B", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY );
     MStringInput stringInput = new MStringInput("Config.C", false, InputEditable.ANY,
         StringUtils.EMPTY, (short) 3);
     MEnumInput enumInput = new MEnumInput("Config.D", false, InputEditable.ANY, StringUtils.EMPTY,

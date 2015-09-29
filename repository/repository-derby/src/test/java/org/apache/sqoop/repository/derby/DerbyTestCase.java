@@ -1021,7 +1021,7 @@ abstract public class DerbyTestCase {
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
     MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
     inputs.add(input);
@@ -1034,7 +1034,7 @@ abstract public class DerbyTestCase {
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
     inputs.add(input);
@@ -1054,7 +1054,7 @@ abstract public class DerbyTestCase {
     // I1 overrides another user_only attribute, hence a bad config
     MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I4", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
     inputs.add(input);
@@ -1067,7 +1067,7 @@ abstract public class DerbyTestCase {
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
     inputs.add(input);
@@ -1087,7 +1087,7 @@ abstract public class DerbyTestCase {
     // I1 overrides another user_only attribute, hence a bad config
     MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I4", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
     inputs.add(input);
@@ -1100,7 +1100,7 @@ abstract public class DerbyTestCase {
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
     inputs.add(input);
@@ -1119,7 +1119,7 @@ abstract public class DerbyTestCase {
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
     MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I1," + configName1 + ".I3");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I1," + configName1 + ".I3", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
     inputs.add(input);
@@ -1132,7 +1132,7 @@ abstract public class DerbyTestCase {
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
     inputs.add(input);
@@ -1153,7 +1153,7 @@ abstract public class DerbyTestCase {
     // I2 overrides a nonexistant input
     MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".FOO");
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".FOO", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
     inputs.add(input);
@@ -1166,7 +1166,7 @@ abstract public class DerbyTestCase {
     inputs = new LinkedList<MInput<?>>();
     input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5");
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
     inputs.add(input);
     input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
     inputs.add(input);

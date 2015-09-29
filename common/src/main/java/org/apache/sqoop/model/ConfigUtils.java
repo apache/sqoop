@@ -144,6 +144,7 @@ public class  ConfigUtils {
         short maxLen = inputAnnotation.size();
         InputEditable editable = inputAnnotation.editable();
         String overrides = inputAnnotation.overrides();
+        String sensitiveKeyPattern = inputAnnotation.sensitiveKeyPattern();
         Class<?> type = field.getType();
 
         MInput input;
@@ -158,7 +159,7 @@ public class  ConfigUtils {
         if (type == String.class) {
           input = new MStringInput(inputName, sensitive, editable, overrides, maxLen);
         } else if (type.isAssignableFrom(Map.class)) {
-          input = new MMapInput(inputName, sensitive, editable, overrides);
+          input = new MMapInput(inputName, sensitive, editable, overrides, sensitiveKeyPattern);
         } else if (type == Integer.class) {
           input = new MIntegerInput(inputName, sensitive, editable, overrides);
         } else if (type == Long.class) {

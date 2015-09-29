@@ -106,7 +106,13 @@ public final class ConfigInputSerialization {
       // Skip if sensitive
       if (!mInput.isEmpty() && !(skipSensitive && mInput.isSensitive())) {
         if (mInput.getType() == MInputType.MAP) {
-          input.put(ConfigInputConstants.CONFIG_INPUT_VALUE, mInput.getValue());
+          MMapInput mMapInput = (MMapInput)mInput;
+          input.put(ConfigInputConstants.CONFIG_INPUT_SENSITIVE_KEY_PATTERN, mMapInput.getSensitiveKeyPattern());
+          if (skipSensitive) {
+            input.put(ConfigInputConstants.CONFIG_INPUT_VALUE, mMapInput.getNonsenstiveValue());
+          } else {
+            input.put(ConfigInputConstants.CONFIG_INPUT_VALUE, mMapInput.getValue());
+          }
         } else {
           input.put(ConfigInputConstants.CONFIG_INPUT_VALUE, mInput.getUrlSafeValueString());
         }
@@ -155,6 +161,7 @@ public final class ConfigInputSerialization {
           InputEditable.valueOf((String)input.get(ConfigInputConstants.CONFIG_INPUT_EDITABLE))
               : InputEditable.USER_ONLY;
       String overrides = (String) input.get(ConfigInputConstants.CONFIG_INPUT_OVERRIDES);
+      String sensitveKeyPattern = (String) input.get(ConfigInputConstants.CONFIG_INPUT_SENSITIVE_KEY_PATTERN);
 
       MInput mInput = null;
       switch (type) {
@@ -164,7 +171,7 @@ public final class ConfigInputSerialization {
         break;
       }
       case MAP: {
-        mInput = new MMapInput(name, sensitive.booleanValue(), editable, overrides);
+        mInput = new MMapInput(name, sensitive.booleanValue(), editable, overrides, sensitveKeyPattern);
         break;
       }
       case INTEGER: {

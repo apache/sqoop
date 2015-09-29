@@ -121,7 +121,7 @@ public class TestMJob {
 
   private MToConfig toConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     MConfig config = new MConfig("CONFIGTONAME", list);
@@ -131,7 +131,7 @@ public class TestMJob {
 
   private MDriverConfig driverConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     MConfig config = new MConfig("CONFIGDRIVERNAME", list);
