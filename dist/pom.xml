@@ -40,7 +40,6 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-server</artifactId>
-      <type>war</type>
     </dependency>
     <dependency>
       <groupId>org.apache.sqoop</groupId>
@@ -155,27 +154,13 @@ limitations under the License.
                       </fileset>
                      </copy>
 
-                    <!-- Build server directory -->
-                    <get src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.major.version}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.tar.gz"
-                         dest="target/apache-tomcat.tar.gz" verbose="true" skipexisting="true"/>
-                    <untar src="target/apache-tomcat.tar.gz" dest="target" compression="gzip"/>
-                    <move file="target/apache-tomcat-${tomcat.version}" tofile="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server"/>
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/bin">
-                      <fileset dir="src/main/server/bin"/>
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/lib">
+                      <fileset dir="../server/target/lib">
+                        <include name="*.jar" />
+                      </fileset>
                     </copy>
-                    <chmod dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/bin" perm="u+x" includes="**/*.sh"/>
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/conf">
-                      <fileset dir="src/main/server/conf"/>
-                    </copy>
-                    <delete dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/webapps"/>
-                    <mkdir dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/webapps"/>
-                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/webapps">
-                      <fileset dir="src/main/server/webapps"/>
-                    </copy>
-                    <copy file="../server/target/sqoop.war"
-                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/webapps"/>
-                    <copy file="../tomcat/target/sqoop-tomcat-${project.version}.jar"
-                      toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/lib"/>
+                    <copy file="../server/target/sqoop-server-${project.version}.jar"
+                            toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/server/lib"/>
 
                     <!-- Build shell client directory -->
                     <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/shell/lib">
@@ -187,6 +172,20 @@ limitations under the License.
                     </copy>
                     <copy file="../shell/target/sqoop-shell-${project.version}.jar"
                       toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/shell/lib"/>
+
+                    <!-- Build tools client directory -->
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/tools/lib">
+                      <fileset dir="../tools/target/lib">
+                        <include name="*.jar" />
+                        </fileset>
+                    </copy>
+                    <copy file="../tools/target/sqoop-tools-${project.version}.jar"
+                          toDir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/tools/lib"/>
+
+                    <!-- Build "conf" directory -->
+                    <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/conf">
+                        <fileset dir="src/main/conf"/>
+                    </copy>
 
                     <!-- Build "bin" directory -->
                     <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/bin">

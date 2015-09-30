@@ -24,6 +24,80 @@ function print_usage(){
   echo ""
 }
 
+function sqoop_server_classpath_set {
+
+  HADOOP_COMMON_HOME=${HADOOP_COMMON_HOME:-${HADOOP_HOME}/share/hadoop/common}
+  HADOOP_HDFS_HOME=${HADOOP_HDFS_HOME:-${HADOOP_HOME}/share/hadoop/hdfs}
+  HADOOP_MAPRED_HOME=${HADOOP_MAPRED_HOME:-${HADOOP_HOME}/share/hadoop/mapreduce}
+  HADOOP_YARN_HOME=${HADOOP_YARN_HOME:-${HADOOP_HOME}/share/hadoop/yarn}
+
+  if [[ ! (-d "${HADOOP_COMMON_HOME}" && -d "${HADOOP_HDFS_HOME}" && -d "${HADOOP_MAPRED_HOME}" && -d "${HADOOP_YARN_HOME}") ]]; then
+    echo "Can't load the Hadoop related java lib, please check the setting for the following environment variables:"
+    echo "    HADOOP_COMMON_HOME, HADOOP_HDFS_HOME, HADOOP_MAPRED_HOME, HADOOP_YARN_HOME"
+    exit
+  fi
+
+  for f in $SQOOP_SERVER_LIB/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HADOOP_COMMON_HOME/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HADOOP_COMMON_HOME/lib/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HADOOP_HDFS_HOME/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HADOOP_HDFS_HOME/lib/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HADOOP_MAPRED_HOME/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HADOOP_MAPRED_HOME/lib/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HADOOP_YARN_HOME/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HADOOP_YARN_HOME/lib/*.jar; do
+    CLASSPATH="${CLASSPATH}:$f"
+  done
+
+  for f in $HIVE_HOME/lib/*.jar; do
+    # exclude the jdbc for derby, to avoid the sealing violation exception
+    if [[ ! $f =~ derby* && ! $f =~ jetty* ]]; then
+      CLASSPATH="${CLASSPATH}:$f"
+    fi
+  done
+}
+
+function is_sqoop_server_running {
+  if [[ -f "${sqoop_pidfile}" ]]; then
+    kill -s 0 $(cat "$sqoop_pidfile") >/dev/null 2>&1
+    return $?
+  else
+    return 1
+  fi
+}
+
+function sqoop_extra_classpath_set {
+  if [[ -n "${SQOOP_SERVER_EXTRA_LIB}" ]]; then
+    for f in $SQOOP_SERVER_EXTRA_LIB/*.jar; do
+      CLASSPATH="${CLASSPATH}:$f"
+    done
+  fi
+}
+
 if [ $# = 0 ]; then
   print_usage
   exit
@@ -44,25 +118,30 @@ done
 
 BASEDIR=`dirname ${PRG}`
 BASEDIR=`cd ${BASEDIR}/..;pwd`
+SQOOP_IDENT_STRING=${SQOOP_IDENT_STRING:-$USER}
+SQOOP_PID_DIR=${SQOOP_PID_DIR:-/tmp}
+sqoop_pidfile="${SQOOP_PID_DIR}/sqoop-${SQOOP_IDENT_STRING}-jetty-server.pid"
+JAVA_OPTS="$JAVA_OPTS -Dsqoop.config.dir=`dirname $0`/../conf"
 
 echo "Sqoop home directory: ${BASEDIR}"
 
-CATALINA_BIN=${CATALINA_BIN:-${BASEDIR}/server/bin}
-CLIENT_LIB=${CLIENT_LIB:-${BASEDIR}/shell/lib}
+SQOOP_CLIENT_LIB=${BASEDIR}/shell/lib
+SQOOP_SERVER_LIB=${BASEDIR}/server/lib
+SQOOP_TOOLS_LIB=${BASEDIR}/tools/lib
 
-setup_catalina_opts() {
-  # The Java System properties 'sqoop.http.port' and 'sqoop.admin.port' are
-  # not used by Sqoop. They are used in Tomcat's server.xml configuration file
-  echo "Using   CATALINA_OPTS:       ${CATALINA_OPTS}"
+EXEC_JAVA='java'
+if [ -n "${JAVA_HOME}" ] ; then
+    EXEC_JAVA="${JAVA_HOME}/bin/java"
+fi
 
-  catalina_opts="-Dsqoop.http.port=${SQOOP_HTTP_PORT}";
-  catalina_opts="${catalina_opts} -Dsqoop.admin.port=${SQOOP_ADMIN_PORT}";
+# validation the java command
+${EXEC_JAVA} -version 2>/dev/null
+if [[ $? -gt 0 ]]; then
+  echo "Can't find the path for java, please check the environment setting."
+  exit
+fi
 
-  echo "Adding to CATALINA_OPTS:    ${catalina_opts}"
-
-  export CATALINA_OPTS="${CATALINA_OPTS} ${catalina_opts}"
-}
-
+sqoop_extra_classpath_set
 COMMAND=$1
 case $COMMAND in
   tool)
@@ -72,48 +151,82 @@ case $COMMAND in
     fi
 
     source ${BASEDIR}/bin/sqoop-sys.sh
-    setup_catalina_opts
 
     # Remove the "tool" keyword from the command line and pass the rest
     shift
 
-    $CATALINA_BIN/tool-wrapper.sh -server org.apache.sqoop.tomcat.TomcatToolRunner $@
+    # Build class path with full path to each library,including tools ,server and hadoop related
+    for f in $SQOOP_TOOLS_LIB/*.jar; do
+      CLASSPATH="${CLASSPATH}:$f"
+    done
+
+    # Build class path with full path to each library, including hadoop related
+    sqoop_server_classpath_set
+
+    ${EXEC_JAVA} $JAVA_OPTS -classpath ${CLASSPATH} org.apache.sqoop.tools.ToolRunner $@
     ;;
   server)
     if [ $# = 1 ]; then
       echo "Usage: sqoop.sh server <start/stop>"
       exit
     fi
-    actionCmd=$2
 
     source ${BASEDIR}/bin/sqoop-sys.sh
-    setup_catalina_opts
 
-    # There seems to be a bug in catalina.sh whereby catalina.sh doesn't respect
-    # CATALINA_OPTS when stopping the tomcat server. Consequently, we have to hack around
-    # by specifying the CATALINA_OPTS properties in JAVA_OPTS variable
-    if [ "$actionCmd" == "stop" ]; then
-      export JAVA_OPTS="$JAVA_OPTS $CATALINA_OPTS"
-    fi
+    case $2 in
+      start)
+        # check if the sqoop server started already.
+        is_sqoop_server_running
+        if [[ $? -eq 0 ]]; then
+          echo "The Sqoop server is already started."
+          exit
+        fi
 
-    # Remove the first 2 command line arguments (server and action command (start/stop)) so we can pass
-    # the rest to catalina.sh script
-    shift
-    shift
+        # Build class path with full path to each library, including hadoop related
+        sqoop_server_classpath_set
 
-    $CATALINA_BIN/catalina.sh $actionCmd "$@"
+        echo "Starting the Sqoop2 server..."
+        ${EXEC_JAVA} $JAVA_OPTS -classpath ${CLASSPATH} org.apache.sqoop.server.SqoopJettyServer &
+
+        echo $! > "${sqoop_pidfile}" 2>/dev/null
+        if [[ $? -gt 0 ]]; then
+          echo "ERROR:  Cannot write pid ${pidfile}."
+        fi
+
+        # wait 5 seconds, then check if the sqoop server started successfully.
+        sleep 5
+        is_sqoop_server_running
+        if [[ $? -eq 0 ]]; then
+          echo "Sqoop2 server started."
+        fi
+      ;;
+      stop)
+        # check if the sqoop server stopped already.
+        is_sqoop_server_running
+        if [[ $? -gt 0 ]]; then
+          echo "No Sqoop server is running."
+          exit
+        fi
+
+        pid=$(cat "$sqoop_pidfile")
+        echo "Stopping the Sqoop2 server..."
+        kill -9 "${pid}" >/dev/null 2>&1
+        rm -f "${sqoop_pidfile}"
+        echo "Sqoop2 server stopped."
+      ;;
+      *)
+        echo "Unknown command, usage: sqoop.sh server <start/stop>"
+        exit
+      ;;
+    esac
     ;;
 
   client)
     # Build class path with full path to each library
-    for f in $CLIENT_LIB/*.jar; do
+    for f in $SQOOP_CLIENT_LIB/*.jar; do
       CLASSPATH="${CLASSPATH}:$f"
     done
 
-    EXEC_JAVA='java'
-    if [ -n "${JAVA_HOME}" ] ; then
-        EXEC_JAVA="${JAVA_HOME}/bin/java"
-    fi
     ${EXEC_JAVA} $JAVA_OPTS -classpath ${CLASSPATH} org.apache.sqoop.shell.SqoopShell $2
     ;;
 

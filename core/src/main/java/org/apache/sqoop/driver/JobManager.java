@@ -138,7 +138,7 @@ public class JobManager implements Reconfigurable {
   /**
    * Synchronization variable between threads.
    */
-  private boolean running = true;
+  private boolean running;
 
   /**
    * Specifies how old submissions should be removed from repository.
@@ -215,7 +215,7 @@ public class JobManager implements Reconfigurable {
   public synchronized void initialize() {
     LOG.trace("Begin submission engine manager initialization");
     MapContext context = SqoopConfiguration.getInstance().getContext();
-
+    running = true;
     // Let's load configured submission engine
     String submissionEngineClassName =
       context.getString(DriverConstants.SYSCFG_SUBMISSION_ENGINE);

@@ -47,7 +47,8 @@ import org.testng.annotations.BeforeSuite;
  * In addition to pure Tomcat based test case it will also create and initialize
  * the database provider prior every test execution.
  */
-abstract public class ConnectorTestCase extends TomcatTestCase {
+@edu.umd.cs.findbugs.annotations.SuppressWarnings({"MS_PKGPROTECT", "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"})
+abstract public class ConnectorTestCase extends JettyTestCase {
 
   private static final Logger LOG = Logger.getLogger(ConnectorTestCase.class);
 
@@ -74,14 +75,14 @@ abstract public class ConnectorTestCase extends TomcatTestCase {
   };
 
   @BeforeSuite(alwaysRun = true)
-  public static void startProvider() throws Exception {
+  public void startProvider() throws Exception {
     provider = DatabaseProviderFactory.getProvider(System.getProperties());
     LOG.info("Starting database provider: " + provider.getClass().getName());
     provider.start();
   }
 
   @AfterSuite(alwaysRun = true)
-  public static void stopProvider() {
+  public void stopProvider() {
     LOG.info("Stopping database provider: " + provider.getClass().getName());
     provider.stop();
   }

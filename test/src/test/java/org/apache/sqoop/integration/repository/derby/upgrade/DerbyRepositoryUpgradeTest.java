@@ -19,8 +19,8 @@ package org.apache.sqoop.integration.repository.derby.upgrade;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.client.SqoopClient;
-import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
-import org.apache.sqoop.test.testcases.TomcatTestCase;
+import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
+import org.apache.sqoop.test.testcases.JettyTestCase;
 import org.apache.sqoop.test.utils.CompressionUtils;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.ITestContext;
@@ -51,14 +51,14 @@ import static org.testng.Assert.assertNotNull;
  * methods describing content of the repository (what links/jobs it have, ...).
  *
  */
-public abstract class DerbyRepositoryUpgradeTest extends TomcatTestCase {
+public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
 
   private static final Logger LOG = Logger.getLogger(DerbyRepositoryUpgradeTest.class);
 
   /**
    * Custom Sqoop mini cluster that points derby repository to real on-disk structures.
    */
-  public static class DerbySqoopMiniCluster extends TomcatSqoopMiniCluster {
+  public static class DerbySqoopMiniCluster extends JettySqoopMiniCluster {
     private String repositoryPath;
 
     public DerbySqoopMiniCluster(String repositoryPath, String temporaryPath, Configuration configuration) throws Exception {
@@ -66,6 +66,7 @@ public abstract class DerbyRepositoryUpgradeTest extends TomcatTestCase {
       this.repositoryPath = repositoryPath;
     }
 
+    @Override
     protected Map<String, String> getRepositoryConfiguration() {
       Map<String, String> properties = new HashMap<String, String>();
 
@@ -124,10 +125,10 @@ public abstract class DerbyRepositoryUpgradeTest extends TomcatTestCase {
   public abstract Integer[] getDeleteJobIds();
 
   public String getRepositoryPath() {
-    return HdfsUtils.joinPathFragments(getTemporaryTomcatPath(), "repo");
+    return HdfsUtils.joinPathFragments(getTemporaryJettyPath(), "repo");
   }
 
-  public String getTemporaryTomcatPath() {
+  public String getTemporaryJettyPath() {
     return HdfsUtils.joinPathFragments(getTemporaryPath(), getClass().getCanonicalName(), getTestName());
   }
 
@@ -149,7 +150,7 @@ public abstract class DerbyRepositoryUpgradeTest extends TomcatTestCase {
     CompressionUtils.untarStreamToDirectory(tarballStream, getRepositoryPath());
 
     // And use them for new Derby repo instance
-    setCluster(new DerbySqoopMiniCluster(getRepositoryPath(), getTemporaryTomcatPath() + "/sqoop-mini-cluster", hadoopCluster.getConfiguration()));
+    setCluster(new DerbySqoopMiniCluster(getRepositoryPath(), getTemporaryJettyPath() + "/sqoop-mini-cluster", hadoopCluster.getConfiguration()));
 
     // Start server
     getCluster().start();

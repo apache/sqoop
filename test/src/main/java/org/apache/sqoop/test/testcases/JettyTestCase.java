@@ -30,8 +30,8 @@ import org.apache.sqoop.test.asserts.HdfsAsserts;
 import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
+import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
-import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.ITest;
 import org.testng.ITestContext;
@@ -40,11 +40,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 
 /**
- * Basic test case that will bootstrap Sqoop server running in external Tomcat
+ * Basic test case that will bootstrap Sqoop server running in embedded Jetty
  * process.
  */
-abstract public class TomcatTestCase implements ITest {
-  private static final Logger LOG = Logger.getLogger(TomcatTestCase.class);
+@edu.umd.cs.findbugs.annotations.SuppressWarnings({"MS_PKGPROTECT", "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"})
+abstract public class JettyTestCase implements ITest {
+  private static final Logger LOG = Logger.getLogger(JettyTestCase.class);
 
   public String methodName;
 
@@ -79,9 +80,9 @@ abstract public class TomcatTestCase implements ITest {
   protected static FileSystem hdfsClient;
 
   /**
-   * Tomcat based Sqoop mini cluster
+   * Jetty based Sqoop mini cluster
    */
-  private static TomcatSqoopMiniCluster cluster;
+  private static JettySqoopMiniCluster cluster;
 
   /**
    * Sqoop client API.
@@ -151,8 +152,8 @@ abstract public class TomcatTestCase implements ITest {
    *
    * @return New instance of test mini cluster
    */
-  public TomcatSqoopMiniCluster createSqoopMiniCluster() throws Exception {
-    return new TomcatSqoopMiniCluster(getSqoopMiniClusterTemporaryPath(), hadoopCluster.getConfiguration());
+  public JettySqoopMiniCluster createSqoopMiniCluster() throws Exception {
+    return new JettySqoopMiniCluster(getSqoopMiniClusterTemporaryPath(), hadoopCluster.getConfiguration());
   }
 
   /**
@@ -172,7 +173,7 @@ abstract public class TomcatTestCase implements ITest {
     return cluster;
   }
 
-  public static void setCluster(TomcatSqoopMiniCluster sqoopMiniClusterluster) {
+  public static void setCluster(JettySqoopMiniCluster sqoopMiniClusterluster) {
     cluster = sqoopMiniClusterluster;
   }
 

@@ -64,11 +64,13 @@ public class AuditLoggerManager implements Reconfigurable {
   }
 
   private AuditLoggerManager() {
-    loggers = new ArrayList<AuditLogger>();
   }
 
   public synchronized void initialize() {
     LOG.info("Begin audit logger manager initialization");
+    if (loggers == null) {
+      loggers = new ArrayList<AuditLogger>();
+    }
     initializeLoggers();
 
     SqoopConfiguration.getInstance().getProvider()

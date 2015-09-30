@@ -49,7 +49,7 @@ public class SqoopServer {
 
   public static void initialize() {
     try {
-      LOG.info("Booting up Sqoop server");
+      LOG.info("Initializing Sqoop server.");
       SqoopConfiguration.getInstance().initialize();
       AuthenticationManager.getInstance().initialize();
       AuthorizationManager.getInstance().initialize();
@@ -58,9 +58,9 @@ public class SqoopServer {
       ConnectorManager.getInstance().initialize();
       Driver.getInstance().initialize();
       JobManager.getInstance().initialize();
-      LOG.info("Sqoop server has successfully boot up");
+      LOG.info("Sqoop server has successfully been initialized.");
     } catch (RuntimeException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-      LOG.error("Server startup failure", e);
+      LOG.error("Failure in server initialization", e);
       throw new RuntimeException("Failure in server initialization", e);
     }
   }

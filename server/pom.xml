@@ -30,7 +30,6 @@ limitations under the License.
   <groupId>org.apache.sqoop</groupId>
   <artifactId>sqoop-server</artifactId>
   <name>Sqoop Server</name>
-  <packaging>war</packaging>
 
   <dependencies>
     <dependency>
@@ -114,14 +113,6 @@ limitations under the License.
       <scope>provided</scope>
     </dependency>
 
-<!--
-    <dependency>
-      <groupId>org.apache.sqoop.connector</groupId>
-      <artifactId>sqoop-connector-mysql-jdbc</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
--->
-
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -132,10 +123,44 @@ limitations under the License.
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>
+    <dependency>
+       <groupId>org.eclipse.jetty</groupId>
+       <artifactId>jetty-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+    </dependency>
   </dependencies>
 
-  <build>
-    <finalName>sqoop</finalName>
-  </build>
+  <profiles>
+    <profile>
+      <id>binary</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                    <includeScope>runtime</includeScope>
+                    <excludeScope>test</excludeScope>
+                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

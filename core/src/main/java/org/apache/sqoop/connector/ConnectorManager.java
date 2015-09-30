@@ -94,11 +94,11 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   // key: connector id, value: connector name
-  private Map<Long, String> idToNameMap = new HashMap<Long, String>();
+  private Map<Long, String> idToNameMap;
   private Set<String> connectorNames = new HashSet<String>();
 
   // key: connector name, value: connector handler
-  private Map<String, ConnectorHandler> handlerMap = new HashMap<String, ConnectorHandler>();
+  private Map<String, ConnectorHandler> handlerMap;
 
   public List<MConnector> getConnectorConfigurables() {
     List<MConnector> connectors = new LinkedList<MConnector>();
@@ -110,10 +110,6 @@ public class ConnectorManager implements Reconfigurable {
 
   public Set<Long> getConnectorIds() {
     return idToNameMap.keySet();
-  }
-
-  public Set<String> getConnectorNames() {
-    return connectorNames;
   }
 
   public Map<Long, ResourceBundle> getResourceBundles(Locale locale) {
@@ -166,6 +162,16 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   public synchronized void initialize(boolean autoUpgrade) {
+    if (handlerMap == null) {
+      handlerMap = new HashMap<String, ConnectorHandler>();
+    }
+    if (idToNameMap == null) {
+      idToNameMap = new HashMap<Long, String>();
+    }
+    if (connectorNames == null) {
+      connectorNames = new HashSet<String>();
+    }
+
     if (LOG.isTraceEnabled()) {
       LOG.trace("Begin connector manager initialization");
     }
@@ -234,8 +240,9 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   public synchronized void destroy() {
-      handlerMap = null;
-      idToNameMap = null;
+    handlerMap = null;
+    idToNameMap = null;
+    connectorNames = null;
   }
 
   @Override

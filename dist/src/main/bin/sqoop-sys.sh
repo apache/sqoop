@@ -27,17 +27,3 @@ ECHO="true"
 if [ "${1}" == "-silent" ]; then
   ECHO="false"
 fi
-
-if [ "${SQOOP_HTTP_PORT}" = "" ]; then
-  export SQOOP_HTTP_PORT=12000
-  print "Setting SQOOP_HTTP_PORT:     ${SQOOP_HTTP_PORT}"
-else
-  print "Using   SQOOP_HTTP_PORT:     ${SQOOP_HTTP_PORT}"
-fi
-
-if [ "${SQOOP_ADMIN_PORT}" = "" ]; then
-  export SQOOP_ADMIN_PORT=`expr $SQOOP_HTTP_PORT +  1`
-  print "Setting SQOOP_ADMIN_PORT:     ${SQOOP_ADMIN_PORT}"
-else
-  print "Using   SQOOP_ADMIN_PORT:     ${SQOOP_ADMIN_PORT}"
-fi

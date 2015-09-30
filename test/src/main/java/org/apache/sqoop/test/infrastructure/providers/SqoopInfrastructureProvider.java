@@ -19,8 +19,8 @@ package org.apache.sqoop.test.infrastructure.providers;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
-import org.apache.sqoop.test.minicluster.TomcatSqoopMiniCluster;
 
 /**
  * Sqoop infrastructure provider.
@@ -37,7 +37,7 @@ public class SqoopInfrastructureProvider extends InfrastructureProvider {
   @Override
   public void start() {
     try {
-      instance = new TomcatSqoopMiniCluster(rootPath, hadoopConf);
+      instance = new JettySqoopMiniCluster(rootPath, hadoopConf);
       instance.start();
     } catch (Exception e) {
       LOG.error("Could not start Sqoop mini cluster.", e);
