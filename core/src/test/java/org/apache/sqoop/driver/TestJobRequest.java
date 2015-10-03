@@ -51,9 +51,9 @@ public class TestJobRequest {
 
   @Test
   public void testAddJarForClass() {
-    jobRequest.addJarForClass(TestJobRequest.class);
+    jobRequest.addJarForClass(String.class);
     assertEquals(1, jobRequest.getJars().size());
-    assertTrue(jobRequest.getJars().contains(ClassUtils.jarForClass(TestJobRequest.class)));
+    assertTrue(jobRequest.getJars().contains(ClassUtils.jarForClass(String.class)));
   }
 
   @Test

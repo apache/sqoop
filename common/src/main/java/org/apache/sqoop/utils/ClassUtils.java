@@ -17,18 +17,23 @@
  */
 package org.apache.sqoop.utils;
 
+import org.apache.log4j.Logger;
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.error.code.CoreError;
+
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import org.apache.sqoop.classification.InterfaceAudience;
-import org.apache.sqoop.classification.InterfaceStability;
-import org.apache.log4j.Logger;
 
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
@@ -209,11 +214,29 @@ public final class ClassUtils {
   /**
    * Return jar path for given class.
    *
+   * This method is based on the getJar method in Hadoop's JarFinder
+   *
    * @param klass Class object
    * @return Path on local filesystem to jar where given jar is present
    */
   public static String jarForClass(Class klass) {
-    return klass.getProtectionDomain().getCodeSource().getLocation().toString();
+    String jarPath = null;
+    String class_file = klass.getName().replaceAll("\\.", "/") + ".class";
+    try {
+      URL url = defaultClassLoader.getResource(class_file);
+      String path = url.getPath();
+      path = URLDecoder.decode(path, "UTF-8");
+      if ("jar".equals(url.getProtocol())) {
+        jarPath = path.replaceAll("!.*$", "");
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    if (jarPath == null) {
+      throw new SqoopException(CoreError.CORE_0009, "failed to find jar for " +
+        "class: " + klass.getName());
+    }
+    return jarPath;
   }
 
   /**
@@ -241,6 +264,15 @@ public final class ClassUtils {
     }
 
     return values.toArray(new String[values.size()]);
+  }
+
+
+  public static void clearCache() {
+    CACHE_CLASSES.clear();
+  }
+
+  public static void setDefaultClassLoader(ClassLoader classLoader) {
+    defaultClassLoader = classLoader;
   }
 
   private ClassUtils() {

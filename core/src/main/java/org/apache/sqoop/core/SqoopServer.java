@@ -19,13 +19,13 @@ package org.apache.sqoop.core;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.JobManager;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.security.AuthenticationManager;
 import org.apache.sqoop.security.AuthorizationManager;
+import org.apache.sqoop.utils.ClassUtils;
 
 /**
  * Entry point for initializing and destroying Sqoop server
@@ -44,6 +44,7 @@ public class SqoopServer {
     AuthorizationManager.getInstance().destroy();
     AuthenticationManager.getInstance().destroy();
     SqoopConfiguration.getInstance().destroy();
+    ClassUtils.clearCache();
     LOG.info("Sqoop server has been correctly terminated");
   }
 
