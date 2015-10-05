@@ -60,10 +60,10 @@ public class TestClassUtils {
     File jarFile = compileAJar();
     URL[] urlArray = { jarFile.toURI().toURL() };
     URLClassLoader newClassLoader = new URLClassLoader(urlArray, classLoader);
-    ClassUtils.setDefaultClassLoader(newClassLoader);
     testAClass = newClassLoader.loadClass("A");
     testParentClass = newClassLoader.loadClass("Parent");
     testChildClass = newClassLoader.loadClass("Child");
+    Thread.currentThread().setContextClassLoader(newClassLoader);
   }
 
   private File compileAJar() throws Exception{
@@ -159,7 +159,6 @@ public class TestClassUtils {
   @AfterMethod
   public void restoreClassLoader() {
     Thread.currentThread().setContextClassLoader(classLoader);
-    ClassUtils.setDefaultClassLoader(classLoader);
   }
 
   @Test

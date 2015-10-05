@@ -50,14 +50,6 @@ public final class ClassUtils {
   private static final Class<?> NEGATIVE_CACHE_SENTINEL =
     NegativeCacheSentinel.class;
 
-  private static ClassLoader defaultClassLoader;
-  static {
-    defaultClassLoader = Thread.currentThread().getContextClassLoader();
-    if (defaultClassLoader == null) {
-      defaultClassLoader = ClassUtils.class.getClassLoader();
-    }
-  }
-
   /**
    * A unique class which is used as a sentinel value in the caching
    * for loadClass.
@@ -74,7 +66,7 @@ public final class ClassUtils {
    * @return Class instance or NULL
    */
   public static Class<?> loadClass(String className) {
-    return loadClassWithClassLoader(className, defaultClassLoader);
+    return loadClassWithClassLoader(className, getClassLoader());
   }
 
   /**
@@ -139,7 +131,7 @@ public final class ClassUtils {
    * @return Instance of new class or NULL in case of any error
    */
   public static Object instantiate(String className, Object ... args) {
-    return instantiateWithClassLoader(className, defaultClassLoader, args);
+    return instantiateWithClassLoader(className, getClassLoader(), args);
   }
 
   /**
@@ -196,7 +188,7 @@ public final class ClassUtils {
    * @return Path on local filesystem to jar where given jar is present
    */
   public static String jarForClass(String className) {
-    return jarForClassWithClassLoader(className, defaultClassLoader);
+    return jarForClassWithClassLoader(className, getClassLoader());
   }
 
   /**
@@ -223,7 +215,7 @@ public final class ClassUtils {
     String jarPath = null;
     String class_file = klass.getName().replaceAll("\\.", "/") + ".class";
     try {
-      URL url = defaultClassLoader.getResource(class_file);
+      URL url = getClassLoader().getResource(class_file);
       String path = url.getPath();
       path = URLDecoder.decode(path, "UTF-8");
       if ("jar".equals(url.getProtocol())) {
@@ -271,8 +263,12 @@ public final class ClassUtils {
     CACHE_CLASSES.clear();
   }
 
-  public static void setDefaultClassLoader(ClassLoader classLoader) {
-    defaultClassLoader = classLoader;
+  public static ClassLoader getClassLoader() {
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    if (classLoader == null) {
+      classLoader = ClassUtils.class.getClassLoader();
+    }
+    return classLoader;
   }
 
   private ClassUtils() {
