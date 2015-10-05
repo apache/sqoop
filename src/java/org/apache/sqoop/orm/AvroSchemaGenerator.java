@@ -55,6 +55,11 @@ public class AvroSchemaGenerator {
     this.tableName = table;
   }
 
+  // Backward compatible method SQOOP-2597
+  public Schema generate() throws IOException {
+    return generate(null);
+  }
+
   public Schema generate(String schemaNameOverride) throws IOException {
     ClassWriter classWriter = new ClassWriter(options, connManager,
         tableName, null);
