@@ -81,6 +81,10 @@ public class DirectNetezzaManager extends NetezzaManager {
   public static final String NETEZZA_TRUNC_STRING_LONG_ARG =
       "trunc-string";
 
+  public static final String NETEZZA_TABLE_ENCODING_OPT =
+      "netezza.table.encoding";
+  public static final String NETEZZA_TABLE_ENCODING_LONG_ARG =
+      "encoding";
 
 
   private static final String QUERY_CHECK_DICTIONARY_FOR_TABLE =
@@ -286,6 +290,9 @@ public class DirectNetezzaManager extends NetezzaManager {
     netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_IGNORE_ZERO_OPT)
       .withDescription("Truncate string to declared storage size")
       .withLongOpt(NETEZZA_IGNORE_ZERO_LONG_ARG).create());
+    netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_TABLE_ENCODING_OPT)
+        .hasArg().withDescription("Table encoding")
+        .withLongOpt(NETEZZA_TABLE_ENCODING_LONG_ARG).create());
     return netezzaOpts;
   }
 
@@ -307,7 +314,12 @@ public class DirectNetezzaManager extends NetezzaManager {
       String dir = cmdLine.getOptionValue(NETEZZA_LOG_DIR_LONG_ARG);
       conf.set(NETEZZA_LOG_DIR_OPT, dir);
     }
-
+    if (cmdLine.hasOption(NETEZZA_TABLE_ENCODING_LONG_ARG)) {
+      String encoding = cmdLine
+          .getOptionValue(NETEZZA_TABLE_ENCODING_LONG_ARG);
+      conf.set(NETEZZA_TABLE_ENCODING_OPT, encoding);
+    }
+    
     conf.setBoolean(NETEZZA_CTRL_CHARS_OPT,
       cmdLine.hasOption(NETEZZA_CTRL_CHARS_LONG_ARG));
 
