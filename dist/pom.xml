@@ -191,7 +191,7 @@ limitations under the License.
                     <copy todir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/bin">
                       <fileset dir="src/main/bin"/>
                     </copy>
-                    <chmod dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/bin" perm="u+x" includes="*"/>
+                    <chmod dir="target/sqoop-${project.version}-bin-hadoop${hadoop.version}/bin" perm="ugo+x" includes="*"/>
 
                     <!-- Finally create distribution tar -->
                     <tar destfile="target/sqoop-${project.version}-bin-hadoop${hadoop.version}.tar.gz" compression="gzip">
