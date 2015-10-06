@@ -333,6 +333,26 @@ public class TestAvroExport extends ExportJobTestCase {
     }
   }
 
+  public void testPathPatternInExportDir() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    ColumnGenerator[] gens = new ColumnGenerator[] {
+      colGenerator(true, Schema.create(Schema.Type.BOOLEAN), true, "BIT"),
+    };
+
+    createAvroFile(0, TOTAL_RECORDS, gens);
+    createTable(gens);
+
+    // Converts path to an unary set while preserving the leading '/'
+    String pathPattern = new StringBuilder(getTablePath().toString())
+            .insert(1, "{")
+            .append("}")
+            .toString();
+
+    runExport(getArgv(true, 10, 10, "--export-dir", pathPattern));
+    verifyExport(TOTAL_RECORDS);
+  }
+
   public void testNullableField() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1 * 10;

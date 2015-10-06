@@ -127,18 +127,26 @@ public class ExportJobBase extends JobBase {
     FileSystem fs = p.getFileSystem(conf);
 
     try {
-      FileStatus stat = fs.getFileStatus(p);
+      FileStatus[] fileStatuses = fs.globStatus(p);
 
-      if (null == stat) {
+      if (null == fileStatuses) {
         // Couldn't get the item.
         LOG.warn("Input path " + p + " does not exist");
         return FileType.UNKNOWN;
       }
 
+      if (fileStatuses.length == 0) {
+        LOG.warn("Input path " + p + " does not match any file");
+        return FileType.UNKNOWN;
+      }
+
+      FileStatus stat = fileStatuses[0];
+
       if (stat.isDir()) {
-        FileStatus [] subitems = fs.listStatus(p);
+        Path dir = stat.getPath();
+        FileStatus [] subitems = fs.listStatus(dir);
         if (subitems == null || subitems.length == 0) {
-          LOG.warn("Input path " + p + " contains no files");
+          LOG.warn("Input path " + dir + " contains no files");
           return FileType.UNKNOWN; // empty dir.
         }
 
