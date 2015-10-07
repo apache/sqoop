@@ -15,25 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.driver.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Config;
+import org.apache.sqoop.etl.io.DataReader;
+import org.apache.sqoop.job.etl.Loader;
+import org.apache.sqoop.job.etl.LoaderContext;
 
-/**
- * Representing the driver job configuration
- */
-@ConfigurationClass
-public class JobConfiguration {
-  @Config
-  public ThrottlingConfig throttlingConfig;
+import java.util.UUID;
 
-  @Config
-  public JarConfig jarConfig;
+public class TestLoader extends Loader<TestLinkConfiguration, TestToJobConfiguration> {
+
+  private long rowsWritten = 0;
 
 
-  public JobConfiguration() {
-    throttlingConfig = new ThrottlingConfig();
-    jarConfig = new JarConfig();
+  @Override
+  public void load(LoaderContext context, TestLinkConfiguration linkConfiguration,
+                   TestToJobConfiguration toJobConfig) throws Exception {
+    DataReader reader = context.getDataReader();
+    //This will break if the TestDependency jar is not loaded
+    TestDependency testDependency = new TestDependency();
+    while (reader.readTextRecord() != null){
+      rowsWritten++;
+    }
+  }
+
+  @Override
+  public long getRowsWritten() {
+    return rowsWritten;
   }
 }

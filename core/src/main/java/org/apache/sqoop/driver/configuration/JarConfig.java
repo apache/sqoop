@@ -15,25 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.sqoop.driver.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Config;
+import org.apache.sqoop.model.ConfigClass;
+import org.apache.sqoop.model.Input;
 
-/**
- * Representing the driver job configuration
- */
-@ConfigurationClass
-public class JobConfiguration {
-  @Config
-  public ThrottlingConfig throttlingConfig;
+import java.util.List;
 
-  @Config
-  public JarConfig jarConfig;
-
-
-  public JobConfiguration() {
-    throttlingConfig = new ThrottlingConfig();
-    jarConfig = new JarConfig();
-  }
+@ConfigClass
+public class JarConfig {
+  // A list of the FQDNs of additional jars that are needed to execute the job
+  @Input public List<String> extraJars;
 }

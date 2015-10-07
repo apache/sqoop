@@ -15,25 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.driver.configuration;
 
-import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Config;
+import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
 
-/**
- * Representing the driver job configuration
- */
-@ConfigurationClass
-public class JobConfiguration {
-  @Config
-  public ThrottlingConfig throttlingConfig;
-
-  @Config
-  public JarConfig jarConfig;
-
-
-  public JobConfiguration() {
-    throttlingConfig = new ThrottlingConfig();
-    jarConfig = new JarConfig();
+public class TestToDestroyer extends Destroyer<TestLinkConfiguration, TestToJobConfiguration> {
+  @Override
+  public void destroy(DestroyerContext context, TestLinkConfiguration linkConfig,
+                      TestToJobConfiguration jobConfig) {
   }
 }

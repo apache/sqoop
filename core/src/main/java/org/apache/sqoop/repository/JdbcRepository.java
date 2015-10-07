@@ -242,6 +242,7 @@ public class JdbcRepository extends Repository {
           // so let's just compare the structure to see if we need upgrade.
           if(!mDriver.equals(existingDriver)) {
             if (autoUpgrade) {
+              mDriver.setPersistenceId(existingDriver.getPersistenceId());
               upgradeDriver(mDriver);
               return mDriver;
             } else {

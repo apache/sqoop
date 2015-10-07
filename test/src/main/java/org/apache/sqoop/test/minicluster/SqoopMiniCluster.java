@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.test.minicluster;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.core.ConfigurationConstants;
@@ -138,6 +139,7 @@ public abstract class SqoopMiniCluster {
     mapToProperties(sqoopProperties, getSecurityConfiguration());
     mapToProperties(sqoopProperties, getConnectorManagerConfiguration());
     mapToProperties(sqoopProperties, getDriverManagerConfiguration());
+    mapToProperties(sqoopProperties, getClasspathConfiguration());
 
     FileUtils.writeLines(f, sqoopProperties);
 
@@ -214,5 +216,9 @@ public abstract class SqoopMiniCluster {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ConfigurationConstants.DRIVER_AUTO_UPGRADE, "true");
     return properties;
+  }
+
+  protected Map<String, String> getClasspathConfiguration() {
+    return MapUtils.EMPTY_MAP;
   }
 }

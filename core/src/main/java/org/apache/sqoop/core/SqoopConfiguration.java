@@ -38,6 +38,7 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.error.code.CoreError;
+import org.apache.sqoop.utils.ClassUtils;
 
 import static org.apache.sqoop.utils.ContextUtils.getUniqueStrings;
 
@@ -189,7 +190,7 @@ public class SqoopConfiguration implements Reconfigurable {
 
     initialized = true;
 
-    configureClassLoader(ConfigurationConstants.CLASSPATH);
+    configureClassLoader();
   }
 
   public synchronized MapContext getContext() {
@@ -229,44 +230,53 @@ public class SqoopConfiguration implements Reconfigurable {
 
   /**
    * Load extra classpath from sqoop configuration.
-   * @param classpathProperty
    */
-  private synchronized void configureClassLoader(String classpathProperty) {
-    LOG.info("Adding jars to current classloader from property: " + classpathProperty);
+  private synchronized void configureClassLoader() {
+    LOG.info("Adding jars to current classloader from property: " + ConfigurationConstants.CLASSPATH);
+    List<URL> urls = getJarsForProperty(ConfigurationConstants.CLASSPATH);
+
+    // Chain the current thread classloader so that
+    // configured classpath adds to existing classloader.
+    // Existing classpath is not changed.
+    ClassLoader currentThreadClassLoader = Thread.currentThread().getContextClassLoader();
+    if (currentThreadClassLoader == null) {
+      throw new SqoopException(CoreError.CORE_0009, "No thread context classloader to override.");
+    }
+    URLClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]),
+        currentThreadClassLoader);
+    Thread.currentThread().setContextClassLoader(classLoader);
+  }
+
+
+  /**
+   * Get the list of jars for a given property
+   *
+   * @param classpathProperty The property corresponding to the list of jars
+   * @return A list of URLs pointing to the jars
+   */
+  public synchronized List<URL> getJarsForProperty(String classpathProperty) {
+    List<URL> urls = new LinkedList<>();
 
     // CSV URL list separated by ":".
     String paths = getContext().getString(classpathProperty);
 
     if (StringUtils.isEmpty(paths)) {
-      LOG.debug("Property " + classpathProperty + " is null or empty. Not adding any extra jars.");
-      return;
-    }
-
-    ClassLoader currentThreadClassLoader = Thread.currentThread().getContextClassLoader();
-    if (currentThreadClassLoader == null) {
-      throw new SqoopException(CoreError.CORE_0009, "No thread context classloader to override.");
-    }
-
-    Set<String> pathSet = getUniqueStrings(paths);
-    List<URL> urls = new LinkedList<URL>();
-
-    for (String path : pathSet) {
-      try {
-        LOG.debug("Found jar in path: " + path);
-        URL url = new File(path).toURI().toURL();
-        urls.add(url);
-        LOG.debug("Using URL: " + url.toString());
-      } catch (MalformedURLException e) {
-        throw new SqoopException(CoreError.CORE_0009, "Malformed URL found.", e);
+      LOG.debug("Property " + classpathProperty + " is null or empty.");
+    } else {
+      Set<String> pathSet = getUniqueStrings(paths);
+      for (String path : pathSet) {
+        try {
+          LOG.debug("Found jar in path: " + path);
+          URL url = new File(path).toURI().toURL();
+          urls.add(url);
+          LOG.debug("Using URL: " + url.toString());
+        } catch (MalformedURLException e) {
+          throw new SqoopException(CoreError.CORE_0009, "Malformed URL found.", e);
+        }
       }
     }
 
-    // Chain the current thread classloader so that
-    // configured classpath adds to existing classloader.
-    // Existing classpath is not changed.
-    URLClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]),
-        currentThreadClassLoader);
-    Thread.currentThread().setContextClassLoader(classLoader);
+    return urls;
   }
 
   private synchronized void configureLogging() {

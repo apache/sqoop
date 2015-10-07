@@ -15,25 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.driver.configuration;
 
 import org.apache.sqoop.model.ConfigurationClass;
-import org.apache.sqoop.model.Config;
 
-/**
- * Representing the driver job configuration
- */
 @ConfigurationClass
-public class JobConfiguration {
-  @Config
-  public ThrottlingConfig throttlingConfig;
+public class TestToJobConfiguration {
+  public TestToJobConfiguration() {
 
-  @Config
-  public JarConfig jarConfig;
-
-
-  public JobConfiguration() {
-    throttlingConfig = new ThrottlingConfig();
-    jarConfig = new JarConfig();
   }
 }

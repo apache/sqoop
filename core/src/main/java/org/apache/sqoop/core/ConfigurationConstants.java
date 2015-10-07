@@ -82,6 +82,11 @@ public final class ConfigurationConstants {
   public static final String CLASSPATH = "org.apache.sqoop.classpath.extra";
 
   /**
+   * Add external jars to job classpath.
+   */
+  public static final String JOB_CLASSPATH = "org.apache.sqoop.classpath.job";
+
+  /**
    * Enable Sqoop App to kill Tomcat in case that it will fail to load.
    */
   public static final String KILL_TOMCAT_ON_FAILURE = "sqoop.kill_tomcat_on_load_failure";

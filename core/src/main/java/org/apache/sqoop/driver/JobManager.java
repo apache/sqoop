@@ -17,8 +17,11 @@
  */
 package org.apache.sqoop.driver;
 
+import java.net.URL;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
@@ -27,6 +30,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.core.Reconfigurable;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopConfiguration.CoreConfigurationListener;
@@ -163,6 +167,11 @@ public class JobManager implements Reconfigurable {
   private String notificationBaseUrl;
 
   /**
+   * Additional jars to be made available during job execution
+   */
+  private List<URL> extraJobClasspath;
+
+  /**
    * Set notification base URL.
    *
    * @param url
@@ -210,6 +219,8 @@ public class JobManager implements Reconfigurable {
     if (executionEngine != null) {
       executionEngine.destroy();
     }
+
+    extraJobClasspath = null;
   }
 
   public synchronized void initialize() {
@@ -240,6 +251,8 @@ public class JobManager implements Reconfigurable {
       throw new SqoopException(DriverError.DRIVER_0007,
         executionEngineClassName);
     }
+
+    extraJobClasspath = SqoopConfiguration.getInstance().getJarsForProperty(ConfigurationConstants.JOB_CLASSPATH);
 
     // We need to make sure that user has configured compatible combination of
     // submission engine and execution engine
@@ -372,6 +385,8 @@ public class JobManager implements Reconfigurable {
 
     // set all the jars
     addStandardJars(jobRequest);
+    addJobJars(jobRequest);
+    addExtraJarsFromSqoopConfig(jobRequest);
     addConnectorClass(jobRequest, fromConnector);
     addConnectorClass(jobRequest, toConnector);
     addConnectorIDFClass(jobRequest, fromConnector.getIntermediateDataFormat());
@@ -417,6 +432,21 @@ public class JobManager implements Reconfigurable {
     jobRequest.addJarForClass(SqoopConnector.class);
     // Execution engine jar
     jobRequest.addJarForClass(executionEngine.getClass());
+  }
+
+  private void addExtraJarsFromSqoopConfig(JobRequest jobRequest) {
+    Set<String> jars = new HashSet<>();
+    for (URL jarURL : extraJobClasspath){
+      jars.add(jarURL.toString());
+    }
+    jobRequest.addJars(jars);
+  }
+
+  private void addJobJars(JobRequest jobRequest) {
+    JobConfiguration jobConfiguration = (JobConfiguration) jobRequest.getDriverConfig();
+    if (jobConfiguration.jarConfig.extraJars != null) {
+      jobRequest.addJars(new HashSet<>(jobConfiguration.jarConfig.extraJars));
+    }
   }
 
   MSubmission createJobSubmission(HttpEventContext ctx, long jobId) {
@@ -697,6 +727,8 @@ public class JobManager implements Reconfigurable {
       LOG.warn("Execution engine cannot be replaced at the runtime. " +
         "You might need to restart the server.");
     }
+
+    extraJobClasspath = SqoopConfiguration.getInstance().getJarsForProperty(ConfigurationConstants.JOB_CLASSPATH);
 
     // Set up worker threads
     purgeThreshold = newContext.getLong(
