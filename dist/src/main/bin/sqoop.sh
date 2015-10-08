@@ -116,12 +116,17 @@ while [ -h "${PRG}" ]; do
   fi
 done
 
+# Default configuration directory is relatively
+DEFAULT_SQOOP_CONF_DIR=`dirname $0`/../conf
+SQOOP_CONF_DIR=${SQOOP_CONF_DIR:-$DEFAULT_SQOOP_CONF_DIR}
+echo "Setting conf dir: $SQOOP_CONF_DIR"
+
 BASEDIR=`dirname ${PRG}`
 BASEDIR=`cd ${BASEDIR}/..;pwd`
 SQOOP_IDENT_STRING=${SQOOP_IDENT_STRING:-$USER}
 SQOOP_PID_DIR=${SQOOP_PID_DIR:-/tmp}
 sqoop_pidfile="${SQOOP_PID_DIR}/sqoop-${SQOOP_IDENT_STRING}-jetty-server.pid"
-JAVA_OPTS="$JAVA_OPTS -Dsqoop.config.dir=`dirname $0`/../conf"
+JAVA_OPTS="$JAVA_OPTS -Dsqoop.config.dir=$SQOOP_CONF_DIR"
 
 echo "Sqoop home directory: ${BASEDIR}"
 
