@@ -18,9 +18,9 @@
 function print_usage(){
   echo "Usage: sqoop.sh COMMAND"
   echo "       where COMMAND is one of:"
-  echo "  server <start/stop>    Start/stop the server"
-  echo "  client [script]        Start an interactive shell without a script"
-  echo "                         or run a script with a batch shell"
+  echo "  server <start/stop/run>    Start/stop the server (or run it in the foreground)"
+  echo "  client [script]            Start an interactive shell without a script"
+  echo "                             or run a script with a batch shell"
   echo ""
 }
 
@@ -179,6 +179,12 @@ case $COMMAND in
     source ${BASEDIR}/bin/sqoop-sys.sh
 
     case $2 in
+      run)
+        # For running in the foreground, we're not doing any checks if we're running or not and simply start the server)
+        sqoop_server_classpath_set
+        echo "Starting the Sqoop2 server..."
+        exec ${EXEC_JAVA} $JAVA_OPTS -classpath ${CLASSPATH} org.apache.sqoop.server.SqoopJettyServer
+        ;;
       start)
         # check if the sqoop server started already.
         is_sqoop_server_running
