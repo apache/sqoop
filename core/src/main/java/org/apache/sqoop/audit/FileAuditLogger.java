@@ -18,10 +18,8 @@
 package org.apache.sqoop.audit;
 
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.error.code.AuditLoggerError;
 
@@ -29,12 +27,10 @@ public class FileAuditLogger extends AuditLogger {
 
   private Logger LOG = Logger.getLogger(FileAuditLogger.class);
 
-  private static final String APPENDER_SURFIX = "Appender";
-
   /**
    * The option name for audit log file location
    */
-  private static final String FILE = "file";
+  private static final String LOGGER = "logger";
 
   /**
    * The logger for output log lines
@@ -46,27 +42,16 @@ public class FileAuditLogger extends AuditLogger {
   public void initialize() {
     Map<String, String> config = getLoggerConfig();
 
-    String outputFile = config.get(FILE);
-    if (outputFile == null) {
+    String loggerName = config.get(LOGGER);
+    if (loggerName == null) {
       throw new SqoopException(AuditLoggerError.AUDIT_0002);
     }
 
-    // setup logger
-    String appender = "log4j.appender." + getLoggerName() + APPENDER_SURFIX;
-    LOG.warn("appender: " + appender);
-    Properties props = new Properties();
-    props.put(appender, "org.apache.log4j.RollingFileAppender");
-    props.put(appender + ".File", outputFile);
-    props.put(appender + ".layout", "org.apache.log4j.PatternLayout");
-    props.put(appender + ".layout.ConversionPattern", "%d %-5p %c: %m%n");
-    props.put("log4j.logger." + getLoggerName(), "INFO," + getLoggerName() + APPENDER_SURFIX);
-    PropertyConfigurator.configure(props);
-
-    logger = Logger.getLogger(getLoggerName());
+    LOG.debug("Using audit logger name: " + loggerName);
+    logger = Logger.getLogger(loggerName);
   }
 
-  public void logAuditEvent(String username, String ip, String operation, String objectType,
-          String objectId) {
+  public void logAuditEvent(String username, String ip, String operation, String objectType, String objectId) {
     StringBuilder sentence = new StringBuilder();
     sentence.append("user=").append(username).append("\t");
     sentence.append("ip=").append(ip).append("\t");

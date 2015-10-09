@@ -27,8 +27,8 @@ public enum AuditLoggerError implements ErrorCode {
   /** The system was unable to find or load the audit logger provider. */
   AUDIT_0001("The system was unable to find or load audit logger class"),
 
-  /** The audit logger output file is not given. */
-  AUDIT_0002("The output file for FileAuditLogger is not given"),
+  /** The audit logger name is not given. */
+  AUDIT_0002("The logger name for FileAuditLogger is not specified"),
 
   ;
 

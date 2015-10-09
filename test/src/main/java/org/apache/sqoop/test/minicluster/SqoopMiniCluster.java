@@ -167,11 +167,9 @@ public abstract class SqoopMiniCluster {
 
     properties.put("org.apache.sqoop.log4j.appender.file", "org.apache.log4j.ConsoleAppender");
     properties.put("org.apache.sqoop.log4j.appender.file.layout", "org.apache.log4j.PatternLayout");
-    properties.put("org.apache.sqoop.log4j.appender.file.layout.ConversionPattern", "%d{ISO8601} %-5p %c{2} [%l] %m%n");
+    properties.put("org.apache.sqoop.log4j.appender.file.layout.ConversionPattern", "%d{ISO8601} %-5p [%l] %m%n");
     properties.put("org.apache.sqoop.log4j.debug", "true");
-    properties.put("org.apache.sqoop.log4j.rootCategory", "WARN, file");
-    properties.put("org.apache.sqoop.log4j.category.org.apache.sqoop", "DEBUG");
-    properties.put("org.apache.sqoop.log4j.category.org.apache.derby", "INFO");
+    properties.put("org.apache.sqoop.log4j.rootCategory", "DEBUG, file");
 
     return properties;
   }
