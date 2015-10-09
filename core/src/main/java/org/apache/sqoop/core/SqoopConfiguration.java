@@ -290,6 +290,11 @@ public class SqoopConfiguration implements Reconfigurable {
       }
     }
 
+    if (props.isEmpty()) {
+      LOG.info("Skipping log4j configuration as it's not configured in sqoop.properties file.");
+      return;
+    }
+
     PropertyConfigurator.configure(props);
   }
 
