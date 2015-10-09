@@ -184,8 +184,10 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     extTableThread.start();
     // We need to start the reader end first
 
+    final String encoding = conf
+        .get(DirectNetezzaManager.NETEZZA_TABLE_ENCODING_OPT);
     recordReader = new BufferedReader(new InputStreamReader(
-      new FileInputStream(nf.getFile())));
+      new FileInputStream(nf.getFile()), (null == encoding ? "UTF-8" : encoding)));
   }
 
   abstract protected void writeRecord(Text text, Context context)
