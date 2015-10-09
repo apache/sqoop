@@ -44,7 +44,7 @@ import org.testng.annotations.BeforeSuite;
 /**
  * Base test case suitable for connector testing.
  *
- * In addition to pure Tomcat based test case it will also create and initialize
+ * In addition to Jetty based test case it will also create and initialize
  * the database provider prior every test execution.
  */
 @edu.umd.cs.findbugs.annotations.SuppressWarnings({"MS_PKGPROTECT", "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"})

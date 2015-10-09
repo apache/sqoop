@@ -45,10 +45,6 @@ limitations under the License.
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-shell</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop-tomcat</artifactId>
-    </dependency>
   </dependencies>
 
   <profiles>

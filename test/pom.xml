@@ -136,11 +136,6 @@ limitations under the License.
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.cargo</groupId>
-      <artifactId>cargo-core-container-tomcat</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derbynet</artifactId>
     </dependency>

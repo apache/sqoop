@@ -28,7 +28,6 @@ import javax.servlet.ServletContextListener;
  * Initializes the Sqoop server. This listener is also responsible for
  * cleaning up any resources occupied by the server during the system shutdown.
  */
-@edu.umd.cs.findbugs.annotations.SuppressWarnings("DM_EXIT")
 public class ServerInitializer implements ServletContextListener {
 
   private static final Logger LOG = Logger.getLogger(ServerInitializer.class);
@@ -41,13 +40,6 @@ public class ServerInitializer implements ServletContextListener {
     try {
       SqoopServer.initialize();
     } catch (Throwable ex) {
-      // We are assuming that by default we are running as the only app inside
-      // the tomcat and hence we want to try kill entire tomcat on our load failure.
-      if("true".equals(System.getProperty(ConfigurationConstants.KILL_TOMCAT_ON_FAILURE, "true"))) {
-        LOG.error("Sqoop server failed to start", ex);
-        System.exit(1);
-      }
-
       throw new RuntimeException("Sqoop server failed to start.", ex);
     }
   }

@@ -86,11 +86,6 @@ public final class ConfigurationConstants {
    */
   public static final String JOB_CLASSPATH = "org.apache.sqoop.classpath.job";
 
-  /**
-   * Enable Sqoop App to kill Tomcat in case that it will fail to load.
-   */
-  public static final String KILL_TOMCAT_ON_FAILURE = "sqoop.kill_tomcat_on_load_failure";
-
   private ConfigurationConstants() {
     // Disable explicit object creation
   }
