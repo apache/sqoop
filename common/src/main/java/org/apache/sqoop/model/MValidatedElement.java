@@ -30,7 +30,7 @@ import java.util.List;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
-public abstract class MValidatedElement extends MNamedElement {
+public abstract class MValidatedElement extends MPersistableEntity {
 
   /**
    * Validation messages.
@@ -42,8 +42,7 @@ public abstract class MValidatedElement extends MNamedElement {
    */
   private Status validationStatus;
 
-  public MValidatedElement(String name) {
-    super(name);
+  public MValidatedElement() {
     resetValidationMessages();
   }
 

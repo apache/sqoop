@@ -33,7 +33,7 @@ import java.util.Set;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public final class MConfig extends MValidatedElement implements MClonable {
+public final class MConfig extends MNamedElement implements MClonable {
 
   private final List<MInput<?>> inputs;
   private Set<String> inputNames = new HashSet<String>();

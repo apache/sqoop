@@ -29,7 +29,7 @@ import java.util.List;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class MConfigList implements MClonable {
+public class MConfigList extends MValidatedElement implements MClonable {
 
   private final List<MConfig> configObjects;
   private final MConfigType type;

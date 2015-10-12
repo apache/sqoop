@@ -1121,7 +1121,7 @@ public final class ConfigFiller {
    *
    * @param element Validated element
    */
-  static void printValidationMessage(MValidatedElement element, boolean includeInputPrefix) {
+  static void printValidationMessage(MNamedElement element, boolean includeInputPrefix) {
     if(element.getValidationStatus() == Status.getDefault()) {
       return;
     }

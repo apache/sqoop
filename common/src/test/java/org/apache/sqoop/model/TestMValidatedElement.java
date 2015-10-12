@@ -35,7 +35,6 @@ public class TestMValidatedElement {
   @Test
   public void testInitialization() {
     MValidatedElement input = new MIntegerInput("input", false,InputEditable.ANY, StringUtils.EMPTY );
-    assertEquals("input", input.getName());
     assertEquals(Status.OK, input.getValidationStatus());
   }
 

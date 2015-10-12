@@ -28,7 +28,7 @@ import java.util.Date;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
-abstract public class MAccountableEntity extends MValidatedElement {
+abstract public class MAccountableEntity extends MNamedElement {
 
   private static final boolean DEFAULT_ENABLED = true;
 

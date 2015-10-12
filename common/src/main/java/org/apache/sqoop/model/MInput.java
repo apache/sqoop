@@ -28,7 +28,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public abstract class MInput<T> extends MValidatedElement implements MClonable {
+public abstract class MInput<T> extends MNamedElement implements MClonable {
   private final boolean sensitive;
 
   private final String overrides;

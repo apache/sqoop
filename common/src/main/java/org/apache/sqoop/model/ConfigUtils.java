@@ -343,12 +343,13 @@ public class  ConfigUtils {
    * @param configs
    * @param result
    */
-  public static void applyValidation(List<MConfig> configs, ConfigValidationResult result) {
-    for(MConfig config : configs) {
-      applyValidation(config, result);
+  public static void applyValidation(MConfigList configList, ConfigValidationResult result) {
+    applyValidation(configList, "", result);
+    for(MConfig config : configList.getConfigs()) {
+      applyValidation(configList, config.getName(), result);
 
       for(MInput input : config.getInputs()) {
-        applyValidation(input, result);
+        applyValidation(input, input.getName(), result);
       }
     }
   }
@@ -361,8 +362,8 @@ public class  ConfigUtils {
    * @param element
    * @param result
    */
-  public static void applyValidation(MValidatedElement element, ConfigValidationResult result) {
-    List<Message> messages = result.getMessages().get(element.getName());
+  public static void applyValidation(MValidatedElement element, String name, ConfigValidationResult result) {
+    List<Message> messages = result.getMessages().get(name);
 
     if(messages != null) {
       element.setValidationMessages(messages);

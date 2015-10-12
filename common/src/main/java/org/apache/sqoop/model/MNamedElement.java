@@ -25,7 +25,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
-public abstract class MNamedElement extends MPersistableEntity {
+public abstract class MNamedElement extends MValidatedElement {
   private static final String LABEL_KEY_SUFFIX = ".label";
   private static final String HELP_KEY_SUFFIX = ".help";
 

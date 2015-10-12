@@ -810,7 +810,7 @@ public class SqoopClient {
   private Status applyLinkValidations(ValidationResultBean bean, MLink link) {
     ConfigValidationResult linkConfig = bean.getValidationResults()[0];
     // Apply validation results
-    ConfigUtils.applyValidation(link.getConnectorLinkConfig().getConfigs(), linkConfig);
+    ConfigUtils.applyValidation(link.getConnectorLinkConfig(), linkConfig);
     Long id = bean.getId();
     if (id != null) {
       link.setPersistenceId(id);
@@ -825,13 +825,13 @@ public class SqoopClient {
     ConfigValidationResult driver = bean.getValidationResults()[2];
 
     ConfigUtils.applyValidation(
-        job.getFromJobConfig().getConfigs(),
+        job.getFromJobConfig(),
         fromConfig);
     ConfigUtils.applyValidation(
-        job.getToJobConfig().getConfigs(),
+        job.getToJobConfig(),
         toConfig);
     ConfigUtils.applyValidation(
-      job.getDriverConfig().getConfigs(),
+      job.getDriverConfig(),
       driver
     );
 
