@@ -32,6 +32,7 @@ public class ConfigInputConstants {
   public static final String CONFIG_NAME = "name";
   public static final String CONFIG_TYPE = "type";
   public static final String CONFIG_INPUTS = "inputs";
+  public static final String CONFIGS = "configs";
   public static final String CONFIG_INPUT_NAME = "name";
   public static final String CONFIG_INPUT_TYPE = "type";
   public static final String CONFIG_INPUT_SENSITIVE = "sensitive";
@@ -41,6 +42,7 @@ public class ConfigInputConstants {
   public static final String CONFIG_INPUT_OVERRIDES = "overrides";
   public static final String CONFIG_INPUT_VALUE = "value";
   public static final String CONFIG_INPUT_ENUM_VALUES = "values";
+  public static final String CONFIG_VALIDATORS = "validators";
 
   private ConfigInputConstants() {
 

@@ -21,6 +21,7 @@ package org.apache.sqoop.driver;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.model.MValidator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -106,56 +108,73 @@ public class TestDriverConfigUpgrader {
   }
 
   MDriverConfig job() {
-    return new MDriverConfig(configs1());
+    return new MDriverConfig(configs1(), validators1());
   }
 
   MDriverConfig job1() {
-    return new MDriverConfig(configs1());
+    return new MDriverConfig(configs1(), validators1());
   }
 
   MDriverConfig job2() {
-    return new MDriverConfig(configs2());
+    return new MDriverConfig(configs2(), validators2());
   }
 
   MDriverConfig job3() {
-    return new MDriverConfig(configs3());
+    return new MDriverConfig(configs3(), validators3());
   }
 
   List<MConfig> configs1() {
-    List<MConfig> list = new LinkedList<MConfig>();
-    list.add(new MConfig("f1", inputs1("f1")));
+    List<MConfig> list = new LinkedList<>();
+    list.add(new MConfig("f1", inputs1("f1"), Collections.EMPTY_LIST));
+    return list;
+  }
+
+  List<MValidator> validators1() {
+    List<MValidator> list = new LinkedList<>();
+    list.add(new MValidator("testClass", ""));
     return list;
   }
 
   List<MInput<?>> inputs1(String formName) {
     List<MInput<?>> list = new LinkedList<MInput<?>>();
     list.add(new MStringInput(formName + ".s1", false, InputEditable.ANY, StringUtils.EMPTY,
-        (short) 30));
+        (short) 30, Collections.EMPTY_LIST));
     list.add(new MStringInput(formName + ".s2", false, InputEditable.ANY, StringUtils.EMPTY,
-        (short) 30));
-    list.add(new MIntegerInput(formName + ".i", false, InputEditable.ANY, StringUtils.EMPTY));
+        (short) 30, Collections.EMPTY_LIST));
+    list.add(new MIntegerInput(formName + ".i", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST));
     return list;
   }
 
   List<MConfig> configs2() {
     List<MConfig> list = new LinkedList<MConfig>();
-    list.add(new MConfig("f1", inputs2("f1")));
+    list.add(new MConfig("f1", inputs2("f1"), Collections.EMPTY_LIST));
+    return list;
+  }
+
+  List<MValidator> validators2() {
+    List<MValidator> list = new LinkedList<>();
+    list.add(new MValidator("testClass2", "2"));
     return list;
   }
 
   List<MInput<?>> inputs2(String formName) {
     List<MInput<?>> list = new LinkedList<MInput<?>>();
     list.add(new MStringInput(formName + ".s1", false, InputEditable.ANY, StringUtils.EMPTY,
-        (short) 30));
+        (short) 30, Collections.EMPTY_LIST));
     list.add(new MStringInput(formName + ".s2_", false, InputEditable.ANY, StringUtils.EMPTY,
-        (short) 30));
-    list.add(new MIntegerInput(formName + ".i", false, InputEditable.ANY, StringUtils.EMPTY));
+        (short) 30, Collections.EMPTY_LIST));
+    list.add(new MIntegerInput(formName + ".i", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST));
     return list;
   }
 
   List<MConfig> configs3() {
     List<MConfig> list = new LinkedList<MConfig>();
-    list.add(new MConfig("f2", inputs1("f2")));
+    list.add(new MConfig("f2", inputs1("f2"), Collections.EMPTY_LIST));
+    return list;
+  }
+
+  List<MValidator> validators3() {
+    List<MValidator> list = new LinkedList<>();
     return list;
   }
 }

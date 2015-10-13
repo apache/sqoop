@@ -20,6 +20,8 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.List;
+
 /**
  * Long user input.
  *
@@ -28,8 +30,8 @@ import org.apache.sqoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public class MLongInput extends MInput<Long> {
 
-  public MLongInput(String name, boolean sensitive, InputEditable editable, String overrides) {
-    super(name, sensitive, editable, overrides);
+  public MLongInput(String name, boolean sensitive, InputEditable editable, String overrides, List<MValidator> mValidators) {
+    super(name, sensitive, editable, overrides, mValidators);
   }
 
   @Override
@@ -86,7 +88,7 @@ public class MLongInput extends MInput<Long> {
 
   @Override
   public MLongInput clone(boolean cloneWithValue) {
-    MLongInput copy = new MLongInput(getName(), isSensitive(), getEditable(), getOverrides());
+    MLongInput copy = new MLongInput(getName(), isSensitive(), getEditable(), getOverrides(), getCloneOfValidators());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(this.getValue());

@@ -90,16 +90,16 @@ public final class ConnectorHandler {
     MToConfig toConfig = null;
     if (connector.getSupportedDirections().contains(Direction.FROM)) {
       fromConfig = new MFromConfig(ConfigUtils.toConfigs(
-          connector.getJobConfigurationClass(Direction.FROM)));
+          connector.getJobConfigurationClass(Direction.FROM)), ConfigUtils.getMValidatorsFromConfigurationClass(connector.getJobConfigurationClass(Direction.FROM)));
     }
 
     if (connector.getSupportedDirections().contains(Direction.TO)) {
       toConfig = new MToConfig(ConfigUtils.toConfigs(
-          connector.getJobConfigurationClass(Direction.TO)));
+          connector.getJobConfigurationClass(Direction.TO)), ConfigUtils.getMValidatorsFromConfigurationClass(connector.getJobConfigurationClass(Direction.TO)));
     }
 
     MLinkConfig linkConfig = new MLinkConfig(
-        ConfigUtils.toConfigs(connector.getLinkConfigurationClass()));
+        ConfigUtils.toConfigs(connector.getLinkConfigurationClass()), ConfigUtils.getMValidatorsFromConfigurationClass(connector.getLinkConfigurationClass()));
 
     connectorConfigurable = new MConnector(connectorUniqueName, connectorClassName, connector.getVersion(),
         linkConfig, fromConfig, toConfig);

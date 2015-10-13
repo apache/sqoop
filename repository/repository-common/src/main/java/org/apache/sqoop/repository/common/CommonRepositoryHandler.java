@@ -25,6 +25,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -341,7 +342,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         List<MConfig> driverConfigs = new ArrayList<MConfig>();
         loadDriverConfigs(driverConfigs, driverConfigFetchStmt, driverConfigInputFetchStmt, 1, conn);
 
-        mDriver = new MDriver(new MDriverConfig(driverConfigs), driverVersion);
+        mDriver = new MDriver(new MDriverConfig(driverConfigs, Collections.EMPTY_LIST), driverVersion);
         mDriver.setPersistenceId(driverId);
       }
     } catch (SQLException ex) {
@@ -1491,13 +1492,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         MFromConfig fromJobConfig = null;
         MToConfig toJobConfig = null;
         if (supportedDirections.isDirectionSupported(Direction.FROM)) {
-          fromJobConfig = new MFromConfig(fromConfig);
+          fromJobConfig = new MFromConfig(fromConfig, Collections.EMPTY_LIST);
         }
         if (supportedDirections.isDirectionSupported(Direction.TO)) {
-          toJobConfig = new MToConfig(toConfig);
+          toJobConfig = new MToConfig(toConfig, Collections.EMPTY_LIST);
         }
         MConnector mc = new MConnector(connectorName, connectorClassName, connectorVersion,
-            new MLinkConfig(linkConfig), fromJobConfig, toJobConfig);
+            new MLinkConfig(linkConfig, Collections.EMPTY_LIST), fromJobConfig, toJobConfig);
         mc.setPersistenceId(connectorId);
 
         connectors.add(mc);
@@ -1534,7 +1535,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
         loadConnectorConfigs(connectorLinkConfig, fromConfig, toConfig, connectorConfigFetchStatement,
             connectorConfigInputStatement, 2, conn);
-        MLink link = new MLink(connectorId, new MLinkConfig(connectorLinkConfig));
+        MLink link = new MLink(connectorId, new MLinkConfig(connectorLinkConfig, Collections.EMPTY_LIST));
 
         link.setPersistenceId(id);
         link.setName(name);
@@ -1649,9 +1650,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         MJob job = new MJob(
             fromConnectorId, toConnectorId,
             fromLinkId, toLinkId,
-            new MFromConfig(fromConnectorFromJobConfig),
-            new MToConfig(toConnectorToJobConfig),
-            new MDriverConfig(driverConfig));
+            new MFromConfig(fromConnectorFromJobConfig, Collections.EMPTY_LIST),
+            new MToConfig(toConnectorToJobConfig, Collections.EMPTY_LIST),
+            new MDriverConfig(driverConfig, Collections.EMPTY_LIST));
 
         job.setPersistenceId(id);
         job.setName(name);
@@ -1724,9 +1725,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         MJob job = new MJob(
           fromConnectorId, toConnectorId,
           fromLinkId, toLinkId,
-          new MFromConfig(mFromConfig.getConfigs()),
-          new MToConfig(mToConfig.getConfigs()),
-          new MDriverConfig(driverConfig));
+          new MFromConfig(mFromConfig.getConfigs(), Collections.EMPTY_LIST),
+          new MToConfig(mToConfig.getConfigs(), Collections.EMPTY_LIST),
+          new MDriverConfig(driverConfig, Collections.EMPTY_LIST));
 
         job.setPersistenceId(id);
         job.setName(name);
@@ -1969,7 +1970,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         int configIndex = rsetConfig.getInt(5);
         List<MInput<?>> configInputs = new ArrayList<MInput<?>>();
 
-        MConfig mDriverConfig = new MConfig(configName, configInputs);
+        MConfig mDriverConfig = new MConfig(configName, configInputs, Collections.EMPTY_LIST);
         mDriverConfig.setPersistenceId(configId);
 
         inputFetchStmt.setLong(configPosition, configId);
@@ -1995,28 +1996,28 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             MInput input = null;
             switch (mit) {
               case STRING:
-                input = new MStringInput(inputName, inputSensitivity, editableEnum, overrides, inputStrLength);
+                input = new MStringInput(inputName, inputSensitivity, editableEnum, overrides, inputStrLength, Collections.EMPTY_LIST);
                 break;
               case MAP:
-                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides, StringUtils.EMPTY);
+                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides, StringUtils.EMPTY, Collections.EMPTY_LIST);
                 break;
               case BOOLEAN:
-                input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               case INTEGER:
-                input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               case LONG:
-                input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               case ENUM:
-                input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides, inputEnumValues.split(","));
+                input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides, inputEnumValues.split(","), Collections.EMPTY_LIST);
                 break;
               case LIST:
-                input = new MListInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MListInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               case DATETIME:
-                input = new MDateTimeInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MDateTimeInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               default:
                 throw new SqoopException(CommonRepositoryError.COMMON_0003,
@@ -2145,7 +2146,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         int configIndex = rsetConfig.getInt(5);
         List<MInput<?>> configInputs = new ArrayList<MInput<?>>();
 
-        MConfig config = new MConfig(configName, configInputs);
+        MConfig config = new MConfig(configName, configInputs, Collections.EMPTY_LIST);
         config.setPersistenceId(configId);
 
         inputFetchStmt.setLong(configPosition, configId);
@@ -2173,29 +2174,29 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             switch (mit) {
               case STRING:
                 input = new MStringInput(inputName, inputSensitivity, editableEnum, overrides,
-                        inputStrLength);
+                        inputStrLength, Collections.EMPTY_LIST);
                 break;
               case MAP:
-                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides, StringUtils.EMPTY);
+                input = new MMapInput(inputName, inputSensitivity, editableEnum, overrides, StringUtils.EMPTY, Collections.EMPTY_LIST);
                 break;
               case BOOLEAN:
-                input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MBooleanInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               case INTEGER:
-                input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MIntegerInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               case LONG:
-                input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MLongInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               case ENUM:
                 input = new MEnumInput(inputName, inputSensitivity, editableEnum, overrides,
-                        inputEnumValues.split(","));
+                        inputEnumValues.split(","), Collections.EMPTY_LIST);
                 break;
               case LIST:
-                input = new MListInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MListInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               case DATETIME:
-                input = new MDateTimeInput(inputName, inputSensitivity, editableEnum, overrides);
+                input = new MDateTimeInput(inputName, inputSensitivity, editableEnum, overrides, Collections.EMPTY_LIST);
                 break;
               default:
                 throw new SqoopException(CommonRepositoryError.COMMON_0003, "input-" + inputName + ":"

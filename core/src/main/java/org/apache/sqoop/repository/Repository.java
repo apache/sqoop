@@ -34,6 +34,7 @@ import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
@@ -476,8 +477,8 @@ public abstract class Repository {
         for (MLink link : existingLinksByConnector) {
           LOG.info(" Link upgrade for link:" + link.getName() + " for connector:" + connectorName);
           // Make a new copy of the configs
-          List<MConfig> linkConfig = newConnector.getLinkConfig().clone(false).getConfigs();
-          MLinkConfig newLinkConfig = new MLinkConfig(linkConfig);
+          MConfigList linkConfig = newConnector.getLinkConfig().clone(false);
+          MLinkConfig newLinkConfig = new MLinkConfig(linkConfig.getConfigs(), linkConfig.getCloneOfValidators());
           MLinkConfig oldLinkConfig = link.getConnectorLinkConfig();
           upgrader.upgradeLinkConfig(oldLinkConfig, newLinkConfig);
           MLink newlink = new MLink(link, newLinkConfig);
@@ -513,9 +514,9 @@ public abstract class Repository {
               && supportedDirections.isDirectionSupported(Direction.TO)
               && job.getToConnectorId() == newConnector.getPersistenceId()) {
             // Upgrade both configs
-            MFromConfig newFromConfig = new MFromConfig(newConnector.getFromConfig().clone(false).getConfigs());
+            MFromConfig newFromConfig = new MFromConfig(newConnector.getFromConfig().clone(false).getConfigs(), newConnector.getFromConfig().getCloneOfValidators());
             MFromConfig oldFromConfig = job.getFromJobConfig();
-            MToConfig newToConfig = new MToConfig(newConnector.getToConfig().clone(false).getConfigs());
+            MToConfig newToConfig = new MToConfig(newConnector.getToConfig().clone(false).getConfigs(), newConnector.getToConfig().getCloneOfValidators());
             MToConfig oldToConfig = job.getToJobConfig();
             upgrader.upgradeFromJobConfig(oldFromConfig, newFromConfig);
             upgrader.upgradeToJobConfig(oldToConfig, newToConfig);
@@ -536,7 +537,7 @@ public abstract class Repository {
             }
           } else if (supportedDirections.isDirectionSupported(Direction.FROM)
               && job.getFromConnectorId() == newConnector.getPersistenceId()) {
-            MFromConfig newFromConfig = new MFromConfig(newConnector.getFromConfig().clone(false).getConfigs());
+            MFromConfig newFromConfig = new MFromConfig(newConnector.getFromConfig().clone(false).getConfigs(), newConnector.getFromConfig().getCloneOfValidators());
             MFromConfig oldFromConfig = job.getFromJobConfig();
             upgrader.upgradeFromJobConfig(oldFromConfig, newFromConfig);
             MToConfig oldToConfig = job.getToJobConfig();
@@ -559,7 +560,7 @@ public abstract class Repository {
           } else if (supportedDirections.isDirectionSupported(Direction.TO)
               && job.getToConnectorId() == newConnector.getPersistenceId()) {
             MToConfig oldToConfig = job.getToJobConfig();
-            MToConfig newToConfig = new MToConfig(newConnector.getToConfig().clone(false).getConfigs());
+            MToConfig newToConfig = new MToConfig(newConnector.getToConfig().clone(false).getConfigs(), newConnector.getToConfig().getCloneOfValidators());
             upgrader.upgradeToJobConfig(oldToConfig, newToConfig);
             MFromConfig oldFromConfig = job.getFromJobConfig();
             // create a job with old FROM direction configs but new TO direction

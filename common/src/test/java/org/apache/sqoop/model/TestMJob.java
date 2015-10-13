@@ -21,6 +21,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -105,37 +106,49 @@ public class TestMJob {
 
   private MFromConfig fromConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     input.setValue(100);
-    MLongInput lInput = new MLongInput("LONG-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MLongInput lInput = new MLongInput("LONG-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     lInput.setValue(100L);
-    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20);
+    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20, Collections.EMPTY_LIST);
     strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     list.add(strInput);
-    MConfig config = new MConfig("CONFIGFROMNAME", list);
+    MConfig config = new MConfig("CONFIGFROMNAME", list, Collections.EMPTY_LIST);
     configs.add(config);
-    return new MFromConfig(configs);
+
+    List<MValidator> validators = new ArrayList<>();
+    validators.add(new MValidator("testValidator", ""));
+
+    return new MFromConfig(configs, validators);
   }
 
   private MToConfig toConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
-    MConfig config = new MConfig("CONFIGTONAME", list);
+    MConfig config = new MConfig("CONFIGTONAME", list, Collections.EMPTY_LIST);
     configs.add(config);
-    return new MToConfig(configs);
+
+    List<MValidator> validators = new ArrayList<>();
+
+    return new MToConfig(configs, validators);
   }
 
   private MDriverConfig driverConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    MMapInput input = new MMapInput("MAP-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
-    MConfig config = new MConfig("CONFIGDRIVERNAME", list);
+    MConfig config = new MConfig("CONFIGDRIVERNAME", list, Collections.EMPTY_LIST);
     configs.add(config);
-    return new MDriverConfig(configs);
+
+    List<MValidator> validators = new ArrayList<>();
+    validators.add(new MValidator("testValidator1", ""));
+    validators.add(new MValidator("testValidator2", "blah"));
+
+    return new MDriverConfig(configs, validators);
   }
 }

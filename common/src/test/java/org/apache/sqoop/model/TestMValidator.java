@@ -17,29 +17,18 @@
  */
 package org.apache.sqoop.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
-import static org.testng.Assert.*;
-
-public class TestMJobConfig {
-  /**
-   * Test for class initialization and values
-   */
+/**
+ * Test class for org.apache.sqoop.model.MValidator
+ */
+public class TestMValidator {
   @Test
-  public void testInitialization() {
-    List<MConfig> configs = new ArrayList<>();
-    List<MValidator> validators = new ArrayList<>();
-    MFromConfig fromJobConfig = new MFromConfig(configs, validators);
-    List<MConfig> configs2 = new ArrayList<>();
-    List<MValidator> validators2 = new ArrayList<>();
-    MFromConfig fromJobConfig2 = new MFromConfig(configs2, validators2);
-    assertEquals(fromJobConfig2, fromJobConfig);
-    MConfig c = new MConfig("test", null, Collections.EMPTY_LIST);
-    configs2.add(c);
-    assertFalse(fromJobConfig.equals(fromJobConfig2));
+  public void testEquality() {
+    MValidator testMValidator1 = new MValidator("testValidator", AbstractValidator.DEFAULT_STRING_ARGUMENT);
+    MValidator testMValidator2 = new MValidator("testValidator", AbstractValidator.DEFAULT_STRING_ARGUMENT);
+    assertEquals(testMValidator1, testMValidator2);
   }
 }

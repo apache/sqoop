@@ -18,6 +18,7 @@
 package org.apache.sqoop.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -37,15 +38,20 @@ public class TestMAccountableEntity {
   @Test
   public void testInitialization() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput intInput = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
-    MLongInput longInput = new MLongInput("LONG-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MIntegerInput intInput = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
+    MLongInput longInput = new MLongInput("LONG-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(intInput);
     list.add(longInput);
 
-    MConfig config = new MConfig("CONFIGNAME", list);
+    MConfig config = new MConfig("CONFIGNAME", list, Collections.EMPTY_LIST);
     configs.add(config);
-    MAccountableEntity link = new MLink(123l, new MLinkConfig(configs));
+
+    List<MValidator> validators = new ArrayList<>();
+    MValidator validator = new MValidator("test", "");
+    validators.add(validator);
+
+    MAccountableEntity link = new MLink(123l, new MLinkConfig(configs, validators));
     // Initially creation date and last update date is same
     assertEquals(link.getCreationDate(), link.getLastUpdateDate());
     Date testCreationDate = new Date();
@@ -63,5 +69,6 @@ public class TestMAccountableEntity {
     assertEquals(1, ((MLink) link).getConnectorLinkConfig().getConfigs().size());
     assertEquals(2, ((MLink) link).getConnectorLinkConfig().getConfigs().get(0).getInputs().size());
 
+    assertEquals(validator, ((MLink) link).getConnectorLinkConfig().getValidators().get(0));
   }
 }

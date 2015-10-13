@@ -26,6 +26,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -36,26 +37,29 @@ public class TestMConnector {
 
   private MConnector createConnector(List<Direction> supportedDirections) {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput inputs = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MIntegerInput inputs = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.setValue(100);
-    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20);
+    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20, Collections.EMPTY_LIST);
     strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(inputs);
     list.add(strInput);
-    MConfig config = new MConfig("CONFIGNAME", list);
+    MConfig config = new MConfig("CONFIGNAME", list, Collections.EMPTY_LIST);
     configs.add(config);
 
-    MLinkConfig linkConfig = new MLinkConfig(configs);
+    List<MValidator> validators = new ArrayList<>();
+    validators.add(new MValidator("test", ""));
+
+    MLinkConfig linkConfig = new MLinkConfig(configs, validators);
     MFromConfig fromConfig = null;
     MToConfig toConfig = null;
 
     if (supportedDirections.contains(Direction.FROM)) {
-      fromConfig = new MFromConfig(configs);
+      fromConfig = new MFromConfig(configs, validators);
     }
 
     if (supportedDirections.contains(Direction.TO)) {
-      toConfig = new MToConfig(configs);
+      toConfig = new MToConfig(configs, validators);
     }
 
     return new MConnector("NAME", "CLASSNAME", "1.0",
@@ -67,11 +71,13 @@ public class TestMConnector {
    */
   @Test
   public void testInitialization() {
-    List<MConfig> fromJobConfig = new ArrayList<MConfig>();
-    List<MConfig> toJobConfig = new ArrayList<MConfig>();
-    MLinkConfig linkConfig = new MLinkConfig(fromJobConfig);
-    MFromConfig fromConfig1 = new MFromConfig(fromJobConfig);
-    MToConfig toConfig1 = new MToConfig(toJobConfig);
+    List<MConfig> fromJobConfig = new ArrayList<>();
+    List<MValidator> fromValidators = new ArrayList<>();
+    List<MConfig> toJobConfig = new ArrayList<>();
+    List<MValidator> toValidators = new ArrayList<>();
+    MLinkConfig linkConfig = new MLinkConfig(fromJobConfig, fromValidators);
+    MFromConfig fromConfig1 = new MFromConfig(fromJobConfig, fromValidators);
+    MToConfig toConfig1 = new MToConfig(toJobConfig, toValidators);
     MConnector connector1 = new MConnector("NAME", "CLASSNAME", "1.0",
         linkConfig, fromConfig1, toConfig1);
     assertEquals("NAME", connector1.getUniqueName());

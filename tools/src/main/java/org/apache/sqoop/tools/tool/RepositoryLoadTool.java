@@ -59,6 +59,7 @@ import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MValidator;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.tools.ConfiguredTool;
@@ -273,7 +274,8 @@ public class RepositoryLoadTool extends ConfiguredTool {
     ConnectorConfigurableUpgrader connectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mConnector.getUniqueName()).getConfigurableUpgrader();
 
     List<MConfig> connectorConfigs = mConnector.getLinkConfig().clone(false).getConfigs();
-    MLinkConfig newLinkConfigs = new MLinkConfig(connectorConfigs);
+    List<MValidator> connectorValidators = mConnector.getLinkConfig().getCloneOfValidators();
+    MLinkConfig newLinkConfigs = new MLinkConfig(connectorConfigs, connectorValidators);
 
     // upgrading the configs to make sure they match the current repository
     connectorConfigUpgrader.upgradeLinkConfig(link.getConnectorLinkConfig(), newLinkConfigs);

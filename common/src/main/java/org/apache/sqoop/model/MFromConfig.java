@@ -30,8 +30,8 @@ import java.util.List;
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
 public class MFromConfig extends MConfigList {
-  public MFromConfig(List<MConfig> configs) {
-    super(configs, MConfigType.JOB);
+  public MFromConfig(List<MConfig> configs, List<MValidator> mValidators) {
+    super(configs, MConfigType.JOB, mValidators);
   }
 
   @Override
@@ -62,7 +62,7 @@ public class MFromConfig extends MConfigList {
 
   @Override
   public MFromConfig clone(boolean cloneWithValue) {
-    MFromConfig copy = new MFromConfig(super.clone(cloneWithValue).getConfigs());
+    MFromConfig copy = new MFromConfig(super.clone(cloneWithValue).getConfigs(), getCloneOfValidators());
     return copy;
   }
 }

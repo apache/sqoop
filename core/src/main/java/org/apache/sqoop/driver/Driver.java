@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.driver;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -32,6 +33,8 @@ import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MValidator;
+import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.repository.RepositoryManager;
 
 /**
@@ -112,7 +115,8 @@ public class Driver implements Reconfigurable {
 
   private Driver() {
     List<MConfig> driverConfig = ConfigUtils.toConfigs(getDriverJobConfigurationClass());
-    mDriver = new MDriver(new MDriverConfig(driverConfig), DriverBean.CURRENT_DRIVER_VERSION);
+    List<MValidator> mValidators = ConfigUtils.getMValidatorsFromConfigurationClass(getDriverJobConfigurationClass());
+    mDriver = new MDriver(new MDriverConfig(driverConfig, mValidators), DriverBean.CURRENT_DRIVER_VERSION);
 
     // Build upgrader
     driverUpgrader = new DriverUpgrader();

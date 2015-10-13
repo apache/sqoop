@@ -18,6 +18,7 @@
 package org.apache.sqoop.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -82,16 +83,20 @@ public class TestMLink {
 
   private MLinkConfig linkConfig() {
     List<MConfig> configs = new ArrayList<MConfig>();
-    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY);
+    MIntegerInput input = new MIntegerInput("INTEGER-INPUT", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     input.setValue(100);
-    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20);
+    MStringInput strInput = new MStringInput("STRING-INPUT",false, InputEditable.ANY, StringUtils.EMPTY, (short)20, Collections.EMPTY_LIST);
     strInput.setValue("TEST-VALUE");
     List<MInput<?>> list = new ArrayList<MInput<?>>();
     list.add(input);
     list.add(strInput);
-    MConfig config = new MConfig("CONFIGNAME", list);
+    MConfig config = new MConfig("CONFIGNAME", list, Collections.EMPTY_LIST);
     configs.add(config);
-    return new MLinkConfig(configs);
+
+    List<MValidator> validators = new ArrayList<>();
+    validators.add(new MValidator("test", ""));
+
+    return new MLinkConfig(configs, validators);
   }
 
 }

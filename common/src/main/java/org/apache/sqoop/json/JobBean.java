@@ -18,7 +18,8 @@
 package org.apache.sqoop.json;
 
 import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
-import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigs;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreValidator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,12 +30,14 @@ import java.util.ResourceBundle;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
-import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.json.util.ConfigInputConstants;
+import org.apache.sqoop.json.util.ConfigValidatorConstants;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MValidator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -138,16 +141,13 @@ public class JobBean implements JsonBean {
     object.put(TO_LINK_ID, job.getToLinkId());
     // job configs
     MFromConfig fromConfigList = job.getFromJobConfig();
-    object.put(FROM_CONFIG_VALUES,
-        extractConfigList(fromConfigList.getConfigs(), fromConfigList.getType(), skipSensitive));
+    object.put(FROM_CONFIG_VALUES, extractConfigList(fromConfigList, skipSensitive));
     MToConfig toConfigList = job.getToJobConfig();
-    object.put(TO_CONFIG_VALUES,
-        extractConfigList(toConfigList.getConfigs(), toConfigList.getType(), skipSensitive));
+    object.put(TO_CONFIG_VALUES, extractConfigList(toConfigList, skipSensitive));
     MDriverConfig driverConfigList = job.getDriverConfig();
     object.put(
         DRIVER_CONFIG_VALUES,
-        extractConfigList(driverConfigList.getConfigs(), driverConfigList.getType(),
-            skipSensitive));
+        extractConfigList(driverConfigList, skipSensitive));
 
     return object;
   }
@@ -172,22 +172,31 @@ public class JobBean implements JsonBean {
     long toConnectorId = (Long) object.get(TO_CONNECTOR_ID);
     long fromConnectionId = (Long) object.get(FROM_LINK_ID);
     long toConnectionId = (Long) object.get(TO_LINK_ID);
-    JSONArray fromConfigJson = (JSONArray) object.get(FROM_CONFIG_VALUES);
-    JSONArray toConfigJson = (JSONArray) object.get(TO_CONFIG_VALUES);
-    JSONArray driverConfigJson = (JSONArray) object.get(DRIVER_CONFIG_VALUES);
+    JSONObject fromConfigJson = (JSONObject) object.get(FROM_CONFIG_VALUES);
+    JSONObject toConfigJson = (JSONObject) object.get(TO_CONFIG_VALUES);
+    JSONObject driverConfigJson = (JSONObject) object.get(DRIVER_CONFIG_VALUES);
 
-    List<MConfig> fromConfig = restoreConfigList(fromConfigJson);
-    List<MConfig> toConfig = restoreConfigList(toConfigJson);
-    List<MConfig> driverConfig = restoreConfigList(driverConfigJson);
+    List<MConfig> fromConfigs = restoreConfigs((JSONArray) fromConfigJson.get(ConfigInputConstants.CONFIGS));
+    List<MValidator> fromValidators = restoreValidator((JSONArray)
+      fromConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+
+    List<MConfig> toConfigs = restoreConfigs((JSONArray) toConfigJson.get(ConfigInputConstants.CONFIGS));
+    List<MValidator> toValidators = restoreValidator((JSONArray)
+      toConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+
+    List<MConfig> driverConfigs = restoreConfigs((JSONArray) driverConfigJson
+      .get(ConfigInputConstants.CONFIGS));
+    List<MValidator> driverValidators = restoreValidator((JSONArray)
+      driverConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
 
     MJob job = new MJob(
       fromConnectorId,
       toConnectorId,
       fromConnectionId,
       toConnectionId,
-      new MFromConfig(fromConfig),
-      new MToConfig(toConfig),
-      new MDriverConfig(driverConfig)
+      new MFromConfig(fromConfigs, fromValidators),
+      new MToConfig(toConfigs, toValidators),
+      new MDriverConfig(driverConfigs, driverValidators)
     );
 
     job.setPersistenceId((Long) object.get(ID));

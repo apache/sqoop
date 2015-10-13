@@ -31,6 +31,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import java.sql.*;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -984,65 +985,65 @@ abstract public class DerbyTestCase {
   }
 
   protected MLinkConfig getLinkConfig() {
-    return new MLinkConfig(getConfigs("LINK1", "LINK2"));
+    return new MLinkConfig(getConfigs("LINK1", "LINK2"), Collections.EMPTY_LIST);
   }
 
   protected MFromConfig getFromConfig() {
-    return new MFromConfig(getConfigs("JOB3", "JOB4"));
+    return new MFromConfig(getConfigs("JOB3", "JOB4"), Collections.EMPTY_LIST);
   }
 
   protected MFromConfig getBadFromConfig() {
-    return new MFromConfig(getBadConfigs("FROM1", "FROM2"));
+    return new MFromConfig(getBadConfigs("FROM1", "FROM2"), Collections.EMPTY_LIST);
   }
 
   protected MFromConfig getMultipleOverridesFromConfig() {
-    return new MFromConfig(getMultipleOverrideConfigs("FROM1", "FROM2"));
+    return new MFromConfig(getMultipleOverrideConfigs("FROM1", "FROM2"), Collections.EMPTY_LIST);
   }
 
   protected MFromConfig getNonExistentOverridesFromConfig() {
-    return new MFromConfig(getBadConfigsWithNonExistingInputOverrides("FROM1", "FROM2"));
+    return new MFromConfig(getBadConfigsWithNonExistingInputOverrides("FROM1", "FROM2"), Collections.EMPTY_LIST);
   }
 
   protected MToConfig getToConfig() {
-    return new MToConfig(getConfigs("JOB5", "JOB6"));
+    return new MToConfig(getConfigs("JOB5", "JOB6"), Collections.EMPTY_LIST);
   }
 
   protected MDriverConfig getDriverConfig() {
-    return new MDriverConfig(getConfigs("DRIVER1", "DRIVER2"));
+    return new MDriverConfig(getConfigs("DRIVER1", "DRIVER2"), Collections.EMPTY_LIST);
   }
 
   protected MDriverConfig getBadDriverConfig() {
-    return new MDriverConfig(getBadConfigsWithSelfOverrides("DRIVER1", "DRIVER2"));
+    return new MDriverConfig(getBadConfigsWithSelfOverrides("DRIVER1", "DRIVER2"), Collections.EMPTY_LIST);
   }
 
   protected List<MConfig> getConfigs(String configName1, String configName2) {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY);
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName1, inputs));
+    configs.add(new MConfig(configName1, inputs, Collections.EMPTY_LIST));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName2, inputs));
+    configs.add(new MConfig(configName2, inputs, Collections.EMPTY_LIST));
 
     return configs;
   }
@@ -1052,30 +1053,30 @@ abstract public class DerbyTestCase {
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
     // I1 overrides another user_only attribute, hence a bad config
-    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I4", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I4", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY);
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName1, inputs));
+    configs.add(new MConfig(configName1, inputs, Collections.EMPTY_LIST));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName2, inputs));
+    configs.add(new MConfig(configName2, inputs, Collections.EMPTY_LIST));
 
     return configs;
   }
@@ -1085,30 +1086,30 @@ abstract public class DerbyTestCase {
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
     // I1 overrides another user_only attribute, hence a bad config
-    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I4", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I4", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY);
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I5", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, configName1 + ".I4");
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, configName1 + ".I4", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName1, inputs));
+    configs.add(new MConfig(configName1, inputs, Collections.EMPTY_LIST));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName2, inputs));
+    configs.add(new MConfig(configName2, inputs, Collections.EMPTY_LIST));
 
     return configs;
   }
@@ -1117,30 +1118,30 @@ abstract public class DerbyTestCase {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I1," + configName1 + ".I3", StringUtils.EMPTY);
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".I1," + configName1 + ".I3", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName1, inputs));
+    configs.add(new MConfig(configName1, inputs, Collections.EMPTY_LIST));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName2, inputs));
+    configs.add(new MConfig(configName2, inputs, Collections.EMPTY_LIST));
 
     return configs;
   }
@@ -1151,30 +1152,30 @@ abstract public class DerbyTestCase {
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
     // I2 overrides a nonexistant input
-    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30);
+    MInput input = new MStringInput(configName1 + ".I1", false, InputEditable.USER_ONLY, configName1 + ".I2", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".FOO", StringUtils.EMPTY);
+    input = new MMapInput(configName1 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName1 + ".FOO", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1");
+    input = new MIntegerInput(configName1 + ".I3", false, InputEditable.ANY, configName1 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName1 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName1 + ".I5", false, InputEditable.ANY, configName1 + ".I4," + configName1 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName1, inputs));
+    configs.add(new MConfig(configName1, inputs, Collections.EMPTY_LIST));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30);
+    input = new MStringInput(configName2 + ".I1", false, InputEditable.USER_ONLY, configName2 + ".I2", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY);
+    input = new MMapInput(configName2 + ".I2", false, InputEditable.CONNECTOR_ONLY, configName2 + ".I5", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1");
+    input = new MIntegerInput(configName2 + ".I3", false, InputEditable.ANY, configName2 + ".I1", Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MBooleanInput(configName2 + ".I4", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"});
+    input = new MEnumInput(configName2 + ".I5", false, InputEditable.ANY, configName2 + ".I4," + configName2 + ".I3", new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName2, inputs));
+    configs.add(new MConfig(configName2, inputs, Collections.EMPTY_LIST));
 
     return configs;
   }

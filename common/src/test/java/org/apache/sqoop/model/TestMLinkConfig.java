@@ -18,6 +18,7 @@
 package org.apache.sqoop.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.testng.annotations.Test;
@@ -31,14 +32,16 @@ public class TestMLinkConfig {
    */
   @Test
   public void testInitialization() {
-    List<MConfig> configs = new ArrayList<MConfig>();
-    MLinkConfig linkConfig = new MLinkConfig(configs);
-    List<MConfig> testConfig = new ArrayList<MConfig>();
+    List<MConfig> configs = new ArrayList<>();
+    List<MValidator> validators = new ArrayList<>();
+    MLinkConfig linkConfig = new MLinkConfig(configs, validators);
+    List<MConfig> testConfig = new ArrayList<>();
+    List<MValidator> testValidator = new ArrayList<>();
     assertEquals(testConfig, linkConfig.getConfigs());
-    MLinkConfig linkConfig2 = new MLinkConfig(testConfig);
+    MLinkConfig linkConfig2 = new MLinkConfig(testConfig, testValidator);
     assertEquals(linkConfig2, linkConfig);
     // Add a config to list for checking not equals
-    MConfig c = new MConfig("test", null);
+    MConfig c = new MConfig("test", null, Collections.EMPTY_LIST);
     testConfig.add(c);
     assertFalse(linkConfig.equals(linkConfig2));
   }

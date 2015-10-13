@@ -20,6 +20,8 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.List;
+
 /**
  * Represents an element of metadata used by the connector.
  */
@@ -33,12 +35,13 @@ public abstract class MNamedElement extends MValidatedElement {
   private String labelKey;
   private String helpKey;
 
-  protected MNamedElement(String name) {
+  protected MNamedElement(String name, List<MValidator> mValidators) {
+    super(mValidators);
     setName(name);
   }
 
   protected MNamedElement(MNamedElement other) {
-    this(other.name);
+    this(other.name, other.getCloneOfValidators());
   }
 
   /**

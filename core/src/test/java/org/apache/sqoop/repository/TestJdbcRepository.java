@@ -59,6 +59,7 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MValidator;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
@@ -743,9 +744,9 @@ public class TestJdbcRepository {
 
   private MConnector connector(long connectorId, String version) {
     MConnector connector = new MConnector("A" + connectorId, "A" + connectorId, version + connectorId,
-        new MLinkConfig(new LinkedList<MConfig>()),
-        new MFromConfig(ConfigUtils.toConfigs(ValidConfiguration.class)),
-        new MToConfig(ConfigUtils.toConfigs(ValidConfiguration.class)));
+        new MLinkConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()),
+        new MFromConfig(ConfigUtils.toConfigs(ValidConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(ValidConfiguration.class)),
+        new MToConfig(ConfigUtils.toConfigs(ValidConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(ValidConfiguration.class)));
     connector.setPersistenceId(connectorId);
     return connector;
   }
@@ -755,7 +756,7 @@ public class TestJdbcRepository {
   }
 
   private MDriver driver() {
-    MDriver driver = new MDriver(new MDriverConfig(new LinkedList<MConfig>()),
+    MDriver driver = new MDriver(new MDriverConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()),
         DriverBean.CURRENT_DRIVER_VERSION);
     driver.setPersistenceId(1);
     return driver;
@@ -768,7 +769,7 @@ public class TestJdbcRepository {
   }
 
   private MLink link(long linkId, String linkName, long connectorId) {
-    MLink link = new MLink(connectorId, new MLinkConfig(new LinkedList<MConfig>()));
+    MLink link = new MLink(connectorId, new MLinkConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()));
     link.setPersistenceId(linkId);
     link.setName(linkName);
     return link;
@@ -776,9 +777,9 @@ public class TestJdbcRepository {
 
   private MJob job(long id, String jobName, long fromConnectorId, long toConnectorId, long fromLinkId, long toLinkId) {
     MJob job = new MJob(fromConnectorId, toConnectorId, fromLinkId, toLinkId,
-        new MFromConfig(new LinkedList<MConfig>()),
-        new MToConfig(new LinkedList<MConfig>()),
-        new MDriverConfig(new LinkedList<MConfig>()));
+        new MFromConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()),
+        new MToConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()),
+        new MDriverConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()));
     job.setPersistenceId(id);
     job.setName(jobName);
     return job;

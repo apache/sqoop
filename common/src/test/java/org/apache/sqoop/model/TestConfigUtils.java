@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.model;
 
+import com.google.common.base.Strings;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,7 +27,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,10 +50,18 @@ public class TestConfigUtils {
     config.aConfig.a1 = "value";
     config.cConfig.enumeration = Enumeration.X;
 
+    List<MValidator> expectedValidatorsOnAConfig = new ArrayList<>();
+    expectedValidatorsOnAConfig.add(new MValidator(AConfig.AConfigValidator.class.getName(), AbstractValidator.DEFAULT_STRING_ARGUMENT));
+
+    List<MValidator> expectedValidatorsOnA1 = new ArrayList<>();
+    expectedValidatorsOnA1.add(new MValidator(AConfig.A1Validator.class.getName(), AbstractValidator.DEFAULT_STRING_ARGUMENT));
+
     List<MConfig> configsByInstance = ConfigUtils.toConfigs(config);
     assertEquals(getConfigs(), configsByInstance);
     assertEquals("value", configsByInstance.get(0).getInputs().get(0).getValue());
+    assertEquals(expectedValidatorsOnA1, configsByInstance.get(0).getInputs().get(0).getValidators());
     assertEquals("X", configsByInstance.get(2).getInput("cConfig.enumeration").getValue());
+    assertEquals(expectedValidatorsOnAConfig, configsByInstance.get(0).getValidators());
 
     List<MConfig> configsByClass = ConfigUtils.toConfigs(TestConfiguration.class);
     assertEquals(getConfigs(), configsByClass);
@@ -229,28 +242,28 @@ public class TestConfigUtils {
     // Config A
     inputs = new LinkedList<MInput<?>>();
     inputs.add(new MStringInput("aConfig.a1", false, InputEditable.ANY, StringUtils.EMPTY,
-        (short) 30));
+        (short) 30, Collections.EMPTY_LIST));
     inputs.add(new MStringInput("aConfig.a2", true, InputEditable.ANY, StringUtils.EMPTY,
-        (short) -1));
-    ret.add(new MConfig("aConfig", inputs));
+        (short) -1, Collections.EMPTY_LIST));
+    ret.add(new MConfig("aConfig", inputs, Collections.EMPTY_LIST));
 
     // Config B
     inputs = new LinkedList<MInput<?>>();
     inputs.add(new MStringInput("bConfig.b1", false, InputEditable.ANY, StringUtils.EMPTY,
-        (short) 2));
+        (short) 2, Collections.EMPTY_LIST));
     inputs.add(new MStringInput("bConfig.b2", false, InputEditable.ANY, StringUtils.EMPTY,
-        (short) 3));
-    ret.add(new MConfig("bConfig", inputs));
+        (short) 3, Collections.EMPTY_LIST));
+    ret.add(new MConfig("bConfig", inputs, Collections.EMPTY_LIST));
 
     // Config C
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MLongInput("cConfig.longValue", false, InputEditable.ANY, StringUtils.EMPTY));
-    inputs.add(new MMapInput("cConfig.map", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY));
+    inputs.add(new MLongInput("cConfig.longValue", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST));
+    inputs.add(new MMapInput("cConfig.map", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST));
     inputs.add(new MEnumInput("cConfig.enumeration", false, InputEditable.ANY, StringUtils.EMPTY,
-        new String[] { "X", "Y" }));
-    inputs.add(new MListInput("cConfig.list", false, InputEditable.ANY, StringUtils.EMPTY));
-    inputs.add(new MDateTimeInput("cConfig.dt", false, InputEditable.ANY, StringUtils.EMPTY));
-    ret.add(new MConfig("cConfig", inputs));
+        new String[] { "X", "Y" }, Collections.EMPTY_LIST));
+    inputs.add(new MListInput("cConfig.list", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST));
+    inputs.add(new MDateTimeInput("cConfig.dt", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST));
+    ret.add(new MConfig("cConfig", inputs, Collections.EMPTY_LIST));
 
     return ret;
   }
@@ -261,10 +274,10 @@ public class TestConfigUtils {
     List<MInput<?>> inputs;
     // Config A
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MStringInput("aConfig.a1", false, InputEditable.ANY, "aConfig.a1", (short) 30));
+    inputs.add(new MStringInput("aConfig.a1", false, InputEditable.ANY, "aConfig.a1", (short) 30, Collections.EMPTY_LIST));
     inputs.add(new MStringInput("aConfig.a2", true, InputEditable.ANY, StringUtils.EMPTY,
-        (short) -1));
-    ret.add(new MConfig("aConfig", inputs));
+        (short) -1, Collections.EMPTY_LIST));
+    ret.add(new MConfig("aConfig", inputs, Collections.EMPTY_LIST));
     return ret;
   }
 
@@ -274,10 +287,10 @@ public class TestConfigUtils {
     List<MInput<?>> inputs;
     // Config A
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MStringInput("aConfig.a1", false, InputEditable.ANY, "aConfig.a3", (short) 30));
+    inputs.add(new MStringInput("aConfig.a1", false, InputEditable.ANY, "aConfig.a3", (short) 30, Collections.EMPTY_LIST));
     inputs.add(new MStringInput("aConfig.a2", true, InputEditable.ANY, StringUtils.EMPTY,
-        (short) -1));
-    ret.add(new MConfig("aConfig", inputs));
+        (short) -1, Collections.EMPTY_LIST));
+    ret.add(new MConfig("aConfig", inputs, Collections.EMPTY_LIST));
     return ret;
   }
 
@@ -287,10 +300,10 @@ public class TestConfigUtils {
     List<MInput<?>> inputs;
     // Config A
     inputs = new LinkedList<MInput<?>>();
-    inputs.add(new MStringInput("aConfig.a1", false, InputEditable.ANY, "aConfig.a2", (short) 30));
+    inputs.add(new MStringInput("aConfig.a1", false, InputEditable.ANY, "aConfig.a2", (short) 30, Collections.EMPTY_LIST));
     inputs.add(new MStringInput("aConfig.a2", true, InputEditable.USER_ONLY, StringUtils.EMPTY,
-        (short) -1));
-    ret.add(new MConfig("aConfig", inputs));
+        (short) -1, Collections.EMPTY_LIST));
+    ret.add(new MConfig("aConfig", inputs, Collections.EMPTY_LIST));
     return ret;
   }
 
@@ -383,12 +396,30 @@ public class TestConfigUtils {
     DConfig dConfig;
   }
 
-  @ConfigClass
+  @ConfigClass(validators = {@Validator(AConfig.AConfigValidator.class)})
   public static class AConfig {
-    @Input(size = 30)
+    @Input(size = 30, validators = {@Validator(AConfig.A1Validator.class)})
     String a1;
     @Input(sensitive = true)
     String a2;
+
+    public static class AConfigValidator extends AbstractValidator<AConfig> {
+      @Override
+      public void validate(AConfig aConfig) {
+        if (Strings.isNullOrEmpty(aConfig.a1)) {
+          addMessage(Status.ERROR, "a1 cannot be empty");
+        }
+      }
+    }
+
+    public static class A1Validator extends AbstractValidator<String> {
+      @Override
+      public void validate(String a1) {
+        if (Strings.isNullOrEmpty(a1)) {
+          addMessage(Status.ERROR, "I am a redundant validator");
+        }
+      }
+    }
   }
 
   @ConfigClass

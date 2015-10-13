@@ -23,6 +23,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class TestMListInput {
    */
   @Test
   public void testInitialization() {
-    MListInput input = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MListInput input = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(MInputType.LIST, input.getType());
   }
@@ -49,13 +50,13 @@ public class TestMListInput {
   @Test
   public void testEquals() {
     // Positive test
-    MListInput input1 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
-    MListInput input2 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MListInput input1 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
+    MListInput input2 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MListInput input3 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
-    MListInput input4 = new MListInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY);
+    MListInput input3 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
+    MListInput input4 = new MListInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertFalse(input3.equals(input4));
   }
 
@@ -64,7 +65,7 @@ public class TestMListInput {
    */
   @Test
   public void testValue() {
-    MListInput input1 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MListInput input1 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     List<String> list = new LinkedList<String>();
     input1.setValue(list);
     assertEquals(list, input1.getValue());
@@ -77,7 +78,7 @@ public class TestMListInput {
    */
   @Test
   public void testUrlSafe() {
-    MListInput input1 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MListInput input1 = new MListInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     List<String> list = new LinkedList<String>();
     input1.setValue(list);
     // Getting URL safe string
@@ -98,7 +99,7 @@ public class TestMListInput {
    */
   @Test
   public void testNamedElement() {
-    MListInput input1 = new MListInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY);
+    MListInput input1 = new MListInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
   }
@@ -108,8 +109,8 @@ public class TestMListInput {
    */
   @Test
   public void testSensitivity() {
-    MListInput input1 = new MListInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY );
-    MListInput input2 = new MListInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY );
+    MListInput input1 = new MListInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST );
+    MListInput input2 = new MListInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST );
     assertFalse(input1.isSensitive());
     assertTrue(input2.isSensitive());
   }

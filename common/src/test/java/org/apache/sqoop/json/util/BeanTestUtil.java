@@ -24,6 +24,7 @@ import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MValidator;
 
 public class BeanTestUtil {
 

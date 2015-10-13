@@ -42,6 +42,7 @@ import org.apache.sqoop.validation.Status;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,7 @@ public final class ConfigFiller {
    * Internal input that will be reused for loading names for link and
    * job objects.
    */
-  private static MStringInput nameInput = new MStringInput("object-name", false, InputEditable.ANY, StringUtils.EMPTY, (short)25);
+  private static MStringInput nameInput = new MStringInput("object-name", false, InputEditable.ANY, StringUtils.EMPTY, (short)25, Collections.EMPTY_LIST);
 
   /**
    * Fill job object based on CLI options.

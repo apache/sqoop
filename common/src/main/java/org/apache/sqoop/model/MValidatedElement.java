@@ -22,6 +22,7 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +32,8 @@ import java.util.List;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public abstract class MValidatedElement extends MPersistableEntity {
+
+  private List<MValidator> mValidators;
 
   /**
    * Validation messages.
@@ -42,13 +45,15 @@ public abstract class MValidatedElement extends MPersistableEntity {
    */
   private Status validationStatus;
 
-  public MValidatedElement() {
+  public MValidatedElement(List<MValidator> mValidators) {
+    this.mValidators = mValidators;
     resetValidationMessages();
   }
 
   public MValidatedElement(MValidatedElement other) {
     super(other);
     resetValidationMessages();
+    this.mValidators = other.getCloneOfValidators();
     this.validationStatus = other.validationStatus;
     this.validationMessages.addAll(other.validationMessages);
   }
@@ -97,11 +102,25 @@ public abstract class MValidatedElement extends MPersistableEntity {
     return this.validationMessages;
   }
 
+  public List<MValidator> getValidators() {
+    return mValidators;
+  }
+
   /**
    * Return message validation status.
    */
   public Status getValidationStatus() {
     return validationStatus;
+  }
+
+  public List<MValidator> getCloneOfValidators() {
+    if (getValidators() == null) return null;
+
+    List<MValidator> copyValidators = new ArrayList<>();
+    for(MValidator itr : this.getValidators()) {
+      copyValidators.add((MValidator)itr.clone(true));
+    }
+    return copyValidators;
   }
 
 }

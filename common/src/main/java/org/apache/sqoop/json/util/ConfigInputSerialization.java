@@ -23,6 +23,7 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MDateTimeInput;
 import org.apache.sqoop.model.MEnumInput;
 import org.apache.sqoop.model.MConfig;
@@ -34,6 +35,7 @@ import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.model.MValidator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -51,18 +53,23 @@ public final class ConfigInputSerialization {
   /**
    * Transform given list of configs to JSON Array object.
    *
-   * @param mConfigs List of configs.
+   * @param mConfigList List of configs.
    * @return JSON object with serialized config of the list.
    */
   @SuppressWarnings("unchecked")
-  public static JSONArray extractConfigList(List<MConfig> mConfigs, MConfigType type,
-      boolean skipSensitive) {
+  public static JSONObject extractConfigList(MConfigList mConfigList, boolean skipSensitive) {
+    JSONObject jsonConfigList = new JSONObject();
+
+    jsonConfigList.put(ConfigInputConstants.CONFIG_VALIDATORS, extractValidators(mConfigList.getValidators()));
+
     JSONArray configs = new JSONArray();
 
-    for (MConfig mConfig : mConfigs) {
-      configs.add(extractConfig(mConfig, type, skipSensitive));
+    for (MConfig mConfig : mConfigList.getConfigs()) {
+      configs.add(extractConfig(mConfig, mConfigList.getType(), skipSensitive));
     }
-    return configs;
+
+    jsonConfigList.put(ConfigInputConstants.CONFIGS, configs);
+    return jsonConfigList;
   }
 
   /**
@@ -78,6 +85,9 @@ public final class ConfigInputSerialization {
     config.put(ConfigInputConstants.CONFIG_ID, mConfig.getPersistenceId());
     config.put(ConfigInputConstants.CONFIG_NAME, mConfig.getName());
     config.put(ConfigInputConstants.CONFIG_TYPE, type.name());
+
+    config.put(ConfigInputConstants.CONFIG_VALIDATORS, extractValidators(mConfig.getValidators()));
+
     JSONArray mInputs = new JSONArray();
     config.put(ConfigInputConstants.CONFIG_INPUTS, mInputs);
 
@@ -89,6 +99,8 @@ public final class ConfigInputSerialization {
       input.put(ConfigInputConstants.CONFIG_INPUT_SENSITIVE, mInput.isSensitive());
       input.put(ConfigInputConstants.CONFIG_INPUT_EDITABLE, mInput.getEditable().name());
       input.put(ConfigInputConstants.CONFIG_INPUT_OVERRIDES, mInput.getOverrides());
+
+      input.put(ConfigInputConstants.CONFIG_VALIDATORS, extractValidators(mInput.getValidators()));
 
       // String specific serialization
       if (mInput.getType() == MInputType.STRING) {
@@ -125,12 +137,46 @@ public final class ConfigInputSerialization {
   }
 
   /**
+   * Extract list of MValidators to JSONArray.
+   *
+   * @param mValidators List of MValidators
+   * @return JSONArray containing json objects representing the MValidators
+   */
+  public static JSONArray extractValidators(List<MValidator> mValidators) {
+    JSONArray jsonValidators = new JSONArray();
+    for (MValidator mValidator : mValidators) {
+      JSONObject jsonValidator = new JSONObject();
+      jsonValidator.put(ConfigValidatorConstants.VALIDATOR_CLASS, mValidator.getValidatorClass());
+      jsonValidator.put(ConfigValidatorConstants.VALIDATOR_STR_ARG, mValidator.getStrArg());
+      jsonValidators.add(jsonValidator);
+    }
+    return jsonValidators;
+  }
+
+  /**
+   * Restore List of MValidations from JSON Array.
+   *
+   * @param jsonValidators JSON array representing list of MValidators
+   * @return Restored list of MValidations
+   */
+  public static List<MValidator> restoreValidator(JSONArray jsonValidators) {
+    List<MValidator> mValidators = new ArrayList<>();
+    for (int validatorCounter = 0; validatorCounter < jsonValidators.size(); validatorCounter++) {
+      JSONObject jsonValidator = (JSONObject) jsonValidators.get(validatorCounter);
+      String validatorClassName = (String) jsonValidator.get(ConfigValidatorConstants.VALIDATOR_CLASS);
+      String validatorStrArg = (String) jsonValidator.get(ConfigValidatorConstants.VALIDATOR_STR_ARG);
+      mValidators.add(new MValidator(validatorClassName, validatorStrArg));
+    }
+    return mValidators;
+  }
+
+  /**
    * Restore List of MConfigs from JSON Array.
    *
    * @param configs JSON array representing list of MConfigs
    * @return Restored list of MConfigs
    */
-  public static List<MConfig> restoreConfigList(JSONArray configs) {
+  public static List<MConfig> restoreConfigs(JSONArray configs) {
     List<MConfig> mConfigs = new ArrayList<MConfig>();
 
     for (int i = 0; i < configs.size(); i++) {
@@ -163,40 +209,43 @@ public final class ConfigInputSerialization {
       String overrides = (String) input.get(ConfigInputConstants.CONFIG_INPUT_OVERRIDES);
       String sensitveKeyPattern = (String) input.get(ConfigInputConstants.CONFIG_INPUT_SENSITIVE_KEY_PATTERN);
 
+      List<MValidator> mValidatorsForInput = restoreValidator((JSONArray)
+        input.get(ConfigInputConstants.CONFIG_VALIDATORS));
+
       MInput mInput = null;
       switch (type) {
       case STRING: {
         long size = (Long) input.get(ConfigInputConstants.CONFIG_INPUT_SIZE);
-        mInput = new MStringInput(name, sensitive.booleanValue(), editable, overrides, (short) size);
+        mInput = new MStringInput(name, sensitive.booleanValue(), editable, overrides, (short) size, mValidatorsForInput);
         break;
       }
       case MAP: {
-        mInput = new MMapInput(name, sensitive.booleanValue(), editable, overrides, sensitveKeyPattern);
+        mInput = new MMapInput(name, sensitive.booleanValue(), editable, overrides, sensitveKeyPattern, mValidatorsForInput);
         break;
       }
       case INTEGER: {
-        mInput = new MIntegerInput(name, sensitive.booleanValue(), editable, overrides);
+        mInput = new MIntegerInput(name, sensitive.booleanValue(), editable, overrides, mValidatorsForInput);
         break;
       }
       case LONG: {
-        mInput = new MLongInput(name, sensitive.booleanValue(), editable, overrides);
+        mInput = new MLongInput(name, sensitive.booleanValue(), editable, overrides, mValidatorsForInput);
         break;
       }
       case BOOLEAN: {
-        mInput = new MBooleanInput(name, sensitive.booleanValue(), editable, overrides);
+        mInput = new MBooleanInput(name, sensitive.booleanValue(), editable, overrides, mValidatorsForInput);
         break;
       }
       case ENUM: {
         String values = (String) input.get(ConfigInputConstants.CONFIG_INPUT_ENUM_VALUES);
-        mInput = new MEnumInput(name, sensitive.booleanValue(), editable, overrides, values.split(","));
+        mInput = new MEnumInput(name, sensitive.booleanValue(), editable, overrides, values.split(","), mValidatorsForInput);
         break;
       }
       case LIST: {
-        mInput = new MListInput(name, sensitive.booleanValue(), editable, overrides);
+        mInput = new MListInput(name, sensitive.booleanValue(), editable, overrides, mValidatorsForInput);
         break;
       }
       case DATETIME: {
-        mInput = new MDateTimeInput(name, sensitive.booleanValue(), editable, overrides);
+        mInput = new MDateTimeInput(name, sensitive.booleanValue(), editable, overrides, mValidatorsForInput);
         break;
       }
       default:
@@ -230,12 +279,16 @@ public final class ConfigInputSerialization {
       mInputs.add(mInput);
     }
 
-    MConfig mConfig = new MConfig((String) config.get(ConfigInputConstants.CONFIG_NAME), mInputs);
-    mConfig.setPersistenceId((Long) config.get(ConfigInputConstants.CONFIG_ID));
-    return mConfig;
-  }
 
-  private ConfigInputSerialization() {
+
+    List<MValidator> mValidatorsForConfig = restoreValidator((JSONArray)
+      config.get(ConfigInputConstants.CONFIG_VALIDATORS));
+    MConfig mConfig = new MConfig((String) config.get(ConfigInputConstants.CONFIG_NAME), mInputs, mValidatorsForConfig);
+    mConfig.setPersistenceId((Long) config.get(ConfigInputConstants.CONFIG_ID));
+      return mConfig;
+    }
+
+    private ConfigInputSerialization() {
     // Do not instantiate
   }
 }

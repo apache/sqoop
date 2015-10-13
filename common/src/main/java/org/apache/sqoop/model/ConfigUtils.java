@@ -21,7 +21,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.utils.ClassUtils;
 import org.apache.sqoop.validation.ConfigValidationRunner;
@@ -125,6 +124,11 @@ public class  ConfigUtils {
         "Missing annotation ConfigClass on class " + klass.getName());
     }
 
+    List<MValidator> mValidatorsForConfigClass = new ArrayList<>();
+    for (Validator validator : global.validators()) {
+      mValidatorsForConfigClass.add(getMValidator(validator));
+    }
+
     // Intermediate list of inputs
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
 
@@ -140,6 +144,10 @@ public class  ConfigUtils {
       Input inputAnnotation = field.getAnnotation(Input.class);
 
       if(inputAnnotation != null) {
+        List<MValidator> mValidatorsForInput = new ArrayList<>();
+        for (Validator validator : inputAnnotation.validators()) {
+          mValidatorsForInput.add(getMValidator(validator));
+        }
         boolean sensitive = inputAnnotation.sensitive();
         short maxLen = inputAnnotation.size();
         InputEditable editable = inputAnnotation.editable();
@@ -157,22 +165,22 @@ public class  ConfigUtils {
 
         // Instantiate corresponding MInput<?> structure
         if (type == String.class) {
-          input = new MStringInput(inputName, sensitive, editable, overrides, maxLen);
+          input = new MStringInput(inputName, sensitive, editable, overrides, maxLen, mValidatorsForInput);
         } else if (type.isAssignableFrom(Map.class)) {
-          input = new MMapInput(inputName, sensitive, editable, overrides, sensitiveKeyPattern);
+          input = new MMapInput(inputName, sensitive, editable, overrides, sensitiveKeyPattern, mValidatorsForInput);
         } else if (type == Integer.class) {
-          input = new MIntegerInput(inputName, sensitive, editable, overrides);
+          input = new MIntegerInput(inputName, sensitive, editable, overrides, mValidatorsForInput);
         } else if (type == Long.class) {
-          input = new MLongInput(inputName, sensitive, editable, overrides);
+          input = new MLongInput(inputName, sensitive, editable, overrides, mValidatorsForInput);
         } else if (type == Boolean.class) {
-          input = new MBooleanInput(inputName, sensitive, editable, overrides);
+          input = new MBooleanInput(inputName, sensitive, editable, overrides, mValidatorsForInput);
         } else if (type.isEnum()) {
           input = new MEnumInput(inputName, sensitive, editable, overrides,
-              ClassUtils.getEnumStrings(type));
+              ClassUtils.getEnumStrings(type), mValidatorsForInput);
         } else if (type.isAssignableFrom(List.class)) {
-          input = new MListInput(inputName, sensitive, editable, overrides);
+          input = new MListInput(inputName, sensitive, editable, overrides, mValidatorsForInput);
         } else if (type == DateTime.class) {
-          input = new MDateTimeInput(inputName, sensitive, editable, overrides);
+          input = new MDateTimeInput(inputName, sensitive, editable, overrides, mValidatorsForInput);
         } else {
           throw new SqoopException(ModelError.MODEL_004, "Unsupported type "
               + type.getName() + " for input " + fieldName);
@@ -203,7 +211,7 @@ public class  ConfigUtils {
         inputs.add(input);
       }
     }
-    MConfig config = new MConfig(configName, inputs);
+    MConfig config = new MConfig(configName, inputs, mValidatorsForConfigClass);
     // validation has to happen only when all inputs have been parsed
     for (MInput<?> input : config.getInputs()) {
       validateInputOverridesAttribute(input, config);
@@ -615,20 +623,38 @@ public class  ConfigUtils {
   }
 
   public static ConfigurationClass getConfigurationClassAnnotation(Object object, boolean strict) {
-    ConfigurationClass annotation = object.getClass().getAnnotation(ConfigurationClass.class);
+    return getConfigurationClassAnnotation(object.getClass(), strict);
+  }
+
+  public static ConfigurationClass getConfigurationClassAnnotation(Class<?> klass, boolean strict) {
+    ConfigurationClass annotation = klass.getAnnotation(ConfigurationClass.class);
 
     if(strict && annotation == null) {
-      throw new SqoopException(ModelError.MODEL_003, "Missing annotation ConfigurationGroupClass on class " + object.getClass().getName());
+      throw new SqoopException(ModelError.MODEL_003, "Missing annotation ConfigurationGroupClass on class " + klass.getName());
     }
 
     return annotation;
   }
 
+  public static List<MValidator> getMValidatorsFromConfigurationClass(Class<?> klass) {
+    ConfigurationClass annotation = getConfigurationClassAnnotation(klass, true);
+
+    List<MValidator> mValidators = new ArrayList<>();
+    for (Validator validator : annotation.validators()) {
+      mValidators.add(getMValidator(validator));
+    }
+    return mValidators;
+  }
+
   public static ConfigClass getConfigClassAnnotation(Object object, boolean strict) {
-    ConfigClass annotation = object.getClass().getAnnotation(ConfigClass.class);
+    return getConfigClassAnnotation(object.getClass(), strict);
+  }
+
+  public static ConfigClass getConfigClassAnnotation(Class<?> klass, boolean strict) {
+    ConfigClass annotation = klass.getAnnotation(ConfigClass.class);
 
     if(strict && annotation == null) {
-      throw new SqoopException(ModelError.MODEL_003, "Missing annotation ConfigurationGroupClass on class " + object.getClass().getName());
+      throw new SqoopException(ModelError.MODEL_003, "Missing annotation ConfigurationGroupClass on class " + klass.getName());
     }
 
     return annotation;
@@ -643,6 +669,8 @@ public class  ConfigUtils {
 
     return annotation;
   }
+
+
 
   public static Input getInputAnnotation(Field field, boolean strict) {
     Input annotation = field.getAnnotation(Input.class);
@@ -710,5 +738,9 @@ public class  ConfigUtils {
         return null;
       }
     });
+  }
+
+  public static MValidator getMValidator(Validator validator) {
+    return new MValidator(validator.value().getName(), validator.strArg());
   }
 }

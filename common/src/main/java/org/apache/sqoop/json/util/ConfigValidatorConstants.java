@@ -15,28 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.model;
-
-import org.apache.commons.lang.StringUtils;
-import org.testng.annotations.Test;
-
-import java.util.Collections;
-
-import static org.testng.Assert.*;
+package org.apache.sqoop.json.util;
 
 /**
- * Test class for org.apache.sqoop.model.MNamedElement
+ * Constants related to validators
  */
-public class TestMNamedElement {
-
-  /**
-   * Test initialization and values
-   */
-  @Test
-  public void testInitialization() {
-    MNamedElement named = new MIntegerInput("SQOOP", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
-    assertEquals("SQOOP", named.getName());
-    assertEquals("SQOOP.label", named.getLabelKey());
-    assertEquals("SQOOP.help", named.getHelpKey());
-  }
+public class ConfigValidatorConstants {
+  public static final String VALIDATOR_CLASS = "validator-class";
+  public static final String VALIDATOR_STR_ARG = "validator-str-arg";
 }

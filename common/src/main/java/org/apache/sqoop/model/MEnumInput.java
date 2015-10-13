@@ -23,6 +23,7 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -36,8 +37,8 @@ public class MEnumInput extends MInput<String> {
    */
   String []values;
 
-  public MEnumInput(String name, boolean sensitive, InputEditable editable, String overrides, String[] values) {
-    super(name, sensitive, editable, overrides);
+  public MEnumInput(String name, boolean sensitive, InputEditable editable, String overrides, String[] values, List<MValidator> mValidators) {
+    super(name, sensitive, editable, overrides, mValidators);
     if (values != null) {
       this.values = values.clone();
     } else {
@@ -139,7 +140,7 @@ public class MEnumInput extends MInput<String> {
   @Override
   public MEnumInput clone(boolean cloneWithValue) {
     MEnumInput copy = new MEnumInput(getName(), isSensitive(), getEditable(), getOverrides(),
-        getValues());
+        getValues(), getCloneOfValidators());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(this.getValue());

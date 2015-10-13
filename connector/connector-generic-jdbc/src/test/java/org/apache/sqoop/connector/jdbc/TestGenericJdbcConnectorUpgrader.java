@@ -44,8 +44,8 @@ public class TestGenericJdbcConnectorUpgrader {
   @Test
   public void testFromConfig() {
     // No upgrade
-    MFromConfig originalConfigs = new MFromConfig(ConfigUtils.toConfigs(FromJobConfiguration.class));
-    MFromConfig newConfigs = new MFromConfig(ConfigUtils.toConfigs(FromJobConfiguration.class));
+    MFromConfig originalConfigs = new MFromConfig(ConfigUtils.toConfigs(FromJobConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(FromJobConfiguration.class));
+    MFromConfig newConfigs = new MFromConfig(ConfigUtils.toConfigs(FromJobConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(FromJobConfiguration.class));
     originalConfigs.getInput("fromJobConfig.schemaName").setValue("test-schema");
     originalConfigs.getInput("fromJobConfig.tableName").setValue("test-tableName");
     originalConfigs.getInput("fromJobConfig.columns").setValue("test-columns");
@@ -63,8 +63,8 @@ public class TestGenericJdbcConnectorUpgrader {
   @Test
   public void testToConfig() {
     // No upgrade
-    MToConfig originalConfigs = new MToConfig(ConfigUtils.toConfigs(ToJobConfiguration.class));
-    MToConfig newConfigs = new MToConfig(ConfigUtils.toConfigs(ToJobConfiguration.class));
+    MToConfig originalConfigs = new MToConfig(ConfigUtils.toConfigs(ToJobConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(ToJobConfiguration.class));
+    MToConfig newConfigs = new MToConfig(ConfigUtils.toConfigs(ToJobConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(ToJobConfiguration.class));
     originalConfigs.getInput("toJobConfig.schemaName").setValue("test-schema");
     originalConfigs.getInput("toJobConfig.tableName").setValue("test-tableName");
     originalConfigs.getInput("toJobConfig.columns").setValue("test-columns");
@@ -82,8 +82,8 @@ public class TestGenericJdbcConnectorUpgrader {
   @Test
   public void testLinkConfig() {
     // No upgrade
-    MLinkConfig originalConfigs = new MLinkConfig(ConfigUtils.toConfigs(LinkConfiguration.class));
-    MLinkConfig newConfigs = new MLinkConfig(ConfigUtils.toConfigs(LinkConfiguration.class));
+    MLinkConfig originalConfigs = new MLinkConfig(ConfigUtils.toConfigs(LinkConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(LinkConfiguration.class));
+    MLinkConfig newConfigs = new MLinkConfig(ConfigUtils.toConfigs(LinkConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(LinkConfiguration.class));
     originalConfigs.getInput("linkConfig.jdbcDriver").setValue("test-jdbcDriver");
     originalConfigs.getInput("linkConfig.connectionString").setValue("test-connectionString");
     originalConfigs.getInput("linkConfig.username").setValue("test-username");

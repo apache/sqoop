@@ -18,9 +18,11 @@
 package org.apache.sqoop.json;
 
 import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
-import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
 import static org.apache.sqoop.json.util.ConfigBundleSerialization.extractConfigParamBundle;
 import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfigParamBundle;
+
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigs;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreValidator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,11 +33,13 @@ import java.util.ResourceBundle;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.json.util.ConfigInputConstants;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MValidator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -99,22 +103,19 @@ public class ConnectorBean extends ConfigurableBean {
     connectorJsonObject.put(CONFIGURABLE_VERSION, connector.getVersion());
     connectorJsonObject.put(
         CONNECTOR_LINK_CONFIG,
-        extractConfigList(connector.getLinkConfig().getConfigs(), connector.getLinkConfig()
-            .getType(), skipSensitive));
+        extractConfigList(connector.getLinkConfig(), skipSensitive));
 
     connectorJsonObject.put(CONNECTOR_JOB_CONFIG, new JSONObject());
     // add sub fields to the job config for from and to
     if (connector.getFromConfig() != null) {
       ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG)).put(
           Direction.FROM,
-          extractConfigList(connector.getFromConfig().getConfigs(), connector.getFromConfig()
-              .getType(), skipSensitive));
+          extractConfigList(connector.getFromConfig(), skipSensitive));
     }
     if (connector.getToConfig() != null) {
       ((JSONObject) connectorJsonObject.get(CONNECTOR_JOB_CONFIG)).put(
           Direction.TO,
-          extractConfigList(connector.getToConfig().getConfigs(), connector.getToConfig()
-              .getType(), skipSensitive));
+          extractConfigList(connector.getToConfig(), skipSensitive));
     }
     // add the config-param inside each connector
     connectorJsonObject.put(ALL_CONFIGS, new JSONObject());
@@ -148,28 +149,33 @@ public class ConnectorBean extends ConfigurableBean {
     String className = (String) object.get(CLASS);
     String version = (String) object.get(CONFIGURABLE_VERSION);
 
-    List<MConfig> linkConfigs = restoreConfigList((JSONArray) object
-        .get(CONNECTOR_LINK_CONFIG));
+    JSONObject jsonLink = (JSONObject) object.get(CONNECTOR_LINK_CONFIG);
+    List<MConfig> linkConfigs = restoreConfigs((JSONArray) jsonLink.get(ConfigInputConstants.CONFIGS));
+    List<MValidator> linkValidators = restoreValidator((JSONArray) jsonLink
+      .get(ConfigInputConstants.CONFIG_VALIDATORS));
 
     // parent that encapsulates both the from/to configs
     JSONObject jobConfigJson = (JSONObject) object.get(CONNECTOR_JOB_CONFIG);
-    JSONArray fromJobConfigJson = (JSONArray) jobConfigJson.get(Direction.FROM.name());
-    JSONArray toJobConfigJson = (JSONArray) jobConfigJson.get(Direction.TO.name());
+    JSONObject fromJobConfigJson = (JSONObject) jobConfigJson.get(Direction.FROM.name());
+    JSONObject toJobConfigJson = (JSONObject) jobConfigJson.get(Direction.TO.name());
 
     MFromConfig fromConfig = null;
     MToConfig toConfig = null;
     if (fromJobConfigJson != null) {
-
-      List<MConfig> fromJobConfig = restoreConfigList(fromJobConfigJson);
-      fromConfig = new MFromConfig(fromJobConfig);
+      List<MConfig> fromLinkConfigs = restoreConfigs((JSONArray) fromJobConfigJson.get(ConfigInputConstants.CONFIGS));
+      List<MValidator> fromLinkValidators = restoreValidator((JSONArray)
+        fromJobConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+      fromConfig = new MFromConfig(fromLinkConfigs, fromLinkValidators);
 
     }
     if (toJobConfigJson != null) {
-      List<MConfig> toJobConfig = restoreConfigList(toJobConfigJson);
-      toConfig = new MToConfig(toJobConfig);
+      List<MConfig> toLinkConfigs = restoreConfigs((JSONArray) toJobConfigJson.get(ConfigInputConstants.CONFIGS));
+      List<MValidator> toLinkValidators = restoreValidator((JSONArray)
+        toJobConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+      toConfig = new MToConfig(toLinkConfigs, toLinkValidators);
     }
 
-    MLinkConfig linkConfig = new MLinkConfig(linkConfigs);
+    MLinkConfig linkConfig = new MLinkConfig(linkConfigs, linkValidators);
     MConnector connector = new MConnector(uniqueName, className, version, linkConfig, fromConfig,
         toConfig);
 

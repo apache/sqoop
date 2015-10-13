@@ -27,6 +27,8 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
+
 /**
  * Test class for org.apache.sqoop.model.MDateTimeInput
  */
@@ -36,7 +38,7 @@ public class TestMDateTimeInput {
    */
   @Test
   public void testInitialization() {
-    MDateTimeInput input = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MDateTimeInput input = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(MInputType.DATETIME, input.getType());
   }
@@ -47,13 +49,13 @@ public class TestMDateTimeInput {
   @Test
   public void testEquals() {
     // Positive test
-    MDateTimeInput input1 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
-    MDateTimeInput input2 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MDateTimeInput input1 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
+    MDateTimeInput input2 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MDateTimeInput input3 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
-    MDateTimeInput input4 = new MDateTimeInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY);
+    MDateTimeInput input3 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
+    MDateTimeInput input4 = new MDateTimeInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertFalse(input3.equals(input4));
   }
 
@@ -62,7 +64,7 @@ public class TestMDateTimeInput {
    */
   @Test
   public void testValue() {
-    MDateTimeInput input1 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MDateTimeInput input1 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
 
     //  Test for long format
     DateTime dt = new DateTime(1234567L);
@@ -83,7 +85,7 @@ public class TestMDateTimeInput {
    */
   @Test
   public void testUrlSafe() {
-    MDateTimeInput input1 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY);
+    MDateTimeInput input1 = new MDateTimeInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     DateTime dt = new DateTime(1234567L);
     input1.setValue(dt);
     // Getting URL safe string
@@ -104,7 +106,7 @@ public class TestMDateTimeInput {
    */
   @Test
   public void testNamedElement() {
-    MDateTimeInput input1 = new MDateTimeInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY);
+    MDateTimeInput input1 = new MDateTimeInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
   }
@@ -114,8 +116,8 @@ public class TestMDateTimeInput {
    */
   @Test
   public void testSensitivity() {
-    MDateTimeInput input1 = new MDateTimeInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY );
-    MDateTimeInput input2 = new MDateTimeInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY );
+    MDateTimeInput input1 = new MDateTimeInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST );
+    MDateTimeInput input2 = new MDateTimeInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST );
     assertFalse(input1.isSensitive());
     assertTrue(input2.isSensitive());
   }

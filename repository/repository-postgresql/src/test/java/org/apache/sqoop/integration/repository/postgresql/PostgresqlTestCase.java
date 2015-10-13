@@ -31,6 +31,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -130,37 +131,37 @@ abstract public class PostgresqlTestCase {
   }
 
   protected MLinkConfig getLinkConfig() {
-    return new MLinkConfig(getConfigs("l1", "l2"));
+    return new MLinkConfig(getConfigs("l1", "l2"), Collections.EMPTY_LIST);
   }
 
   protected MFromConfig getFromConfig() {
-    return new MFromConfig(getConfigs("from1", "from2"));
+    return new MFromConfig(getConfigs("from1", "from2"), Collections.EMPTY_LIST);
   }
 
   protected MToConfig getToConfig() {
-    return new MToConfig(getConfigs("to1", "to2"));
+    return new MToConfig(getConfigs("to1", "to2"), Collections.EMPTY_LIST);
   }
 
   protected MDriverConfig getDriverConfig() {
-    return new MDriverConfig(getConfigs("d1", "d2"));
+    return new MDriverConfig(getConfigs("d1", "d2"), Collections.EMPTY_LIST);
   }
 
   protected List<MConfig> getConfigs(String configName1, String configName2) {
     List<MConfig> configs = new LinkedList<MConfig>();
 
     List<MInput<?>> inputs = new LinkedList<MInput<?>>();
-    MInput<?> input = new MStringInput("I1", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30);
+    MInput<?> input = new MStringInput("I1", false, InputEditable.ANY, StringUtils.EMPTY, (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput("I2", false, InputEditable.ANY, "I1", StringUtils.EMPTY);
+    input = new MMapInput("I2", false, InputEditable.ANY, "I1", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName1, inputs));
+    configs.add(new MConfig(configName1, inputs, Collections.EMPTY_LIST));
 
     inputs = new LinkedList<MInput<?>>();
-    input = new MStringInput("I3", false, InputEditable.ANY, "I4", (short) 30);
+    input = new MStringInput("I3", false, InputEditable.ANY, "I4", (short) 30, Collections.EMPTY_LIST);
     inputs.add(input);
-    input = new MMapInput("I4", false, InputEditable.ANY, "I3", StringUtils.EMPTY);
+    input = new MMapInput("I4", false, InputEditable.ANY, "I3", StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
-    configs.add(new MConfig(configName2, inputs));
+    configs.add(new MConfig(configName2, inputs, Collections.EMPTY_LIST));
 
     return configs;
   }

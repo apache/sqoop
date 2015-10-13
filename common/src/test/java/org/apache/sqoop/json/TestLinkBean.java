@@ -17,16 +17,19 @@
  */
 package org.apache.sqoop.json;
 
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreValidator;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.sqoop.json.util.BeanTestUtil;
 import org.apache.sqoop.json.util.ConfigInputConstants;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.model.MValidator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -50,7 +53,13 @@ public class TestLinkBean {
 
     // Check for sensitivity
     JSONObject linkObj = (JSONObject) json.get(LinkBean.LINK);
-    JSONArray linkConfigs = (JSONArray) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
+    JSONObject linkConfigList = (JSONObject) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
+    JSONArray linkConfigs = (JSONArray) linkConfigList.get(ConfigInputConstants.CONFIGS);
+    List<MValidator> linkValidators = restoreValidator((JSONArray)
+      linkConfigList.get(ConfigInputConstants.CONFIG_VALIDATORS));
+    MValidator mValidator = linkValidators.get(0);
+    assertEquals("testValidator1", mValidator.getValidatorClass());
+    assertEquals("", mValidator.getStrArg());
     JSONObject linkConfig = (JSONObject) linkConfigs.get(0);
     JSONArray inputs = (JSONArray) linkConfig.get(ConfigInputConstants.CONFIG_INPUTS);
     for (Object in : inputs) {
@@ -100,8 +109,9 @@ public class TestLinkBean {
 
     // Sensitive values should exist
     JSONObject linkObj = (JSONObject) json.get(LinkBean.LINK);
-    JSONArray linkConfigsObj = (JSONArray) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
-    JSONObject linkConfigObj = (JSONObject) linkConfigsObj.get(0);
+    JSONObject linkConfigList = (JSONObject) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
+    JSONArray linkConfigs = (JSONArray) linkConfigList.get(ConfigInputConstants.CONFIGS);
+    JSONObject linkConfigObj = (JSONObject) linkConfigs.get(0);
     JSONArray inputs = (JSONArray) linkConfigObj.get(ConfigInputConstants.CONFIG_INPUTS);
     assertEquals(3, inputs.size());
     // Inputs are ordered when creating link
@@ -110,8 +120,9 @@ public class TestLinkBean {
 
     // Sensitive values should not exist
     linkObj = (JSONObject) jsonFiltered.get(LinkBean.LINK);
-    linkConfigsObj = (JSONArray) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
-    linkConfigObj = (JSONObject) linkConfigsObj.get(0);
+    linkConfigList = (JSONObject) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
+    linkConfigs = (JSONArray) linkConfigList.get(ConfigInputConstants.CONFIGS);
+    linkConfigObj = (JSONObject) linkConfigs.get(0);
     inputs = (JSONArray) linkConfigObj.get(ConfigInputConstants.CONFIG_INPUTS);
     assertEquals(3, inputs.size());
     // Inputs are ordered when creating link

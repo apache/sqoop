@@ -18,6 +18,7 @@
 package org.apache.sqoop.json.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.apache.sqoop.model.MIntegerInput;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MValidator;
 import org.apache.sqoop.utils.MapResourceBundle;
 
 public class ConfigTestUtil {
@@ -44,18 +46,24 @@ public class ConfigTestUtil {
     List<MConfig> driverConfigs = new ArrayList<MConfig>();
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MIntegerInput("numExtractors", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MIntegerInput("numExtractors", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     input.setPersistenceId(1);
     inputs.add(input);
 
-    input = new MIntegerInput("numLoaders", false, InputEditable.USER_ONLY, StringUtils.EMPTY);
+    input = new MIntegerInput("numLoaders", false, InputEditable.USER_ONLY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     input.setPersistenceId(2);
     inputs.add(input);
 
-    config = new MConfig("driver", inputs);
+    config = new MConfig("driver", inputs, Collections.EMPTY_LIST);
     config.setPersistenceId(10);
     driverConfigs.add(config);
-    return new MDriverConfig(driverConfigs);
+
+
+    List<MValidator> validators = new ArrayList<>();
+    validators.add(new MValidator("testValidator1", ""));
+    validators.add(new MValidator("testValidator2", "blah"));
+
+    return new MDriverConfig(driverConfigs, validators);
   }
 
   public static MLinkConfig getLinkConfig() {
@@ -65,25 +73,28 @@ public class ConfigTestUtil {
     List<MConfig> linkConfig = new ArrayList<MConfig>();
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("url", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("url", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(1);
     inputs.add(input);
 
-    input = new MStringInput("username", false, InputEditable.USER_ONLY, "password", (short) 10);
+    input = new MStringInput("username", false, InputEditable.USER_ONLY, "password", (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(2);
     input.setValue("test");
     inputs.add(input);
 
-    input = new MStringInput("password", true, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("password", true, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(3);
     input.setValue("test");
     inputs.add(input);
 
-    config = new MConfig("connection", inputs);
+    config = new MConfig("connection", inputs, Collections.EMPTY_LIST);
     config.setPersistenceId(10);
     linkConfig.add(config);
 
-    return new MLinkConfig(linkConfig);
+    List<MValidator> validators = new ArrayList<>();
+    validators.add(new MValidator("testValidator1", ""));
+
+    return new MLinkConfig(linkConfig, validators);
   }
 
   static MFromConfig getFromConfig() {
@@ -94,41 +105,43 @@ public class ConfigTestUtil {
 
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("A", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("A", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(4);
     inputs.add(input);
 
-    input = new MStringInput("B", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("B", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(5);
     inputs.add(input);
 
-    input = new MStringInput("C", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("C", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(6);
     inputs.add(input);
 
-    config = new MConfig("Z", inputs);
+    config = new MConfig("Z", inputs, Collections.EMPTY_LIST);
     config.setPersistenceId(11);
  jobConfigs.add(config);
 
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("D", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("D", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(7);
     inputs.add(input);
 
-    input = new MStringInput("E", false, InputEditable.USER_ONLY, "D, F", (short) 10);
+    input = new MStringInput("E", false, InputEditable.USER_ONLY, "D, F", (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(8);
     inputs.add(input);
 
-    input = new MStringInput("F", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("F", false, InputEditable.USER_ONLY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(9);
     inputs.add(input);
 
-    config = new MConfig("from-table", inputs);
+    config = new MConfig("from-table", inputs, Collections.EMPTY_LIST);
     config.setPersistenceId(12);
     jobConfigs.add(config);
 
-    return new MFromConfig(jobConfigs);
+    List<MValidator> validators = new ArrayList<>();
+
+    return new MFromConfig(jobConfigs, validators);
   }
 
   static MToConfig getToConfig() {
@@ -139,41 +152,45 @@ public class ConfigTestUtil {
 
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("A", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("A", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(4);
     inputs.add(input);
 
-    input = new MStringInput("B", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("B", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(5);
     inputs.add(input);
 
-    input = new MStringInput("C", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("C", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(6);
     inputs.add(input);
 
-    config = new MConfig("Z", inputs);
+    config = new MConfig("Z", inputs, Collections.EMPTY_LIST);
     config.setPersistenceId(11);
     jobConfigs.add(config);
 
     inputs = new ArrayList<MInput<?>>();
 
-    input = new MStringInput("D", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("D", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(7);
     inputs.add(input);
 
-    input = new MStringInput("E", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("E", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(8);
     inputs.add(input);
 
-    input = new MStringInput("F", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10);
+    input = new MStringInput("F", false, InputEditable.ANY, StringUtils.EMPTY, (short) 10, Collections.EMPTY_LIST);
     input.setPersistenceId(9);
  inputs.add(input);
 
-    config = new MConfig("to-table", inputs);
+    config = new MConfig("to-table", inputs, Collections.EMPTY_LIST);
     config.setPersistenceId(12);
     jobConfigs.add(config);
 
-    return new MToConfig(jobConfigs);
+    List<MValidator> validators = new ArrayList<>();
+    validators.add(new MValidator("testValidator1", ""));
+    validators.add(new MValidator("testValidator2", "blah"));
+
+    return new MToConfig(jobConfigs, validators);
   }
 
   public static ResourceBundle getResourceBundle() {

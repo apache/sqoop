@@ -20,6 +20,7 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.Collections;
 import java.util.Date;
 
 /**
@@ -64,7 +65,7 @@ abstract public class MAccountableEntity extends MNamedElement {
    * the accountable entity is enabled.
    */
   public MAccountableEntity() {
-    super((String)null);
+    super((String)null, Collections.EMPTY_LIST);
     this.creationUser = null;
     this.creationDate = new Date();
     this.lastUpdateUser = this.creationUser;

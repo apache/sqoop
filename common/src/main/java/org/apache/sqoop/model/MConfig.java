@@ -39,8 +39,8 @@ public final class MConfig extends MNamedElement implements MClonable {
   private Set<String> inputNames = new HashSet<String>();
   private Set<String> userOnlyEditableInputNames = new HashSet<String>();
 
-  public MConfig(String name, List<MInput<?>> inputs) {
-    super(name);
+  public MConfig(String name, List<MInput<?>> inputs, List<MValidator> mValidators) {
+    super(name, mValidators);
     this.inputs = inputs;
     if (inputs != null && inputs.size() > 0) {
       for (MInput<?> input : inputs) {
@@ -142,11 +142,11 @@ public final class MConfig extends MNamedElement implements MClonable {
 
   @Override
   public MConfig clone(boolean cloneWithValue) {
-    List<MInput<?>> copyInputs = new ArrayList<MInput<?>>();
+    List<MInput<?>> copyInputs = new ArrayList<>();
     for(MInput<?> itr : this.getInputs()) {
       copyInputs.add((MInput<?>)itr.clone(cloneWithValue));
     }
-    MConfig copyConfig = new MConfig(this.getName(), copyInputs);
+    MConfig copyConfig = new MConfig(this.getName(), copyInputs, getCloneOfValidators());
     return copyConfig;
   }
 }

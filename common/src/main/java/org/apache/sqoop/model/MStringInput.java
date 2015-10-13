@@ -21,6 +21,8 @@ import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.utils.UrlSafeUtils;
 
+import java.util.List;
+
 /**
  * Represents a <tt>String</tt> input. The boolean flag <tt>sensitive</tt> supplied
  * to its constructor can be used to indicate if the string should be masked
@@ -38,8 +40,8 @@ public final class MStringInput extends MInput<String> {
    * @param sensitive a flag indicating if the string should be masked
    * @param maxLength the maximum length of the string
    */
-  public MStringInput(String name, boolean sensitive, InputEditable editable, String overrides, short maxLength) {
-    super(name, sensitive, editable, overrides);
+  public MStringInput(String name, boolean sensitive, InputEditable editable, String overrides, short maxLength, List<MValidator> mValidators) {
+    super(name, sensitive, editable, overrides, mValidators);
     this.maxLength = maxLength;
   }
 
@@ -112,7 +114,7 @@ public final class MStringInput extends MInput<String> {
   @Override
   public MStringInput clone(boolean cloneWithValue) {
     MStringInput copy = new MStringInput(getName(), isSensitive(), getEditable(), getOverrides(),
-        getMaxLength());
+        getMaxLength(), getCloneOfValidators());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(this.getValue());

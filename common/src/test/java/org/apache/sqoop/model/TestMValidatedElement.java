@@ -22,6 +22,10 @@ import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static org.testng.Assert.*;
 
 /**
@@ -34,7 +38,10 @@ public class TestMValidatedElement {
    */
   @Test
   public void testInitialization() {
-    MValidatedElement input = new MIntegerInput("input", false,InputEditable.ANY, StringUtils.EMPTY );
+    MValidator testMValidator = new MValidator("testValidator", null);
+    List<MValidator> mValidatorList = new ArrayList<>();
+    mValidatorList.add(testMValidator);
+    MValidatedElement input = new MIntegerInput("input", false,InputEditable.ANY, StringUtils.EMPTY, mValidatorList);
     assertEquals(Status.OK, input.getValidationStatus());
   }
 
@@ -43,7 +50,7 @@ public class TestMValidatedElement {
    */
   @Test
   public void testVarious() {
-    MValidatedElement input = new MIntegerInput("input", false, InputEditable.ANY, StringUtils.EMPTY );
+    MValidatedElement input = new MIntegerInput("input", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
 
     // Default status
     assertEquals(Status.OK, input.getValidationStatus());

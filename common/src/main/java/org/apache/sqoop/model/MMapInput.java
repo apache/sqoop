@@ -18,6 +18,7 @@
 package org.apache.sqoop.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -35,8 +36,8 @@ public final class MMapInput extends MInput<Map<String, String>> {
 
   private final String sensitiveKeyPattern;
 
-  public MMapInput(String name, boolean sensitive, InputEditable editable, String overrides, String sensitiveKeyPattern) {
-    super(name, sensitive, editable, overrides);
+  public MMapInput(String name, boolean sensitive, InputEditable editable, String overrides, String sensitiveKeyPattern, List<MValidator> mValidators) {
+    super(name, sensitive, editable, overrides, mValidators);
     this.sensitiveKeyPattern = sensitiveKeyPattern;
   }
 
@@ -124,7 +125,7 @@ public final class MMapInput extends MInput<Map<String, String>> {
 
   @Override
   public MMapInput clone(boolean cloneWithValue) {
-    MMapInput copy = new MMapInput(getName(), isSensitive(), getEditable(), getOverrides(), getSensitiveKeyPattern());
+    MMapInput copy = new MMapInput(getName(), isSensitive(), getEditable(), getOverrides(), getSensitiveKeyPattern(), getCloneOfValidators());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue && this.getValue() != null) {
       Map<String, String> copyMap = new HashMap<String, String>();

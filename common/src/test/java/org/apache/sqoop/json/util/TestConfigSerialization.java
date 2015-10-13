@@ -21,6 +21,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +43,8 @@ import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
+import org.apache.sqoop.model.MValidator;
+import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.joda.time.DateTime;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -82,6 +86,18 @@ public class TestConfigSerialization {
     assertEquals(1, (int)retrieved.getIntegerInput("Integer").getValue());
     assertEquals(true, retrieved.getBooleanInput("Boolean").getValue().booleanValue());
     assertEquals("YES", retrieved.getEnumInput("Enum").getValue());
+
+    // Verify all expected input validators
+    assertEquals(Collections.EMPTY_LIST, retrieved.getStringInput("String")
+      .getValidators());
+    assertEquals(buildMValidators(), retrieved.getMapInput("Map")
+      .getValidators());
+    assertEquals(Collections.EMPTY_LIST, retrieved.getIntegerInput("Integer").getValidators());
+    assertEquals(Collections.EMPTY_LIST, retrieved.getBooleanInput("Boolean").getValidators());
+    assertEquals(Collections.EMPTY_LIST, retrieved.getEnumInput("Enum").getValidators());
+
+    // Verify config validators
+    assertEquals(buildMValidators(), config.getValidators());
   }
 
   @Test
@@ -204,6 +220,18 @@ public class TestConfigSerialization {
     assertEquals("YES", retrieved.getEnumInput("Enum").getValue());
     assertEquals(list, retrieved.getListInput("List").getValue());
     assertEquals(dt, retrieved.getDateTimeInput("DateTime").getValue());
+
+    // Verify all expected input validators
+    assertEquals(Collections.EMPTY_LIST, retrieved.getStringInput("String").getValidators());
+    assertEquals(buildMValidators(), retrieved.getMapInput("Map").getValidators());
+    assertEquals(Collections.EMPTY_LIST, retrieved.getIntegerInput("Integer").getValidators());
+    assertEquals(Collections.EMPTY_LIST, retrieved.getBooleanInput("Boolean").getValidators());
+    assertEquals(Collections.EMPTY_LIST, retrieved.getEnumInput("Enum").getValidators());
+    assertEquals(Collections.EMPTY_LIST, retrieved.getListInput("List").getValidators());
+    assertEquals(buildMValidators(), retrieved.getDateTimeInput("DateTime").getValidators());
+
+    // Verify config validators
+    assertEquals(buildMValidators(), config.getValidators());
   }
 
   protected MConfig getMapConfig() {
@@ -212,10 +240,10 @@ public class TestConfigSerialization {
 
     inputs = new LinkedList<MInput<?>>();
 
-    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY, "A");
+    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY, "A", Collections.EMPTY_LIST);
     inputs.add(input);
 
-    return new MConfig("c", inputs);
+    return new MConfig("c", inputs, Collections.EMPTY_LIST);
   }
 
   /**
@@ -227,32 +255,43 @@ public class TestConfigSerialization {
     List<MInput<?>> inputs;
     MInput<?> input;
 
+    List<MValidator> mValidatorsForInput = buildMValidators();
+
     inputs = new LinkedList<MInput<?>>();
 
-    input = new MStringInput("String", false, InputEditable.ANY, StringUtils.EMPTY, (short)30);
+    input = new MStringInput("String", false, InputEditable.ANY, StringUtils.EMPTY, (short)30, Collections.EMPTY_LIST);
     inputs.add(input);
 
-    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    input = new MMapInput("Map", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, mValidatorsForInput);
     inputs.add(input);
 
-    input = new MIntegerInput("Integer", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MIntegerInput("Integer", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
 
-    input = new MLongInput("Long", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MLongInput("Long", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
 
-    input = new MBooleanInput("Boolean", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MBooleanInput("Boolean", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
 
-    input = new MEnumInput("Enum", false, InputEditable.ANY, StringUtils.EMPTY, new String[] {"YES", "NO"});
+    input = new MEnumInput("Enum", false, InputEditable.ANY, StringUtils.EMPTY, new String[] {"YES", "NO"}, Collections.EMPTY_LIST);
     inputs.add(input);
 
-    input = new MListInput("List", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MListInput("List", false, InputEditable.ANY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     inputs.add(input);
 
-    input = new MDateTimeInput("DateTime", false, InputEditable.ANY, StringUtils.EMPTY);
+    input = new MDateTimeInput("DateTime", false, InputEditable.ANY, StringUtils.EMPTY, mValidatorsForInput);
     inputs.add(input);
 
-    return new MConfig("c", inputs);
+    List<MValidator> mValidatorsForConfig = buildMValidators();
+
+    return new MConfig("c", inputs, mValidatorsForConfig);
+  }
+
+  protected List<MValidator> buildMValidators() {
+    List<MValidator> mValidators = new ArrayList<>();
+    mValidators.add(new MValidator("validator1", AbstractValidator.DEFAULT_STRING_ARGUMENT));
+    mValidators.add(new MValidator("validator1", "strarg"));
+    return mValidators;
   }
 }

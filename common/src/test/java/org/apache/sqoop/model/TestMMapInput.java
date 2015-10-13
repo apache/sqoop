@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.model;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class TestMMapInput {
    */
   @Test
   public void testInitialization() {
-    MMapInput input = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    MMapInput input = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertEquals("sqoopsqoop", input.getName());
     assertEquals(MInputType.MAP, input.getType());
   }
@@ -49,13 +50,13 @@ public class TestMMapInput {
   @Test
   public void testEquals() {
     // Positive test
-    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
-    MMapInput input2 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
+    MMapInput input2 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertTrue(input1.equals(input2));
 
     // Negative test
-    MMapInput input3 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
-    MMapInput input4 = new MMapInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    MMapInput input3 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
+    MMapInput input4 = new MMapInput("sqoopsqoop1", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertFalse(input3.equals(input4));
   }
 
@@ -64,7 +65,7 @@ public class TestMMapInput {
    */
   @Test
   public void testValue() {
-    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     Map<String, String> map1 = new HashMap<String, String>();
     input1.setValue(map1);
     assertEquals(map1, input1.getValue());
@@ -77,7 +78,7 @@ public class TestMMapInput {
    */
   @Test
   public void testUrlSafe() {
-    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    MMapInput input1 = new MMapInput("sqoopsqoop", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     Map<String, String> map1 = new HashMap<String, String>();
     input1.setValue(map1);
     // Getting URL safe string
@@ -98,7 +99,7 @@ public class TestMMapInput {
    */
   @Test
   public void testNamedElement() {
-    MMapInput input1 = new MMapInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY);
+    MMapInput input1 = new MMapInput("sqoopsqoop", true, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.EMPTY_LIST);
     assertEquals("sqoopsqoop.label", input1.getLabelKey());
     assertEquals("sqoopsqoop.help", input1.getHelpKey());
   }
@@ -108,8 +109,8 @@ public class TestMMapInput {
    */
   @Test
   public void testSensitivity() {
-    MMapInput input1 = new MMapInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY );
-    MMapInput input2 = new MMapInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY );
+    MMapInput input1 = new MMapInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY , Collections.EMPTY_LIST);
+    MMapInput input2 = new MMapInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY , Collections.EMPTY_LIST);
     assertFalse(input1.isSensitive());
     assertTrue(input2.isSensitive());
   }
@@ -123,9 +124,9 @@ public class TestMMapInput {
     testValue.put("sqoop features", "awesome features");
     testValue.put("sqoop bugs", "horrible bugs");
 
-    MMapInput input1 = new MMapInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY );
+    MMapInput input1 = new MMapInput("NAME", false, InputEditable.ANY, StringUtils.EMPTY, StringUtils.EMPTY , Collections.EMPTY_LIST);
     input1.setValue(testValue);
-    MMapInput input2 = new MMapInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY, ".*bugs.*");
+    MMapInput input2 = new MMapInput("NAME", true, InputEditable.ANY, StringUtils.EMPTY, ".*bugs.*", Collections.EMPTY_LIST);
     input2.setValue(testValue);
 
     assertEquals(input1.getNonsenstiveValue(), testValue);

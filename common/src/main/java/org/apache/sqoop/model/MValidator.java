@@ -20,49 +20,49 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
-import java.util.List;
-
 /**
- * Config describing all required information to build the TO part of the job
- * NOTE: It extends a config list since {@link MToConfig} could consist of a related config groups
- *       In future this could be simplified to hold a single list of all configs for the TO object
+ * Represents an @Validator class by its name and optional argument
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class MToConfig extends MConfigList {
-  public MToConfig(List<MConfig> configs, List<MValidator> mValidators) {
-    super(configs, MConfigType.JOB, mValidators);
+public class MValidator implements MClonable {
+  private final String validatorClass;
+  private final String strArg;
+
+  public MValidator(String validatorClass, String strArg) {
+    this.validatorClass = validatorClass;
+    this.strArg = strArg;
+  }
+
+  // The value of cloneWithValue is ignored
+  @Override
+  public Object clone(boolean cloneWithValue) {
+    return new MValidator(validatorClass, strArg);
+  }
+
+  public String getValidatorClass() {
+    return validatorClass;
+  }
+
+  public String getStrArg() {
+    return strArg;
   }
 
   @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder("To: ");
-    sb.append(super.toString());
-    return sb.toString();
-  }
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof MValidator)) return false;
 
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
+    MValidator that = (MValidator) o;
 
-    if (!(other instanceof MToConfig)) {
-      return false;
-    }
-
-    MToConfig mj = (MToConfig) other;
-    return super.equals(mj);
+    if (!getValidatorClass().equals(that.getValidatorClass())) return false;
+    return getStrArg().equals(that.getStrArg());
   }
 
   @Override
   public int hashCode() {
-    return super.hashCode();
-  }
-
-  @Override
-  public MToConfig clone(boolean cloneWithValue) {
-    MToConfig copy = new MToConfig(super.clone(cloneWithValue).getConfigs(), getCloneOfValidators());
-    return copy;
+    int result = getValidatorClass().hashCode();
+    result = 31 * result + getStrArg().hashCode();
+    return result;
   }
 }

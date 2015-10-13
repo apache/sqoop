@@ -18,7 +18,8 @@
 package org.apache.sqoop.json;
 
 import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
-import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigs;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreValidator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,9 +30,11 @@ import java.util.ResourceBundle;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
+import org.apache.sqoop.json.util.ConfigInputConstants;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MValidator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -118,7 +121,7 @@ public class LinkBean implements JsonBean {
     linkJsonObject.put(UPDATE_DATE, link.getLastUpdateDate().getTime());
     linkJsonObject.put(CONNECTOR_ID, link.getConnectorId());
     linkJsonObject.put(LINK_CONFIG_VALUES,
-      extractConfigList(link.getConnectorLinkConfig().getConfigs(), link.getConnectorLinkConfig().getType(), skipSensitive));
+      extractConfigList(link.getConnectorLinkConfig(), skipSensitive));
     return linkJsonObject;
   }
 
@@ -139,9 +142,10 @@ public class LinkBean implements JsonBean {
   private MLink restoreLink(Object obj) {
     JSONObject object = (JSONObject) obj;
     long connectorId = (Long) object.get(CONNECTOR_ID);
-    JSONArray connectorLinkConfig = (JSONArray) object.get(LINK_CONFIG_VALUES);
-    List<MConfig> linkConfig = restoreConfigList(connectorLinkConfig);
-    MLink link = new MLink(connectorId, new MLinkConfig(linkConfig));
+    JSONObject connectorLinkConfig = (JSONObject) object.get(LINK_CONFIG_VALUES);
+    List<MConfig> linkConfigs = restoreConfigs((JSONArray) connectorLinkConfig.get(ConfigInputConstants.CONFIGS));
+    List<MValidator> linkValidators = restoreValidator((JSONArray) connectorLinkConfig.get(ConfigInputConstants.CONFIG_VALIDATORS));
+    MLink link = new MLink(connectorId, new MLinkConfig(linkConfigs, linkValidators));
     link.setPersistenceId((Long) object.get(ID));
     link.setName((String) object.get(NAME));
     link.setEnabled((Boolean) object.get(ENABLED));

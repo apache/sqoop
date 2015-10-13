@@ -20,6 +20,8 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.List;
+
 /**
  * Represents a <tt>Boolean</tt> input.
  */
@@ -27,8 +29,8 @@ import org.apache.sqoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public class MBooleanInput extends MInput<Boolean> {
 
-  public MBooleanInput(String name, boolean sensitive, InputEditable editable, String overrides) {
-    super(name, sensitive, editable, overrides);
+  public MBooleanInput(String name, boolean sensitive, InputEditable editable, String overrides, List<MValidator> mValidators) {
+    super(name, sensitive, editable, overrides, mValidators);
   }
 
   @Override
@@ -78,7 +80,7 @@ public class MBooleanInput extends MInput<Boolean> {
 
   @Override
   public Object clone(boolean cloneWithValue) {
-    MBooleanInput copy = new MBooleanInput(getName(), isSensitive(), getEditable(), getOverrides());
+    MBooleanInput copy = new MBooleanInput(getName(), isSensitive(), getEditable(), getOverrides(), getCloneOfValidators());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(getValue());

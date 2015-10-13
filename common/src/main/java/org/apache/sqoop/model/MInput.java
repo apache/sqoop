@@ -20,6 +20,8 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.List;
+
 /**
  * Represents a parameter input used by the connector for creating a link
  * or a job object.
@@ -37,8 +39,8 @@ public abstract class MInput<T> extends MNamedElement implements MClonable {
 
   private T value;
 
-  protected MInput(String name, boolean sensitive, InputEditable editable, String overrides) {
-    super(name);
+  protected MInput(String name, boolean sensitive, InputEditable editable, String overrides, List<MValidator> mValidators) {
+    super(name, mValidators);
     this.sensitive = sensitive;
     this.editable = editable;
     this.overrides = overrides;

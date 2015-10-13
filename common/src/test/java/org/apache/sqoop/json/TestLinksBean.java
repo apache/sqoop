@@ -58,7 +58,8 @@ public class TestLinksBean {
     JSONArray linksObj = (JSONArray) json.get(LinksBean.LINKS);
     JSONObject linkObj = (JSONObject) linksObj.get(0);
 
-    JSONArray linkConfigs = (JSONArray) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
+    JSONObject linkConfigList = (JSONObject) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
+    JSONArray linkConfigs = (JSONArray) linkConfigList.get(ConfigInputConstants.CONFIGS);
     JSONObject linkConfig = (JSONObject) linkConfigs.get(0);
     JSONArray inputs = (JSONArray) linkConfig.get(ConfigInputConstants.CONFIG_INPUTS);
     for (Object inp : inputs) {

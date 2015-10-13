@@ -20,6 +20,7 @@ package org.apache.sqoop.model;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.sqoop.json.DriverBean;
@@ -29,12 +30,18 @@ public class TestMDriver {
 
   @Test
   public void testDriver() {
-    List<MConfig> driverConfig = new ArrayList<MConfig>();
-    driverConfig.add(new MConfig("driver-test", new ArrayList<MInput<?>>()));
-    MDriverConfig mDriverConfig = new MDriverConfig(driverConfig);
+    List<MConfig> driverConfig = new ArrayList<>();
+    driverConfig.add(new MConfig("driver-test", new ArrayList<MInput<?>>(), Collections.EMPTY_LIST));
+
+    List<MValidator> driverValidators = new ArrayList<>();
+    driverValidators.add(new MValidator("test", ""));
+
+    MDriverConfig mDriverConfig = new MDriverConfig(driverConfig, driverValidators);
 
     MDriver driver = new MDriver(mDriverConfig, DriverBean.CURRENT_DRIVER_VERSION);
     assertEquals(1, driver.getDriverConfig().getConfigs().size());
     assertEquals("driver-test", driver.getDriverConfig().getConfigs().get(0).getName());
+    assertEquals("test", driver.getDriverConfig().getValidators().get(0).getValidatorClass());
+    assertEquals("", driver.getDriverConfig().getValidators().get(0).getStrArg());
   }
 }

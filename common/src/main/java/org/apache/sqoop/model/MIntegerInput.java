@@ -20,6 +20,8 @@ package org.apache.sqoop.model;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.List;
+
 /**
  * Integer base user input.
  *
@@ -29,8 +31,8 @@ import org.apache.sqoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public class MIntegerInput extends MInput<Integer> {
 
-  public MIntegerInput(String name, boolean sensitive, InputEditable editable, String overrides) {
-    super(name, sensitive, editable, overrides);
+  public MIntegerInput(String name, boolean sensitive, InputEditable editable, String overrides, List<MValidator> mValidators) {
+    super(name, sensitive, editable, overrides, mValidators);
   }
 
   @Override
@@ -87,7 +89,7 @@ public class MIntegerInput extends MInput<Integer> {
 
   @Override
   public MIntegerInput clone(boolean cloneWithValue) {
-    MIntegerInput copy = new MIntegerInput(getName(), isSensitive(), getEditable(), getOverrides());
+    MIntegerInput copy = new MIntegerInput(getName(), isSensitive(), getEditable(), getOverrides(), getCloneOfValidators());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue) {
       copy.setValue(this.getValue());

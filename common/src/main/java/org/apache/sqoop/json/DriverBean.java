@@ -18,18 +18,24 @@
 package org.apache.sqoop.json;
 
 import static org.apache.sqoop.json.util.ConfigInputSerialization.extractConfigList;
-import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigList;
 import static org.apache.sqoop.json.util.ConfigBundleSerialization.extractConfigParamBundle;
 import static org.apache.sqoop.json.util.ConfigBundleSerialization.restoreConfigParamBundle;
+
+
+
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreConfigs;
+import static org.apache.sqoop.json.util.ConfigInputSerialization.restoreValidator;
 
 import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
+import org.apache.sqoop.json.util.ConfigInputConstants;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MDriverConfig;
+import org.apache.sqoop.model.MValidator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 /**
@@ -66,8 +72,8 @@ public class DriverBean extends ConfigurableBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
-    JSONArray configs =
-      extractConfigList(driver.getDriverConfig().getConfigs(), driver.getDriverConfig().getType(), skipSensitive);
+    JSONObject configs =
+      extractConfigList(driver.getDriverConfig(), skipSensitive);
 
     JSONObject result = new JSONObject();
     result.put(ID, driver.getPersistenceId());
@@ -81,8 +87,11 @@ public class DriverBean extends ConfigurableBean {
   public void restore(JSONObject jsonObject) {
     long id = (Long) jsonObject.get(ID);
     String driverVersion = (String) jsonObject.get(CONFIGURABLE_VERSION);
-    List<MConfig> driverConfig = restoreConfigList((JSONArray) jsonObject.get(DRIVER_JOB_CONFIG));
-    driver = new MDriver(new MDriverConfig(driverConfig), driverVersion);
+    JSONObject driverJobConfig = (JSONObject) jsonObject.get(DRIVER_JOB_CONFIG);
+    List<MConfig> driverConfigs = restoreConfigs((JSONArray) driverJobConfig.get(ConfigInputConstants.CONFIGS));
+    List<MValidator> driverValidators = restoreValidator((JSONArray)
+      driverJobConfig.get(ConfigInputConstants.CONFIG_VALIDATORS));
+    driver = new MDriver(new MDriverConfig(driverConfigs, driverValidators), driverVersion);
     driver.setPersistenceId(id);
     driverConfigBundle = restoreConfigParamBundle((JSONObject) jsonObject.get(ALL_CONFIGS));
   }

@@ -22,12 +22,14 @@ import org.joda.time.DateTime;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
+import java.util.List;
+
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
 public class MDateTimeInput extends MInput<DateTime> {
 
-  public MDateTimeInput(String name, boolean sensitive, InputEditable editable, String overrides) {
-    super(name, sensitive, editable, overrides);
+  public MDateTimeInput(String name, boolean sensitive, InputEditable editable, String overrides, List<MValidator> mValidators) {
+    super(name, sensitive, editable, overrides, mValidators);
   }
 
   @Override
@@ -84,7 +86,7 @@ public class MDateTimeInput extends MInput<DateTime> {
 
   @Override
   public MDateTimeInput clone(boolean cloneWithValue) {
-    MDateTimeInput copy = new MDateTimeInput(getName(), isSensitive(), getEditable(), getOverrides());
+    MDateTimeInput copy = new MDateTimeInput(getName(), isSensitive(), getEditable(), getOverrides(), getCloneOfValidators());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue && this.getValue() != null) {
       copy.setValue(new DateTime(this.getValue()));

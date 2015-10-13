@@ -30,8 +30,8 @@ import java.util.List;
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
 public class MDriverConfig extends MConfigList {
-  public MDriverConfig(List<MConfig> configs) {
-    super(configs, MConfigType.JOB);
+  public MDriverConfig(List<MConfig> configs, List<MValidator> mValidators) {
+    super(configs, MConfigType.JOB, mValidators);
   }
 
   @Override
@@ -62,7 +62,7 @@ public class MDriverConfig extends MConfigList {
 
   @Override
   public MDriverConfig clone(boolean cloneWithValue) {
-    MDriverConfig copy = new MDriverConfig(super.clone(cloneWithValue).getConfigs());
+    MDriverConfig copy = new MDriverConfig(super.clone(cloneWithValue).getConfigs(), getCloneOfValidators());
     return copy;
   }
 }

@@ -44,6 +44,7 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MValidator;
 import org.apache.sqoop.utils.MapResourceBundle;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -221,13 +222,13 @@ public class TestSqoopClient {
 
   private MConnector connector(long id) {
     MConnector connector = new MConnector("A" + id, "A" + id, "1.0" + id,
-        new MLinkConfig(null), new MFromConfig(null), new MToConfig(null));
+        new MLinkConfig(null, null), new MFromConfig(null, null), new MToConfig(null, null));
     connector.setPersistenceId(id);
     return connector;
   }
 
   private MDriver driver() {
-    MDriver driver = new MDriver(new MDriverConfig(new LinkedList<MConfig>()), "1");
+    MDriver driver = new MDriver(new MDriverConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()), "1");
     driver.setPersistenceId(1);
     return driver;
   }

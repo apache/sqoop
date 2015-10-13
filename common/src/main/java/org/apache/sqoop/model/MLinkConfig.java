@@ -31,8 +31,8 @@ import java.util.List;
 @InterfaceStability.Unstable
 public class MLinkConfig extends MConfigList {
 
-  public MLinkConfig(List<MConfig> configs) {
-    super(configs, MConfigType.LINK);
+  public MLinkConfig(List<MConfig> configs, List<MValidator> mValidators) {
+    super(configs, MConfigType.LINK, mValidators);
   }
 
   @Override
@@ -44,7 +44,7 @@ public class MLinkConfig extends MConfigList {
 
   @Override
   public MLinkConfig clone(boolean cloneWithValue) {
-    MLinkConfig copy = new MLinkConfig(super.clone(cloneWithValue).getConfigs());
+    MLinkConfig copy = new MLinkConfig(super.clone(cloneWithValue).getConfigs(), getCloneOfValidators());
     return copy;
   }
 }

@@ -34,7 +34,8 @@ public class MConfigList extends MValidatedElement implements MClonable {
   private final List<MConfig> configObjects;
   private final MConfigType type;
 
-  public MConfigList(List<MConfig> configObjects, MConfigType type) {
+  public MConfigList(List<MConfig> configObjects, MConfigType type, List<MValidator> mValidators) {
+    super(mValidators);
     this.configObjects = configObjects;
     this.type = type;
   }
@@ -144,7 +145,7 @@ public class MConfigList extends MValidatedElement implements MClonable {
         copyConfigs.add(newConfig);
       }
     }
-    MConfigList copyConfigList = new MConfigList(copyConfigs, type);
+    MConfigList copyConfigList = new MConfigList(copyConfigs, type, getCloneOfValidators());
     return copyConfigList;
   }
 }

@@ -28,8 +28,8 @@ import org.apache.sqoop.utils.UrlSafeUtils;
 @InterfaceStability.Unstable
 public class MListInput extends MInput<List<String>> {
 
-  public MListInput(String name, boolean sensitive, InputEditable editable, String overrides) {
-    super(name, sensitive, editable, overrides);
+  public MListInput(String name, boolean sensitive, InputEditable editable, String overrides, List<MValidator> mValidators) {
+    super(name, sensitive, editable, overrides, mValidators);
   }
 
   @Override
@@ -102,7 +102,7 @@ public class MListInput extends MInput<List<String>> {
 
   @Override
   public Object clone(boolean cloneWithValue) {
-    MListInput copy = new MListInput(getName(), isSensitive(), getEditable(), getOverrides());
+    MListInput copy = new MListInput(getName(), isSensitive(), getEditable(), getOverrides(), getCloneOfValidators());
     copy.setPersistenceId(getPersistenceId());
     if(cloneWithValue && this.getValue() != null) {
       List<String> copyList = new LinkedList<String>();
