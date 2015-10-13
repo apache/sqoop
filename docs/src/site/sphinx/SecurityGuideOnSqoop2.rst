@@ -25,7 +25,7 @@ Simple Authentication
 
 Configuration
 -------------
-Modify Sqoop configuration file, normally in <Sqoop Folder>/server/config/sqoop.properties.
+Modify Sqoop configuration file, normally in <Sqoop Folder>/conf/sqoop.properties.
 
 ::
 
@@ -83,7 +83,7 @@ Create keytab and principal for Sqoop 2 via kadmin in command line.
 
 Configuration
 -------------
-Modify Sqoop configuration file, normally in <Sqoop Folder>/server/config/sqoop.properties.
+Modify Sqoop configuration file, normally in <Sqoop Folder>/conf/sqoop.properties.
 
 ::
 
@@ -134,7 +134,7 @@ If the Sqoop server has started successfully with Kerberos authentication, the f
 
   2014-12-04 15:02:58,038 INFO  security.KerberosAuthenticationHandler [org.apache.sqoop.security.authentication.KerberosAuthenticationHandler.secureLogin(KerberosAuthenticationHandler.java:84)] Using Kerberos authentication, principal [sqoop/_HOST@HADOOP.COM] keytab [/home/kerberos/sqoop.keytab]
 
-If the Sqoop client was able to communicate with the Sqoop server, the following will be in <Sqoop Folder>/server/log/catalina.out:
+If the Sqoop client was able to communicate with the Sqoop server, the following will be in <@LOGDIR>/sqoop.log :
 
 ::
 
@@ -169,7 +169,7 @@ Users can create their own authentication modules. By performing the following s
     }
   }
 
--	Modify configuration org.apache.sqoop.authentication.handler in <Sqoop Folder>/server/config/sqoop.properties and set it to the customized authentication handler class name.
+-	Modify configuration org.apache.sqoop.authentication.handler in <Sqoop Folder>/conf/sqoop.properties and set it to the customized authentication handler class name.
 -	Restart the Sqoop server.
 
 Authorization

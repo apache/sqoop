@@ -488,7 +488,7 @@ Loading new connector say sqoop-foo-connector to the sqoop2, here are the steps 
 
 1. Create a ``sqoop-foo-connector.jar``. Make sure the jar contains the ``sqoopconnector.properties`` for it to be picked up by Sqoop
 
-2. Add this jar to the ``org.apache.sqoop.classpath.extra`` property in the sqoop.properties located under the ``server/conf`` directory.
+2. Add this jar to the ``org.apache.sqoop.classpath.extra`` property in the sqoop.properties located under the ``conf`` directory.
 
 ::
 

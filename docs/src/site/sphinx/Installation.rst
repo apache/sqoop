@@ -44,7 +44,7 @@ Installing Dependencies
 
 Hadoop libraries must be available on node where you are planning to run Sqoop server with proper configuration for major services - ``NameNode`` and either ``JobTracker`` or ``ResourceManager`` depending whether you are running Hadoop 1 or 2. There is no need to run any Hadoop service on the same node as Sqoop server, just the libraries and configuration files must be available.
 
-Path to Hadoop libraries is stored in file ``catalina.properties`` inside directory ``server/conf``. You need to change property called ``common.loader`` to contain all directories with your Hadoop libraries. The default expected locations are ``/usr/lib/hadoop`` and ``/usr/lib/hadoop/lib/``. Please check out the comments in the file for further description how to configure different locations.
+Path to Hadoop libraries is stored in environment ``HADOOP_COMMON_HOME``, ``HADOOP_HDFS_HOME``, ``HADOOP_MAPRED_HOME`` and ``HADOOP_YARN_HOME``. You need to set the environment with your Hadoop libraries. If the environment ``HADOOP_HOME`` is set, the default expected locations are ``$HADOOP_HOME/share/hadoop/common``, ``$HADOOP_HOME/share/hadoop/hdfs``, ``$HADOOP_HOME/share/hadoop/mapreduce`` and ``$HADOOP_HOME/share/hadoop/yarn``.
 
 Lastly you might need to install JDBC drivers that are not bundled with Sqoop because of incompatible licenses. You can add any arbitrary Java jar file to Sqoop server by copying it into ``lib/`` directory. You can create this directory if it do not exists already.
 
@@ -60,7 +60,7 @@ Further documentation pages will assume that you have the binaries on your ``$PA
 Configuring Server
 ------------------
 
-Before starting server you should revise configuration to match your specific environment. Server configuration files are stored in ``server/config`` directory of distributed artifact along side with other configuration files of Tomcat.
+Before starting server you should revise configuration to match your specific environment. Server configuration files are stored in ``conf`` directory.
 
 File ``sqoop_bootstrap.properties`` specifies which configuration provider should be used for loading configuration for rest of Sqoop server. Default value ``PropertiesConfigurationProvider`` should be sufficient.
 
@@ -89,7 +89,7 @@ Similarly you can stop server using following command: ::
 
   sqoop2-server stop
 
-By default Sqoop server daemons use ports 12000 and 12001. You can set ``SQOOP_HTTP_PORT`` and ``SQOOP_ADMIN_PORT`` in configuration file ``server/bin/setenv.sh`` to use different ports.
+By default Sqoop server daemons use ports 12000. You can set ``org.apache.sqoop.jetty.port`` in configuration file ``conf/sqoop.properties`` to use different ports.
 
 Client installation
 ===================
