@@ -57,6 +57,12 @@ public enum CoreError implements ErrorCode {
   /** Sqoop classpath error */
   CORE_0009("Sqoop classpath error"),
 
+  /** Sqoop validator argument error error */
+  CORE_0010("Validator needs defined argument"),
+
+  /** Sqoop validator argument error error */
+  CORE_0011("Validator has malformed argument"),
+
   ;
 
   private final String message;
