@@ -91,7 +91,7 @@ public class GenericJdbcConnector extends SqoopConnector {
   }
 
   @Override
-  public ConnectorConfigurableUpgrader getConfigurableUpgrader() {
+  public ConnectorConfigurableUpgrader getConfigurableUpgrader(String oldConnectorVersion) {
     return new GenericJdbcConnectorUpgrader();
   }
 

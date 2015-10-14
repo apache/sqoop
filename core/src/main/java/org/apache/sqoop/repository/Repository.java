@@ -448,6 +448,7 @@ public abstract class Repository {
     LOG.info("Upgrading connector: " + oldConnector.getUniqueName());
     long connectorId = oldConnector.getPersistenceId();
     String connectorName = oldConnector.getUniqueName();
+    String oldVersion = oldConnector.getVersion();
     newConnector.setPersistenceId(connectorId);
 
     RepositoryTransaction tx = null;
@@ -457,7 +458,7 @@ public abstract class Repository {
 
       boolean upgradeSuccessful = true;
       // 1. Get an upgrader for the connector
-      ConnectorConfigurableUpgrader upgrader = connector.getConfigurableUpgrader();
+      ConnectorConfigurableUpgrader upgrader = connector.getConfigurableUpgrader(oldVersion);
       // 2. Get all links associated with the connector.
       List<MLink> existingLinksByConnector = findLinksForConnectorUpgrade(connectorName);
       // 3. Get all jobs associated with the connector.
@@ -606,12 +607,12 @@ public abstract class Repository {
     }
   }
 
-  public final void upgradeDriver(MDriver driver) {
+  public final void upgradeDriver(MDriver driver, String oldDriverVersion) {
     LOG.info("Upgrading driver");
     RepositoryTransaction tx = null;
     try {
       //1. find upgrader
-      DriverUpgrader upgrader = Driver.getInstance().getConfigurableUpgrader();
+      DriverUpgrader upgrader = Driver.getInstance().getConfigurableUpgrader(oldDriverVersion);
       //2. find all jobs in the system
       List<MJob> existingJobs = findJobs();
       boolean upgradeSuccessful = true;

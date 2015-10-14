@@ -78,7 +78,7 @@ public class TestConnector extends SqoopConnector {
   }
 
   @Override
-  public ConnectorConfigurableUpgrader getConfigurableUpgrader() {
+  public ConnectorConfigurableUpgrader getConfigurableUpgrader(String oldConnectorVersion) {
     return null;
   }
 

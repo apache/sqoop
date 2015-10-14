@@ -107,7 +107,7 @@ public class KafkaConnector extends SqoopConnector {
    * @return ConnectorConfigurableUpgrader object
    */
   @Override
-  public ConnectorConfigurableUpgrader getConfigurableUpgrader() {
+  public ConnectorConfigurableUpgrader getConfigurableUpgrader(String oldConnectorVersion) {
     // Nothing to upgrade at this point
     return null;
   }

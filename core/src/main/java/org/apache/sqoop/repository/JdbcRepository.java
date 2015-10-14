@@ -243,7 +243,7 @@ public class JdbcRepository extends Repository {
           if(!mDriver.equals(existingDriver)) {
             if (autoUpgrade) {
               mDriver.setPersistenceId(existingDriver.getPersistenceId());
-              upgradeDriver(mDriver);
+              upgradeDriver(mDriver, existingDriver.getVersion());
               return mDriver;
             } else {
               throw new SqoopException(RepositoryError.JDBCREPO_0026,

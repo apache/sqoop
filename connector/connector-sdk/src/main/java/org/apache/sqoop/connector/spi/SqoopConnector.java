@@ -87,7 +87,7 @@ public abstract class SqoopConnector {
    * configs related to the link and job
    * @return ConnectorConfigurableUpgrader object
    */
-  public abstract ConnectorConfigurableUpgrader getConfigurableUpgrader();
+  public abstract ConnectorConfigurableUpgrader getConfigurableUpgrader(String oldConnectorVersion);
 
   /**
    * Returns the {@linkplain IntermediateDataFormat} this connector

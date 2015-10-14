@@ -142,7 +142,7 @@ public class Driver implements Reconfigurable {
     LOG.trace("Begin Driver destroy");
   }
 
-  public DriverUpgrader getConfigurableUpgrader() {
+  public DriverUpgrader getConfigurableUpgrader(String oldDriverVersion) {
     return driverUpgrader;
   }
 

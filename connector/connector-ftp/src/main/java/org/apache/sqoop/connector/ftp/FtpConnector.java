@@ -122,7 +122,7 @@ public class FtpConnector extends SqoopConnector {
    * @return configurable upgrader object
    */
   @Override
-  public ConnectorConfigurableUpgrader getConfigurableUpgrader() {
+  public ConnectorConfigurableUpgrader getConfigurableUpgrader(String oldConnectorVersion) {
     return new FtpConnectorUpgrader();
   }
 

@@ -263,6 +263,14 @@ public class RepositoryLoadTool extends ConfiguredTool {
     return true;
   }
 
+  /**
+   * We currently pass through null as the old connector version because we do
+   * not have a good way of determining what the old version of the connector is
+   * here.
+   *
+   * According to Jarcec, this chunk of code will receive some much needed
+   * attention in the near future and this will be fixed.
+   */
   private long loadLink(MLink link) {
 
     // starting by pretending we have a brand new link
@@ -271,7 +279,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     MConnector mConnector = ConnectorManager.getInstance().getConnectorConfigurable(link.getConnectorId());
-    ConnectorConfigurableUpgrader connectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mConnector.getUniqueName()).getConfigurableUpgrader();
+    ConnectorConfigurableUpgrader connectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mConnector.getUniqueName()).getConfigurableUpgrader(null);
 
     List<MConfig> connectorConfigs = mConnector.getLinkConfig().clone(false).getConfigs();
     List<MValidator> connectorValidators = mConnector.getLinkConfig().getCloneOfValidators();
@@ -304,6 +312,15 @@ public class RepositoryLoadTool extends ConfiguredTool {
     return newLink.getPersistenceId();
   }
 
+
+  /**
+   * We currently pass through null as the old connector version because we do
+   * not have a good way of determining what the old version of the connector is
+   * here.
+   *
+   * According to Jarcec, this chunk of code will receive some much needed
+   * attention in the near future and this will be fixed.
+   */
   private long loadJob(MJob job) {
     // starting by pretending we have a brand new job
     resetPersistenceId(job);
@@ -313,14 +330,14 @@ public class RepositoryLoadTool extends ConfiguredTool {
     MFromConfig fromConfig = job.getFromJobConfig();
     MToConfig toConfig = job.getToJobConfig();
 
-    ConnectorConfigurableUpgrader fromConnectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mFromConnector.getUniqueName()).getConfigurableUpgrader();
-    ConnectorConfigurableUpgrader toConnectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mToConnector.getUniqueName()).getConfigurableUpgrader();
+    ConnectorConfigurableUpgrader fromConnectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mFromConnector.getUniqueName()).getConfigurableUpgrader(null);
+    ConnectorConfigurableUpgrader toConnectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mToConnector.getUniqueName()).getConfigurableUpgrader(null);
 
     fromConnectorConfigUpgrader.upgradeFromJobConfig(job.getFromJobConfig(), fromConfig);
 
     toConnectorConfigUpgrader.upgradeToJobConfig(job.getToJobConfig(), toConfig);
 
-    DriverUpgrader driverConfigUpgrader =  Driver.getInstance().getConfigurableUpgrader();
+    DriverUpgrader driverConfigUpgrader =  Driver.getInstance().getConfigurableUpgrader(null);
     MDriver driver = Driver.getInstance().getDriver();
     MDriverConfig driverConfigs = driver.getDriverConfig();
     driverConfigUpgrader.upgradeJobConfig( job.getDriverConfig(), driverConfigs);

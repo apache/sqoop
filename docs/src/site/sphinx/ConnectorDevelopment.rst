@@ -54,7 +54,7 @@ The ``SqoopConnector`` class defines an API for the connectors that must be impl
   public abstract Class getJobConfigurationClass(Direction direction);
   public abstract From getFrom();
   public abstract To getTo();
-  public abstract ConnectorConfigurableUpgrader getConfigurableUpgrader()
+  public abstract ConnectorConfigurableUpgrader getConfigurableUpgrader(String oldConnectorVersion)
 
 Connectors can optionally override the following methods:
 ::
