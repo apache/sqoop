@@ -111,8 +111,7 @@ public class TestLoader {
     loader.load(loaderContext, linkConfig, jobConfig);
 
     int index = START;
-    try (Statement statement = executor.getConnection().createStatement(
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try (Statement statement = executor.createStatement();
          ResultSet rs = statement.executeQuery("SELECT * FROM "
                  + executor.encloseIdentifier(tableName) + " ORDER BY ICOL");) {
       while (rs.next()) {

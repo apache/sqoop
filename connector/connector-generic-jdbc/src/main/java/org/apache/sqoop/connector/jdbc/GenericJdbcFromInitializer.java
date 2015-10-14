@@ -82,8 +82,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
     Schema schema = new Schema(schemaName);
     ResultSetMetaData rsmt = null;
-    try (Statement statement = executor.getConnection().createStatement(
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try (Statement statement = executor.createStatement();
          ResultSet rs = statement.executeQuery(context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL)
                  .replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));) {
 
@@ -172,8 +171,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
       String incrementalNewMaxValueQuery = sb.toString();
       LOG.info("Incremental new max value query:  " + incrementalNewMaxValueQuery);
 
-      try (Statement statement = executor.getConnection().createStatement(
-              ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      try (Statement statement = executor.createStatement();
            ResultSet rs = statement.executeQuery(incrementalNewMaxValueQuery);) {
         if (!rs.next()) {
           throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0022);
@@ -208,7 +206,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     PreparedStatement ps = null;
     ResultSet rs = null;
     try {
-      ps = executor.createStatement(minMaxQuery);
+      ps = executor.prepareStatement(minMaxQuery);
       if (incrementalImport) {
         ps.setString(1, jobConf.incrementalRead.lastValue);
         ps.setString(2, incrementalMaxValue);

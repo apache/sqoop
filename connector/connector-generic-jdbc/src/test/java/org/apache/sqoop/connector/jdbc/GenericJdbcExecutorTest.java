@@ -28,7 +28,6 @@ import java.sql.SQLException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class GenericJdbcExecutorTest {
@@ -157,5 +156,13 @@ public class GenericJdbcExecutorTest {
   public void testGetTableRowCount() throws Exception {
     assertEquals(NUMBER_OF_ROWS, executor.getTableRowCount(table),
             "Table " + table + " is expected to be empty.");
+  }
+
+  @Test
+  public void testFetchSize() throws Exception {
+    assertEquals((int) GenericJdbcTestConstants.LINK_CONFIGURATION.linkConfig.fetchSize,
+      executor.createStatement().getFetchSize());
+    assertEquals((int) GenericJdbcTestConstants.LINK_CONFIGURATION.linkConfig.fetchSize,
+      executor.prepareStatement("SELECT * FROM " + table).getFetchSize());
   }
 }

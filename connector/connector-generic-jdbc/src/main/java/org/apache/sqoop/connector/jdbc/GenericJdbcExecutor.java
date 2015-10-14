@@ -130,12 +130,31 @@ public class GenericJdbcExecutor {
     return connection;
   }
 
-  public PreparedStatement createStatement(String sql) {
-     try {
-      return connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+  public Statement createStatement() {
+    try {
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      setFetchSize(statement);
+      return statement;
     } catch (SQLException e) {
       logSQLException(e);
       throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+    }
+  }
+
+  public PreparedStatement prepareStatement(String sql) {
+    try {
+      PreparedStatement preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      setFetchSize(preparedStatement);
+      return preparedStatement;
+    } catch (SQLException e) {
+      logSQLException(e);
+      throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0002, e);
+    }
+  }
+
+  private void setFetchSize(Statement statement) throws SQLException {
+    if(link.linkConfig.fetchSize != null) {
+      statement.setFetchSize(link.linkConfig.fetchSize);
     }
   }
 
@@ -217,7 +236,7 @@ public class GenericJdbcExecutor {
       final long expectedInsertCount = getTableRowCount(fromTable);
       oldAutoCommit = connection.getAutoCommit();
       connection.setAutoCommit(false);
-      stmt = connection.createStatement();
+      stmt = createStatement();
       final int actualInsertCount = stmt.executeUpdate(insertQuery);
       if(expectedInsertCount == actualInsertCount) {
         LOG.info("Transferred " + actualInsertCount + " rows of staged data " +
@@ -255,8 +274,7 @@ public class GenericJdbcExecutor {
   }
 
   public long getTableRowCount(String tableName) {
-    try (Statement statement = connection.createStatement(
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try (Statement statement = createStatement();
          ResultSet resultSet = statement.executeQuery("SELECT COUNT(1) FROM " + encloseIdentifier(tableName));) {
       resultSet.next();
       return resultSet.getLong(1);
@@ -267,8 +285,7 @@ public class GenericJdbcExecutor {
   }
 
   public void executeUpdate(String sql) {
-    try (Statement statement = connection.createStatement(
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+    try (Statement statement = createStatement()) {
       statement.executeUpdate(sql);
     } catch (SQLException e) {
       logSQLException(e);
@@ -425,8 +442,7 @@ public class GenericJdbcExecutor {
   }
 
   public String[] getQueryColumns(String query) {
-    try (Statement statement = connection.createStatement(
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try (Statement statement = createStatement();
          ResultSet rs = statement.executeQuery(query);) {
       ResultSetMetaData rsmd = rs.getMetaData();
       int count = rsmd.getColumnCount();

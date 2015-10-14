@@ -69,8 +69,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     assert schemaName != null;
 
     Schema schema = new Schema(schemaName);
-    try (Statement statement = executor.getConnection().createStatement(
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try (Statement statement = executor.createStatement();
          ResultSet rs = statement.executeQuery("SELECT * FROM " + schemaName + " WHERE 1 = 0");) {
 
       ResultSetMetaData rsmt = rs.getMetaData();

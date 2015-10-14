@@ -22,6 +22,7 @@ import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.InRange;
 import org.apache.sqoop.validation.validators.NotEmpty;
 import org.apache.sqoop.validation.validators.ClassAvailable;
 import org.apache.sqoop.validation.validators.StartsWith;
@@ -47,6 +48,9 @@ public class LinkConfig {
 
   @Input(size = 40, sensitive = true)
   public String password;
+
+  @Input(validators = {@Validator(value = InRange.class, strArg = "0," + Integer.MAX_VALUE)})
+  public Integer fetchSize;
 
   @Input
   public Map<String, String> jdbcProperties;

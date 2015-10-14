@@ -43,5 +43,6 @@ public class GenericJdbcTestConstants {
   static {
     LINK_CONFIGURATION.linkConfig.jdbcDriver = DRIVER;
     LINK_CONFIGURATION.linkConfig.connectionString = URL;
+    LINK_CONFIGURATION.linkConfig.fetchSize = 25;
   }
 }
