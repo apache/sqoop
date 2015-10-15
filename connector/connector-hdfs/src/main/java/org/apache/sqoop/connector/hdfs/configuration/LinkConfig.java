@@ -36,7 +36,8 @@ public class LinkConfig {
   @Input(size = 255, validators = { @Validator(DirectoryExistsValidator.class)})
   public String confDir;
 
-  @Input public Map<String, String> configOverrides;
+  @Input(sensitiveKeyPattern = "(?i)(.*(password|key|secret).*)")
+  public Map<String, String> configOverrides;
 
   public LinkConfig() {
     configOverrides = new HashMap<>();
