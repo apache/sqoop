@@ -85,7 +85,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     Object fromJob = MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
 
     SqoopSplit split = context.getCurrentKey();
-    ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context), fromSchema);
+    ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context), matcher.getFromSchema());
 
     try {
       LOG.info("Starting progress service");

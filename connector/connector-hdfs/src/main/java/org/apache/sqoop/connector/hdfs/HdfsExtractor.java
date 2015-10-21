@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.hdfs;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -38,6 +39,7 @@ import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
+import org.apache.sqoop.schema.ByteArraySchema;
 import org.apache.sqoop.schema.Schema;
 
 /**
@@ -112,12 +114,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     boolean hasNext = filereader.next(line);
     while (hasNext) {
       rowsRead++;
-      if (HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
-        Object[] data = SqoopIDFUtils.fromCSV(line.toString(), schema);
-        dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, data));
-      } else {
-        dataWriter.writeStringRecord(line.toString());
-      }
+      extractRow(linkConfiguration, fromJobConfiguration, line);
       line = new Text();
       hasNext = filereader.next(line);
       if (filereader.getPosition() >= end && filereader.syncSeen()) {
@@ -180,12 +177,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
         next = fileseeker.getPos();
       }
       rowsRead++;
-      if (HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
-        Object[] data = SqoopIDFUtils.fromCSV(line.toString(), schema);
-        dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, data));
-      } else {
-        dataWriter.writeStringRecord(line.toString());
-      }
+      extractRow(linkConfiguration, fromJobConfiguration, line);
     }
     LOG.info("Extracting ended on position: " + fileseeker.getPos());
     filestream.close();
@@ -211,6 +203,18 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
       return false;
     }
     return true;
+  }
+
+  private void extractRow(LinkConfiguration linkConfiguration, FromJobConfiguration fromJobConfiguration, Text line) throws UnsupportedEncodingException {
+    if (schema instanceof ByteArraySchema) {
+      dataWriter.writeArrayRecord(new Object[] {line.toString().getBytes(SqoopIDFUtils.BYTE_FIELD_CHARSET)});
+    } else if (!HdfsUtils.hasCustomFormat(linkConfiguration,
+      fromJobConfiguration)) {
+      dataWriter.writeStringRecord(line.toString());
+    } else {
+      Object[] data = SqoopIDFUtils.fromCSV(line.toString(), schema);
+      dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, data));
+    }
   }
 
 

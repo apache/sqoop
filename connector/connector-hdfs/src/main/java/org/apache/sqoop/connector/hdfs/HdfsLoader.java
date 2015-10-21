@@ -36,6 +36,7 @@ import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
+import org.apache.sqoop.schema.ByteArraySchema;
 import org.apache.sqoop.utils.ClassUtils;
 
 public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
@@ -86,21 +87,24 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
       filewriter.initialize(filepath, conf, codec);
 
-      if (HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfig)) {
+      if (!HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfig) || (context.getSchema() instanceof ByteArraySchema)) {
+        String record;
+        while ((record = reader.readTextRecord()) != null) {
+          if (context.getSchema() instanceof ByteArraySchema) {
+            filewriter.write(SqoopIDFUtils.toText(record));
+          } else {
+            filewriter.write(record);
+          }
+          rowsWritten++;
+        }
+      } else {
         Object[] record;
 
         while ((record = reader.readArrayRecord()) != null) {
           filewriter.write(
-              SqoopIDFUtils.toCSV(
-                  HdfsUtils.formatRecord(linkConfiguration, toJobConfig, record),
-                  context.getSchema()));
-          rowsWritten++;
-        }
-      } else {
-        String record;
-
-        while ((record = reader.readTextRecord()) != null) {
-          filewriter.write(record);
+            SqoopIDFUtils.toCSV(
+              HdfsUtils.formatRecord(linkConfiguration, toJobConfig, record),
+              context.getSchema()));
           rowsWritten++;
         }
       }

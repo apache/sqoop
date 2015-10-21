@@ -64,7 +64,9 @@ public class HdfsUtils {
     LinkedList<Path> files = new LinkedList<Path>();
     for (FileStatus fileStatus : fs.listStatus(new Path(directory), filterHiddenFiles)) {
       LOG.debug("Found mapreduce output file: " + fileStatus.getPath() + " with size " + fileStatus.getLen());
-      files.add(fileStatus.getPath());
+      if (fileStatus.isFile()) {
+        files.add(fileStatus.getPath());
+      }
     }
     return files.toArray(new Path[files.size()]);
   }
