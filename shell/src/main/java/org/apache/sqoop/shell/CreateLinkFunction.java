@@ -64,17 +64,17 @@ public class CreateLinkFunction extends SqoopFunction {
     MLink link = null;
     Long cid;
     String connectorName = line.getOptionValue(Constants.OPT_CID);
-    MConnector connector = client.getConnector(connectorName);
+    MConnector connector = getClient().getConnector(connectorName);
     if (null == connector) {
       //Now check if command line argument is a connector id
       //This works as getConnector(String...) does not throw an exception
       cid = getLong(line, Constants.OPT_CID);
-      client.getConnector(cid);
+      getClient().getConnector(cid);
 
       //Would have thrown an exception before this if input was neither a valid name nor an id
       //This will do an extra getConnector() call again inside createLink()
       //but should not matter as connectors are cached
-      link = client.createLink(cid);
+      link = getClient().createLink(cid);
       printlnResource(Constants.RES_CREATE_CREATING_LINK, cid);
     }
     else {
@@ -82,13 +82,13 @@ public class CreateLinkFunction extends SqoopFunction {
       //This will do an extra getConnector() call again inside createLink() but
       //should not matter as connectors are cached
       cid = connector.getPersistenceId();
-      link = client.createLink(connectorName);
+      link = getClient().createLink(connectorName);
       printlnResource(Constants.RES_CREATE_CREATING_LINK, connectorName);
     }
 
     ConsoleReader reader = new ConsoleReader();
 
-    ResourceBundle connectorConfigBundle = client.getConnectorConfigBundle(cid);
+    ResourceBundle connectorConfigBundle = getClient().getConnectorConfigBundle(cid);
 
     Status status = Status.OK;
     if (isInteractive) {
@@ -106,14 +106,14 @@ public class CreateLinkFunction extends SqoopFunction {
         }
 
         // Try to create
-        status = client.saveLink(link);
+        status = getClient().saveLink(link);
       } while(!status.canProceed());
     } else {
       LinkDynamicConfigOptions options = new LinkDynamicConfigOptions();
       options.prepareOptions(link);
       CommandLine linkoptsline = ConfigOptions.parseOptions(options, 0, args, false);
       if (fillLink(linkoptsline, link)) {
-        status = client.saveLink(link);
+        status = getClient().saveLink(link);
         if (!status.canProceed()) {
           printLinkValidationMessages(link);
           return null;

@@ -66,6 +66,10 @@ public final class ShellEnvironment {
     return client;
   }
 
+  public static void setClient(SqoopClient sc) {
+    client = sc;
+  }
+
   public static void setIo(IO ioObject) {
     io = ioObject;
   }

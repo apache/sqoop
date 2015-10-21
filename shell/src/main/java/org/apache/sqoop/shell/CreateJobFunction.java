@@ -74,25 +74,25 @@ public class CreateJobFunction extends  SqoopFunction {
     printlnResource(Constants.RES_CREATE_CREATING_JOB, fromLinkArg, toLinkArg);
 
     ConsoleReader reader = new ConsoleReader();
-    MJob job = client.createJob(fromLinkArg, toLinkArg);
+    MJob job = getClient().createJob(fromLinkArg, toLinkArg);
 
-    MConnector fromConnector = client.getConnector(job.getFromConnectorId());
+    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
     if (!fromConnector.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
       errorMessage("Connector " + fromConnector.getUniqueName() + " does not support direction " + Direction.FROM);
       return Status.ERROR;
     }
 
-    MConnector toConnector = client.getConnector(job.getToConnectorId());
+    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
     if (!toConnector.getSupportedDirections().isDirectionSupported(Direction.TO)) {
       errorMessage("Connector " + toConnector.getUniqueName() + " does not support direction " + Direction.TO);
       return Status.ERROR;
     }
 
-    ResourceBundle fromConfigBundle = client.getConnectorConfigBundle(
+    ResourceBundle fromConfigBundle = getClient().getConnectorConfigBundle(
         job.getFromConnectorId());
-    ResourceBundle toConfigBundle = client.getConnectorConfigBundle(
+    ResourceBundle toConfigBundle = getClient().getConnectorConfigBundle(
         job.getToConnectorId());
-    ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
+    ResourceBundle driverConfigBundle = getClient().getDriverConfigBundle();
 
     Status status = Status.OK;
 
@@ -111,14 +111,14 @@ public class CreateJobFunction extends  SqoopFunction {
         }
 
         // Try to create
-        status = client.saveJob(job);
+        status = getClient().saveJob(job);
       } while(!status.canProceed());
     } else {
       JobDynamicConfigOptions options = new JobDynamicConfigOptions();
       options.prepareOptions(job);
       CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
       if (fillJob(line, job)) {
-        status = client.saveJob(job);
+        status = getClient().saveJob(job);
         if (!status.canProceed()) {
           printJobValidationMessages(job);
           return null;
