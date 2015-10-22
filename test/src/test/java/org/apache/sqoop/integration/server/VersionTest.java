@@ -40,7 +40,6 @@ public class VersionTest extends SqoopTestCase {
     VersionBean versionBean = versionRequest.read(getSqoopServerUrl());
 
     assertEquals(versionBean.getBuildVersion(), VersionInfo.getBuildVersion());
-    assertEquals(versionBean.getBuildDate(), VersionInfo.getBuildDate());
     assertEquals(versionBean.getSourceRevision(), VersionInfo.getSourceRevision());
     assertEquals(versionBean.getSystemUser(), VersionInfo.getUser());
     assertEquals(versionBean.getSourceRevision(), VersionInfo.getSourceRevision());
