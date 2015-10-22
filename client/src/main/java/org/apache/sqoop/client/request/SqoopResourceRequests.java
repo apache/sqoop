@@ -39,6 +39,7 @@ public class SqoopResourceRequests {
   private JobResourceRequest jobRequest;
   private SubmissionResourceRequest submissionRequest;
   private AuthorizationResourceRequest authorizationRequest;
+  private VersionResourceRequest versionRequest;
   private DelegationTokenAuthenticatedURL.Token authToken;
 
   public SqoopResourceRequests() {
@@ -47,6 +48,10 @@ public class SqoopResourceRequests {
 
   public void setServerUrl(String serverUrl) {
     this.serverUrl = serverUrl;
+  }
+
+  public String getServerUrl() {
+    return serverUrl;
   }
 
   public DriverResourceRequest getDriverResourceRequest() {
@@ -95,6 +100,14 @@ public class SqoopResourceRequests {
     }
 
     return authorizationRequest;
+  }
+
+  public VersionResourceRequest getVersionRequest() {
+    if (versionRequest == null) {
+      versionRequest = new VersionResourceRequest(authToken);
+    }
+
+    return versionRequest;
   }
 
   public DriverBean readDriver() {
@@ -203,6 +216,10 @@ public class SqoopResourceRequests {
 
   public void revokePrivilege(List<MPrincipal> principals, List<MPrivilege> privileges) {
     getAuthorizationRequest().grantRevokePrivilege(serverUrl, principals, privileges, false);
+  }
+
+  public VersionBean readVersion() {
+    return getVersionRequest().read(serverUrl);
   }
 
   public Token<?>[] addDelegationTokens(String renewer,

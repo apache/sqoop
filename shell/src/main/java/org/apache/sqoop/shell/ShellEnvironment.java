@@ -208,5 +208,12 @@ public final class ShellEnvironment {
   public static void print(String format, Object... args) {
     io.out.printf(format, args);
   }
+
+  // for tests only
+  public static void cleanup() {
+    serverHost = DEFAULT_SERVER_HOST;
+    serverPort = DEFAULT_SERVER_PORT;
+    serverWebapp = DEFAULT_SERVER_WEBAPP;
+  }
 }
 

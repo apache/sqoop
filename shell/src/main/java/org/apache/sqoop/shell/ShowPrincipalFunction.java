@@ -48,11 +48,7 @@ public class ShowPrincipalFunction extends SqoopFunction {
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
-    MRole role = null;
-
-    if (line.hasOption(Constants.OPT_ROLE)) {
-      role = new MRole(line.getOptionValue(Constants.OPT_ROLE));
-    }
+    MRole role = new MRole(line.getOptionValue(Constants.OPT_ROLE));
 
     showPrincipals(role);
 

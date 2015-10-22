@@ -21,7 +21,6 @@ import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.sqoop.client.request.VersionResourceRequest;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.VersionBean;
 import org.apache.sqoop.shell.core.Constants;
@@ -33,7 +32,6 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
 @edu.umd.cs.findbugs.annotations.SuppressWarnings("SE_BAD_FIELD")
 public class ShowVersionFunction extends SqoopFunction {
   private static final long serialVersionUID = 1L;
-  private VersionResourceRequest versionRequest;
 
   @SuppressWarnings("static-access")
   public ShowVersionFunction() {
@@ -83,15 +81,15 @@ public class ShowVersionFunction extends SqoopFunction {
     return Status.OK;
   }
 
-  private void showVersion(boolean server, boolean client, boolean restApi) {
+  private void showVersion(boolean showServerVersion, boolean showClientVersion, boolean showRestApiVersion) {
 
     // If no option has been given, print out client version as default
-    if (!client && !server && !restApi) {
-      client = true;
+    if (!showClientVersion && !showServerVersion && !showRestApiVersion) {
+      showClientVersion = true;
     }
 
     // Print out client string if needed
-    if (client) {
+    if (showClientVersion) {
       printlnResource(Constants.RES_SHOW_PROMPT_VERSION_CLIENT_SERVER,
         Constants.OPT_CLIENT,
         // See SQOOP-1623 to understand how the client version is derived.
@@ -103,16 +101,13 @@ public class ShowVersionFunction extends SqoopFunction {
     }
 
     // If only client version was required we do not need to continue
-    if(!server && !restApi) {
+    if(!showServerVersion && !showRestApiVersion) {
       return;
     }
 
-    if (versionRequest == null) {
-      versionRequest = new VersionResourceRequest();
-    }
-    VersionBean versionBean = versionRequest.read(getServerUrl());
+    VersionBean versionBean = client.readVersion();
 
-    if (server) {
+    if (showServerVersion) {
       printlnResource(Constants.RES_SHOW_PROMPT_VERSION_CLIENT_SERVER,
         Constants.OPT_SERVER,
         versionBean.getBuildVersion(),
@@ -122,7 +117,7 @@ public class ShowVersionFunction extends SqoopFunction {
       );
     }
 
-    if (restApi) {
+    if (showRestApiVersion) {
       printlnResource(Constants.RES_SHOW_PROMPT_API_VERSIONS,
         Arrays.toString(versionBean.getSupportedAPIVersions())
       );

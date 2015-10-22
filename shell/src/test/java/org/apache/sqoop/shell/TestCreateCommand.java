@@ -60,16 +60,16 @@ public class TestCreateCommand {
 
   @Test
   public void testCreateLink() {
-    when(client.getConnector("connector_1")).thenReturn(new MConnector("", "", "", null, null, null));
-    when(client.createLink("connector_1")).thenReturn(new MLink(1, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
+    when(client.getConnector("connector_test")).thenReturn(new MConnector("", "", "", null, null, null));
+    when(client.createLink("connector_test")).thenReturn(new MLink(1, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
     when(client.saveLink(any(MLink.class))).thenReturn(Status.OK);
 
-    // create link -c connector_1
-    Status status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c", "connector_1"));
+    // create link -c connector_test
+    Status status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c", "connector_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
-    // create link -cid connector_1
-    status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-cid", "connector_1"));
+    // create link -cid connector_test
+    status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-cid", "connector_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
     // incorrect command: create link -c
@@ -88,7 +88,7 @@ public class TestCreateCommand {
     when(client.getConnector(any(Integer.class))).thenThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "Connector doesn't exist"));
 
     try {
-      createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c", "connector_1"));
+      createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c", "connector_test"));
       Assert.fail("Create link should fail as requested connector doesn't exist!");
     } catch (SqoopException e) {
       Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
@@ -135,8 +135,8 @@ public class TestCreateCommand {
 
   @Test
   public void testCreateRole() {
-    // create role -r role_1
-    Status status = (Status) createCmd.execute(Arrays.asList(Constants.FN_ROLE, "-r", "role_1"));
+    // create role -r role_test
+    Status status = (Status) createCmd.execute(Arrays.asList(Constants.FN_ROLE, "-r", "role_test"));
     Assert.assertTrue(status != null && status == Status.OK);
   }
 }

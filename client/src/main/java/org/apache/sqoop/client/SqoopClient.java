@@ -29,7 +29,6 @@ import org.apache.hadoop.security.token.Token;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.client.request.SqoopResourceRequests;
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.*;
 import org.apache.sqoop.model.*;
@@ -103,6 +102,10 @@ public class SqoopClient {
   public void setServerUrl(String serverUrl) {
     resourceRequests.setServerUrl(serverUrl);
     clearCache();
+  }
+
+  public String getServerUrl() {
+    return resourceRequests.getServerUrl();
   }
 
   /**
@@ -805,6 +808,10 @@ public class SqoopClient {
   public Token<?>[] addDelegationTokens(String renewer,
                                         Credentials credentials) throws IOException {
     return resourceRequests.addDelegationTokens(renewer, credentials);
+  }
+
+  public VersionBean readVersion() {
+    return resourceRequests.readVersion();
   }
 
   private Status applyLinkValidations(ValidationResultBean bean, MLink link) {

@@ -69,7 +69,6 @@ public class ShowOptionFunction extends SqoopFunction {
       }
     } else {
       printAllOptions();
-      return null;
     }
 
     return Status.OK;
