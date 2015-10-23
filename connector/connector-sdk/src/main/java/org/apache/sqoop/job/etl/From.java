@@ -34,19 +34,26 @@ import org.apache.sqoop.classification.InterfaceStability;
 public class From extends Transferable {
 
   private Class<? extends Partitioner> partitioner;
+  private Class<? extends Partition> partition;
   private Class<? extends Extractor> extractor;
 
   public From(Class<? extends Initializer> initializer,
               Class<? extends Partitioner> partitioner,
+              Class<? extends Partition> partition,
               Class<? extends Extractor> extractor,
               Class<? extends Destroyer> destroyer) {
     super(initializer, destroyer);
     this.partitioner = partitioner;
+    this.partition = partition;
     this.extractor = extractor;
   }
 
   public Class<? extends Partitioner> getPartitioner() {
     return partitioner;
+  }
+
+  public Class<? extends Partition> getPartition() {
+    return partition;
   }
 
   public Class<? extends Extractor> getExtractor() {
@@ -57,6 +64,7 @@ public class From extends Transferable {
   public String toString() {
     return "From{" + super.toString() +
       ", partitioner=" + partitioner.getName() +
+      ", partition=" + partition.getName() +
       ", extractor=" + extractor.getName() +
       '}';
   }

@@ -38,6 +38,7 @@ public class HdfsConnector extends SqoopConnector {
   private static final From FROM = new From(
           HdfsFromInitializer.class,
           HdfsPartitioner.class,
+          HdfsPartition.class,
           HdfsExtractor.class,
           HdfsFromDestroyer.class);
 

@@ -46,6 +46,7 @@ public class KiteConnector extends SqoopConnector {
   private static final From FROM = new From(
       KiteFromInitializer.class,
       KiteDatasetPartitioner.class,
+      KiteDatasetPartition.class,
       KiteExtractor.class,
       KiteFromDestroyer.class);
 

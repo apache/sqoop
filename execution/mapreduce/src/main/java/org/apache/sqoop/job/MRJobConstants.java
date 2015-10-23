@@ -31,6 +31,9 @@ public final class MRJobConstants extends Constants {
   public static final String JOB_ETL_PARTITIONER = PREFIX_JOB_CONFIG
       + "etl.partitioner";
 
+  public static final String JOB_ETL_PARTITION = PREFIX_JOB_CONFIG
+      + "etl.partition";
+
   public static final String JOB_ETL_EXTRACTOR = PREFIX_JOB_CONFIG
       + "etl.extractor";
 

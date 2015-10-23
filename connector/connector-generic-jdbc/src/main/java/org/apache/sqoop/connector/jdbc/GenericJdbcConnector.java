@@ -35,6 +35,7 @@ public class GenericJdbcConnector extends SqoopConnector {
   private static final From FROM = new From(
       GenericJdbcFromInitializer.class,
       GenericJdbcPartitioner.class,
+      GenericJdbcPartition.class,
       GenericJdbcExtractor.class,
       GenericJdbcFromDestroyer.class);
 
