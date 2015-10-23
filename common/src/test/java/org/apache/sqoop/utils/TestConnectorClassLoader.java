@@ -126,7 +126,7 @@ public class TestConnectorClassLoader {
 
     ClassLoader currentClassLoader = getClass().getClassLoader();
     ClassLoader connectorClassloader = new ConnectorClassLoader(
-        new URL[] { testJar }, currentClassLoader, null);
+        new URL[] { testJar }, currentClassLoader, null, false);
 
     assertNull(currentClassLoader.getResourceAsStream("resource.txt"),
         "Resource should be null for current classloader");

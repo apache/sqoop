@@ -85,7 +85,7 @@ public class ConnectorClassLoader extends URLClassLoader {
   private final List<String> systemClasses;
 
   public ConnectorClassLoader(URL[] urls, ClassLoader parent,
-      List<String> systemClasses) {
+      List<String> systemClasses, boolean overrideDefaultSystemClasses) {
     super(urls, parent);
     if (LOG.isDebugEnabled()) {
       LOG.debug("urls: " + Arrays.toString(urls));
@@ -96,15 +96,24 @@ public class ConnectorClassLoader extends URLClassLoader {
       throw new IllegalArgumentException("No parent classloader!");
     }
     // if the caller-specified system classes are null or empty, use the default
-    this.systemClasses = (systemClasses == null || systemClasses.isEmpty()) ?
-        Arrays.asList(SYSTEM_CLASSES_DEFAULT.split("\\s*,\\s*")) :
-        systemClasses;
+    this.systemClasses = new ArrayList<String>();
+    if (systemClasses != null && !systemClasses.isEmpty()) {
+      this.systemClasses.addAll(systemClasses);
+    }
+    if (!overrideDefaultSystemClasses || this.systemClasses.isEmpty()) {
+      this.systemClasses.addAll(Arrays.asList(SYSTEM_CLASSES_DEFAULT.split("\\s*,\\s*")));
+    }
     LOG.info("system classes: " + this.systemClasses);
   }
 
   public ConnectorClassLoader(String classpath, ClassLoader parent,
       List<String> systemClasses) throws MalformedURLException {
-    this(constructUrlsFromClasspath(classpath), parent, systemClasses);
+    this(constructUrlsFromClasspath(classpath), parent, systemClasses, true);
+  }
+
+  public ConnectorClassLoader(String classpath, ClassLoader parent,
+      List<String> systemClasses, boolean overrideDefaultSystemClasses) throws MalformedURLException {
+    this(constructUrlsFromClasspath(classpath), parent, systemClasses, overrideDefaultSystemClasses);
   }
 
   static URL[] constructUrlsFromClasspath(String classpath)
