@@ -44,6 +44,7 @@ import org.apache.sqoop.accumulo.AccumuloUtil;
 import org.apache.sqoop.mapreduce.AccumuloImportJob;
 import org.apache.sqoop.mapreduce.HBaseBulkImportJob;
 import org.apache.sqoop.mapreduce.JdbcCallExportJob;
+import org.apache.sqoop.mapreduce.PhoenixImportJob;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.SqlTypeMap;
 
@@ -643,7 +644,9 @@ public abstract class SqlManager
     context.setConnManager(this);
 
     ImportJobBase importer;
-    if (opts.getHBaseTable() != null) {
+    if(opts.getPhoenixTable() != null) {
+    	importer = new PhoenixImportJob(opts, context);
+    } else if (opts.getHBaseTable() != null) {
       // Import to HBase.
       if (!HBaseUtil.isHBaseJarPresent()) {
         throw new ImportException("HBase jars are not present in "
@@ -666,7 +669,6 @@ public abstract class SqlManager
       importer = new DataDrivenImportJob(opts, context.getInputFormat(),
               context);
     }
-
     checkTableImportOptions(context);
 
     String splitCol = getSplitColumn(opts, tableName);
@@ -686,7 +688,9 @@ public abstract class SqlManager
     context.setConnManager(this);
 
     ImportJobBase importer;
-    if (opts.getHBaseTable() != null) {
+    if(opts.getPhoenixTable() != null) {
+    	importer = new PhoenixImportJob(opts, context);
+    } else if (opts.getHBaseTable() != null) {
       // Import to HBase.
       if (!HBaseUtil.isHBaseJarPresent()) {
         throw new ImportException("HBase jars are not present in classpath,"

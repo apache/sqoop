@@ -316,6 +316,12 @@ public class SqoopOptions implements Cloneable {
   // explicit split by cols
   @StoredAsProperty("reset.onemapper") private boolean autoResetToOneMapper;
 
+  // Phoenix table to import into.
+  @StoredAsProperty("phoenix.table") private String phoenixTable;
+
+  // Phoenix columns to be upserted to . The order should confirm to the import table select query
+  @StoredAsProperty("phoenix.columns") private String phoenixColumns;
+
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved job, these will
   // be populated by the JobStorage to facilitate updating the same
@@ -432,7 +438,7 @@ public class SqoopOptions implements Cloneable {
     putProperty(props, prefix + ".escape",
         Integer.toString((int) values.getEscapedBy()));
     putProperty(props, prefix + ".enclose.required",
-        Boolean.toString(values.isEncloseRequired()));
+            Boolean.toString(values.isEncloseRequired()));
   }
 
   /** Take a comma-delimited list of input and split the elements
@@ -1892,6 +1898,21 @@ public class SqoopOptions implements Cloneable {
 
   public void setConf(Configuration config) {
     this.conf = config;
+  }
+
+  public String getPhoenixTable() {
+    return phoenixTable;
+  }
+  public void setPhoenixTable(String phoenixTable) {
+    this.phoenixTable = phoenixTable;
+  }
+
+  public String getPhoenixColumns() {
+    return phoenixColumns;
+  }
+
+  public void setPhoenixColumns(String phoenixColumns) {
+    this.phoenixColumns = phoenixColumns;
   }
 
   /**

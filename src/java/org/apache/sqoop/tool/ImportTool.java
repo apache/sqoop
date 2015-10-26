@@ -800,6 +800,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     toolOptions.addUniqueOptions(getHCatalogOptions());
     toolOptions.addUniqueOptions(getHCatImportOnlyOptions());
     toolOptions.addUniqueOptions(getAccumuloOptions());
+    toolOptions.addUniqueOptions(getPhoenixOptions());
 
     // get common codegen opts.
     RelatedOptions codeGenOpts = getCodeGenOpts(allTables);
@@ -984,6 +985,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       applyHBaseOptions(in, out);
       applyHCatalogOptions(in, out);
       applyAccumuloOptions(in, out);
+      applyPhoenixOptions(in, out);
 
     } catch (NumberFormatException nfe) {
       throw new InvalidOptionsException("Error: expected numeric argument.\n"

@@ -188,6 +188,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       "hbase-bulkload";
   public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
 
+  // Phoenix arguments
+  public static final String PHOENIX_TABLE_ARG = "phoenix-table";
+  public static final String PHOENIX_COLUMNS_ARG = "phoenix-columns";
+  
   //Accumulo arguments.
   public static final String ACCUMULO_TABLE_ARG = "accumulo-table";
   public static final String ACCUMULO_COL_FAM_ARG = "accumulo-column-family";
@@ -774,6 +778,34 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     return hbaseOpts;
   }
 
+  protected RelatedOptions getPhoenixOptions() {
+	  RelatedOptions phoenixOpts =
+	      new RelatedOptions("Phoenix arguments");
+	  phoenixOpts.addOption(OptionBuilder.withArgName("table")
+	      .hasArg()
+	      .withDescription("Phoenix table to import data to")
+	      .withLongOpt(PHOENIX_TABLE_ARG)
+	      .create());
+	  phoenixOpts.addOption(OptionBuilder.withArgName("columns")
+	      .hasArg()
+	      .withDescription("columns to import.")
+	      .withLongOpt(PHOENIX_COLUMNS_ARG)
+	      .create());
+	  
+	  return phoenixOpts;  
+	    
+  }
+  
+  protected void applyPhoenixOptions(CommandLine in, SqoopOptions out) {
+    if (in.hasOption(PHOENIX_TABLE_ARG)) {
+      out.setPhoenixTable(in.getOptionValue(PHOENIX_TABLE_ARG));
+    }
+
+    if (in.hasOption(PHOENIX_COLUMNS_ARG)) {
+      out.setPhoenixColumns(in.getOptionValue(PHOENIX_COLUMNS_ARG));
+    }
+  }
+  
   protected RelatedOptions getAccumuloOptions() {
     RelatedOptions accumuloOpts =
       new RelatedOptions("Accumulo arguments");
