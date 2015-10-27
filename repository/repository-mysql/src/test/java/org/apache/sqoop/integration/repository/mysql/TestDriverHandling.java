@@ -22,6 +22,10 @@ import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MDriver;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertNotNull;
+
 /**
  * Test driver methods on MySql repository.
  */

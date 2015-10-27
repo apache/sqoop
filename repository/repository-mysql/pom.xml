@@ -61,6 +61,11 @@ limitations under the License.
       <artifactId>mysql-connector-java</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -106,7 +111,6 @@ limitations under the License.
           <name>mysql</name>
         </property>
       </activation>
-
       <build>
         <plugins>
           <plugin>

@@ -20,6 +20,8 @@ package org.apache.sqoop.integration.repository.mysql;
 
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertTrue;
+
 /**
  * Test driver methods on MySql repository.
  */

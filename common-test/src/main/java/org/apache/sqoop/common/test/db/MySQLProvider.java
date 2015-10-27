@@ -34,7 +34,7 @@ public class MySQLProvider extends DatabaseProvider {
 
   private static final String CONNECTION = System.getProperties().getProperty(
     "sqoop.provider.mysql.jdbc",
-    "jdbc:mysql://localhost/test"
+    "jdbc:mysql://localhost:3306/test?createDatabaseIfNotExist=true&amp;sessionVariables=sql_mode='ANSI_QUOTES'"
   );
 
   private static final String USERNAME = System.getProperties().getProperty(
