@@ -54,7 +54,7 @@ public class TestToDestroyer {
     context.setString(HdfsConstants.WORK_DIRECTORY, workDir.getAbsolutePath());
 
     Destroyer destroyer = new HdfsToDestroyer();
-    destroyer.destroy(new DestroyerContext(context, true, null), linkConfig, jobConfig);
+    destroyer.destroy(new DestroyerContext(context, true, null, "test_user"), linkConfig, jobConfig);
 
     File[] files = targetDir.listFiles();
 
@@ -99,7 +99,7 @@ public class TestToDestroyer {
     context.setString(HdfsConstants.WORK_DIRECTORY, workDir.getAbsolutePath());
 
     Destroyer destroyer = new HdfsToDestroyer();
-    destroyer.destroy(new DestroyerContext(context, false, null), linkConfig, jobConfig);
+    destroyer.destroy(new DestroyerContext(context, false, null, "test_user"), linkConfig, jobConfig);
 
     File[] files = targetDir.listFiles();
 

@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapred.MRConstants;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
@@ -85,7 +86,7 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
     Object fromJob = MRConfigurationUtils.getConnectorJobConfig(Direction.FROM, conf);
 
     SqoopSplit split = context.getCurrentKey();
-    ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context), matcher.getFromSchema());
+    ExtractorContext extractorContext = new ExtractorContext(subContext, new SqoopMapDataWriter(context), matcher.getFromSchema(), conf.get(MRJobConstants.SUBMITTING_USER));
 
     try {
       LOG.info("Starting progress service");

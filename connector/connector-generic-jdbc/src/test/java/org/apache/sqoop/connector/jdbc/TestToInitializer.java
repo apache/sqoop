@@ -41,6 +41,7 @@ public class TestToInitializer {
   private final String schemalessTableName;
   private final String stageTableName;
   private final String tableColumns;
+  private final String testUser;
 
   private GenericJdbcExecutor executor;
 
@@ -50,6 +51,7 @@ public class TestToInitializer {
     schemalessTableName = getClass().getSimpleName().toUpperCase() + "TABLE";
     stageTableName = getClass().getSimpleName().toUpperCase() + "_STAGE_TABLE";
     tableColumns = "ICOL,VCOL";
+    testUser = "test_user";
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -86,7 +88,7 @@ public class TestToInitializer {
     jobConfig.toJobConfig.tableName = schemalessTableName;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();
@@ -109,7 +111,7 @@ public class TestToInitializer {
     jobConfig.toJobConfig.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();
@@ -132,7 +134,7 @@ public class TestToInitializer {
     jobConfig.toJobConfig.tableName = tableName;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();
@@ -156,7 +158,7 @@ public class TestToInitializer {
     jobConfig.toJobConfig.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();
@@ -191,7 +193,7 @@ public class TestToInitializer {
     jobConfig.toJobConfig.stageTableName = stageTableName;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();
@@ -219,7 +221,7 @@ public class TestToInitializer {
     executor.executeUpdate("INSERT INTO " + fullStageTableName +
       " VALUES(1, 1.1, 'one')");
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();
@@ -278,7 +280,7 @@ public class TestToInitializer {
     executor.executeUpdate("INSERT INTO " + fullStageTableName +
       " VALUES(1, 1.1, 'one')");
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();
@@ -301,7 +303,7 @@ public class TestToInitializer {
     jobConfig.toJobConfig.stageTableName = stageTableName;
     createTable(fullStageTableName);
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcToInitializer();

@@ -261,7 +261,7 @@ public class SqoopOutputFormatLoadExecutor {
         // encapsulates the toDataFormat
 
         // Create loader context
-        LoaderContext loaderContext = new LoaderContext(subContext, reader, matcher.getToSchema());
+        LoaderContext loaderContext = new LoaderContext(subContext, reader, matcher.getToSchema(), context.getConfiguration().get(MRJobConstants.SUBMITTING_USER));
 
         LOG.info("Running loader class " + loaderName);
         loader.load(loaderContext, connectorLinkConfig, connectorToJobConfig);

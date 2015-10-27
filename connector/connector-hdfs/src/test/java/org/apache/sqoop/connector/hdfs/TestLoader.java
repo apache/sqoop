@@ -62,6 +62,7 @@ public class TestLoader extends TestHdfsBase {
   private ToCompression compression;
   private final String outputDirectory;
   private Loader loader;
+  private String user = "test_user";
 
   @Factory(dataProvider="test-hdfs-loader")
   public TestLoader(ToFormat outputFormat,
@@ -110,11 +111,13 @@ public class TestLoader extends TestHdfsBase {
 
       @Override
       public Object[] readArrayRecord() {
+        assertTestUser(user);
         return null;
       }
 
       @Override
       public String readTextRecord() {
+        assertTestUser(user);
         if (index++ < NUMBER_OF_ROWS_PER_FILE) {
           return index + "," + (double)index + ",'" + index + "'";
         } else {
@@ -124,9 +127,10 @@ public class TestLoader extends TestHdfsBase {
 
       @Override
       public Object readContent() {
+        assertTestUser(user);
         return null;
       }
-    }, null);
+    }, null, user);
     LinkConfiguration linkConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
     jobConf.toJobConfig.compression = compression;
@@ -163,6 +167,8 @@ public class TestLoader extends TestHdfsBase {
 
       @Override
       public Object[] readArrayRecord() {
+        assertTestUser(user);
+
         if (index++ < NUMBER_OF_ROWS_PER_FILE) {
           return new Object[]{
               index,
@@ -184,7 +190,7 @@ public class TestLoader extends TestHdfsBase {
       public Object readContent() {
         throw new AssertionError("should not be at readContent");
       }
-    }, schema);
+    }, schema, "test_user");
     LinkConfiguration linkConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
     jobConf.toJobConfig.compression = compression;

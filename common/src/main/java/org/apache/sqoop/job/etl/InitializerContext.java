@@ -31,8 +31,11 @@ import org.apache.sqoop.common.MutableContext;
 @InterfaceStability.Unstable
 public class InitializerContext extends TransferableContext {
 
-  public InitializerContext(MutableContext context) {
+  private String user;
+
+  public InitializerContext(MutableContext context, String user) {
     super(context);
+    this.user = user;
   }
 
   /**
@@ -46,5 +49,14 @@ public class InitializerContext extends TransferableContext {
   @Override
   public MutableContext getContext() {
     return (MutableContext)super.getContext();
+  }
+
+  /**
+   * Return the user
+   *
+   * @return
+   */
+  public String getUser() {
+    return user;
   }
 }

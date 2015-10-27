@@ -34,19 +34,21 @@ public class TestFromDestroyer {
   LinkConfiguration linkConfig;
   FromJobConfiguration jobConfig;
   MutableContext context;
+  String user;
 
   public TestFromDestroyer() {
     linkConfig = new LinkConfiguration();
     jobConfig = new FromJobConfiguration();
     context = new MutableMapContext();
     destroyer = new HdfsFromDestroyer();
+    user = "test_user";
   }
 
   @Test
   public void testUpdateConfiguration() {
     DateTime dt = new DateTime();
     context.setLong(HdfsConstants.MAX_IMPORT_DATE, dt.getMillis());
-    destroyer.updateConfiguration(new DestroyerContext(context, true, null), linkConfig, jobConfig);
+    destroyer.updateConfiguration(new DestroyerContext(context, true, null, user), linkConfig, jobConfig);
     assertEquals(jobConfig.incremental.lastImportedDate, dt);
   }
 }

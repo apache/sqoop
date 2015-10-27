@@ -215,7 +215,7 @@ public class TestSqoopOutputFormatLoadExecutor {
       exceptionThrown = true;
     }
     writer.close(null);
-    verify(jobContextMock, times(1)).getConfiguration();
+    verify(jobContextMock, times(2)).getConfiguration();
     verify(jobContextMock, times(1)).getCounter(SqoopCounters.ROWS_WRITTEN);
     Assert.assertFalse(exceptionThrown, "Exception Thrown during writing");
   }

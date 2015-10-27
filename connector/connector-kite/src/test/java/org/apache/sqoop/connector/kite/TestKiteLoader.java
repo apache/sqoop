@@ -81,7 +81,7 @@ public class TestKiteLoader {
         return null;
       }
     };
-    LoaderContext context = new LoaderContext(null, reader, schema);
+    LoaderContext context = new LoaderContext(null, reader, schema, "test_user");
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration toJobConfig = new ToJobConfiguration();
 

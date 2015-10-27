@@ -62,7 +62,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
@@ -94,7 +94,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
@@ -124,7 +124,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 13, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 13, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
@@ -161,7 +161,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
@@ -193,7 +193,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
@@ -215,7 +215,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
@@ -239,7 +239,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[]{
@@ -261,7 +261,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[]{
@@ -286,7 +286,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
 
@@ -315,7 +315,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[]{
@@ -341,7 +341,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
     verifyResult(partitions, new String[]{
         "'2013-01-01 01:01:01.123' <= TSCOL AND TSCOL < '2013-05-02 12:14:17.634'",
@@ -366,7 +366,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 3, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
     verifyResult(partitions, new String[]{
       "BCOL = TRUE",
@@ -390,7 +390,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 25, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 25, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
     verifyResult(partitions, new String[] {
@@ -437,7 +437,7 @@ public class TestPartitioner {
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null, "test_user");
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
     assertEquals(partitions.size(), 5);
     // First partition needs to contain entire upper bound
@@ -462,7 +462,7 @@ public class TestPartitioner {
     FromJobConfiguration jobConfig = new FromJobConfiguration();
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null, "test_user");
 
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 
@@ -493,7 +493,7 @@ public class TestPartitioner {
     jobConfig.fromJobConfig.allowNullValueInPartitionColumn = true;
 
     Partitioner partitioner = new GenericJdbcPartitioner();
-    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null);
+    PartitionerContext partitionerContext = new PartitionerContext(context, 5, null, "test_user");
 
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
 

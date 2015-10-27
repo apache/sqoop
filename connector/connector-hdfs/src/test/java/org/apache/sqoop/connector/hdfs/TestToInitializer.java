@@ -46,7 +46,7 @@ public class TestToInitializer extends TestHdfsBase {
     linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = TARGET_DIR;
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
+    InitializerContext initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
 
     Initializer initializer = new HdfsToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
@@ -66,7 +66,7 @@ public class TestToInitializer extends TestHdfsBase {
     linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = file.getAbsolutePath();
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
+    InitializerContext initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
 
     Initializer initializer = new HdfsToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
@@ -83,7 +83,7 @@ public class TestToInitializer extends TestHdfsBase {
     linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
+    InitializerContext initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
 
     Initializer initializer = new HdfsToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
@@ -101,7 +101,7 @@ public class TestToInitializer extends TestHdfsBase {
     jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
     jobConfig.toJobConfig.appendMode = true;
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext());
+    InitializerContext initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
 
     Initializer initializer = new HdfsToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);

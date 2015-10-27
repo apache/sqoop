@@ -56,6 +56,10 @@ public final class MRJobConstants extends Constants {
   public static final String JOB_ETL_EXTRACTOR_NUM = PREFIX_JOB_CONFIG
     + "etl.extractor.count";
 
+  public static final String SUBMITTING_USER = PREFIX_JOB_CONFIG
+    + "submission.user";
+
+
   public static final String PREFIX_CONNECTOR_FROM_CONTEXT =
     PREFIX_JOB_CONFIG + "connector.from.context.";
 

@@ -75,7 +75,7 @@ public class TestFtpLoader {
     };
 
     try {
-      LoaderContext context = new LoaderContext(null, reader, null);
+      LoaderContext context = new LoaderContext(null, reader, null, "test_user");
       LinkConfiguration linkConfig = new LinkConfiguration();
       linkConfig.linkConfig.username = username;
       linkConfig.linkConfig.password = password;

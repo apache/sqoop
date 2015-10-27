@@ -44,7 +44,7 @@ public class SqoopDestroyerExecutor {
    *                      and configuration objects.
    * @param direction The direction of the Destroyer to execute.
    */
-  public static void executeDestroyer(boolean success, Configuration configuration, Direction direction) {
+  public static void executeDestroyer(boolean success, Configuration configuration, Direction direction, String user) {
     String destroyerPropertyName, prefixPropertyName;
     switch (direction) {
       default:
@@ -78,7 +78,7 @@ public class SqoopDestroyerExecutor {
     Schema schema = direction == Direction.FROM ?
         matcher.getFromSchema() : matcher.getToSchema();
 
-    DestroyerContext destroyerContext = new DestroyerContext(subContext, success, schema);
+    DestroyerContext destroyerContext = new DestroyerContext(subContext, success, schema, user);
 
     LOG.info("Executing destroyer class " + destroyer.getClass());
     destroyer.destroy(destroyerContext, configConnection, configJob);

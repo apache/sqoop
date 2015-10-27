@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
@@ -30,6 +31,7 @@ import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 
 import java.io.IOException;
+import java.security.PrivilegedExceptionAction;
 
 public class HdfsToDestroyer extends Destroyer<LinkConfiguration, ToJobConfiguration> {
 
@@ -39,28 +41,38 @@ public class HdfsToDestroyer extends Destroyer<LinkConfiguration, ToJobConfigura
    * {@inheritDoc}
    */
   @Override
-  public void destroy(DestroyerContext context, LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
-    Configuration configuration = new Configuration();
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
+  public void destroy(final DestroyerContext context, final LinkConfiguration linkConfig, final ToJobConfiguration jobConfig) {
+    final Configuration configuration = new Configuration();
     HdfsUtils.contextToConfiguration(context.getContext(), configuration);
 
-    String workingDirectory = context.getString(HdfsConstants.WORK_DIRECTORY);
-    Path targetDirectory = new Path(jobConfig.toJobConfig.outputDirectory);
+    final String workingDirectory = context.getString(HdfsConstants.WORK_DIRECTORY);
+    final Path targetDirectory = new Path(jobConfig.toJobConfig.outputDirectory);
 
     try {
-      FileSystem fs = FileSystem.get(configuration);
+      UserGroupInformation.createProxyUser(context.getUser(),
+        UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+        public Void run() throws Exception {
+          FileSystem fs = FileSystem.get(configuration);
 
-      // If we succeeded, we need to move all files from working directory
-      if(context.isSuccess()) {
-        FileStatus[] fileStatuses = fs.listStatus(new Path(workingDirectory));
-        for (FileStatus status : fileStatuses) {
-          LOG.info("Committing file: " + status.getPath().toString() + " of size " + status.getLen());
-          fs.rename(status.getPath(), new Path(targetDirectory, status.getPath().getName()));
+          // If we succeeded, we need to move all files from working directory
+          if (context.isSuccess()) {
+            FileStatus[] fileStatuses = fs.listStatus(new Path
+              (workingDirectory));
+            for (FileStatus status : fileStatuses) {
+              LOG.info("Committing file: " + status.getPath().toString() + " " +
+                "of size " + status.getLen());
+              fs.rename(status.getPath(), new Path(targetDirectory, status
+                .getPath().getName()));
+            }
+          }
+
+          // Clean up working directory
+          fs.delete(new Path(workingDirectory), true);
+          return null;
         }
-      }
-
-      // Clean up working directory
-      fs.delete(new Path(workingDirectory), true);
-    } catch (IOException e) {
+      });
+    } catch (Exception e) {
       throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0008, e);
     }
   }

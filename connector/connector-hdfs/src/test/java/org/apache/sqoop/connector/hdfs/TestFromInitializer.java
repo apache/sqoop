@@ -48,7 +48,7 @@ public class TestFromInitializer {
     jobConfig = new FromJobConfiguration();
     context = new MutableMapContext();
     initializer = new HdfsFromInitializer();
-    initializerContext = new InitializerContext(context);
+    initializerContext = new InitializerContext(context, "test_user");
   }
 
   @Test

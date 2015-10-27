@@ -66,6 +66,7 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     From from = (From) mrJobRequest.getFrom();
     To to = (To) mrJobRequest.getTo();
     MutableMapContext context = mrJobRequest.getDriverContext();
+    context.setString(MRJobConstants.SUBMITTING_USER, jobRequest.getJobSubmission().getCreationUser());
     context.setString(MRJobConstants.JOB_ETL_PARTITIONER, from.getPartitioner().getName());
     context.setString(MRJobConstants.JOB_ETL_PARTITION, from.getPartition().getName());
     context.setString(MRJobConstants.JOB_ETL_EXTRACTOR, from.getExtractor().getName());

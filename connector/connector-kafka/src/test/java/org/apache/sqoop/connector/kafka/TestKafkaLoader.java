@@ -77,7 +77,7 @@ public class TestKafkaLoader {
       public Object readContent() {
         return null;
       }
-    }, null);
+    }, null, "test_user");
     LinkConfiguration linkConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
     linkConf.linkConfig.brokerList = testUtil.getKafkaServerUrl();

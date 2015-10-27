@@ -94,7 +94,7 @@ public class SqoopAuthenticationFilter extends DelegationTokenAuthenticationFilt
     Map<String, String> proxyuserConf = mapContext.getValByRegex("org\\.apache\\.sqoop\\.authentication\\.proxyuser");
     Configuration conf = new Configuration(false);
     for (Map.Entry<String, String> entry : proxyuserConf.entrySet()) {
-      conf.set(entry.getKey().substring("org.apache.sqoop.authentication.proxyuser.".length()), entry.getValue());
+      conf.set(entry.getKey().substring("org.apache.sqoop.authentication.".length()), entry.getValue());
     }
     return conf;
   }

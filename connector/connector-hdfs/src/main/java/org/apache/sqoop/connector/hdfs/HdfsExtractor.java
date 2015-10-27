@@ -19,6 +19,7 @@ package org.apache.sqoop.connector.hdfs;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.PrivilegedExceptionAction;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -29,6 +30,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.LineReader;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
@@ -56,25 +58,29 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
   private long rowsRead = 0;
 
   @Override
-  public void extract(ExtractorContext context, LinkConfiguration linkConfiguration, FromJobConfiguration jobConfiguration, HdfsPartition partition) {
-    HdfsUtils.contextToConfiguration(context.getContext(), conf);
-    dataWriter = context.getDataWriter();
-    schema = context.getSchema();
-
+  public void extract(final ExtractorContext context, final LinkConfiguration linkConfiguration, final FromJobConfiguration jobConfiguration, final HdfsPartition partition) {
     try {
-      HdfsPartition p = partition;
-      LOG.info("Working on partition: " + p);
-      int numFiles = p.getNumberOfFiles();
-      for (int i = 0; i < numFiles; i++) {
-        extractFile(linkConfiguration, jobConfiguration, p.getFile(i), p.getOffset(i), p.getLength(i));
-      }
-    } catch (IOException e) {
+      UserGroupInformation.createProxyUser(context.getUser(), UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+        public Void run() throws Exception {
+          HdfsUtils.contextToConfiguration(context.getContext(), conf);
+          dataWriter = context.getDataWriter();
+          schema = context.getSchema();
+          HdfsPartition p = partition;
+          LOG.info("Working on partition: " + p);
+          int numFiles = p.getNumberOfFiles();
+          for (int i = 0; i < numFiles; i++) {
+            extractFile(linkConfiguration, jobConfiguration, p.getFile(i), p.getOffset(i), p.getLength(i));
+          }
+          return null;
+        }
+      });
+    } catch (Exception e) {
       throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0001, e);
     }
   }
 
   private void extractFile(LinkConfiguration linkConfiguration,
-                           FromJobConfiguration fromJobCOnfiguration,
+                           FromJobConfiguration fromJobConfiguration,
                            Path file, long start, long length)
       throws IOException {
     long end = start + length;
@@ -83,9 +89,9 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     LOG.info("\t to offset " + end);
     LOG.info("\t of length " + length);
     if(isSequenceFile(file)) {
-      extractSequenceFile(linkConfiguration, fromJobCOnfiguration, file, start, length);
+      extractSequenceFile(linkConfiguration, fromJobConfiguration, file, start, length);
     } else {
-      extractTextFile(linkConfiguration, fromJobCOnfiguration, file, start, length);
+      extractTextFile(linkConfiguration, fromJobConfiguration, file, start, length);
     }
   }
 

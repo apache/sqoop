@@ -104,7 +104,7 @@ public class TestExtractor {
     // result set
     schema.addColumn(new FixedPoint("c1",2L, true)).addColumn(new Decimal("c2", 5, 2)).addColumn(new Text("c3")).addColumn(new Date("c4"));
 
-    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema);
+    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema, "test_user");
 
     partition = new GenericJdbcPartition();
     partition.setConditions("-50.0 <= DCOL AND DCOL < -16.6666666666666665");
@@ -144,7 +144,7 @@ public class TestExtractor {
     // result set
     schema.addColumn(new FixedPoint("c1", 2L, true)).addColumn(new Text("c2")).addColumn(new Date("c3"));
 
-    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema);
+    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema, "test_user");
 
     partition = new GenericJdbcPartition();
     partition.setConditions("-50 <= ICOL AND ICOL < -16");
@@ -181,7 +181,7 @@ public class TestExtractor {
     Extractor extractor = new GenericJdbcExtractor();
     DummyWriter writer = new DummyWriter();
     Schema schema = new Schema("TestIncorrectColumns");
-    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema);
+    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema, "test_user");
 
     partition.setConditions("-50 <= ICOL AND ICOL < -16");
     extractor.extract(extractorContext, linkConfig, jobConfig, partition);
@@ -217,7 +217,7 @@ public class TestExtractor {
     Schema schema = new Schema("TestExtractor");
     schema.addColumn(new FixedPoint("c1",2L, true)).addColumn(new Decimal("c2", 5, 2)).addColumn(new Text("c3")).addColumn(new Date("c4"));
 
-    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema);
+    ExtractorContext extractorContext = new ExtractorContext(context, writer, schema, "test_user");
 
     GenericJdbcPartition partition = new GenericJdbcPartition();
     partition.setConditions("-50 <= ICOL AND ICOL < -16");

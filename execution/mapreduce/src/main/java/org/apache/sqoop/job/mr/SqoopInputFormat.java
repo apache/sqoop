@@ -69,7 +69,7 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     Schema fromSchema = MRConfigurationUtils.getConnectorSchema(Direction.FROM, conf);
 
     long maxPartitions = conf.getLong(MRJobConstants.JOB_ETL_EXTRACTOR_NUM, 10);
-    PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions, fromSchema);
+    PartitionerContext partitionerContext = new PartitionerContext(connectorContext, maxPartitions, fromSchema, conf.get(MRJobConstants.SUBMITTING_USER));
 
     List<Partition> partitions = partitioner.getPartitions(partitionerContext, connectorLinkConfig, connectorFromJobConfig);
     List<InputSplit> splits = new LinkedList<InputSplit>();

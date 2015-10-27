@@ -49,6 +49,8 @@ public class TestKiteToDestroyer extends PowerMockTestCase {
 
   private final String[] expectedUris = new String[]{"a", "b"};
 
+  private String user;
+
   @org.mockito.Mock
   private KiteDatasetExecutor executorMock;
 
@@ -70,12 +72,13 @@ public class TestKiteToDestroyer extends PowerMockTestCase {
     toJobConfig = new ToJobConfiguration();
     toJobConfig.toJobConfig.uri = "dataset:file:/foo/bar";
     toJobConfig.toJobConfig.fileFormat = FileFormat.AVRO;
+    user = "test_user";
   }
 
   @Test
   public void testDestroyForSuccessfulJob() {
     // setup
-    DestroyerContext context = new DestroyerContext(null, true, null);
+    DestroyerContext context = new DestroyerContext(null, true, null, user);
     when(KiteDatasetExecutor.listTemporaryDatasetUris(toJobConfig.toJobConfig.uri))
         .thenReturn(expectedUris);
 
@@ -91,7 +94,7 @@ public class TestKiteToDestroyer extends PowerMockTestCase {
   @Test
   public void testDestroyForFailedJob() {
     // setup
-    DestroyerContext context = new DestroyerContext(null, false, null);
+    DestroyerContext context = new DestroyerContext(null, false, null, user);
     when(KiteDatasetExecutor.listTemporaryDatasetUris(toJobConfig.toJobConfig.uri))
         .thenReturn(expectedUris);
     for (String uri : expectedUris) {

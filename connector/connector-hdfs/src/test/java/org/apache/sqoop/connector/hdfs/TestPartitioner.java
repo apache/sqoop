@@ -94,7 +94,7 @@ public class TestPartitioner extends TestHdfsBase {
 
   @Test
   public void testPartitioner() {
-    PartitionerContext context = new PartitionerContext(new MapContext(new HashMap<String, String>()), 5, null);
+    PartitionerContext context = new PartitionerContext(new MapContext(new HashMap<String, String>()), 5, null, "test_user");
     LinkConfiguration linkConf = new LinkConfiguration();
     FromJobConfiguration jobConf = new FromJobConfiguration();
 

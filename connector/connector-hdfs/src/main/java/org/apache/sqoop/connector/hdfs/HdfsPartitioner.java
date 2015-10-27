@@ -19,6 +19,7 @@
 package org.apache.sqoop.connector.hdfs;
 
 import java.io.IOException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.hadoop.net.NodeBase;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
@@ -71,104 +73,108 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
       new HashMap<String, Set<String>>();
 
   @Override
-  public List<Partition> getPartitions(PartitionerContext context,
-                                       LinkConfiguration linkConfiguration,
-                                       FromJobConfiguration fromJobConfig) {
+  public List<Partition> getPartitions(final PartitionerContext context,
+                                       final LinkConfiguration linkConfiguration,
+                                       final FromJobConfiguration fromJobConfig) {
     assert fromJobConfig.incremental != null;
 
-    Configuration conf = new Configuration();
+    final Configuration conf = new Configuration();
     HdfsUtils.contextToConfiguration(context.getContext(), conf);
 
+    final List<Partition> partitions = new ArrayList<>();
     try {
-      long numInputBytes = getInputSize(conf, fromJobConfig.fromJobConfig.inputDirectory);
-      maxSplitSize = numInputBytes / context.getMaxPartitions();
+      UserGroupInformation.createProxyUser(context.getUser(),
+        UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+        public Void run() throws Exception {
+          long numInputBytes = getInputSize(conf, fromJobConfig.fromJobConfig.inputDirectory);
+          maxSplitSize = numInputBytes / context.getMaxPartitions();
 
-      if(numInputBytes % context.getMaxPartitions() != 0 ) {
-        maxSplitSize += 1;
-       }
-
-      long minSizeNode = 0;
-      long minSizeRack = 0;
-      long maxSize = 0;
-
-      // the values specified by setxxxSplitSize() takes precedence over the
-      // values that might have been specified in the config
-      if (minSplitSizeNode != 0) {
-        minSizeNode = minSplitSizeNode;
-      } else {
-        minSizeNode = conf.getLong(SPLIT_MINSIZE_PERNODE, 0);
-      }
-      if (minSplitSizeRack != 0) {
-        minSizeRack = minSplitSizeRack;
-      } else {
-        minSizeRack = conf.getLong(SPLIT_MINSIZE_PERRACK, 0);
-      }
-      if (maxSplitSize != 0) {
-        maxSize = maxSplitSize;
-      } else {
-        maxSize = conf.getLong("mapreduce.input.fileinputformat.split.maxsize", 0);
-      }
-      if (minSizeNode != 0 && maxSize != 0 && minSizeNode > maxSize) {
-        throw new IOException("Minimum split size pernode " + minSizeNode +
-                              " cannot be larger than maximum split size " +
-                              maxSize);
-      }
-      if (minSizeRack != 0 && maxSize != 0 && minSizeRack > maxSize) {
-        throw new IOException("Minimum split size per rack" + minSizeRack +
-                              " cannot be larger than maximum split size " +
-                              maxSize);
-      }
-      if (minSizeRack != 0 && minSizeNode > minSizeRack) {
-        throw new IOException("Minimum split size per node" + minSizeNode +
-                              " cannot be smaller than minimum split " +
-                              "size per rack " + minSizeRack);
-      }
-
-      // Incremental import related options
-      boolean incremental = fromJobConfig.incremental.incrementalType != null && fromJobConfig.incremental.incrementalType == IncrementalType.NEW_FILES;
-      long lastImportedDate = fromJobConfig.incremental.lastImportedDate != null ? fromJobConfig.incremental.lastImportedDate.getMillis() : -1;
-      long maxImportDate = context.getLong(HdfsConstants.MAX_IMPORT_DATE, -1);
-
-      // all the files in input set
-      String indir = fromJobConfig.fromJobConfig.inputDirectory;
-      FileSystem fs = FileSystem.get(conf);
-
-      List<Path> paths = new LinkedList<Path>();
-      for(FileStatus status : fs.listStatus(new Path(indir))) {
-        if(!status.isDir()) {
-          if(incremental) {
-            long modifiedDate = status.getModificationTime();
-            if(lastImportedDate < modifiedDate && modifiedDate <= maxImportDate) {
-              LOG.info("Will process input file: " + status.getPath() + " with modification date " + modifiedDate);
-              paths.add(status.getPath());
-            } else {
-              LOG.info("Skipping input file: " + status.getPath() + " with modification date " + modifiedDate);
-            }
-          } else {
-            // Without incremental mode, we're processing all files
-            LOG.info("Will process input file: " + status.getPath());
-            paths.add(status.getPath());
+          if (numInputBytes % context.getMaxPartitions() != 0) {
+            maxSplitSize += 1;
           }
+
+          long minSizeNode = 0;
+          long minSizeRack = 0;
+          long maxSize = 0;
+
+          // the values specified by setxxxSplitSize() takes precedence over the
+          // values that might have been specified in the config
+          if (minSplitSizeNode != 0) {
+            minSizeNode = minSplitSizeNode;
+          } else {
+            minSizeNode = conf.getLong(SPLIT_MINSIZE_PERNODE, 0);
+          }
+          if (minSplitSizeRack != 0) {
+            minSizeRack = minSplitSizeRack;
+          } else {
+            minSizeRack = conf.getLong(SPLIT_MINSIZE_PERRACK, 0);
+          }
+          if (maxSplitSize != 0) {
+            maxSize = maxSplitSize;
+          } else {
+            maxSize = conf.getLong("mapreduce.input.fileinputformat.split.maxsize", 0);
+          }
+          if (minSizeNode != 0 && maxSize != 0 && minSizeNode > maxSize) {
+            throw new IOException("Minimum split size pernode " + minSizeNode +
+              " cannot be larger than maximum split size " + maxSize);
+          }
+          if (minSizeRack != 0 && maxSize != 0 && minSizeRack > maxSize) {
+            throw new IOException("Minimum split size per rack" + minSizeRack +
+              " cannot be larger than maximum split size " + maxSize);
+          }
+          if (minSizeRack != 0 && minSizeNode > minSizeRack) {
+            throw new IOException("Minimum split size per node" + minSizeNode +
+              " cannot be smaller than minimum split " + "size per rack " + minSizeRack);
+          }
+
+          // Incremental import related options
+          boolean incremental = fromJobConfig.incremental.incrementalType != null
+            && fromJobConfig.incremental.incrementalType == IncrementalType.NEW_FILES;
+          long lastImportedDate = fromJobConfig.incremental.lastImportedDate != null
+            ? fromJobConfig.incremental.lastImportedDate.getMillis() : -1;
+          long maxImportDate = context.getLong(HdfsConstants.MAX_IMPORT_DATE, -1);
+
+          // all the files in input set
+          String indir = fromJobConfig.fromJobConfig.inputDirectory;
+          FileSystem fs = FileSystem.get(conf);
+
+          List<Path> paths = new LinkedList<Path>();
+          for (FileStatus status : fs.listStatus(new Path(indir))) {
+            if (!status.isDir()) {
+              if (incremental) {
+                long modifiedDate = status.getModificationTime();
+                if (lastImportedDate < modifiedDate && modifiedDate <= maxImportDate) {
+                  LOG.info("Will process input file: " + status.getPath() + " with modification date " + modifiedDate);
+                  paths.add(status.getPath());
+                } else {
+                  LOG.info("Skipping input file: " + status.getPath() + " with modification date " + modifiedDate);
+                }
+              } else {
+                // Without incremental mode, we're processing all files
+                LOG.info("Will process input file: " + status.getPath());
+                paths.add(status.getPath());
+              }
+            }
+          }
+
+          if (paths.size() == 0) {
+            return null;
+          }
+
+          // create splits for all files that are not in any pool.
+          getMoreSplits(conf, paths, maxSize, minSizeNode, minSizeRack, partitions);
+
+          // free up rackToNodes map
+          rackToNodes.clear();
+
+          return null;
         }
-      }
-
-      List<Partition> partitions = new ArrayList<Partition>();
-      if (paths.size() == 0) {
-        return partitions;
-      }
-
-      // create splits for all files that are not in any pool.
-      getMoreSplits(conf, paths,
-                    maxSize, minSizeNode, minSizeRack, partitions);
-
-      // free up rackToNodes map
-      rackToNodes.clear();
-
-      return partitions;
-
-    } catch (IOException e) {
+      });
+    } catch (Exception e) {
       throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0000, e);
     }
+
+    return partitions;
   }
 
   //TODO: Perhaps get the FS from link configuration so we can support remote HDFS

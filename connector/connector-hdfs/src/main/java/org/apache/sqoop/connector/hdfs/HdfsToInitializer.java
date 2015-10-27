@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -31,6 +32,7 @@ import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 
 import java.io.IOException;
+import java.security.PrivilegedExceptionAction;
 import java.util.UUID;
 
 public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfiguration> {
@@ -41,36 +43,43 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
    * {@inheritDoc}
    */
   @Override
-  public void initialize(InitializerContext context, LinkConfiguration linkConfig, ToJobConfiguration jobConfig) {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
+  public void initialize(final InitializerContext context, final LinkConfiguration linkConfig, final ToJobConfiguration jobConfig) {
     assert jobConfig != null;
     assert linkConfig != null;
     assert jobConfig.toJobConfig != null;
     assert jobConfig.toJobConfig.outputDirectory != null;
 
-    Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
+    final Configuration configuration = HdfsUtils.createConfiguration(linkConfig);
     HdfsUtils.contextToConfiguration(new MapContext(linkConfig.linkConfig.configOverrides), configuration);
     HdfsUtils.configurationToContext(configuration, context.getContext());
 
-    boolean appendMode = Boolean.TRUE.equals(jobConfig.toJobConfig.appendMode);
+    final boolean appendMode = Boolean.TRUE.equals(jobConfig.toJobConfig.appendMode);
 
     // Verification that given HDFS directory either don't exists or is empty
     try {
-      FileSystem fs = FileSystem.get(configuration);
-      Path path = new Path(jobConfig.toJobConfig.outputDirectory);
+      UserGroupInformation.createProxyUser(context.getUser(),
+        UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+        public Void run() throws Exception {
+          FileSystem fs = FileSystem.get(configuration);
+          Path path = new Path(jobConfig.toJobConfig.outputDirectory);
 
-      if(fs.exists(path)) {
-        if(fs.isFile(path)) {
-          throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory already exists and is a file");
-        }
+          if (fs.exists(path)) {
+            if (fs.isFile(path)) {
+              throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory already exists and is a file");
+            }
 
-        if(fs.isDirectory(path) && !appendMode) {
-          FileStatus[] fileStatuses = fs.listStatus(path);
-          if(fileStatuses.length != 0) {
-            throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory is not empty");
+            if (fs.isDirectory(path) && !appendMode) {
+              FileStatus[] fileStatuses = fs.listStatus(path);
+              if (fileStatuses.length != 0) {
+                throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory is not empty");
+              }
+            }
           }
+          return null;
         }
-      }
-    } catch (IOException e) {
+      });
+    } catch (Exception e) {
       throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Unexpected exception", e);
     }
 

@@ -73,7 +73,7 @@ public class TestKiteExtractor {
     // setup
     Schema schema = new Schema("testExtractor");
     schema.addColumn(new Text("TextCol"));
-    ExtractorContext context = new ExtractorContext(null, writerMock, schema);
+    ExtractorContext context = new ExtractorContext(null, writerMock, schema, "test_user");
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
     KiteDatasetPartition partition = new KiteDatasetPartition();

@@ -36,10 +36,13 @@ public class LoaderContext extends TransferableContext {
 
   private final Schema schema;
 
-  public LoaderContext(ImmutableContext context, DataReader reader, Schema schema) {
+  private final String user;
+
+  public LoaderContext(ImmutableContext context, DataReader reader, Schema schema, String user) {
     super(context);
     this.reader = reader;
     this.schema = schema;
+    this.user = user;
   }
 
   /**
@@ -59,4 +62,14 @@ public class LoaderContext extends TransferableContext {
   public Schema getSchema() {
     return schema;
   }
+
+  /**
+   * Return the String representing the user.
+   *
+   * @return
+   */
+  public String getUser() {
+    return user;
+  }
+
 }

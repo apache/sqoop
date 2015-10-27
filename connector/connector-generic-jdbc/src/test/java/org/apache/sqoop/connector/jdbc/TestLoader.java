@@ -107,7 +107,7 @@ public class TestLoader {
     schema.addColumn(new FixedPoint("c1", 2L, true)).addColumn(new Decimal("c2", 5, 2))
         .addColumn(new Text("c3")).addColumn(new Date("c4"))
         .addColumn(new DateTime("c5", false, false)).addColumn(new Time("c6", false)).addColumn(new DateTime("c7", false, false));
-    LoaderContext loaderContext = new LoaderContext(context, reader, schema);
+    LoaderContext loaderContext = new LoaderContext(context, reader, schema, "test_user");
     loader.load(loaderContext, linkConfig, jobConfig);
 
     int index = START;

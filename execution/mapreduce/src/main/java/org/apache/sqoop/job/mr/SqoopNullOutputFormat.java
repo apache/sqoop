@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.io.SqoopWritable;
 
 /**
@@ -74,8 +75,8 @@ public class SqoopNullOutputFormat extends OutputFormat<SqoopWritable, NullWrita
 
     private void invokeDestroyerExecutor(JobContext jobContext, boolean success) {
       Configuration config = jobContext.getConfiguration();
-      SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.FROM);
-      SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.TO);
+      SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.FROM, jobContext.getConfiguration().get(MRJobConstants.SUBMITTING_USER));
+      SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.TO, jobContext.getConfiguration().get(MRJobConstants.SUBMITTING_USER));
     }
 
     @Override

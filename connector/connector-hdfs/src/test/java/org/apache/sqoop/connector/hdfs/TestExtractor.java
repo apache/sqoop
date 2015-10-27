@@ -51,6 +51,7 @@ public class TestExtractor extends TestHdfsBase {
   private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
   private static final int NUMBER_OF_FILES = 5;
   private static final int NUMBER_OF_ROWS_PER_FILE = 1000;
+  private static final String TEST_USER = "test_user";
 
   private ToFormat outputFileType;
   private Class<? extends CompressionCodec> compressionClass;
@@ -132,6 +133,8 @@ public class TestExtractor extends TestHdfsBase {
         Assert.assertEquals("'" + index + "'", components[3]);
         Assert.assertEquals("\\\\N", components[4]);
 
+        assertTestUser(TEST_USER);
+
         visited[index - 1] = true;
       }
 
@@ -139,7 +142,7 @@ public class TestExtractor extends TestHdfsBase {
       public void writeRecord(Object obj) {
         throw new AssertionError("Should not be writing object.");
       }
-    }, schema);
+    }, schema, TEST_USER);
 
     LinkConfiguration emptyLinkConfig = new LinkConfiguration();
     FromJobConfiguration emptyJobConfig = new FromJobConfiguration();
@@ -193,7 +196,7 @@ public class TestExtractor extends TestHdfsBase {
       public void writeRecord(Object obj) {
         throw new AssertionError("Should not be writing object.");
       }
-    }, schema);
+    }, schema, TEST_USER);
 
     LinkConfiguration emptyLinkConfig = new LinkConfiguration();
     FromJobConfiguration fromJobConfiguration = new FromJobConfiguration();

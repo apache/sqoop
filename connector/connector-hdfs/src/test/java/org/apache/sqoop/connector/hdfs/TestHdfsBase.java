@@ -25,6 +25,8 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.security.UserGroupInformation;
+import org.testng.Assert;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -149,5 +151,14 @@ public class TestHdfsBase {
                                      int numberOfRows)
       throws IOException, InstantiationException, IllegalAccessException {
     createSequenceInput(indir, clz, numberOfFiles, numberOfRows, "%d,%f,%s");
+  }
+
+  protected void assertTestUser(String testUser) {
+    // Ensure that we are impersonating correctly
+    try{
+      Assert.assertEquals(UserGroupInformation.getCurrentUser().getUserName(), testUser);
+    } catch (Exception e) {
+      Assert.fail();
+    }
   }
 }

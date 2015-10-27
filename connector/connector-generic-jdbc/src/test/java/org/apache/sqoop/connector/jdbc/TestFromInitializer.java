@@ -44,6 +44,7 @@ public class TestFromInitializer {
   private final String tableSql;
   private final String schemalessTableSql;
   private final String tableColumns;
+  private final String testUser;
 
   private GenericJdbcExecutor executor;
 
@@ -57,6 +58,7 @@ public class TestFromInitializer {
     tableSql = "SELECT * FROM " + schemaName + "." + tableName + " WHERE ${CONDITIONS}";
     schemalessTableSql = "SELECT * FROM " + schemalessTableName + " WHERE ${CONDITIONS}";
     tableColumns = "ICOL,VCOL";
+    testUser = "test_user";
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -123,7 +125,7 @@ public class TestFromInitializer {
     jobConfig.fromJobConfig.tableName = schemalessTableName;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -151,7 +153,7 @@ public class TestFromInitializer {
     jobConfig.incrementalRead.lastValue = "-51";
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -181,7 +183,7 @@ public class TestFromInitializer {
     jobConfig.incrementalRead.lastValue = "0";
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -210,7 +212,7 @@ public class TestFromInitializer {
     jobConfig.fromJobConfig.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -237,7 +239,7 @@ public class TestFromInitializer {
     jobConfig.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -266,7 +268,7 @@ public class TestFromInitializer {
     jobConfig.incrementalRead.lastValue = "-51";
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -296,7 +298,7 @@ public class TestFromInitializer {
     jobConfig.incrementalRead.lastValue = "0";
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -326,7 +328,7 @@ public class TestFromInitializer {
     jobConfig.fromJobConfig.tableName = tableName;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -356,7 +358,7 @@ public class TestFromInitializer {
     jobConfig.fromJobConfig.columns = tableColumns;
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -384,7 +386,7 @@ public class TestFromInitializer {
     jobConfig.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -414,7 +416,7 @@ public class TestFromInitializer {
     jobConfig.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();
@@ -436,7 +438,7 @@ public class TestFromInitializer {
     jobConfig.fromJobConfig.partitionColumn = "DCOL";
 
     MutableContext context = new MutableMapContext();
-    InitializerContext initializerContext = new InitializerContext(context);
+    InitializerContext initializerContext = new InitializerContext(context, testUser);
 
     @SuppressWarnings("rawtypes")
     Initializer initializer = new GenericJdbcFromInitializer();

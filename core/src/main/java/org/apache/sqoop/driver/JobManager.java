@@ -531,7 +531,8 @@ public class JobManager implements Reconfigurable {
   }
 
   private InitializerContext getConnectorInitializerContext(JobRequest jobRequest, Direction direction) {
-    return new InitializerContext(jobRequest.getConnectorContext(direction));
+    return new InitializerContext(jobRequest.getConnectorContext(direction),
+      jobRequest.getJobSubmission().getCreationUser());
   }
 
   void prepareJob(JobRequest request) {
@@ -571,8 +572,8 @@ public class JobManager implements Reconfigurable {
       Destroyer fromDestroyer = (Destroyer) ClassUtils.instantiate(fromConnector.getFrom().getDestroyer());
       Destroyer toDestroyer = (Destroyer) ClassUtils.instantiate(toConnector.getTo().getDestroyer());
 
-      DestroyerContext fromDestroyerContext = new DestroyerContext(submission.getFromConnectorContext(), true, submission.getFromSchema());
-      DestroyerContext toDestroyerContext = new DestroyerContext(submission.getToConnectorContext(), false, submission.getToSchema());
+      DestroyerContext fromDestroyerContext = new DestroyerContext(submission.getFromConnectorContext(), true, submission.getFromSchema(), submission.getCreationUser());
+      DestroyerContext toDestroyerContext = new DestroyerContext(submission.getToConnectorContext(), false, submission.getToSchema(), submission.getCreationUser());
 
       fromDestroyer.updateConfiguration(fromDestroyerContext, fromLinkConfig, fromJob);
       toDestroyer.updateConfiguration(toDestroyerContext, toLinkConfig, toJob);
@@ -626,11 +627,11 @@ public class JobManager implements Reconfigurable {
     }
 
     DestroyerContext fromDestroyerContext = new DestroyerContext(
-      request.getConnectorContext(Direction.FROM), false, request.getJobSubmission()
-        .getFromSchema());
+      request.getConnectorContext(Direction.FROM), false, request.getJobSubmission().getFromSchema(),
+      request.getJobSubmission().getCreationUser());
     DestroyerContext toDestroyerContext = new DestroyerContext(
-        request.getConnectorContext(Direction.TO), false, request.getJobSubmission()
-        .getToSchema());
+      request.getConnectorContext(Direction.TO), false, request.getJobSubmission().getToSchema(),
+      request.getJobSubmission().getCreationUser());
 
     fromDestroyer.destroy(fromDestroyerContext, request.getConnectorLinkConfig(Direction.FROM),
         request.getJobConfig(Direction.FROM));

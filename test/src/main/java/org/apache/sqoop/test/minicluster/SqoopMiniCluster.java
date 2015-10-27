@@ -154,7 +154,6 @@ public abstract class SqoopMiniCluster {
       output.add(entry.getKey() + "=" + entry.getValue());
     }
   }
-
   /**
    * Return properties for logger configuration.
    *
@@ -200,6 +199,18 @@ public abstract class SqoopMiniCluster {
 
     properties.put("org.apache.sqoop.authentication.type", "SIMPLE");
     properties.put("org.apache.sqoop.authentication.handler", "org.apache.sqoop.security.SimpleAuthenticationHandler");
+
+    /**
+     * Due to the fact that we share a JVM with hadoop during unit testing,
+     * proxy user configuration is also shared with hadoop.
+     *
+     * We need to enable impersonation on hadoop for our map reduce jobs
+     * (normally this would be accomplished with "hadoop.proxyuser"), so we
+     * pass it through sqoop configuration
+     */
+    String user = System.getProperty("user.name");
+    properties.put("org.apache.sqoop.authentication.proxyuser." + user + ".groups", "*");
+    properties.put("org.apache.sqoop.authentication.proxyuser." + user + ".hosts", "*");
 
     return properties;
   }

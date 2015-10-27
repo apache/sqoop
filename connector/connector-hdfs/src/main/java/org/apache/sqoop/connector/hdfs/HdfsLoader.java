@@ -18,12 +18,14 @@
 package org.apache.sqoop.connector.hdfs;
 
 import java.io.IOException;
+import java.security.PrivilegedExceptionAction;
 import java.util.UUID;
 
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
@@ -52,40 +54,43 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
    * @throws Exception
    */
   @Override
-  public void load(LoaderContext context, LinkConfiguration linkConfiguration,
-                   ToJobConfiguration toJobConfig) throws Exception {
-    Configuration conf = new Configuration();
-    HdfsUtils.contextToConfiguration(context.getContext(), conf);
+  public void load(final LoaderContext context, final LinkConfiguration linkConfiguration,
+                   final ToJobConfiguration toJobConfig) throws Exception {
+    UserGroupInformation.createProxyUser(context.getUser(),
+      UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+      public Void run() throws Exception {
+        Configuration conf = new Configuration();
+        HdfsUtils.contextToConfiguration(context.getContext(), conf);
 
-    DataReader reader = context.getDataReader();
-    String directoryName = context.getString(HdfsConstants.WORK_DIRECTORY);
-    String codecname = getCompressionCodecName(toJobConfig);
+        DataReader reader = context.getDataReader();
+        String directoryName = context.getString(HdfsConstants.WORK_DIRECTORY);
+        String codecname = getCompressionCodecName(toJobConfig);
 
-    CompressionCodec codec = null;
-    if (codecname != null) {
-      Class<?> clz = ClassUtils.loadClass(codecname);
-      if (clz == null) {
-        throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0003, codecname);
-      }
+        CompressionCodec codec = null;
+        if (codecname != null) {
+          Class<?> clz = ClassUtils.loadClass(codecname);
+          if (clz == null) {
+            throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0003, codecname);
+          }
 
-      try {
-        codec = (CompressionCodec) clz.newInstance();
-        if (codec instanceof Configurable) {
-          ((Configurable) codec).setConf(conf);
+          try {
+            codec = (CompressionCodec) clz.newInstance();
+            if (codec instanceof Configurable) {
+              ((Configurable) codec).setConf(conf);
+            }
+          } catch (RuntimeException|InstantiationException|IllegalAccessException e) {
+            throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0004, codecname, e);
+          }
         }
-      } catch (RuntimeException|InstantiationException|IllegalAccessException e) {
-        throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0004, codecname, e);
-      }
-    }
 
-    String filename = directoryName + "/" + UUID.randomUUID() + getExtension(toJobConfig,codec);
+        String filename = directoryName + "/" + UUID.randomUUID() + getExtension(toJobConfig,codec);
 
-    try {
-      Path filepath = new Path(filename);
+        try {
+          Path filepath = new Path(filename);
 
-      GenericHdfsWriter filewriter = getWriter(toJobConfig);
+          GenericHdfsWriter filewriter = getWriter(toJobConfig);
 
-      filewriter.initialize(filepath, conf, codec);
+          filewriter.initialize(filepath, conf, codec);
 
       if (!HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfig) || (context.getSchema() instanceof ByteArraySchema)) {
         String record;
@@ -110,10 +115,12 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
       }
       filewriter.destroy();
 
-    } catch (IOException e) {
-      throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0005, e);
+        } catch (IOException e) {
+          throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0005, e);
+        }
+      return null;
     }
-
+  });
   }
 
   private GenericHdfsWriter getWriter(ToJobConfiguration toJobConf) {

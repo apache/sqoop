@@ -160,7 +160,8 @@ public class OutputDirectoryTest extends ConnectorTestCase {
       // We can directly verify the ErrorCode from SqoopException as client side
       // is not rebuilding SqoopExceptions per missing ErrorCodes. E.g. the cause
       // will be generic Throwable and not SqoopException instance.
-      Throwable cause = ex.getCause();
+      // We need to 'getCause' twice because of the layer from impersonation
+      Throwable cause = ex.getCause().getCause();
       assertNotNull(cause);
 
       for(String fragment : fragments) {
