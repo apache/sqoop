@@ -433,7 +433,7 @@ public final class ConfigFiller {
     String opt = ConfigOptions.getOptionKey(prefix, input);
     if (line.hasOption(opt)) {
       String value = line.getOptionValue(ConfigOptions.getOptionKey(prefix, input));
-      if(value.length() > input.getMaxLength()) {
+      if((input.getMaxLength() >= 0) && (value.length() > input.getMaxLength())) {
         errorMessage(input, "Size of input exceeds allowance for this input"
           + " field. Maximal allowed size is " + input.getMaxLength());
       }
@@ -1039,7 +1039,7 @@ public final class ConfigFiller {
       input.setValue(userTyped);
 
       // Check that it did not exceeds maximal allowance for given input
-      if(userTyped.length() > input.getMaxLength()) {
+      if((input.getMaxLength() >= 0) && (userTyped.length() > input.getMaxLength())) {
         errorMessage("Size of input exceeds allowance for this input"
           + " field. Maximal allowed size is " + input.getMaxLength());
         return fillInputStringWithBundle(input, reader, bundle);
