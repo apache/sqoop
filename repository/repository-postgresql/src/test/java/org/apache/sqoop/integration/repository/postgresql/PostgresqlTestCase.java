@@ -21,12 +21,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.PostgreSQLProvider;
+import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.*;
 import org.apache.sqoop.repository.postgresql.PostgresqlRepositoryHandler;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
+import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -44,11 +46,17 @@ abstract public class PostgresqlTestCase {
   public static DatabaseProvider provider;
   public static PostgresqlTestUtils utils;
   public PostgresqlRepositoryHandler handler;
+  private ConnectorManager mockConnectorManager;
 
   @BeforeClass(alwaysRun = true)
   public void setUpClass() {
     provider = new PostgreSQLProvider();
     utils = new PostgresqlTestUtils(provider);
+
+    mockConnectorManager = Mockito.mock(ConnectorManager.class);
+    Mockito.when(mockConnectorManager.getConnectorConfigurable("A")).thenReturn(getConnector(true, true, "A", "org.apache.sqoop.test.A"));
+    Mockito.when(mockConnectorManager.getConnectorConfigurable("B")).thenReturn(getConnector(true, true, "B", "org.apache.sqoop.test.B"));
+    ConnectorManager.setInstance(mockConnectorManager);
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -164,5 +172,18 @@ abstract public class PostgresqlTestCase {
     configs.add(new MConfig(configName2, inputs, Collections.EMPTY_LIST));
 
     return configs;
+  }
+
+  protected MConnector getConnector(boolean from, boolean to, String connectorName, String connectorClass) {
+    MFromConfig fromConfig = null;
+    MToConfig toConfig = null;
+    if (from) {
+      fromConfig = getFromConfig();
+    }
+    if (to) {
+      toConfig = getToConfig();
+    }
+    return new MConnector(connectorName, connectorClass, "1.0-test", getLinkConfig(), fromConfig,
+            toConfig);
   }
 }
