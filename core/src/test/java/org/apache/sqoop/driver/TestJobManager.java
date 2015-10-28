@@ -18,8 +18,10 @@
 package org.apache.sqoop.driver;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.Mockito.doReturn;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -28,9 +30,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.error.code.DriverError;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
@@ -48,9 +52,14 @@ public class TestJobManager {
   private ConnectorManager connectorMgrMock;
   private RepositoryManager repositoryManagerMock;
   private Repository jdbcRepoMock;
+  private SqoopConfiguration configurationMock;
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
+    configurationMock = mock(SqoopConfiguration.class);
+    doReturn(new MapContext(Collections.EMPTY_MAP)).when(configurationMock).getContext();
+    SqoopConfiguration.setInstance(configurationMock);
+
     jobManager = JobManager.getInstance();
     connectorMgrMock = mock(ConnectorManager.class);
     sqoopConnectorMock = mock(SqoopConnector.class);

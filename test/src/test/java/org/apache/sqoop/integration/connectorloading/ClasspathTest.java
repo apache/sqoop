@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.integration.classpath;
+package org.apache.sqoop.integration.connectorloading;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.hadoop.conf.Configuration;

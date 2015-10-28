@@ -40,11 +40,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.common.EmptyConfiguration;
 import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.DriverBean;
@@ -76,9 +78,14 @@ public class TestJdbcRepository {
   private JdbcRepositoryHandler repoHandlerMock;
   private ConnectorConfigurableUpgrader connectorUpgraderMock;
   private DriverUpgrader driverUpgraderMock;
+  private SqoopConfiguration configurationMock;
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
+    configurationMock = mock(SqoopConfiguration.class);
+    doReturn(new MapContext(Collections.EMPTY_MAP)).when(configurationMock).getContext();
+    SqoopConfiguration.setInstance(configurationMock);
+
     repoTransactionMock = mock(JdbcRepositoryTransaction.class);
     connectorMgrMock = mock(ConnectorManager.class);
     driverMock = mock(Driver.class);

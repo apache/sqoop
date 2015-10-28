@@ -140,6 +140,7 @@ public abstract class SqoopMiniCluster {
     mapToProperties(sqoopProperties, getConnectorManagerConfiguration());
     mapToProperties(sqoopProperties, getDriverManagerConfiguration());
     mapToProperties(sqoopProperties, getClasspathConfiguration());
+    mapToProperties(sqoopProperties, getBlacklistedConnectorConfiguration());
 
     FileUtils.writeLines(f, sqoopProperties);
 
@@ -228,6 +229,10 @@ public abstract class SqoopMiniCluster {
   }
 
   protected Map<String, String> getClasspathConfiguration() {
+    return MapUtils.EMPTY_MAP;
+  }
+
+  protected Map<String, String> getBlacklistedConnectorConfiguration() {
     return MapUtils.EMPTY_MAP;
   }
 }

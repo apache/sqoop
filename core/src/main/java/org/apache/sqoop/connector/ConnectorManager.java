@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.spi.SqoopConnector;
@@ -40,6 +42,7 @@ import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.repository.RepositoryTransaction;
+import org.apache.sqoop.utils.ContextUtils;
 
 public class ConnectorManager implements Reconfigurable {
 
@@ -58,6 +61,8 @@ public class ConnectorManager implements Reconfigurable {
    */
   private static boolean DEFAULT_AUTO_UPGRADE = false;
 
+  private Set<String> blacklistedConnectors;
+
   /**
    * Create default object by default.
    *
@@ -70,7 +75,15 @@ public class ConnectorManager implements Reconfigurable {
   /**
    * The private constructor for the singleton class.
    */
-  private ConnectorManager() {}
+  private ConnectorManager() {
+    String blacklistedConnectorsString =
+      SqoopConfiguration.getInstance().getContext().getString(ConfigurationConstants.BLACKLISTED_CONNECTORS);
+    if (blacklistedConnectorsString == null) {
+      blacklistedConnectors = Collections.EMPTY_SET;
+    } else {
+      blacklistedConnectors = ContextUtils.getUniqueStrings(blacklistedConnectorsString);
+    }
+  }
 
   /**
    * Return current instance.
@@ -176,7 +189,7 @@ public class ConnectorManager implements Reconfigurable {
       LOG.trace("Begin connector manager initialization");
     }
 
-    List<URL> connectorConfigs = ConnectorManagerUtils.getConnectorConfigs();
+    List<URL> connectorConfigs = ConnectorManagerUtils.getConnectorConfigs(blacklistedConnectors);
 
     LOG.info("Connector config urls: " + connectorConfigs);
 

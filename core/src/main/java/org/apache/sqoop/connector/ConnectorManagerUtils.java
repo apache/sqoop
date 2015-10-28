@@ -19,6 +19,7 @@ package org.apache.sqoop.connector;
 
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.ConfigurationConstants;
+import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.error.code.ConnectorError;
 
 import java.io.File;
@@ -27,6 +28,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -40,15 +43,18 @@ public class ConnectorManagerUtils {
    *
    * @return List of URLs.
    */
-  public static List<URL> getConnectorConfigs() {
-    List<URL> connectorConfigs = new ArrayList<URL>();
+  public static List<URL> getConnectorConfigs(Set<String> connectorBlacklist) {
+    List<URL> connectorConfigs = new ArrayList<>();
 
     try {
       // Check ConnectorManager classloader.
       Enumeration<URL> appPathConfigs = ConnectorManager.class.getClassLoader().getResources(
           ConfigurationConstants.FILENAME_CONNECTOR_PROPERTIES);
       while (appPathConfigs.hasMoreElements()) {
-        connectorConfigs.add(appPathConfigs.nextElement());
+        URL connectorConfig = appPathConfigs.nextElement();
+        if (!isBlacklisted(connectorConfig, connectorBlacklist)) {
+          connectorConfigs.add(connectorConfig);
+        }
       }
 
       // Check thread context classloader.
@@ -58,7 +64,7 @@ public class ConnectorManagerUtils {
 
         while (ctxPathConfigs.hasMoreElements()) {
           URL configUrl = ctxPathConfigs.nextElement();
-          if (!connectorConfigs.contains(configUrl)) {
+          if (!connectorConfigs.contains(configUrl) && !isBlacklisted(configUrl, connectorBlacklist)) {
             connectorConfigs.add(configUrl);
           }
         }
@@ -68,6 +74,17 @@ public class ConnectorManagerUtils {
     }
 
     return connectorConfigs;
+  }
+
+  static boolean isBlacklisted(URL connectorConfig, Set<String> connectorBlacklist) throws IOException {
+    Properties properties = new Properties();
+    properties.load(connectorConfig.openStream());
+    String connectorName = properties.getProperty(ConfigurationConstants.CONNPROP_CONNECTOR_NAME);
+    if (connectorName == null) {
+      throw new IOException("malformed connector properties: " + connectorConfig.getPath());
+    } else {
+      return connectorBlacklist.contains(connectorName);
+    }
   }
 
   static boolean isConnectorJar(File file) {

@@ -32,6 +32,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -752,7 +753,7 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       LOG.trace("Begin HDFS Connector pre-loading.");
     }
 
-    List<URL> connectorConfigs = ConnectorManagerUtils.getConnectorConfigs();
+    List<URL> connectorConfigs = ConnectorManagerUtils.getConnectorConfigs(Collections.EMPTY_SET);
 
     if (LOG.isInfoEnabled()) {
       LOG.info("Connector configs: " + connectorConfigs);

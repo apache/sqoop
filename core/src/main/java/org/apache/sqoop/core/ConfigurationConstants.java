@@ -86,6 +86,11 @@ public final class ConfigurationConstants {
    */
   public static final String JOB_CLASSPATH = "org.apache.sqoop.classpath.job";
 
+  /**
+   * List of connectors that will not be loaded at startup
+   */
+  public static final String BLACKLISTED_CONNECTORS = "org.apache.sqoop.connector.blacklist";
+
   private ConfigurationConstants() {
     // Disable explicit object creation
   }
