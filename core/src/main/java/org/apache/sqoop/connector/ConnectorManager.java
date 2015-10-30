@@ -75,15 +75,7 @@ public class ConnectorManager implements Reconfigurable {
   /**
    * The private constructor for the singleton class.
    */
-  private ConnectorManager() {
-    String blacklistedConnectorsString =
-      SqoopConfiguration.getInstance().getContext().getString(ConfigurationConstants.BLACKLISTED_CONNECTORS);
-    if (blacklistedConnectorsString == null) {
-      blacklistedConnectors = Collections.EMPTY_SET;
-    } else {
-      blacklistedConnectors = ContextUtils.getUniqueStrings(blacklistedConnectorsString);
-    }
-  }
+  private ConnectorManager() {}
 
   /**
    * Return current instance.
@@ -184,6 +176,16 @@ public class ConnectorManager implements Reconfigurable {
     if (connectorNames == null) {
       connectorNames = new HashSet<String>();
     }
+    if (blacklistedConnectors == null) {
+      String blacklistedConnectorsString =
+        SqoopConfiguration.getInstance().getContext().getString(ConfigurationConstants.BLACKLISTED_CONNECTORS);
+
+      if (blacklistedConnectorsString == null) {
+        blacklistedConnectors = Collections.EMPTY_SET;
+      } else {
+        blacklistedConnectors = ContextUtils.getUniqueStrings(blacklistedConnectorsString);
+      }
+    }
 
     if (LOG.isTraceEnabled()) {
       LOG.trace("Begin connector manager initialization");
@@ -256,6 +258,7 @@ public class ConnectorManager implements Reconfigurable {
     handlerMap = null;
     idToNameMap = null;
     connectorNames = null;
+    blacklistedConnectors = null;
   }
 
   @Override

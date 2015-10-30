@@ -21,10 +21,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.ConfigurationConstants;
-import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.HdfsUtils;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -60,8 +60,12 @@ public class BlacklistedConnectorTest extends ConnectorTestCase {
   @Test(expectedExceptions = {SqoopException.class})
   public void testCreateLinkWithNonexistantConnector() throws Exception {
     startSqoopMiniCluster();
-
     getClient().createLink("generic-jdbc-connector");
+  }
+
+  @AfterMethod
+  public void stopCluster() throws Exception {
+    getCluster().stop();
   }
 
   @Override
