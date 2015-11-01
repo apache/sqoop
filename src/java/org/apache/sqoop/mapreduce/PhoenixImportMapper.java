@@ -31,7 +31,9 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.phoenix.mapreduce.util.PhoenixConfigurationUtil;
 import org.apache.phoenix.util.ColumnInfo;
+import org.apache.sqoop.phoenix.PhoenixConstants;
 import org.apache.sqoop.phoenix.PhoenixSqoopWritable;
+import org.apache.sqoop.phoenix.PhoenixUtil;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
@@ -50,6 +52,8 @@ public class PhoenixImportMapper
 	
 	private Configuration conf;
 	private List<ColumnInfo> columnInfos;
+	/* holds the mapping of phoenix column to db column */
+	private Map<String,String> columnMappings;
 	
 	@Override
 	protected void setup(Mapper<LongWritable, SqoopRecord, NullWritable, PhoenixSqoopWritable>.Context context)
@@ -57,6 +61,11 @@ public class PhoenixImportMapper
 		conf = context.getConfiguration();
 		try {
 			columnInfos = PhoenixConfigurationUtil.getUpsertColumnMetadataList(conf);
+			String columnMaps = conf.get(PhoenixConstants.PHOENIX_COLUMN_MAPPING);
+			for(Map.Entry<String,String> prop : conf) {
+				System.out.println(String.format(" the key is [%s] and the value is [%s]" , prop.getKey(),prop.getValue()));
+			}
+            columnMappings = PhoenixUtil.getPhoenixToSqoopMap(columnMaps);
 		} catch (SQLException e) {
 			 throw new RuntimeException("Failed to load the upsert column metadata for table.");
 		}
@@ -67,18 +76,14 @@ public class PhoenixImportMapper
       throws IOException, InterruptedException {
    
 		Map<String,Object> fields = val.getFieldMap();
-		//TODO: need to optimize this call. 
-		Map<String,Object> keysToUpper = Maps.newHashMapWithExpectedSize(fields.size()); 
-		for(Map.Entry<String,Object> kv : fields.entrySet()) {
-			keysToUpper.put(kv.getKey().toUpperCase(), kv.getValue());
-		}
 		PhoenixSqoopWritable recordWritable = new PhoenixSqoopWritable();
 		recordWritable.setColumnMetadata(columnInfos);
 		List<Object> columnValues = Lists.newArrayListWithCapacity(columnInfos.size());
 		for(ColumnInfo column : columnInfos) {
-			String columnName = column.getDisplayName();
-			Object columnValue = keysToUpper.get(columnName);
-			columnValues.add(columnValue);
+			String pColName = column.getDisplayName();
+			String sColName = columnMappings.get(pColName);
+			Object sColValue = fields.get(sColName);
+			columnValues.add(sColValue);
 		}
 		recordWritable.setValues(columnValues);
 		context.write(NullWritable.get(), recordWritable);

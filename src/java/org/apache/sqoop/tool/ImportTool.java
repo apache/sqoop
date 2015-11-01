@@ -1132,6 +1132,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     validateHiveOptions(options);
     validateHCatalogOptions(options);
     validateAccumuloOptions(options);
+    validatePhoenixOptions(options);
   }
 }
 

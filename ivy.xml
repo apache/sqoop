@@ -292,8 +292,9 @@ under the License.
       <exclude org="log4j" module="log4j"/>
     </dependency>
 
-    <dependency org="org.apache.phoenix" name="phoenix-core" rev="4.3.1" conf="phoenix->default">
+    <dependency org="org.apache.phoenix" name="phoenix-core" rev="${phoenix.version}" conf="phoenix->default">
       <artifact name="phoenix-core" type="jar"/>
+      <artifact name="phoenix-core" type="test-jar" ext="jar" m:classifier="tests"/>
     </dependency>
     
     <dependency org="org.apache.hive.hcatalog" name="hive-hcatalog-core"

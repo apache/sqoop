@@ -319,9 +319,12 @@ public class SqoopOptions implements Cloneable {
   // Phoenix table to import into.
   @StoredAsProperty("phoenix.table") private String phoenixTable;
 
-  // Phoenix columns to be upserted to . The order should confirm to the import table select query
-  @StoredAsProperty("phoenix.columns") private String phoenixColumns;
+  //Phoenix column mapping to db columns.
+  @StoredAsProperty("phoenix.column.mapping") private String phoenixColumnMapping;
 
+  //Is bulkload.
+  @StoredAsProperty("phoenix.bulk.load.enabled") private boolean phoenixBulkLoadEnabled;
+ 
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved job, these will
   // be populated by the JobStorage to facilitate updating the same
@@ -1900,21 +1903,7 @@ public class SqoopOptions implements Cloneable {
     this.conf = config;
   }
 
-  public String getPhoenixTable() {
-    return phoenixTable;
-  }
-  public void setPhoenixTable(String phoenixTable) {
-    this.phoenixTable = phoenixTable;
-  }
-
-  public String getPhoenixColumns() {
-    return phoenixColumns;
-  }
-
-  public void setPhoenixColumns(String phoenixColumns) {
-    this.phoenixColumns = phoenixColumns;
-  }
-
+ 
   /**
    * @return command-line arguments after a '-'.
    */
@@ -2423,6 +2412,51 @@ public class SqoopOptions implements Cloneable {
    **/
   public void setAccumuloZookeepers(String zookeepers) {
     this.accumuloZookeepers = zookeepers;
+  }
+
+  /**
+   * Get the phoenix table to import
+   * @return
+   */
+  public String getPhoenixTable() {
+    return phoenixTable;
+  }
+  
+  /**
+   * sets the target phoenix table
+   * @param phoenixTable
+   */
+  public void setPhoenixTable(String phoenixTable) {
+    this.phoenixTable = phoenixTable;
+  }
+
+  /**
+   * one to one mapping between db columns and phoenix columns for the table
+   * the pattern is dbcolumn1;phoenixcolumn1,dbcolumn2;phoenixcolumn2
+   * @return
+   */
+  public String getPhoenixColumnMapping() {
+	  return phoenixColumnMapping;
+  }
+
+  /**
+   * sets the db column manpping to phoenix column mapping.
+   * @param phoenixColumnMapping
+   */
+  public void setPhoenixColumnMapping(String phoenixColumnMapping) {
+	 this.phoenixColumnMapping = phoenixColumnMapping;
+  }
+
+  /**
+   * returns if the load to phoenix is through the bulk load	
+   * @return
+   */
+  public boolean isPhoenixBulkLoadEnabled() {
+	return phoenixBulkLoadEnabled;
+  }
+	
+  public void setPhoenixBulkLoadEnabled(boolean phoenixBulkLoadEnabled) {
+	this.phoenixBulkLoadEnabled = phoenixBulkLoadEnabled;
   }
 
   public void setConnManagerClassName(String connManagerClass) {

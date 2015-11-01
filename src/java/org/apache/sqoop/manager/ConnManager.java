@@ -813,6 +813,15 @@ public abstract class ConnManager {
   public boolean isDirectModeAccumuloSupported() {
     return false;
   }
+  
+  /**
+   * Determine if phoenix operations from direct mode of the connector is
+   * allowed.  By default direct mode is not compatible with Phoenix
+   * @return Whether direct mode is allowed.
+   */
+  public boolean isDirectModePhoenixSupported() {
+    return false;
+  }
 
 }
 
