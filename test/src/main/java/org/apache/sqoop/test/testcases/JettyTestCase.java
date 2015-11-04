@@ -140,7 +140,9 @@ abstract public class JettyTestCase implements ITest {
   }
 
   protected void stopSqoop() throws Exception {
-    cluster.stop();
+    if (cluster != null) {
+      cluster.stop();
+    }
   }
 
   protected void stopHadoop() throws Exception {
