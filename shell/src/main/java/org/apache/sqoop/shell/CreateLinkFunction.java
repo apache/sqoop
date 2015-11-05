@@ -86,7 +86,7 @@ public class CreateLinkFunction extends SqoopFunction {
       printlnResource(Constants.RES_CREATE_CREATING_LINK, connectorName);
     }
 
-    ConsoleReader reader = new ConsoleReader();
+    ConsoleReader reader = getConsoleReader();
 
     ResourceBundle connectorConfigBundle = getClient().getConnectorConfigBundle(cid);
 

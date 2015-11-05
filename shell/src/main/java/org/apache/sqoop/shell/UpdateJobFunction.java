@@ -61,7 +61,7 @@ public class UpdateJobFunction extends SqoopFunction {
   private Status updateJob(String jobArg, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_SQOOP_UPDATING_JOB, jobArg);
 
-    ConsoleReader reader = new ConsoleReader();
+    ConsoleReader reader = getConsoleReader();
 
     // TODO(SQOOP-1634): using from/to and driver config id, this call can be avoided
     MJob job = client.getJob(jobArg);

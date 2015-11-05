@@ -60,7 +60,7 @@ public class CloneJobFunction extends SqoopFunction {
   private Status cloneJob(String jobArg, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_CLONE_CLONING_JOB, jobArg);
 
-    ConsoleReader reader = new ConsoleReader();
+    ConsoleReader reader = getConsoleReader();
 
     MJob job = client.getJob(jobArg);
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);

@@ -60,7 +60,7 @@ public class UpdateLinkFunction extends SqoopFunction {
   private Status updateLink(String linkArg, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_SQOOP_UPDATING_LINK, linkArg);
 
-    ConsoleReader reader = new ConsoleReader();
+    ConsoleReader reader = getConsoleReader();
 
     // TODO(SQOOP-1634): using link config id, this call can be avoided
     MLink link = client.getLink(linkArg);

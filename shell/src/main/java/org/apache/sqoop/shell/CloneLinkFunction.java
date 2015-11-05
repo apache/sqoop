@@ -61,15 +61,15 @@ public class CloneLinkFunction extends SqoopFunction {
   private Status cloneLink(String linkArg, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_CLONE_CLONING_LINK, linkArg);
 
-    ConsoleReader reader = new ConsoleReader();
+    ConsoleReader reader = getConsoleReader();
 
-    MLink connection = client.getLink(linkArg);
+    MLink link = client.getLink(linkArg);
     // Remove persistent id as we're making a clone
-    connection.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
+    link.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     Status status = Status.OK;
 
-    ResourceBundle linkConfigBundle = client.getConnectorConfigBundle(connection.getConnectorId());
+    ResourceBundle linkConfigBundle = client.getConnectorConfigBundle(link.getConnectorId());
 
     if (isInteractive) {
       printlnResource(Constants.RES_PROMPT_UPDATE_LINK_CONFIG);
@@ -81,29 +81,29 @@ public class CloneLinkFunction extends SqoopFunction {
         }
 
         // Fill in data from user
-        if(!fillLinkWithBundle(reader, connection, linkConfigBundle)) {
+        if(!fillLinkWithBundle(reader, link, linkConfigBundle)) {
           return null;
         }
 
-        status = client.saveLink(connection);
+        status = client.saveLink(link);
       } while(!status.canProceed());
     } else {
       LinkDynamicConfigOptions options = new LinkDynamicConfigOptions();
-      options.prepareOptions(connection);
+      options.prepareOptions(link);
       CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
-      if (fillLink(line, connection)) {
-        status = client.saveLink(connection);
+      if (fillLink(line, link)) {
+        status = client.saveLink(link);
         if (!status.canProceed()) {
-          printLinkValidationMessages(connection);
+          printLinkValidationMessages(link);
           return null;
         }
       } else {
-        printLinkValidationMessages(connection);
+        printLinkValidationMessages(link);
         return null;
       }
     }
 
-    printlnResource(Constants.RES_CLONE_LINK_SUCCESSFUL, status.name(), connection.getPersistenceId());
+    printlnResource(Constants.RES_CLONE_LINK_SUCCESSFUL, status.name(), link.getPersistenceId());
 
     return status;
   }

@@ -23,11 +23,14 @@ import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
 import org.codehaus.groovy.tools.shell.IO;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import jline.ConsoleReader;
 
 /**
  * Static internal environment of the shell shared across all commands and
@@ -56,6 +59,7 @@ public final class ShellEnvironment {
   static ResourceBundle resource = ResourceBundle.getBundle(Constants.RESOURCE_NAME, Locale.getDefault());
   static SqoopClient client = new SqoopClient(getServerUrl());
   static IO io;
+  static ConsoleReader consoleReader;
 
   public static String getEnv(String variable, String defaultValue) {
     String value = System.getenv(variable);
@@ -167,6 +171,18 @@ public final class ShellEnvironment {
 
   public static long getPollTimeout() {
     return pollTimeout;
+  }
+
+  public static void setConsoleReader(ConsoleReader reader) {
+    consoleReader = reader;
+  }
+
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"LI_LAZY_INIT_STATIC"})
+  public static ConsoleReader getConsoleReader() throws IOException {
+    if (consoleReader == null) {
+      consoleReader = new ConsoleReader();
+    }
+    return consoleReader;
   }
 
   public static String resourceString(String resourceName) {

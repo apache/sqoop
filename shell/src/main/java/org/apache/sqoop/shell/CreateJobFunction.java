@@ -73,7 +73,7 @@ public class CreateJobFunction extends  SqoopFunction {
   private Status createJob(String fromLinkArg, String toLinkArg, List<String> args, boolean isInteractive) throws IOException {
     printlnResource(Constants.RES_CREATE_CREATING_JOB, fromLinkArg, toLinkArg);
 
-    ConsoleReader reader = new ConsoleReader();
+    ConsoleReader reader = getConsoleReader();
     MJob job = getClient().createJob(fromLinkArg, toLinkArg);
 
     MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
