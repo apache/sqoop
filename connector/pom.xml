@@ -40,6 +40,7 @@ limitations under the License.
     <module>connector-kafka</module>
     <module>connector-ftp</module>
     <module>connector-sftp</module>
+    <module>connector-oracle-jdbc</module>
     <!-- Uncomment and finish connectors after sqoop framework will become stable
     <module>connector-mysql-jdbc</module>
     <module>connector-mysql-fastpath</module>
