@@ -21,7 +21,6 @@ import jline.ConsoleReader;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MDateTimeInput;
@@ -36,7 +35,6 @@ import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MNamedElement;
 import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.model.MValidatedElement;
 import org.apache.sqoop.validation.Message;
 import org.apache.sqoop.validation.Status;
 import org.joda.time.DateTime;
@@ -229,7 +227,7 @@ public final class ConfigFiller {
    * @return
    * @throws IOException
    */
-  private static boolean fillInputDateTime(String prefix,
+  static boolean fillInputDateTime(String prefix,
                                        MDateTimeInput input,
                                        CommandLine line)
                                        throws IOException {
@@ -250,14 +248,13 @@ public final class ConfigFiller {
   private static DateTime parseDateTime(String value) {
     DateTime dt = null;
     try {
-      dt = DateTime.parse(value);
-    } catch (IllegalArgumentException iae) {
-      // value is not valid ISO8601 format
+      dt = new DateTime(Long.parseLong(value));
+    } catch (NumberFormatException nfe) {
+      // value is not numeric string
       try {
-        long a  = Long.parseLong(value);
-        dt = new DateTime(a);
-      } catch (NumberFormatException nfe) {
-        // value is not numeric string
+        dt = DateTime.parse(value);
+      } catch (IllegalArgumentException iae) {
+        // value is not valid ISO8601 format
       }
     }
     return dt;
@@ -274,7 +271,7 @@ public final class ConfigFiller {
    * @return
    * @throws IOException
    */
-  private static boolean fillInputList(String prefix,
+  static boolean fillInputList(String prefix,
                                        MListInput input,
                                        CommandLine line)
                                        throws IOException {
@@ -303,7 +300,7 @@ public final class ConfigFiller {
    * @return
    * @throws IOException
    */
-  private static boolean fillInputEnum(String prefix,
+  static boolean fillInputEnum(String prefix,
                                        MEnumInput input,
                                        CommandLine line)
                                        throws IOException {
@@ -335,7 +332,7 @@ public final class ConfigFiller {
    * @return
    * @throws IOException
    */
-  private static boolean fillInputMap(String prefix,
+  static boolean fillInputMap(String prefix,
                                       MMapInput input,
                                       CommandLine line)
                                       throws IOException {
@@ -343,9 +340,9 @@ public final class ConfigFiller {
     if (line.hasOption(opt)) {
       String value = line.getOptionValue(opt);
       Map<String, String> values = new HashMap<String, String>();
-      String[] keyValue = null;
       String[] entries = value.split("&");
       for (String entry : entries) {
+        String[] keyValue = null;
         if (entry.contains("=")) {
           keyValue = entry.split("=", 2);
         }
@@ -372,7 +369,7 @@ public final class ConfigFiller {
    * @return
    * @throws IOException
    */
-  private static boolean fillInputInteger(String prefix,
+  static boolean fillInputInteger(String prefix,
                                           MIntegerInput input,
                                           CommandLine line)
                                           throws IOException {
@@ -402,7 +399,7 @@ public final class ConfigFiller {
    * @return
    * @throws IOException
    */
-  private static boolean fillInputLong(String prefix, MLongInput input, CommandLine line) throws IOException {
+  static boolean fillInputLong(String prefix, MLongInput input, CommandLine line) throws IOException {
     String opt = ConfigOptions.getOptionKey(prefix, input);
     if (line.hasOption(opt)) {
       try {
@@ -426,7 +423,7 @@ public final class ConfigFiller {
    * @return
    * @throws IOException
    */
-  public static boolean fillInputString(String prefix,
+  static boolean fillInputString(String prefix,
                                         MStringInput input,
                                         CommandLine line)
                                         throws IOException {
@@ -436,6 +433,7 @@ public final class ConfigFiller {
       if((input.getMaxLength() >= 0) && (value.length() > input.getMaxLength())) {
         errorMessage(input, "Size of input exceeds allowance for this input"
           + " field. Maximal allowed size is " + input.getMaxLength());
+        return false;
       }
       input.setValue(value);
     } else {
@@ -453,7 +451,7 @@ public final class ConfigFiller {
    * @return
    * @throws IOException
    */
-  public static boolean fillInputBoolean(String prefix,
+  static boolean fillInputBoolean(String prefix,
                                          MBooleanInput input,
                                          CommandLine line)
                                          throws IOException {
@@ -586,9 +584,9 @@ public final class ConfigFiller {
       case STRING:
         return fillInputStringWithBundle((MStringInput) input, reader, bundle);
       case INTEGER:
-        return fillInputInteger((MIntegerInput) input, reader, bundle);
+        return fillInputIntegerWithBundle((MIntegerInput) input, reader, bundle);
       case LONG:
-        return fillInputLong((MLongInput) input, reader, bundle);
+        return fillInputLongWithBundle((MLongInput) input, reader, bundle);
       case BOOLEAN:
         return fillInputBooleanWithBundle((MBooleanInput) input, reader, bundle);
       case MAP:
@@ -622,7 +620,7 @@ public final class ConfigFiller {
    * @return True if user wish to continue with loading additional inputs
    * @throws IOException
    */
-  private static boolean fillInputDateTimeWithBundle(MDateTimeInput input,
+  static boolean fillInputDateTimeWithBundle(MDateTimeInput input,
                                                      ConsoleReader reader,
                                                      ResourceBundle bundle)
                                                      throws IOException {
@@ -669,7 +667,7 @@ public final class ConfigFiller {
    * @return True if user wish to continue with loading additional inputs
    * @throws IOException
    */
-  private static boolean fillInputListWithBundle(MListInput input,
+  static boolean fillInputListWithBundle(MListInput input,
                                        ConsoleReader reader,
                                        ResourceBundle bundle)
                                        throws IOException {
@@ -735,7 +733,7 @@ public final class ConfigFiller {
    * @return True if user with to continue with loading addtional inputs
    * @throws IOException
    */
-  private static boolean fillInputEnumWithBundle(MEnumInput input,
+  static boolean fillInputEnumWithBundle(MEnumInput input,
                                        ConsoleReader reader,
                                        ResourceBundle bundle)
                                        throws IOException {
@@ -767,6 +765,7 @@ public final class ConfigFiller {
     }
 
     reader.flushConsole();
+
     String userTyped;
     if(input.isSensitive()) {
       userTyped = reader.readLine('*');
@@ -816,7 +815,7 @@ public final class ConfigFiller {
    * @return True if user wish to continue with loading additional inputs
    * @throws IOException
    */
-  private static boolean fillInputMapWithBundle(MMapInput input,
+  static boolean fillInputMapWithBundle(MMapInput input,
                                       ConsoleReader reader,
                                       ResourceBundle bundle)
                                       throws IOException {
@@ -924,7 +923,7 @@ public final class ConfigFiller {
     return input;
   }
 
-  private static boolean fillInputInteger(MIntegerInput input,
+  static boolean fillInputIntegerWithBundle(MIntegerInput input,
                                           ConsoleReader reader,
                                           ResourceBundle bundle)
                                           throws IOException {
@@ -955,7 +954,7 @@ public final class ConfigFiller {
         input.setValue(value);
       } catch (NumberFormatException ex) {
         errorMessage("Input is not valid integer number");
-        return fillInputInteger(input, reader, bundle);
+        return fillInputIntegerWithBundle(input, reader, bundle);
       }
 
       input.setValue(Integer.valueOf(userTyped));
@@ -964,7 +963,7 @@ public final class ConfigFiller {
     return true;
   }
 
-  private static boolean fillInputLong(MLongInput input, ConsoleReader reader, ResourceBundle bundle) throws IOException {
+  static boolean fillInputLongWithBundle(MLongInput input, ConsoleReader reader, ResourceBundle bundle) throws IOException {
     generatePrompt(reader, bundle, input);
 
     if (!input.isEmpty() && !input.isSensitive()) {
@@ -990,7 +989,7 @@ public final class ConfigFiller {
         input.setValue(value);
       } catch (NumberFormatException ex) {
         errorMessage("Input is not a valid long");
-        return fillInputLong(input, reader, bundle);
+        return fillInputLongWithBundle(input, reader, bundle);
       }
 
       input.setValue(Long.valueOf(userTyped));
@@ -1085,6 +1084,15 @@ public final class ConfigFiller {
       // Empty input in case that nothing was given
       input.setEmpty();
     } else {
+      Boolean value;
+      try {
+        value = Boolean.valueOf(userTyped);
+        input.setValue(value);
+      } catch (NumberFormatException ex) {
+        errorMessage("Input is not a valid boolean");
+        return fillInputBooleanWithBundle(input, reader, bundle);
+      }
+
       // Set value that user has entered
       input.setValue(Boolean.valueOf(userTyped));
     }
