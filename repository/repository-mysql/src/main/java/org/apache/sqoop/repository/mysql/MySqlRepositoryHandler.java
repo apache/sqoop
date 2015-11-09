@@ -88,8 +88,7 @@ public class MySqlRepositoryHandler extends CommonRepositoryHandler {
     // Select and return the version
     try {
       DatabaseMetaData md = conn.getMetaData();
-      metadataResultSet = md.getTables(null,
-          CommonRepositorySchemaConstants.SCHEMA_SQOOP,
+      metadataResultSet = md.getTables(CommonRepositorySchemaConstants.SCHEMA_SQOOP, null,
           CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME, null);
 
       if (metadataResultSet.next()) {

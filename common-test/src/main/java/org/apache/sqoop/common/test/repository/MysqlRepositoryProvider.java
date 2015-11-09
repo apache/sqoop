@@ -27,7 +27,7 @@ public class MysqlRepositoryProvider extends RepositoryProviderBase {
 
   private static final String CONNECTION = System.getProperties().getProperty(
       "sqoop.repository.mysql.jdbc.url",
-      "jdbc:mysql://localhost/test"
+      "jdbc:mysql://localhost:3306/test?createDatabaseIfNotExist=true&sessionVariables=sql_mode='ANSI_QUOTES'"
   );
 
   private static final String USERNAME = System.getProperties().getProperty(

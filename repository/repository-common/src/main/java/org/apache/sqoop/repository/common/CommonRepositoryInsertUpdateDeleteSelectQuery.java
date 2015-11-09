@@ -566,7 +566,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID)
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?"
-          + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " DESC";
+          + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + "DESC ,"
+            + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + " DESC";
 
   // DML: Select context type
   private static final String STMT_SELECT_CONTEXT_TYPE =
