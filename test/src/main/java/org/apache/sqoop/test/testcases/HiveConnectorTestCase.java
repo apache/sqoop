@@ -76,13 +76,19 @@ public class HiveConnectorTestCase extends ConnectorTestCase {
 
   @AfterMethod(alwaysRun = true)
   public void stopHive() throws Exception {
-    LOG.info("Stopping Hive Provider: " + provider.getClass().getName());
-    hiveProvider.stop();
+    if (hiveProvider != null) {
+      LOG.info("Stopping Hive Provider: " + provider.getClass().getName());
+      hiveProvider.stop();
+    }
 
-    LOG.info("Stopping Hive Server: " + hiveServerRunner.getClass().getName());
-    hiveServerRunner.stop();
+    if (hiveServerRunner != null) {
+      LOG.info("Stopping Hive Server: " + hiveServerRunner.getClass().getName());
+      hiveServerRunner.stop();
+    }
 
-    LOG.info("Stopping Metastore Server: " + metastoreServerRunner.getClass().getName());
-    metastoreServerRunner.stop();
+    if (metastoreServerRunner != null) {
+      LOG.info("Stopping Metastore Server: " + metastoreServerRunner.getClass().getName());
+      metastoreServerRunner.stop();
+    }
   }
 }

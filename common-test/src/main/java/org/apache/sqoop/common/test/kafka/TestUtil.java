@@ -94,8 +94,10 @@ public class TestUtil {
 
     // Set kafkaConsumer to null so that a new one is created when
     // getKafkaConsumer is called.
-    kafkaConsumer.shutdown();
-    kafkaConsumer = null;
+    if (kafkaConsumer != null) {
+      kafkaConsumer.shutdown();
+      kafkaConsumer = null;
+    }
 
     try {
       Thread.sleep(3 * 1000);   // add this sleep time to
@@ -103,9 +105,13 @@ public class TestUtil {
     } catch (InterruptedException e) {
       // ignore
     }
-    logger.info("Shutting down the kafka Server.");
-    kafkaServer.stop();
-    logger.info("Completed the tearDown phase.");
+    if (kafkaServer != null) {
+      logger.info("Shutting down the kafka Server.");
+      kafkaServer.stop();
+      logger.info("Completed the tearDown phase.");
+    } else {
+      logger.info("Kafka Server haven't been started, skipping shutdown");
+    }
   }
 
   public String getZkUrl() {
