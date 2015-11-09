@@ -30,6 +30,10 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
  *  Return details about one particular link with id lid
  * GET /v1/link/{lname}
  *  Return details about one particular link with name lname
+ * GET /v1/link/all
+ *  Return details about all links
+ * GET /v1/link/all?cname={cname}
+ *  Return details about all links for given connector (by name)
  *
  * POST /v1/link/ with {connector-id} and {link-config-id} in the post data
  *  Create link for connector with id connector-id

@@ -21,14 +21,15 @@ import org.apache.log4j.Logger;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
+import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
-import org.testng.ITest;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
@@ -60,8 +61,8 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
     public void setConnection(HttpURLConnection connection) throws Exception {
       this.connection = connection;
 
-      try { this.input = (connection.getInputStream() != null) ? IOUtils.toString(connection.getInputStream()) : "NOT PRESENT"; } catch(Exception e) { this.input = "NOT PRESENT"; }
-      this.error = connection.getErrorStream() != null ? IOUtils.toString(connection.getErrorStream()) : "NOT PRESENT";
+      try { this.input = (connection.getInputStream() != null) ? IOUtils.toString(connection.getInputStream()) : ""; } catch(Exception e) { this.input = ""; }
+      this.error = connection.getErrorStream() != null ? IOUtils.toString(connection.getErrorStream()) : "";
     }
 
     // Each test should implement whatever is needed here
@@ -80,6 +81,18 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
       // We're not parsing entire JSON, but rather just looking for sub-strings that are of particular interest
       assertTrue(error.contains("error-code-class\":\"" + errorClass));
       assertTrue(error.contains("error-code\":\"" + errorCode));
+    }
+
+    public void assertContains(String subString) throws Exception {
+      assertTrue(responseString().contains(subString), "Server response doesn't contain: " + subString);
+    }
+
+    private String responseString() {
+      if(input.isEmpty()) {
+        return error;
+      } else {
+        return input;
+      }
     }
   }
 
@@ -101,7 +114,28 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
   }
 
   /**
-   * Poisoned requests that we'll be running with expected responses from the server
+   * Data preparation for links, jobs and other objects that we might need.
+   */
+  @BeforeMethod
+  public void loadTestData() {
+    // Link: first-link
+    MLink genericJDBCLink = getClient().createLink("generic-jdbc-connector");
+    genericJDBCLink.setName("first-link");
+    MConfigList configs = genericJDBCLink.getConnectorLinkConfig();
+    configs.getStringInput("linkConfig.jdbcDriver").setValue("org.apache.derby.jdbc.ClientDriver");
+    configs.getStringInput("linkConfig.connectionString").setValue("jdbc:derby:memory:invalid-rest-calls-test;create=true");
+    configs.getStringInput("linkConfig.username").setValue("sqoop");
+    configs.getStringInput("linkConfig.password").setValue("is-awesome");
+    getClient().saveLink(genericJDBCLink);
+  }
+
+  @AfterMethod
+  public void dropTestData() {
+    getClient().deleteLink("first-link");
+  }
+
+  /**
+   * Correct and poisoned requests that we'll be running with expected responses from the server
    */
   public static TestDescription []PROVDER_DATA = new TestDescription[] {
     // End point /version/
@@ -151,6 +185,43 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
         assertResponseCode(500);
         assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0002");
       }}),
+
+    // End point /v1/link
+
+    // Get
+    new TestDescription("Get all links", "v1/link/all", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(200);
+        assertContains("first-link");
+      }}),
+    new TestDescription("Get link by name", "v1/link/first-link", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(200);
+        assertContains("first-link");
+      }}),
+    new TestDescription("Get all links for connector", "v1/link/all?cname=generic-jdbc-connector", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(200);
+        assertContains("first-link");
+      }}),
+    new TestDescription("Get non existing link", "v1/link/i-dont-exists", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(500);
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0005");
+        assertContains("Invalid link: i-dont-exists");
+      }}),
+    new TestDescription("Get links for non existing connector", "v1/link/all?cname=i-dont-exists", "GET", null, new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(500);
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0005");
+        assertContains("Invalid connector: i-dont-exists");
+      }}),
+
   };
 
   @DataProvider(name="invalid-rest-calls-test", parallel=false)

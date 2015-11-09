@@ -18,10 +18,11 @@
 package org.apache.sqoop.handler;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
@@ -54,8 +55,6 @@ public class LinkRequestHandler implements RequestHandler {
 
   static final String ENABLE = "enable";
   static final String DISABLE = "disable";
-  static final String LINKS_PATH = "links";
-  static final String LINK_PATH = "link";
 
   public LinkRequestHandler() {
     LOG.info("LinkRequestHandler initialized");
@@ -197,52 +196,37 @@ public class LinkRequestHandler implements RequestHandler {
   private JsonBean getLinks(RequestContext ctx) {
     String identifier = ctx.getLastURLElement();
     LinkBean linkBean;
+    List<MLink> links;
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    // links by connector
-    if (ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM) != null) {
-      identifier = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
-      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "linksByConnector", identifier);
-      if (repository.findConnector(identifier) != null) {
-        String connectorName = repository.findConnector(identifier).getUniqueName();
-        List<MLink> linkList = repository.findLinksForConnector(connectorName);
+    AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(), "get", "link", identifier);
 
-        // Authorization check
-        linkList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.LINK, linkList);
+    if(identifier.equals("all")) { // Return all links (by perhaps only for given connector)
+      String connectorName = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
 
-        linkBean = createLinksBean(linkList, locale);
+      if(StringUtils.isEmpty(connectorName)) {
+        links = repository.findLinks();
       } else {
-        // this means name nor Id existed
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + identifier
-            + " name for links given");
+        if(repository.findConnector(connectorName) == null) {
+          throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + connectorName);
+        }
+        links = repository.findLinksForConnector(connectorName);
       }
-    } else
-    // all links in the system
-    if (ctx.getPath().contains(LINKS_PATH)
-        || (ctx.getPath().contains(LINK_PATH) && identifier.equals("all"))) {
-      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "links", "all");
-      List<MLink> linkList = repository.findLinks();
-
-      // Authorization check
-      linkList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.LINK, linkList);
-
-      linkBean = createLinksBean(linkList, locale);
-    }
-    // link by Id
-    else {
-      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "link", identifier);
-
+    } else { // Return one specific link with name or id stored in identifier
       String linkName = HandlerUtils.getLinkNameFromIdentifier(identifier);
-      MLink link = repository.findLink(linkName);
+      links = new LinkedList<>();
+      links.add(repository.findLink(linkName));
+    }
 
-      // Authorization check
-      AuthorizationEngine.readLink(ctx.getUserName(), link.getName());
+    // Authorization check
+    links = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.LINK, links);
 
-      linkBean = createLinkBean(Arrays.asList(link), locale);
+    // Return bean entity (we have to separate what we're returning here)
+    if(identifier.equals("all")) {
+      linkBean = createLinksBean(links, locale);
+    } else {
+      linkBean = createLinkBean(links, locale);
     }
     return linkBean;
   }
