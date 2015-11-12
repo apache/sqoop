@@ -39,16 +39,6 @@ limitations under the License.
     </dependency>
   </dependencies>
 
-
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.tomdz.maven</groupId>
-        <artifactId>sphinx-maven-plugin</artifactId>
-        <version>1.0.2</version>
-      </plugin>
-    </plugins>
-  </reporting>
   <profiles>
     <profile>
       <id>binary</id>
