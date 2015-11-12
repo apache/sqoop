@@ -61,7 +61,12 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
     public void setConnection(HttpURLConnection connection) throws Exception {
       this.connection = connection;
 
-      try { this.input = (connection.getInputStream() != null) ? IOUtils.toString(connection.getInputStream()) : ""; } catch(Exception e) { this.input = ""; }
+      this.input = "";
+      try {
+        this.input = (connection.getInputStream() != null) ? IOUtils.toString(connection.getInputStream()) : "";
+      } catch(Exception e) {
+        // We're ignoring exception here because that means that request wasn't successful and data are in "error" stream
+      }
       this.error = connection.getErrorStream() != null ? IOUtils.toString(connection.getErrorStream()) : "";
     }
 
