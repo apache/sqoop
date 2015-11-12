@@ -21,13 +21,23 @@ import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.ToJobConfiguration;
 import org.apache.sqoop.model.ConfigUtils;
+import org.apache.sqoop.model.InputEditable;
+import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MFromConfig;
+import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.MValidator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Test upgrader.
@@ -48,14 +58,12 @@ public class TestGenericJdbcConnectorUpgrader {
     MFromConfig newConfigs = new MFromConfig(ConfigUtils.toConfigs(FromJobConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(FromJobConfiguration.class));
     originalConfigs.getInput("fromJobConfig.schemaName").setValue("test-schema");
     originalConfigs.getInput("fromJobConfig.tableName").setValue("test-tableName");
-    originalConfigs.getInput("fromJobConfig.columns").setValue("test-columns");
     originalConfigs.getInput("fromJobConfig.partitionColumn").setValue("test-partitionColumn");
     originalConfigs.getInput("fromJobConfig.allowNullValueInPartitionColumn").setValue("test-allowNullValueInPartitionColumn");
     upgrader.upgradeFromJobConfig(originalConfigs, newConfigs);
     assertEquals(originalConfigs, newConfigs);
     assertEquals("test-schema", newConfigs.getInput("fromJobConfig.schemaName").getValue());
     assertEquals("test-tableName", newConfigs.getInput("fromJobConfig.tableName").getValue());
-    assertEquals("test-columns", newConfigs.getInput("fromJobConfig.columns").getValue());
     assertEquals("test-partitionColumn", newConfigs.getInput("fromJobConfig.partitionColumn").getValue());
     assertEquals("test-allowNullValueInPartitionColumn", newConfigs.getInput("fromJobConfig.allowNullValueInPartitionColumn").getValue());
   }
@@ -67,14 +75,12 @@ public class TestGenericJdbcConnectorUpgrader {
     MToConfig newConfigs = new MToConfig(ConfigUtils.toConfigs(ToJobConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(ToJobConfiguration.class));
     originalConfigs.getInput("toJobConfig.schemaName").setValue("test-schema");
     originalConfigs.getInput("toJobConfig.tableName").setValue("test-tableName");
-    originalConfigs.getInput("toJobConfig.columns").setValue("test-columns");
     originalConfigs.getInput("toJobConfig.stageTableName").setValue("test-stageTableName");
     originalConfigs.getInput("toJobConfig.shouldClearStageTable").setValue("test-shouldClearStageTable");
     upgrader.upgradeToJobConfig(originalConfigs, newConfigs);
     assertEquals(originalConfigs, newConfigs);
     assertEquals("test-schema", newConfigs.getInput("toJobConfig.schemaName").getValue());
     assertEquals("test-tableName", newConfigs.getInput("toJobConfig.tableName").getValue());
-    assertEquals("test-columns", newConfigs.getInput("toJobConfig.columns").getValue());
     assertEquals("test-stageTableName", newConfigs.getInput("toJobConfig.stageTableName").getValue());
     assertEquals("test-shouldClearStageTable", newConfigs.getInput("toJobConfig.shouldClearStageTable").getValue());
   }
@@ -96,5 +102,44 @@ public class TestGenericJdbcConnectorUpgrader {
     assertEquals("test-username", newConfigs.getInput("linkConfig.username").getValue());
     assertEquals("test-password", newConfigs.getInput("linkConfig.password").getValue());
     assertEquals("test-jdbcProperties", newConfigs.getInput("linkConfig.jdbcProperties").getValue());
+  }
+
+  @Test
+  public void testColumnsToColumnListFrom() {
+    MFromConfig originalConfigs = new MFromConfig(columnsConfigs("fromJobConfig"), Collections.<MValidator>emptyList());
+    MFromConfig newConfigs = new MFromConfig(ConfigUtils.toConfigs(FromJobConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(FromJobConfiguration.class));
+    originalConfigs.getStringInput("fromJobConfig.columns").setValue("id,first,second");
+    upgrader.upgradeFromJobConfig(originalConfigs, newConfigs);
+
+    List<String> columns = newConfigs.getListInput("fromJobConfig.columnList").getValue();
+    assertNotNull(columns);
+    assertEquals(3, columns.size());
+    assertEquals("id", columns.get(0));
+    assertEquals("first", columns.get(1));
+    assertEquals("second", columns.get(2));
+  }
+
+  @Test
+  public void testColumnsToColumnListTo() {
+    MToConfig originalConfigs = new MToConfig(columnsConfigs("toJobConfig"), Collections.<MValidator>emptyList());
+    MToConfig newConfigs = new MToConfig(ConfigUtils.toConfigs(ToJobConfiguration.class), ConfigUtils.getMValidatorsFromConfigurationClass(ToJobConfiguration.class));
+    originalConfigs.getStringInput("toJobConfig.columns").setValue("id,first,second");
+    upgrader.upgradeToJobConfig(originalConfigs, newConfigs);
+
+    List<String> columns = newConfigs.getListInput("toJobConfig.columnList").getValue();
+    assertNotNull(columns);
+    assertEquals(3, columns.size());
+    assertEquals("id", columns.get(0));
+    assertEquals("first", columns.get(1));
+    assertEquals("second", columns.get(2));
+  }
+
+  private List<MConfig> columnsConfigs(String configName) {
+    List<MInput<?>> inputs = new LinkedList<>();
+    inputs.add(new MStringInput(configName + ".columns", false, InputEditable.ANY, "", (short)50, Collections.<MValidator>emptyList()));
+
+    List<MConfig> configs = new LinkedList<>();
+    configs.add(new MConfig(configName, inputs, Collections.<MValidator>emptyList()));
+    return configs;
   }
 }

@@ -35,6 +35,7 @@ import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 @Test(groups = "slow")
 public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase implements ITest {
@@ -109,7 +110,9 @@ public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase implements IT
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
-    job.getFromJobConfig().getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
+    List<String> columns = new java.util.LinkedList<>();
+    columns.add("id");
+    job.getFromJobConfig().getListInput("fromJobConfig.columnList").setValue(columns);
 
     // Fill the Kite "TO" config
     MConfigList toConfig = job.getToJobConfig();

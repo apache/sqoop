@@ -35,12 +35,15 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class TestToInitializer {
   private final String schemaName;
   private final String tableName;
   private final String schemalessTableName;
   private final String stageTableName;
-  private final String tableColumns;
+  private final List<String> tableColumns;
   private final String testUser;
 
   private GenericJdbcExecutor executor;
@@ -50,8 +53,10 @@ public class TestToInitializer {
     tableName = getClass().getSimpleName().toUpperCase() + "TABLEWITHSCHEMA";
     schemalessTableName = getClass().getSimpleName().toUpperCase() + "TABLE";
     stageTableName = getClass().getSimpleName().toUpperCase() + "_STAGE_TABLE";
-    tableColumns = "ICOL,VCOL";
     testUser = "test_user";
+    tableColumns = new LinkedList<>();
+    tableColumns.add("ICOL");
+    tableColumns.add("VCOL");
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -108,7 +113,7 @@ public class TestToInitializer {
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
     jobConfig.toJobConfig.tableName = schemalessTableName;
-    jobConfig.toJobConfig.columns = tableColumns;
+    jobConfig.toJobConfig.columnList = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context, testUser);
@@ -155,7 +160,7 @@ public class TestToInitializer {
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
     jobConfig.toJobConfig.schemaName = schemaName;
     jobConfig.toJobConfig.tableName = tableName;
-    jobConfig.toJobConfig.columns = tableColumns;
+    jobConfig.toJobConfig.columnList = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context, testUser);

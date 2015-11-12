@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -99,11 +100,9 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     String schemaName = toJobConfig.toJobConfig.schemaName;
     String tableName = toJobConfig.toJobConfig.tableName;
     String stageTableName = toJobConfig.toJobConfig.stageTableName;
-    boolean clearStageTable = toJobConfig.toJobConfig.shouldClearStageTable == null ?
-      false : toJobConfig.toJobConfig.shouldClearStageTable;
-    final boolean stageEnabled =
-      stageTableName != null && stageTableName.length() > 0;
-    String tableColumns = toJobConfig.toJobConfig.columns;
+    boolean clearStageTable = toJobConfig.toJobConfig.shouldClearStageTable == null ? false : toJobConfig.toJobConfig.shouldClearStageTable;
+    final boolean stageEnabled = stageTableName != null && stageTableName.length() > 0;
+    List<String> tableColumns = toJobConfig.toJobConfig.columnList;
 
     // when fromTable name is specified:
     if(stageEnabled) {
@@ -124,7 +123,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     final String tableInUse = stageEnabled ? stageTableName : tableName;
     String fullTableName = executor.encloseIdentifiers(schemaName, tableInUse);
 
-    if (tableColumns == null) {
+    if (tableColumns == null || tableColumns.size() == 0) {
       String[] columns = executor.getQueryColumns("SELECT * FROM " + fullTableName + " WHERE 1 = 0");
       StringBuilder builder = new StringBuilder();
       builder.append("INSERT INTO ");
@@ -137,14 +136,13 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
       dataSql = builder.toString();
 
     } else {
-      String[] columns = StringUtils.split(tableColumns, ',');
       StringBuilder builder = new StringBuilder();
       builder.append("INSERT INTO ");
       builder.append(fullTableName);
       builder.append(" (");
       builder.append(tableColumns);
       builder.append(") VALUES (?");
-      for (int i = 1; i < columns.length; i++) {
+      for (int i = 1; i < tableColumns.size(); i++) {
         builder.append(",?");
       }
       builder.append(")");

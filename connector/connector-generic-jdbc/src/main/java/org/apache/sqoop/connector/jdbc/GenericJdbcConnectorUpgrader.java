@@ -21,15 +21,16 @@ package org.apache.sqoop.connector.jdbc;
 import org.apache.sqoop.configurable.ConfigurableUpgradeUtil;
 import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
 import org.apache.sqoop.model.MConfig;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MInput;
 import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MToConfig;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-// NOTE: All config types have the similar upgrade path at this point
 public class GenericJdbcConnectorUpgrader extends ConnectorConfigurableUpgrader {
 
   @Override
@@ -39,11 +40,30 @@ public class GenericJdbcConnectorUpgrader extends ConnectorConfigurableUpgrader 
 
   @Override
   public void upgradeFromJobConfig(MFromConfig original, MFromConfig upgradeTarget) {
+    // Move all configuration options that did not change
     ConfigurableUpgradeUtil.doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
+
+    // We've changed "String columns" to "List<String> columnList" as it better represents the type
+    migrateColumnsToColumnList(original, upgradeTarget, "fromJobConfig");
   }
 
   @Override
   public void upgradeToJobConfig(MToConfig original, MToConfig upgradeTarget) {
+    // Move all configuration options that did not change
     ConfigurableUpgradeUtil.doUpgrade(original.getConfigs(), upgradeTarget.getConfigs());
+
+    // We've changed "String columns" to "List<String> columnList" as it better represents the type
+    migrateColumnsToColumnList(original, upgradeTarget, "toJobConfig");
+  }
+
+  private void migrateColumnsToColumnList(MConfigList original, MConfigList upgradeTarget, String configName) {
+    String oldInputName = configName + ".columns";
+    String newInputName = configName + ".columnList";
+
+    if(original.getConfig(configName).getInputNames().contains(oldInputName)) {
+      String columnString = original.getStringInput(oldInputName).getValue();
+      String[] columns = columnString.split(","); // Our code has expected comma separated list in the past
+      upgradeTarget.getListInput(newInputName).setValue(Arrays.asList(columns));
+    }
   }
 }

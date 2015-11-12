@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -250,7 +251,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     String schemaName = fromJobConfig.fromJobConfig.schemaName;
     String tableName = fromJobConfig.fromJobConfig.tableName;
     String tableSql = fromJobConfig.fromJobConfig.sql;
-    String tableColumns = fromJobConfig.fromJobConfig.columns;
+    List<String> tableColumns = fromJobConfig.fromJobConfig.columnList;
 
     // Assertion that should be true based on our validations
     assert (tableName != null && tableSql == null) || (tableName == null && tableSql != null);
@@ -259,7 +260,7 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
       // For databases that support schemas (IE: postgresql).
       String fullTableName = executor.encloseIdentifiers(schemaName, tableName);
 
-      if (tableColumns == null) {
+      if (tableColumns == null || tableColumns.size() == 0) {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT * FROM ");
         builder.append(fullTableName);
@@ -270,16 +271,17 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
         String[] queryColumns = executor.getQueryColumns(dataSql.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, "1 = 0"));
         fieldNames = executor.columnList(queryColumns);
       } else {
+        fieldNames = executor.columnList(tableColumns.toArray(new String[tableColumns.size()]));
+
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT ");
-        builder.append(tableColumns);
+        builder.append(fieldNames);
         builder.append(" FROM ");
         builder.append(fullTableName);
         builder.append(" WHERE ");
         builder.append(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);
         dataSql = builder.toString();
 
-        fieldNames = tableColumns;
       }
     } else {
       assert tableSql.contains(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN);

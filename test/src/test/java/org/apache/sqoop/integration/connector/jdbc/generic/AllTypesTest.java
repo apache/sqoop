@@ -35,6 +35,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
+import java.util.List;
+
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -97,7 +99,9 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
     // Fill rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
     MConfigList fromConfig = job.getFromJobConfig();
-    fromConfig.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("value"));
+    List<String> columns = new java.util.LinkedList<>();
+    columns.add("value");
+    fromConfig.getListInput("fromJobConfig.columnList").setValue(columns);
 
     // Fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);

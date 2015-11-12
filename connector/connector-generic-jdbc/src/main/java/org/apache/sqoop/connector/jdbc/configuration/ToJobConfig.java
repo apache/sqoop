@@ -24,6 +24,9 @@ import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.apache.sqoop.validation.validators.NotEmpty;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  */
@@ -35,14 +38,18 @@ public class ToJobConfig {
   @Input(size = 2000, validators = { @Validator(NotEmpty.class)})
   public String tableName;
 
-  @Input(size = 50)
-  public String columns;
+  @Input
+  public List<String> columnList;
 
   @Input(size = 2000)
   public String stageTableName;
 
   @Input
   public Boolean shouldClearStageTable;
+
+  public ToJobConfig() {
+    columnList = new LinkedList<>();
+  }
 
   public static class ConfigValidator extends AbstractValidator<ToJobConfig> {
     @Override

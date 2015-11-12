@@ -28,6 +28,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.List;
+
 @Test
 public class FromRDBMSToKiteTest extends ConnectorTestCase {
   @BeforeMethod(alwaysRun = true)
@@ -69,7 +71,9 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
-    job.getFromJobConfig().getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id"));
+    List<String> columns = new java.util.LinkedList<>();
+    columns.add("id");
+    job.getFromJobConfig().getListInput("fromJobConfig.columnList").setValue(columns);
 
     // Fill the Kite "TO" config
     MConfigList toConfig = job.getToJobConfig();

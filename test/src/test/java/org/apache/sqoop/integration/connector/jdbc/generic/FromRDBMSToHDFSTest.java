@@ -25,6 +25,8 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.Test;
 
+import java.util.List;
+
 /**
  * Import simple table with various configurations.
  */
@@ -92,7 +94,11 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     // Connector values
     fillRdbmsFromConfig(job, "id");
     MConfigList configs = job.getFromJobConfig();
-    configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("name") + "," + provider.escapeColumnName("story"));
+    List<String> columns = new java.util.LinkedList<>();
+    columns.add("id");
+    columns.add("name");
+    columns.add("story");
+    configs.getListInput("fromJobConfig.columnList").setValue(columns);
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
 
     saveJob(job);
@@ -130,7 +136,10 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     // Connector values
     fillRdbmsFromConfig(job, "id");
     MConfigList configs = job.getFromJobConfig();
-    configs.getStringInput("fromJobConfig.columns").setValue(provider.escapeColumnName("id") + "," + provider.escapeColumnName("country"));
+    List<String> columns = new java.util.LinkedList<>();
+    columns.add("id");
+    columns.add("country");
+    configs.getListInput("fromJobConfig.columnList").setValue(columns);
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
 
     saveJob(job);

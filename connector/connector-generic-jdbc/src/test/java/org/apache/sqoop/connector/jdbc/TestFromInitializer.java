@@ -18,7 +18,10 @@
 package org.apache.sqoop.connector.jdbc;
 
 import java.sql.Types;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
@@ -43,7 +46,7 @@ public class TestFromInitializer {
   private final String schemalessTableName;
   private final String tableSql;
   private final String schemalessTableSql;
-  private final String tableColumns;
+  private final List<String> tableColumns;
   private final String testUser;
 
   private GenericJdbcExecutor executor;
@@ -57,8 +60,10 @@ public class TestFromInitializer {
     schemalessTableName = getClass().getSimpleName().toUpperCase() + "TABLE";
     tableSql = "SELECT * FROM " + schemaName + "." + tableName + " WHERE ${CONDITIONS}";
     schemalessTableSql = "SELECT * FROM " + schemalessTableName + " WHERE ${CONDITIONS}";
-    tableColumns = "ICOL,VCOL";
     testUser = "test_user";
+    tableColumns = new LinkedList<>();
+    tableColumns.add("ICOL");
+    tableColumns.add("VCOL");
   }
 
   @BeforeMethod(alwaysRun = true)
@@ -209,7 +214,7 @@ public class TestFromInitializer {
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
     jobConfig.fromJobConfig.tableName = schemalessTableName;
-    jobConfig.fromJobConfig.columns = tableColumns;
+    jobConfig.fromJobConfig.columnList = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context, testUser);
@@ -219,8 +224,8 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT ICOL,VCOL FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
-        tableColumns,
+        "SELECT \"ICOL\", \"VCOL\" FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "\"" + StringUtils.join(tableColumns, "\", \"") + "\"",
         "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),
@@ -355,7 +360,7 @@ public class TestFromInitializer {
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
     jobConfig.fromJobConfig.schemaName = schemaName;
     jobConfig.fromJobConfig.tableName = tableName;
-    jobConfig.fromJobConfig.columns = tableColumns;
+    jobConfig.fromJobConfig.columnList = tableColumns;
 
     MutableContext context = new MutableMapContext();
     InitializerContext initializerContext = new InitializerContext(context, testUser);
@@ -365,8 +370,8 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT ICOL,VCOL FROM " + fullTableName + " WHERE ${CONDITIONS}",
-        tableColumns,
+        "SELECT \"ICOL\", \"VCOL\" FROM " + fullTableName + " WHERE ${CONDITIONS}",
+        "\"" + StringUtils.join(tableColumns, "\", \"") + "\"",
         "\"ICOL\"",
         String.valueOf(Types.INTEGER),
         String.valueOf(START),

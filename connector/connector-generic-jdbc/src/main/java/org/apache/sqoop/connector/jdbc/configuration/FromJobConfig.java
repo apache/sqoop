@@ -25,6 +25,9 @@ import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.apache.sqoop.validation.validators.NullOrContains;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  */
@@ -39,8 +42,8 @@ public class FromJobConfig {
   @Input(size = 2000, validators = { @Validator(value = NullOrContains.class, strArg = GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN) })
   public String sql;
 
-  @Input(size = 50)
-  public String columns;
+  @Input
+  public List<String> columnList;
 
   @Input(size = 50)
   public String partitionColumn;
@@ -50,6 +53,10 @@ public class FromJobConfig {
 
   @Input(size = 50)
   public String boundaryQuery;
+
+  public FromJobConfig() {
+    columnList = new LinkedList<>();
+  }
 
   public static class ConfigValidator extends AbstractValidator<FromJobConfig> {
     @Override
@@ -66,8 +73,8 @@ public class FromJobConfig {
       if (config.sql != null && config.partitionColumn == null) {
         addMessage(Status.ERROR, "Partition column is required on query based import");
       }
-      if(config.sql != null && config.columns != null) {
-        addMessage(Status.ERROR, "Can't use sql import and specify columns at the same time");
+      if(config.sql != null && (config.columnList != null && !config.columnList.isEmpty())) {
+        addMessage(Status.ERROR, "Can't use sql import and specify columnList at the same time");
       }
     }
   }
