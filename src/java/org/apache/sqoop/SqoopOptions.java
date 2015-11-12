@@ -319,10 +319,10 @@ public class SqoopOptions implements Cloneable {
   // Phoenix table to import into.
   @StoredAsProperty("phoenix.table") private String phoenixTable;
 
-  //Phoenix column mapping to db columns.
+  //Phoenix column mapping to sqoop columns.
   @StoredAsProperty("phoenix.column.mapping") private String phoenixColumnMapping;
 
-  //Is bulkload.
+  //Is this a bulkload job.
   @StoredAsProperty("phoenix.bulk.load.enabled") private boolean phoenixBulkLoadEnabled;
  
   // These next two fields are not serialized to the metastore.

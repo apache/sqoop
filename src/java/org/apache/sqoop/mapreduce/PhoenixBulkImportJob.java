@@ -52,143 +52,144 @@ import com.google.common.base.Preconditions;
 
 /**
  * Job to bulk import data from db to phoenix. 
- *
  */
 public class PhoenixBulkImportJob extends DataDrivenImportJob {
 
 	public static final Log LOG = LogFactory.getLog(
 			PhoenixBulkImportJob.class.getName());
 
-    public PhoenixBulkImportJob(final SqoopOptions opts,
+  public PhoenixBulkImportJob(final SqoopOptions opts,
                           final ImportJobContext importContext) {
-        super(opts, importContext.getInputFormat(), importContext);
-    }
+  	super(opts, importContext.getInputFormat(), importContext);
+  }
 
-    @Override
-    protected void configureMapper(Job job, String tableName,
-                                   String tableClassName) throws IOException {
-        job.setOutputKeyClass(ImmutableBytesWritable.class);
-        job.setOutputValueClass(KeyValue.class);
-        job.setMapperClass(getMapperClass());
-    }
+  @Override
+  protected void configureMapper(Job job, String tableName,
+                                 String tableClassName) throws IOException {
+  	job.setOutputKeyClass(ImmutableBytesWritable.class);
+    job.setOutputValueClass(KeyValue.class);
+    job.setMapperClass(getMapperClass());
+  }
 
-    @Override
-    protected Class<? extends Mapper> getMapperClass() {
-        return PhoenixBulkImportMapper.class;
-    }
+  @Override
+  protected Class<? extends Mapper> getMapperClass() {
+  	return PhoenixBulkImportMapper.class;
+  }
 
-    @Override
-    protected Class<? extends OutputFormat> getOutputFormatClass()
-            throws ClassNotFoundException {
-        return HFileOutputFormat.class;
-    }
+  @Override
+  protected Class<? extends OutputFormat> getOutputFormatClass()
+          throws ClassNotFoundException {
+  	return HFileOutputFormat.class;
+  }
 
-    @Override
-    protected void configureOutputFormat(Job job, String tableName,
-                                         String tableClassName) throws ClassNotFoundException, IOException {
-    	
-    	ConnManager manager = getContext().getConnManager();
-    	String[] sColumnNames = null;
-    	if(null == tableName) {
-    		String sqlQuery = options.getSqlQuery();
-    		sColumnNames = manager.getColumnNamesForQuery(sqlQuery);
-    	} else {
-    		if(null == options.getColumns()) {
-    			sColumnNames = manager.getColumnNames(tableName);	
-    		} else {
-    			sColumnNames = options.getColumns();
-    		}
-    	}
-        String columnMappings = options.getPhoenixColumnMapping();
-        // if column mappings aren't provided, we assume the column names in sqoop and phoenix match.
-        if(columnMappings == null || columnMappings.isEmpty()) {
-        	columnMappings = Joiner.on(",").join(sColumnNames);
-        }
-        job.getConfiguration().set(PhoenixConstants.PHOENIX_SQOOP_COLUMNS, Joiner.on(",").join(sColumnNames));
-        job.getConfiguration().set(PhoenixConstants.PHOENIX_COLUMN_MAPPING, columnMappings);
-        job.setOutputFormatClass(getOutputFormatClass());
+  @Override
+  protected void configureOutputFormat(Job job, String tableName,
+                   String tableClassName) throws ClassNotFoundException, IOException {
+  	
+  	ConnManager manager = getContext().getConnManager();
+  	String[] sColumnNames = null;
+  	if (null == tableName) {
+  		String sqlQuery = options.getSqlQuery();
+  		sColumnNames = manager.getColumnNamesForQuery(sqlQuery);
+  	} else {
+  		if (null == options.getColumns()) {
+  			sColumnNames = manager.getColumnNames(tableName);	
+  		} else {
+  			sColumnNames = options.getColumns();
+  		}
+  	}
+    String columnMappings = options.getPhoenixColumnMapping();
+    // if column mappings aren't provided, 
+    // we assume the column names in sqoop and phoenix match.
+    if(columnMappings == null || columnMappings.isEmpty()) {
+    	columnMappings = Joiner.on(",").join(sColumnNames);
     }
+    job.getConfiguration().set(PhoenixConstants.PHOENIX_SQOOP_COLUMNS, 
+    																Joiner.on(",").join(sColumnNames));
+    job.getConfiguration().set(PhoenixConstants.PHOENIX_COLUMN_MAPPING, columnMappings);
+    job.setOutputFormatClass(getOutputFormatClass());
+  }
 
-    @Override
-    protected void jobSetup(Job job) throws IOException, ImportException {
-    	super.jobSetup(job);
-        Configuration conf = job.getConfiguration();
-        HBaseConfiguration.addHbaseResources(conf);
-        final String tableName = options.getPhoenixTable();
-        final String sColumnNames = conf.get(PhoenixConstants.PHOENIX_SQOOP_COLUMNS);
-        final String columnMappings = conf.get(PhoenixConstants.PHOENIX_COLUMN_MAPPING);
-        Preconditions.checkNotNull(tableName);
-        Preconditions.checkNotNull(sColumnNames);
-        
-        
-        final Map<String,String> phoenixToSqoopMapping = PhoenixUtil.getPhoenixToSqoopMap(columnMappings);
-        final String pColumnNames = Joiner.on(",").join(phoenixToSqoopMapping.keySet());
-        boolean isValidColumns = PhoenixUtil.validateColumns(sColumnNames,columnMappings);
-        if(!isValidColumns) {
-        	throw new RuntimeException(String.format("Failure to map sqoop columns [%s] to phoenix columns [%s] ", sColumnNames,pColumnNames));
-        }
-        
-        PhoenixMapReduceUtil.setOutput(job, tableName,pColumnNames);
-        
-        FileOutputFormat.setOutputPath(job, getContext().getDestination());
-        HTable hTable = new HTable(job.getConfiguration(), tableName);
-        HFileOutputFormat.configureIncrementalLoad(job, hTable);
-        TableMapReduceUtil.initCredentials(job);
-        TableMapReduceUtil.addDependencyJars(job);
-        TableMapReduceUtil.addDependencyJars(conf, HTable.class);
-        TableMapReduceUtil.addDependencyJars(job.getConfiguration(), PhoenixDriver.class);
-   }
+  @Override
+  protected void jobSetup(Job job) throws IOException, ImportException {
+  	super.jobSetup(job);
+    Configuration conf = job.getConfiguration();
+    HBaseConfiguration.addHbaseResources(conf);
+    final String tableName = options.getPhoenixTable();
+    final String sColumnNames = conf.get(PhoenixConstants.PHOENIX_SQOOP_COLUMNS);
+    final String columnMappings = conf.get(PhoenixConstants.PHOENIX_COLUMN_MAPPING);
+    Preconditions.checkNotNull(tableName);
+    Preconditions.checkNotNull(sColumnNames);
+    
+    final Map<String,String> phoenixToSqoopMapping = PhoenixUtil.getPhoenixToSqoopMap(columnMappings);
+    final String pColumnNames = Joiner.
+    															on(PhoenixConstants.PHOENIX_COLUMN_MAPPING_SEPARATOR).
+    															join(phoenixToSqoopMapping.keySet());
+    boolean isValidColumns = PhoenixUtil.validateColumns(sColumnNames,columnMappings);
+    if (!isValidColumns) {
+    	throw new RuntimeException(String.format("Failure to map sqoop columns [%s] "
+    		+ "to phoenix columns [%s] ", sColumnNames,pColumnNames));
+    }
+    
+    PhoenixMapReduceUtil.setOutput(job,tableName,pColumnNames);
+    
+    FileOutputFormat.setOutputPath(job,getContext().getDestination());
+    HTable hTable = new HTable(job.getConfiguration(), tableName);
+    HFileOutputFormat.configureIncrementalLoad(job, hTable);
+    TableMapReduceUtil.initCredentials(job);
+    TableMapReduceUtil.addDependencyJars(job);
+    TableMapReduceUtil.addDependencyJars(conf, HTable.class);
+    TableMapReduceUtil.addDependencyJars(job.getConfiguration(), PhoenixDriver.class);
+  }
 
 	@Override
 	protected void completeImport(Job job) throws IOException, ImportException {
 		super.completeImport(job);
 		FileSystem fileSystem = FileSystem.get(job.getConfiguration());
-
-	    Path bulkLoadDir = getContext().getDestination();
-	    setPermission(fileSystem, fileSystem.getFileStatus(bulkLoadDir),
-	      FsPermission.createImmutable((short) 00777));
-
-	    HTable hTable = new HTable(job.getConfiguration(), options.getPhoenixTable());
-
-	    // Load generated HFiles into table
-	    try {
-	      LoadIncrementalHFiles loader = new LoadIncrementalHFiles(
-	        job.getConfiguration());
-	      loader.doBulkLoad(bulkLoadDir, hTable);
-	    }
-	    catch (Exception e) {
-	      String errorMessage = String.format("Unrecoverable error while " +
+		Path bulkLoadDir = getContext().getDestination();
+	  setPermission(fileSystem, fileSystem.getFileStatus(bulkLoadDir),
+	  FsPermission.createImmutable((short) 00777));
+	  HTable hTable = new HTable(job.getConfiguration(), options.getPhoenixTable());
+	  
+	  // Load generated HFiles into table
+	  try {
+	  	LoadIncrementalHFiles loader = new LoadIncrementalHFiles(
+	      job.getConfiguration());
+	     	loader.doBulkLoad(bulkLoadDir, hTable);
+	  }
+	  catch (Exception e) {
+	  	String errorMessage = String.format("Unrecoverable error while " +
 	        "performing the bulk load of files in [%s]",
-	        bulkLoadDir.toString());
-	      throw new ImportException(errorMessage, e);
-	    }
+	        	bulkLoadDir.toString());
+	    throw new ImportException(errorMessage, e);
 	  }
+	}
 
-	  @Override
-	  protected void jobTeardown(Job job) throws IOException, ImportException {
-	    super.jobTeardown(job);
-	    // Delete the hfiles directory after we are finished.
-	    FileSystem fileSystem = FileSystem.get(job.getConfiguration());
-	    fileSystem.delete(getContext().getDestination(), true);
-	  }
+  @Override
+  protected void jobTeardown(Job job) throws IOException, ImportException {
+    super.jobTeardown(job);
+    // Delete the hfiles directory after we are finished.
+    FileSystem fileSystem = FileSystem.get(job.getConfiguration());
+    fileSystem.delete(getContext().getDestination(), true);
+  }
 
-	  /**
-	   * Set the file permission of the path of the given fileStatus. If the path
-	   * is a directory, apply permission recursively to all subdirectories and
-	   * files.
-	   *
-	   * @param fs         the filesystem
-	   * @param fileStatus containing the path
-	   * @param permission the permission
-	   * @throws java.io.IOException
-	   */
-	  private void setPermission(FileSystem fs, FileStatus fileStatus,
-	                             FsPermission permission) throws IOException {
-	    if(fileStatus.isDir()) {
-	      for(FileStatus file : fs.listStatus(fileStatus.getPath())){
-	        setPermission(fs, file, permission);
-	      }
-	    }
-	    fs.setPermission(fileStatus.getPath(), permission);
+  /**
+   * Set the file permission of the path of the given fileStatus. If the path
+   * is a directory, apply permission recursively to all subdirectories and
+   * files.
+   *
+   * @param fs         the filesystem
+   * @param fileStatus containing the path
+   * @param permission the permission
+   * @throws java.io.IOException
+   */
+  private void setPermission(FileSystem fs, FileStatus fileStatus,
+                             FsPermission permission) throws IOException {
+    if (fileStatus.isDirectory()) {
+      for (FileStatus file : fs.listStatus(fileStatus.getPath())){
+        setPermission(fs, file, permission);
+      }
+    }
+    fs.setPermission(fileStatus.getPath(), permission);
 	}
 }

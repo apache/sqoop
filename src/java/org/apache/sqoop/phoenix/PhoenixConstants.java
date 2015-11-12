@@ -20,11 +20,17 @@ package org.apache.sqoop.phoenix;
 /**
  * Set of constants specifically for phoenix. 
  */
-public class PhoenixConstants {
+public final class PhoenixConstants {
 
 	/** property used to specify the column mapping of db to phoenix **/
 	public static final String PHOENIX_COLUMN_MAPPING = "sqoop.phoenix.import.column.mapping";
 	
 	/** property used to specify the columns beings imported from sqoop. */
 	public static final String PHOENIX_SQOOP_COLUMNS = "sqoop.phoenix.columns";
+	
+	/** separator for phoenix columns */
+	public static final String PHOENIX_COLUMN_MAPPING_SEPARATOR = ",";
+	
+	/** separator between phoenix and sqoop column.  */
+	public static final String PHOENIX_SQOOP_COLUMN_SEPARATOR = ";";
 }

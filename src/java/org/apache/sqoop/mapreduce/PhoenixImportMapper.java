@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
@@ -35,10 +34,9 @@ import org.apache.sqoop.phoenix.PhoenixConstants;
 import org.apache.sqoop.phoenix.PhoenixSqoopWritable;
 import org.apache.sqoop.phoenix.PhoenixUtil;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
+import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.mapreduce.AutoProgressMapper;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * Imports records by writing them to Phoenix 
@@ -62,10 +60,7 @@ public class PhoenixImportMapper
 		try {
 			columnInfos = PhoenixConfigurationUtil.getUpsertColumnMetadataList(conf);
 			String columnMaps = conf.get(PhoenixConstants.PHOENIX_COLUMN_MAPPING);
-			for(Map.Entry<String,String> prop : conf) {
-				System.out.println(String.format(" the key is [%s] and the value is [%s]" , prop.getKey(),prop.getValue()));
-			}
-            columnMappings = PhoenixUtil.getPhoenixToSqoopMap(columnMaps);
+			columnMappings = PhoenixUtil.getPhoenixToSqoopMap(columnMaps);
 		} catch (SQLException e) {
 			 throw new RuntimeException("Failed to load the upsert column metadata for table.");
 		}
@@ -79,7 +74,7 @@ public class PhoenixImportMapper
 		PhoenixSqoopWritable recordWritable = new PhoenixSqoopWritable();
 		recordWritable.setColumnMetadata(columnInfos);
 		List<Object> columnValues = Lists.newArrayListWithCapacity(columnInfos.size());
-		for(ColumnInfo column : columnInfos) {
+		for (ColumnInfo column : columnInfos) {
 			String pColName = column.getDisplayName();
 			String sColName = columnMappings.get(pColName);
 			Object sColValue = fields.get(sColName);
