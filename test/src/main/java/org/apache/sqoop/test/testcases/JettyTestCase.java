@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
@@ -237,6 +238,13 @@ abstract public class JettyTestCase implements ITest {
    * @throws IOException
    */
   protected void createFromFile(String filename, String...lines) throws IOException {
+    createFromFile(hdfsClient, filename, lines);
+  }
+
+  /**
+   * Create file on given HDFS instance with given lines
+   */
+  protected void createFromFile(FileSystem hdfsClient, String filename, String...lines) throws IOException {
     HdfsUtils.createFile(hdfsClient, HdfsUtils.joinPathFragments(getMapreduceDirectory(), filename), lines);
   }
 }
