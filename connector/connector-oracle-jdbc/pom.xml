@@ -54,7 +54,6 @@ limitations under the License.
   </dependencies>
 
   <build>
-    <finalName>sqoop</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
