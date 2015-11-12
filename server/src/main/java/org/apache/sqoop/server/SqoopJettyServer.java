@@ -108,9 +108,7 @@ public class SqoopJettyServer {
     context.addServlet(ConnectorServlet.class, "/v1/connector/*");
     context.addServlet(DriverServlet.class, "/v1/driver/*");
     context.addServlet(JobServlet.class, "/v1/job/*");
-    context.addServlet(JobsServlet.class, "/v1/jobs/*");
     context.addServlet(LinkServlet.class, "/v1/link/*");
-    context.addServlet(LinksServlet.class, "/v1/links/*");
     context.addServlet(SubmissionsServlet.class, "/v1/submissions/*");
     context.addServlet(VersionServlet.class, "/version");
     context.addFilter(SqoopAuthenticationFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
