@@ -76,6 +76,8 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
 
   @Test
   public void testWithDisabledObjects() throws Exception {
+    // the test will be executed several times, and the jobName should be different.
+    String jobName = "job_" + System.currentTimeMillis();
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
     fillRdbmsLinkConfig(rdbmsLink);
@@ -88,6 +90,7 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
 
     // Job creation
     MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    job.setName(jobName);
 
     // rdms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -99,11 +102,11 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
 
     // Disable model entities as per parameterized run
     getClient().enableLink(rdbmsLink.getPersistenceId(), enabledLink);
-    getClient().enableJob(job.getPersistenceId(), enabledJob);
+    getClient().enableJob(jobName, enabledJob);
 
     // Try to execute the job and verify that the it was not executed
     try {
-      executeJob(job.getPersistenceId());
+      executeJob(jobName);
       fail("Expected exception as the model classes are disabled.");
     } catch(SqoopException ex) {
       // Top level exception should be CLIENT_0001

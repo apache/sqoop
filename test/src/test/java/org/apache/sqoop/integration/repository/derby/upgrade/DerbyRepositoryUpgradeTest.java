@@ -19,6 +19,7 @@ package org.apache.sqoop.integration.repository.derby.upgrade;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.client.SqoopClient;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.testcases.JettyTestCase;
 import org.apache.sqoop.test.utils.CompressionUtils;
@@ -54,6 +55,7 @@ import static org.testng.Assert.assertNotNull;
 public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
 
   private static final Logger LOG = Logger.getLogger(DerbyRepositoryUpgradeTest.class);
+  protected Map<Long, String> jobIdToNameMap;
 
   /**
    * Custom Sqoop mini cluster that points derby repository to real on-disk structures.
@@ -112,17 +114,12 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
   /**
    * List of job ids that should be disabled
    */
-  public abstract Integer[] getDisabledJobIds();
+  public abstract String[] getDisabledJobNames();
 
   /**
    * List of link ids that we should delete using the id
    */
   public abstract Integer[] getDeleteLinkIds();
-
-  /**
-   * List of job ids that we should delete using the id
-   */
-  public abstract Integer[] getDeleteJobIds();
 
   public String getRepositoryPath() {
     return HdfsUtils.joinPathFragments(getTemporaryJettyPath(), "repo");
@@ -157,6 +154,11 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
 
     // Initialize Sqoop Client API
     setClient(new SqoopClient(getServerUrl()));
+
+    jobIdToNameMap = new HashMap<Long, String>();
+    for(MJob job : getClient().getJobs()) {
+      jobIdToNameMap.put(job.getPersistenceId(), job.getName());
+    }
   }
 
   @AfterMethod
@@ -166,6 +168,7 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
 
   @Test
   public void testPostUpgrade() throws Exception {
+
     // Please note that the upgrade itself is done on startup and hence prior calling this test
     // method. We're just verifying that Server has started and behaves and we are expecting.
 
@@ -185,13 +188,13 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
     for(Integer id : getDisabledLinkIds()) {
       assertFalse(getClient().getLink(id).getEnabled());
     }
-    for(Integer id : getDisabledJobIds()) {
-      assertFalse(getClient().getJob(id).getEnabled());
+    for(String name : getDisabledJobNames()) {
+      assertFalse(getClient().getJob(name).getEnabled());
     }
 
     // Remove all objects
-    for(Integer id : getDeleteJobIds()) {
-      getClient().deleteJob(id);
+    for(String name : jobIdToNameMap.values()) {
+      getClient().deleteJob(name);
     }
     for(Integer id : getDeleteLinkIds()) {
       getClient().deleteLink(id);

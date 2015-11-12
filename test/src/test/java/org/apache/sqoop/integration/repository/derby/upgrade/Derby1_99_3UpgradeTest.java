@@ -20,10 +20,7 @@ package org.apache.sqoop.integration.repository.derby.upgrade;
 import org.apache.sqoop.model.MJob;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertEquals;
@@ -77,18 +74,13 @@ public class Derby1_99_3UpgradeTest extends DerbyRepositoryUpgradeTest {
   }
 
   @Override
-  public Integer[] getDisabledJobIds() {
-    return new Integer[] {3};
+  public String[] getDisabledJobNames() {
+    return new String[] {jobIdToNameMap.get(3L)};
   }
 
   @Override
   public Integer[] getDeleteLinkIds() {
     return new Integer[] {1, 2, 3, 4, 5};
-  }
-
-  @Override
-  public Integer[] getDeleteJobIds() {
-    return new Integer[] {1, 2, 3, 4, 5, 6};
   }
 
   @Test

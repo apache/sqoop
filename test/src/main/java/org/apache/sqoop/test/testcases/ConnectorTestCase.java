@@ -279,8 +279,8 @@ abstract public class ConnectorTestCase extends JettyTestCase {
    * @param jid Job id
    * @throws Exception
    */
-  protected void executeJob(long jid) throws Exception {
-    MSubmission finalSubmission = getClient().startJob(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
+  protected void executeJob(String jobName) throws Exception {
+    MSubmission finalSubmission = getClient().startJob(jobName, DEFAULT_SUBMISSION_CALLBACKS, 100);
 
     if(finalSubmission.getStatus().isFailure()) {
       LOG.error("Submission has failed: " + finalSubmission.getError().getErrorSummary());
@@ -297,6 +297,6 @@ abstract public class ConnectorTestCase extends JettyTestCase {
    * @throws Exception
    */
   protected void executeJob(MJob job) throws Exception {
-    executeJob(job.getPersistenceId());
+    executeJob(job.getName());
   }
 }

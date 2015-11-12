@@ -353,8 +353,8 @@ public class SqoopTestCase implements ITest {
    * @param jid Job id
    * @throws Exception
    */
-  public void executeJob(long jid) throws Exception {
-    MSubmission finalSubmission = getClient().startJob(jid, DEFAULT_SUBMISSION_CALLBACKS, 100);
+  public void executeJob(String jobName) throws Exception {
+    MSubmission finalSubmission = getClient().startJob(jobName, DEFAULT_SUBMISSION_CALLBACKS, 100);
 
     if(finalSubmission.getStatus().isFailure()) {
       LOG.error("Submission has failed: " + finalSubmission.getError().getErrorSummary());

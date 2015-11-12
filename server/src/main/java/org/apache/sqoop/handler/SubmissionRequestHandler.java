@@ -24,6 +24,7 @@ import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.SubmissionsBean;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.security.authorization.AuthorizationEngine;
@@ -75,7 +76,8 @@ public class SubmissionRequestHandler implements RequestHandler {
   }
 
   private JsonBean getSubmissionsForJob(String jobIdentifier, RequestContext ctx) {
-    String jobName = HandlerUtils.getJobNameFromIdentifier(jobIdentifier);
+    MJob job = HandlerUtils.getJobFromIdentifier(jobIdentifier);
+    String jobName = job.getName();
 
     //Authorization check
     AuthorizationEngine.statusJob(ctx.getUserName(), jobName);

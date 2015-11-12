@@ -120,7 +120,7 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
       );
 
     // Verify new last value
-    MJob updatedJob = getClient().getJob(job.getPersistenceId());
+    MJob updatedJob = getClient().getJob(job.getName());
     assertEquals(updatedJob.getFromJobConfig().getStringInput("incrementalRead.lastValue").getValue(), newMaxValue);
 
     // Clean up testing table
@@ -175,7 +175,7 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
       );
 
     // Verify new last value
-    MJob updatedJob = getClient().getJob(job.getPersistenceId());
+    MJob updatedJob = getClient().getJob(job.getName());
     assertEquals(updatedJob.getFromJobConfig().getStringInput("incrementalRead.lastValue").getValue(), newMaxValue);
 
     // Clean up testing table

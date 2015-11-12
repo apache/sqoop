@@ -27,53 +27,14 @@ import org.apache.sqoop.server.common.ServerError;
 
 public class HandlerUtils {
 
-  public static long getJobIdFromIdentifier(String identifier) {
-    // support jobName or jobId for the api
-    // NOTE: jobId is a fallback for older sqoop clients if any, since we want
-    // to primarily use unique jobNames
-    long jobId;
-    Repository repository = RepositoryManager.getInstance().getRepository();
-    MJob job = repository.findJob(identifier);
-    if (job != null) {
-      jobId = job.getPersistenceId();
-    } else {
-      try {
-        jobId = Long.parseLong(identifier);
-      } catch (NumberFormatException ex) {
-        // this means name nor Id existed and we want to throw a user friendly
-        // message than a number format exception
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid job: " + identifier
-            + " requested");
-      }
-    }
-    return jobId;
-  }
-
-  public static String getJobNameFromIdentifier(String identifier) {
-    // support jobName or jobId for the api
-    // NOTE: jobId is a fallback for older sqoop clients if any, since we want
-    // to primarily use unique jobNames
+  public static MJob getJobFromIdentifier(String identifier) {
     Repository repository = RepositoryManager.getInstance().getRepository();
     MJob job = repository.findJob(identifier);
     if (job == null) {
-      long jobId;
-      try {
-        jobId = Long.parseLong(identifier);
-      } catch (NumberFormatException ex) {
-        // this means name nor Id existed and we want to throw a user friendly
-        // message than a number format exception
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid job: " + identifier
-            + " requested");
-      }
-
-      job = repository.findJob(jobId);
-      if (job == null) {
-        throw new SqoopException(ServerError.SERVER_0006, "Job: " + identifier
-            + " doesn't exist");
-      }
+      throw new SqoopException(ServerError.SERVER_0006, "Job: " + identifier
+              + " doesn't exist");
     }
-
-    return job.getName();
+    return job;
   }
 
   public static long getLinkIdFromIdentifier(String identifier) {

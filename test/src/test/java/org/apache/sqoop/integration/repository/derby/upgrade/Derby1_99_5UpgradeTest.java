@@ -85,17 +85,12 @@ public class Derby1_99_5UpgradeTest extends DerbyRepositoryUpgradeTest {
   }
 
   @Override
-  public Integer[] getDisabledJobIds() {
-    return new Integer[] {4, 5};
+  public String[] getDisabledJobNames() {
+    return new String[] {jobIdToNameMap.get(4L), jobIdToNameMap.get(5L)};
   }
 
   @Override
   public Integer[] getDeleteLinkIds() {
-    return new Integer[] {1, 2, 3, 4, 5, 6};
-  }
-
-  @Override
-  public Integer[] getDeleteJobIds() {
     return new Integer[] {1, 2, 3, 4, 5, 6};
   }
 
