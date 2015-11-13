@@ -52,7 +52,7 @@ public class FromRDBMSToKafkaTest extends KafkaConnectorTestCase {
     saveLink(rdbmsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), kafkaLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), kafkaLink.getName());
 
     // set rdbms "FROM" job config
     fillRdbmsFromConfig(job, "id");

@@ -94,7 +94,7 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
     saveLink(hdfsConnection);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
 
     // Fill rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -139,7 +139,7 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
+    MJob job = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
     fillHdfsFromConfig(job);
 
     // Set the rdbms "TO" config here

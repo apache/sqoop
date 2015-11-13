@@ -81,8 +81,8 @@ public class Derby1_99_6UpgradeTest extends DerbyRepositoryUpgradeTest {
   }
 
   @Override
-  public Integer[] getDisabledLinkIds() {
-    return new Integer[] {4, 5};
+  public String[] getDisabledLinkNames() {
+    return new String[] {linkIdToNameMap.get(4L), linkIdToNameMap.get(5L)};
   }
 
   @Override
@@ -91,8 +91,9 @@ public class Derby1_99_6UpgradeTest extends DerbyRepositoryUpgradeTest {
   }
 
   @Override
-  public Integer[] getDeleteLinkIds() {
-    return new Integer[] {1, 2, 3, 4, 5, 6};
+  public String[] getDeleteLinkNames() {
+    return new String[] {linkIdToNameMap.get(1L), linkIdToNameMap.get(2L),
+            linkIdToNameMap.get(3L), linkIdToNameMap.get(4L), linkIdToNameMap.get(5L), linkIdToNameMap.get(6L)};
   }
 
   @Test
@@ -102,7 +103,7 @@ public class Derby1_99_6UpgradeTest extends DerbyRepositoryUpgradeTest {
       assertNotNull(job.getName());
     }
 
-    MJob job = getClient().createJob(1, 1);
+    MJob job = getClient().createJob(linkIdToNameMap.get(1L), linkIdToNameMap.get(1L));
     assertNull(job.getName());
     assertEquals(getClient().saveJob(job), Status.ERROR);
   }

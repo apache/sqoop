@@ -37,53 +37,24 @@ public class HandlerUtils {
     return job;
   }
 
-  public static long getLinkIdFromIdentifier(String identifier) {
-    // support linkName or linkId for the api
-    // NOTE: linkId is a fallback for older sqoop clients if any, since we want
-    // to primarily use unique linkNames
-    long linkId;
+  public static MLink getLinkFromLinkName(String linkName) {
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MLink link = repository.findLink(identifier);
-    if (link != null) {
-      linkId = link.getPersistenceId();
-    } else {
-      try {
-        linkId = Long.parseLong(identifier);
-      } catch (NumberFormatException ex) {
-        // this means name nor Id existed and we want to throw a user friendly
-        // message than a number format exception
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid link: " + identifier
-            + " requested");
-      }
+    MLink link = repository.findLink(linkName);
+    if (link == null) {
+      throw new SqoopException(ServerError.SERVER_0006, "Invalid link name: " + linkName
+              + " doesn't exist");
     }
-    return linkId;
+    return link;
   }
 
-  public static String getLinkNameFromIdentifier(String identifier) {
-    // support linkName or linkId for the api
-    // NOTE: linkId is a fallback for older sqoop clients if any, since we want
-    // to primarily use unique linkNames
+  public static MLink getLinkFromLinkId(Long linkId) {
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MLink link = repository.findLink(identifier);
+    MLink link = repository.findLink(linkId);
     if (link == null) {
-      long linkId;
-      try {
-        linkId = Long.parseLong(identifier);
-      } catch (NumberFormatException ex) {
-        // this means name nor Id existed and we want to throw a user friendly
-        // message than a number format exception
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid link: " + identifier
-            + " requested");
-      }
-
-      link = repository.findLink(linkId);
-      if (link == null) {
-        throw new SqoopException(ServerError.SERVER_0006, "Link: " + identifier
-            + " doesn't exist");
-      }
+      throw new SqoopException(ServerError.SERVER_0006, "Invalid link id: " + linkId
+              + " doesn't exist");
     }
-
-    return link.getName();
+    return link;
   }
 
   public static long getConnectorIdFromIdentifier(String identifier) {

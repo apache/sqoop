@@ -49,7 +49,7 @@ public class FromHDFSToKafkaTest extends KafkaConnectorTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(hdfsLink.getPersistenceId(), kafkaLink.getPersistenceId());
+    MJob job = getClient().createJob(hdfsLink.getName(), kafkaLink.getName());
 
     // Job connector configs
     fillHdfsFromConfig(job);

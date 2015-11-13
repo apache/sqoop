@@ -55,7 +55,7 @@ public class ShowJobInOrderTest extends SqoopTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // rdms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -66,7 +66,7 @@ public class ShowJobInOrderTest extends SqoopTestCase {
     saveJob(job);
 
     // Job creation
-    job = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
+    job = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
 
     // rdms "To" config
     fillRdbmsToConfig(job);
@@ -77,7 +77,7 @@ public class ShowJobInOrderTest extends SqoopTestCase {
     saveJob(job);
 
     // Job creation
-    job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // rdms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -88,7 +88,7 @@ public class ShowJobInOrderTest extends SqoopTestCase {
     saveJob(job);
 
     // Job creation
-    job = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
+    job = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
 
 
     // hdfs "From" config

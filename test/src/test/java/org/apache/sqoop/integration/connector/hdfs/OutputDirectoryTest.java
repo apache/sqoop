@@ -54,7 +54,7 @@ public class OutputDirectoryTest extends ConnectorTestCase {
     saveLink(hdfsConnection);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -90,7 +90,7 @@ public class OutputDirectoryTest extends ConnectorTestCase {
     saveLink(hdfsConnection);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -125,7 +125,7 @@ public class OutputDirectoryTest extends ConnectorTestCase {
     saveLink(hdfsConnection);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");

@@ -106,7 +106,7 @@ public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase implements IT
   @Test
   public void testCities() throws Exception {
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), kiteLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), kiteLink.getName());
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");

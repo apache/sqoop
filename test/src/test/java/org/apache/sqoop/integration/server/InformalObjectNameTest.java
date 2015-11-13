@@ -69,7 +69,7 @@ public class InformalObjectNameTest extends SqoopTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // rdms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -81,7 +81,7 @@ public class InformalObjectNameTest extends SqoopTestCase {
     saveJob(job);
     assertEquals(job, getClient().getJob(JOB_NAME_CONTAINS_WHITESPACE));
 
-    job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // rdms "FROM" config
     fillRdbmsFromConfig(job, "id");

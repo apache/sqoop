@@ -92,7 +92,7 @@ public class PartitionerTest extends ConnectorTestCase implements ITest {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // set the rdbms "FROM" config
     fillRdbmsFromConfig(job, partitionColumn);

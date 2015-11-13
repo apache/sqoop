@@ -20,6 +20,7 @@ package org.apache.sqoop.integration.repository.derby.upgrade;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.testcases.JettyTestCase;
 import org.apache.sqoop.test.utils.CompressionUtils;
@@ -56,6 +57,7 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
 
   private static final Logger LOG = Logger.getLogger(DerbyRepositoryUpgradeTest.class);
   protected Map<Long, String> jobIdToNameMap;
+  protected Map<Long, String> linkIdToNameMap;
 
   /**
    * Custom Sqoop mini cluster that points derby repository to real on-disk structures.
@@ -109,7 +111,7 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
   /**
    * List of link ids that should be disabled
    */
-  public abstract Integer[] getDisabledLinkIds();
+  public abstract String[] getDisabledLinkNames();
 
   /**
    * List of job ids that should be disabled
@@ -119,7 +121,7 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
   /**
    * List of link ids that we should delete using the id
    */
-  public abstract Integer[] getDeleteLinkIds();
+  public abstract String[] getDeleteLinkNames();
 
   public String getRepositoryPath() {
     return HdfsUtils.joinPathFragments(getTemporaryJettyPath(), "repo");
@@ -159,6 +161,11 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
     for(MJob job : getClient().getJobs()) {
       jobIdToNameMap.put(job.getPersistenceId(), job.getName());
     }
+
+    linkIdToNameMap = new HashMap<Long, String>();
+    for(MLink link : getClient().getLinks()) {
+      linkIdToNameMap.put(link.getPersistenceId(), link.getName());
+    }
   }
 
   @AfterMethod
@@ -185,8 +192,8 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
     }
 
     // Verify that disabled status is preserved
-    for(Integer id : getDisabledLinkIds()) {
-      assertFalse(getClient().getLink(id).getEnabled());
+    for(String linkName : getDisabledLinkNames()) {
+      assertFalse(getClient().getLink(linkName).getEnabled());
     }
     for(String name : getDisabledJobNames()) {
       assertFalse(getClient().getJob(name).getEnabled());
@@ -196,8 +203,8 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
     for(String name : jobIdToNameMap.values()) {
       getClient().deleteJob(name);
     }
-    for(Integer id : getDeleteLinkIds()) {
-      getClient().deleteLink(id);
+    for(String linkName : getDeleteLinkNames()) {
+      getClient().deleteLink(linkName);
     }
 
     // We should end up with empty repository

@@ -90,7 +90,7 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // Set the rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -142,7 +142,7 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     String query = "SELECT * FROM " + provider.escapeTableName(getTableName().getTableName()) + " WHERE ${CONDITIONS}";
 

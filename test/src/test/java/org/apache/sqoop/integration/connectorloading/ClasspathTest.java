@@ -175,7 +175,7 @@ public class ClasspathTest extends ConnectorTestCase {
     MLink testConnection = getClient().createLink("test-connector");
     saveLink(testConnection);
 
-    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), testConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsConnection.getName(), testConnection.getName());
 
     fillRdbmsFromConfig(job, "id");
 

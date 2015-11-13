@@ -56,8 +56,8 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(hdfsLink.getPersistenceId(),
-        rdbmsLink.getPersistenceId());
+    MJob job = getClient().createJob(hdfsLink.getName(),
+        rdbmsLink.getName());
 
     // fill HDFS "FROM" config
     fillHdfsFromConfig(job);

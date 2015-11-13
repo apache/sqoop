@@ -47,7 +47,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveLink(hdfsConnection);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -89,7 +89,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // Connector values
     fillRdbmsFromConfig(job, "id");
@@ -131,7 +131,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // Connector values
     fillRdbmsFromConfig(job, "id");
@@ -173,7 +173,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // Connector values
     MConfigList configs = job.getFromJobConfig();
@@ -213,7 +213,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
     // Connector values
     String partitionColumn = provider.escapeTableName(getTableName().getTableName()) + "." + provider.escapeColumnName("id");
@@ -263,7 +263,7 @@ public class FromRDBMSToHDFSTest extends ConnectorTestCase {
     saveLink(hdfsConnection);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getPersistenceId(), hdfsConnection.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");

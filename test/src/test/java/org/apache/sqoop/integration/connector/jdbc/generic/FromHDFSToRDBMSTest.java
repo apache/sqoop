@@ -64,7 +64,7 @@ public class FromHDFSToRDBMSTest extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
+    MJob job = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
 
     // set hdfs "FROM" config for the job, since the connector test case base class only has utilities for hdfs!
     fillHdfsFromConfig(job);

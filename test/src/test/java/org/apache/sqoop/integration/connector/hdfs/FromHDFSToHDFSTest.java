@@ -51,7 +51,7 @@ public class FromHDFSToHDFSTest extends ConnectorTestCase {
     fillHdfsLink(hdfsLinkTo);
     saveLink(hdfsLinkTo);
 
-    MJob job = getClient().createJob(hdfsLinkFrom.getPersistenceId(), hdfsLinkTo.getPersistenceId());
+    MJob job = getClient().createJob(hdfsLinkFrom.getName(), hdfsLinkTo.getName());
 
     fillHdfsFromConfig(job);
 

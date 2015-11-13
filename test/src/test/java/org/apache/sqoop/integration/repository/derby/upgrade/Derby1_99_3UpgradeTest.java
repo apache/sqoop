@@ -69,8 +69,8 @@ public class Derby1_99_3UpgradeTest extends DerbyRepositoryUpgradeTest {
   }
 
   @Override
-  public Integer[] getDisabledLinkIds() {
-    return new Integer[] {4};
+  public String[] getDisabledLinkNames() {
+    return new String[] {linkIdToNameMap.get(4L)};
   }
 
   @Override
@@ -79,8 +79,9 @@ public class Derby1_99_3UpgradeTest extends DerbyRepositoryUpgradeTest {
   }
 
   @Override
-  public Integer[] getDeleteLinkIds() {
-    return new Integer[] {1, 2, 3, 4, 5};
+  public String[] getDeleteLinkNames() {
+    return new String[] {linkIdToNameMap.get(1L), linkIdToNameMap.get(2L),
+            linkIdToNameMap.get(3L), linkIdToNameMap.get(4L), linkIdToNameMap.get(5L)};
   }
 
   @Test

@@ -56,7 +56,7 @@ public class HdfsIncrementalReadTest extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
+    MJob job = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
     fillHdfsFromConfig(job);
     job.getFromJobConfig().getEnumInput("incremental.incrementalType").setValue(IncrementalType.NEW_FILES);
     fillRdbmsToConfig(job);

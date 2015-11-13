@@ -89,7 +89,7 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
     saveLink(hdfsLink);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
     job.setName(jobName);
 
     // rdms "FROM" config
@@ -101,7 +101,7 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
     saveJob(job);
 
     // Disable model entities as per parameterized run
-    getClient().enableLink(rdbmsLink.getPersistenceId(), enabledLink);
+    getClient().enableLink(rdbmsLink.getName(), enabledLink);
     getClient().enableJob(jobName, enabledJob);
 
     // Try to execute the job and verify that the it was not executed

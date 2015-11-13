@@ -37,14 +37,7 @@ import org.apache.sqoop.json.JobsBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.ConfigUtils;
-import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MFromConfig;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MPersistableEntity;
-import org.apache.sqoop.model.MResource;
-import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.*;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.request.HttpEventContext;
@@ -186,17 +179,14 @@ public class JobRequestHandler implements RequestHandler {
 
     // Job object
     MJob postedJob = jobs.get(0);
+    MLink fromLink = HandlerUtils.getLinkFromLinkId(postedJob.getFromLinkId());
+    MLink toLink = HandlerUtils.getLinkFromLinkId(postedJob.getToLinkId());
 
     // Authorization check
     if (create) {
-      AuthorizationEngine.createJob(ctx.getUserName(),
-          HandlerUtils.getLinkNameFromIdentifier(String.valueOf(postedJob.getFromLinkId())),
-          HandlerUtils.getLinkNameFromIdentifier(String.valueOf(postedJob.getToLinkId())));
+      AuthorizationEngine.createJob(ctx.getUserName(), fromLink.getName(), toLink.getName());
     } else {
-      AuthorizationEngine.updateJob(ctx.getUserName(),
-          HandlerUtils.getLinkNameFromIdentifier(String.valueOf(postedJob.getFromLinkId())),
-          HandlerUtils.getLinkNameFromIdentifier(String.valueOf(postedJob.getToLinkId())),
-          postedJob.getName());
+      AuthorizationEngine.updateJob(ctx.getUserName(), fromLink.getName(), toLink.getName(), postedJob.getName());
     }
 
     // Verify that user is not trying to spoof us

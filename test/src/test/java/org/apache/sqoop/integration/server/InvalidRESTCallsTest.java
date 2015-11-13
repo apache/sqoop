@@ -216,8 +216,8 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0005");
-        assertContains("Invalid link: i-dont-exists");
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0006");
+        assertContains("Invalid link name: i-dont-exists");
       }}),
     new TestDescription("Get links for non existing connector", "v1/link/all?cname=i-dont-exists", "GET", null, new Validator() {
       @Override
