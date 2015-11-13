@@ -265,7 +265,7 @@ public class TableDefWriter {
        String key = options.getHivePartitionKey();
        String value = options.getHivePartitionValue();
        String[] keys = key.split(",");
-       String[] values = key.split(",");
+       String[] values = value.split(",");
        for(int i=0;i<keys.length;i++){
            sb.append(keys[i]).append("='")
              .append(values[i]).append("',");

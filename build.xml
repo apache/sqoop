@@ -39,7 +39,7 @@
     </then>
     <else>
       <echo message="Use Hadoop 2.x by default" />
-      <property name="hadoopversion" value="200" />
+      <property name="hadoopversion" value="100" />
     </else>
   </if>
 
