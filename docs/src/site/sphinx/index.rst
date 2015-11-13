@@ -47,7 +47,15 @@ If you are excited to start using Sqoop you can follow the links below to get a 
 
 - `Sqoop 5 Minute Demo <Sqoop5MinutesDemo.html>`_
 - `Command Line Shell Usage Guide <CommandLineClient.html>`_
-- `Connectors <Connectors.html>`_
+- Connector guides
+
+  + `Generic JDBC Connector <Connector-GenericJDBC.html>`_
+  + `HDFS Connector <Connector-HDFS.html>`_
+  + `Kite Connector <Connector-Kite.html>`_
+  + `Kafka Connector <Connector-Kafka.html>`_
+  + `FTP Connector <Connector-FTP.html>`_
+  + `SFTP Connector <Connector-SFTP.html>`_
+
 - `Security Guide <SecurityGuideOnSqoop2.html>`_
 
 Developer Guide
