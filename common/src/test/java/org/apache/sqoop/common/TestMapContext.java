@@ -23,7 +23,7 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static junit.framework.Assert.assertNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
