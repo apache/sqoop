@@ -231,6 +231,11 @@ public class ImportJobBase extends JobBase {
       throw new IOException("Direct mode is incompatible with "
             + "HBase. Please remove the parameter --direct");
     }
+    if (options.getPhoenixTable() != null && options.isDirect()
+            && !getContext().getConnManager().isDirectModePhoenixSupported()) {
+          throw new IOException("Direct mode is incompatible with "
+                + "Phoenix. Please remove the parameter --direct");
+        }
     if (null != tableName) {
       LOG.info("Beginning import of " + tableName);
     } else {

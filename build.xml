@@ -191,7 +191,10 @@
   </if>
 
   <!-- Set dependency versions that are working with all Hadoop versions-->
-  <property name="hbase95.version" value="0.95.2-hadoop${hbasecompatprofile}-SNAPSHOT" />
+  <property name="hbase95.version" value="0.98.9-hadoop${hbasecompatprofile}" />
+	
+  <!-- Set phoenix version-->
+  <property name="phoenix.version" value="4.6.0-HBase-0.98"/>
 
   <!-- Load system-wide and project-wide default properties set by
        the user, to avoid needing to override with -D. -->

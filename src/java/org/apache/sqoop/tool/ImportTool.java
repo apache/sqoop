@@ -800,6 +800,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     toolOptions.addUniqueOptions(getHCatalogOptions());
     toolOptions.addUniqueOptions(getHCatImportOnlyOptions());
     toolOptions.addUniqueOptions(getAccumuloOptions());
+    toolOptions.addUniqueOptions(getPhoenixOptions());
 
     // get common codegen opts.
     RelatedOptions codeGenOpts = getCodeGenOpts(allTables);
@@ -984,6 +985,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       applyHBaseOptions(in, out);
       applyHCatalogOptions(in, out);
       applyAccumuloOptions(in, out);
+      applyPhoenixOptions(in, out);
 
     } catch (NumberFormatException nfe) {
       throw new InvalidOptionsException("Error: expected numeric argument.\n"
@@ -1021,7 +1023,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         && options.getTargetDir() == null
         && options.getHBaseTable() == null
         && options.getHCatTableName() == null
-        && options.getAccumuloTable() == null) {
+        && options.getAccumuloTable() == null
+        && options.getPhoenixTable() == null) {
       throw new InvalidOptionsException(
           "Must specify destination with --target-dir. "
           + HELP_STR);
@@ -1130,6 +1133,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     validateHiveOptions(options);
     validateHCatalogOptions(options);
     validateAccumuloOptions(options);
+    validatePhoenixOptions(options);
   }
 }
 

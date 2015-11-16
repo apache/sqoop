@@ -44,6 +44,9 @@ import org.apache.sqoop.accumulo.AccumuloUtil;
 import org.apache.sqoop.mapreduce.AccumuloImportJob;
 import org.apache.sqoop.mapreduce.HBaseBulkImportJob;
 import org.apache.sqoop.mapreduce.JdbcCallExportJob;
+import org.apache.sqoop.mapreduce.PhoenixBulkImportJob;
+import org.apache.sqoop.mapreduce.PhoenixImportJob;
+import org.apache.sqoop.phoenix.PhoenixUtil;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.SqlTypeMap;
 
@@ -661,12 +664,21 @@ public abstract class SqlManager
              + "classpath, cannot import to Accumulo!");
        }
        importer = new AccumuloImportJob(opts, context);
+    } else if(opts.getPhoenixTable() != null) {
+    	if(!PhoenixUtil.isPhoenixJarPresent()) {
+    		throw new ImportException("Phoenix jars are not present in "
+    	             + "classpath, cannot import to Phoenix!");
+    	}
+    	if(opts.isPhoenixBulkLoadEnabled()) {
+    		importer = new PhoenixBulkImportJob(opts, context);
+    	} else {
+    		importer = new PhoenixImportJob(opts, context);	
+    	}
     } else {
       // Import to HDFS.
       importer = new DataDrivenImportJob(opts, context.getInputFormat(),
               context);
     }
-
     checkTableImportOptions(context);
 
     String splitCol = getSplitColumn(opts, tableName);
@@ -704,6 +716,16 @@ public abstract class SqlManager
               + " cannot import to Accumulo!");
       }
       importer = new AccumuloImportJob(opts, context);
+    } else if(opts.getPhoenixTable() != null) {
+    	if(!PhoenixUtil.isPhoenixJarPresent()) {
+    		throw new ImportException("Phoenix jars are not present in "
+    	             + "classpath, cannot import to Phoenix!");
+    	}
+    	if(opts.isPhoenixBulkLoadEnabled()) {
+    		importer = new PhoenixBulkImportJob(opts, context);
+    	} else {
+    		importer = new PhoenixImportJob(opts, context);	
+    	}
     } else {
       // Import to HDFS.
       importer = new DataDrivenImportJob(opts, context.getInputFormat(),

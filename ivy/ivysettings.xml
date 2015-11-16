@@ -33,6 +33,9 @@ under the License.
   -->
   <property name="repo.maven.org" value="http://repo1.maven.org/maven2/"
       override="false"/>
+  <property name="release.apache.org"
+      value="https://repository.apache.org/content/repositories/releases/"
+      override="false"/>    
   <property name="snapshot.apache.org"
       value="https://repository.apache.org/content/repositories/snapshots/"
       override="false"/>

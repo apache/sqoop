@@ -188,6 +188,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       "hbase-bulkload";
   public static final String HBASE_CREATE_TABLE_ARG = "hbase-create-table";
 
+  // Phoenix arguments
+  public static final String PHOENIX_TABLE_ARG = "phoenix-table";
+  public static final String PHOENIX_COLUMN_MAPPING_ARG = "phoenix-column-mapping";
+  public static final String PHOENIX_BULK_LOAD_ENABLED_ARG = "phoenix-bulkload";
+  
   //Accumulo arguments.
   public static final String ACCUMULO_TABLE_ARG = "accumulo-table";
   public static final String ACCUMULO_COL_FAM_ARG = "accumulo-column-family";
@@ -774,6 +779,39 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     return hbaseOpts;
   }
 
+  protected RelatedOptions getPhoenixOptions() {
+	  RelatedOptions phoenixOpts =
+	      new RelatedOptions("Phoenix arguments");
+	  phoenixOpts.addOption(OptionBuilder.withArgName("table")
+	      .hasArg()
+	      .withDescription("Phoenix table to import data to")
+	      .withLongOpt(PHOENIX_TABLE_ARG)
+	      .create());
+	  phoenixOpts.addOption(OptionBuilder.withArgName("phoenix-column-mapping")
+		      .hasArg()
+		      .withDescription("column mapping between db and phoenix.")
+		      .withLongOpt(PHOENIX_COLUMN_MAPPING_ARG)
+		      .create());
+	  phoenixOpts.addOption(OptionBuilder
+		        .withDescription("Enable Phoenix bulk load")
+		        .withLongOpt(PHOENIX_BULK_LOAD_ENABLED_ARG)
+		        .create());
+	  return phoenixOpts;  
+	    
+  }
+  
+  protected void applyPhoenixOptions(CommandLine in, SqoopOptions out) {
+    if (in.hasOption(PHOENIX_TABLE_ARG)) {
+      out.setPhoenixTable(in.getOptionValue(PHOENIX_TABLE_ARG));
+    }
+
+    if(in.hasOption(PHOENIX_COLUMN_MAPPING_ARG)) {
+    	out.setPhoenixColumnMapping(in.getOptionValue(PHOENIX_COLUMN_MAPPING_ARG));
+    }
+    
+    out.setPhoenixBulkLoadEnabled(in.hasOption(PHOENIX_BULK_LOAD_ENABLED_ARG));
+  }
+  
   protected RelatedOptions getAccumuloOptions() {
     RelatedOptions accumuloOpts =
       new RelatedOptions("Accumulo arguments");
@@ -1634,6 +1672,14 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           BaseSqoopTool.HBASE_BULK_LOAD_ENABLED_ARG,
           BaseSqoopTool.HBASE_TABLE_ARG);
       throw new InvalidOptionsException(validationMessage);
+    }
+  }
+  
+  protected void validatePhoenixOptions(SqoopOptions options)
+	      throws InvalidOptionsException {
+    if(options.isPhoenixBulkLoadEnabled() && options.getPhoenixTable() == null) {
+    	throw new InvalidOptionsException("bulkload requires --phoenix-bulkload and --phoenix-table options "
+    			 + HELP_STR);
     }
   }
 

@@ -37,6 +37,7 @@ under the License.
       extends="runtime"
       description="artifacts needed to compile/test the application"/>
     <conf name="accumulo" visibility="private" />
+    <conf name="phoenix" visibility="private" />
     <conf name="hbase94" visibility="private" />
     <conf name="hbase95" visibility="private" extends="hbasecompat${hbasecompatprofile}" />
     <conf name="hbasecompat1" visibility="private" />
@@ -46,15 +47,15 @@ under the License.
     <conf name="avrohadoop2" visibility="private" />
     <conf name="hcatalog13" visibility="private" />
     <conf name="hadoop23" visibility="private"
-      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo,phoenix" />
     <conf name="hadoop20" visibility="private"
-      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo,phoenix" />
     <conf name="hadoop100" visibility="private"
-      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo,phoenix" />
     <conf name="hadoop200" visibility="private"
-      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo,phoenix" />
     <conf name="hadoop210" visibility="private"
-      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo,phoenix" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="hadoop23test" visibility="private" extends="test,hadoop23" />
@@ -291,7 +292,16 @@ under the License.
       <exclude org="log4j" module="log4j"/>
     </dependency>
 
-
+    <dependency org="org.apache.phoenix" name="phoenix-core" rev="${phoenix.version}" conf="phoenix->default">
+       <artifact name="phoenix-core" type="jar"/>
+       <artifact name="phoenix-core" type="test-jar" ext="jar" m:classifier="tests"/>
+       <exclude org="org.apache.hbase" module="hbase-common"/>
+       <exclude org="org.apache.hbase" module="hbase-prefix-tree"/>
+       <exclude org="org.apache.hbase" module="hbase-client"/>
+       <exclude org="org.apache.hbase" module="hbase-server"/>
+       <exclude org="org.apache.hbase" module="hbase-protocol"/>
+    </dependency>
+    
     <dependency org="org.apache.hive.hcatalog" name="hive-hcatalog-core"
       rev="${hcatalog.version}" conf="hcatalog13->default">
       <artifact name="hive-hcatalog-core" type="jar"/>
