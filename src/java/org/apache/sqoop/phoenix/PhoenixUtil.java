@@ -101,7 +101,7 @@ public class PhoenixUtil {
 		for (String sqoopColumn : sqoopColumns) {
 			if (!values.contains(sqoopColumn)) {
 				throw new RuntimeException(String.format("Sqoop column [%s] doesn't exist in the valid list"
-					+ " of phoenix columns [%s] ",sqoopColumn, Arrays.toString(values.toArray())));
+					+ " of column mappings [%s] ",sqoopColumn, Arrays.toString(values.toArray())));
 			}
 		}
 		return true;

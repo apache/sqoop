@@ -191,7 +191,7 @@
   </if>
 
   <!-- Set dependency versions that are working with all Hadoop versions-->
-  <property name="hbase95.version" value="0.95.2-hadoop${hbasecompatprofile}" />
+  <property name="hbase95.version" value="0.98.9-hadoop${hbasecompatprofile}" />
 	
   <!-- Set phoenix version-->
   <property name="phoenix.version" value="4.3.1" />

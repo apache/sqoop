@@ -1023,7 +1023,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         && options.getTargetDir() == null
         && options.getHBaseTable() == null
         && options.getHCatTableName() == null
-        && options.getAccumuloTable() == null) {
+        && options.getAccumuloTable() == null
+        && options.getPhoenixTable() == null) {
       throw new InvalidOptionsException(
           "Must specify destination with --target-dir. "
           + HELP_STR);
