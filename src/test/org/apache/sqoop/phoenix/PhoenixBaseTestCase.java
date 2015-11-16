@@ -26,6 +26,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -38,6 +39,7 @@ import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
 import org.apache.hadoop.hbase.master.HMaster;
 import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
+import org.apache.hadoop.util.StringUtils;
 import org.apache.phoenix.jdbc.PhoenixConnection;
 import org.apache.phoenix.util.QueryUtil;
 import org.junit.After;
@@ -58,7 +60,9 @@ public class PhoenixBaseTestCase extends ImportJobTestCase {
 	public static final Log LOG = LogFactory.getLog(PhoenixBaseTestCase.class.getName());
 	 
 	private static String testBuildDataProperty = "";
-
+	private static final int ZK_DEFAULT_PORT = 2181;
+	private static final Random random = new Random();
+	
 	private static void recordTestBuildDataProperty() {
 		testBuildDataProperty = System.getProperty("test.build.data", "");
 	}
@@ -71,8 +75,7 @@ public class PhoenixBaseTestCase extends ImportJobTestCase {
   private String workDir = createTempDir().getAbsolutePath();
   private MiniZooKeeperCluster zookeeperCluster;
   private MiniHBaseCluster hbaseCluster;
- 
-  
+   
   @Override
   @Before
   public void setUp() {
@@ -83,12 +86,12 @@ public class PhoenixBaseTestCase extends ImportJobTestCase {
 	    Configuration hbaseConf = HBaseConfiguration.create();
 	    hbaseConf.set(HConstants.HBASE_DIR, hbaseRoot);
 	    //Hbase 0.90 does not have HConstants.ZOOKEEPER_CLIENT_PORT
-	    hbaseConf.setInt("hbase.zookeeper.property.clientPort", 2181);
+	    int zookeeperPort = ZK_DEFAULT_PORT + random.nextInt(1000);
+	    hbaseConf.setInt("hbase.zookeeper.property.clientPort",zookeeperPort );
 	    hbaseConf.set(HConstants.ZOOKEEPER_QUORUM, "0.0.0.0");
 	    hbaseConf.setInt("hbase.master.info.port", -1);
 	    hbaseConf.setInt("hbase.zookeeper.property.maxClientCnxns", 500);
 	    String zookeeperDir = new File(workDir, "zk").getAbsolutePath();
-      int zookeeperPort = 2181;
       zookeeperCluster = new MiniZooKeeperCluster();
       Method m;
       Class<?> zkParam[] = {Integer.TYPE};
@@ -98,34 +101,34 @@ public class PhoenixBaseTestCase extends ImportJobTestCase {
       } catch (NoSuchMethodException e) {
       	m = MiniZooKeeperCluster.class.getDeclaredMethod("setClientPort",
              zkParam);
-     }
-     m.invoke(zookeeperCluster, new Object[]{new Integer(zookeeperPort)});
-     zookeeperCluster.startup(new File(zookeeperDir));
-     hbaseCluster = new MiniHBaseCluster(hbaseConf, 1);
-     HMaster master = hbaseCluster.getMaster();
-     Object serverName = master.getServerName();
+      }
+      m.invoke(zookeeperCluster, new Object[]{new Integer(zookeeperPort)});
+      zookeeperCluster.startup(new File(zookeeperDir));
+      hbaseCluster = new MiniHBaseCluster(hbaseConf, 1);
+      HMaster master = hbaseCluster.getMaster();
+      Object serverName = master.getServerName();
 
-     String hostAndPort;
-     if (serverName instanceof String) {
-       m = HMaster.class.getDeclaredMethod("getMasterAddress",
+      String hostAndPort;
+      if (serverName instanceof String) {
+        m = HMaster.class.getDeclaredMethod("getMasterAddress",
                new Class<?>[]{});
-       Class<?> clazz = Class.forName("org.apache.hadoop.hbase.HServerAddress");
-       Object serverAddr = clazz.cast(m.invoke(master, new Object[]{}));
-       //returns the address as hostname:port
-       hostAndPort = serverAddr.toString();
-     } else {
-       Class<?> clazz = Class.forName("org.apache.hadoop.hbase.ServerName");
-       m = clazz.getDeclaredMethod("getHostAndPort", new Class<?>[]{});
-       hostAndPort = m.invoke(serverName, new Object[]{}).toString();
+        Class<?> clazz = Class.forName("org.apache.hadoop.hbase.HServerAddress");
+        Object serverAddr = clazz.cast(m.invoke(master, new Object[]{}));
+        //returns the address as hostname:port
+        hostAndPort = serverAddr.toString();
+      } else {
+        Class<?> clazz = Class.forName("org.apache.hadoop.hbase.ServerName");
+        m = clazz.getDeclaredMethod("getHostAndPort", new Class<?>[]{});
+        hostAndPort = m.invoke(serverName, new Object[]{}).toString();
+      }
+      hbaseConf.set("hbase.master", hostAndPort);
+      hbaseTestUtil = new HBaseTestingUtility(hbaseConf);
+      hbaseTestUtil.setZkCluster(zookeeperCluster);
+      hbaseCluster.startMaster();
+      super.setUp();
+	  } catch (Throwable e) {
+      throw new RuntimeException(e);
     }
-    hbaseConf.set("hbase.master", hostAndPort);
-    hbaseTestUtil = new HBaseTestingUtility(hbaseConf);
-    hbaseTestUtil.setZkCluster(zookeeperCluster);
-    hbaseCluster.startMaster();
-    super.setUp();
-	 } catch (Throwable e) {
-     throw new RuntimeException(e);
-   }
   }
   
   public static File createTempDir() {
@@ -154,7 +157,7 @@ public class PhoenixBaseTestCase extends ImportJobTestCase {
 	 * @return
 	 */
 	protected Connection getPhoenixConnection() throws SQLException {
-		int zkport = hbaseTestUtil.getConfiguration().getInt("hbase.zookeeper.property.clientPort",2181);
+		int zkport = hbaseTestUtil.getConfiguration().getInt("hbase.zookeeper.property.clientPort",ZK_DEFAULT_PORT);
     String zkServer = hbaseTestUtil.getConfiguration().get(HConstants.ZOOKEEPER_QUORUM);
     String url = QueryUtil.getUrl(zkServer, zkport);
     Connection phoenixConnection = DriverManager.getConnection(url);
@@ -175,8 +178,7 @@ public class PhoenixBaseTestCase extends ImportJobTestCase {
     FileUtils.deleteDirectory(new File(workDir));
     LOG.info("shutdown() method returning.");
     restoreTestBuidlDataProperty();
-	    
-  }
+	}
 	
 	@After
 	@Override
@@ -184,7 +186,8 @@ public class PhoenixBaseTestCase extends ImportJobTestCase {
 	  try {
 	  	shutdown();
 	  } catch(Exception ex) {
-	  	ex.printStackTrace();
+	  	LOG.error("Error shutting down HBase minicluster: "
+          + StringUtils.stringifyException(ex));
 	  }
     super.tearDown();
 	}
@@ -197,12 +200,13 @@ public class PhoenixBaseTestCase extends ImportJobTestCase {
   														String phoenixColumnMapping,boolean isBulkload, String queryStr) {
 
   	Preconditions.checkNotNull(phoenixTable);
+  	int zkPort = hbaseTestUtil.getConfiguration().getInt("hbase.zookeeper.property.clientPort",ZK_DEFAULT_PORT);
   	ArrayList<String> args = new ArrayList<String>();
     
     if (includeHadoopFlags) {
       CommonArgs.addHadoopFlags(args);
       args.add("-D");
-      args.add("hbase.zookeeper.property.clientPort=2181");
+      args.add(String.format("hbase.zookeeper.property.clientPort=%s",zkPort));
     }
 
     if (null != queryStr) {

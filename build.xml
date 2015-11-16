@@ -194,7 +194,7 @@
   <property name="hbase95.version" value="0.98.9-hadoop${hbasecompatprofile}" />
 	
   <!-- Set phoenix version-->
-  <property name="phoenix.version" value="4.3.1" />
+  <property name="phoenix.version" value="4.6.0-HBase-0.98"/>
 
   <!-- Load system-wide and project-wide default properties set by
        the user, to avoid needing to override with -D. -->
