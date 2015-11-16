@@ -29,7 +29,7 @@ import org.junit.Test;
  * Tests to import onto phoenix tables.
  *
  */
-public class PhoenixBasicImportTest extends PhoenixTestCase {
+public class PhoenixBasicImportTest extends PhoenixBaseTestCase {
 	
 	/**
 	 * Test where the sqoop and phoenix table column names are the same.

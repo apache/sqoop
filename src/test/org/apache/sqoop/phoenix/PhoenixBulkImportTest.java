@@ -29,7 +29,7 @@ import org.junit.Test;
  * Tests to bulk import onto phoenix tables.
  *
  */
-public class PhoenixBulkImportTest extends PhoenixTestCase {
+public class PhoenixBulkImportTest extends PhoenixBaseTestCase {
 	
 	/**
 	 * Test where the sqoop and phoenix table column names are the same.

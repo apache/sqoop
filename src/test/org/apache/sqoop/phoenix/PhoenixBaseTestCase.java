@@ -53,9 +53,9 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
  * Base test class for all phoenix tests.
  *
  */
-public class PhoenixTestCase extends ImportJobTestCase {
+public class PhoenixBaseTestCase extends ImportJobTestCase {
 
-	public static final Log LOG = LogFactory.getLog(PhoenixTestCase.class.getName());
+	public static final Log LOG = LogFactory.getLog(PhoenixBaseTestCase.class.getName());
 	 
 	private static String testBuildDataProperty = "";
 
@@ -88,16 +88,16 @@ public class PhoenixTestCase extends ImportJobTestCase {
 	    hbaseConf.setInt("hbase.master.info.port", -1);
 	    hbaseConf.setInt("hbase.zookeeper.property.maxClientCnxns", 500);
 	    String zookeeperDir = new File(workDir, "zk").getAbsolutePath();
-	     int zookeeperPort = 2181;
-	     zookeeperCluster = new MiniZooKeeperCluster();
-	     Method m;
-	     Class<?> zkParam[] = {Integer.TYPE};
-	     try {
-	       m = MiniZooKeeperCluster.class.getDeclaredMethod("setDefaultClientPort",
-	               zkParam);
-	     } catch (NoSuchMethodException e) {
-       m = MiniZooKeeperCluster.class.getDeclaredMethod("setClientPort",
+      int zookeeperPort = 2181;
+      zookeeperCluster = new MiniZooKeeperCluster();
+      Method m;
+      Class<?> zkParam[] = {Integer.TYPE};
+      try {
+      	m = MiniZooKeeperCluster.class.getDeclaredMethod("setDefaultClientPort",
                zkParam);
+      } catch (NoSuchMethodException e) {
+      	m = MiniZooKeeperCluster.class.getDeclaredMethod("setClientPort",
+             zkParam);
      }
      m.invoke(zookeeperCluster, new Object[]{new Integer(zookeeperPort)});
      zookeeperCluster.startup(new File(zookeeperDir));
@@ -117,13 +117,13 @@ public class PhoenixTestCase extends ImportJobTestCase {
        Class<?> clazz = Class.forName("org.apache.hadoop.hbase.ServerName");
        m = clazz.getDeclaredMethod("getHostAndPort", new Class<?>[]{});
        hostAndPort = m.invoke(serverName, new Object[]{}).toString();
-     }
-     hbaseConf.set("hbase.master", hostAndPort);
-     hbaseTestUtil = new HBaseTestingUtility(hbaseConf);
-     hbaseTestUtil.setZkCluster(zookeeperCluster);
-     hbaseCluster.startMaster();
-     super.setUp();
-	  } catch (Throwable e) {
+    }
+    hbaseConf.set("hbase.master", hostAndPort);
+    hbaseTestUtil = new HBaseTestingUtility(hbaseConf);
+    hbaseTestUtil.setZkCluster(zookeeperCluster);
+    hbaseCluster.startMaster();
+    super.setUp();
+	 } catch (Throwable e) {
      throw new RuntimeException(e);
    }
   }

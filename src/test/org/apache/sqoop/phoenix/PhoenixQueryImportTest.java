@@ -10,7 +10,7 @@ import org.junit.Test;
  * Tests to insert onto phoenix table using query 
  *
  */
-public class PhoenixQueryImportTest extends PhoenixTestCase {
+public class PhoenixQueryImportTest extends PhoenixBaseTestCase {
 
 	/**
 	 * 
