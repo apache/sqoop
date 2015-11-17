@@ -274,8 +274,8 @@ public class JobRequestHandler implements RequestHandler {
       connectorIdentifier = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
           ctx.getRequest().getRemoteAddr(), "get", "jobsByConnector", connectorIdentifier);
-      long connectorId = HandlerUtils.getConnectorIdFromIdentifier(connectorIdentifier);
-      List<MJob> jobList = repository.findJobsForConnector(connectorId);
+      MConnector mConnector = HandlerUtils.getConnectorFromConnectorName(connectorIdentifier);
+      List<MJob> jobList = repository.findJobsForConnector(mConnector.getPersistenceId());
 
       // Authorization check
       jobList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.JOB, jobList);

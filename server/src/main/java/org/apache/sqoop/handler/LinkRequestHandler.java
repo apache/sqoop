@@ -33,11 +33,7 @@ import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.ConfigUtils;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MLinkConfig;
-import org.apache.sqoop.model.MPersistableEntity;
-import org.apache.sqoop.model.MResource;
+import org.apache.sqoop.model.*;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.security.authorization.AuthorizationEngine;
@@ -134,15 +130,15 @@ public class LinkRequestHandler implements RequestHandler {
     }
 
     MLink postedLink = links.get(0);
+    MConnector mConnector = HandlerUtils.getConnectorFromConnectorId(postedLink.getConnectorId());
 
     // Authorization check
     if (create) {
       AuthorizationEngine.createLink(ctx.getUserName(),
-          HandlerUtils.getConnectorNameFromIdentifier(String.valueOf(postedLink.getConnectorId())));
+              mConnector.getUniqueName());
     } else {
-      AuthorizationEngine.updateLink(ctx.getUserName(),
-          HandlerUtils.getConnectorNameFromIdentifier(String.valueOf(postedLink.getConnectorId())),
-          postedLink.getName());
+      AuthorizationEngine.updateLink(ctx.getUserName(), mConnector.getUniqueName(),
+              postedLink.getName());
     }
 
     MLinkConfig linkConfig = ConnectorManager.getInstance()
