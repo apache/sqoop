@@ -90,7 +90,7 @@ public class JobResourceRequest extends ResourceRequest {
     JobBean jobBean = new JobBean(job);
     // Extract all config inputs including sensitive inputs
     JSONObject jobJson = jobBean.extract(false);
-    String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(),
+    String response = super.put(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(job.getName()),
         jobJson.toJSONString());
     ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore(JSONUtils.parse(response));

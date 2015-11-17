@@ -18,7 +18,9 @@
 package org.apache.sqoop.integration.server;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
+import com.google.common.collect.Iterables;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
@@ -27,37 +29,82 @@ import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.utils.ParametrizedUtils;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 @Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
 public class InformalObjectNameTest extends SqoopTestCase {
-  private static final String LINK_NAME_CONTAINS_WHITESPACE = "link name";
-  private static final String LINK_NAME_CONTAINS_SLASH = "link/name";
 
-  private static final String JOB_NAME_CONTAINS_WHITESPACE = "job name";
-  private static final String JOB_NAME_CONTAINS_SLASH= "job/name";
+  private String target;
+  private String specialChar;
 
-  public InformalObjectNameTest() {
+  private static final String TARGET_JOB = "Job";
+  private static final String TARGET_LINK = "Link";
+
+  /**
+   * The object used for test, job and link.
+   */
+  public static Object[] TARGETS = new Object [] {
+          TARGET_JOB,
+          TARGET_LINK,
+  };
+
+  /**
+   * The special char used for test.
+   */
+  public static Object [] SPECIAL_CHAR = new Object[] {
+          " ", "\t", "/", ".", "?", "&", "*", "[", "]", "(", ")", "`", "~", "!", "@",
+          "#", "$", "%", "^", "-", "_", "=", "+", ";", ":", "\"", "<", ">", ",",
+  };
+
+  @Factory(dataProvider="special-name-integration-test")
+  public InformalObjectNameTest(String target, String specialChar) {
+    this.target = target;
+    this.specialChar = specialChar;
+  }
+
+  @DataProvider(name="special-name-integration-test", parallel=true)
+  public static Object[][] data() {
+    return Iterables.toArray(ParametrizedUtils.crossProduct(TARGETS, SPECIAL_CHAR), Object[].class);
   }
 
   @Test
-  public void testInformalLinkName() throws Exception {
-    // RDBMS link
+  public void testInformalName() throws Exception {
+    if (TARGET_LINK.equals(target)) {
+      verifyActionsForLink("link" + specialChar + "name");
+    } else if (TARGET_JOB.equals(target)) {
+      verifyActionsForJob("job" + specialChar + "name");
+    }
+  }
+
+  private void verifyActionsForLink(String linkName) {
+    // create link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
     fillRdbmsLinkConfig(rdbmsLink);
-    rdbmsLink.setName(LINK_NAME_CONTAINS_WHITESPACE);
+    rdbmsLink.setName(linkName);
     saveLink(rdbmsLink);
-    assertEquals(rdbmsLink, getClient().getLink(LINK_NAME_CONTAINS_WHITESPACE));
+    // read link
+    assertEquals(rdbmsLink, getClient().getLink(linkName));
 
-    rdbmsLink = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkConfig(rdbmsLink);
-    rdbmsLink.setName(LINK_NAME_CONTAINS_SLASH);
-    saveLink(rdbmsLink);
-    assertEquals(rdbmsLink, getClient().getLink(LINK_NAME_CONTAINS_SLASH));
+    // update link
+    getClient().updateLink(rdbmsLink);
+
+    // enable link
+    getClient().enableLink(linkName, true);
+
+    // delete link
+    getClient().deleteLink(linkName);
+    try {
+      getClient().getLink(linkName);
+      fail("The link doesn't exist, exception should be thrown.");
+    } catch (Exception e) {
+      // ignore the exception
+    }
   }
 
-  @Test
-  public void testInformalJobName() throws Exception {
+  private void verifyActionsForJob(String jobName) throws Exception {
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
     fillRdbmsLinkConfig(rdbmsLink);
@@ -68,6 +115,7 @@ public class InformalObjectNameTest extends SqoopTestCase {
     fillHdfsLinkConfig(hdfsLink);
     saveLink(hdfsLink);
 
+
     // Job creation
     MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
 
@@ -77,21 +125,25 @@ public class InformalObjectNameTest extends SqoopTestCase {
     // hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
 
-    job.setName(JOB_NAME_CONTAINS_WHITESPACE);
-    saveJob(job);
-    assertEquals(job, getClient().getJob(JOB_NAME_CONTAINS_WHITESPACE));
-
-    job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
-
-    // rdms "FROM" config
-    fillRdbmsFromConfig(job, "id");
-
-    // hdfs "TO" config
-    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
-
-    job.setName(JOB_NAME_CONTAINS_SLASH);
+    job.setName(jobName);
     saveJob(job);
 
-    assertEquals(job, getClient().getJob(JOB_NAME_CONTAINS_SLASH));
+    // read job
+    assertEquals(job, getClient().getJob(jobName));
+
+    // update job
+    getClient().updateJob(job);
+
+    // enable job
+    getClient().enableJob(jobName, true);
+
+    // delete job
+    getClient().deleteJob(jobName);
+    try {
+      getClient().getJob(jobName);
+      fail("The job doesn't exist, exception should be thrown.");
+    } catch (Exception e) {
+      // ignore the exception
+    }
   }
 }
