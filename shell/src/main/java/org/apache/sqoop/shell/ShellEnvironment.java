@@ -30,7 +30,8 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
+
 
 /**
  * Static internal environment of the shell shared across all commands and

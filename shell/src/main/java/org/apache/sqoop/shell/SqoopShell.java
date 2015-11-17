@@ -125,7 +125,7 @@ public final class SqoopShell {
 
       // Switch to interactive mode
       setInteractive(true);
-      shell.run(args);
+      shell.run(null);
 
     } else {
       // Batch mode (with a script file):

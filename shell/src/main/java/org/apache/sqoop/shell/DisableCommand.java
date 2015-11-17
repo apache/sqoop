@@ -19,14 +19,14 @@ package org.apache.sqoop.shell;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Shell;
+import org.codehaus.groovy.tools.shell.Groovysh;
 
 /**
  *
  */
 public class DisableCommand extends SqoopCommand {
 
-  public DisableCommand(Shell shell) {
+  public DisableCommand(Groovysh shell) {
     super(shell,
       Constants.CMD_DISABLE,
       Constants.CMD_DISABLE_SC,

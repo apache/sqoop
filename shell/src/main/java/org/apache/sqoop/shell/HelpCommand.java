@@ -28,14 +28,14 @@ import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
 import org.codehaus.groovy.tools.shell.Command;
 import org.codehaus.groovy.tools.shell.CommandSupport;
-import org.codehaus.groovy.tools.shell.Shell;
+import org.codehaus.groovy.tools.shell.Groovysh;
 import org.codehaus.groovy.tools.shell.util.SimpleCompletor;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
 public class HelpCommand extends CommandSupport {
 
-  protected HelpCommand(Shell shell) {
+  protected HelpCommand(Groovysh shell) {
     super(shell, Constants.CMD_HELP, Constants.CMD_HELP_SC);
   }
 

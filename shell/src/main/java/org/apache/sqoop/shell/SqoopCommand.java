@@ -29,7 +29,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.utils.ClassUtils;
 import org.codehaus.groovy.tools.shell.ComplexCommandSupport;
-import org.codehaus.groovy.tools.shell.Shell;
+import org.codehaus.groovy.tools.shell.Groovysh;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
@@ -61,23 +61,22 @@ public abstract class SqoopCommand extends ComplexCommandSupport {
    */
   private final Map<String, SqoopFunction> functionInstances;
 
-  protected SqoopCommand(Shell shell,
+  protected SqoopCommand(Groovysh shell,
                          String name,
                          String shortcut) {
     this(shell, name, shortcut, null);
   }
 
-  protected SqoopCommand(Shell shell,
+  protected SqoopCommand(Groovysh shell,
                          String name,
                          String shortcut,
                          Map<String, Class<? extends SqoopFunction>> funcs) {
-    super(shell, name, shortcut);
+    super(shell, name, shortcut, new LinkedList<String>());
 
     this.name = name;
     this.functionNames = funcs;
     this.functionInstances = new HashMap<String, SqoopFunction>();
 
-    this.functions = new LinkedList<String>();
     if (funcs != null) {
       this.functions.addAll(funcs.keySet());
     }
