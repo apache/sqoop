@@ -1118,9 +1118,10 @@ public final class ConfigFiller {
       fillInputStringWithBundle(nameInput, reader, getResourceBundle());
       if (StringUtils.isEmpty(nameInput.getValue())) {
         errorMessage(nameInput, "Job name or link name cannot be null");
-        continue;
+      } else {
+        break;
       }
-    } while (false);
+    } while (true);
 
     return nameInput.getValue();
   }
