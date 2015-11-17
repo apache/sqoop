@@ -30,7 +30,9 @@ limitations under the License.
   <packaging>pom</packaging>
 
   <modules>
+    <module>commons</module>
     <module>mapreduce</module>
+    <module>spark</module>
   </modules>
 
 </project>

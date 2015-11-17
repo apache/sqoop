@@ -17,18 +17,6 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
-import org.apache.sqoop.error.code.GenericJdbcConnectorError;
-import org.apache.sqoop.schema.Schema;
-import org.apache.sqoop.schema.type.Column;
-import org.apache.sqoop.utils.ClassUtils;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -44,6 +32,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
+import org.apache.sqoop.error.code.GenericJdbcConnectorError;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.Column;
+import org.apache.sqoop.utils.ClassUtils;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 /**
  * Database executor that is based on top of JDBC spec.
@@ -192,7 +192,8 @@ public class GenericJdbcExecutor {
     List<String> enclosedIdentifiers = new LinkedList<String>();
     for(String identifier: identifiers) {
       if(identifier != null) {
-        enclosedIdentifiers.add(encloseIdentifier(identifier));
+//        enclosedIdentifiers.add(encloseIdentifier(identifier));
+        enclosedIdentifiers.add(identifier);
       }
     }
 

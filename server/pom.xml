@@ -16,156 +16,184 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache</groupId>
-    <artifactId>sqoop</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>sqoop</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
 
-  <groupId>org.apache.sqoop</groupId>
-  <artifactId>sqoop-server</artifactId>
-  <name>Sqoop Server</name>
+    <groupId>org.apache.sqoop</groupId>
+    <artifactId>sqoop-server</artifactId>
+    <name>Sqoop Server</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop-core</artifactId>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.sqoop</groupId>
+            <artifactId>sqoop-core</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop-tools</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop</groupId>
+            <artifactId>sqoop-tools</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop-common</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop</groupId>
+            <artifactId>sqoop-common</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop-security</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop</groupId>
+            <artifactId>sqoop-security</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.submission</groupId>
-      <artifactId>sqoop-submission-mapreduce</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.submission</groupId>
+            <artifactId>sqoop-submission-mapreduce</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.repository</groupId>
-      <artifactId>sqoop-repository-common</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.submission</groupId>
+            <artifactId>sqoop-submission-spark</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.repository</groupId>
-      <artifactId>sqoop-repository-derby</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.repository</groupId>
+            <artifactId>sqoop-repository-common</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.repository</groupId>
-      <artifactId>sqoop-repository-postgresql</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.repository</groupId>
+            <artifactId>sqoop-repository-derby</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.repository</groupId>
-      <artifactId>sqoop-repository-mysql</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.repository</groupId>
+            <artifactId>sqoop-repository-postgresql</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.connector</groupId>
-      <artifactId>sqoop-connector-generic-jdbc</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.repository</groupId>
+            <artifactId>sqoop-repository-mysql</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.connector</groupId>
-      <artifactId>sqoop-connector-hdfs</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.connector</groupId>
+            <artifactId>sqoop-connector-generic-jdbc</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.connector</groupId>
-      <artifactId>sqoop-connector-kite</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.connector</groupId>
+            <artifactId>sqoop-connector-hdfs</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.connector</groupId>
-      <artifactId>sqoop-connector-kafka</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.connector</groupId>
+            <artifactId>sqoop-connector-kite</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.connector</groupId>
-      <artifactId>sqoop-connector-sftp</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.connector</groupId>
+            <artifactId>sqoop-connector-kafka</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.connector</groupId>
-      <artifactId>sqoop-connector-ftp</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.connector</groupId>
+            <artifactId>sqoop-connector-sftp</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.sqoop.connector</groupId>
-      <artifactId>sqoop-connector-oracle-jdbc</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.connector</groupId>
+            <artifactId>sqoop-connector-ftp</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <scope>provided</scope>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.connector</groupId>
+            <artifactId>sqoop-connector-oracle-jdbc</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-    </dependency>
-    <dependency>
-       <groupId>org.eclipse.jetty</groupId>
-       <artifactId>jetty-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlet</artifactId>
-    </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-  <profiles>
-    <profile>
-      <id>binary</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>package</phase>
-                <goals>
-                    <goal>copy-dependencies</goal>
-                </goals>
-                <configuration>
-                    <includeScope>runtime</includeScope>
-                    <excludeScope>test</excludeScope>
-                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.sqoop.submission</groupId>
+            <artifactId>sqoop-submission-spark</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop.execution</groupId>
+            <artifactId>sqoop-execution-mapreduce</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- TODO: Remove this dependency -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.37</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.1</version>
+        </dependency>
+
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>binary</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <includeScope>runtime</includeScope>
+                                    <excludeScope>test</excludeScope>
+                                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

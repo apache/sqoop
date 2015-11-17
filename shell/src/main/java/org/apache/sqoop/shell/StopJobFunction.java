@@ -46,7 +46,8 @@ public class StopJobFunction extends SqoopFunction {
       MSubmission submission = client.stopJob(line.getOptionValue(Constants.OPT_JID));
       if(submission.getStatus().isFailure()) {
         SubmissionDisplayer.displayFooter(submission);
-      } else {
+      }
+      else {
         SubmissionDisplayer.displayHeader(submission);
         SubmissionDisplayer.displayProgress(submission);
       }
