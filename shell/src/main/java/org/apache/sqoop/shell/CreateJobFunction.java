@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.shell;
 
-import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
@@ -32,6 +31,8 @@ import org.apache.sqoop.validation.Status;
 import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import jline.console.ConsoleReader;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 import static org.apache.sqoop.shell.utils.ConfigFiller.*;

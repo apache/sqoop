@@ -28,7 +28,6 @@ import static org.testng.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.client.SqoopClient;
@@ -88,7 +87,7 @@ public class TestUpdateCommand {
 
     data = new byte[1000];
     in = new ByteArrayInputStream(data);
-    reader = new ConsoleReader(in, new OutputStreamWriter(System.out));
+    reader = new ConsoleReader(in, System.out);
     ShellEnvironment.setConsoleReader(reader);
     resourceBundle = new ResourceBundle() {
       @Override

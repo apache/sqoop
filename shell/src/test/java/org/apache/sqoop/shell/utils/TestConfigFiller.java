@@ -26,13 +26,12 @@ import static org.testng.Assert.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -67,7 +66,7 @@ public class TestConfigFiller {
     line = mock(CommandLine.class);
     data = new byte[1000];
     in = new ByteArrayInputStream(data);
-    reader = new ConsoleReader(in, new OutputStreamWriter(System.out));
+    reader = new ConsoleReader(in, System.out);
     resourceBundle = new ResourceBundle() {
       @Override
       protected Object handleGetObject(String key) {

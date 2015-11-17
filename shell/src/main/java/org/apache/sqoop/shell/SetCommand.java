@@ -19,11 +19,11 @@ package org.apache.sqoop.shell;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Shell;
+import org.codehaus.groovy.tools.shell.Groovysh;
 
 public class SetCommand extends SqoopCommand {
 
-  protected SetCommand(Shell shell) {
+  protected SetCommand(Groovysh shell) {
     super(shell,
       Constants.CMD_SET,
       Constants.CMD_SET_SC,

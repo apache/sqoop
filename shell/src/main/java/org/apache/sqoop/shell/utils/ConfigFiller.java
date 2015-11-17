@@ -17,8 +17,6 @@
  */
 package org.apache.sqoop.shell.utils;
 
-import jline.ConsoleReader;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.model.InputEditable;
@@ -46,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+
+import jline.console.ConsoleReader;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 
@@ -693,8 +693,8 @@ public final class ConfigFiller {
       }
 
       // Special prompt for List element
-      reader.printString("element# ");
-      reader.flushConsole();
+      reader.print("element# ");
+      reader.flush();
 
       if(input.isSensitive()) {
         userTyped = reader.readLine('*');
@@ -757,14 +757,14 @@ public final class ConfigFiller {
     }
 
     // Prompt
-    reader.printString("Choose: ");
+    reader.print("Choose: ");
 
     // Fill previously filled index when available
     if(lastChoice != -1) {
       reader.putString(Integer.toString(lastChoice));
     }
 
-    reader.flushConsole();
+    reader.flush();
 
     String userTyped;
     if(input.isSensitive()) {
@@ -841,8 +841,8 @@ public final class ConfigFiller {
       }
 
       // Special prompt for Map entry
-      reader.printString("entry# ");
-      reader.flushConsole();
+      reader.print("entry# ");
+      reader.flush();
 
       if(input.isSensitive()) {
         userTyped = reader.readLine('*');
@@ -1017,6 +1017,7 @@ public final class ConfigFiller {
     // However do not printout if this input contains sensitive information.
     if(!input.isEmpty() && !input.isSensitive()) {
       reader.putString(input.getValue());
+      reader.flush();
     }
 
     // Get the data
@@ -1103,8 +1104,8 @@ public final class ConfigFiller {
   @SuppressWarnings("rawtypes")
   static void generatePrompt(ConsoleReader reader, ResourceBundle bundle, MInput input)
       throws IOException {
-    reader.printString(bundle.getString(input.getLabelKey()) + ": ");
-    reader.flushConsole();
+    reader.print(bundle.getString(input.getLabelKey()) + ": ");
+    reader.flush();
   }
 
   static String getName(ConsoleReader reader, String name) throws IOException {

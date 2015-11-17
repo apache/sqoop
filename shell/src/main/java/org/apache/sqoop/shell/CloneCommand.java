@@ -19,14 +19,14 @@ package org.apache.sqoop.shell;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Shell;
+import org.codehaus.groovy.tools.shell.Groovysh;
 
 /**
  * Client side cloning of connection and job objects.
  */
 public class CloneCommand extends SqoopCommand {
 
-  public CloneCommand(Shell shell) {
+  public CloneCommand(Groovysh shell) {
     super(shell,
       Constants.CMD_CLONE,
       Constants.CMD_CLONE_SC,
