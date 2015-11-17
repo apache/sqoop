@@ -162,12 +162,12 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
       void validate() throws Exception {
         assertResponseCode(200);
       }}),
-    new TestDescription("Get connector by ID", "v1/connector/1", "GET", null, new Validator() {
+    new TestDescription("Get connector by name", "v1/connector/generic-jdbc-connector", "GET", null, new Validator() {
       @Override
       void validate() throws Exception {
         assertResponseCode(200);
       }}),
-    new TestDescription("Get connector by name", "v1/connector/generic-jdbc-connector", "GET", null, new Validator() {
+    new TestDescription("Get connector by ID", "v1/connector/1", "GET", null, new Validator() {
       @Override
       void validate() throws Exception {
         assertResponseCode(200);
@@ -182,7 +182,7 @@ public class InvalidRESTCallsTest extends SqoopTestCase {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0005");
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0006");
       }}),
     new TestDescription("Invalid post request", "v1/connector", "POST", "Random data", new Validator() {
       @Override

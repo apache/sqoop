@@ -68,16 +68,16 @@ public class ConnectorRequestHandler implements RequestHandler {
     } else {
       // NOTE: we now support using unique name as well as the connector id
       // NOTE: connectorId is a fallback for older sqoop clients if any, since we want to primarily use unique conenctorNames
-      String cName = HandlerUtils.getConnectorNameFromIdentifier(cIdentifier);
+      MConnector mConnector = HandlerUtils.getConnectorFromConnectorName(cIdentifier);
 
       configParamBundles = new HashMap<>();
 
-      MConnector connector = ConnectorManager.getInstance().getConnectorConfigurable(cName);
+      MConnector connector = ConnectorManager.getInstance().getConnectorConfigurable(mConnector.getUniqueName());
       configParamBundles.put(connector.getPersistenceId(),
-          ConnectorManager.getInstance().getResourceBundle(cName, locale));
+          ConnectorManager.getInstance().getResourceBundle(mConnector.getUniqueName(), locale));
 
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "connector", String.valueOf(cIdentifier));
+          ctx.getRequest().getRemoteAddr(), "get", "connector", mConnector.getUniqueName());
 
       // Authorization check
       AuthorizationEngine.readConnector(ctx.getUserName(), connector.getUniqueName());
