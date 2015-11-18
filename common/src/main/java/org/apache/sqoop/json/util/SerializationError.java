@@ -29,6 +29,10 @@ public enum SerializationError implements ErrorCode {
 
   SERIALIZATION_002("Invalid JSON"),
 
+  SERIALIZATION_003("Required key field is missing"),
+
+  SERIALIZATION_004("Invalid type for key"),
+
   ;
 
   private final String message;

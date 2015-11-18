@@ -155,7 +155,7 @@ public class JobBean implements JsonBean {
   @Override
   public void restore(JSONObject jsonObject) {
     jobs = new ArrayList<MJob>();
-    JSONObject obj = (JSONObject) jsonObject.get(JOB);
+    JSONObject obj = JSONUtils.getJSONObject(jsonObject, JOB);
     jobs.add(restoreJob(obj));
   }
 
@@ -168,26 +168,22 @@ public class JobBean implements JsonBean {
 
   private MJob restoreJob(Object obj) {
     JSONObject object = (JSONObject) obj;
-    long fromConnectorId = (Long) object.get(FROM_CONNECTOR_ID);
-    long toConnectorId = (Long) object.get(TO_CONNECTOR_ID);
-    long fromConnectionId = (Long) object.get(FROM_LINK_ID);
-    long toConnectionId = (Long) object.get(TO_LINK_ID);
-    JSONObject fromConfigJson = (JSONObject) object.get(FROM_CONFIG_VALUES);
-    JSONObject toConfigJson = (JSONObject) object.get(TO_CONFIG_VALUES);
-    JSONObject driverConfigJson = (JSONObject) object.get(DRIVER_CONFIG_VALUES);
+    long fromConnectorId = JSONUtils.getLong(object, FROM_CONNECTOR_ID);
+    long toConnectorId = JSONUtils.getLong(object, TO_CONNECTOR_ID);
+    long fromConnectionId = JSONUtils.getLong(object, FROM_LINK_ID);
+    long toConnectionId = JSONUtils.getLong(object, TO_LINK_ID);
+    JSONObject fromConfigJson = JSONUtils.getJSONObject(object, FROM_CONFIG_VALUES);
+    JSONObject toConfigJson = JSONUtils.getJSONObject(object, TO_CONFIG_VALUES);
+    JSONObject driverConfigJson = JSONUtils.getJSONObject(object, DRIVER_CONFIG_VALUES);
 
-    List<MConfig> fromConfigs = restoreConfigs((JSONArray) fromConfigJson.get(ConfigInputConstants.CONFIGS));
-    List<MValidator> fromValidators = restoreValidator((JSONArray)
-      fromConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+    List<MConfig> fromConfigs = restoreConfigs(JSONUtils.getJSONArray(fromConfigJson, ConfigInputConstants.CONFIGS));
+    List<MValidator> fromValidators = restoreValidator(JSONUtils.getJSONArray(fromConfigJson, ConfigInputConstants.CONFIG_VALIDATORS));
 
-    List<MConfig> toConfigs = restoreConfigs((JSONArray) toConfigJson.get(ConfigInputConstants.CONFIGS));
-    List<MValidator> toValidators = restoreValidator((JSONArray)
-      toConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+    List<MConfig> toConfigs = restoreConfigs(JSONUtils.getJSONArray(toConfigJson, ConfigInputConstants.CONFIGS));
+    List<MValidator> toValidators = restoreValidator(JSONUtils.getJSONArray(toConfigJson, ConfigInputConstants.CONFIG_VALIDATORS));
 
-    List<MConfig> driverConfigs = restoreConfigs((JSONArray) driverConfigJson
-      .get(ConfigInputConstants.CONFIGS));
-    List<MValidator> driverValidators = restoreValidator((JSONArray)
-      driverConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+    List<MConfig> driverConfigs = restoreConfigs(JSONUtils.getJSONArray(driverConfigJson, ConfigInputConstants.CONFIGS));
+    List<MValidator> driverValidators = restoreValidator(JSONUtils.getJSONArray(driverConfigJson, ConfigInputConstants.CONFIG_VALIDATORS));
 
     MJob job = new MJob(
       fromConnectorId,
@@ -199,13 +195,13 @@ public class JobBean implements JsonBean {
       new MDriverConfig(driverConfigs, driverValidators)
     );
 
-    job.setPersistenceId((Long) object.get(ID));
-    job.setName((String) object.get(NAME));
-    job.setEnabled((Boolean) object.get(ENABLED));
-    job.setCreationUser((String) object.get(CREATION_USER));
-    job.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
-    job.setLastUpdateUser((String) object.get(UPDATE_USER));
-    job.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
+    job.setPersistenceId(JSONUtils.getLong(object, ID));
+    job.setName(JSONUtils.getString(object, NAME));
+    job.setEnabled(JSONUtils.getBoolean(object, ENABLED));
+    job.setCreationUser( JSONUtils.getString(object, CREATION_USER));
+    job.setCreationDate(new Date(JSONUtils.getLong(object, CREATION_DATE)));
+    job.setLastUpdateUser(JSONUtils.getString(object, UPDATE_USER));
+    job.setLastUpdateDate(new Date(JSONUtils.getLong(object, UPDATE_DATE)));
     return job;
   }
 }

@@ -56,7 +56,7 @@ public class SubmissionsBean extends SubmissionBean {
 
   @Override
   public void restore(JSONObject json) {
-    JSONArray submissionsArray = (JSONArray) json.get(SUBMISSIONS);
+    JSONArray submissionsArray = JSONUtils.getJSONArray(json, SUBMISSIONS);
     restoreSubmissions(submissionsArray);
   }
 
