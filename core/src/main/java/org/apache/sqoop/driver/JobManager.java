@@ -140,6 +140,16 @@ public class JobManager implements Reconfigurable {
   private UpdateThread updateThread = null;
 
   /**
+   * Lock for purge thread.
+   */
+  private Object purgeThreadLock = new Object();
+
+  /**
+   * Lock for update thread.
+   */
+  private Object updateThreadLock = new Object();
+
+  /**
    * Synchronization variable between threads.
    */
   private boolean running;
@@ -196,20 +206,24 @@ public class JobManager implements Reconfigurable {
 
     running = false;
 
-    try {
-      purgeThread.interrupt();
-      purgeThread.join();
-    } catch (InterruptedException e) {
-      // TODO(jarcec): Do I want to wait until it actually finish here?
-      LOG.error("Interrupted joining purgeThread");
+    synchronized(purgeThreadLock) {
+      try {
+        purgeThread.interrupt();
+        purgeThread.join();
+      } catch (InterruptedException e) {
+        // TODO(jarcec): Do I want to wait until it actually finish here?
+        LOG.error("Interrupted joining purgeThread");
+      }
     }
 
-    try {
-      updateThread.interrupt();
-      updateThread.join();
-    } catch (InterruptedException e) {
-      // TODO(jarcec): Do I want to wait until it actually finish here?
-      LOG.error("Interrupted joining updateThread");
+    synchronized(updateThreadLock) {
+      try {
+        updateThread.interrupt();
+        updateThread.join();
+      } catch (InterruptedException e) {
+        // TODO(jarcec): Do I want to wait until it actually finish here?
+        LOG.error("Interrupted joining updateThread");
+      }
     }
 
     if (submissionEngine != null) {
@@ -763,11 +777,15 @@ public class JobManager implements Reconfigurable {
         try {
           LOG.info("Purging old submissions");
           Date threshold = new Date((new Date()).getTime() - purgeThreshold);
-          RepositoryManager.getInstance().getRepository()
-            .purgeSubmissions(threshold);
+          synchronized(purgeThreadLock) {
+            RepositoryManager.getInstance().getRepository()
+              .purgeSubmissions(threshold);
+          }
           Thread.sleep(purgeSleep);
         } catch (InterruptedException e) {
           LOG.debug("Purge thread interrupted", e);
+        } catch (SqoopException ex) {
+          LOG.error("Purge thread encountered exception", ex);
         }
       }
 
@@ -787,18 +805,21 @@ public class JobManager implements Reconfigurable {
         try {
           LOG.debug("Updating running submissions");
 
-          // Let's get all running submissions from repository to check them out
-          List<MSubmission> unfinishedSubmissions =
-            RepositoryManager.getInstance().getRepository()
-              .findUnfinishedSubmissions();
+          synchronized(updateThreadLock) {
+            // Let's get all running submissions from repository to check them out
+            List<MSubmission> unfinishedSubmissions =
+              RepositoryManager.getInstance().getRepository()
+                .findUnfinishedSubmissions();
 
-          for (MSubmission submission : unfinishedSubmissions) {
-            updateSubmission(submission);
+            for (MSubmission submission : unfinishedSubmissions) {
+              updateSubmission(submission);
+            }
           }
-
           Thread.sleep(updateSleep);
         } catch (InterruptedException e) {
-          LOG.debug("Purge thread interrupted", e);
+          LOG.debug("Update thread interrupted", e);
+        } catch (SqoopException ex) {
+          LOG.error("Update thread encountered exception", ex);
         }
       }
 
