@@ -70,7 +70,10 @@ limitations under the License.
           <plugin>
             <groupId>org.tomdz.maven</groupId>
             <artifactId>sphinx-maven-plugin</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
+            <configuration>
+              <warningsAsErrors>true</warningsAsErrors>
+            </configuration>
           </plugin>
           <!-- Turning off standard reports as they collide with sphinx -->
           <plugin>
