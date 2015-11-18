@@ -89,7 +89,7 @@ public class PrincipalBean implements JsonBean {
   @Override
   public void restore(JSONObject json) {
     principals = new ArrayList<MPrincipal>();
-    JSONObject obj = (JSONObject) json.get(PRINCIPAL);
+    JSONObject obj = JSONUtils.getJSONObject(json, PRINCIPAL);
     principals.add(restorePrincipal(obj));
   }
 
@@ -102,6 +102,6 @@ public class PrincipalBean implements JsonBean {
 
   private MPrincipal restorePrincipal(Object obj) {
     JSONObject object = (JSONObject) obj;
-    return new MPrincipal((String) object.get(NAME), (String) object.get(TYPE));
+    return new MPrincipal(JSONUtils.getString(object, NAME), JSONUtils.getString(object, TYPE));
   }
 }

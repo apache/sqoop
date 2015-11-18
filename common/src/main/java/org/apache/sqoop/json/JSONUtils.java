@@ -21,12 +21,14 @@ import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.util.SerializationError;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Date;
 
 /**
  */
@@ -66,6 +68,53 @@ public class JSONUtils {
     } catch (IOException e) {
       throw new SqoopException(SerializationError.SERIALIZATION_002, e);
     }
+  }
+
+  /**
+   * Retrieve safely given key from JSONObject and ensure that it's of given class.
+   */
+  public static <T> T getType(JSONObject jsonObject, String key, Class<T> targetClass) {
+    if(!jsonObject.containsKey(key)) {
+      throw new SqoopException(SerializationError.SERIALIZATION_003, "Key: " + key);
+    }
+    Object ret = jsonObject.get(key);
+
+    if(ret == null) {
+      return null;
+    }
+
+    if( !(targetClass.isInstance(ret))) {
+      throw new SqoopException(SerializationError.SERIALIZATION_004, "Found " + ret.getClass().getName() + " instead of " + targetClass.getName() + " for key: " + key);
+    }
+
+    return (T)ret;
+  }
+
+  public static Long getLong(JSONObject jsonObject, String key) {
+    return getType(jsonObject, key, Long.class);
+  }
+  public static JSONObject getJSONObject(JSONObject jsonObject, String key) {
+    return getType(jsonObject, key, JSONObject.class);
+  }
+  public static JSONArray getJSONArray(JSONObject jsonObject, String key) {
+    return getType(jsonObject, key, JSONArray.class);
+  }
+  public static String getString(JSONObject jsonObject, String key) {
+    return getType(jsonObject, key, String.class);
+  }
+  public static Boolean getBoolean(JSONObject jsonObject, String key) {
+    return getType(jsonObject, key, Boolean.class);
+  }
+  public static Double getDouble(JSONObject jsonObject, String key) {
+    return getType(jsonObject, key, Double.class);
+  }
+  public static Date getDate(JSONObject jsonObject, String key) {
+    Long epoch = getType(jsonObject, key, Long.class);
+    if(epoch == null) {
+      return null;
+    }
+
+    return new Date(epoch);
   }
 
   private JSONUtils() {

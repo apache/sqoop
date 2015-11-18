@@ -57,7 +57,7 @@ public class JobsBean extends JobBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray array = (JSONArray) jsonObject.get(JOBS);
+    JSONArray array = JSONUtils.getJSONArray(jsonObject, JOBS);
     restoreJobs(array);
   }
 }

@@ -18,11 +18,13 @@
 package org.apache.sqoop.json;
 
 import org.apache.sqoop.common.SqoopException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.sql.Date;
 
 import static org.testng.Assert.assertEquals;
 
@@ -60,5 +62,77 @@ public class TestJSONUtils {
   @Test(expectedExceptions = NullPointerException.class)
   public void testReaderNull() {
     JSONUtils.parse((Reader)null);
+  }
+
+  @Test
+  public void testGetType() {
+    JSONObject object = JSONUtils.parse("{\"id\":3}");
+    assertEquals(new Long(3), JSONUtils.getType(object, "id", Long.class));
+  }
+
+  @Test
+  public void testGetTypeNull() {
+    JSONObject object = JSONUtils.parse("{\"id\": null}");
+    assertEquals(null, JSONUtils.getType(object, "id", String.class));
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testGetTypeNonExistingKey() {
+    JSONObject object = JSONUtils.parse("{\"id\":3}");
+    JSONUtils.getType(object, "non-existing", Long.class);
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testGetTypeIncorrectType() {
+    JSONObject object = JSONUtils.parse("{\"id\":3}");
+    JSONUtils.getType(object, "id", String.class);
+  }
+
+  @Test
+  public void testGetLong() {
+    JSONObject object = JSONUtils.parse("{\"id\":3}");
+    assertEquals(new Long(3), JSONUtils.getLong(object, "id"));
+  }
+
+  @Test
+  public void testGetJSONObject() {
+    JSONObject object = JSONUtils.parse("{\"id\": {}}");
+    assertEquals(new JSONObject(), JSONUtils.getJSONObject(object, "id"));
+  }
+
+  @Test
+  public void testGetJSONArray() {
+    JSONObject object = JSONUtils.parse("{\"id\": []}");
+    assertEquals(new JSONArray(), JSONUtils.getJSONArray(object, "id"));
+  }
+
+  @Test
+  public void testGetString() {
+    JSONObject object = JSONUtils.parse("{\"id\": \"sqoop-is-awesome\"}");
+    assertEquals("sqoop-is-awesome", JSONUtils.getString(object, "id"));
+  }
+
+  @Test
+  public void testGetBoolean() {
+    JSONObject object = JSONUtils.parse("{\"id\": true}");
+    assertEquals(Boolean.TRUE, JSONUtils.getBoolean(object, "id"));
+  }
+
+  @Test
+  public void testGetDouble() {
+    JSONObject object = JSONUtils.parse("{\"id\": 0.1}");
+    assertEquals(0.1, JSONUtils.getDouble(object, "id"));
+  }
+
+  @Test
+  public void testGetDate() {
+    JSONObject object = JSONUtils.parse("{\"id\": 1447628346000}");
+    assertEquals(new Date(1447628346000L), JSONUtils.getDate(object, "id"));
+  }
+
+  @Test
+  public void testGetDateNull() {
+    JSONObject object = JSONUtils.parse("{\"id\": null}");
+    assertEquals(null, JSONUtils.getDate(object, "id"));
   }
 }

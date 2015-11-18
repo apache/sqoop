@@ -58,7 +58,7 @@ public class ConnectorsBean extends ConnectorBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray array = (JSONArray) jsonObject.get(CONNECTORS);
+    JSONArray array = JSONUtils.getJSONArray(jsonObject, CONNECTORS);
     super.restoreConnectors(array);
   }
 }

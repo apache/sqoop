@@ -56,7 +56,7 @@ public class PrincipalsBean extends PrincipalBean {
 
   @Override
   public void restore(JSONObject json) {
-    JSONArray principalsArray = (JSONArray) json.get(PRINCIPALS);
+    JSONArray principalsArray = JSONUtils.getJSONArray(json, PRINCIPALS);
     restorePrincipals(principalsArray);
   }
 

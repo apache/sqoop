@@ -130,7 +130,7 @@ public class ConnectorBean extends ConfigurableBean {
   public void restore(JSONObject jsonObject) {
     connectors = new ArrayList<MConnector>();
     connectorConfigBundles = new HashMap<Long, ResourceBundle>();
-    JSONObject obj = (JSONObject) jsonObject.get(CONNECTOR);
+    JSONObject obj = JSONUtils.getJSONObject(jsonObject, CONNECTOR);
     connectors.add(restoreConnector(obj));
   }
 
@@ -144,34 +144,30 @@ public class ConnectorBean extends ConfigurableBean {
 
   private MConnector restoreConnector(Object obj) {
     JSONObject object = (JSONObject) obj;
-    long connectorId = (Long) object.get(ID);
-    String uniqueName = (String) object.get(NAME);
-    String className = (String) object.get(CLASS);
-    String version = (String) object.get(CONFIGURABLE_VERSION);
+    long connectorId = JSONUtils.getLong(object, ID);
+    String uniqueName = JSONUtils.getString(object, NAME);
+    String className = JSONUtils.getString(object, CLASS);
+    String version = JSONUtils.getString(object, CONFIGURABLE_VERSION);
 
-    JSONObject jsonLink = (JSONObject) object.get(CONNECTOR_LINK_CONFIG);
-    List<MConfig> linkConfigs = restoreConfigs((JSONArray) jsonLink.get(ConfigInputConstants.CONFIGS));
-    List<MValidator> linkValidators = restoreValidator((JSONArray) jsonLink
-      .get(ConfigInputConstants.CONFIG_VALIDATORS));
+    JSONObject jsonLink = JSONUtils.getJSONObject(object, CONNECTOR_LINK_CONFIG);
+    List<MConfig> linkConfigs = restoreConfigs(JSONUtils.getJSONArray(jsonLink, ConfigInputConstants.CONFIGS));
+    List<MValidator> linkValidators = restoreValidator(JSONUtils.getJSONArray(jsonLink, ConfigInputConstants.CONFIG_VALIDATORS));
 
     // parent that encapsulates both the from/to configs
-    JSONObject jobConfigJson = (JSONObject) object.get(CONNECTOR_JOB_CONFIG);
-    JSONObject fromJobConfigJson = (JSONObject) jobConfigJson.get(Direction.FROM.name());
-    JSONObject toJobConfigJson = (JSONObject) jobConfigJson.get(Direction.TO.name());
+    JSONObject jobConfigJson = JSONUtils.getJSONObject(object, CONNECTOR_JOB_CONFIG);
+    JSONObject fromJobConfigJson = jobConfigJson.containsKey(Direction.FROM.name()) ? JSONUtils.getJSONObject(jobConfigJson, Direction.FROM.name()) : null;
+    JSONObject toJobConfigJson = jobConfigJson.containsKey(Direction.TO.name()) ? JSONUtils.getJSONObject(jobConfigJson, Direction.TO.name()) : null;
 
     MFromConfig fromConfig = null;
     MToConfig toConfig = null;
     if (fromJobConfigJson != null) {
-      List<MConfig> fromLinkConfigs = restoreConfigs((JSONArray) fromJobConfigJson.get(ConfigInputConstants.CONFIGS));
-      List<MValidator> fromLinkValidators = restoreValidator((JSONArray)
-        fromJobConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+      List<MConfig> fromLinkConfigs = restoreConfigs(JSONUtils.getJSONArray(fromJobConfigJson, ConfigInputConstants.CONFIGS));
+      List<MValidator> fromLinkValidators = restoreValidator(JSONUtils.getJSONArray(fromJobConfigJson, ConfigInputConstants.CONFIG_VALIDATORS));
       fromConfig = new MFromConfig(fromLinkConfigs, fromLinkValidators);
-
     }
     if (toJobConfigJson != null) {
-      List<MConfig> toLinkConfigs = restoreConfigs((JSONArray) toJobConfigJson.get(ConfigInputConstants.CONFIGS));
-      List<MValidator> toLinkValidators = restoreValidator((JSONArray)
-        toJobConfigJson.get(ConfigInputConstants.CONFIG_VALIDATORS));
+      List<MConfig> toLinkConfigs = restoreConfigs(JSONUtils.getJSONArray(toJobConfigJson, ConfigInputConstants.CONFIGS));
+      List<MValidator> toLinkValidators = restoreValidator(JSONUtils.getJSONArray(toJobConfigJson, ConfigInputConstants.CONFIG_VALIDATORS));
       toConfig = new MToConfig(toLinkConfigs, toLinkValidators);
     }
 
@@ -181,8 +177,7 @@ public class ConnectorBean extends ConfigurableBean {
 
     connector.setPersistenceId(connectorId);
     if (object.containsKey(ALL_CONFIGS)) {
-
-      JSONObject jsonConfigBundle = (JSONObject) object.get(ALL_CONFIGS);
+      JSONObject jsonConfigBundle = JSONUtils.getJSONObject(object, ALL_CONFIGS);
       connectorConfigBundles.put(connectorId, restoreConfigParamBundle(jsonConfigBundle));
     }
     return connector;

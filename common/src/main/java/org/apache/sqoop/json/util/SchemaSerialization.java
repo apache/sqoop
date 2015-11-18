@@ -22,6 +22,7 @@ import java.util.HashSet;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.schema.NullSchema;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.AbstractComplexListType;
@@ -189,9 +190,9 @@ public class SchemaSerialization {
   }
 
   private static Column restoreColumn(JSONObject obj) {
-    String name = (String) obj.get(NAME);
+    String name = JSONUtils.getString(obj, NAME);
 
-    Boolean nullable = (Boolean) obj.get(NULLABLE);
+    Boolean nullable = JSONUtils.getBoolean(obj, NULLABLE);
     AbstractPrimitiveType key = null;
     Column value = null;
     Long arraySize = null;
@@ -200,29 +201,31 @@ public class SchemaSerialization {
 
     // complex type attribute
     if (obj.containsKey(MAP)) {
-      JSONObject map = (JSONObject) obj.get(MAP);
+      JSONObject map = JSONUtils.getJSONObject(obj, MAP);
 
       if (map.containsKey(KEY)) {
-        key = (AbstractPrimitiveType) restoreColumn((JSONObject) map.get(KEY));
+        key = (AbstractPrimitiveType) restoreColumn(JSONUtils.getJSONObject(map, KEY));
       }
       if (map.containsKey(VALUE)) {
-        value = restoreColumn((JSONObject) map.get(VALUE));
+        value = restoreColumn(JSONUtils.getJSONObject(map, VALUE));
       }
     }
     if (obj.containsKey(LIST)) {
-      JSONObject list = (JSONObject) obj.get(LIST);
+      JSONObject list = JSONUtils.getJSONObject(obj, LIST);
       if (list.containsKey(LIST_TYPE)) {
-        listType = restoreColumn((JSONObject) list.get(LIST_TYPE));
+        listType = restoreColumn(JSONUtils.getJSONObject(list, LIST_TYPE));
       }
-      arraySize = (Long) list.get(SIZE);
+      if(list.containsKey(SIZE)) {
+        arraySize = JSONUtils.getLong(list, SIZE);
+      }
       if (list.containsKey(ENUM_OPTIONS)) {
-        JSONArray optionsArray = (JSONArray) list.get(ENUM_OPTIONS);
+        JSONArray optionsArray = JSONUtils.getJSONArray(list, ENUM_OPTIONS);
         for (int n = 0; n < optionsArray.size(); n++) {
           options.add((String) optionsArray.get(n));
         }
       }
     }
-    ColumnType type = ColumnType.valueOf((String) obj.get(TYPE));
+    ColumnType type = ColumnType.valueOf(JSONUtils.getString(obj, TYPE));
     Column output = null;
     switch (type) {
     case ARRAY:
@@ -239,25 +242,25 @@ public class SchemaSerialization {
       output = new Date(name);
       break;
     case DATE_TIME:
-      Boolean hasFraction = (Boolean) obj.get(FRACTION);
-      Boolean hasTimezone = (Boolean) obj.get(TIMEZONE);
+      Boolean hasFraction = JSONUtils.getBoolean(obj, FRACTION);
+      Boolean hasTimezone = JSONUtils.getBoolean(obj, TIMEZONE);
       output = new DateTime(name, hasFraction, hasTimezone);
       break;
     case DECIMAL:
-      Integer precision = obj.get(PRECISION) != null ? ((Long) obj.get(PRECISION)).intValue() : null;
-      Integer scale = obj.get(SCALE) != null ? ((Long) obj.get(SCALE)).intValue() : null;
+      Integer precision = obj.get(PRECISION) != null ? (JSONUtils.getLong(obj, PRECISION)).intValue() : null;
+      Integer scale = obj.get(SCALE) != null ? (JSONUtils.getLong(obj, SCALE)).intValue() : null;
       output = new Decimal(name, precision, scale);
       break;
     case ENUM:
       output = new Enum(name, options);
       break;
     case FIXED_POINT:
-      Boolean signed = (Boolean) obj.get(SIGNED);
-      Long fixedPointByteSize = (Long) obj.get(BYTE_SIZE);
+      Boolean signed = JSONUtils.getBoolean(obj, SIGNED);
+      Long fixedPointByteSize = JSONUtils.getLong(obj, BYTE_SIZE);
       output = new FixedPoint(name, fixedPointByteSize, signed);
       break;
     case FLOATING_POINT:
-      Long floatingPointByteSize = (Long) obj.get(BYTE_SIZE);
+      Long floatingPointByteSize = JSONUtils.getLong(obj, BYTE_SIZE);
       output = new FloatingPoint(name, floatingPointByteSize);
       break;
     case MAP:
@@ -267,15 +270,15 @@ public class SchemaSerialization {
       output = new Set(name, listType);
       break;
     case TEXT:
-      charSize = (Long) obj.get(CHAR_SIZE);
+      charSize = JSONUtils.getLong(obj, CHAR_SIZE);
       output = new Text(name).setCharSize(charSize);
       break;
     case TIME:
-      Boolean hasTimeFraction = (Boolean) obj.get(FRACTION);
+      Boolean hasTimeFraction = JSONUtils.getBoolean(obj, FRACTION);
       output = new Time(name, hasTimeFraction);
       break;
     case UNKNOWN:
-      Long jdbcType = (Long) obj.get(JDBC_TYPE);
+      Long jdbcType = JSONUtils.getLong(obj, JDBC_TYPE);
       output = new Unknown(name).setJdbcType(jdbcType);
       break;
     default:

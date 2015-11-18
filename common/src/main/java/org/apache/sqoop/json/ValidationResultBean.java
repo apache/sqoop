@@ -118,14 +118,14 @@ public class ValidationResultBean implements JsonBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray array = (JSONArray) jsonObject.get(VALIDATION_RESULT);
+    JSONArray array = JSONUtils.getJSONArray(jsonObject, VALIDATION_RESULT);
     results = new ConfigValidationResult[array.size()];
     int i = 0;
     for(Object item : array) {
       results[i++] = restoreValidationResult((JSONObject) item);
     }
     if(jsonObject.containsKey(ID)) {
-      id = (Long) jsonObject.get(ID);
+      id = JSONUtils.getLong(jsonObject, ID);
     }
   }
 
@@ -150,9 +150,6 @@ public class ValidationResultBean implements JsonBean {
   }
 
   private Message restoreMessage(JSONObject item) {
-    return new Message(
-      Status.valueOf((String) item.get(STATUS)),
-      (String) item.get(MESSAGE)
-    );
+    return new Message(Status.valueOf(JSONUtils.getString(item, STATUS)), JSONUtils.getString(item, MESSAGE));
   }
 }
