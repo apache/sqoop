@@ -79,7 +79,6 @@ public class TestCloneCommand {
   public void setup() throws IOException {
     Groovysh shell = new Groovysh();
     cloneCmd = new CloneCommand(shell);
-    ShellEnvironment.setInteractive(false);
     ShellEnvironment.setIo(shell.getIo());
     client = mock(SqoopClient.class);
     ShellEnvironment.setClient(client);
@@ -104,6 +103,7 @@ public class TestCloneCommand {
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testCloneLink() {
+    ShellEnvironment.setInteractive(false);
     MLink link = new MLink(1L, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
     when(client.getConnectorConfigBundle(1L)).thenReturn(new MapResourceBundle(new HashMap()));
@@ -170,6 +170,7 @@ public class TestCloneCommand {
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testCloneJob() {
+    ShellEnvironment.setInteractive(false);
     MJob job = new MJob(1L, 2L, 1L, 2L,
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),

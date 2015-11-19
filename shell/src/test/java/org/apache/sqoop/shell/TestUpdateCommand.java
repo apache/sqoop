@@ -80,7 +80,6 @@ public class TestUpdateCommand {
   public void setup() throws IOException {
     Groovysh shell = new Groovysh();
     updateCmd = new UpdateCommand(shell);
-    ShellEnvironment.setInteractive(false);
     ShellEnvironment.setIo(shell.getIo());
     client = mock(SqoopClient.class);
     ShellEnvironment.setClient(client);
@@ -105,6 +104,7 @@ public class TestUpdateCommand {
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testUpdateLink() throws InterruptedException {
+    ShellEnvironment.setInteractive(false);
     MLink link = new MLink(1L, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
     when(client.getConnectorConfigBundle(1L)).thenReturn(new MapResourceBundle(new HashMap()));
@@ -172,6 +172,7 @@ public class TestUpdateCommand {
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
   public void testUpdateJob() throws InterruptedException {
+    ShellEnvironment.setInteractive(false);
     MJob job = new MJob(1L, 2L, 1L, 2L,
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
