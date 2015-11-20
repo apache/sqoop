@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.connector.jdbc.oracle.configuration;
 
+import java.util.List;
+
+import org.apache.sqoop.connector.jdbc.oracle.util.OracleUtilities;
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
@@ -32,27 +35,32 @@ public class FromJobConfig {
   public String tableName;
 
   @Input
+  public List<String> columns;
+
+  @Input
   public Boolean consistentRead;
 
   @Input
   public Long consistentReadScn;
 
-  @Input(size = 2000)
-  public String partitionList;
+  @Input
+  public List<String> partitionList;
 
-  @Input(size = 2000)
-  public String dataChunkMethod;
+  @Input
+  public OracleUtilities.OracleDataChunkMethod dataChunkMethod;
 
-  @Input(size = 2000)
-  public String dataChunkAllocationMethod;
+  @Input
+  public OracleUtilities.OracleBlockToSplitAllocationMethod
+      dataChunkAllocationMethod;
 
-  @Input(size = 2000)
-  public String whereClauseLocation;
+  @Input
+  public OracleUtilities.OracleTableImportWhereClauseLocation
+      whereClauseLocation;
 
   @Input
   public Boolean omitLobColumns;
 
-  @Input
+  @Input(size = 2000)
   public String queryHint;
 
   @Input(size = 2000)

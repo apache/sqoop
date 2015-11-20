@@ -121,7 +121,7 @@ public class OracleJdbcToInitializer extends
 
       boolean noLoggingOnNewTable = BooleanUtils.isTrue(jobConfig.nologging);
 
-      String updateKeyCol = jobConfig.updateKey;
+      List<String> updateKeyCol = jobConfig.updateKey;
 
       /* =========================== */
       /* VALIDATION OF INPUTS */
@@ -494,5 +494,15 @@ public class OracleJdbcToInitializer extends
     }
 
     return result;
+  }
+
+  @Override
+  protected List<String> getColumnNames(ToJobConfiguration jobConfiguration)
+      throws SQLException {
+    List<String> colNames = OracleQueries.getToTableColumnNames(
+        connection, table, true, true);
+
+    return OracleUtilities.getSelectedColumnNamesInOracleTable(table,
+        colNames, jobConfiguration.toJobConfig.columns);
   }
 }
