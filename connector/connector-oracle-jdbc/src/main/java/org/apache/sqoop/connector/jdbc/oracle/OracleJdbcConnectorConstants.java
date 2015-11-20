@@ -17,6 +17,10 @@
  */
 package org.apache.sqoop.connector.jdbc.oracle;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public final class OracleJdbcConnectorConstants {
 
   // Resource bundle name
@@ -39,12 +43,12 @@ public final class OracleJdbcConnectorConstants {
   public static final String ORACLE_JDBC_DRIVER_CLASS =
       "oracle.jdbc.OracleDriver";
 
-  public static final String ORACLE_SESSION_INITIALIZATION_STATEMENTS_DEFAULT =
-      "alter session disable parallel query;" +
-      "alter session set \"_serial_direct_read\"=true;" +
-      "alter session set tracefile_identifier=oraoop;" +
-      "--alter session set events '10046 trace name context forever, level 8';";
-
+  public static final List<String>
+   ORACLE_SESSION_INITIALIZATION_STATEMENTS_DEFAULT =
+      Collections.unmodifiableList(
+          Arrays.asList("alter session disable parallel query",
+              "alter session set \"_serial_direct_read\"=true",
+              "alter session set tracefile_identifier=sqoop"));
 
   /////////////////////////////////////////////////////////////////////
 
@@ -287,12 +291,6 @@ public final class OracleJdbcConnectorConstants {
 //  public static final String ORAOOP_ORACLE_APPEND_VALUES_HINT_USAGE =
 //      "oraoop.oracle.append.values.hint.usage";
 //
-  /**
-   * Whether to use the append values hint for exports.
-   */
-  public enum AppendValuesHintUsage {
-    AUTO, ON, OFF
-  }
 
   // http://download.oracle.com/docs/cd/E11882_01/server.112/e17118/
   //     sql_elements001.htm#i45441

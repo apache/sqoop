@@ -180,22 +180,24 @@ public class OracleConnectionFactory {
   }
 
   public static void executeOraOopSessionInitializationStatements(
-      Connection connection, String sessionInitializationStatements) {
-    String statementsStr = sessionInitializationStatements;
-    if(StringUtils.isEmpty(statementsStr)) {
-      statementsStr =OracleJdbcConnectorConstants.
+      Connection connection, List<String> sessionInitializationStatements) {
+    List<String> statements = sessionInitializationStatements;
+
+    if(statements == null || statements.isEmpty()) {
+      statements = OracleJdbcConnectorConstants.
           ORACLE_SESSION_INITIALIZATION_STATEMENTS_DEFAULT;
     }
 
-    List<String> statements =
-        parseOraOopSessionInitializationStatements(statementsStr);
-
-    if (statements.size() == 0) {
-      LOG.warn("No Oracle 'session initialization' statements were found to "
-              + "execute.");
-    } else {
-      for (String statement : statements) {
+    int numStatements = 0;
+    for (String statement : statements) {
+      String initializationStatement = statement.trim();
+      if (initializationStatement != null
+          && !initializationStatement.isEmpty()
+          && !initializationStatement
+              .startsWith(OracleJdbcConnectorConstants.Oracle.
+                  ORACLE_SQL_STATEMENT_COMMENT_TOKEN)) {
         try {
+          numStatements++;
           connection.createStatement().execute(statement);
           LOG.info("Initializing Oracle session with SQL : " + statement);
         } catch (Exception ex) {
@@ -206,41 +208,10 @@ public class OracleConnectionFactory {
         }
       }
     }
-  }
-
-  public static List<String> parseOraOopSessionInitializationStatements(
-      String sessionInitializationStatements) {
-
-    ArrayList<String> result = new ArrayList<String>();
-
-    if (sessionInitializationStatements != null
-        && !sessionInitializationStatements.isEmpty()) {
-      String[] initializationStatements =
-          sessionInitializationStatements.split(";");
-      for (String initializationStatement : initializationStatements) {
-        initializationStatement = initializationStatement.trim();
-        if (initializationStatement != null
-            && !initializationStatement.isEmpty()
-            && !initializationStatement
-                .startsWith(OracleJdbcConnectorConstants.Oracle.
-                    ORACLE_SQL_STATEMENT_COMMENT_TOKEN)) {
-
-          LOG.debug(String
-              .format(
-                  "initializationStatement (quoted & pre-expression "
-                  + "evaluation) = \"%s\"",
-                  initializationStatement));
-
-          //TODO: Not supported in Sqoop 2?
-          /*initializationStatement =
-              OracleUtilities.replaceConfigurationExpression(
-                  initializationStatement, conf);*/
-
-          result.add(initializationStatement);
-        }
-      }
+    if(numStatements==0) {
+      LOG.warn("No Oracle 'session initialization' statements were found to "
+          + "execute.");
     }
-    return result;
   }
 
 }

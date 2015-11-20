@@ -104,9 +104,7 @@ public class OracleJdbcPartitioner extends
           OracleUtilities.OracleBlockToSplitAllocationMethod
               blockAllocationMethod = OracleUtilities
                   .getOracleBlockToSplitAllocationMethod(
-                      jobConfiguration.fromJobConfig,
-                      OracleUtilities.
-                          OracleBlockToSplitAllocationMethod.ROUNDROBIN);
+                      jobConfiguration.fromJobConfig);
 
           // Group the Oracle data-chunks into splits...
           splits =
@@ -145,8 +143,7 @@ public class OracleJdbcPartitioner extends
 
   private List<String> getPartitionList(FromJobConfig jobConfig) {
     LOG.debug("Partition list = " + jobConfig.partitionList);
-    List<String> result =
-        OracleUtilities.splitOracleStringList(jobConfig.partitionList);
+    List<String> result = jobConfig.partitionList;
     if (result != null && result.size() > 0) {
       LOG.debug("Partition filter list: " + result.toString());
     }

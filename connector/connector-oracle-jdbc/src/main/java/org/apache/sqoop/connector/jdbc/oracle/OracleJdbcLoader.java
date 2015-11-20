@@ -96,11 +96,6 @@ public class OracleJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurati
           linkConfiguration.connectionConfig.username,
           jobConfiguration.toJobConfig.tableName);
     }
-    tableColumns = OracleQueries.getToTableColumns(
-        connection, table, true, false);
-    tableHasMapperRowNumberColumn =
-        tableColumns.findColumnByName(
-            OracleJdbcConnectorConstants.COLUMN_NAME_EXPORT_MAPPER_ROW) != null;
 
     // Should we use the APPEND_VALUES Oracle hint?...
     useAppendValuesOracleHint = false;
@@ -124,9 +119,6 @@ public class OracleJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurati
 
     updateColumnNames = OracleUtilities.
         getExportUpdateKeyColumnNames(jobConfiguration.toJobConfig);
-
-    tableColumns = OracleQueries.getToTableColumns(
-        connection, table, true, false);
 
     if (updateMode == UpdateMode.Merge || updateMode == UpdateMode.Update) {
       // Should we use the APPEND_VALUES Oracle hint?...
@@ -183,6 +175,13 @@ public class OracleJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurati
     } else {
       setupUpdate(linkConfiguration, jobConfiguration);
     }
+
+    tableColumns = OracleQueries.getToTableColumns(
+        connection, table, true, false);
+
+    tableHasMapperRowNumberColumn =
+        tableColumns.findColumnByName(
+            OracleJdbcConnectorConstants.COLUMN_NAME_EXPORT_MAPPER_ROW) != null;
 
     // Has the user forced the use of APPEND_VALUES either on or off?...
     useAppendValuesOracleHint =
@@ -304,74 +303,85 @@ public class OracleJdbcLoader extends Loader<LinkConfiguration, ToJobConfigurati
      * table (that OraOop created), there are two pseudo-columns we added to
      * the table to identify the export job and the mapper.
      */
+    List<String> columnNamesList = new ArrayList<String>();
+    for(Column column : context.getSchema().getColumnsList()) {
+      columnNamesList.add(column.getName());
+    }
 
     int colCount = 0;
     for (int idx = 0; idx < this.tableColumns.size(); idx++) {
       OracleTableColumn oracleTableColumn = this.tableColumns.get(idx);
       String columnName = oracleTableColumn.getName();
-
-      // column names...
-      if (colCount > 0) {
-        sqlNames.append("\n,");
-      }
-      sqlNames.append(columnName);
-
-      // column values...
-      if (colCount > 0) {
-        sqlValues.append("\n,");
-      }
-
-      String pseudoColumnValue =
-          generateInsertValueForPseudoColumn(columnName);
-
-      String bindVarName = null;
-
-      if (pseudoColumnValue != null) {
-        bindVarName = pseudoColumnValue;
-      } else if (oracleTableColumn.getOracleType() == OracleQueries
-          .getOracleType("STRUCT")) {
-        if (oracleTableColumn.getDataType().equals(
-            OracleJdbcConnectorConstants.Oracle.URITYPE)) {
-          bindVarName =
-              String.format("urifactory.getUri(%s)",
-                  columnNameToBindVariable(columnName));
+      if(columnNamesList.contains(columnName) ||
+          OracleJdbcConnectorConstants.COLUMN_NAME_EXPORT_PARTITION
+              .equals(columnName) ||
+          OracleJdbcConnectorConstants.COLUMN_NAME_EXPORT_SUBPARTITION
+              .equals(columnName) ||
+          OracleJdbcConnectorConstants.COLUMN_NAME_EXPORT_MAPPER_ROW
+          .equals(columnName)) {
+        // column names...
+        if (colCount > 0) {
+          sqlNames.append("\n,");
         }
-        //TODO: Date as string?
-      /*} else if (getConf().getBoolean(
-          OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING,
-          OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING_DEFAULT)) {
-        if (oracleTableColumn.getOracleType() == OraOopOracleQueries
-            .getOracleType("DATE")) {
-          bindVarName =
-              String.format("to_date(%s, 'yyyy-mm-dd hh24:mi:ss')",
-                  columnNameToBindVariable(columnName));
-        } else if (oracleTableColumn.getOracleType() == OraOopOracleQueries
-            .getOracleType("TIMESTAMP")) {
-          bindVarName =
-              String.format("to_timestamp(%s, 'yyyy-mm-dd hh24:mi:ss.ff')",
-                  columnNameToBindVariable(columnName));
-        } else if (oracleTableColumn.getOracleType() == OraOopOracleQueries
-            .getOracleType("TIMESTAMPTZ")) {
-          bindVarName =
-              String.format(
-                  "to_timestamp_tz(%s, 'yyyy-mm-dd hh24:mi:ss.ff TZR')",
-                  columnNameToBindVariable(columnName));
-        } else if (oracleTableColumn.getOracleType() == OraOopOracleQueries
-            .getOracleType("TIMESTAMPLTZ")) {
-          bindVarName =
-              String.format(
-                  "to_timestamp_tz(%s, 'yyyy-mm-dd hh24:mi:ss.ff TZR')",
-                  columnNameToBindVariable(columnName));
-        }*/
+        sqlNames.append(columnName);
+
+        // column values...
+        if (colCount > 0) {
+          sqlValues.append("\n,");
+        }
+
+        String pseudoColumnValue =
+            generateInsertValueForPseudoColumn(columnName);
+
+        String bindVarName = null;
+
+        if (pseudoColumnValue != null) {
+          bindVarName = pseudoColumnValue;
+        } else if (oracleTableColumn.getOracleType() == OracleQueries
+            .getOracleType("STRUCT")) {
+          if (oracleTableColumn.getDataType().equals(
+              OracleJdbcConnectorConstants.Oracle.URITYPE)) {
+            bindVarName =
+                String.format("urifactory.getUri(%s)",
+                    columnNameToBindVariable(columnName));
+          }
+          //TODO: Date as string?
+        /*} else if (getConf().getBoolean(
+            OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING,
+            OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING_DEFAULT)) {
+          if (oracleTableColumn.getOracleType() == OraOopOracleQueries
+              .getOracleType("DATE")) {
+            bindVarName =
+                String.format("to_date(%s, 'yyyy-mm-dd hh24:mi:ss')",
+                    columnNameToBindVariable(columnName));
+          } else if (oracleTableColumn.getOracleType() == OraOopOracleQueries
+              .getOracleType("TIMESTAMP")) {
+            bindVarName =
+                String.format("to_timestamp(%s, 'yyyy-mm-dd hh24:mi:ss.ff')",
+                    columnNameToBindVariable(columnName));
+          } else if (oracleTableColumn.getOracleType() == OraOopOracleQueries
+              .getOracleType("TIMESTAMPTZ")) {
+            bindVarName =
+                String.format(
+                    "to_timestamp_tz(%s, 'yyyy-mm-dd hh24:mi:ss.ff TZR')",
+                    columnNameToBindVariable(columnName));
+          } else if (oracleTableColumn.getOracleType() == OraOopOracleQueries
+              .getOracleType("TIMESTAMPLTZ")) {
+            bindVarName =
+                String.format(
+                    "to_timestamp_tz(%s, 'yyyy-mm-dd hh24:mi:ss.ff TZR')",
+                    columnNameToBindVariable(columnName));
+          }*/
+        }
+
+        if (bindVarName == null) {
+          bindVarName = columnNameToBindVariable(columnName);
+        }
+
+        sqlValues.append(bindVarName);
+
+        colCount++;
       }
-
-      if (bindVarName == null) {
-        bindVarName = columnNameToBindVariable(columnName);
-      }
-
-      sqlValues.append(bindVarName);
-
-      colCount++;
     }
 
     String sql =

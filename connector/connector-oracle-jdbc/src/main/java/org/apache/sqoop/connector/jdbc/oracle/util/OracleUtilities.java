@@ -93,6 +93,13 @@ public final class OracleUtilities {
     SUBSPLIT, SPLIT
   }
 
+  /**
+   * Whether to use the append values hint for exports.
+   */
+  public enum AppendValuesHintUsage {
+    AUTO, ON, OFF
+  }
+
 //  /**
 //   * Used for testing purposes - can get OraOop to call a class to run a report
 //   * on various performance metrics.
@@ -272,34 +279,34 @@ public final class OracleUtilities {
     return String.format("%s()", stackTraceElements[1].getMethodName());
   }
 
-//  public static String[] getDuplicatedStringArrayValues(String[] list,
-//      boolean ignoreCase) {
-//
-//    if (list == null) {
-//      throw new IllegalArgumentException("The list argument cannot be null");
-//    }
-//
-//    ArrayList<String> duplicates = new ArrayList<String>();
-//
-//    for (int idx1 = 0; idx1 < list.length - 1; idx1++) {
-//      for (int idx2 = idx1 + 1; idx2 < list.length; idx2++) {
-//        if (list[idx1].equals(list[idx2])) {
-//          // If c is a duplicate of both a & b, don't add c to the list twice...
-//          if (!duplicates.contains(list[idx2])) {
-//            duplicates.add(list[idx2]);
-//          }
-//
-//        } else if (ignoreCase && list[idx1].equalsIgnoreCase((list[idx2]))) {
-//          // If c is a duplicate of both a & b, don't add c to the list twice...
-//          if (stringListIndexOf(duplicates, list[idx2], ignoreCase) == -1) {
-//            duplicates.add(list[idx2]);
-//          }
-//        }
-//      }
-//    }
-//
-//    return duplicates.toArray(new String[duplicates.size()]);
-//  }
+  public static String[] getDuplicatedStringArrayValues(String[] list,
+      boolean ignoreCase) {
+
+    if (list == null) {
+      throw new IllegalArgumentException("The list argument cannot be null");
+    }
+
+    ArrayList<String> duplicates = new ArrayList<String>();
+
+    for (int idx1 = 0; idx1 < list.length - 1; idx1++) {
+      for (int idx2 = idx1 + 1; idx2 < list.length; idx2++) {
+        if (list[idx1].equals(list[idx2])) {
+          // If c is a duplicate of both a & b, don't add c to the list twice...
+          if (!duplicates.contains(list[idx2])) {
+            duplicates.add(list[idx2]);
+          }
+
+        } else if (ignoreCase && list[idx1].equalsIgnoreCase((list[idx2]))) {
+          // If c is a duplicate of both a & b, don't add c to the list twice...
+          if (stringListIndexOf(duplicates, list[idx2], ignoreCase) == -1) {
+            duplicates.add(list[idx2]);
+          }
+        }
+      }
+    }
+
+    return duplicates.toArray(new String[duplicates.size()]);
+  }
 
   public static String getFullExceptionMessage(Exception ex) {
 
@@ -365,138 +372,32 @@ public final class OracleUtilities {
 
   public static OracleDataChunkMethod
       getOraOopOracleDataChunkMethod(FromJobConfig jobConfig) {
-
-    String strMethod = jobConfig.dataChunkMethod;
-    if (strMethod == null) {
-      return OracleDataChunkMethod.ROWID;
-    }
-
-    OracleDataChunkMethod result;
-
-    try {
-      strMethod = strMethod.toUpperCase().trim();
-      result = OracleDataChunkMethod.valueOf(strMethod);
-    } catch (IllegalArgumentException ex) {
+    OracleDataChunkMethod result = jobConfig.dataChunkMethod;
+    if(result == null) {
       result = OracleDataChunkMethod.ROWID;
-      LOG.error("An invalid value of \"" + strMethod
-          + "\" was specified for the data chunk method "
-          + "configuration property value.\n" + "\tThe default value of "
-          + OracleDataChunkMethod.ROWID
-          + " will be used.");
     }
     return result;
   }
 
   public static
       OracleBlockToSplitAllocationMethod getOracleBlockToSplitAllocationMethod(
-          FromJobConfig jobConfig,
-          OracleBlockToSplitAllocationMethod defaultMethod) {
-
-    String strMethod = jobConfig.dataChunkAllocationMethod;
-    if (strMethod == null) {
-      return defaultMethod;
+          FromJobConfig jobConfig) {
+    OracleBlockToSplitAllocationMethod result =
+        jobConfig.dataChunkAllocationMethod;
+    if(result == null) {
+      result = OracleBlockToSplitAllocationMethod.ROUNDROBIN;
     }
-
-    OracleBlockToSplitAllocationMethod result;
-
-    try {
-      strMethod = strMethod.toUpperCase().trim();
-      result =
-          OracleBlockToSplitAllocationMethod
-              .valueOf(strMethod);
-    } catch (IllegalArgumentException ex) {
-      result = defaultMethod;
-
-      String errorMsg =
-          String
-              .format(
-                "An invalid value of \"%s\" was specified for the data chunk "
-                    + " allocation method configuration property value.\n"
-                    + "\tValid values are: %s\n"
-                    + "\tThe default value of %s will be used.",
-                strMethod,
-                getOracleBlockToSplitAllocationMethods(), defaultMethod.name());
-      LOG.error(errorMsg);
-    }
-
     return result;
-  }
-
-  private static String getOracleBlockToSplitAllocationMethods() {
-
-    OracleBlockToSplitAllocationMethod[] values =
-        OracleBlockToSplitAllocationMethod.values();
-
-    StringBuilder result =
-        new StringBuilder((2 * values.length) - 1); // <- Include capacity
-                                                    //    for commas
-
-    for (int idx = 0; idx < values.length; idx++) {
-      OracleBlockToSplitAllocationMethod value =
-          values[idx];
-      if (idx > 0) {
-        result.append(" or ");
-      }
-      result.append(value.name());
-    }
-    return result.toString();
   }
 
   public static OracleTableImportWhereClauseLocation
       getTableImportWhereClauseLocation(
-        FromJobConfig jobConfig,
-        OracleTableImportWhereClauseLocation defaultLocation) {
-
-    String strLocation = jobConfig.whereClauseLocation;
-
-    if (strLocation == null) {
-      return defaultLocation;
+        FromJobConfig jobConfig) {
+    OracleTableImportWhereClauseLocation result = jobConfig.whereClauseLocation;
+    if(result == null) {
+      result = OracleTableImportWhereClauseLocation.SUBSPLIT;
     }
-
-    OracleTableImportWhereClauseLocation result;
-
-    try {
-      strLocation = strLocation.toUpperCase().trim();
-      result =
-          OracleTableImportWhereClauseLocation
-              .valueOf(strLocation);
-    } catch (IllegalArgumentException ex) {
-      result = defaultLocation;
-
-      String errorMsg =
-          String
-              .format(
-                  "An invalid value of \"%s\"was specified for the "
-                      + "where clause location configuration property value.\n"
-                      + "\tValid values are: %s\n"
-                      + "\tThe default value of %s will be used.", strLocation,
-                  getOracleTableImportWhereClauseLocations(), defaultLocation
-                      .name());
-      LOG.error(errorMsg);
-    }
-
     return result;
-  }
-
-  private static String getOracleTableImportWhereClauseLocations() {
-
-    OracleTableImportWhereClauseLocation[] locationValues =
-        OracleTableImportWhereClauseLocation.values();
-
-    StringBuilder result =
-        new StringBuilder((2 * locationValues.length) - 1); // <- Include
-                                                            //    capacity for
-                                                            //    commas
-
-    for (int idx = 0; idx < locationValues.length; idx++) {
-      OracleTableImportWhereClauseLocation locationValue =
-          locationValues[idx];
-      if (idx > 0) {
-        result.append(" or ");
-      }
-      result.append(locationValue.name());
-    }
-    return result.toString();
   }
 
 //  public static String getOutputDirectory(
@@ -514,52 +415,6 @@ public final class OracleUtilities {
 //
 //  public static String padRight(String s, int n) {
 //    return StringUtils.rightPad(s, n);
-//  }
-//
-//  public static String replaceConfigurationExpression(String str,
-//      org.apache.hadoop.conf.Configuration conf) {
-//
-//    int startPos = str.indexOf('{');
-//    int endPos = str.indexOf('}');
-//
-//    // Example:
-//    // alter session set timezone = '{oracle.sessionTimeZone|GMT}';
-//
-//    if (startPos == -1 || endPos == -1) {
-//      return str;
-//    }
-//
-//    String configName = null;
-//    String defaultValue = null;
-//
-//    String expression = str.substring(startPos + 1, endPos);
-//    int defaultValuePos = expression.indexOf('|');
-//    if (defaultValuePos == -1) {
-//      // return expression;
-//      configName = expression;
-//    } else {
-//      configName = expression.substring(0, defaultValuePos);
-//      defaultValue = expression.substring(defaultValuePos + 1);
-//    }
-//
-//    if (defaultValue == null) {
-//      defaultValue = "";
-//    }
-//
-//    String configValue = conf.get(configName);
-//    if (configValue == null) {
-//      configValue = defaultValue;
-//    }
-//
-//    String result = str.replace(String.format("{%s}", expression), configValue);
-//
-//    LOG.debug(String.format("The expression:\n%s\nwas replaced with:\n%s", str,
-//        result));
-//
-//    // Recurse to evaluate any other expressions...
-//    result = replaceConfigurationExpression(result, conf);
-//
-//    return result;
 //  }
 //
 //  public static boolean stackContainsClass(String className) {
@@ -676,20 +531,20 @@ public final class OracleUtilities {
     return result.toString();
   }
 
-//  public static int stringListIndexOf(List<String> list, String value,
-//      boolean ignoreCase) {
-//
-//    for (int idx = 0; idx < list.size(); idx++) {
-//      if (list.get(idx).equals(value)) {
-//        return idx;
-//      }
-//      if (ignoreCase && list.get(idx).equalsIgnoreCase(value)) {
-//        return idx;
-//      }
-//    }
-//    return -1;
-//  }
-//
+  public static int stringListIndexOf(List<String> list, String value,
+      boolean ignoreCase) {
+
+    for (int idx = 0; idx < list.size(); idx++) {
+      if (list.get(idx).equals(value)) {
+        return idx;
+      }
+      if (ignoreCase && list.get(idx).equalsIgnoreCase(value)) {
+        return idx;
+      }
+    }
+    return -1;
+  }
+
 //  public static void writeOutputFile(org.apache.hadoop.conf.Configuration conf,
 //      String fileName, String fileText) {
 //
@@ -1240,20 +1095,12 @@ public final class OracleUtilities {
 
   public static String[] getExportUpdateKeyColumnNames(ToJobConfig jobConfig) {
 
-    if (jobConfig.updateKey == null) {
+    if (jobConfig.updateKey == null || jobConfig.updateKey.isEmpty()) {
       // This must be an "insert-export" if no --update-key has been specified!
       return new String[0];
     }
 
-    String[] columnNames = jobConfig.updateKey.split(",");
-    for (int idx = 0; idx < columnNames.length; idx++) {
-      columnNames[idx] = columnNames[idx].trim();
-      if (!columnNames[idx].startsWith("\"")) {
-        columnNames[idx] = columnNames[idx].toUpperCase();
-      }
-
-    }
-    return columnNames;
+    return jobConfig.updateKey.toArray(new String[jobConfig.updateKey.size()]);
   }
 //
   /**
@@ -1303,58 +1150,13 @@ public final class OracleUtilities {
     return result;
   }
 
-  public static OracleJdbcConnectorConstants.AppendValuesHintUsage
-    getOracleAppendValuesHintUsage(ToJobConfig jobConfig) {
-
-    String strUsage = jobConfig.appendValuesHint;
-    if (strUsage == null) {
-      return OracleJdbcConnectorConstants.AppendValuesHintUsage.AUTO;
+  public static AppendValuesHintUsage getOracleAppendValuesHintUsage(
+      ToJobConfig jobConfig) {
+    AppendValuesHintUsage result = jobConfig.appendValuesHint;
+    if (result == null) {
+      result = AppendValuesHintUsage.AUTO;
     }
-
-    OracleJdbcConnectorConstants.AppendValuesHintUsage result;
-
-    try {
-      strUsage = strUsage.toUpperCase().trim();
-      result = OracleJdbcConnectorConstants.
-          AppendValuesHintUsage.valueOf(strUsage);
-    } catch (IllegalArgumentException ex) {
-      result = OracleJdbcConnectorConstants.AppendValuesHintUsage.AUTO;
-
-      String errorMsg =
-          String
-              .format(
-                  "An invalid value of \"%s\" was specified for the "
-                      + "append values hint configuration property value.\n"
-                      + "\tValid values are: %s\n"
-                      + "\tThe default value of %s will be used.", strUsage,
-                  getOraOopOracleAppendValuesHintUsageValues(),
-                  OracleJdbcConnectorConstants.
-                  AppendValuesHintUsage.AUTO.name());
-      LOG.error(errorMsg);
-    }
-
     return result;
-  }
-
-  private static String getOraOopOracleAppendValuesHintUsageValues() {
-
-    OracleJdbcConnectorConstants.AppendValuesHintUsage[] values =
-        OracleJdbcConnectorConstants.AppendValuesHintUsage.values();
-
-    StringBuilder result = new StringBuilder((2 * values.length) - 1); // <-
-                                                                     // Include
-                                                                     // capacity
-                                                                     // for
-                                                                     // commas
-
-    for (int idx = 0; idx < values.length; idx++) {
-      OracleJdbcConnectorConstants.AppendValuesHintUsage value = values[idx];
-      if (idx > 0) {
-        result.append(" or ");
-      }
-      result.append(value.name());
-    }
-    return result.toString();
   }
 
   public static String getImportHint(FromJobConfig jobConfig) {
@@ -1442,5 +1244,77 @@ public final class OracleUtilities {
     }
 
     return result;
+  }
+
+  private static boolean isEscaped(String name) {
+    return name.startsWith("\"") && name.endsWith("\"");
+  }
+
+  private String escapeOracleColumnName(String columnName) {
+    if (isEscaped(columnName)) {
+      return columnName;
+    } else {
+      return "\"" + columnName + "\"";
+    }
+  }
+
+  private static String unescapeOracleColumnName(String columnName) {
+    if (isEscaped(columnName)) {
+      return columnName.substring(1, columnName.length() - 1);
+    } else {
+      return columnName;
+    }
+  }
+
+  public static List<String> getSelectedColumnNamesInOracleTable(
+      OracleTable table, List<String> colNamesInTable,
+      List<String> selectedColumnsInput) {
+    if (selectedColumnsInput != null && selectedColumnsInput.size() > 0) {
+      String[] selectedColumns = new String[selectedColumnsInput.size()];
+
+      for (int idx = 0; idx < selectedColumnsInput.size(); idx++) {
+        String column = selectedColumnsInput.get(idx);
+        // If the user did not escape this column name, then we should
+        // uppercase it...
+        if (!isEscaped(column)) {
+          selectedColumns[idx] = column.toUpperCase();
+        } else {
+          // If the user escaped this column name, then we should
+          // retain its case...
+          selectedColumns[idx] = unescapeOracleColumnName(column);
+        }
+      }
+
+      // Ensure there are no duplicated column names...
+      String[] duplicates =
+          OracleUtilities
+              .getDuplicatedStringArrayValues(selectedColumns, false);
+      if (duplicates.length > 0) {
+        StringBuilder msg = new StringBuilder();
+        msg.append("The following column names have been duplicated in the ");
+        msg.append("\"--columns\" clause:\n");
+
+        for (String duplicate : duplicates) {
+          msg.append("\t" + duplicate + "\n");
+        }
+
+        throw new RuntimeException(msg.toString());
+      }
+
+      List<String> result = new ArrayList<String>(selectedColumnsInput.size());
+      // Ensure the user selected column names that actually exist...
+      for (String selectedColumn : selectedColumns) {
+        if (!colNamesInTable.contains(selectedColumn)) {
+          throw new RuntimeException(String.format(
+              "The column named \"%s\" does not exist within the table"
+                  + "%s (or is of an unsupported data-type).", selectedColumn,
+              table.toString()));
+        }
+        result.add(selectedColumn);
+      }
+      return result;
+    } else {
+      return colNamesInTable;
+    }
   }
 }

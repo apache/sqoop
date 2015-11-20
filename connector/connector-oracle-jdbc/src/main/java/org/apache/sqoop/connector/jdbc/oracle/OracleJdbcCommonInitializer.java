@@ -45,7 +45,7 @@ import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.Column;
 
-public class OracleJdbcCommonInitializer<JobConfiguration> extends Initializer<LinkConfiguration, JobConfiguration> {
+public abstract class OracleJdbcCommonInitializer<JobConfiguration> extends Initializer<LinkConfiguration, JobConfiguration> {
 
   private static final Logger LOG =
       Logger.getLogger(OracleJdbcCommonInitializer.class);
@@ -107,6 +107,9 @@ public class OracleJdbcCommonInitializer<JobConfiguration> extends Initializer<L
     showUserTheOracleCommandToKillOraOop(context.getContext());
   }
 
+  protected abstract List<String>
+      getColumnNames(JobConfiguration jobConfiguration) throws SQLException;
+
   @Override
   public Schema getSchema(InitializerContext context,
       LinkConfiguration linkConfiguration,
@@ -123,8 +126,7 @@ public class OracleJdbcCommonInitializer<JobConfiguration> extends Initializer<L
     Schema schema = new Schema(table.toString());
 
     try {
-      List<String> colNames = OracleQueries.getToTableColumnNames(
-          connection, table, true, true);
+      List<String> colNames = getColumnNames(jobConfiguration);
 
       List<Column> columnTypes =
             OracleQueries.getColDataTypes(connection, table, colNames);

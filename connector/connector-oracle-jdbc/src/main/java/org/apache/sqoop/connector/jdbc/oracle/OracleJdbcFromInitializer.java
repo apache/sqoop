@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.jdbc.oracle;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.log4j.Logger;
@@ -85,6 +86,19 @@ public class OracleJdbcFromInitializer extends
             scn);
         LOG.info("Performing a consistent read using SCN: " + scn);
       }
+    }
+
+    @Override
+    protected List<String> getColumnNames(FromJobConfiguration jobConfiguration)
+        throws SQLException {
+      List<String> colNames = OracleQueries.getFromTableColumnNames(connection,
+          table, OracleUtilities.omitLobAndLongColumnsDuringImport(
+              jobConfiguration.fromJobConfig),
+          true // <- onlyOraOopSupportedTypes
+          );
+
+      return OracleUtilities.getSelectedColumnNamesInOracleTable(table,
+          colNames, jobConfiguration.fromJobConfig.columns);
     }
 
 }
