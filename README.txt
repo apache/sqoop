@@ -1,46 +1,6 @@
-
-= Welcome to Sqoop!
-
-This is the Sqoop (SQL-to-Hadoop) tool. Sqoop allows easy imports and
-exports of data sets between databases and HDFS.
-
-
-== More Documentation
-
-Sqoop ships with additional documentation: a user guide and a manual page.
-
-Asciidoc sources for both of these are in +src/docs/+. Run +ant docs+ to build
-the documentation. It will be created in +build/docs/+.
-
-If you got Sqoop in release form, documentation will already be built and
-available in the +docs/+ directory.
-
-
-== Compiling Sqoop
-
-Compiling Sqoop requires the following tools:
-
-* Apache ant (1.7.1)
-* Java JDK 1.6
-
-Additionally, building the documentation requires these tools:
-
-* asciidoc
-* make
-* python 2.5+
-* xmlto
-* tar
-* gzip
-
-To compile Sqoop, run +ant package+. There will be a fully self-hosted build
-provided in the +build/sqoop-(version)/+ directory. 
-
-You can build just the jar by running +ant jar+.
-
-See the COMPILING.txt document for for information.
-
-== This is also an Asciidoc file!
-
-* Try running +asciidoc README.txt+
-* For more information about asciidoc, see http://www.methods.co.nz/asciidoc/
-
+在百分点的大数据实践过程中，经常遇到这样一个问题：如何快速的将企业传统关系型数据库的数据导入百分点BD-OS，或者反之。由 Apache 开源的Sqoop是这方面的利器，但是在实际的生产环境应用中它却表现出了一些不足，百分点解决了这些问题，形成自己的针对企业级大数据平台的Sqoop版本。此版本的Sqoop作为BD-OS的核心组件之一，再实际环境中得以广泛应用。
+PATCH列表
+支持Microsoft SQL Server 2000 数据库到HDFS/Hive的导入和导出
+支持批量导入时，如果中间某张表导入失败会自动跳过继续导其余的表。不会中途退出
+支持数据导入到 Hive 多分区的情况
+支持数据导入到HDFS/Hive 时，增加指定参数可以删除或替换掉字段数据中包含\t的特殊字符
