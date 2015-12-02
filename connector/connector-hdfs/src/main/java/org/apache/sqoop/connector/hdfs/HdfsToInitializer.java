@@ -27,6 +27,7 @@ import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
+import org.apache.sqoop.connector.hdfs.security.SecurityUtils;
 import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
@@ -58,8 +59,7 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
 
     // Verification that given HDFS directory either don't exists or is empty
     try {
-      UserGroupInformation.createProxyUser(context.getUser(),
-        UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+      SecurityUtils.createProxyUser(context).doAs(new PrivilegedExceptionAction<Void>() {
         public Void run() throws Exception {
           FileSystem fs = FileSystem.get(configuration);
           Path path = new Path(jobConfig.toJobConfig.outputDirectory);
@@ -76,6 +76,10 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
               }
             }
           }
+
+          // Generate delegation tokens if we are on secured cluster
+          SecurityUtils.generateDelegationTokens(context.getContext(), path, configuration);
+
           return null;
         }
       });

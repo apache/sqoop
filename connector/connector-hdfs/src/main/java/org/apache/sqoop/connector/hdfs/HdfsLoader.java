@@ -34,6 +34,7 @@ import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.GenericHdfsWriter;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsSequenceWriter;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsTextWriter;
+import org.apache.sqoop.connector.hdfs.security.SecurityUtils;
 import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
@@ -56,8 +57,7 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   @Override
   public void load(final LoaderContext context, final LinkConfiguration linkConfiguration,
                    final ToJobConfiguration toJobConfig) throws Exception {
-    UserGroupInformation.createProxyUser(context.getUser(),
-      UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+    SecurityUtils.createProxyUserAndLoadDelegationTokens(context).doAs(new PrivilegedExceptionAction<Void>() {
       public Void run() throws Exception {
         Configuration conf = new Configuration();
         HdfsUtils.contextToConfiguration(context.getContext(), conf);
