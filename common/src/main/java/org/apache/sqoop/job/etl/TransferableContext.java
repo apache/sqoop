@@ -30,8 +30,11 @@ public abstract class TransferableContext {
 
   ImmutableContext context;
 
-  public TransferableContext(ImmutableContext context) {
+  private String user;
+
+  public TransferableContext(ImmutableContext context, String user) {
     this.context = context;
+    this.user = user;
   }
 
   /**
@@ -76,5 +79,12 @@ public abstract class TransferableContext {
    */
   public boolean getBoolean(String key, boolean defaultValue) {
     return context.getBoolean(key, defaultValue);
+  }
+
+  /**
+   * Return user who started this job (e.g. the one who run "start job" in shell)
+   */
+  public String getUser() {
+    return user;
   }
 }

@@ -37,13 +37,10 @@ public class PartitionerContext extends TransferableContext {
 
   private boolean skipMaxPartitionCheck = false;
 
-  private String user;
-
   public PartitionerContext(ImmutableContext context, long maxPartitions, Schema schema, String user) {
-    super(context);
+    super(context, user);
     this.maxPartitions = maxPartitions;
     this.schema = schema;
-    this.user = user;
   }
 
   /**
@@ -91,14 +88,5 @@ public class PartitionerContext extends TransferableContext {
    */
   public Schema getSchema() {
     return schema;
-  }
-
-  /**
-   * Return user that submitted job
-   *
-   * @return
-   */
-  public String getUser() {
-    return user;
   }
 }

@@ -35,13 +35,10 @@ public class DestroyerContext extends TransferableContext {
 
   private Schema schema;
 
-  private String user;
-
   public DestroyerContext(ImmutableContext context, boolean success, Schema schema, String user) {
-    super(context);
+    super(context, user);
     this.success = success;
     this.schema = schema;
-    this.user = user;
   }
 
   /**
@@ -62,12 +59,4 @@ public class DestroyerContext extends TransferableContext {
     return schema;
   }
 
-  /**
-   * Return user associated with this step.
-   *
-   * @return
-   */
-  public String getUser() {
-    return user;
-  }
 }
