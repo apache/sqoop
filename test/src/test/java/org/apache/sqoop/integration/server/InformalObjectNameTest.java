@@ -30,6 +30,7 @@ import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProv
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
@@ -144,6 +145,15 @@ public class InformalObjectNameTest extends SqoopTestCase {
       fail("The job doesn't exist, exception should be thrown.");
     } catch (Exception e) {
       // ignore the exception
+    }
+  }
+
+  @AfterMethod
+  public void dropTestData() {
+    if (TARGET_LINK.equals(target)) {
+      clearLink();
+    } else if (TARGET_JOB.equals(target)) {
+      clearJob();
     }
   }
 }

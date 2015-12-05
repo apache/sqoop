@@ -20,16 +20,13 @@ package org.apache.sqoop.integration.server.rest;
 import org.apache.log4j.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConfigList;
-import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.DataOutputStream;
@@ -133,12 +130,8 @@ public abstract class RestTest extends SqoopTestCase {
 
   @AfterMethod
   public void dropTestData() {
-    for(MJob job : getClient().getJobs()) {
-      getClient().deleteJob(job.getName());
-    }
-    for(MLink link : getClient().getLinks()) {
-      getClient().deleteLink(link.getName());
-    }
+    clearJob();
+    clearLink();
   }
 
   private TestDescription desc;

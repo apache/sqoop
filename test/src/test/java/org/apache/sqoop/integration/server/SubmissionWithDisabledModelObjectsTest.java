@@ -72,6 +72,8 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
   @AfterMethod
   public void tearDownRdbmsTable() {
     dropTable();
+    clearJob();
+    clearLink();
   }
 
   @Test

@@ -22,9 +22,10 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -34,7 +35,7 @@ import static org.testng.Assert.assertEquals;
 /**
  * Ensure that jobs will be shown in order
  */
-@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
+@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
 public class ShowJobInOrderTest extends SqoopTestCase {
 
   public ShowJobInOrderTest() {
@@ -56,6 +57,7 @@ public class ShowJobInOrderTest extends SqoopTestCase {
 
     // Job creation
     MJob job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
+    job.setName("testJobName1");
 
     // rdms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -67,6 +69,7 @@ public class ShowJobInOrderTest extends SqoopTestCase {
 
     // Job creation
     job = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
+    job.setName("testJobName2");
 
     // rdms "To" config
     fillRdbmsToConfig(job);
@@ -78,6 +81,7 @@ public class ShowJobInOrderTest extends SqoopTestCase {
 
     // Job creation
     job = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
+    job.setName("testJobName3");
 
     // rdms "FROM" config
     fillRdbmsFromConfig(job, "id");
@@ -89,7 +93,7 @@ public class ShowJobInOrderTest extends SqoopTestCase {
 
     // Job creation
     job = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
-
+    job.setName("testJobName4");
 
     // hdfs "From" config
     fillHdfsFromConfig(job);
@@ -101,9 +105,14 @@ public class ShowJobInOrderTest extends SqoopTestCase {
 
     List<MJob> jobs = getClient().getJobs();
 
-    assertEquals(1, jobs.get(0).getPersistenceId());
-    assertEquals(2, jobs.get(1).getPersistenceId());
-    assertEquals(3, jobs.get(2).getPersistenceId());
-    assertEquals(4, jobs.get(3).getPersistenceId());
+    assertEquals(jobs.get(0).getName(), "testJobName1");
+    assertEquals(jobs.get(1).getName(), "testJobName2");
+    assertEquals(jobs.get(2).getName(), "testJobName3");
+    assertEquals(jobs.get(3).getName(), "testJobName4");
+  }
+
+  @AfterMethod
+  public void dropTestData() {
+    clearJob();
   }
 }
