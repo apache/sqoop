@@ -339,22 +339,22 @@ public class JobManager implements Reconfigurable {
 
   private JobRequest createJobRequest(MSubmission submission, MJob job) {
     // get from/to connections for the job
-    MLink fromConnection = getLink(job.getFromLinkId());
-    MLink toConnection = getLink(job.getToLinkId());
+    MLink fromLink = getLink(job.getFromLinkId());
+    MLink toLink = getLink(job.getToLinkId());
 
     // get from/to connectors for the connection
-    SqoopConnector fromConnector = getSqoopConnector(fromConnection.getConnectorId());
+    SqoopConnector fromConnector = getSqoopConnector(fromLink.getConnectorName());
     validateSupportedDirection(fromConnector, Direction.FROM);
-    SqoopConnector toConnector = getSqoopConnector(toConnection.getConnectorId());
+    SqoopConnector toConnector = getSqoopConnector(toLink.getConnectorName());
     validateSupportedDirection(toConnector, Direction.TO);
 
     // link config for the FROM part of the job
     Object fromLinkConfig = ClassUtils.instantiate(fromConnector.getLinkConfigurationClass());
-    ConfigUtils.fromConfigs(fromConnection.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
+    ConfigUtils.fromConfigs(fromLink.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
 
     // link config for the TO part of the job
     Object toLinkConfig = ClassUtils.instantiate(toConnector.getLinkConfigurationClass());
-    ConfigUtils.fromConfigs(toConnection.getConnectorLinkConfig().getConfigs(), toLinkConfig);
+    ConfigUtils.fromConfigs(toLink.getConnectorLinkConfig().getConfigs(), toLinkConfig);
 
     // from config for the job
     Object fromJob = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
@@ -470,7 +470,11 @@ public class JobManager implements Reconfigurable {
     return summary;
   }
 
-  SqoopConnector getSqoopConnector(long connnectorId) {
+  SqoopConnector getSqoopConnector(String connnectorName) {
+    return ConnectorManager.getInstance().getSqoopConnector(connnectorName);
+  }
+
+  SqoopConnector getSqoopConnector(Long connnectorId) {
     return ConnectorManager.getInstance().getSqoopConnector(connnectorId);
   }
 

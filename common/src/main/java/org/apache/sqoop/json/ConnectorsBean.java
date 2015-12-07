@@ -39,7 +39,7 @@ public class ConnectorsBean extends ConnectorBean {
   private static final String CONNECTORS = "connectors";
 
   // for "extract"
-  public ConnectorsBean(List<MConnector> connectors, Map<Long, ResourceBundle> bundles) {
+  public ConnectorsBean(List<MConnector> connectors, Map<String, ResourceBundle> bundles) {
     super(connectors, bundles);
   }
 

@@ -81,16 +81,15 @@ public class ShowLinkFunction extends SqoopFunction {
     List<String> ids = new LinkedList<String>();
     List<String> names = new LinkedList<String>();
     List<String> connectorIds = new LinkedList<String>();
+    List<String> connectorNames = new LinkedList<String>();
     List<String> availabilities = new LinkedList<String>();
 
     for (MLink link : links) {
       ids.add(String.valueOf(link.getPersistenceId()));
       names.add(link.getName());
-      connectorIds.add(String.valueOf(link.getConnectorId()));
+      connectorNames.add(link.getConnectorName());
       availabilities.add(String.valueOf(link.getEnabled()));
     }
-
-    List<String> connectorNames = getConnectorNames(connectorIds);
 
     TableDisplayer.display(header, ids, names, connectorIds, connectorNames, availabilities);
   }
@@ -126,41 +125,10 @@ public class ShowLinkFunction extends SqoopFunction {
       formatter.format(link.getLastUpdateDate())
     );
 
-    long connectorId = link.getConnectorId();
-    MConnector connector = client.getConnector(connectorId);
-    String connectorName = "";
-    if (connector != null) {
-      connectorName = connector.getUniqueName();
-    }
-    printlnResource(Constants.RES_SHOW_PROMPT_LINK_CID_INFO, connectorName, connectorId);
+    printlnResource(Constants.RES_SHOW_PROMPT_LINK_CID_INFO, link.getConnectorName());
 
     // Display link config
     displayConfig(link.getConnectorLinkConfig().getConfigs(),
-    client.getConnectorConfigBundle(connectorId));
-  }
-
-  private List<String> getConnectorNames(List<String> connectorIds) {
-    Map<String, String> connectorIdToName = new HashMap<String, String>();
-    for (String connectorId : connectorIds) {
-      if (!connectorIdToName.containsKey(connectorId)) {
-        try {
-          MConnector connector = client.getConnector(Long.parseLong(connectorId));
-          if (connector != null) {
-            connectorIdToName.put(connectorId, connector.getUniqueName());
-          }
-        } catch (SqoopException ex) {
-          connectorIdToName.put(connectorId, "Access Denied");
-        }
-      }
-    }
-    List<String> connectorNames = new ArrayList<String>();
-    for (String connectorId : connectorIds) {
-      if (connectorIdToName.get(connectorId) != null) {
-        connectorNames.add(connectorIdToName.get(connectorId));
-      } else {
-        connectorNames.add("");
-      }
-    }
-    return connectorNames;
+      client.getConnectorConfigBundle(link.getConnectorName()));
   }
 }

@@ -90,9 +90,9 @@ public class CreateJobFunction extends  SqoopFunction {
     }
 
     ResourceBundle fromConfigBundle = getClient().getConnectorConfigBundle(
-        job.getFromConnectorId());
+            fromConnector.getUniqueName());
     ResourceBundle toConfigBundle = getClient().getConnectorConfigBundle(
-        job.getToConnectorId());
+            toConnector.getUniqueName());
     ResourceBundle driverConfigBundle = getClient().getDriverConfigBundle();
 
     Status status = Status.OK;

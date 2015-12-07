@@ -278,7 +278,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    MConnector mConnector = ConnectorManager.getInstance().getConnectorConfigurable(link.getConnectorId());
+    MConnector mConnector = ConnectorManager.getInstance().getConnectorConfigurable(link.getConnectorName());
     ConnectorConfigurableUpgrader connectorConfigUpgrader = ConnectorManager.getInstance().getSqoopConnector(mConnector.getUniqueName()).getConfigurableUpgrader(null);
 
     List<MConfig> connectorConfigs = mConnector.getLinkConfig().clone(false).getConfigs();
@@ -291,7 +291,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
     // Transform config structures to objects for validations
     SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
-        link.getConnectorId());
+        link.getConnectorName());
 
     Object connectorConfig = ClassUtils.instantiate(connector.getLinkConfigurationClass());
 

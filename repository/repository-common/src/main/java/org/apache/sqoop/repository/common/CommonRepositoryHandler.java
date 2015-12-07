@@ -371,11 +371,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public void createLink(MLink link, Connection conn) {
     int result;
+    MConnector mConnector;
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertLink(),
           Statement.RETURN_GENERATED_KEYS)) {
 
       stmt.setString(1, link.getName());
-      stmt.setLong(2, link.getConnectorId());
+      mConnector = findConnector(link.getConnectorName(), conn);
+      stmt.setLong(2, mConnector.getPersistenceId());
       stmt.setBoolean(3, link.getEnabled());
       stmt.setString(4, link.getCreationUser());
       stmt.setTimestamp(5, new Timestamp(link.getCreationDate().getTime()));
@@ -1515,7 +1517,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     try (ResultSet rsConnection = stmt.executeQuery();
          PreparedStatement connectorConfigFetchStatement = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
          PreparedStatement connectorConfigInputStatement = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());) {
-
       while(rsConnection.next()) {
         long id = rsConnection.getLong(1);
         String name = rsConnection.getString(2);
@@ -1525,6 +1526,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         Date creationDate = rsConnection.getTimestamp(6);
         String updateUser = rsConnection.getString(7);
         Date lastUpdateDate = rsConnection.getTimestamp(8);
+        String connectorName = rsConnection.getString(9);
 
         connectorConfigFetchStatement.setLong(1, connectorId);
         connectorConfigInputStatement.setLong(1, id);
@@ -1535,7 +1537,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
         loadConnectorConfigs(connectorLinkConfig, fromConfig, toConfig, connectorConfigFetchStatement,
             connectorConfigInputStatement, 2, conn);
-        MLink link = new MLink(connectorId, new MLinkConfig(connectorLinkConfig, Collections.EMPTY_LIST));
+
+        MLink link = new MLink(connectorName, new MLinkConfig(connectorLinkConfig, Collections.EMPTY_LIST));
 
         link.setPersistenceId(id);
         link.setName(name);
@@ -1576,7 +1579,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         configStmt.setLong(1, connectorId);
         inputStmt.setLong(1, id);
         loadInputsForConfigs(connectorLinkConfig, configStmt, inputStmt);
-        MLink link = new MLink(connectorId, connectorLinkConfig);
+
+        MLink link = new MLink(connectorName, connectorLinkConfig);
 
         link.setPersistenceId(id);
         link.setName(name);

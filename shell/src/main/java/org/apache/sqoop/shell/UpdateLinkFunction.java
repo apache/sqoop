@@ -65,8 +65,7 @@ public class UpdateLinkFunction extends SqoopFunction {
 
     // TODO(SQOOP-1634): using link config id, this call can be avoided
     MLink link = client.getLink(linkArg);
-
-    ResourceBundle connectorLinkConfigBundle = client.getConnectorConfigBundle(link.getConnectorId());
+    ResourceBundle connectorLinkConfigBundle = client.getConnectorConfigBundle(link.getConnectorName());
 
     Status status = Status.OK;
 

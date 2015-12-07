@@ -124,6 +124,6 @@ public class ShowConnectorFunction extends SqoopFunction {
       connector.getVersion(),
       connector.getSupportedDirections().toString()
     );
-    displayConnectorConfigDetails(connector, client.getConnectorConfigBundle(connector.getPersistenceId()));
+    displayConnectorConfigDetails(connector, client.getConnectorConfigBundle(connector.getUniqueName()));
   }
 }

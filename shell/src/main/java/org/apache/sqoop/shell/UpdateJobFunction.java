@@ -20,6 +20,7 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.ConfigDisplayer;
@@ -67,10 +68,14 @@ public class UpdateJobFunction extends SqoopFunction {
     // TODO(SQOOP-1634): using from/to and driver config id, this call can be avoided
     MJob job = client.getJob(jobArg);
 
+    // TODO: should be removed when MJob link with Connector by name.
+    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
+    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
+
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
-        job.getFromConnectorId());
+            fromConnector.getUniqueName());
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
-        job.getToConnectorId());
+            toConnector.getUniqueName());
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;

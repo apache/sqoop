@@ -159,15 +159,20 @@ public class ShowJobFunction extends SqoopFunction {
       job.getLastUpdateUser(),
       formatter.format(job.getLastUpdateDate())
     );
+
+    // TODO: should be removed when MJob link with Connector by name.
+    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
+    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
+
     displayConfig(job.getDriverConfig().getConfigs(),
             client.getDriverConfigBundle());
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_FROM_LID_INFO,
         job.getFromLinkId());
     displayConfig(job.getFromJobConfig().getConfigs(),
-                 client.getConnectorConfigBundle(job.getFromConnectorId()));
+                 client.getConnectorConfigBundle(fromConnector.getUniqueName()));
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_TO_LID_INFO,
             job.getToLinkId());
     displayConfig(job.getToJobConfig().getConfigs(),
-                 client.getConnectorConfigBundle(job.getToConnectorId()));
+                 client.getConnectorConfigBundle(toConnector.getUniqueName()));
   }
 }

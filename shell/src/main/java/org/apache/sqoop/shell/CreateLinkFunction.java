@@ -72,24 +72,23 @@ public class CreateLinkFunction extends SqoopFunction {
       cid = getLong(line, Constants.OPT_CID);
       getClient().getConnector(cid);
 
-      //Would have thrown an exception before this if input was neither a valid name nor an id
+      //Would have thrown an exception before this if input was an invalid connector name
       //This will do an extra getConnector() call again inside createLink()
       //but should not matter as connectors are cached
-      link = getClient().createLink(cid);
+      link = getClient().createLink(connectorName);
       printlnResource(Constants.RES_CREATE_CREATING_LINK, cid);
     }
     else {
       //Command line had connector name
       //This will do an extra getConnector() call again inside createLink() but
       //should not matter as connectors are cached
-      cid = connector.getPersistenceId();
       link = getClient().createLink(connectorName);
       printlnResource(Constants.RES_CREATE_CREATING_LINK, connectorName);
     }
 
     ConsoleReader reader = getConsoleReader();
 
-    ResourceBundle connectorConfigBundle = getClient().getConnectorConfigBundle(cid);
+    ResourceBundle connectorConfigBundle = getClient().getConnectorConfigBundle(connectorName);
 
     Status status = Status.OK;
     if (isInteractive) {

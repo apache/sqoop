@@ -304,6 +304,6 @@ public class TestLinkHandling extends DerbyTestCase {
   }
 
   public MLink getLink() {
-    return new MLink(1, handler.findConnector("A", getDerbyDatabaseConnection()).getLinkConfig());
+    return new MLink("A", handler.findConnector("A", getDerbyDatabaseConnection()).getLinkConfig());
   }
 }

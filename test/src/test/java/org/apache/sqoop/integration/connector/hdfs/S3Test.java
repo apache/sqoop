@@ -90,7 +90,7 @@ public class S3Test extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // DB -> S3
-    MJob db2aws = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob db2aws = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
     fillRdbmsFromConfig(db2aws, "id");
     fillHdfsToConfig(db2aws, ToFormat.TEXT_FILE);
 
@@ -110,7 +110,7 @@ public class S3Test extends ConnectorTestCase {
     assertEquals(provider.rowCount(getTableName()), 0);
 
     // S3 -> DB
-    MJob aws2db = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
+    MJob aws2db = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
     fillHdfsFromConfig(aws2db);
     fillRdbmsToConfig(aws2db);
 
@@ -145,7 +145,7 @@ public class S3Test extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // S3 -> HDFS
-    MJob aws2hdfs = getClient().createJob(s3Link.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob aws2hdfs = getClient().createJob(s3Link.getName(), hdfsLink.getName());
     fillHdfsFromConfig(aws2hdfs);
     aws2hdfs.getFromJobConfig().getEnumInput("incremental.incrementalType").setValue(IncrementalType.NEW_FILES);
 

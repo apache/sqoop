@@ -52,7 +52,7 @@ public class BeanTestUtil {
   }
 
   public static MLink getLink(String connectorName) {
-    return new MLink(1, getConnector(1L, connectorName).getLinkConfig());
+    return new MLink(connectorName, getConnector(1L, connectorName).getLinkConfig());
   }
 
   public static MConnector getConnector(Long connectorId, String connectorName) {

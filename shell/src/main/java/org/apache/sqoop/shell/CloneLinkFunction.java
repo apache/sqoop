@@ -70,7 +70,7 @@ public class CloneLinkFunction extends SqoopFunction {
 
     Status status = Status.OK;
 
-    ResourceBundle linkConfigBundle = client.getConnectorConfigBundle(link.getConnectorId());
+    ResourceBundle linkConfigBundle = client.getConnectorConfigBundle(link.getConnectorName());
 
     if (isInteractive) {
       printlnResource(Constants.RES_PROMPT_UPDATE_LINK_CONFIG);

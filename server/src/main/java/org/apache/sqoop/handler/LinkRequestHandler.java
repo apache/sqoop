@@ -130,7 +130,7 @@ public class LinkRequestHandler implements RequestHandler {
     }
 
     MLink postedLink = links.get(0);
-    MConnector mConnector = HandlerUtils.getConnectorFromConnectorId(postedLink.getConnectorId());
+    MConnector mConnector = HandlerUtils.getConnectorFromConnectorName(postedLink.getConnectorName());
 
     // Authorization check
     if (create) {
@@ -142,7 +142,7 @@ public class LinkRequestHandler implements RequestHandler {
     }
 
     MLinkConfig linkConfig = ConnectorManager.getInstance()
-        .getConnectorConfigurable(postedLink.getConnectorId()).getLinkConfig();
+        .getConnectorConfigurable(postedLink.getConnectorName()).getLinkConfig();
     if (!linkConfig.equals(postedLink.getConnectorLinkConfig())) {
       throw new SqoopException(ServerError.SERVER_0003, "Detected incorrect link config structure");
     }
@@ -156,7 +156,7 @@ public class LinkRequestHandler implements RequestHandler {
     }
     // Associated connector for this link
     SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
-        postedLink.getConnectorId());
+        postedLink.getConnectorName());
 
     // Validate user supplied config data
     ConfigValidationResult connectorLinkConfigValidation = ConfigUtils.validateConfigs(postedLink
@@ -240,10 +240,10 @@ public class LinkRequestHandler implements RequestHandler {
   private void addConnectorConfigBundle(Locale locale, LinkBean bean) {
     // Add associated resources into the bean
     for (MLink link : bean.getLinks()) {
-      long connectorId = link.getConnectorId();
-      if (!bean.hasConnectorConfigBundle(connectorId)) {
-        bean.addConnectorConfigBundle(connectorId, ConnectorManager.getInstance()
-            .getResourceBundle(connectorId, locale));
+      String connectorName = link.getConnectorName();
+      if (!bean.hasConnectorConfigBundle(connectorName)) {
+        bean.addConnectorConfigBundle(connectorName, ConnectorManager.getInstance()
+            .getResourceBundle(connectorName, locale));
       }
     }
   }

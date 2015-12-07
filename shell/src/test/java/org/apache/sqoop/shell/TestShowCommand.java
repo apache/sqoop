@@ -203,7 +203,7 @@ public class TestShowCommand {
   @Test
   public void testShowLink() {
     when(client.getLinks()).thenReturn(new ArrayList<MLink>());
-    when(client.getLink(any(String.class))).thenReturn(new MLink(1L, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
+    when(client.getLink(any(String.class))).thenReturn(new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
 
     // show link summary
     out.reset();
@@ -234,6 +234,7 @@ public class TestShowCommand {
   @Test
   public void testShowJob() {
     when(client.getJobs()).thenReturn(new ArrayList<MJob>());
+    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
     when(client.getJob("1")).thenReturn(new MJob(1L, 2L, 1L, 2L,
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),

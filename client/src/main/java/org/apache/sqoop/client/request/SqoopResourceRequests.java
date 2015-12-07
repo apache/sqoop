@@ -114,8 +114,8 @@ public class SqoopResourceRequests {
     return getDriverResourceRequest().read(serverUrl);
   }
 
-  public ConnectorBean readConnector(Long cid) {
-    return getConnectorResourceRequest().read(serverUrl, cid);
+  public ConnectorBean readConnector(String connectorName) {
+    return getConnectorResourceRequest().read(serverUrl, connectorName);
   }
 
   public ValidationResultBean saveLink(MLink link) {

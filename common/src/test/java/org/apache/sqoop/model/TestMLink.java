@@ -35,14 +35,14 @@ public class TestMLink {
   public void testInitialization() {
     // Test default constructor
     MLink link = link();
-    assertEquals(123l, link.getConnectorId());
+    assertEquals("connector_test", link.getConnectorName());
     assertEquals("Vampire", link.getName());
     assertEquals("Buffy", link.getCreationUser());
     assertEquals(linkConfig(), link.getConnectorLinkConfig());
 
     // Test copy constructor
     MLink copy = new MLink(link);
-    assertEquals(123l, copy.getConnectorId());
+    assertEquals("connector_test", copy.getConnectorName());
     assertEquals("Vampire", copy.getName());
     assertEquals("Buffy", copy.getCreationUser());
     assertEquals(link.getCreationDate(), copy.getCreationDate());
@@ -75,7 +75,7 @@ public class TestMLink {
   }
 
   private MLink link() {
-    MLink link = new MLink(123l, linkConfig());
+    MLink link = new MLink("connector_test", linkConfig());
     link.setName("Vampire");
     link.setCreationUser("Buffy");
     return link;

@@ -94,7 +94,7 @@ abstract public class MySqlTestCase {
   }
 
   protected MLink getLink(String name, MConnector connector) {
-    MLink link = new MLink(connector.getPersistenceId(),
+    MLink link = new MLink(connector.getUniqueName(),
         connector.getLinkConfig());
     link.setName(name);
     fillLink(link);

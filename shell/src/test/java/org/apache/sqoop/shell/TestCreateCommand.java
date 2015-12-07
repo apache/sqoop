@@ -104,7 +104,8 @@ public class TestCreateCommand {
   public void testCreateLink() {
     ShellEnvironment.setInteractive(false);
     when(client.getConnector("connector_test")).thenReturn(new MConnector("", "", "", null, null, null));
-    when(client.createLink("connector_test")).thenReturn(new MLink(1, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
+    when(client.createLink("connector_test")).thenReturn(
+            new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
     when(client.saveLink(any(MLink.class))).thenReturn(Status.OK);
 
     // create link -c connector_test
@@ -144,10 +145,10 @@ public class TestCreateCommand {
     ShellEnvironment.setInteractive(true);
     initEnv();
     when(client.getConnector("connector_test")).thenReturn(new MConnector("", "", "", null, null, null));
-    MLink link = new MLink(1, new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
+    MLink link = new MLink("connector_test", new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
     when(client.createLink("connector_test")).thenReturn(link);
     when(client.saveLink(any(MLink.class))).thenReturn(Status.OK);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(resourceBundle);
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
 
     // create link -c connector_test
     initData("linkname\r" +         // link name
@@ -228,7 +229,7 @@ public class TestCreateCommand {
     when(client.getConnector(1)).thenReturn(fromConnector);
     when(client.getConnector(2)).thenReturn(toConnector);
     when(client.saveJob(any(MJob.class))).thenReturn(Status.OK);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(resourceBundle);
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
 
     // create job -f link_from -to link_to

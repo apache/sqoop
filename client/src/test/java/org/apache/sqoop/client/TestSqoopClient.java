@@ -66,26 +66,15 @@ public class TestSqoopClient {
    * not require additional HTTP request.
    */
   @Test
-  public void testGetConnector() {
-    when(resourceRequests.readConnector(1L)).thenReturn(connectorBean(connector(1)));
-    MConnector connector = client.getConnector(1);
-    assertEquals(1, connector.getPersistenceId());
-
-    client.getConnectorConfigBundle(1L);
-
-    verify(resourceRequests, times(1)).readConnector(1L);
-  }
-
-  @Test
   public void testGetConnectorByString() {
     when(resourceRequests.readConnector(null)).thenReturn(connectorBean(connector(1)));
     MConnector connector = client.getConnector("A1");
     assertEquals(1, connector.getPersistenceId());
     assertEquals("A1", connector.getUniqueName());
 
-    client.getConnectorConfigBundle(1L);
+    client.getConnectorConfigBundle("A1");
 
-    verify(resourceRequests, times(0)).readConnector(1L);
+    verify(resourceRequests, times(0)).readConnector("A1");
     verify(resourceRequests, times(1)).readConnector(null);
   }
 
@@ -95,13 +84,13 @@ public class TestSqoopClient {
    */
   @Test
   public void testGetConnectorBundle() {
-    when(resourceRequests.readConnector(1L)).thenReturn(connectorBean(connector(1)));
-    client.getConnectorConfigBundle(1L);
+    when(resourceRequests.readConnector("A1")).thenReturn(connectorBean(connector(1)));
+    client.getConnectorConfigBundle("A1");
 
-    MConnector connector = client.getConnector(1);
+    MConnector connector = client.getConnector("A1");
     assertEquals(1, connector.getPersistenceId());
 
-    verify(resourceRequests, times(1)).readConnector(1L);
+    verify(resourceRequests, times(1)).readConnector("A1");
   }
 
   /**
@@ -144,12 +133,12 @@ public class TestSqoopClient {
     Collection<MConnector> connectors = client.getConnectors();
     assertEquals(2, connectors.size());
 
-    client.getConnectorConfigBundle(1);
-    connector = client.getConnector(1);
+    client.getConnectorConfigBundle("A1");
+    connector = client.getConnector("A1");
     assertEquals(1, connector.getPersistenceId());
 
-    connector = client.getConnector(2);
-    client.getConnectorConfigBundle(2);
+    connector = client.getConnector("A2");
+    client.getConnectorConfigBundle("A2");
     assertEquals(2, connector.getPersistenceId());
 
     connectors = client.getConnectors();
@@ -179,21 +168,21 @@ public class TestSqoopClient {
   public void testGetConnectorOneByOne() {
     ConnectorBean bean = connectorBean(connector(1), connector(2));
     when(resourceRequests.readConnector(null)).thenReturn(bean);
-    when(resourceRequests.readConnector(1L)).thenReturn(bean);
-    when(resourceRequests.readConnector(2L)).thenReturn(bean);
+    when(resourceRequests.readConnector("A1")).thenReturn(bean);
+    when(resourceRequests.readConnector("A2")).thenReturn(bean);
 
-    client.getConnectorConfigBundle(1);
-    client.getConnector(1);
+    client.getConnectorConfigBundle("A1");
+    client.getConnector("A1");
 
-    client.getConnector(2);
-    client.getConnectorConfigBundle(2);
+    client.getConnector("A2");
+    client.getConnectorConfigBundle("A2");
 
     Collection<MConnector> connectors = client.getConnectors();
     assertEquals(2, connectors.size());
 
     verify(resourceRequests, times(1)).readConnector(null);
-    verify(resourceRequests, times(1)).readConnector(1L);
-    verify(resourceRequests, times(1)).readConnector(2L);
+    verify(resourceRequests, times(1)).readConnector("A1");
+    verify(resourceRequests, times(0)).readConnector("A2");
     verifyNoMoreInteractions(resourceRequests);
   }
 
@@ -208,11 +197,11 @@ public class TestSqoopClient {
 
   private ConnectorBean connectorBean(MConnector...connectors) {
     List<MConnector> connectorList = new ArrayList<MConnector>();
-    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
+    Map<String, ResourceBundle> bundles = new HashMap<String, ResourceBundle>();
 
     for(MConnector connector : connectors) {
       connectorList.add(connector);
-      bundles.put(connector.getPersistenceId(), null);
+      bundles.put(connector.getUniqueName(), null);
     }
     return new ConnectorBean(connectorList, bundles);
   }

@@ -109,7 +109,7 @@ public class TestJobManager {
 
   @Test
   public void testGetLink() {
-    MLink testLink = new MLink(123l, null);
+    MLink testLink = new MLink("connector_test", null);
     testLink.setEnabled(true);
     MLink mConnectionSpy = org.mockito.Mockito.spy(testLink);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
@@ -121,7 +121,7 @@ public class TestJobManager {
 
   @Test
   public void testDisabledLink() {
-    MLink testConnection = new MLink(123l, null);
+    MLink testConnection = new MLink("connector_test", null);
     testConnection.setPersistenceId(1234);
     testConnection.setEnabled(false);
     SqoopException exception = new SqoopException(DriverError.DRIVER_0010, "Connection: "

@@ -39,17 +39,17 @@ public class ConnectorResourceRequest extends ResourceRequest {
     super(token);
   }
 
-  public ConnectorBean read(String serverUrl, Long cid) {
+  public ConnectorBean read(String serverUrl, String connectorName) {
     String response;
-    if (cid == null) {
+    if (connectorName == null) {
       response = super.get(serverUrl + RESOURCE + "all");
     } else {
-      response = super.get(serverUrl + RESOURCE + cid);
+      response = super.get(serverUrl + RESOURCE + connectorName);
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
     ConnectorBean bean = new ConnectorsBean();
-    if (cid != null) {
+    if (connectorName != null) {
       bean = new ConnectorBean();
     }
     bean.restore(jsonObject);

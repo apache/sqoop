@@ -105,10 +105,10 @@ public class TestUpdateCommand {
   @Test
   public void testUpdateLink() throws InterruptedException {
     ShellEnvironment.setInteractive(false);
-    MLink link = new MLink(1L, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
+    MLink link = new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
-    when(client.getConnectorConfigBundle(1L)).thenReturn(new MapResourceBundle(new HashMap()));
-    when(client.updateLink(link)).thenReturn(Status.OK);
+    when(client.getConnectorConfigBundle("connector_test")).thenReturn(new MapResourceBundle(new HashMap()));
+    when(client.updateLink(any(MLink.class))).thenReturn(Status.OK);
 
     // update link -lid link_test
     Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
@@ -134,14 +134,14 @@ public class TestUpdateCommand {
   }
 
   @Test
-  public void testUpdateLinkInteractive() {
+  public void testUpdateLinkInteractive() throws Exception {
     ShellEnvironment.setInteractive(true);
     initEnv();
     when(client.getConnector("connector_test")).thenReturn(new MConnector("", "", "", null, null, null));
-    MLink link = new MLink(1, new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
+    MLink link = new MLink("connector_test", new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
-    when(client.updateLink(link)).thenReturn(Status.OK);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(resourceBundle);
+    when(client.updateLink(any(MLink.class))).thenReturn(Status.OK);
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
 
     // update link -lid link_test
     initData("linkname\r" +         // link name
@@ -178,7 +178,8 @@ public class TestUpdateCommand {
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getJob("job_test")).thenReturn(job);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(new MapResourceBundle(new HashMap()));
+    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.getDriverConfigBundle()).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.updateJob(job)).thenReturn(Status.OK);
 
@@ -213,7 +214,8 @@ public class TestUpdateCommand {
         new MToConfig(getConfig("toJobConfig"), new ArrayList<MValidator>()),
         new MDriverConfig(getConfig("driverConfig"), new ArrayList<MValidator>()));
     when(client.getJob("job_test")).thenReturn(job);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(resourceBundle);
+    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
     when(client.updateJob(job)).thenReturn(Status.OK);
 

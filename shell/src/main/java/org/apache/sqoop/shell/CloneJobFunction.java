@@ -20,6 +20,7 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.shell.core.Constants;
@@ -66,10 +67,13 @@ public class CloneJobFunction extends SqoopFunction {
     MJob job = client.getJob(jobArg);
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
+    // TODO: the job should be related with connector by connectorName
+    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
+    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
-        job.getFromConnectorId());
+            fromConnector.getUniqueName());
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
-        job.getToConnectorId());
+            toConnector.getUniqueName());
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;

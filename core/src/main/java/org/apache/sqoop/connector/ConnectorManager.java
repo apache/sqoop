@@ -117,12 +117,12 @@ public class ConnectorManager implements Reconfigurable {
     return idToNameMap.keySet();
   }
 
-  public Map<Long, ResourceBundle> getResourceBundles(Locale locale) {
-    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
+  public Map<String, ResourceBundle> getResourceBundles(Locale locale) {
+    Map<String, ResourceBundle> bundles = new HashMap<String, ResourceBundle>();
     for (ConnectorHandler handler : handlerMap.values()) {
-      long id = handler.getConnectorConfigurable().getPersistenceId();
+      String connectorName = handler.getConnectorConfigurable().getUniqueName();
       ResourceBundle bundle = handler.getSqoopConnector().getBundle(locale);
-      bundles.put(id, bundle);
+      bundles.put(connectorName, bundle);
     }
     return bundles;
   }
