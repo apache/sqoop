@@ -67,13 +67,10 @@ public class CloneJobFunction extends SqoopFunction {
     MJob job = client.getJob(jobArg);
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
-    // TODO: the job should be related with connector by connectorName
-    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
-    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
-            fromConnector.getUniqueName());
+            job.getFromConnectorName());
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
-            toConnector.getUniqueName());
+            job.getToConnectorName());
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;

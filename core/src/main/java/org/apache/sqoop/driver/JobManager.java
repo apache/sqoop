@@ -496,6 +496,7 @@ public class JobManager implements Reconfigurable {
     return link;
   }
 
+  // TODO: this method should be removed when MSubmission link job with jobName
   MJob getJob(long jobId) {
     MJob job = RepositoryManager.getInstance().getRepository().findJob(jobId);
     if (job == null) {
@@ -504,6 +505,18 @@ public class JobManager implements Reconfigurable {
 
     if (!job.getEnabled()) {
       throw new SqoopException(DriverError.DRIVER_0009, "Job: " + job.getName());
+    }
+    return job;
+  }
+
+  MJob getJob(String jobName) {
+    MJob job = RepositoryManager.getInstance().getRepository().findJob(jobName);
+    if (job == null) {
+      throw new SqoopException(DriverError.DRIVER_0004, "Unknown job name: " + jobName);
+    }
+
+    if (!job.getEnabled()) {
+      throw new SqoopException(DriverError.DRIVER_0009, "Job: " + jobName);
     }
     return job;
   }
@@ -569,8 +582,8 @@ public class JobManager implements Reconfigurable {
     try {
       MJob job = getJob(submission.getJobId());
 
-      SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorId());
-      SqoopConnector toConnector = getSqoopConnector(job.getToConnectorId());
+      SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorName());
+      SqoopConnector toConnector = getSqoopConnector(job.getToConnectorName());
 
       MLink fromConnection = getLink(job.getFromLinkId());
       MLink toConnection = getLink(job.getToLinkId());

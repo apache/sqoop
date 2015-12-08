@@ -92,8 +92,8 @@ abstract public class PostgresqlTestCase {
   protected MJob getJob(String name, MConnector connectorA, MConnector connectorB, MLink linkA, MLink linkB) {
     MDriver driver = handler.findDriver(MDriver.DRIVER_NAME, provider.getConnection());
     MJob job = new MJob(
-        connectorA.getPersistenceId(),
-        connectorB.getPersistenceId(),
+        connectorA.getUniqueName(),
+        connectorB.getUniqueName(),
         linkA.getPersistenceId(),
         linkB.getPersistenceId(),
         connectorA.getFromConfig(),

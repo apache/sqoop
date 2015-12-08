@@ -99,12 +99,7 @@ public class ShowJobFunction extends SqoopFunction {
       if (fromLink != null) {
         fromLinkName = fromLink.getName();
       }
-      String fromConnectorName = "";
-      MConnector fromConnector = client.getConnector(job.getFromConnectorId());
-      if (fromConnector != null) {
-        fromConnectorName = fromConnector.getUniqueName();
-      }
-      fromConnectors.add(fromLinkName + " (" + fromConnectorName + ")");
+      fromConnectors.add(fromLinkName + " (" + job.getFromConnectorName() + ")");
 
       // To link and connector
       String toLinkName = "";
@@ -112,12 +107,7 @@ public class ShowJobFunction extends SqoopFunction {
       if (toLink != null) {
         toLinkName = toLink.getName();
       }
-      String toConnnectorName = "";
-      MConnector toConnector = client.getConnector(job.getToConnectorId());
-      if (toConnector != null) {
-        toConnnectorName = toConnector.getUniqueName();
-      }
-      toConnectors.add(toLinkName + " (" + toConnnectorName + ")");
+      toConnectors.add(toLinkName + " (" + job.getToConnectorName() + ")");
 
       availabilities.add(String.valueOf(job.getEnabled()));
     }
@@ -160,19 +150,15 @@ public class ShowJobFunction extends SqoopFunction {
       formatter.format(job.getLastUpdateDate())
     );
 
-    // TODO: should be removed when MJob link with Connector by name.
-    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
-    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
-
     displayConfig(job.getDriverConfig().getConfigs(),
             client.getDriverConfigBundle());
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_FROM_LID_INFO,
         job.getFromLinkId());
     displayConfig(job.getFromJobConfig().getConfigs(),
-                 client.getConnectorConfigBundle(fromConnector.getUniqueName()));
+                 client.getConnectorConfigBundle(job.getFromConnectorName()));
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_TO_LID_INFO,
             job.getToLinkId());
     displayConfig(job.getToJobConfig().getConfigs(),
-                 client.getConnectorConfigBundle(toConnector.getUniqueName()));
+                 client.getConnectorConfigBundle(job.getToConnectorName()));
   }
 }

@@ -141,19 +141,19 @@ public class TestJobManager {
 
   @Test
   public void testGetJob() {
-    MJob testJob = job(123l, 456l);
+    MJob testJob = job("jobName", "fromConnectorName", "toConnectorName");
     testJob.setEnabled(true);
     MJob mJobSpy = org.mockito.Mockito.spy(testJob);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findJob(123l)).thenReturn(mJobSpy);
-    assertEquals(jobManager.getJob(123l), mJobSpy);
+    when(jdbcRepoMock.findJob("jobName")).thenReturn(mJobSpy);
+    assertEquals(jobManager.getJob("jobName"), mJobSpy);
     verify(repositoryManagerMock, times(1)).getRepository();
-    verify(jdbcRepoMock, times(1)).findJob(123l);
+    verify(jdbcRepoMock, times(1)).findJob("jobName");
   }
 
   @Test
   public void testDisabledJob() {
-    MJob testJob = job(123l, 456l);
+    MJob testJob = job("jobName", "fromConnectorName", "toConnectorName");
     testJob.setEnabled(false);
     testJob.setPersistenceId(1111);
     SqoopException exception = new SqoopException(DriverError.DRIVER_0009, "Job: "
@@ -161,13 +161,13 @@ public class TestJobManager {
 
     MJob mJobSpy = org.mockito.Mockito.spy(testJob);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findJob(123l)).thenReturn(mJobSpy);
+    when(jdbcRepoMock.findJob("jobName")).thenReturn(mJobSpy);
     try {
-      jobManager.getJob(123l);
+      jobManager.getJob("jobName");
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
       verify(repositoryManagerMock, times(1)).getRepository();
-      verify(jdbcRepoMock, times(1)).findJob(123l);
+      verify(jdbcRepoMock, times(1)).findJob("jobName");
     }
   }
 
@@ -187,9 +187,9 @@ public class TestJobManager {
     }
   }
 
-  private MJob job(long fromId, long toId) {
-    MJob job = new MJob(fromId, toId, 1L, 2L, null, null, null);
-    job.setName("Vampire");
+  private MJob job(String jobName, String fromConnectorName, String toConnectorName) {
+    MJob job = new MJob(fromConnectorName, toConnectorName, 1L, 2L, null, null, null);
+    job.setName(jobName);
     job.setCreationUser("Buffy");
     return job;
   }

@@ -1539,7 +1539,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             connectorConfigInputStatement, 2, conn);
 
         MLink link = new MLink(connectorName, new MLinkConfig(connectorLinkConfig, Collections.EMPTY_LIST));
-
         link.setPersistenceId(id);
         link.setName(name);
         link.setCreationUser(creationUser);
@@ -1581,7 +1580,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         loadInputsForConfigs(connectorLinkConfig, configStmt, inputStmt);
 
         MLink link = new MLink(connectorName, connectorLinkConfig);
-
         link.setPersistenceId(id);
         link.setName(name);
         link.setCreationUser(creationUser);
@@ -1624,6 +1622,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         Date creationDate = rsJob.getTimestamp(9);
         String updateBy = rsJob.getString(10);
         Date lastUpdateDate = rsJob.getTimestamp(11);
+        String fromConnectorName = rsJob.getString(12);
+        String toConnectorName = rsJob.getString(13);
 
         fromConfigFetchStmt.setLong(1, fromConnectorId);
         toConfigFetchStmt.setLong(1,toConnectorId);
@@ -1652,7 +1652,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2, conn);
 
         MJob job = new MJob(
-            fromConnectorId, toConnectorId,
+            fromConnectorName, toConnectorName,
             fromLinkId, toLinkId,
             new MFromConfig(fromConnectorFromJobConfig, Collections.EMPTY_LIST),
             new MToConfig(toConnectorToJobConfig, Collections.EMPTY_LIST),
@@ -1727,7 +1727,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2, conn);
 
         MJob job = new MJob(
-          fromConnectorId, toConnectorId,
+          fromConnectorName, toConnectorName,
           fromLinkId, toLinkId,
           new MFromConfig(mFromConfig.getConfigs(), Collections.EMPTY_LIST),
           new MToConfig(mToConfig.getConfigs(), Collections.EMPTY_LIST),

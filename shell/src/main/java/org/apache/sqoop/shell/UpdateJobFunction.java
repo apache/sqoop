@@ -68,14 +68,10 @@ public class UpdateJobFunction extends SqoopFunction {
     // TODO(SQOOP-1634): using from/to and driver config id, this call can be avoided
     MJob job = client.getJob(jobArg);
 
-    // TODO: should be removed when MJob link with Connector by name.
-    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
-    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
-
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
-            fromConnector.getUniqueName());
+            job.getFromConnectorName());
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
-            toConnector.getUniqueName());
+            job.getToConnectorName());
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;

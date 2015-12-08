@@ -324,8 +324,8 @@ public class RepositoryLoadTool extends ConfiguredTool {
   private long loadJob(MJob job) {
     // starting by pretending we have a brand new job
     resetPersistenceId(job);
-    MConnector mFromConnector = ConnectorManager.getInstance().getConnectorConfigurable(job.getFromConnectorId());
-    MConnector mToConnector = ConnectorManager.getInstance().getConnectorConfigurable(job.getToConnectorId());
+    MConnector mFromConnector = ConnectorManager.getInstance().getConnectorConfigurable(job.getFromConnectorName());
+    MConnector mToConnector = ConnectorManager.getInstance().getConnectorConfigurable(job.getToConnectorName());
 
     MFromConfig fromConfig = job.getFromJobConfig();
     MToConfig toConfig = job.getToJobConfig();
@@ -347,10 +347,10 @@ public class RepositoryLoadTool extends ConfiguredTool {
     // Transform config structures to objects for validations
     SqoopConnector fromConnector =
         ConnectorManager.getInstance().getSqoopConnector(
-            job.getFromConnectorId());
+            job.getFromConnectorName());
     SqoopConnector toConnector =
         ConnectorManager.getInstance().getSqoopConnector(
-            job.getToConnectorId());
+            job.getToConnectorName());
 
     Object fromConnectorConfig = ClassUtils.instantiate(
         fromConnector.getJobConfigurationClass(Direction.FROM));

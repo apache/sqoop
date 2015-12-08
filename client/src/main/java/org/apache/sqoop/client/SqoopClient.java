@@ -393,8 +393,8 @@ public class SqoopClient {
     MConnector connectorForToLink = getConnector(toLink.getConnectorName());
 
     return new MJob(
-      connectorForFromLink.getPersistenceId(),
-      connectorForToLink.getPersistenceId(),
+      connectorForFromLink.getUniqueName(),
+      connectorForToLink.getUniqueName(),
       fromLink.getPersistenceId(),
       toLink.getPersistenceId(),
       connectorForFromLink.getFromConfig().clone(false),

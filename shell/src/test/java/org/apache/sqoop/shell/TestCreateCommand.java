@@ -182,11 +182,11 @@ public class TestCreateCommand {
     MConnector fromConnector = new MConnector("connector_from", "", "", null, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()), null);
     MConnector toConnector = new MConnector("connector_to", "", "", null, null, new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.createJob("link_from", "link_to")).thenReturn(
-        new MJob(1, 2, 1, 2, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+        new MJob("fromConnectorName", "toConnectorName", 1, 2, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
-    when(client.getConnector(1)).thenReturn(fromConnector);
-    when(client.getConnector(2)).thenReturn(toConnector);
+    when(client.getConnector("fromConnectorName")).thenReturn(fromConnector);
+    when(client.getConnector("toConnectorName")).thenReturn(toConnector);
     when(client.saveJob(any(MJob.class))).thenReturn(Status.OK);
 
     // create job -f link_from -to link_to
@@ -222,12 +222,12 @@ public class TestCreateCommand {
     initEnv();
     MConnector fromConnector = new MConnector("connector_from", "", "", null, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()), null);
     MConnector toConnector = new MConnector("connector_to", "", "", null, null, new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
-    MJob job = new MJob(1, 2, 1, 2, new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
+    MJob job = new MJob("fromConnectorName", "toConnectorName", 1, 2, new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
         new MToConfig(getConfig("toJobConfig"), new ArrayList<MValidator>()),
         new MDriverConfig(getConfig("driverConfig"), new ArrayList<MValidator>()));
     when(client.createJob("link_from", "link_to")).thenReturn(job);
-    when(client.getConnector(1)).thenReturn(fromConnector);
-    when(client.getConnector(2)).thenReturn(toConnector);
+    when(client.getConnector("fromConnectorName")).thenReturn(fromConnector);
+    when(client.getConnector("toConnectorName")).thenReturn(toConnector);
     when(client.saveJob(any(MJob.class))).thenReturn(Status.OK);
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);

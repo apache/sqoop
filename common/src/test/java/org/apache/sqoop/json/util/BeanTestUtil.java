@@ -77,8 +77,10 @@ public class BeanTestUtil {
   }
 
   public static MJob getJob(String connectorName) {
-    return new MJob(1, 2, 1, 2, getConnector(1L, connectorName).getFromConfig(), getConnector(1L, connectorName)
-        .getToConfig(), ConfigTestUtil.getDriverConfig());
+    String fromConnectorName = "from_" + connectorName;
+    String toConnectorName = "to_" + connectorName;
+    return new MJob(fromConnectorName, toConnectorName, 1, 2, getConnector(1L, fromConnectorName).getFromConfig(),
+            getConnector(2L, toConnectorName).getToConfig(), ConfigTestUtil.getDriverConfig());
   }
 
 }

@@ -77,13 +77,13 @@ public class CreateJobFunction extends  SqoopFunction {
     ConsoleReader reader = getConsoleReader();
     MJob job = getClient().createJob(fromLinkArg, toLinkArg);
 
-    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
+    MConnector fromConnector = getClient().getConnector(job.getFromConnectorName());
     if (!fromConnector.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
       errorMessage("Connector " + fromConnector.getUniqueName() + " does not support direction " + Direction.FROM);
       return Status.ERROR;
     }
 
-    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
+    MConnector toConnector = getClient().getConnector(job.getToConnectorName());
     if (!toConnector.getSupportedDirections().isDirectionSupported(Direction.TO)) {
       errorMessage("Connector " + toConnector.getUniqueName() + " does not support direction " + Direction.TO);
       return Status.ERROR;

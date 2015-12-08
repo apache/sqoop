@@ -191,9 +191,9 @@ public class JobRequestHandler implements RequestHandler {
 
     // Verify that user is not trying to spoof us
     MFromConfig fromConfig = ConnectorManager.getInstance()
-        .getConnectorConfigurable(postedJob.getFromConnectorId()).getFromConfig();
+        .getConnectorConfigurable(postedJob.getFromConnectorName()).getFromConfig();
     MToConfig toConfig = ConnectorManager.getInstance()
-        .getConnectorConfigurable(postedJob.getToConnectorId()).getToConfig();
+        .getConnectorConfigurable(postedJob.getToConnectorName()).getToConfig();
     MDriverConfig driverConfig = Driver.getInstance().getDriver().getDriverConfig();
 
     if (!fromConfig.equals(postedJob.getFromJobConfig())
@@ -213,9 +213,9 @@ public class JobRequestHandler implements RequestHandler {
 
     // Corresponding connectors for this
     SqoopConnector fromConnector = ConnectorManager.getInstance().getSqoopConnector(
-        postedJob.getFromConnectorId());
+        postedJob.getFromConnectorName());
     SqoopConnector toConnector = ConnectorManager.getInstance().getSqoopConnector(
-        postedJob.getToConnectorId());
+        postedJob.getToConnectorName());
 
     if (!fromConnector.getSupportedDirections().contains(Direction.FROM)) {
       throw new SqoopException(ServerError.SERVER_0004, "Connector "
@@ -325,16 +325,17 @@ public class JobRequestHandler implements RequestHandler {
   private void addConnectorConfigBundle(JobBean bean, Locale locale) {
     // Add associated resources into the bean
     for (MJob job : bean.getJobs()) {
-      long fromConnectorId = job.getFromConnectorId();
-      long toConnectorId = job.getToConnectorId();
+      String fromConnectorName = job.getFromConnectorName();
+      String toConnectorName = job.getToConnectorName();
+
       // replace it only if it does not already exist
-      if (!bean.hasConnectorConfigBundle(fromConnectorId)) {
-        bean.addConnectorConfigBundle(fromConnectorId, ConnectorManager.getInstance()
-            .getResourceBundle(fromConnectorId, locale));
+      if (!bean.hasConnectorConfigBundle(fromConnectorName)) {
+        bean.addConnectorConfigBundle(fromConnectorName, ConnectorManager.getInstance()
+            .getResourceBundle(fromConnectorName, locale));
       }
-      if (!bean.hasConnectorConfigBundle(toConnectorId)) {
-        bean.addConnectorConfigBundle(toConnectorId, ConnectorManager.getInstance()
-            .getResourceBundle(toConnectorId, locale));
+      if (!bean.hasConnectorConfigBundle(toConnectorName)) {
+        bean.addConnectorConfigBundle(toConnectorName, ConnectorManager.getInstance()
+            .getResourceBundle(toConnectorName, locale));
       }
     }
   }

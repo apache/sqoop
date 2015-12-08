@@ -74,8 +74,8 @@ public class TestJobsBean {
 
     assertEquals(retrievedJob1.getFromLinkId(), 1);
     assertEquals(retrievedJob1.getToLinkId(), 2);
-    assertEquals(retrievedJob1.getFromConnectorId(), 1);
-    assertEquals(retrievedJob1.getToConnectorId(), 2);
+    assertEquals(retrievedJob1.getFromConnectorName(), "from_ahoj");
+    assertEquals(retrievedJob1.getToConnectorName(), "to_ahoj");
     assertEquals(created, retrievedJob1.getCreationDate());
     assertEquals(updated, retrievedJob1.getLastUpdateDate());
     assertEquals(false, retrievedJob1.getEnabled());
