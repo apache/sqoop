@@ -680,7 +680,7 @@ public final class OraOopOracleQueries {
       if (idx > 0) {
         columnList.append(",");
       }
-      columnList.append(result.get(idx).getName());
+      columnList.append("\"").append(result.get(idx).getName()).append("\"");
     }
     sql =
         String.format("SELECT %s FROM %s WHERE 0=1", columnList.toString(),
@@ -1176,12 +1176,12 @@ public final class OraOopOracleQueries {
       if (insertClause.length() > 0) {
         insertClause.append(",");
       }
-      insertClause.append(String.format("target.%s", columnName));
+      insertClause.append(String.format("target.\"%s\"", columnName));
 
       if (valuesClause.length() > 0) {
         valuesClause.append(",");
       }
-      valuesClause.append(String.format("source.%s", columnName));
+      valuesClause.append(String.format("source.\"%s\"", columnName));
 
       if (!OraOopUtilities.stringArrayContains(mergeColumnNames, columnName,
           true)) {
@@ -1199,7 +1199,7 @@ public final class OraOopOracleQueries {
           if (updateClause.length() > 0) {
             updateClause.append(",");
           }
-          updateClause.append(String.format("target.%1$s = source.%1$s",
+          updateClause.append(String.format("target.\"%1$s\" = source.\"%1$s\"",
               columnName));
 
         }
@@ -1244,12 +1244,12 @@ public final class OraOopOracleQueries {
       if (targetColumnsClause.length() > 0) {
         targetColumnsClause.append(",");
       }
-      targetColumnsClause.append(String.format("a.%s", columnName));
+      targetColumnsClause.append(String.format("a.\"%s\"", columnName));
 
       if (sourceColumnsClause.length() > 0) {
         sourceColumnsClause.append(",");
       }
-      sourceColumnsClause.append(String.format("b.%s", columnName));
+      sourceColumnsClause.append(String.format("b.\"%s\"", columnName));
     }
 
     String sourceClause = sourceColumnsClause.toString();
@@ -1313,7 +1313,7 @@ public final class OraOopOracleQueries {
       if (idx > 0) {
         columnClause.append(",");
       }
-      columnClause.append("a." + columnNames.get(idx));
+      columnClause.append("a.\"" + columnNames.get(idx) + "\"");
     }
 
     StringBuilder rowEqualityClause = new StringBuilder();
@@ -1339,9 +1339,9 @@ public final class OraOopOracleQueries {
         rowEqualityClause.append("OR");
       }
 
-      rowEqualityClause.append(String.format("(a.%1$s <> b.%1$s "
-          + "OR (a.%1$s IS NULL AND b.%1$s IS NOT NULL) "
-          + "OR (a.%1$s IS NOT NULL AND b.%1$s IS NULL))", columnName));
+      rowEqualityClause.append(String.format("(a.\"%1$s\" <> b.\"%1$s\" "
+          + "OR (a.\"%1$s\" IS NULL AND b.\"%1$s\" IS NOT NULL) "
+          + "OR (a.\"%1$s\" IS NOT NULL AND b.\"%1$s\" IS NULL))", columnName));
     }
 
     String sqlJoin = null;
