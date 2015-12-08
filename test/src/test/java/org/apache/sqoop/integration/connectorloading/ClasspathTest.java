@@ -53,6 +53,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+@Test(groups = "no-real-cluster")
 public class ClasspathTest extends ConnectorTestCase {
 
   private static final String TEST_CONNECTOR_JAR_NAME = "test-connector.jar";

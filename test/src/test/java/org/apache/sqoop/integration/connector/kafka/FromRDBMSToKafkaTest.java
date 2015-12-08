@@ -25,7 +25,7 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.KafkaConnectorTestCase;
 import org.testng.annotations.Test;
 
-
+@Test(groups = "no-real-cluster")
 public class FromRDBMSToKafkaTest extends KafkaConnectorTestCase {
 
   private static final String[] input = {

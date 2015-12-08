@@ -508,6 +508,23 @@ public class SqoopClient {
     resourceRequests.deleteJob(String.valueOf(jobId));
   }
 
+  public void deleteAllLinks(){
+    for (MJob job : getJobs()) {
+      deleteJob(job.getName());
+    }
+  }
+
+  public void deleteAllJobs(){
+    for (MLink link : getLinks()) {
+      deleteLink(link.getName());
+    }
+  }
+
+  public void deleteAllLinksAndJobs(){
+    deleteAllLinks();
+    deleteAllJobs();
+  }
+
   /**
    * Start job with given name.
    *

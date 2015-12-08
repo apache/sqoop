@@ -230,6 +230,33 @@ limitations under the License.
       </build>
     </profile>
 
+    <profile>
+      <id>realcluster</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <excludedGroups>no-real-cluster</excludedGroups>
+              <reportNameSuffix>real-cluster-integration</reportNameSuffix>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <excludedGroups>no-real-cluster</excludedGroups>
+              <reportNameSuffix>real-cluster-integration</reportNameSuffix>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <!-- Sign profile for releasing artifacts to Nexus repository -->
     <profile>
       <id>sign</id>
@@ -260,10 +287,10 @@ limitations under the License.
         <artifactId>sqoop-client</artifactId>
         <version>${project.version}</version>
       </dependency>
-	  <dependency>
-		<groupId>org.apache.sqoop</groupId>
-		<artifactId>sqoop-shell</artifactId>
-		<version>${project.version}</version>
+      <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>sqoop-shell</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.sqoop</groupId>
@@ -500,10 +527,10 @@ limitations under the License.
         <artifactId>commons-cli</artifactId>
         <version>${commons-cli.version}</version>
       </dependency>
-       <dependency>
-         <groupId>commons-io</groupId>
-         <artifactId>commons-io</artifactId>
-         <version>${commons-io.version}</version>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
@@ -640,9 +667,9 @@ limitations under the License.
         <version>${hadoop.2.version}</version>
       </dependency>
       <dependency>
-       <groupId>org.apache.avro</groupId>
-       <artifactId>avro</artifactId>
-       <version>${avro.version}</version>
+        <groupId>org.apache.avro</groupId>
+        <artifactId>avro</artifactId>
+        <version>${avro.version}</version>
       </dependency>
       <dependency>
         <groupId>net.sourceforge.findbugs</groupId>
@@ -660,7 +687,7 @@ limitations under the License.
         <artifactId>jetty-servlet</artifactId>
         <version>${jetty.version}</version>
       </dependency>
-   </dependencies>
+    </dependencies>
   </dependencyManagement>
 
   <modules>

@@ -17,12 +17,9 @@
  */
 package org.apache.sqoop.test.testcases;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.client.SqoopClient;
@@ -31,13 +28,19 @@ import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
+import org.apache.sqoop.test.minicluster.RealSqoopCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
+import org.apache.sqoop.test.minicluster.SqoopMiniClusterFactory;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
 
 /**
  * Basic test case that will bootstrap Sqoop server running in embedded Jetty
@@ -82,7 +85,7 @@ abstract public class JettyTestCase implements ITest {
   /**
    * Jetty based Sqoop mini cluster
    */
-  private static JettySqoopMiniCluster cluster;
+  private static SqoopMiniCluster cluster;
 
   /**
    * Sqoop client API.
@@ -97,8 +100,9 @@ abstract public class JettyTestCase implements ITest {
   }
 
   @BeforeMethod(alwaysRun = true)
-  public void setMethodName(Method method) throws Exception {
+  public void setupMehodNameAndOutputPath(Method method) throws Exception {
     methodName = method.getName();
+    hdfsClient.delete(new Path(getMapreduceDirectory()), true);
   }
 
   @BeforeSuite(alwaysRun = true)
@@ -154,8 +158,9 @@ abstract public class JettyTestCase implements ITest {
    *
    * @return New instance of test mini cluster
    */
-  public JettySqoopMiniCluster createSqoopMiniCluster() throws Exception {
-    return new JettySqoopMiniCluster(getSqoopMiniClusterTemporaryPath(), hadoopCluster.getConfiguration());
+  public SqoopMiniCluster createSqoopMiniCluster() throws Exception {
+    return SqoopMiniClusterFactory.getSqoopMiniCluster(System.getProperties(), JettySqoopMiniCluster.class,
+      getSqoopMiniClusterTemporaryPath(), hadoopCluster.getConfiguration());
   }
 
   /**

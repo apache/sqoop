@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 import java.lang.reflect.Method;
 import java.util.List;
 
-@Test(groups = "slow")
+@Test(groups = {"slow", "no-real-cluster"})
 public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase implements ITest {
   private String testName;
 

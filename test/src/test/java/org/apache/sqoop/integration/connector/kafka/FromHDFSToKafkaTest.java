@@ -23,7 +23,7 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.KafkaConnectorTestCase;
 import org.testng.annotations.Test;
 
-
+@Test(groups = "no-real-cluster")
 public class FromHDFSToKafkaTest extends KafkaConnectorTestCase {
 
   public static final String[] input = {
