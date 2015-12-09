@@ -261,7 +261,7 @@ Starting a job requires a job id. On successful start, getStatus() method return
   }
 
 
-  //Check job status for a running job 
+  //Check job status for a running job
   MSubmission submission = client.getJobStatus(jobId);
   if(submission.getStatus().isRunning() && submission.getProgress() != -1) {
     System.out.println("Progress : " + String.format("%.2f %%", submission.getProgress() * 100));

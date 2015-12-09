@@ -61,4 +61,3 @@ Loader
 ------
 
 During the *loading* phase, Kafka is written to directly from each loader. The order in which data is loaded into Kafka is not guaranteed.
-

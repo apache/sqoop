@@ -54,4 +54,3 @@ Sqoop 2 project has multiple modules where one module is depend on another modul
 Alternatively, for manually adding M2_REPO classpath variable as maven repository path in eclipse-> window-> Java ->Classpath Variables ->Click "New" ->In new dialog box, input Name as M2_REPO and Path as $HOME/.m2/repository ->click Ok.
 
 On successful execution of above maven commands, Then import the sqoop project modules into eclipse-> File -> Import ->General ->Existing Projects into Workspace-> Click Next-> Browse Sqoop 2 directory ($HOME/git/sqoop2) ->Click Ok ->Import dialog shows multiple projects (sqoop-client, sqoop-common, etc.) -> Select all modules -> click Finish.
-

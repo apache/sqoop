@@ -218,7 +218,7 @@ You can iteratively check your running job status with ``status job`` command:
   Lastly updated by: root
   External ID: job_1412137947693_0001
     http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0001/
-  2014-11-04 20:09:16 PST: RUNNING  - 0.00 % 
+  2014-11-04 20:09:16 PST: RUNNING  - 0.00 %
 
 Alternatively you can start a sqoop job and observe job running status with the following command:
 
