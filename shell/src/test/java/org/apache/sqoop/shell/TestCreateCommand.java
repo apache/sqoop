@@ -182,7 +182,8 @@ public class TestCreateCommand {
     MConnector fromConnector = new MConnector("connector_from", "", "", null, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()), null);
     MConnector toConnector = new MConnector("connector_to", "", "", null, null, new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.createJob("link_from", "link_to")).thenReturn(
-        new MJob("fromConnectorName", "toConnectorName", 1, 2, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+            new MJob("fromConnectorName", "toConnectorName", "link_from", "link_to",
+            new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
     when(client.getConnector("fromConnectorName")).thenReturn(fromConnector);
@@ -222,7 +223,8 @@ public class TestCreateCommand {
     initEnv();
     MConnector fromConnector = new MConnector("connector_from", "", "", null, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()), null);
     MConnector toConnector = new MConnector("connector_to", "", "", null, null, new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
-    MJob job = new MJob("fromConnectorName", "toConnectorName", 1, 2, new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
+    MJob job = new MJob("fromConnectorName", "toConnectorName", "link_from", "link_to",
+        new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
         new MToConfig(getConfig("toJobConfig"), new ArrayList<MValidator>()),
         new MDriverConfig(getConfig("driverConfig"), new ArrayList<MValidator>()));
     when(client.createJob("link_from", "link_to")).thenReturn(job);

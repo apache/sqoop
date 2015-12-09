@@ -339,8 +339,8 @@ public class JobManager implements Reconfigurable {
 
   private JobRequest createJobRequest(MSubmission submission, MJob job) {
     // get from/to connections for the job
-    MLink fromLink = getLink(job.getFromLinkId());
-    MLink toLink = getLink(job.getToLinkId());
+    MLink fromLink = getLink(job.getFromLinkName());
+    MLink toLink = getLink(job.getToLinkName());
 
     // get from/to connectors for the connection
     SqoopConnector fromConnector = getSqoopConnector(fromLink.getConnectorName());
@@ -486,9 +486,9 @@ public class JobManager implements Reconfigurable {
     }
   }
 
-  MLink getLink(long linkId) {
+  MLink getLink(String linkName) {
     MLink link = RepositoryManager.getInstance().getRepository()
-        .findLink(linkId);
+        .findLink(linkName);
     if (!link.getEnabled()) {
       throw new SqoopException(DriverError.DRIVER_0010, "Connection: "
           + link.getName());
@@ -585,8 +585,8 @@ public class JobManager implements Reconfigurable {
       SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorName());
       SqoopConnector toConnector = getSqoopConnector(job.getToConnectorName());
 
-      MLink fromConnection = getLink(job.getFromLinkId());
-      MLink toConnection = getLink(job.getToLinkId());
+      MLink fromConnection = getLink(job.getFromLinkName());
+      MLink toConnection = getLink(job.getToLinkName());
 
       Object fromLinkConfig = ClassUtils.instantiate(fromConnector.getLinkConfigurationClass());
       ConfigUtils.fromConfigs(fromConnection.getConnectorLinkConfig().getConfigs(), fromLinkConfig);

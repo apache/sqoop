@@ -109,19 +109,19 @@ public class TestJobManager {
 
   @Test
   public void testGetLink() {
-    MLink testLink = new MLink("connector_test", null);
+    MLink testLink = new MLink("linkName", null);
     testLink.setEnabled(true);
     MLink mConnectionSpy = org.mockito.Mockito.spy(testLink);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findLink(123l)).thenReturn(mConnectionSpy);
-    assertEquals(jobManager.getLink(123l), mConnectionSpy);
+    when(jdbcRepoMock.findLink("linkName")).thenReturn(mConnectionSpy);
+    assertEquals(jobManager.getLink("linkName"), mConnectionSpy);
     verify(repositoryManagerMock, times(1)).getRepository();
-    verify(jdbcRepoMock, times(1)).findLink(123l);
+    verify(jdbcRepoMock, times(1)).findLink("linkName");
   }
 
   @Test
   public void testDisabledLink() {
-    MLink testConnection = new MLink("connector_test", null);
+    MLink testConnection = new MLink("linkName", null);
     testConnection.setPersistenceId(1234);
     testConnection.setEnabled(false);
     SqoopException exception = new SqoopException(DriverError.DRIVER_0010, "Connection: "
@@ -129,13 +129,13 @@ public class TestJobManager {
 
     MLink mConnectionSpy = org.mockito.Mockito.spy(testConnection);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findLink(123l)).thenReturn(mConnectionSpy);
+    when(jdbcRepoMock.findLink("linkName")).thenReturn(mConnectionSpy);
     try {
-      jobManager.getLink(123l);
+      jobManager.getLink("linkName");
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
       verify(repositoryManagerMock, times(1)).getRepository();
-      verify(jdbcRepoMock, times(1)).findLink(123l);
+      verify(jdbcRepoMock, times(1)).findLink("linkName");
     }
   }
 
@@ -188,7 +188,7 @@ public class TestJobManager {
   }
 
   private MJob job(String jobName, String fromConnectorName, String toConnectorName) {
-    MJob job = new MJob(fromConnectorName, toConnectorName, 1L, 2L, null, null, null);
+    MJob job = new MJob(fromConnectorName, toConnectorName, "fromLinkName", "toLinkName", null, null, null);
     job.setName(jobName);
     job.setCreationUser("Buffy");
     return job;

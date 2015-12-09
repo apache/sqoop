@@ -106,8 +106,8 @@ abstract public class MySqlTestCase {
     MDriver driver = handler.findDriver(MDriver.DRIVER_NAME,
         provider.getConnection());
     MJob job = new MJob(connectorA.getUniqueName(),
-        connectorB.getUniqueName(), linkA.getPersistenceId(),
-        linkB.getPersistenceId(), connectorA.getFromConfig(),
+        connectorB.getUniqueName(), linkA.getName(),
+        linkB.getName(), connectorA.getFromConfig(),
         connectorB.getToConfig(), driver.getDriverConfig());
     job.setName(name);
     fillJob(job);

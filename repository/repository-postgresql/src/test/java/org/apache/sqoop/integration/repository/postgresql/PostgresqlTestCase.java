@@ -94,8 +94,8 @@ abstract public class PostgresqlTestCase {
     MJob job = new MJob(
         connectorA.getUniqueName(),
         connectorB.getUniqueName(),
-        linkA.getPersistenceId(),
-        linkB.getPersistenceId(),
+        linkA.getName(),
+        linkB.getName(),
         connectorA.getFromConfig(),
         connectorB.getToConfig(),
         driver.getDriverConfig());

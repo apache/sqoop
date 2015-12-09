@@ -37,9 +37,8 @@ public class MJob extends MAccountableEntity implements MClonable {
    */
   private final String fromConnectorName;
   private final String toConnectorName;
-  private final long fromLinkId;
-  private final long toLinkId;
-
+  private final String fromLinkName;
+  private final String toLinkName;
   private final MFromConfig fromConfig;
   private final MToConfig toConfig;
   private final MDriverConfig driverConfig;
@@ -49,23 +48,23 @@ public class MJob extends MAccountableEntity implements MClonable {
    *
    * @param fromConnectorId FROM Connector id
    * @param toConnectorId TO Connector id
-   * @param fromLinkId FROM Link id
-   * @param toLinkId TO Link id
+   * @param fromLinkName FROM Link name
+   * @param toLinkName TO Link name
    * @param fromConfig FROM job config
    * @param toConfig TO job config
    * @param driverConfig driver config
    */
   public MJob(String fromConnectorName,
               String toConnectorName,
-              long fromLinkId,
-              long toLinkId,
+              String fromLinkName,
+              String toLinkName,
               MFromConfig fromConfig,
               MToConfig toConfig,
               MDriverConfig driverConfig) {
     this.fromConnectorName = fromConnectorName;
     this.toConnectorName = toConnectorName;
-    this.fromLinkId = fromLinkId;
-    this.toLinkId = toLinkId;
+    this.fromLinkName = fromLinkName;
+    this.toLinkName = toLinkName;
     this.fromConfig = fromConfig;
     this.toConfig = toConfig;
     this.driverConfig = driverConfig;
@@ -99,8 +98,8 @@ public class MJob extends MAccountableEntity implements MClonable {
 
     this.fromConnectorName = other.getFromConnectorName();
     this.toConnectorName = other.getToConnectorName();
-    this.fromLinkId = other.getFromLinkId();
-    this.toLinkId = other.getToLinkId();
+    this.fromLinkName = other.getFromLinkName();
+    this.toLinkName = other.getToLinkName();
     this.fromConfig = fromConfig;
     this.toConfig = toConfig;
     this.driverConfig = driverConfig;
@@ -117,12 +116,12 @@ public class MJob extends MAccountableEntity implements MClonable {
     return sb.toString();
   }
 
-  public long getFromLinkId() {
-    return fromLinkId;
+  public String getFromLinkName() {
+    return fromLinkName;
   }
 
-  public long getToLinkId() {
-    return toLinkId;
+  public String getToLinkName() {
+    return toLinkName;
   }
 
   public String getFromConnectorName() {
@@ -153,8 +152,8 @@ public class MJob extends MAccountableEntity implements MClonable {
       return new MJob(
           getFromConnectorName(),
           getToConnectorName(),
-          getFromLinkId(),
-          getToLinkId(),
+          getFromLinkName(),
+          getToLinkName(),
           getFromJobConfig().clone(false),
           getToJobConfig().clone(false),
           getDriverConfig().clone(false));
@@ -174,8 +173,8 @@ public class MJob extends MAccountableEntity implements MClonable {
     MJob job = (MJob)object;
     return (job.getFromConnectorName().equals(this.getFromConnectorName()))
         && (job.getToConnectorName().equals(this.getToConnectorName()))
-        && (job.getFromLinkId() == this.getFromLinkId())
-        && (job.getToLinkId() == this.getToLinkId())
+        && (job.getFromLinkName().equals(this.getFromLinkName()))
+        && (job.getToLinkName().equals(this.getToLinkName()))
         && (job.getPersistenceId() == this.getPersistenceId())
         && (job.getFromJobConfig().equals(this.getFromJobConfig()))
         && (job.getToJobConfig().equals(this.getToJobConfig()))
@@ -186,8 +185,8 @@ public class MJob extends MAccountableEntity implements MClonable {
   public int hashCode() {
     int result = fromConnectorName != null ? fromConnectorName.hashCode() : 0;
     result = 31 * result + (toConnectorName != null ? toConnectorName.hashCode() : 0);
-    result = 31 * result + (int) (fromLinkId ^ (fromLinkId >>> 32));
-    result = 31 * result + (int) (toLinkId ^ (toLinkId >>> 32));
+    result = 31 * result + (fromLinkName != null ? fromLinkName.hashCode() : 0);
+    result = 31 * result + (toLinkName != null ? toLinkName.hashCode() : 0);
     result = 31 * result + (fromConfig != null ? fromConfig.hashCode() : 0);
     result = 31 * result + (toConfig != null ? toConfig.hashCode() : 0);
     result = 31 * result + (driverConfig != null ? driverConfig.hashCode() : 0);

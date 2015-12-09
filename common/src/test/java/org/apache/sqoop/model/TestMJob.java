@@ -98,7 +98,8 @@ public class TestMJob {
         .getConfig("CONFIGFROMNAME").getInput("STRING-INPUT").getValue());  }
 
   private MJob job() {
-    MJob job = new MJob("fromConnectorName", "toConnectorName", 1L, 2L, fromConfig(), toConfig(), driverConfig());
+    MJob job = new MJob("fromConnectorName", "toConnectorName", "fromLinkName", "toLinkName",
+            fromConfig(), toConfig(), driverConfig());
     job.setName("Vampire");
     job.setCreationUser("Buffy");
     return job;

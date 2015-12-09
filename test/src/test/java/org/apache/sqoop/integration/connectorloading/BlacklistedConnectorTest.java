@@ -66,7 +66,9 @@ public class BlacklistedConnectorTest extends ConnectorTestCase {
 
   @AfterMethod
   public void stopCluster() throws Exception {
-    getCluster().stop();
+    if (getCluster() != null) {
+      getCluster().stop();
+    }
   }
 
   @Override

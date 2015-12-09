@@ -92,22 +92,9 @@ public class ShowJobFunction extends SqoopFunction {
     for(MJob job : jobs) {
       ids.add(String.valueOf(job.getPersistenceId()));
       names.add(job.getName());
-
       // From link and connnector
-      String fromLinkName = "";
-      MLink fromLink = client.getLink(job.getFromLinkId());
-      if (fromLink != null) {
-        fromLinkName = fromLink.getName();
-      }
-      fromConnectors.add(fromLinkName + " (" + job.getFromConnectorName() + ")");
-
-      // To link and connector
-      String toLinkName = "";
-      MLink toLink = client.getLink(job.getToLinkId());
-      if (toLink != null) {
-        toLinkName = toLink.getName();
-      }
-      toConnectors.add(toLinkName + " (" + job.getToConnectorName() + ")");
+      fromConnectors.add(job.getFromLinkName() + " (" + job.getFromConnectorName() + ")");
+      toConnectors.add(job.getToLinkName() + " (" + job.getToConnectorName() + ")");
 
       availabilities.add(String.valueOf(job.getEnabled()));
     }
@@ -153,11 +140,11 @@ public class ShowJobFunction extends SqoopFunction {
     displayConfig(job.getDriverConfig().getConfigs(),
             client.getDriverConfigBundle());
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_FROM_LID_INFO,
-        job.getFromLinkId());
+        job.getFromLinkName());
     displayConfig(job.getFromJobConfig().getConfigs(),
                  client.getConnectorConfigBundle(job.getFromConnectorName()));
     printlnResource(Constants.RES_SHOW_PROMPT_JOB_TO_LID_INFO,
-            job.getToLinkId());
+            job.getToLinkName());
     displayConfig(job.getToJobConfig().getConfigs(),
                  client.getConnectorConfigBundle(job.getToConnectorName()));
   }

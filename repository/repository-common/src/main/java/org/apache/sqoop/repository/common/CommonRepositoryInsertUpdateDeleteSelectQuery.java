@@ -335,6 +335,13 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
       STMT_SELECT_LINK_ALL
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
 
+  // DML Select link id by name
+  private static final String STMT_SELECT_LINK_ID_BY_NAME =
+      "SELECT "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
+
   // DML: Select all links for a specific connector.
   private static final String STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE =
       "SELECT "
@@ -442,7 +449,9 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_USER) + ", "
           + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE) + ", "
           + "FROM_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
-          + "TO_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
+          + "TO_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
+          + "FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + ", "
+          + "TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " JOB"
           + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " FROM_CONNECTOR"
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + " = FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
@@ -799,6 +808,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
   public String getStmtSelectLinkSingleByName() {
     return STMT_SELECT_LINK_SINGLE_BY_NAME;
   }
+
+  public String getStmtSelectLinkIdByName() {return STMT_SELECT_LINK_ID_BY_NAME;}
 
   public String getStmtSelectLinkAll() {
     return STMT_SELECT_LINK_ALL;

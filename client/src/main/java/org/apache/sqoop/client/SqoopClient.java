@@ -395,8 +395,8 @@ public class SqoopClient {
     return new MJob(
       connectorForFromLink.getUniqueName(),
       connectorForToLink.getUniqueName(),
-      fromLink.getPersistenceId(),
-      toLink.getPersistenceId(),
+      fromLinkName,
+      toLinkName,
       connectorForFromLink.getFromConfig().clone(false),
       connectorForToLink.getToConfig().clone(false),
       getDriverConfig()

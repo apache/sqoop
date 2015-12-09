@@ -61,8 +61,8 @@ public class TestJobBean {
     assertEquals(22L, target.getPersistenceId());
     assertEquals("The big Job", target.getName());
 
-    assertEquals(target.getFromLinkId(), 1);
-    assertEquals(target.getToLinkId(), 2);
+    assertEquals(target.getFromLinkName(), "fromLinkName");
+    assertEquals(target.getToLinkName(), "toLinkName");
     assertEquals(target.getFromConnectorName(), "from_ahoj");
     assertEquals(target.getToConnectorName(), "to_ahoj");
     assertEquals(created, target.getCreationDate());

@@ -173,7 +173,7 @@ public class TestUpdateCommand {
   @Test
   public void testUpdateJob() throws InterruptedException {
     ShellEnvironment.setInteractive(false);
-    MJob job = new MJob("fromConnectorName", "toConnectorName", 1L, 2L,
+    MJob job = new MJob("fromConnectorName", "toConnectorName", "link_from", "link_to",
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
@@ -210,7 +210,8 @@ public class TestUpdateCommand {
   public void testUpdateJobInteractive() {
     ShellEnvironment.setInteractive(true);
     initEnv();
-    MJob job = new MJob("fromConnectorName", "toConnectorName", 1, 2, new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
+    MJob job = new MJob("fromConnectorName", "toConnectorName", "link_from", "link_to",
+        new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
         new MToConfig(getConfig("toJobConfig"), new ArrayList<MValidator>()),
         new MDriverConfig(getConfig("driverConfig"), new ArrayList<MValidator>()));
     when(client.getJob("job_test")).thenReturn(job);

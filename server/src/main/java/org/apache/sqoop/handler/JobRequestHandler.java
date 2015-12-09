@@ -179,14 +179,13 @@ public class JobRequestHandler implements RequestHandler {
 
     // Job object
     MJob postedJob = jobs.get(0);
-    MLink fromLink = HandlerUtils.getLinkFromLinkId(postedJob.getFromLinkId());
-    MLink toLink = HandlerUtils.getLinkFromLinkId(postedJob.getToLinkId());
 
     // Authorization check
     if (create) {
-      AuthorizationEngine.createJob(ctx.getUserName(), fromLink.getName(), toLink.getName());
+      AuthorizationEngine.createJob(ctx.getUserName(), postedJob.getFromLinkName(), postedJob.getToLinkName());
     } else {
-      AuthorizationEngine.updateJob(ctx.getUserName(), fromLink.getName(), toLink.getName(), postedJob.getName());
+      AuthorizationEngine.updateJob(ctx.getUserName(), postedJob.getFromLinkName(), postedJob.getToLinkName(),
+              postedJob.getName());
     }
 
     // Verify that user is not trying to spoof us

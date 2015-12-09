@@ -48,8 +48,8 @@ import org.json.simple.JSONObject;
 @InterfaceStability.Unstable
 public class JobBean implements JsonBean {
 
-  static final String FROM_LINK_ID = "from-link-id";
-  static final String TO_LINK_ID = "to-link-id";
+  static final String FROM_LINK_NAME = "from-link-name";
+  static final String TO_LINK_NAME = "to-link-name";
   static final String FROM_CONNECTOR_NAME = "from-connector-name";
   static final String TO_CONNECTOR_NAME = "to-connector-name";
   static final String FROM_CONFIG_VALUES = "from-config-values";
@@ -137,8 +137,8 @@ public class JobBean implements JsonBean {
     object.put(FROM_CONNECTOR_NAME, job.getFromConnectorName());
     object.put(TO_CONNECTOR_NAME, job.getToConnectorName());
     // job associated links
-    object.put(FROM_LINK_ID, job.getFromLinkId());
-    object.put(TO_LINK_ID, job.getToLinkId());
+    object.put(FROM_LINK_NAME, job.getFromLinkName());
+    object.put(TO_LINK_NAME, job.getToLinkName());
     // job configs
     MFromConfig fromConfigList = job.getFromJobConfig();
     object.put(FROM_CONFIG_VALUES, extractConfigList(fromConfigList, skipSensitive));
@@ -170,8 +170,8 @@ public class JobBean implements JsonBean {
     JSONObject object = (JSONObject) obj;
     String fromConnectorName = JSONUtils.getString(object, FROM_CONNECTOR_NAME);
     String toConnectorName = JSONUtils.getString(object, TO_CONNECTOR_NAME);
-    long fromConnectionId = JSONUtils.getLong(object, FROM_LINK_ID);
-    long toConnectionId = JSONUtils.getLong(object, TO_LINK_ID);
+    String fromLinkName = JSONUtils.getString(object, FROM_LINK_NAME);
+    String toLinkName = JSONUtils.getString(object, TO_LINK_NAME);
     JSONObject fromConfigJson = JSONUtils.getJSONObject(object, FROM_CONFIG_VALUES);
     JSONObject toConfigJson = JSONUtils.getJSONObject(object, TO_CONFIG_VALUES);
     JSONObject driverConfigJson = JSONUtils.getJSONObject(object, DRIVER_CONFIG_VALUES);
@@ -188,8 +188,8 @@ public class JobBean implements JsonBean {
     MJob job = new MJob(
       fromConnectorName,
       toConnectorName,
-      fromConnectionId,
-      toConnectionId,
+      fromLinkName,
+      toLinkName,
       new MFromConfig(fromConfigs, fromValidators),
       new MToConfig(toConfigs, toValidators),
       new MDriverConfig(driverConfigs, driverValidators)

@@ -235,12 +235,12 @@ public class TestShowCommand {
   public void testShowJob() {
     when(client.getJobs()).thenReturn(new ArrayList<MJob>());
     when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
-    when(client.getJob("1")).thenReturn(new MJob("fromConnectorName", "toConnectorName", 1L, 2L,
+    when(client.getJob("1")).thenReturn(new MJob("fromConnectorName", "toConnectorName", "linkName1", "linkName2",
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
-    when(client.getJobsByConnector("2")).thenReturn(Arrays.asList(new MJob("fromConnectorName", "toConnectorName", 1L, 2L,
-        new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+    when(client.getJobsByConnector("2")).thenReturn(Arrays.asList(new MJob("fromConnectorName", "toConnectorName",
+        "linkName1", "linkName2", new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()))));
 
