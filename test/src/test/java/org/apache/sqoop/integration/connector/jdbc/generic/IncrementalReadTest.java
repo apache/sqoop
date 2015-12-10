@@ -18,6 +18,7 @@
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import com.google.common.collect.Iterables;
+import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
@@ -73,6 +74,11 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     } else {
       return methodName + "[" + checkColumn + "]";
     }
+  }
+
+  @BeforeMethod
+  public void cleanUpHDFS() throws Exception {
+    hdfsClient.delete(new Path(getMapreduceDirectory()), true);
   }
 
   @Test
