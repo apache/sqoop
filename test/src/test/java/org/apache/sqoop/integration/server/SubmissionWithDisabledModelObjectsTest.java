@@ -19,6 +19,7 @@ package org.apache.sqoop.integration.server;
 
 import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.error.code.DriverError;
 import org.apache.sqoop.model.MLink;
@@ -128,5 +129,11 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
         fail("Unexpected expception retrieved from server " + cause);
       }
     }
+  }
+
+  // The default table name is too long for oracle
+  @Override
+  public TableName getTableName() {
+    return new TableName("DisabledObjectsTest");
   }
 }
