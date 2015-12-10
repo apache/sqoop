@@ -23,7 +23,7 @@ import org.apache.sqoop.common.test.db.TableName;
 /**
  * Releases of Ubuntu Linux.
  *
- * Purpose of this set is to cover most common data types (varchar, int, numeric, date, boolean).
+ * Purpose of this set is to cover most common data types (varchar, int, decimal, date, boolean).
  */
 public class UbuntuReleases extends DataSet {
 
@@ -38,7 +38,7 @@ public class UbuntuReleases extends DataSet {
       "id",
       "id", "int",
       "code_name", "varchar(64)",
-      "version", "numeric(4,2)",
+      "version", "decimal(4,2)",
       "release_date", "date"
     );
 
