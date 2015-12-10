@@ -112,31 +112,17 @@ public class TestCreateCommand {
     Status status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c", "connector_test"));
     assertTrue(status != null && status == Status.OK);
 
-    // create link -cid connector_test
-    status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-cid", "connector_test"));
+    // create link -connector connector_test
+    status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-connector", "connector_test"));
     assertTrue(status != null && status == Status.OK);
 
     // incorrect command: create link -c
     try {
       status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c"));
-      fail("Create link should fail as connector id/name is missing!");
+      fail("Create link should fail as connector name is missing!");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing argument for option"));
-    }
-  }
-
-  @Test
-  public void testCreateLinkWithNonExistingConnector() {
-    ShellEnvironment.setInteractive(false);
-    when(client.getConnector(any(String.class))).thenThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "Connector doesn't exist"));
-    when(client.getConnector(any(Integer.class))).thenThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "Connector doesn't exist"));
-
-    try {
-      createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c", "connector_test"));
-      fail("Create link should fail as requested connector doesn't exist!");
-    } catch (SqoopException e) {
-      assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
     }
   }
 

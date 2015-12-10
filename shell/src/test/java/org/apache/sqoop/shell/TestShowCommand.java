@@ -154,7 +154,7 @@ public class TestShowCommand {
   public void testShowConnector() {
     when(client.getConnectors()).thenReturn(new ArrayList<MConnector>());
     when(client.getConnector(any(String.class))).thenReturn(
-        new MConnector("", "", "",
+        new MConnector("test_connector", "", "",
             new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
@@ -164,7 +164,6 @@ public class TestShowCommand {
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR));
     Assert.assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Id"));
     Assert.assertTrue(str.contains("Name"));
     Assert.assertTrue(str.contains("Version"));
     Assert.assertTrue(str.contains("Class"));
@@ -177,12 +176,12 @@ public class TestShowCommand {
     str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("connector(s) to show:"));
 
-    // show connector -cid 1
+    // show connector -name test_connector
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-cid", "1"));
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-name", "test_connector"));
     Assert.assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Connector with id"));
+    Assert.assertTrue(str.contains("Connector with Name: test_connector"));
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -212,7 +211,6 @@ public class TestShowCommand {
     String str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("Id"));
     Assert.assertTrue(str.contains("Name"));
-    Assert.assertTrue(str.contains("Connector Id"));
     Assert.assertTrue(str.contains("Connector Name"));
     Assert.assertTrue(str.contains("Enabled"));
 
@@ -239,7 +237,7 @@ public class TestShowCommand {
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
-    when(client.getJobsByConnector("2")).thenReturn(Arrays.asList(new MJob("fromConnectorName", "toConnectorName",
+    when(client.getJobsByConnector("fromConnectorName")).thenReturn(Arrays.asList(new MJob("fromConnectorName", "toConnectorName",
         "linkName1", "linkName2", new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()))));
@@ -269,9 +267,9 @@ public class TestShowCommand {
     str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("Job with id"));
 
-    // show job -cid 2
+    // show job -connector fromConnectorName
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-cid", "2"));
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-connector", "fromConnectorName"));
     Assert.assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("job(s) to show:"));

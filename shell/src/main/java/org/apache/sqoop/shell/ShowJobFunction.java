@@ -47,10 +47,10 @@ public class ShowJobFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_JOBS))
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_CID)
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOBS_CID))
-        .withLongOpt(Constants.OPT_CID)
-        .create(Constants.OPT_CID_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_CONNECTOR_NAME)
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOBS_CN))
+        .withLongOpt(Constants.OPT_CONNECTOR_NAME)
+        .create(Constants.OPT_CONNECTOR_NAME_CHAR));
     this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOB_JID))
         .withLongOpt(Constants.OPT_JID)
@@ -61,11 +61,9 @@ public class ShowJobFunction extends SqoopFunction {
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_ALL)) {
       showJobs(null);
-    } else if (line.hasOption(Constants.OPT_CID)) {
-      //showJobs(getLong(line, Constants.OPT_CID));
-      showJobs(line.getOptionValue(Constants.OPT_CID));
+    } else if (line.hasOption(Constants.OPT_CONNECTOR_NAME)) {
+      showJobs(line.getOptionValue(Constants.OPT_CONNECTOR_NAME));
     } else if (line.hasOption(Constants.OPT_JID)) {
-      //showJob(getLong(line, Constants.OPT_JID));
       showJob(line.getOptionValue(Constants.OPT_JID));
     } else {
       showSummary();

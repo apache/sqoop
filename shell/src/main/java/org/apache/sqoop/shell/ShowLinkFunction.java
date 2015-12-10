@@ -74,13 +74,11 @@ public class ShowLinkFunction extends SqoopFunction {
     List<String> header = new LinkedList<String>();
     header.add(resourceString(Constants.RES_TABLE_HEADER_ID));
     header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
-    header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR_ID));
     header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_ENABLED));
 
     List<String> ids = new LinkedList<String>();
     List<String> names = new LinkedList<String>();
-    List<String> connectorIds = new LinkedList<String>();
     List<String> connectorNames = new LinkedList<String>();
     List<String> availabilities = new LinkedList<String>();
 
@@ -91,7 +89,7 @@ public class ShowLinkFunction extends SqoopFunction {
       availabilities.add(String.valueOf(link.getEnabled()));
     }
 
-    TableDisplayer.display(header, ids, names, connectorIds, connectorNames, availabilities);
+    TableDisplayer.display(header, ids, names, connectorNames, availabilities);
   }
 
   private void showLinks() {
@@ -125,7 +123,7 @@ public class ShowLinkFunction extends SqoopFunction {
       formatter.format(link.getLastUpdateDate())
     );
 
-    printlnResource(Constants.RES_SHOW_PROMPT_LINK_CID_INFO, link.getConnectorName());
+    printlnResource(Constants.RES_SHOW_PROMPT_LINK_CN_INFO, link.getConnectorName());
 
     // Display link config
     displayConfig(link.getConnectorLinkConfig().getConfigs(),
