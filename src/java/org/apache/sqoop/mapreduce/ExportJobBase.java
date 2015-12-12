@@ -547,7 +547,7 @@ public class ExportJobBase extends JobBase {
     // final table and hence re-running one mapper will lead to a misleading errors
     // of inserting duplicate rows.
     int sqoopMaxAttempts = conf.getInt(SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS, 1);
-    if (sqoopMaxAttempts > 1) {
+    if (sqoopMaxAttempts > 0) {
       conf.setInt(HADOOP_MAP_TASK_MAX_ATTEMTPS, sqoopMaxAttempts);
     }
   }
