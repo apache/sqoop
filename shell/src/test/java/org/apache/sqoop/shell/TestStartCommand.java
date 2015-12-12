@@ -55,13 +55,13 @@ public class TestStartCommand {
     MSubmission submission = new MSubmission();
     when(client.startJob(any(String.class))).thenReturn(submission);
 
-    // start job -jid job_test
-    Status status = (Status) startCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    // start job -name job_test
+    Status status = (Status) startCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for jid
+    // Missing argument for name
     try {
-      startCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
+      startCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
       Assert.fail("Start job should fail as parameters aren't complete!");
     } catch (SqoopException e) {
       Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
@@ -73,8 +73,8 @@ public class TestStartCommand {
   public void testStartJobSynchronousEnabled() throws InterruptedException {
     when(client.startJob(any(String.class), any(SubmissionCallback.class), any(Long.class))).thenReturn(null);
 
-    // start job -jid job_test -synchronous
-    Status status = (Status) startCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test", "-synchronous"));
+    // start job -name job_test -synchronous
+    Status status = (Status) startCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test", "-synchronous"));
     Assert.assertTrue(status != null && status == Status.OK);
   }
 }

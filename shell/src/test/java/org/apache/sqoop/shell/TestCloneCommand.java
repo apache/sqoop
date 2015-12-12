@@ -165,23 +165,23 @@ public class TestCloneCommand {
     when(client.saveJob(job)).thenReturn(Status.OK);
     when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
 
-    // clone job -jid job_test
-    Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    // clone job -name job_test
+    Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option jid
+    // Missing argument for option name
     try {
-      cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
+      cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
       fail("Update job should fail as parameters aren't complete!");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing argument for option"));
     }
 
-    // Missing option jid
+    // Missing option name
     try {
       cloneCmd.execute(Arrays.asList(Constants.FN_JOB));
-      fail("Update job should fail as option jid is missing");
+      fail("Update job should fail as option name is missing");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing required option"));
@@ -201,7 +201,7 @@ public class TestCloneCommand {
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
     when(client.saveJob(job)).thenReturn(Status.OK);
 
-    // clone job -jid job_test
+    // clone job -name job_test
     initData("jobname\r" +          // job name
         // From job config
         "abc\r" +                   // for input with name "String"
@@ -232,7 +232,7 @@ public class TestCloneCommand {
         "0\r" +                     // for input with name "Enum"
         "l1\rl2\rl3\r\r" +          // for input with name "List"
         "7654321\r");              // for input with name "DateTime"
-    Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     assertTrue(status != null && status == Status.OK);
     assertEquals(job.getName(), "jobname");
     // check from job config

@@ -47,16 +47,16 @@ public class CloneJobFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public CloneJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
-      .withLongOpt(Constants.OPT_JID)
+      .withDescription(resourceString(Constants.RES_PROMPT_JOB_NAME))
+      .withLongOpt(Constants.OPT_NAME)
       .isRequired()
       .hasArg()
-      .create(Constants.OPT_JID_CHAR));
+      .create(Constants.OPT_NAME_CHAR));
   }
 
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return cloneJob(line.getOptionValue(Constants.OPT_JID), line.getArgList(), isInteractive);
+    return cloneJob(line.getOptionValue(Constants.OPT_NAME), line.getArgList(), isInteractive);
   }
 
   private Status cloneJob(String jobArg, List<String> args, boolean isInteractive) throws IOException {

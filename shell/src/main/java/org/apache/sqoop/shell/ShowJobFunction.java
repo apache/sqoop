@@ -51,10 +51,10 @@ public class ShowJobFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOBS_CN))
         .withLongOpt(Constants.OPT_CONNECTOR_NAME)
         .create(Constants.OPT_CONNECTOR_NAME_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOB_JID))
-        .withLongOpt(Constants.OPT_JID)
-        .create(Constants.OPT_JID_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_NAME)
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOB_NAME))
+        .withLongOpt(Constants.OPT_NAME)
+        .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
@@ -63,8 +63,8 @@ public class ShowJobFunction extends SqoopFunction {
       showJobs(null);
     } else if (line.hasOption(Constants.OPT_CONNECTOR_NAME)) {
       showJobs(line.getOptionValue(Constants.OPT_CONNECTOR_NAME));
-    } else if (line.hasOption(Constants.OPT_JID)) {
-      showJob(line.getOptionValue(Constants.OPT_JID));
+    } else if (line.hasOption(Constants.OPT_NAME)) {
+      showJob(line.getOptionValue(Constants.OPT_NAME));
     } else {
       showSummary();
     }
@@ -126,7 +126,6 @@ public class ShowJobFunction extends SqoopFunction {
 
     printlnResource(
       Constants.RES_SHOW_PROMPT_JOB_INFO,
-      job.getPersistenceId(),
       job.getName(),
       job.getEnabled(),
       job.getCreationUser(),

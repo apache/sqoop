@@ -233,7 +233,7 @@ public class TestShowCommand {
   public void testShowJob() {
     when(client.getJobs()).thenReturn(new ArrayList<MJob>());
     when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
-    when(client.getJob("1")).thenReturn(new MJob("fromConnectorName", "toConnectorName", "linkName1", "linkName2",
+    when(client.getJob("jobName")).thenReturn(new MJob("fromConnectorName", "toConnectorName", "linkName1", "linkName2",
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
@@ -260,12 +260,12 @@ public class TestShowCommand {
     str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("job(s) to show:"));
 
-    // show job -jid 1
+    // show job -name jobName
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "1"));
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "jobName"));
     Assert.assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Job with id"));
+    Assert.assertTrue(str.contains("Job with name"));
 
     // show job -connector fromConnectorName
     out.reset();
@@ -280,9 +280,9 @@ public class TestShowCommand {
     when(client.getSubmissions()).thenReturn(Arrays.asList(new MSubmission(1L)));
     when(client.getSubmissionsForJob(any(String.class))).thenReturn(Arrays.asList(new MSubmission(1L)));
 
-    // show submission -details -jid 1
+    // show submission -details -name jobName
     out.reset();
-    Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-detail", "-jid", "1"));
+    Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-detail", "-name", "jobName"));
     Assert.assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("Submission details"));
@@ -294,9 +294,9 @@ public class TestShowCommand {
     str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("Submission details"));
 
-    // show submission -jid 1
+    // show submission -job jobName
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-jid", "1"));
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-job", "jobName"));
     Assert.assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("Job Id"));

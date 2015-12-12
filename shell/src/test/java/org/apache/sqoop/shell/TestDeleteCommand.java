@@ -84,14 +84,14 @@ public class TestDeleteCommand {
   public void testDeleteJob() {
     doNothing().when(client).deleteJob("job_test");
 
-    // delete job -j job_test
-    Status status = (Status) deleteCmd.execute(Arrays.asList(Constants.FN_JOB, "-j", "job_test"));
+    // delete job -name job_test
+    Status status = (Status) deleteCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option jid
+    // Missing argument for option name
     try {
-      status = (Status) deleteCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
-      Assert.fail("Delete job should fail as job id/name is missing!");
+      status = (Status) deleteCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
+      Assert.fail("Delete job should fail as job name is missing!");
     } catch (SqoopException e) {
       Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
@@ -103,7 +103,7 @@ public class TestDeleteCommand {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "job doesn't exist")).when(client).deleteJob(any(String.class));
 
     try {
-      deleteCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+      deleteCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
       Assert.fail("Delete job should fail as requested job doesn't exist!");
     } catch (SqoopException e) {
       Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());

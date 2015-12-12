@@ -131,7 +131,7 @@ public class CreateJobFunction extends  SqoopFunction {
     }
 
     ConfigDisplayer.displayConfigWarning(job);
-    printlnResource(Constants.RES_CREATE_JOB_SUCCESSFUL, status.name(), job.getPersistenceId());
+    printlnResource(Constants.RES_CREATE_JOB_SUCCESSFUL, status.name(), job.getName());
 
     return status;
   }

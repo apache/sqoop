@@ -183,23 +183,23 @@ public class TestUpdateCommand {
     when(client.getDriverConfigBundle()).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.updateJob(job)).thenReturn(Status.OK);
 
-    // update job -jid job_test
-    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    // update job -name job_test
+    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option jid
+    // Missing argument for option name
     try {
-      updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
+      updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
       fail("Update job should fail as parameters aren't complete!");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing argument for option"));
     }
 
-    // Missing option jid
+    // Missing option name
     try {
       updateCmd.execute(Arrays.asList(Constants.FN_JOB));
-      fail("Update job should fail as option jid is missing");
+      fail("Update job should fail as option name is missing");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing required option"));
@@ -220,7 +220,7 @@ public class TestUpdateCommand {
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
     when(client.updateJob(job)).thenReturn(Status.OK);
 
-    // update job -jid job_test
+    // update job -name job_test
     initData("jobname\r" +          // job name
         // From job config
         "abc\r" +                   // for input with name "String"
@@ -251,7 +251,7 @@ public class TestUpdateCommand {
         "0\r" +                     // for input with name "Enum"
         "l1\rl2\rl3\r\r" +          // for input with name "List"
         "7654321\r");              // for input with name "DateTime"
-    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     assertTrue(status != null && status == Status.OK);
     assertEquals(job.getName(), "jobname");
     // check from job config
