@@ -26,7 +26,7 @@ import org.apache.sqoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
 public class MLink extends MAccountableEntity implements MClonable {
-  private long connectorId;
+  private String connectorName;
   // NOTE: we hold this in the model for easy access to the link config object, it might as well be retrieved on the fly using the connectorId
   private final MLinkConfig connectorLinkConfig;
 
@@ -36,8 +36,8 @@ public class MLink extends MAccountableEntity implements MClonable {
    * @param connectorId Connector id
    * @param linkConfig Connector forms
    */
-  public MLink(long connectorId, MLinkConfig linkConfig) {
-    this.connectorId = connectorId;
+  public MLink(String connectorName, MLinkConfig linkConfig) {
+    this.connectorName = connectorName;
     this.connectorLinkConfig = linkConfig;
   }
 
@@ -61,7 +61,7 @@ public class MLink extends MAccountableEntity implements MClonable {
    */
   public MLink(MLink other, MLinkConfig linkConfig) {
     super(other);
-    this.connectorId = other.connectorId;
+    this.connectorName = other.connectorName;
     this.connectorLinkConfig = linkConfig;
     this.setPersistenceId(other.getPersistenceId());
   }
@@ -74,8 +74,8 @@ public class MLink extends MAccountableEntity implements MClonable {
     return sb.toString();
   }
 
-  public long getConnectorId() {
-    return connectorId;
+  public String getConnectorName() {
+    return connectorName;
   }
 
   public MLinkConfig getConnectorLinkConfig() {
@@ -90,7 +90,7 @@ public class MLink extends MAccountableEntity implements MClonable {
     if(cloneWithValue) {
       return new MLink(this);
     } else {
-      return new MLink(connectorId, connectorLinkConfig.clone(false));
+      return new MLink(connectorName, connectorLinkConfig.clone(false));
     }
   }
 
@@ -105,14 +105,14 @@ public class MLink extends MAccountableEntity implements MClonable {
     }
 
     MLink mLink = (MLink)object;
-    return (mLink.connectorId == this.connectorId)
+    return (mLink.connectorName.equals(this.connectorName))
         && (mLink.getPersistenceId() == this.getPersistenceId())
         && (mLink.connectorLinkConfig.equals(this.connectorLinkConfig));
     }
 
   @Override
   public int hashCode() {
-    int result = (int) (connectorId ^ (connectorId >>> 32));
+    int result = connectorName != null ? connectorName.hashCode() : 0;
     result = 31 * result + (connectorLinkConfig != null ? connectorLinkConfig.hashCode() : 0);
     return result;
   }

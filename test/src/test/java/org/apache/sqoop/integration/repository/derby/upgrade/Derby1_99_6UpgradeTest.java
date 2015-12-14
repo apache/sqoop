@@ -52,6 +52,7 @@ import static org.testng.Assert.assertNull;
  * Job with id 4 has been disabled
  * Job with id 5 has been disabled
  */
+@Test(groups = "no-real-cluster")
 public class Derby1_99_6UpgradeTest extends DerbyRepositoryUpgradeTest {
 
   @Override

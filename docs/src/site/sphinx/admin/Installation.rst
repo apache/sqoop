@@ -99,5 +99,3 @@ Client do not need extra installation and configuration steps. Just copy Sqoop d
   sqoop2-shell
 
 You can find more documentation to Sqoop client in `Command Line Client <CommandLineClient.html>`_ section.
-
-

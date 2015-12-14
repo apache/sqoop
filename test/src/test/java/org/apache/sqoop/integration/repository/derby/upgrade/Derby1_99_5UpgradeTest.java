@@ -51,6 +51,7 @@ import org.testng.annotations.Test;
  * Job with id 4 has been disabled
  * Job with id 5 has been disabled
  */
+@Test(groups = "no-real-cluster")
 public class Derby1_99_5UpgradeTest extends DerbyRepositoryUpgradeTest {
 
   @Override

@@ -48,10 +48,10 @@ import org.json.simple.JSONObject;
 @InterfaceStability.Unstable
 public class JobBean implements JsonBean {
 
-  static final String FROM_LINK_ID = "from-link-id";
-  static final String TO_LINK_ID = "to-link-id";
-  static final String FROM_CONNECTOR_ID = "from-connector-id";
-  static final String TO_CONNECTOR_ID = "to-connector-id";
+  static final String FROM_LINK_NAME = "from-link-name";
+  static final String TO_LINK_NAME = "to-link-name";
+  static final String FROM_CONNECTOR_NAME = "from-connector-name";
+  static final String TO_CONNECTOR_NAME = "to-connector-name";
   static final String FROM_CONFIG_VALUES = "from-config-values";
   static final String TO_CONFIG_VALUES = "to-config-values";
   static final String DRIVER_CONFIG_VALUES = "driver-config-values";
@@ -61,7 +61,7 @@ public class JobBean implements JsonBean {
   private List<MJob> jobs;
 
   // Optional
-  private Map<Long, ResourceBundle> connectorConfigBundles;
+  private Map<String, ResourceBundle> connectorConfigBundles;
   private ResourceBundle driverConfigBundle;
 
   // For "extract"
@@ -78,27 +78,27 @@ public class JobBean implements JsonBean {
 
   // For "restore"
   public JobBean() {
-    connectorConfigBundles = new HashMap<Long, ResourceBundle>();
+    connectorConfigBundles = new HashMap<String, ResourceBundle>();
   }
 
   public void setDriverConfigBundle(ResourceBundle driverConfigBundle) {
     this.driverConfigBundle = driverConfigBundle;
   }
 
-  public void addConnectorConfigBundle(Long id, ResourceBundle connectorConfigBundle) {
-    connectorConfigBundles.put(id, connectorConfigBundle);
+  public void addConnectorConfigBundle(String connectorName, ResourceBundle connectorConfigBundle) {
+    connectorConfigBundles.put(connectorName, connectorConfigBundle);
   }
 
-  public boolean hasConnectorConfigBundle(Long id) {
-    return connectorConfigBundles.containsKey(id);
+  public boolean hasConnectorConfigBundle(String connectorName) {
+    return connectorConfigBundles.containsKey(connectorName);
   }
 
   public List<MJob> getJobs() {
     return jobs;
   }
 
-  public ResourceBundle getConnectorConfigBundle(Long id) {
-    return connectorConfigBundles.get(id);
+  public ResourceBundle getConnectorConfigBundle(String connectorName) {
+    return connectorConfigBundles.get(connectorName);
   }
 
   public ResourceBundle getDriverConfigBundle() {
@@ -134,11 +134,11 @@ public class JobBean implements JsonBean {
     object.put(UPDATE_DATE, job.getLastUpdateDate().getTime());
     // job link associated connectors
     // TODO(SQOOP-1634): fix not to require the connectorIds in the post data
-    object.put(FROM_CONNECTOR_ID, job.getFromConnectorId());
-    object.put(TO_CONNECTOR_ID, job.getToConnectorId());
+    object.put(FROM_CONNECTOR_NAME, job.getFromConnectorName());
+    object.put(TO_CONNECTOR_NAME, job.getToConnectorName());
     // job associated links
-    object.put(FROM_LINK_ID, job.getFromLinkId());
-    object.put(TO_LINK_ID, job.getToLinkId());
+    object.put(FROM_LINK_NAME, job.getFromLinkName());
+    object.put(TO_LINK_NAME, job.getToLinkName());
     // job configs
     MFromConfig fromConfigList = job.getFromJobConfig();
     object.put(FROM_CONFIG_VALUES, extractConfigList(fromConfigList, skipSensitive));
@@ -168,10 +168,10 @@ public class JobBean implements JsonBean {
 
   private MJob restoreJob(Object obj) {
     JSONObject object = (JSONObject) obj;
-    long fromConnectorId = JSONUtils.getLong(object, FROM_CONNECTOR_ID);
-    long toConnectorId = JSONUtils.getLong(object, TO_CONNECTOR_ID);
-    long fromConnectionId = JSONUtils.getLong(object, FROM_LINK_ID);
-    long toConnectionId = JSONUtils.getLong(object, TO_LINK_ID);
+    String fromConnectorName = JSONUtils.getString(object, FROM_CONNECTOR_NAME);
+    String toConnectorName = JSONUtils.getString(object, TO_CONNECTOR_NAME);
+    String fromLinkName = JSONUtils.getString(object, FROM_LINK_NAME);
+    String toLinkName = JSONUtils.getString(object, TO_LINK_NAME);
     JSONObject fromConfigJson = JSONUtils.getJSONObject(object, FROM_CONFIG_VALUES);
     JSONObject toConfigJson = JSONUtils.getJSONObject(object, TO_CONFIG_VALUES);
     JSONObject driverConfigJson = JSONUtils.getJSONObject(object, DRIVER_CONFIG_VALUES);
@@ -186,10 +186,10 @@ public class JobBean implements JsonBean {
     List<MValidator> driverValidators = restoreValidator(JSONUtils.getJSONArray(driverConfigJson, ConfigInputConstants.CONFIG_VALIDATORS));
 
     MJob job = new MJob(
-      fromConnectorId,
-      toConnectorId,
-      fromConnectionId,
-      toConnectionId,
+      fromConnectorName,
+      toConnectorName,
+      fromLinkName,
+      toLinkName,
       new MFromConfig(fromConfigs, fromValidators),
       new MToConfig(toConfigs, toValidators),
       new MDriverConfig(driverConfigs, driverValidators)

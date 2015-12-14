@@ -24,7 +24,6 @@ import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MToConfig;
-import org.apache.sqoop.model.MValidator;
 
 public class BeanTestUtil {
 
@@ -52,7 +51,7 @@ public class BeanTestUtil {
   }
 
   public static MLink getLink(String connectorName) {
-    return new MLink(1, getConnector(1L, connectorName).getLinkConfig());
+    return new MLink(connectorName, getConnector(1L, connectorName).getLinkConfig());
   }
 
   public static MConnector getConnector(Long connectorId, String connectorName) {
@@ -77,8 +76,10 @@ public class BeanTestUtil {
   }
 
   public static MJob getJob(String connectorName) {
-    return new MJob(1, 2, 1, 2, getConnector(1L, connectorName).getFromConfig(), getConnector(1L, connectorName)
-        .getToConfig(), ConfigTestUtil.getDriverConfig());
+    String fromConnectorName = "from_" + connectorName;
+    String toConnectorName = "to_" + connectorName;
+    return new MJob(fromConnectorName, toConnectorName, "fromLinkName", "toLinkName", getConnector(1L, fromConnectorName).getFromConfig(),
+            getConnector(2L, toConnectorName).getToConfig(), ConfigTestUtil.getDriverConfig());
   }
 
 }

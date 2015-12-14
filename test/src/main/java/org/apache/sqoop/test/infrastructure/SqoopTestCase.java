@@ -459,4 +459,22 @@ public class SqoopTestCase implements ITest {
   public void createAndLoadTableShortStories() {
     new ShortStories(getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance(), getTableName()).createTables().loadBasicData();
   }
+
+  /**
+   * Clear the test data for Job.
+   */
+  public void clearJob() {
+    for(MJob job : getClient().getJobs()) {
+      getClient().deleteJob(job.getName());
+    }
+  }
+
+  /**
+   * Clear the test data for Link.
+   */
+  public void clearLink() {
+    for(MLink link : getClient().getLinks()) {
+      getClient().deleteLink(link.getName());
+    }
+  }
 }

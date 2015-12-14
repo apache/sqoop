@@ -341,22 +341,22 @@ public class JobManager implements Reconfigurable {
 
   private JobRequest createJobRequest(MSubmission submission, MJob job) {
     // get from/to connections for the job
-    MLink fromConnection = getLink(job.getFromLinkId());
-    MLink toConnection = getLink(job.getToLinkId());
+    MLink fromLink = getLink(job.getFromLinkName());
+    MLink toLink = getLink(job.getToLinkName());
 
     // get from/to connectors for the connection
-    SqoopConnector fromConnector = getSqoopConnector(fromConnection.getConnectorId());
+    SqoopConnector fromConnector = getSqoopConnector(fromLink.getConnectorName());
     validateSupportedDirection(fromConnector, Direction.FROM);
-    SqoopConnector toConnector = getSqoopConnector(toConnection.getConnectorId());
+    SqoopConnector toConnector = getSqoopConnector(toLink.getConnectorName());
     validateSupportedDirection(toConnector, Direction.TO);
 
     // link config for the FROM part of the job
     Object fromLinkConfig = ClassUtils.instantiate(fromConnector.getLinkConfigurationClass());
-    ConfigUtils.fromConfigs(fromConnection.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
+    ConfigUtils.fromConfigs(fromLink.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
 
     // link config for the TO part of the job
     Object toLinkConfig = ClassUtils.instantiate(toConnector.getLinkConfigurationClass());
-    ConfigUtils.fromConfigs(toConnection.getConnectorLinkConfig().getConfigs(), toLinkConfig);
+    ConfigUtils.fromConfigs(toLink.getConnectorLinkConfig().getConfigs(), toLinkConfig);
 
     // from config for the job
     Object fromJob = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
@@ -472,7 +472,11 @@ public class JobManager implements Reconfigurable {
     return summary;
   }
 
-  SqoopConnector getSqoopConnector(long connnectorId) {
+  SqoopConnector getSqoopConnector(String connnectorName) {
+    return ConnectorManager.getInstance().getSqoopConnector(connnectorName);
+  }
+
+  SqoopConnector getSqoopConnector(Long connnectorId) {
     return ConnectorManager.getInstance().getSqoopConnector(connnectorId);
   }
 
@@ -484,9 +488,9 @@ public class JobManager implements Reconfigurable {
     }
   }
 
-  MLink getLink(long linkId) {
+  MLink getLink(String linkName) {
     MLink link = RepositoryManager.getInstance().getRepository()
-        .findLink(linkId);
+        .findLink(linkName);
     if (!link.getEnabled()) {
       throw new SqoopException(DriverError.DRIVER_0010, "Connection: "
           + link.getName());
@@ -494,6 +498,7 @@ public class JobManager implements Reconfigurable {
     return link;
   }
 
+  // TODO: this method should be removed when MSubmission link job with jobName
   MJob getJob(long jobId) {
     MJob job = RepositoryManager.getInstance().getRepository().findJob(jobId);
     if (job == null) {
@@ -502,6 +507,18 @@ public class JobManager implements Reconfigurable {
 
     if (!job.getEnabled()) {
       throw new SqoopException(DriverError.DRIVER_0009, "Job: " + job.getName());
+    }
+    return job;
+  }
+
+  MJob getJob(String jobName) {
+    MJob job = RepositoryManager.getInstance().getRepository().findJob(jobName);
+    if (job == null) {
+      throw new SqoopException(DriverError.DRIVER_0004, "Unknown job name: " + jobName);
+    }
+
+    if (!job.getEnabled()) {
+      throw new SqoopException(DriverError.DRIVER_0009, "Job: " + jobName);
     }
     return job;
   }
@@ -567,11 +584,11 @@ public class JobManager implements Reconfigurable {
     try {
       MJob job = getJob(submission.getJobId());
 
-      SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorId());
-      SqoopConnector toConnector = getSqoopConnector(job.getToConnectorId());
+      SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorName());
+      SqoopConnector toConnector = getSqoopConnector(job.getToConnectorName());
 
-      MLink fromConnection = getLink(job.getFromLinkId());
-      MLink toConnection = getLink(job.getToLinkId());
+      MLink fromConnection = getLink(job.getFromLinkName());
+      MLink toConnection = getLink(job.getToLinkName());
 
       Object fromLinkConfig = ClassUtils.instantiate(fromConnector.getLinkConfigurationClass());
       ConfigUtils.fromConfigs(fromConnection.getConnectorLinkConfig().getConfigs(), fromLinkConfig);

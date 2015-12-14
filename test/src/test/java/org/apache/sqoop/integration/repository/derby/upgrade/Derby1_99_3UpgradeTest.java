@@ -41,6 +41,7 @@ import static org.testng.Assert.assertEquals;
  * Job with id 3 has been disabled
  * Job with id 1 has been run 5 times
  */
+@Test(groups = "no-real-cluster")
 public class Derby1_99_3UpgradeTest extends DerbyRepositoryUpgradeTest {
 
   @Override

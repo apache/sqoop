@@ -36,13 +36,10 @@ public class ExtractorContext extends TransferableContext {
 
   private final Schema schema;
 
-  private final String user;
-
   public ExtractorContext(ImmutableContext context, DataWriter writer, Schema schema, String user) {
-    super(context);
+    super(context, user);
     this.writer = writer;
     this.schema = schema;
-    this.user = user;
   }
 
   /**
@@ -61,13 +58,4 @@ public class ExtractorContext extends TransferableContext {
   public Schema getSchema() {
     return schema;
   }
-  /**
-   * Return the user
-   *
-   * @return
-   */
-  public String getUser() {
-    return user;
-  }
-
 }

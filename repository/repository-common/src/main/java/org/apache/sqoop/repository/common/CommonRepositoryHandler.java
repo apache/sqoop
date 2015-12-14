@@ -371,11 +371,13 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public void createLink(MLink link, Connection conn) {
     int result;
+    MConnector mConnector;
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertLink(),
           Statement.RETURN_GENERATED_KEYS)) {
 
       stmt.setString(1, link.getName());
-      stmt.setLong(2, link.getConnectorId());
+      mConnector = findConnector(link.getConnectorName(), conn);
+      stmt.setLong(2, mConnector.getPersistenceId());
       stmt.setBoolean(3, link.getEnabled());
       stmt.setString(4, link.getCreationUser());
       stmt.setTimestamp(5, new Timestamp(link.getCreationDate().getTime()));
@@ -622,15 +624,34 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
+  public Long findLinkIdByName(String linkName, Connection conn) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectLinkIdByName())) {
+      stmt.setString(1,linkName);
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (rs.next()) {
+          return rs.getLong(1);
+        } else {
+          throw new SqoopException(CommonRepositoryError.COMMON_0020);
+        }
+      }
+    } catch (SQLException ex) {
+      logException(ex);
+      throw new SqoopException(CommonRepositoryError.COMMON_0036, ex);
+    }
+  }
+
   /**
    * {@inheritDoc}
    */
   public void createJob(MJob job, Connection conn) {
     int result;
+    // get link id to create job
+    Long fromLinkId = findLinkIdByName(job.getFromLinkName(), conn);
+    Long toLinkId = findLinkIdByName(job.getToLinkName(), conn);
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertJob(), Statement.RETURN_GENERATED_KEYS)) {
       stmt.setString(1, job.getName());
-      stmt.setLong(2, job.getFromLinkId());
-      stmt.setLong(3, job.getToLinkId());
+      stmt.setLong(2, fromLinkId);
+      stmt.setLong(3, toLinkId);
       stmt.setBoolean(4, job.getEnabled());
       stmt.setString(5, job.getCreationUser());
       stmt.setTimestamp(6, new Timestamp(job.getCreationDate().getTime()));
@@ -1515,7 +1536,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     try (ResultSet rsConnection = stmt.executeQuery();
          PreparedStatement connectorConfigFetchStatement = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
          PreparedStatement connectorConfigInputStatement = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());) {
-
       while(rsConnection.next()) {
         long id = rsConnection.getLong(1);
         String name = rsConnection.getString(2);
@@ -1525,6 +1545,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         Date creationDate = rsConnection.getTimestamp(6);
         String updateUser = rsConnection.getString(7);
         Date lastUpdateDate = rsConnection.getTimestamp(8);
+        String connectorName = rsConnection.getString(9);
 
         connectorConfigFetchStatement.setLong(1, connectorId);
         connectorConfigInputStatement.setLong(1, id);
@@ -1535,8 +1556,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
         loadConnectorConfigs(connectorLinkConfig, fromConfig, toConfig, connectorConfigFetchStatement,
             connectorConfigInputStatement, 2, conn);
-        MLink link = new MLink(connectorId, new MLinkConfig(connectorLinkConfig, Collections.EMPTY_LIST));
 
+        MLink link = new MLink(connectorName, new MLinkConfig(connectorLinkConfig, Collections.EMPTY_LIST));
         link.setPersistenceId(id);
         link.setName(name);
         link.setCreationUser(creationUser);
@@ -1576,8 +1597,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         configStmt.setLong(1, connectorId);
         inputStmt.setLong(1, id);
         loadInputsForConfigs(connectorLinkConfig, configStmt, inputStmt);
-        MLink link = new MLink(connectorId, connectorLinkConfig);
 
+        MLink link = new MLink(connectorName, connectorLinkConfig);
         link.setPersistenceId(id);
         link.setName(name);
         link.setCreationUser(creationUser);
@@ -1613,13 +1634,15 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         long toConnectorId = rsJob.getLong(2);
         long id = rsJob.getLong(3);
         String name = rsJob.getString(4);
-        long fromLinkId = rsJob.getLong(5);
-        long toLinkId = rsJob.getLong(6);
         boolean enabled = rsJob.getBoolean(7);
         String createBy = rsJob.getString(8);
         Date creationDate = rsJob.getTimestamp(9);
         String updateBy = rsJob.getString(10);
         Date lastUpdateDate = rsJob.getTimestamp(11);
+        String fromConnectorName = rsJob.getString(12);
+        String toConnectorName = rsJob.getString(13);
+        String fromLinkName = rsJob.getString(14);
+        String toLinkName = rsJob.getString(15);
 
         fromConfigFetchStmt.setLong(1, fromConnectorId);
         toConfigFetchStmt.setLong(1,toConnectorId);
@@ -1648,8 +1671,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2, conn);
 
         MJob job = new MJob(
-            fromConnectorId, toConnectorId,
-            fromLinkId, toLinkId,
+            fromConnectorName, toConnectorName,
+                fromLinkName, toLinkName,
             new MFromConfig(fromConnectorFromJobConfig, Collections.EMPTY_LIST),
             new MToConfig(toConnectorToJobConfig, Collections.EMPTY_LIST),
             new MDriverConfig(driverConfig, Collections.EMPTY_LIST));
@@ -1702,7 +1725,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         Date lastUpdateDate = rsJob.getTimestamp(11);
         String fromConnectorName = rsJob.getString(12);
         String toConnectorName = rsJob.getString(13);
-
+        String fromLinkName = rsJob.getString(14);
+        String toLinkName = rsJob.getString(15);
 
         driverConfigfetchStmt.setLong(1, driverId);
         jobInputFetchStmt.setLong(1, id);
@@ -1723,8 +1747,8 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         loadDriverConfigs(driverConfig, driverConfigfetchStmt, jobInputFetchStmt, 2, conn);
 
         MJob job = new MJob(
-          fromConnectorId, toConnectorId,
-          fromLinkId, toLinkId,
+          fromConnectorName, toConnectorName,
+          fromLinkName, toLinkName,
           new MFromConfig(mFromConfig.getConfigs(), Collections.EMPTY_LIST),
           new MToConfig(mToConfig.getConfigs(), Collections.EMPTY_LIST),
           new MDriverConfig(driverConfig, Collections.EMPTY_LIST));

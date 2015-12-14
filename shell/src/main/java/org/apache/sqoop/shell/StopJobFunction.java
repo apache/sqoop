@@ -33,17 +33,16 @@ public class StopJobFunction extends SqoopFunction {
 
   @SuppressWarnings("static-access")
   public StopJobFunction() {
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
-       .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
-       .withLongOpt(Constants.OPT_JID)
-       .create(Constants.OPT_JID_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_NAME)
+       .withDescription(resourceString(Constants.RES_PROMPT_JOB_NAME))
+       .withLongOpt(Constants.OPT_NAME)
+       .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
-    if (line.hasOption(Constants.OPT_JID)) {
-      //MSubmission submission = client.stopJob(getLong(line, Constants.OPT_JID));
-      MSubmission submission = client.stopJob(line.getOptionValue(Constants.OPT_JID));
+    if (line.hasOption(Constants.OPT_NAME)) {
+      MSubmission submission = client.stopJob(line.getOptionValue(Constants.OPT_NAME));
       if(submission.getStatus().isFailure()) {
         SubmissionDisplayer.displayFooter(submission);
       }

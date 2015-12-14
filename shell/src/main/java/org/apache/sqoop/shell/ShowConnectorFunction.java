@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.client.ClientError;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.TableDisplayer;
@@ -41,17 +43,17 @@ public class ShowConnectorFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_CONNECTORS))
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName("cid")
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_CONNECTOR_CID))
-        .withLongOpt(Constants.OPT_CID)
-        .create(Constants.OPT_CID_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_NAME)
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_CONNECTOR_NAME))
+        .withLongOpt(Constants.OPT_NAME)
+        .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_ALL)) {
       showConnectors();
-    } else if (line.hasOption(Constants.OPT_CID)) {
+    } else if (line.hasOption(Constants.OPT_NAME)) {
       showConnector(line);
     } else {
       showSummary();
@@ -64,27 +66,24 @@ public class ShowConnectorFunction extends SqoopFunction {
     Collection<MConnector> connectors = client.getConnectors();
 
     List<String> header = new LinkedList<String>();
-    header.add(resourceString(Constants.RES_TABLE_HEADER_ID));
     header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_VERSION));
     header.add(resourceString(Constants.RES_TABLE_HEADER_CLASS));
     header.add(resourceString(Constants.RES_TABLE_HEADER_SUPPORTED_DIRECTIONS));
 
-    List<String> ids = new LinkedList<String>();
     List<String> uniqueNames = new LinkedList<String>();
     List<String> versions = new LinkedList<String>();
     List<String> classes = new LinkedList<String>();
     List<String> supportedDirections = new LinkedList<String>();
 
     for(MConnector connector : connectors) {
-      ids.add(String.valueOf(connector.getPersistenceId()));
       uniqueNames.add(connector.getUniqueName());
       versions.add(connector.getVersion());
       classes.add(connector.getClassName());
       supportedDirections.add(connector.getSupportedDirections().toString());
     }
 
-    TableDisplayer.display(header, ids, uniqueNames, versions, classes, supportedDirections);
+    TableDisplayer.display(header, uniqueNames, versions, classes, supportedDirections);
   }
 
   private void showConnectors() {
@@ -99,17 +98,13 @@ public class ShowConnectorFunction extends SqoopFunction {
 
   private void showConnector(CommandLine line) {
     //Check if the command argument is a connector name
-    String connectorName = line.getOptionValue(Constants.OPT_CID);
+    String connectorName = line.getOptionValue(Constants.OPT_NAME);
     MConnector connector = client.getConnector(connectorName);
-    if (null == connector) {
-      //Now check if command line argument is a connector id
-      //This works as getConnector(String...) does not throw an exception
-      Long cid  = getLong(line, Constants.OPT_CID);
-      connector = client.getConnector(cid);
-    }
 
-    //No null checks here - as before. This is because getConnector(long...)
-    //throws an exception if connector is not found.
+    // check if the connector exist
+    if (connector == null) {
+      throw new SqoopException(ClientError.CLIENT_0003, connectorName);
+    }
 
     printlnResource(Constants.RES_SHOW_PROMPT_CONNECTORS_TO_SHOW, 1);
 
@@ -118,12 +113,11 @@ public class ShowConnectorFunction extends SqoopFunction {
 
   private void displayConnector(MConnector connector) {
     printlnResource(Constants.RES_SHOW_PROMPT_CONNECTOR_INFO,
-      connector.getPersistenceId(),
       connector.getUniqueName(),
       connector.getClassName(),
       connector.getVersion(),
       connector.getSupportedDirections().toString()
     );
-    displayConnectorConfigDetails(connector, client.getConnectorConfigBundle(connector.getPersistenceId()));
+    displayConnectorConfigDetails(connector, client.getConnectorConfigBundle(connector.getUniqueName()));
   }
 }

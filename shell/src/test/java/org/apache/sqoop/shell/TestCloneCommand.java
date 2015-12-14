@@ -41,24 +41,7 @@ import jline.console.ConsoleReader;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.model.InputEditable;
-import org.apache.sqoop.model.MBooleanInput;
-import org.apache.sqoop.model.MConfig;
-import org.apache.sqoop.model.MDateTimeInput;
-import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MEnumInput;
-import org.apache.sqoop.model.MFromConfig;
-import org.apache.sqoop.model.MInput;
-import org.apache.sqoop.model.MIntegerInput;
-import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MLinkConfig;
-import org.apache.sqoop.model.MListInput;
-import org.apache.sqoop.model.MLongInput;
-import org.apache.sqoop.model.MMapInput;
-import org.apache.sqoop.model.MStringInput;
-import org.apache.sqoop.model.MToConfig;
-import org.apache.sqoop.model.MValidator;
+import org.apache.sqoop.model.*;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.utils.MapResourceBundle;
@@ -104,9 +87,9 @@ public class TestCloneCommand {
   @Test
   public void testCloneLink() {
     ShellEnvironment.setInteractive(false);
-    MLink link = new MLink(1L, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
+    MLink link = new MLink("connector_name_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
-    when(client.getConnectorConfigBundle(1L)).thenReturn(new MapResourceBundle(new HashMap()));
+    when(client.getConnectorConfigBundle("connector_name_test")).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.saveLink(link)).thenReturn(Status.OK);
 
     // clone link -lid link_test
@@ -136,10 +119,11 @@ public class TestCloneCommand {
   public void testCloneLinkInteractive() {
     ShellEnvironment.setInteractive(true);
     initEnv();
-    MLink link = new MLink(1, new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
+    MLink link = new MLink("connector_name_test", new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
-    when(client.getConnectorConfigBundle(1L)).thenReturn(resourceBundle);
+    when(client.getConnectorConfigBundle("connector_name_test")).thenReturn(resourceBundle);
     when(client.saveLink(link)).thenReturn(Status.OK);
+    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
 
     // clone link -lid link_test
     initData("linkname\r" +         // link name
@@ -171,32 +155,33 @@ public class TestCloneCommand {
   @Test
   public void testCloneJob() {
     ShellEnvironment.setInteractive(false);
-    MJob job = new MJob(1L, 2L, 1L, 2L,
+    MJob job = new MJob("fromConnectorName", "toConnectorName", "linkName1", "linkName2",
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getJob("job_test")).thenReturn(job);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(new MapResourceBundle(new HashMap()));
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.getDriverConfigBundle()).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.saveJob(job)).thenReturn(Status.OK);
+    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
 
-    // clone job -jid job_test
-    Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    // clone job -name job_test
+    Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option jid
+    // Missing argument for option name
     try {
-      cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
+      cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
       fail("Update job should fail as parameters aren't complete!");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing argument for option"));
     }
 
-    // Missing option jid
+    // Missing option name
     try {
       cloneCmd.execute(Arrays.asList(Constants.FN_JOB));
-      fail("Update job should fail as option jid is missing");
+      fail("Update job should fail as option name is missing");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing required option"));
@@ -207,15 +192,16 @@ public class TestCloneCommand {
   public void testCloneJobInteractive() {
     ShellEnvironment.setInteractive(true);
     initEnv();
-    MJob job = new MJob(1, 2, 1, 2, new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
+    MJob job = new MJob("fromConnectorName", "toConnectorName", "linkName1", "linkName2",
+        new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
         new MToConfig(getConfig("toJobConfig"), new ArrayList<MValidator>()),
         new MDriverConfig(getConfig("driverConfig"), new ArrayList<MValidator>()));
     when(client.getJob("job_test")).thenReturn(job);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(resourceBundle);
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
     when(client.saveJob(job)).thenReturn(Status.OK);
 
-    // clone job -jid job_test
+    // clone job -name job_test
     initData("jobname\r" +          // job name
         // From job config
         "abc\r" +                   // for input with name "String"
@@ -246,7 +232,7 @@ public class TestCloneCommand {
         "0\r" +                     // for input with name "Enum"
         "l1\rl2\rl3\r\r" +          // for input with name "List"
         "7654321\r");              // for input with name "DateTime"
-    Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     assertTrue(status != null && status == Status.OK);
     assertEquals(job.getName(), "jobname");
     // check from job config

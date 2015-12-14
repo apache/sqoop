@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+@Test(groups = "no-real-cluster")
 public class BlacklistedConnectorTest extends ConnectorTestCase {
   public static class DerbySqoopMiniCluster extends JettySqoopMiniCluster {
     public DerbySqoopMiniCluster(String temporaryPath, Configuration configuration) throws Exception {
@@ -65,7 +66,9 @@ public class BlacklistedConnectorTest extends ConnectorTestCase {
 
   @AfterMethod
   public void stopCluster() throws Exception {
-    getCluster().stop();
+    if (getCluster() != null) {
+      getCluster().stop();
+    }
   }
 
   @Override

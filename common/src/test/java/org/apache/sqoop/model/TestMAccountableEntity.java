@@ -51,7 +51,7 @@ public class TestMAccountableEntity {
     MValidator validator = new MValidator("test", "");
     validators.add(validator);
 
-    MAccountableEntity link = new MLink(123l, new MLinkConfig(configs, validators));
+    MAccountableEntity link = new MLink("connector_test", new MLinkConfig(configs, validators));
     // Initially creation date and last update date is same
     assertEquals(link.getCreationDate(), link.getLastUpdateDate());
     Date testCreationDate = new Date();

@@ -19,5 +19,5 @@ package org.apache.sqoop.connector.hdfs.configuration;
 
 public enum IncrementalType {
   NONE,
-  NEW_FILES, IncrementalType,
+  NEW_FILES
 }

@@ -20,6 +20,7 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.shell.core.Constants;
@@ -46,16 +47,16 @@ public class CloneJobFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public CloneJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
-      .withLongOpt(Constants.OPT_JID)
+      .withDescription(resourceString(Constants.RES_PROMPT_JOB_NAME))
+      .withLongOpt(Constants.OPT_NAME)
       .isRequired()
       .hasArg()
-      .create(Constants.OPT_JID_CHAR));
+      .create(Constants.OPT_NAME_CHAR));
   }
 
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return cloneJob(line.getOptionValue(Constants.OPT_JID), line.getArgList(), isInteractive);
+    return cloneJob(line.getOptionValue(Constants.OPT_NAME), line.getArgList(), isInteractive);
   }
 
   private Status cloneJob(String jobArg, List<String> args, boolean isInteractive) throws IOException {
@@ -67,9 +68,9 @@ public class CloneJobFunction extends SqoopFunction {
     job.setPersistenceId(MPersistableEntity.PERSISTANCE_ID_DEFAULT);
 
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
-        job.getFromConnectorId());
+            job.getFromConnectorName());
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
-        job.getToConnectorId());
+            job.getToConnectorName());
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;

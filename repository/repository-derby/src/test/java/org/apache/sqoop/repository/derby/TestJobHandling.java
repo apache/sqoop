@@ -343,7 +343,7 @@ public class TestJobHandling extends DerbyTestCase {
   }
 
   public MJob getJob() {
-    return new MJob(1, 1, 1, 1, handler.findConnector("A", derbyConnection).getFromConfig(),
+    return new MJob("A", "A", "CA", "CA", handler.findConnector("A", derbyConnection).getFromConfig(),
         handler.findConnector("A", derbyConnection).getToConfig(), handler.findDriver(
             MDriver.DRIVER_NAME, derbyConnection).getDriverConfig());
   }

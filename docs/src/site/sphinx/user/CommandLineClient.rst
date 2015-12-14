@@ -358,7 +358,7 @@ Create new job object.
 
 Example: ::
 
-  create job --from 1 --to 2 or create job --f 1 --t 2 
+  create job --from 1 --to 2 or create job --f 1 --t 2
 
 Update Command
 --------------

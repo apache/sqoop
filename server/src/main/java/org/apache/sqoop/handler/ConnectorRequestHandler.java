@@ -48,7 +48,7 @@ public class ConnectorRequestHandler implements RequestHandler {
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
     List<MConnector> connectors;
-    Map<Long, ResourceBundle> configParamBundles;
+    Map<String, ResourceBundle> configParamBundles;
     Locale locale = ctx.getAcceptLanguageHeader();
     String cIdentifier = ctx.getLastURLElement();
 
@@ -73,7 +73,7 @@ public class ConnectorRequestHandler implements RequestHandler {
       configParamBundles = new HashMap<>();
 
       MConnector connector = ConnectorManager.getInstance().getConnectorConfigurable(mConnector.getUniqueName());
-      configParamBundles.put(connector.getPersistenceId(),
+      configParamBundles.put(connector.getUniqueName(),
           ConnectorManager.getInstance().getResourceBundle(mConnector.getUniqueName(), locale));
 
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),

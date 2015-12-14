@@ -97,7 +97,7 @@ public class TestInputTypes extends DerbyTestCase {
     map.put("A", "B");
 
     // Connection object with all various values
-    MLink link = new MLink(connector.getPersistenceId(), connector.getLinkConfig());
+    MLink link = new MLink(connector.getUniqueName(), connector.getLinkConfig());
     MLinkConfig linkConfig = link.getConnectorLinkConfig();
     assertEquals(linkConfig.getStringInput("LINK1.I1").getEditable(), InputEditable.USER_ONLY);
     assertEquals(linkConfig.getStringInput("LINK1.I1").getOverrides(), "LINK1.I2");

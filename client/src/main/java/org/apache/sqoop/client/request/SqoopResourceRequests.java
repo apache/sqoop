@@ -17,14 +17,29 @@
  */
 package org.apache.sqoop.client.request;
 
-import org.apache.hadoop.security.token.Token;
-import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
-import org.apache.hadoop.security.Credentials;
-import org.apache.sqoop.json.*;
-import org.apache.sqoop.model.*;
-
 import java.io.IOException;
 import java.util.List;
+
+import org.apache.hadoop.security.Credentials;
+import org.apache.hadoop.security.token.Token;
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
+import org.apache.sqoop.json.ConnectorBean;
+import org.apache.sqoop.json.DriverBean;
+import org.apache.sqoop.json.JobBean;
+import org.apache.sqoop.json.LinkBean;
+import org.apache.sqoop.json.PrincipalsBean;
+import org.apache.sqoop.json.PrivilegesBean;
+import org.apache.sqoop.json.RolesBean;
+import org.apache.sqoop.json.SubmissionBean;
+import org.apache.sqoop.json.SubmissionsBean;
+import org.apache.sqoop.json.ValidationResultBean;
+import org.apache.sqoop.json.VersionBean;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MPrincipal;
+import org.apache.sqoop.model.MPrivilege;
+import org.apache.sqoop.model.MResource;
+import org.apache.sqoop.model.MRole;
 
 /**
  * Unified class for all request objects.
@@ -114,8 +129,8 @@ public class SqoopResourceRequests {
     return getDriverResourceRequest().read(serverUrl);
   }
 
-  public ConnectorBean readConnector(Long cid) {
-    return getConnectorResourceRequest().read(serverUrl, cid);
+  public ConnectorBean readConnector(String connectorName) {
+    return getConnectorResourceRequest().read(serverUrl, connectorName);
   }
 
   public ValidationResultBean saveLink(MLink link) {

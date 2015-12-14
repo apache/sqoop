@@ -61,11 +61,11 @@ public class SqoopClient {
   /**
    * All cached connectors.
    */
-  private Map<Long, MConnector> connectors;
+  private Map<String, MConnector> connectors;
   /**
    * All cached config params for every registered connector in the sqoop system.
    */
-  private Map<Long, ResourceBundle> connectorConfigBundles;
+  private Map<String, ResourceBundle> connectorConfigBundles;
 
   /**
    * Cached driver.
@@ -122,25 +122,22 @@ public class SqoopClient {
    * Clear internal cache.
    */
   public void clearCache() {
-    connectorConfigBundles = new HashMap<Long, ResourceBundle>();
+    connectorConfigBundles = new HashMap<String, ResourceBundle>();
     driverConfigBundle = null;
-    connectors = new HashMap<Long, MConnector>();
+    connectors = new HashMap<String, MConnector>();
     mDriver = null;
     isAllConnectors = false;
   }
 
   /**
    * Get connector with given id.
+   * TODO: This method should be removed when MJob link with Connector by name.
    *
    * @param cid Connector id.
    * @return
    */
   public MConnector getConnector(long cid) {
-    if(connectors.containsKey(cid)) {
-      return connectors.get(cid).clone(false);
-    }
-    retrieveConnector(cid);
-    return connectors.get(cid).clone(false);
+    return retrieveConnector(Long.toString(cid));
   }
 
   /**
@@ -183,13 +180,17 @@ public class SqoopClient {
 
   /**
    * Retrieve connector structure from server and cache it.
+   * TODO: The method support both connector name/id, this should support name only when MJob link with Connector by name.
    *
-   * @param cid Connector id
+   * @param connectorIdentify Connector name/id
    */
-  private void retrieveConnector(long cid) {
-    ConnectorBean request = resourceRequests.readConnector(cid);
-    connectors.put(cid, request.getConnectors().get(0));
-    connectorConfigBundles.put(cid, request.getResourceBundles().get(cid));
+  private MConnector retrieveConnector(String connectorIdentify) {
+    ConnectorBean request = resourceRequests.readConnector(connectorIdentify);
+    MConnector mConnector = request.getConnectors().get(0);
+    String connectorName = mConnector.getUniqueName();
+    connectors.put(connectorName, mConnector);
+    connectorConfigBundles.put(connectorName, request.getResourceBundles().get(connectorName));
+    return mConnector;
   }
 
   /**
@@ -205,7 +206,7 @@ public class SqoopClient {
     ConnectorBean bean = resourceRequests.readConnector(null);
     isAllConnectors = true;
     for(MConnector connector : bean.getConnectors()) {
-      connectors.put(connector.getPersistenceId(), connector);
+      connectors.put(connector.getUniqueName(), connector);
     }
     connectorConfigBundles = bean.getResourceBundles();
 
@@ -218,12 +219,12 @@ public class SqoopClient {
    * @param connectorId Connector id.
    * @return
    */
-  public ResourceBundle getConnectorConfigBundle(long connectorId) {
-    if(connectorConfigBundles.containsKey(connectorId)) {
-      return connectorConfigBundles.get(connectorId);
+  public ResourceBundle getConnectorConfigBundle(String connectorName) {
+    if(connectorConfigBundles.containsKey(connectorName)) {
+      return connectorConfigBundles.get(connectorName);
     }
-    retrieveConnector(connectorId);
-    return connectorConfigBundles.get(connectorId);
+    retrieveConnector(connectorName);
+    return connectorConfigBundles.get(connectorName);
   }
 
   /**
@@ -276,16 +277,6 @@ public class SqoopClient {
   }
 
   /**
-   * Create new link object for given connector id
-   *
-   * @param connectorId Connector id
-   * @return
-   */
-  public MLink createLink(long connectorId) {
-    return new MLink(connectorId, getConnector(connectorId).getLinkConfig());
-  }
-
-  /**
    * Create new link object for given connector name
    *
    * @param connectorName Connector name
@@ -296,7 +287,7 @@ public class SqoopClient {
     if (connector == null) {
       throw new SqoopException(ClientError.CLIENT_0003, connectorName);
     }
-    return createLink(connector.getPersistenceId());
+    return new MLink(connectorName, getConnector(connectorName).getLinkConfig());
   }
 
 
@@ -398,37 +389,17 @@ public class SqoopClient {
   public MJob createJob(String fromLinkName, String toLinkName) {
     MLink fromLink = getLink(fromLinkName);
     MLink toLink = getLink(toLinkName);
+    MConnector connectorForFromLink = getConnector(fromLink.getConnectorName());
+    MConnector connectorForToLink = getConnector(toLink.getConnectorName());
 
     return new MJob(
-      fromLink.getConnectorId(),
-      toLink.getConnectorId(),
-      fromLink.getPersistenceId(),
-      toLink.getPersistenceId(),
-      getConnector(fromLink.getConnectorId()).getFromConfig(),
-      getConnector(toLink.getConnectorId()).getToConfig(),
+      connectorForFromLink.getUniqueName(),
+      connectorForToLink.getUniqueName(),
+      fromLinkName,
+      toLinkName,
+      connectorForFromLink.getFromConfig().clone(false),
+      connectorForToLink.getToConfig().clone(false),
       getDriverConfig()
-    );
-  }
-
-  /**
-   * Create new job the for given links.
-   *
-   * @param fromLinkId From link id
-   * @param toLinkId To link id
-   * @return
-   */
-  public MJob createJob(long fromLinkId, long toLinkId) {
-    MLink fromLink = getLink(fromLinkId);
-    MLink toLink = getLink(toLinkId);
-
-    return new MJob(
-            fromLink.getConnectorId(),
-            toLink.getConnectorId(),
-            fromLink.getPersistenceId(),
-            toLink.getPersistenceId(),
-            getConnector(fromLink.getConnectorId()).getFromConfig(),
-            getConnector(toLink.getConnectorId()).getToConfig(),
-            getDriverConfig()
     );
   }
 
@@ -535,6 +506,23 @@ public class SqoopClient {
    */
   public void deleteJob(long jobId) {
     resourceRequests.deleteJob(String.valueOf(jobId));
+  }
+
+  public void deleteAllLinks(){
+    for (MJob job : getJobs()) {
+      deleteJob(job.getName());
+    }
+  }
+
+  public void deleteAllJobs(){
+    for (MLink link : getLinks()) {
+      deleteLink(link.getName());
+    }
+  }
+
+  public void deleteAllLinksAndJobs(){
+    deleteAllLinks();
+    deleteAllJobs();
   }
 
   /**

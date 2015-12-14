@@ -84,13 +84,13 @@ public class TestDisableCommand {
     doNothing().when(client).enableJob("job_test", false);
 
     // disable job -j job_test
-    Status status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-j", "job_test"));
+    Status status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option jid
+    // Missing argument for option name
     try {
-      status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
-      Assert.fail("Disable job should fail as job id/name is missing!");
+      status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
+      Assert.fail("Disable job should fail as job name is missing!");
     } catch (SqoopException e) {
       Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
@@ -102,7 +102,7 @@ public class TestDisableCommand {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "job doesn't exist")).when(client).enableJob(any(String.class), any(Boolean.class));
 
     try {
-      disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+      disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
       Assert.fail("Disable job should fail as requested job doesn't exist!");
     } catch (SqoopException e) {
       Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());

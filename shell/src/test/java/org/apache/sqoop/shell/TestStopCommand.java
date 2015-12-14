@@ -54,13 +54,13 @@ public class TestStopCommand {
     MSubmission submission = new MSubmission();
     when(client.stopJob(any(String.class))).thenReturn(submission);
 
-    // stop job -jid job_test
-    Status status = (Status) stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    // stop job -name job_test
+    Status status = (Status) stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for jid
+    // Missing argument for name
     try {
-      stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
+      stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
       Assert.fail("Stop job should fail as parameters aren't complete!");
     } catch (SqoopException e) {
       Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());

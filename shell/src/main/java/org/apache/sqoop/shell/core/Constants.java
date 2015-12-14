@@ -38,9 +38,8 @@ public class Constants {
   public static final String OPT_FROM = "from";
   public static final String OPT_TO = "to";
   public static final String OPT_ALL = "all";
-  public static final String OPT_JID = "jid";
-  public static final String OPT_CID = "cid";
   public static final String OPT_NAME = "name";
+  public static final String OPT_CONNECTOR_NAME = "connector";
   public static final String OPT_VALUE = "value";
   public static final String OPT_VERBOSE = "verbose";
   public static final String OPT_HOST = "host";
@@ -60,14 +59,14 @@ public class Constants {
   public static final String OPT_PRINCIPAL = "principal";
   public static final String OPT_PRINCIPAL_TYPE = "principal-type";
   public static final String OPT_WITH_GRANT = "with-grant";
+  public static final String OPT_WITH_JOB = "job";
 
   public static final char OPT_LID_CHAR = 'l';
   public static final char OPT_FROM_CHAR = 'f';
   public static final char OPT_TO_CHAR = 't';
   public static final char OPT_ALL_CHAR = 'a';
-  public static final char OPT_JID_CHAR = 'j';
-  public static final char OPT_CID_CHAR = 'c';
   public static final char OPT_NAME_CHAR = 'n';
+  public static final char OPT_CONNECTOR_NAME_CHAR = 'c';
   public static final char OPT_VALUE_CHAR = 'v';
   public static final char OPT_HOST_CHAR = 'h';
   public static final char OPT_PORT_CHAR = 'p';
@@ -82,6 +81,7 @@ public class Constants {
   public static final char OPT_ROLE_CHAR = 'r';
   public static final char OPT_ACTION_CHAR = 'a';
   public static final char OPT_WITH_GRANT_CHAR = 'g';
+  public static final char OPT_WITH_JOB_CHAR = 'j';
 
   // Resource keys for various commands, command options,
   // functions and descriptions
@@ -157,8 +157,6 @@ public class Constants {
       "args.to_missing";
   public static final String RES_ARGS_JID_MISSING =
       "args.jid_missing";
-  public static final String RES_ARGS_CID_MISSING =
-      "args.cid_missing";
   public static final String RES_ARGS_NAME_MISSING =
       "args.name_missing";
   public static final String RES_ARGS_VALUE_MISSING =
@@ -166,10 +164,10 @@ public class Constants {
 
   public static final String RES_PROMPT_LINK_ID =
       "prompt.link_id";
-  public static final String RES_PROMPT_JOB_ID =
-      "prompt.job_id";
-  public static final String RES_CONNECTOR_ID =
-      "prompt.connector_id";
+  public static final String RES_PROMPT_JOB_NAME =
+      "prompt.job_name";
+  public static final String RES_CONNECTOR_NAME =
+      "prompt.connector_name";
   public static final String RES_PROMPT_UPDATE_LINK_CONFIG =
       "prompt.update_link_config";
   public static final String RES_PROMPT_UPDATE_JOB_CONFIG =
@@ -265,8 +263,8 @@ public class Constants {
       "show.prompt_links_to_show";
   public static final String RES_SHOW_PROMPT_LINK_INFO =
       "show.prompt_link_info";
-  public static final String RES_SHOW_PROMPT_LINK_CID_INFO =
-      "show.prompt_link_cid_info";
+  public static final String RES_SHOW_PROMPT_LINK_CN_INFO =
+      "show.prompt_link_cn_info";
   public static final String RES_SHOW_ROLE_BAD_ARGUMENTS_PRINCIPAL_TYPE =
       "show.role.bad_arguments_principal_type";
   public static final String RES_SHOW_PRIVILEGE_BAD_ARGUMENTS_RESOURCE_TYPE =
@@ -274,8 +272,8 @@ public class Constants {
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_CONNECTORS =
       "show.prompt_display_all_connectors";
-  public static final String RES_SHOW_PROMPT_DISPLAY_CONNECTOR_CID =
-      "show.prompt_display_connector_cid";
+  public static final String RES_SHOW_PROMPT_DISPLAY_CONNECTOR_NAME =
+      "show.prompt_display_connector_name";
   public static final String RES_SHOW_PROMPT_CONNECTORS_TO_SHOW =
       "show.prompt_connectors_to_show";
   public static final String RES_SHOW_PROMPT_CONNECTOR_INFO =
@@ -288,10 +286,10 @@ public class Constants {
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_JOBS =
       "show.prompt_display_all_jobs";
-  public static final String RES_SHOW_PROMPT_DISPLAY_JOBS_CID =
-      "show.prompt_display_all_jobs_cid";
-  public static final String RES_SHOW_PROMPT_DISPLAY_JOB_JID =
-      "show.prompt_display_job_jid";
+  public static final String RES_SHOW_PROMPT_DISPLAY_JOBS_CN =
+      "show.prompt_display_all_jobs_cn";
+  public static final String RES_SHOW_PROMPT_DISPLAY_JOB_NAME =
+      "show.prompt_display_job_name";
   public static final String RES_SHOW_PROMPT_JOBS_TO_SHOW =
       "show.prompt_jobs_to_show";
   public static final String RES_SHOW_PROMPT_JOB_INFO =
@@ -303,8 +301,8 @@ public class Constants {
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS =
       "show.prompt_display_all_submissions";
-  public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS_JOB_ID =
-      "show.prompt_display_all_submissions_jid";
+  public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS_JN =
+      "show.prompt_display_all_submissions_jn";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SERVERS =
       "show.prompt_display_all_servers";
@@ -369,8 +367,6 @@ public class Constants {
       "table.header.supported_directions";
   public static final String RES_TABLE_HEADER_CONNECTOR_NAME =
       "table.header.connector.name";
-  public static final String RES_TABLE_HEADER_CONNECTOR_ID =
-      "table.header.connector.id";
   public static final String RES_TABLE_HEADER_FROM_CONNECTOR =
       "table.header.connector.from";
   public static final String RES_TABLE_HEADER_TO_CONNECTOR =

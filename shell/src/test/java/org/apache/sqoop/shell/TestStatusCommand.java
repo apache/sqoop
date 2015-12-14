@@ -54,13 +54,13 @@ public class TestStatusCommand {
     MSubmission submission = new MSubmission();
     when(client.getJobStatus(any(String.class))).thenReturn(submission);
 
-    // status job -jid job_test
-    Status status = (Status) statusCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
+    // status job -name job_test
+    Status status = (Status) statusCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for jid
+    // Missing argument for name
     try {
-      statusCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
+      statusCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
       Assert.fail("Get job status should fail as parameters aren't complete!");
     } catch (SqoopException e) {
       Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());

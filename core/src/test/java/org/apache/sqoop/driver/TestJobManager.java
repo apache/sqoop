@@ -109,19 +109,19 @@ public class TestJobManager {
 
   @Test
   public void testGetLink() {
-    MLink testLink = new MLink(123l, null);
+    MLink testLink = new MLink("linkName", null);
     testLink.setEnabled(true);
     MLink mConnectionSpy = org.mockito.Mockito.spy(testLink);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findLink(123l)).thenReturn(mConnectionSpy);
-    assertEquals(jobManager.getLink(123l), mConnectionSpy);
+    when(jdbcRepoMock.findLink("linkName")).thenReturn(mConnectionSpy);
+    assertEquals(jobManager.getLink("linkName"), mConnectionSpy);
     verify(repositoryManagerMock, times(1)).getRepository();
-    verify(jdbcRepoMock, times(1)).findLink(123l);
+    verify(jdbcRepoMock, times(1)).findLink("linkName");
   }
 
   @Test
   public void testDisabledLink() {
-    MLink testConnection = new MLink(123l, null);
+    MLink testConnection = new MLink("linkName", null);
     testConnection.setPersistenceId(1234);
     testConnection.setEnabled(false);
     SqoopException exception = new SqoopException(DriverError.DRIVER_0010, "Connection: "
@@ -129,31 +129,31 @@ public class TestJobManager {
 
     MLink mConnectionSpy = org.mockito.Mockito.spy(testConnection);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findLink(123l)).thenReturn(mConnectionSpy);
+    when(jdbcRepoMock.findLink("linkName")).thenReturn(mConnectionSpy);
     try {
-      jobManager.getLink(123l);
+      jobManager.getLink("linkName");
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
       verify(repositoryManagerMock, times(1)).getRepository();
-      verify(jdbcRepoMock, times(1)).findLink(123l);
+      verify(jdbcRepoMock, times(1)).findLink("linkName");
     }
   }
 
   @Test
   public void testGetJob() {
-    MJob testJob = job(123l, 456l);
+    MJob testJob = job("jobName", "fromConnectorName", "toConnectorName");
     testJob.setEnabled(true);
     MJob mJobSpy = org.mockito.Mockito.spy(testJob);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findJob(123l)).thenReturn(mJobSpy);
-    assertEquals(jobManager.getJob(123l), mJobSpy);
+    when(jdbcRepoMock.findJob("jobName")).thenReturn(mJobSpy);
+    assertEquals(jobManager.getJob("jobName"), mJobSpy);
     verify(repositoryManagerMock, times(1)).getRepository();
-    verify(jdbcRepoMock, times(1)).findJob(123l);
+    verify(jdbcRepoMock, times(1)).findJob("jobName");
   }
 
   @Test
   public void testDisabledJob() {
-    MJob testJob = job(123l, 456l);
+    MJob testJob = job("jobName", "fromConnectorName", "toConnectorName");
     testJob.setEnabled(false);
     testJob.setPersistenceId(1111);
     SqoopException exception = new SqoopException(DriverError.DRIVER_0009, "Job: "
@@ -161,13 +161,13 @@ public class TestJobManager {
 
     MJob mJobSpy = org.mockito.Mockito.spy(testJob);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findJob(123l)).thenReturn(mJobSpy);
+    when(jdbcRepoMock.findJob("jobName")).thenReturn(mJobSpy);
     try {
-      jobManager.getJob(123l);
+      jobManager.getJob("jobName");
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
       verify(repositoryManagerMock, times(1)).getRepository();
-      verify(jdbcRepoMock, times(1)).findJob(123l);
+      verify(jdbcRepoMock, times(1)).findJob("jobName");
     }
   }
 
@@ -187,9 +187,9 @@ public class TestJobManager {
     }
   }
 
-  private MJob job(long fromId, long toId) {
-    MJob job = new MJob(fromId, toId, 1L, 2L, null, null, null);
-    job.setName("Vampire");
+  private MJob job(String jobName, String fromConnectorName, String toConnectorName) {
+    MJob job = new MJob(fromConnectorName, toConnectorName, "fromLinkName", "toLinkName", null, null, null);
+    job.setName(jobName);
     job.setCreationUser("Buffy");
     return job;
   }

@@ -46,11 +46,11 @@ public class CreateLinkFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public CreateLinkFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_CONNECTOR_ID))
-      .withLongOpt(Constants.OPT_CID)
+      .withDescription(resourceString(Constants.RES_CONNECTOR_NAME))
+      .withLongOpt(Constants.OPT_CONNECTOR_NAME)
       .isRequired()
       .hasArg()
-      .create(Constants.OPT_CID_CHAR));
+      .create(Constants.OPT_CONNECTOR_NAME_CHAR));
   }
 
   @Override
@@ -60,36 +60,16 @@ public class CreateLinkFunction extends SqoopFunction {
   }
 
   private Status createLink(CommandLine line, List<String> args, boolean isInteractive) throws IOException {
+    String connectorName = line.getOptionValue(Constants.OPT_CONNECTOR_NAME);
 
-    //Check if the command argument is a connector name
-    MLink link = null;
-    Long cid;
-    String connectorName = line.getOptionValue(Constants.OPT_CID);
-    MConnector connector = getClient().getConnector(connectorName);
-    if (null == connector) {
-      //Now check if command line argument is a connector id
-      //This works as getConnector(String...) does not throw an exception
-      cid = getLong(line, Constants.OPT_CID);
-      getClient().getConnector(cid);
-
-      //Would have thrown an exception before this if input was neither a valid name nor an id
-      //This will do an extra getConnector() call again inside createLink()
-      //but should not matter as connectors are cached
-      link = getClient().createLink(cid);
-      printlnResource(Constants.RES_CREATE_CREATING_LINK, cid);
-    }
-    else {
-      //Command line had connector name
-      //This will do an extra getConnector() call again inside createLink() but
-      //should not matter as connectors are cached
-      cid = connector.getPersistenceId();
-      link = getClient().createLink(connectorName);
-      printlnResource(Constants.RES_CREATE_CREATING_LINK, connectorName);
-    }
+    //Command line had connector name
+    //This will call getConnector() inside createLink()
+    MLink link = getClient().createLink(connectorName);
+    printlnResource(Constants.RES_CREATE_CREATING_LINK, connectorName);
 
     ConsoleReader reader = getConsoleReader();
 
-    ResourceBundle connectorConfigBundle = getClient().getConnectorConfigBundle(cid);
+    ResourceBundle connectorConfigBundle = getClient().getConnectorConfigBundle(connectorName);
 
     Status status = Status.OK;
     if (isInteractive) {

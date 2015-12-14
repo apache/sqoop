@@ -18,6 +18,7 @@
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import com.google.common.collect.Iterables;
+import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
@@ -75,6 +76,11 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     }
   }
 
+  @BeforeMethod
+  public void cleanUpHDFS() throws Exception {
+    hdfsClient.delete(new Path(getMapreduceDirectory()), true);
+  }
+
   @Test
   public void testTable() throws Exception {
     createAndLoadTableUbuntuReleases();
@@ -107,16 +113,16 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
 
     // Assert correct output
     assertTo(
-        "10,'Jaunty Jackalope',9.04,'2009-04-23',false",
-        "11,'Karmic Koala',9.10,'2009-10-29',false",
-        "12,'Lucid Lynx',10.04,'2010-04-29',true",
-        "13,'Maverick Meerkat',10.10,'2010-10-10',false",
-        "14,'Natty Narwhal',11.04,'2011-04-28',false",
-        "15,'Oneiric Ocelot',11.10,'2011-10-10',false",
-        "16,'Precise Pangolin',12.04,'2012-04-26',true",
-        "17,'Quantal Quetzal',12.10,'2012-10-18',false",
-        "18,'Raring Ringtail',13.04,'2013-04-25',false",
-        "19,'Saucy Salamander',13.10,'2013-10-17',false"
+        "10,'Jaunty Jackalope',9.04,'2009-04-23'",
+        "11,'Karmic Koala',9.10,'2009-10-29'",
+        "12,'Lucid Lynx',10.04,'2010-04-29'",
+        "13,'Maverick Meerkat',10.10,'2010-10-10'",
+        "14,'Natty Narwhal',11.04,'2011-04-28'",
+        "15,'Oneiric Ocelot',11.10,'2011-10-10'",
+        "16,'Precise Pangolin',12.04,'2012-04-26'",
+        "17,'Quantal Quetzal',12.10,'2012-10-18'",
+        "18,'Raring Ringtail',13.04,'2013-04-25'",
+        "19,'Saucy Salamander',13.10,'2013-10-17'"
       );
 
     // Verify new last value
@@ -162,16 +168,16 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
 
     // Assert correct output
     assertTo(
-        "10,'Jaunty Jackalope',9.04,'2009-04-23',false",
-        "11,'Karmic Koala',9.10,'2009-10-29',false",
-        "12,'Lucid Lynx',10.04,'2010-04-29',true",
-        "13,'Maverick Meerkat',10.10,'2010-10-10',false",
-        "14,'Natty Narwhal',11.04,'2011-04-28',false",
-        "15,'Oneiric Ocelot',11.10,'2011-10-10',false",
-        "16,'Precise Pangolin',12.04,'2012-04-26',true",
-        "17,'Quantal Quetzal',12.10,'2012-10-18',false",
-        "18,'Raring Ringtail',13.04,'2013-04-25',false",
-        "19,'Saucy Salamander',13.10,'2013-10-17',false"
+        "10,'Jaunty Jackalope',9.04,'2009-04-23'",
+        "11,'Karmic Koala',9.10,'2009-10-29'",
+        "12,'Lucid Lynx',10.04,'2010-04-29'",
+        "13,'Maverick Meerkat',10.10,'2010-10-10'",
+        "14,'Natty Narwhal',11.04,'2011-04-28'",
+        "15,'Oneiric Ocelot',11.10,'2011-10-10'",
+        "16,'Precise Pangolin',12.04,'2012-04-26'",
+        "17,'Quantal Quetzal',12.10,'2012-10-18'",
+        "18,'Raring Ringtail',13.04,'2013-04-25'",
+        "19,'Saucy Salamander',13.10,'2013-10-17'"
       );
 
     // Verify new last value

@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
+import org.apache.sqoop.connector.hdfs.security.SecurityUtils;
 import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
@@ -50,8 +51,7 @@ public class HdfsToDestroyer extends Destroyer<LinkConfiguration, ToJobConfigura
     final Path targetDirectory = new Path(jobConfig.toJobConfig.outputDirectory);
 
     try {
-      UserGroupInformation.createProxyUser(context.getUser(),
-        UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+      SecurityUtils.createProxyUserAndLoadDelegationTokens(context).doAs(new PrivilegedExceptionAction<Void>() {
         public Void run() throws Exception {
           FileSystem fs = FileSystem.get(configuration);
 

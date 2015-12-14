@@ -57,10 +57,10 @@ public class ConnectorBean extends ConfigurableBean {
   private static final String CONNECTOR = "connector";
 
   private List<MConnector> connectors;
-  private Map<Long, ResourceBundle> connectorConfigBundles;
+  private Map<String, ResourceBundle> connectorConfigBundles;
 
   // for "extract"
-  public ConnectorBean(List<MConnector> connectors, Map<Long, ResourceBundle> bundles) {
+  public ConnectorBean(List<MConnector> connectors, Map<String, ResourceBundle> bundles) {
     this.connectors = connectors;
     this.connectorConfigBundles = bundles;
   }
@@ -73,7 +73,7 @@ public class ConnectorBean extends ConfigurableBean {
     return connectors;
   }
 
-  public Map<Long, ResourceBundle> getResourceBundles() {
+  public Map<String, ResourceBundle> getResourceBundles() {
     return connectorConfigBundles;
   }
 
@@ -121,7 +121,7 @@ public class ConnectorBean extends ConfigurableBean {
     connectorJsonObject.put(ALL_CONFIGS, new JSONObject());
     if (connectorConfigBundles != null && !connectorConfigBundles.isEmpty()) {
       connectorJsonObject.put(ALL_CONFIGS,
-          extractConfigParamBundle(connectorConfigBundles.get(connector.getPersistenceId())));
+          extractConfigParamBundle(connectorConfigBundles.get(connector.getUniqueName())));
     }
     return connectorJsonObject;
   }
@@ -129,14 +129,14 @@ public class ConnectorBean extends ConfigurableBean {
   @Override
   public void restore(JSONObject jsonObject) {
     connectors = new ArrayList<MConnector>();
-    connectorConfigBundles = new HashMap<Long, ResourceBundle>();
+    connectorConfigBundles = new HashMap<String, ResourceBundle>();
     JSONObject obj = JSONUtils.getJSONObject(jsonObject, CONNECTOR);
     connectors.add(restoreConnector(obj));
   }
 
   protected void restoreConnectors(JSONArray array) {
     connectors = new ArrayList<MConnector>();
-    connectorConfigBundles = new HashMap<Long, ResourceBundle>();
+    connectorConfigBundles = new HashMap<String, ResourceBundle>();
     for (Object obj : array) {
       connectors.add(restoreConnector(obj));
     }
@@ -178,7 +178,7 @@ public class ConnectorBean extends ConfigurableBean {
     connector.setPersistenceId(connectorId);
     if (object.containsKey(ALL_CONFIGS)) {
       JSONObject jsonConfigBundle = JSONUtils.getJSONObject(object, ALL_CONFIGS);
-      connectorConfigBundles.put(connectorId, restoreConfigParamBundle(jsonConfigBundle));
+      connectorConfigBundles.put(uniqueName, restoreConfigParamBundle(jsonConfigBundle));
     }
     return connector;
   }

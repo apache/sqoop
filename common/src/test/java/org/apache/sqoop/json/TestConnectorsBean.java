@@ -42,9 +42,9 @@ public class TestConnectorsBean {
     connectors.add(BeanTestUtil.getConnector(2L, "mysql"));
 
     // Create testing bundles
-    Map<Long, ResourceBundle> configBundles = new HashMap<Long, ResourceBundle>();
-    configBundles.put(1L, ConfigTestUtil.getResourceBundle());
-    configBundles.put(2L, ConfigTestUtil.getResourceBundle());
+    Map<String, ResourceBundle> configBundles = new HashMap<String, ResourceBundle>();
+    configBundles.put("jdbc", ConfigTestUtil.getResourceBundle());
+    configBundles.put("mysql", ConfigTestUtil.getResourceBundle());
 
     // Serialize it to JSON object
     ConnectorsBean connectorsBean = new ConnectorsBean(connectors, configBundles);
@@ -62,7 +62,7 @@ public class TestConnectorsBean {
     assertEquals(connectors.get(0), parsedConnectorsBean.getConnectors().get(0));
     assertEquals(connectors.get(1), parsedConnectorsBean.getConnectors().get(1));
 
-    ResourceBundle retrievedBundle = parsedConnectorsBean.getResourceBundles().get(1L);
+    ResourceBundle retrievedBundle = parsedConnectorsBean.getResourceBundles().get("jdbc");
     assertNotNull(retrievedBundle);
     assertEquals("a", retrievedBundle.getString("a"));
     assertEquals("b", retrievedBundle.getString("b"));
@@ -76,9 +76,9 @@ public class TestConnectorsBean {
     connectors.add(BeanTestUtil.getConnector(2L, "mysql", false, true));
 
     // Create testing bundles
-    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
-    bundles.put(1L, ConfigTestUtil.getResourceBundle());
-    bundles.put(2L, ConfigTestUtil.getResourceBundle());
+    Map<String, ResourceBundle> bundles = new HashMap<String, ResourceBundle>();
+    bundles.put("jdbc", ConfigTestUtil.getResourceBundle());
+    bundles.put("mysql", ConfigTestUtil.getResourceBundle());
 
     // Serialize it to JSON object
     ConnectorsBean bean = new ConnectorsBean(connectors, bundles);
@@ -105,9 +105,9 @@ public class TestConnectorsBean {
     connectors.add(BeanTestUtil.getConnector(2L, "mysql", false, false));
 
     // Create testing bundles
-    Map<Long, ResourceBundle> bundles = new HashMap<Long, ResourceBundle>();
-    bundles.put(1L, ConfigTestUtil.getResourceBundle());
-    bundles.put(2L, ConfigTestUtil.getResourceBundle());
+    Map<String, ResourceBundle> bundles = new HashMap<String, ResourceBundle>();
+    bundles.put("jdbc", ConfigTestUtil.getResourceBundle());
+    bundles.put("mysql", ConfigTestUtil.getResourceBundle());
 
     // Serialize it to JSON object
     ConnectorsBean bean = new ConnectorsBean(connectors, bundles);
