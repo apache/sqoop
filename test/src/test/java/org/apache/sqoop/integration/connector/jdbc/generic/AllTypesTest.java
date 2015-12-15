@@ -80,7 +80,7 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
 
     int i = 1;
     for(ExampleValue value: type.values) {
-      insertRow(false, Integer.toString(i++), value.getInsertStatement());
+      insertRow(i++, value.getObjectValue());
     }
 
     // RDBMS link
@@ -156,8 +156,7 @@ public class AllTypesTest extends ConnectorTestCase implements ITest {
     assertEquals(type.values.size(), rowCount());
     for(ExampleValue value : type.values) {
       assertRow(
-        new Object[] {"value", value.getInsertStatement()},
-        false,
+        new Object[] {"value", value.getObjectValue()},
         value.getObjectValue());
     }
 

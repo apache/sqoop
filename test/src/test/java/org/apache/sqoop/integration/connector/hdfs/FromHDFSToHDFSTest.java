@@ -35,10 +35,10 @@ public class FromHDFSToHDFSTest extends ConnectorTestCase {
   @Test
   public void test() throws Exception {
     String[] sampleData = new String[]{
-      "1,'USA','2004-10-23','San Francisco'",
-      "2,'USA','2004-10-24','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25','Brno'",
-      "4,'USA','2004-10-26','Palo Alto'"
+      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
+      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
+      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
     };
 
     createFromFile("input-0001", sampleData);

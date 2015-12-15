@@ -399,16 +399,6 @@ public class SqoopTestCase implements ITest {
   }
 
   /**
-   * Insert row into table for this test.
-   * @param escapeValues
-   * @param values
-   */
-  public void insertRow(Boolean escapeValues, Object ...values) {
-    getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance()
-        .insertRow(getTableName(), escapeValues, values);
-  }
-
-  /**
    * Fetch row count of table for this test.
    * @return long count
    */

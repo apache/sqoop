@@ -17,11 +17,15 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.List;
 import java.util.Set;
 
@@ -162,6 +166,10 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
 
     // If this is incremental, then we need to get new maximal value and persist is a constant
     String incrementalMaxValue = null;
+    // and the partition column metadata
+    int checkColumnScale = 0;
+    int checkColumnType = 0;
+
     if(incrementalImport) {
       sb.setLength(0);
       sb.append("SELECT ");
@@ -172,13 +180,38 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
       String incrementalNewMaxValueQuery = sb.toString();
       LOG.info("Incremental new max value query:  " + incrementalNewMaxValueQuery);
 
-      try (Statement statement = executor.createStatement();
-           ResultSet rs = statement.executeQuery(incrementalNewMaxValueQuery);) {
+      try (
+        PreparedStatement columnTypeStatement = executor.prepareStatement("SELECT " + executor.encloseIdentifier(jobConf.incrementalRead.checkColumn) + " FROM " + fromFragment + " WHERE 1 = 2");
+        ResultSet columnTypeResultSet = columnTypeStatement.executeQuery();
+        Statement statement = executor.createStatement();
+        ResultSet rs = statement.executeQuery(incrementalNewMaxValueQuery)
+      ) {
+        ResultSetMetaData checkColumnMetaData = columnTypeResultSet.getMetaData();
+        checkColumnScale = checkColumnMetaData.getScale(1);
+        checkColumnType = checkColumnMetaData.getColumnType(1);
+
         if (!rs.next()) {
           throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0022);
         }
 
-        incrementalMaxValue = rs.getString(1);
+        switch (rs.getMetaData().getColumnType(1)) {
+          case Types.DATE:
+            incrementalMaxValue = rs.getDate(1).toString();
+            break;
+          case Types.TIMESTAMP:
+            incrementalMaxValue = rs.getTimestamp(1).toString();
+            break;
+          case Types.DECIMAL:
+          case Types.NUMERIC:
+          case Types.DOUBLE:
+          case Types.FLOAT:
+          case Types.REAL:
+            // Oracle drops precision data when using aggregate functions in the query
+            incrementalMaxValue = rs.getBigDecimal(1).setScale(checkColumnScale).toString();
+            break;
+          default:
+            incrementalMaxValue = rs.getString(1);
+        }
         context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_LAST_INCREMENTAL_VALUE, incrementalMaxValue);
         LOG.info("New maximal value for incremental import is " + incrementalMaxValue);
       }
@@ -209,8 +242,16 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
     try {
       ps = executor.prepareStatement(minMaxQuery);
       if (incrementalImport) {
-        ps.setString(1, jobConf.incrementalRead.lastValue);
-        ps.setString(2, incrementalMaxValue);
+        if (checkColumnType == Types.DATE) {
+          ps.setDate(1, Date.valueOf(jobConf.incrementalRead.lastValue));
+          ps.setDate(2, Date.valueOf(incrementalMaxValue));
+        } else if (checkColumnType == Types.TIMESTAMP) {
+          ps.setTimestamp(1, Timestamp.valueOf(jobConf.incrementalRead.lastValue));
+          ps.setTimestamp(2, Timestamp.valueOf(incrementalMaxValue));
+        } else {
+          ps.setBigDecimal(1, new BigDecimal(jobConf.incrementalRead.lastValue));
+          ps.setBigDecimal(2, new BigDecimal(incrementalMaxValue));
+        }
       }
 
       rs = ps.executeQuery();

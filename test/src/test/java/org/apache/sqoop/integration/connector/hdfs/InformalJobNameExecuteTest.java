@@ -24,6 +24,8 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.*;
 
+import java.sql.Timestamp;
+
 import static org.testng.Assert.assertEquals;
 
 public class InformalJobNameExecuteTest extends ConnectorTestCase {
@@ -54,8 +56,8 @@ public class InformalJobNameExecuteTest extends ConnectorTestCase {
   @Test
   public void test() throws Exception {
     createFromFile("input-0001",
-            "1,'USA','2004-10-23','San Francisco'",
-            "2,'USA','2004-10-24','Sunnyvale'"
+      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
+      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'"
     );
 
     // RDBMS link
@@ -86,7 +88,7 @@ public class InformalJobNameExecuteTest extends ConnectorTestCase {
     executeJob(job);
 
     assertEquals(2L, provider.rowCount(getTableName()));
-    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
-    assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
+    assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
+    assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
   }
 }

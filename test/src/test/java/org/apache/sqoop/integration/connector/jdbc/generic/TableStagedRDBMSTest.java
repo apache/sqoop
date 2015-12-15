@@ -28,6 +28,8 @@ import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.Test;
 
+import java.sql.Timestamp;
+
 /**
  *
  */
@@ -38,11 +40,11 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
     final TableName stageTableName = new TableName("STAGE_" + getTableName());
     createTableCities();
     createFromFile("input-0001",
-        "1,'USA','2004-10-23','San Francisco'",
-        "2,'USA','2004-10-24','Sunnyvale'",
-        "3,'Czech Republic','2004-10-25','Brno'",
-        "4,'USA','2004-10-26','Palo Alto'"
-      );
+      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
+      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
+      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+    );
     new Cities(provider, stageTableName).createTables();
 
     // RDBMS link
@@ -77,10 +79,10 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
 
     assertEquals(0L, provider.rowCount(stageTableName));
     assertEquals(4L, provider.rowCount(getTableName()));
-    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
-    assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
-    assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");
-    assertRowInCities(4, "USA", "2004-10-26", "Palo Alto");
+    assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
+    assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
+    assertRowInCities(3, "Czech Republic", Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
+    assertRowInCities(4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
 
     // Clean up testing table
     provider.dropTable(stageTableName);
