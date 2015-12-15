@@ -34,7 +34,7 @@ Sqoop client script is expected to contain valid Sqoop client commands, empty li
   set server --host sqoop2.company.net
 
   # Executing given job
-  start job  --jid 1
+  start job --name 1
 
 
 .. contents:: Table of Contents
@@ -269,12 +269,12 @@ Show persisted link objects.
 +=======================+======================================================+
 | ``-a``, ``--all``     | Show all available links                             |
 +-----------------------+------------------------------------------------------+
-| ``-x``, ``--lid <x>`` | Show link with id ``<x>``                            |
+| ``-n``, ``--name <x>``| Show link with name ``<x>``                          |
 +-----------------------+------------------------------------------------------+
 
 Example: ::
 
-  show link --all or show link
+  show link --all or show link --name linkName
 
 Show Job Function
 ~~~~~~~~~~~~~~~~~
@@ -286,31 +286,31 @@ Show persisted job objects.
 +=======================+==============================================+
 | ``-a``, ``--all``     | Show all available jobs                      |
 +-----------------------+----------------------------------------------+
-| ``-j``, ``--jid <x>`` | Show job with id ``<x>``                     |
+| ``-n``, ``--name <x>``| Show job with name ``<x>``                   |
 +-----------------------+----------------------------------------------+
 
 Example: ::
 
-  show job --all or show job
+  show job --all or show job --name jobName
 
 Show Submission Function
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Show persisted job submission objects.
 
-+-----------------------+---------------------------------------------+
-| Argument              |  Description                                |
-+=======================+=============================================+
-| ``-j``, ``--jid <x>`` | Show available submissions for given job    |
-+-----------------------+---------------------------------------------+
-| ``-d``, ``--detail``  | Show job submissions in full details        |
-+-----------------------+---------------------------------------------+
++-----------------------+-----------------------------------------------+
+| Argument              |  Description                                  |
++=======================+===============================================+
+| ``-j``, ``--job <x>`` | Show available submissions for given job name |
++-----------------------+-----------------------------------------------+
+| ``-d``, ``--detail``  | Show job submissions in full details          |
++-----------------------+-----------------------------------------------+
 
 Example: ::
 
   show submission
-  show submission --jid 1
-  show submission --jid 1 --detail
+  show submission --j jobName
+  show submission --job jobName --detail
 
 Create Command
 --------------
@@ -332,16 +332,16 @@ Create Link Function
 
 Create new link object.
 
-+------------------------+-------------------------------------------------------------+
-| Argument               |  Description                                                |
-+========================+=============================================================+
-| ``-c``, ``--cid <x>``  |  Create new link object for connector with id ``<x>``       |
-+------------------------+-------------------------------------------------------------+
++------------------------------+-------------------------------------------------------------+
+| Argument                     |  Description                                                |
++==============================+=============================================================+
+| ``-c``, ``--connector <x>``  |  Create new link object for connector with name ``<x>``     |
++------------------------------+-------------------------------------------------------------+
 
 
 Example: ::
 
-  create link --cid 1 or create link -c 1
+  create link --connector connectorName or create link -c connectorName
 
 Create Job Function
 ~~~~~~~~~~~~~~~~~~~
@@ -351,14 +351,14 @@ Create new job object.
 +------------------------+------------------------------------------------------------------+
 | Argument               |  Description                                                     |
 +========================+==================================================================+
-| ``-f``, ``--from <x>`` | Create new job object with a FROM link with id ``<x>``           |
+| ``-f``, ``--from <x>`` | Create new job object with a FROM link with name ``<x>``         |
 +------------------------+------------------------------------------------------------------+
-| ``-t``, ``--to <t>``   | Create new job object with a TO link with id ``<x>``             |
+| ``-t``, ``--to <t>``   | Create new job object with a TO link with name ``<x>``           |
 +------------------------+------------------------------------------------------------------+
 
 Example: ::
 
-  create job --from 1 --to 2 or create job --f 1 --t 2
+  create job --from fromLinkName --to toLinkName or create job --f fromLinkName --t toLinkName
 
 Update Command
 --------------
@@ -373,27 +373,27 @@ Update existing link object.
 +-----------------------+---------------------------------------------+
 | Argument              |  Description                                |
 +=======================+=============================================+
-| ``-x``, ``--lid <x>`` |  Update existing link with id ``<x>``       |
+| ``-n``, ``--name <x>``|  Update existing link with name ``<x>``     |
 +-----------------------+---------------------------------------------+
 
 Example: ::
 
-  update link --lid 1
+  update link --name linkName
 
 Update Job Function
 ~~~~~~~~~~~~~~~~~~~
 
 Update existing job object.
 
-+-----------------------+--------------------------------------------+
-| Argument              |  Description                               |
-+=======================+============================================+
-| ``-j``, ``--jid <x>`` | Update existing job object with id ``<x>`` |
-+-----------------------+--------------------------------------------+
++-------------------------+----------------------------------------------+
+| Argument                |  Description                                 |
++=========================+==============================================+
+| ``-n``, ``--name <x>``  | Update existing job object with name ``<x>`` |
++-------------------------+----------------------------------------------+
 
 Example: ::
 
-  update job --jid 1
+  update job --name jobName
 
 
 Delete Command
@@ -406,15 +406,15 @@ Delete Link Function
 
 Delete existing link object.
 
-+-----------------------+-------------------------------------------+
-| Argument              |  Description                              |
-+=======================+===========================================+
-| ``-x``, ``--lid <x>`` |  Delete link object with id ``<x>``       |
-+-----------------------+-------------------------------------------+
++-------------------------+-------------------------------------------+
+| Argument                |  Description                              |
++=========================+===========================================+
+| ``-n``, ``--name <x>``  |  Delete link object with name ``<x>``     |
++-------------------------+-------------------------------------------+
 
 Example: ::
 
-  delete link --lid 1
+  delete link --name linkName
 
 
 Delete Job Function
@@ -422,15 +422,15 @@ Delete Job Function
 
 Delete existing job object.
 
-+-----------------------+------------------------------------------+
-| Argument              |  Description                             |
-+=======================+==========================================+
-| ``-j``, ``--jid <x>`` | Delete job object with id ``<x>``        |
-+-----------------------+------------------------------------------+
++-------------------------+------------------------------------------+
+| Argument                |  Description                             |
++=========================+==========================================+
+| ``-n``, ``--name <x>``  | Delete job object with name ``<x>``      |
++-------------------------+------------------------------------------+
 
 Example: ::
 
-  delete job --jid 1
+  delete job --name jobName
 
 
 Clone Command
@@ -443,15 +443,15 @@ Clone Link Function
 
 Clone existing link object.
 
-+-----------------------+------------------------------------------+
-| Argument              |  Description                             |
-+=======================+==========================================+
-| ``-x``, ``--lid <x>`` |  Clone link object with id ``<x>``       |
-+-----------------------+------------------------------------------+
++-------------------------+------------------------------------------+
+| Argument                |  Description                             |
++=========================+==========================================+
+| ``-n``, ``--name <x>``  |  Clone link object with name ``<x>``     |
++-------------------------+------------------------------------------+
 
 Example: ::
 
-  clone link --lid 1
+  clone link --name linkName
 
 
 Clone Job Function
@@ -459,15 +459,15 @@ Clone Job Function
 
 Clone existing job object.
 
-+-----------------------+------------------------------------------+
-| Argument              |  Description                             |
-+=======================+==========================================+
-| ``-j``, ``--jid <x>`` | Clone job object with id ``<x>``         |
-+-----------------------+------------------------------------------+
++-------------------------+------------------------------------------+
+| Argument                |  Description                             |
++=========================+==========================================+
+| ``-n``, ``--name <x>``  | Clone job object with name ``<x>``       |
++-------------------------+------------------------------------------+
 
 Example: ::
 
-  clone job --jid 1
+  clone job --name jobName
 
 Start Command
 -------------
@@ -482,15 +482,15 @@ Start job (submit new submission). Starting already running job is considered as
 +----------------------------+----------------------------+
 | Argument                   |  Description               |
 +============================+============================+
-| ``-j``, ``--jid <x>``      | Start job with id ``<x>``  |
+| ``-n``, ``--name <x>``     | Start job with name ``<x>``|
 +----------------------------+----------------------------+
 | ``-s``, ``--synchronous``  | Synchoronous job execution |
 +----------------------------+----------------------------+
 
 Example: ::
 
-  start job --jid 1
-  start job --jid 1 --synchronous
+  start job --name jobName
+  start job --name jobName --synchronous
 
 Stop Command
 ------------
@@ -502,15 +502,15 @@ Stop Job Function
 
 Interrupt running job.
 
-+-----------------------+------------------------------------------+
-| Argument              |  Description                             |
-+=======================+==========================================+
-| ``-j``, ``--jid <x>`` | Interrupt running job with id ``<x>``    |
-+-----------------------+------------------------------------------+
++-------------------------+------------------------------------------+
+| Argument                |  Description                             |
++=========================+==========================================+
+| ``-n``, ``--name <x>``  | Interrupt running job with name ``<x>``  |
++-------------------------+------------------------------------------+
 
 Example: ::
 
-  stop job --jid 1
+  stop job --name jobName
 
 Status Command
 --------------
@@ -522,12 +522,12 @@ Status Job Function
 
 Retrieve last status for given job.
 
-+-----------------------+------------------------------------------+
-| Argument              |  Description                             |
-+=======================+==========================================+
-| ``-j``, ``--jid <x>`` | Retrieve status for job with id ``<x>``  |
-+-----------------------+------------------------------------------+
++-------------------------+------------------------------------------+
+| Argument                |  Description                             |
++=========================+==========================================+
+| ``-n``, ``--name <x>``  | Retrieve status for job with name ``<x>``|
++-------------------------+------------------------------------------+
 
 Example: ::
 
-  status job --jid 1
+  status job --name jobName
