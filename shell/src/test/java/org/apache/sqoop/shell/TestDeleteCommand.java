@@ -54,14 +54,14 @@ public class TestDeleteCommand {
   public void testDeleteLink() {
     doNothing().when(client).deleteLink("link_test");
 
-    // delete link -l link_test
-    Status status = (Status) deleteCmd.execute(Arrays.asList(Constants.FN_LINK, "-l", "link_test"));
+    // delete link -name link_test
+    Status status = (Status) deleteCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option lid
+    // Missing argument for option name
     try {
-      status = (Status) deleteCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid"));
-      Assert.fail("Delete link should fail as link id/name is missing!");
+      status = (Status) deleteCmd.execute(Arrays.asList(Constants.FN_LINK, "-name"));
+      Assert.fail("Delete link should fail as link name is missing!");
     } catch (SqoopException e) {
       Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
@@ -73,7 +73,7 @@ public class TestDeleteCommand {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "link doesn't exist")).when(client).deleteLink(any(String.class));
 
     try {
-      deleteCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
+      deleteCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
       Assert.fail("Delete link should fail as requested link doesn't exist!");
     } catch (SqoopException e) {
       Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());

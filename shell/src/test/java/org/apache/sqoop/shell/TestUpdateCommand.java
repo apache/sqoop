@@ -110,20 +110,20 @@ public class TestUpdateCommand {
     when(client.getConnectorConfigBundle("connector_test")).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.updateLink(any(MLink.class))).thenReturn(Status.OK);
 
-    // update link -lid link_test
-    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
+    // update link -name link_test
+    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
     assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option lid
+    // Missing argument for option name
     try {
-      updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid"));
+      updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-name"));
       fail("Update link should fail as parameters aren't complete!");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing argument for option"));
     }
 
-    // Missing option lid
+    // Missing option name
     try {
       updateCmd.execute(Arrays.asList(Constants.FN_LINK));
       fail("Update link should fail as option lid is missing");
@@ -143,7 +143,7 @@ public class TestUpdateCommand {
     when(client.updateLink(any(MLink.class))).thenReturn(Status.OK);
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
 
-    // update link -lid link_test
+    // update link -name link_test
     initData("linkname\r" +         // link name
         "abc\r" +                   // for input with name "String"
         "12345\r" +                 // for input with name "Integer"
@@ -153,7 +153,7 @@ public class TestUpdateCommand {
         "0\r" +                     // for input with name "Enum"
         "l1\rl2\rl3\r\r" +          // for input with name "List"
         "12345678\r");              // for input with name "DateTime"
-    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
+    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
     assertTrue(status != null && status == Status.OK);
     assertEquals(link.getName(), "linkname");
     assertEquals(link.getConnectorLinkConfig("CONFIGFROMNAME").getStringInput("CONFIGFROMNAME.String").getValue(), "abc");

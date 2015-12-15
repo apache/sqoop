@@ -201,15 +201,16 @@ public class TestShowCommand {
 
   @Test
   public void testShowLink() {
+    MLink fakeLink = new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
+    fakeLink.setName("linkName");
     when(client.getLinks()).thenReturn(new ArrayList<MLink>());
-    when(client.getLink(any(String.class))).thenReturn(new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
+    when(client.getLink(any(String.class))).thenReturn(fakeLink);
 
     // show link summary
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_LINK));
     Assert.assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Id"));
     Assert.assertTrue(str.contains("Name"));
     Assert.assertTrue(str.contains("Connector Name"));
     Assert.assertTrue(str.contains("Enabled"));
@@ -221,12 +222,12 @@ public class TestShowCommand {
     str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("link(s) to show:"));
 
-    // show link -lid 1
+    // show link -name linkName
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "1"));
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "linkName"));
     Assert.assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("link with id"));
+    Assert.assertTrue(str.contains("link with name"));
   }
 
   @Test

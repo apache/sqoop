@@ -53,14 +53,14 @@ public class TestDisableCommand {
   public void testDisableLink() {
     doNothing().when(client).enableLink("link_test", false);
 
-    // disable link -l link_test
-    Status status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-l", "link_test"));
+    // disable link -name link_test
+    Status status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
     Assert.assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option lid
+    // Missing argument for option name
     try {
-      status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid"));
-      Assert.fail("Disable link should fail as link id/name is missing!");
+      status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name"));
+      Assert.fail("Disable link should fail as link name is missing!");
     } catch (SqoopException e) {
       Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
@@ -72,7 +72,7 @@ public class TestDisableCommand {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "link doesn't exist")).when(client).enableLink(any(String.class), any(Boolean.class));
 
     try {
-      disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
+      disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
       Assert.fail("Disable link should fail as requested link doesn't exist!");
     } catch (SqoopException e) {
       Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());

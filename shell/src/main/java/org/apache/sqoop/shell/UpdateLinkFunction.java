@@ -45,17 +45,17 @@ public class UpdateLinkFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public UpdateLinkFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
-      .withLongOpt(Constants.OPT_LID)
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_NAME))
+      .withLongOpt(Constants.OPT_NAME)
       .isRequired()
       .hasArg()
-      .create(Constants.OPT_LID_CHAR));
+      .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return updateLink(line.getOptionValue(Constants.OPT_LID), line.getArgList(), isInteractive);
+    return updateLink(line.getOptionValue(Constants.OPT_NAME), line.getArgList(), isInteractive);
   }
 
   private Status updateLink(String linkArg, List<String> args, boolean isInteractive) throws IOException {
