@@ -117,7 +117,7 @@ abstract public class MySqlTestCase {
 
   protected MSubmission getSubmission(MJob job,
       SubmissionStatus submissionStatus) {
-    MSubmission submission = new MSubmission(job.getPersistenceId(),
+    MSubmission submission = new MSubmission(job.getName(),
         new Date(), submissionStatus);
     fillSubmission(submission);
     return submission;

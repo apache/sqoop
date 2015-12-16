@@ -117,7 +117,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     driverContext.setString("driver2", "value2");
 
     MSubmission submission = new MSubmission();
-    submission.setJobId(1);
+    submission.setJobName("JA0");
     submission.setStatus(SubmissionStatus.RUNNING);
     submission.setCreationDate(creationDate);
     submission.setLastUpdateDate(updateDate);
@@ -141,7 +141,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
 
     submission = submissions.get(0);
 
-    assertEquals(1, submission.getJobId());
+    assertEquals("JA0", submission.getJobName());
     assertEquals(SubmissionStatus.RUNNING, submission.getStatus());
     assertEquals(creationDate.getTime(), submission.getCreationDate().getTime());
     assertEquals(updateDate.getTime(), submission.getLastUpdateDate().getTime());
@@ -188,7 +188,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
     assertEquals(submission.getDriverContext().getString("driver2"), "value2");
 
     // Let's create second (simpler) connection
-    submission = new MSubmission(1, new Date(), SubmissionStatus.SUCCEEDED, "job-x");
+    submission = new MSubmission("JA0", new Date(), SubmissionStatus.SUCCEEDED, "job-x");
     handler.createSubmission(submission, getDerbyDatabaseConnection());
 
     assertEquals(2, submission.getPersistenceId());
@@ -229,7 +229,7 @@ public class TestSubmissionHandling extends DerbyTestCase {
         + " it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happe"
         + "nsYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happens";
     MSubmission submission = new MSubmission();
-    submission.setJobId(1);
+    submission.setJobName("JA0");
     submission.setStatus(SubmissionStatus.RUNNING);
     submission.setCreationDate(new Date());
     submission.setLastUpdateDate(new Date());

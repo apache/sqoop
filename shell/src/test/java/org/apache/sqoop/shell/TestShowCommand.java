@@ -278,12 +278,12 @@ public class TestShowCommand {
 
   @Test
   public void testShowSubmission() {
-    when(client.getSubmissions()).thenReturn(Arrays.asList(new MSubmission(1L)));
-    when(client.getSubmissionsForJob(any(String.class))).thenReturn(Arrays.asList(new MSubmission(1L)));
+    when(client.getSubmissions()).thenReturn(Arrays.asList(new MSubmission("jobName")));
+    when(client.getSubmissionsForJob(any(String.class))).thenReturn(Arrays.asList(new MSubmission("jobName")));
 
-    // show submission -details -name jobName
+    // show submission -details -job jobName
     out.reset();
-    Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-detail", "-name", "jobName"));
+    Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-detail", "-job", "jobName"));
     Assert.assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
     Assert.assertTrue(str.contains("Submission details"));
@@ -300,7 +300,7 @@ public class TestShowCommand {
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-job", "jobName"));
     Assert.assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Job Id"));
+    Assert.assertTrue(str.contains("Job Name"));
     Assert.assertTrue(str.contains("External Id"));
     Assert.assertTrue(str.contains("Status"));
     Assert.assertTrue(str.contains("Last Update Date"));
@@ -310,7 +310,7 @@ public class TestShowCommand {
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION));
     Assert.assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Job Id"));
+    Assert.assertTrue(str.contains("Job Name"));
     Assert.assertTrue(str.contains("External Id"));
     Assert.assertTrue(str.contains("Status"));
     Assert.assertTrue(str.contains("Last Update Date"));

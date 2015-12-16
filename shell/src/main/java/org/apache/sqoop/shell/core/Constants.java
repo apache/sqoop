@@ -369,8 +369,8 @@ public class Constants {
       "table.header.connector.from";
   public static final String RES_TABLE_HEADER_TO_CONNECTOR =
       "table.header.connector.to";
-  public static final String RES_TABLE_HEADER_JOB_ID =
-      "table.header.jid";
+  public static final String RES_TABLE_HEADER_JOB_NAME =
+      "table.header.job.name";
   public static final String RES_TABLE_HEADER_EXTERNAL_ID =
       "table.header.eid";
   public static final String RES_TABLE_HEADER_STATUS =
@@ -430,8 +430,8 @@ public class Constants {
 
   public static final String RES_SUBMISSION_SUBMISSION_DETAIL =
       "submission.submission_detail";
-  public static final String RES_SUBMISSION_JOB_ID =
-      "submission.job_id";
+  public static final String RES_SUBMISSION_JOB_NAME =
+      "submission.job_name";
   public static final String RES_SUBMISSION_CREATION_USER =
       "submission.creation_user";
   public static final String RES_SUBMISSION_CREATION_DATE =

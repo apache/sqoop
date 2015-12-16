@@ -407,7 +407,7 @@ public class JobRequestHandler implements RequestHandler {
         ctx.getRequest().getRemoteAddr(), "status", "job", jobName);
     MSubmission submission = JobManager.getInstance().status(jobName);
     if (submission == null) {
-      submission = new MSubmission(job.getPersistenceId(), new Date(), SubmissionStatus.NEVER_EXECUTED);
+      submission = new MSubmission(job.getName(), new Date(), SubmissionStatus.NEVER_EXECUTED);
     }
 
     return new SubmissionBean(submission);

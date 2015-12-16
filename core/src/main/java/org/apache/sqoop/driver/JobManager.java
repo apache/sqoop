@@ -311,7 +311,7 @@ public class JobManager implements Reconfigurable {
     if (!job.getEnabled()) {
       throw new SqoopException(DriverError.DRIVER_0009, "Job: " + jobName);
     }
-    MSubmission mSubmission = createJobSubmission(ctx, job.getPersistenceId());
+    MSubmission mSubmission = createJobSubmission(ctx, job.getName());
     JobRequest jobRequest = createJobRequest(mSubmission, job);
     // Bootstrap job to execute in the configured execution engine
     prepareJob(jobRequest);
@@ -463,8 +463,8 @@ public class JobManager implements Reconfigurable {
     }
   }
 
-  MSubmission createJobSubmission(HttpEventContext ctx, long jobId) {
-    MSubmission summary = new MSubmission(jobId);
+  MSubmission createJobSubmission(HttpEventContext ctx, String jobName) {
+    MSubmission summary = new MSubmission(jobName);
     summary.setCreationUser(ctx.getUsername());
     summary.setLastUpdateUser(ctx.getUsername());
     return summary;
@@ -494,19 +494,6 @@ public class JobManager implements Reconfigurable {
           + link.getName());
     }
     return link;
-  }
-
-  // TODO: this method should be removed when MSubmission link job with jobName
-  MJob getJob(long jobId) {
-    MJob job = RepositoryManager.getInstance().getRepository().findJob(jobId);
-    if (job == null) {
-      throw new SqoopException(DriverError.DRIVER_0004, "Unknown job id: " + jobId);
-    }
-
-    if (!job.getEnabled()) {
-      throw new SqoopException(DriverError.DRIVER_0009, "Job: " + job.getName());
-    }
-    return job;
   }
 
   MJob getJob(String jobName) {
@@ -580,7 +567,7 @@ public class JobManager implements Reconfigurable {
 
   void invokeDestroyerOnJobSuccess(MSubmission submission) {
     try {
-      MJob job = getJob(submission.getJobId());
+      MJob job = getJob(submission.getJobName());
 
       SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorName());
       SqoopConnector toConnector = getSqoopConnector(job.getToConnectorName());

@@ -149,8 +149,7 @@ public class AuthorizationEngine {
       @Override
       public boolean apply(MSubmission input) {
         try {
-          String jobName = getResourceName(MResource.TYPE.JOB, input.getJobId());
-          checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.READ));
+          checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, input.getJobName(), MPrivilege.ACTION.READ));
           // add valid submission
           return true;
         } catch (RuntimeException e) {
