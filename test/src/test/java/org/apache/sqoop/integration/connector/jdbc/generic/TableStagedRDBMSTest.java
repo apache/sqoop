@@ -89,4 +89,10 @@ public class TableStagedRDBMSTest extends ConnectorTestCase {
     dropTable();
   }
 
+  // shorter name for oracle
+  @Override
+  public TableName getTableName() {
+    return new TableName("stagedrdbms");
+  }
+
 }

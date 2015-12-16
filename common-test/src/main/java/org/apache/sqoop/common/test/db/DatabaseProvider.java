@@ -371,9 +371,9 @@ abstract public class DatabaseProvider {
     } else if (value instanceof Character) {
       preparedStatement.setString(parameterIndex, value.toString());
     } else if (value instanceof Timestamp) {
-      preparedStatement.setString(parameterIndex, value.toString());
+      preparedStatement.setTimestamp(parameterIndex, (Timestamp) value);
     } else if (value instanceof BigDecimal) {
-      preparedStatement.setString(parameterIndex, value.toString());
+      preparedStatement.setBigDecimal(parameterIndex, (BigDecimal) value);
     } else {
       preparedStatement.setObject(parameterIndex, value);
     }

@@ -259,16 +259,34 @@ public class GenericJdbcFromInitializer extends Initializer<LinkConfiguration, F
         throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0006);
       }
 
-      // Boundaries for the job
-      String min = rs.getString(1);
-      String max = rs.getString(2);
-
       // Type of the partition column
       ResultSetMetaData rsmd = rs.getMetaData();
       if (rsmd.getColumnCount() != 2) {
         throw new SqoopException(GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0006);
       }
       int columnType = rsmd.getColumnType(1);
+
+      String min;
+      String max;
+      // Boundaries for the job
+      switch (columnType) {
+        case Types.DATE:
+          min = String.valueOf(rs.getDate(1).getTime());
+          max = String.valueOf(rs.getDate(2).getTime());
+          break;
+        case Types.TIMESTAMP:
+          min = String.valueOf(rs.getTimestamp(1).getTime());
+          max = String.valueOf(rs.getTimestamp(2).getTime());
+          break;
+        case Types.TIME:
+          min = String.valueOf(rs.getTime(1).getTime());
+          max = String.valueOf(rs.getTime(2).getTime());
+          break;
+        default:
+          min = rs.getString(1);
+          max = rs.getString(2);
+      }
+
 
       LOG.info("Boundaries for the job: min=" + min + ", max=" + max + ", columnType=" + columnType);
 

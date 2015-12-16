@@ -22,8 +22,12 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
@@ -249,6 +253,37 @@ public class TestPartitioner {
     });
   }
 
+  // We may round the quotient when calculating splitsize, this tests ensure we catch those values in the final partition
+  @Test
+  public void testNumericInaccurateSplit() throws Exception {
+    MutableContext context = new MutableMapContext();
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNNAME, "DCOL");
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.NUMERIC));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE, String.valueOf(new BigDecimal(1)));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE, String.valueOf(new BigDecimal(13)));
+
+    LinkConfiguration linkConfig = new LinkConfiguration();
+    FromJobConfiguration jobConfig = new FromJobConfiguration();
+
+    Partitioner partitioner = new GenericJdbcPartitioner();
+    PartitionerContext partitionerContext = new PartitionerContext(context, 11, null, "test_user");
+    List<Partition> partitions = partitioner.getPartitions(partitionerContext, linkConfig, jobConfig);
+
+    verifyResult(partitions, new String[] {
+      "1 <= DCOL AND DCOL < 2",
+      "2 <= DCOL AND DCOL < 3",
+      "3 <= DCOL AND DCOL < 4",
+      "4 <= DCOL AND DCOL < 5",
+      "5 <= DCOL AND DCOL < 6",
+      "6 <= DCOL AND DCOL < 7",
+      "7 <= DCOL AND DCOL < 8",
+      "8 <= DCOL AND DCOL < 9",
+      "9 <= DCOL AND DCOL < 10",
+      "10 <= DCOL AND DCOL < 11",
+      "11 <= DCOL AND DCOL <= 13"
+    });
+  }
+
   @Test
   public void testNumericSinglePartition() throws Exception {
     MutableContext context = new MutableMapContext();
@@ -276,10 +311,9 @@ public class TestPartitioner {
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.DATE));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE,
-        Date.valueOf("2004-10-20").toString());
-    context.setString(GenericJdbcConnectorConstants
-        .CONNECTOR_JDBC_PARTITION_MAXVALUE, Date.valueOf("2013-10-17")
-        .toString());
+      String.valueOf(Date.valueOf("2004-10-20").getTime()));
+    context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
+      String.valueOf(Date.valueOf("2013-10-17").getTime()));
 
 
     LinkConfiguration linkConfig = new LinkConfiguration();
@@ -300,15 +334,21 @@ public class TestPartitioner {
 
   @Test
   public void testTimePartition() throws Exception {
+    DateFormat timeDateFormat = new SimpleDateFormat("HH:mm:ss");
+    timeDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+    Long startTime = timeDateFormat.parse("01:01:01").getTime();
+    Long endTime = timeDateFormat.parse("10:40:50").getTime();
+
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_COLUMNNAME, "TCOL");
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.TIME));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE,
-        Time.valueOf("01:01:01").toString());
+        String.valueOf(startTime));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
-        Time.valueOf("10:40:50").toString());
+        String.valueOf(endTime));
 
 
     LinkConfiguration linkConfig = new LinkConfiguration();
@@ -327,15 +367,21 @@ public class TestPartitioner {
 
   @Test
   public void testTimestampPartition() throws Exception {
+    DateFormat timestampDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    timestampDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+    Long startTime = timestampDateFormat.parse("2013-01-01 01:01:01.123").getTime();
+    Long endTime = timestampDateFormat.parse("2013-12-31 10:40:50.654").getTime();
+
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_COLUMNNAME, "TSCOL");
     context.setString(GenericJdbcConnectorConstants
         .CONNECTOR_JDBC_PARTITION_COLUMNTYPE, String.valueOf(Types.TIMESTAMP));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MINVALUE,
-        Timestamp.valueOf("2013-01-01 01:01:01.123").toString());
+        String.valueOf(startTime));
     context.setString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_PARTITION_MAXVALUE,
-        Timestamp.valueOf("2013-12-31 10:40:50.654").toString());
+        String.valueOf(endTime));
 
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
@@ -513,8 +559,8 @@ public class TestPartitioner {
 
     Iterator<Partition> iterator = partitions.iterator();
     for (int i = 0; i < expected.length; i++) {
-      assertEquals(expected[i],
-          ((GenericJdbcPartition)iterator.next()).getConditions());
+      GenericJdbcPartition partition = ((GenericJdbcPartition) iterator.next());
+      assertEquals(partition.toString(), expected[i]);
     }
   }
 }
