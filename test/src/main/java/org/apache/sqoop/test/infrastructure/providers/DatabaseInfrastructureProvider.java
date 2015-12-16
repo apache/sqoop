@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.DatabaseProviderFactory;
+import org.apache.sqoop.test.kdc.KdcRunner;
 
 /**
  * Database infrastructure provider.
@@ -67,6 +68,11 @@ public class DatabaseInfrastructureProvider extends InfrastructureProvider {
   @Override
   public String getRootPath() {
     return null;
+  }
+
+  @Override
+  public void setKdc(KdcRunner kdc) {
+    // No-op.
   }
 
   public DatabaseProvider getInstance() {

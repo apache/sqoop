@@ -22,6 +22,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.common.test.repository.RepositoryProviderFactory;
+import org.apache.sqoop.test.kdc.KdcRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +48,11 @@ public abstract class SqoopMiniCluster {
    * Temporary path for storing Sqoop server data (configuration files)
    */
   private String temporaryPath;
+
+  /**
+   * Kdc runner.
+   */
+  private KdcRunner kdc;
 
   /**
    * Create Sqoop Mini cluster with default configuration
@@ -85,6 +91,10 @@ public abstract class SqoopMiniCluster {
 
   public String getLogPath() {
     return temporaryPath + "/log/";
+  }
+
+  public void setKdc(KdcRunner kdc) {
+    this.kdc = kdc;
   }
 
   /**
@@ -198,8 +208,17 @@ public abstract class SqoopMiniCluster {
   protected Map<String, String> getSecurityConfiguration() {
     Map<String, String> properties = new HashMap<String, String>();
 
-    properties.put("org.apache.sqoop.authentication.type", "SIMPLE");
-    properties.put("org.apache.sqoop.authentication.handler", "org.apache.sqoop.security.SimpleAuthenticationHandler");
+    if (kdc != null && kdc.isKerberosEnabled()) {
+      // Sqoop Server is kerberos enabled
+      properties.put("org.apache.sqoop.security.authentication.type", "KERBEROS");
+      properties.put("org.apache.sqoop.security.authentication.kerberos.http.principal", kdc.getSpnegoPrincipal());
+      properties.put("org.apache.sqoop.security.authentication.kerberos.http.keytab", kdc.getSqoopServerKeytabFile());
+    } else {
+      properties.put("org.apache.sqoop.security.authentication.type", "SIMPLE");
+    }
+
+    // Sqoop Server do simple authentication with other services
+    properties.put("org.apache.sqoop.security.authentication.handler", "org.apache.sqoop.security.authentication.SimpleAuthenticationHandler");
 
     /**
      * Due to the fact that we share a JVM with hadoop during unit testing,

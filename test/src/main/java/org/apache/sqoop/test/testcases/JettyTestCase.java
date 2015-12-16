@@ -27,8 +27,10 @@ import org.apache.sqoop.test.asserts.HdfsAsserts;
 import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
+import org.apache.sqoop.test.kdc.KdcRunner;
+import org.apache.sqoop.test.kdc.KdcRunnerFactory;
+import org.apache.sqoop.test.kdc.MiniKdcRunner;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
-import org.apache.sqoop.test.minicluster.RealSqoopCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniClusterFactory;
 import org.apache.sqoop.test.utils.HdfsUtils;
@@ -93,6 +95,11 @@ abstract public class JettyTestCase implements ITest {
   private static SqoopClient client;
 
   /**
+   * Kdc
+   */
+  private static KdcRunner kdc;
+
+  /**
    * Use the method name as the test name
    */
   public String getTestName() {
@@ -112,6 +119,7 @@ abstract public class JettyTestCase implements ITest {
     LOG.debug("Temporary Directory: " + getTemporaryPath());
     FileUtils.deleteDirectory(new File(getTemporaryPath()));
 
+    startKdc();
     startHadoop();
     startSqoop();
   }
@@ -120,6 +128,17 @@ abstract public class JettyTestCase implements ITest {
   public void tearDownSuite() throws Exception {
     stopSqoop();
     stopHadoop();
+    stopKdc();
+  }
+
+  protected void startKdc() throws Exception {
+    kdc = KdcRunnerFactory.getKdc(System.getProperties(), MiniKdcRunner.class);
+    kdc.setTemporaryPath(getTemporaryPath());
+    kdc.start();
+  }
+
+  protected void stopKdc() throws Exception {
+    kdc.stop();
   }
 
   protected void startHadoop() throws Exception {
@@ -140,7 +159,7 @@ abstract public class JettyTestCase implements ITest {
     cluster.start();
 
     // Initialize Sqoop Client API
-    client = new SqoopClient(getServerUrl());
+    setClient(new SqoopClient(getServerUrl()));
   }
 
   protected void stopSqoop() throws Exception {
@@ -160,7 +179,7 @@ abstract public class JettyTestCase implements ITest {
    */
   public SqoopMiniCluster createSqoopMiniCluster() throws Exception {
     return SqoopMiniClusterFactory.getSqoopMiniCluster(System.getProperties(), JettySqoopMiniCluster.class,
-      getSqoopMiniClusterTemporaryPath(), hadoopCluster.getConfiguration());
+      getSqoopMiniClusterTemporaryPath(), hadoopCluster.getConfiguration(), kdc);
   }
 
   /**
@@ -172,8 +191,9 @@ abstract public class JettyTestCase implements ITest {
     return client;
   }
 
-  public static void setClient(SqoopClient sqoopClient) {
+  public static void setClient(SqoopClient sqoopClient) throws Exception {
     client = sqoopClient;
+    kdc.authenticateWithSqoopServer(sqoopClient);
   }
 
   public static SqoopMiniCluster getCluster() {

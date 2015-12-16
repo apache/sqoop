@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.client.SubmissionCallback;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
@@ -38,7 +39,9 @@ import org.apache.sqoop.test.data.UbuntuReleases;
 import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.InfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.kdc.KdcRunner;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.apache.sqoop.test.utils.SqoopUtils;
 import org.apache.sqoop.validation.Status;
@@ -50,6 +53,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,6 +101,8 @@ public class SqoopTestCase implements ITest {
   private String methodName;
 
   private SqoopClient client;
+
+  private DelegationTokenAuthenticatedURL.Token authToken = new DelegationTokenAuthenticatedURL.Token();
 
   @BeforeSuite
   public static void findSuiteName(ITestContext context) {
@@ -153,19 +159,29 @@ public class SqoopTestCase implements ITest {
     // Create/start infrastructure providers.
     Configuration conf = new JobConf();
 
-    // Start hadoop first.
+    KdcRunner kdc = null;
+
+    // Start kdc first.
+    if (providers.contains(KdcInfrastructureProvider.class)) {
+      KdcInfrastructureProvider kdcProviderObject = startInfrastructureProvider(KdcInfrastructureProvider.class, conf, null);
+      kdc = kdcProviderObject.getInstance();
+      providers.remove(KdcInfrastructureProvider.class);
+    }
+
+    // Start hadoop secondly.
     if (providers.contains(HadoopInfrastructureProvider.class)) {
-      InfrastructureProvider hadoopProviderObject = startInfrastructureProvider(HadoopInfrastructureProvider.class, conf);
+      InfrastructureProvider hadoopProviderObject = startInfrastructureProvider(HadoopInfrastructureProvider.class, conf, kdc);
 
       // Use the prepared hadoop configuration for the rest of the components.
       if (hadoopProviderObject != null) {
         conf = hadoopProviderObject.getHadoopConfiguration();
       }
+      providers.remove(HadoopInfrastructureProvider.class);
     }
 
     // Start the rest of the providers.
     for (Class<? extends InfrastructureProvider> provider : providers) {
-      startInfrastructureProvider(provider, conf);
+      startInfrastructureProvider(provider, conf, kdc);
     }
   }
 
@@ -177,7 +193,7 @@ public class SqoopTestCase implements ITest {
    * @param <T>
    * @return
    */
-  private static <T extends InfrastructureProvider> T startInfrastructureProvider(Class<T> providerClass, Configuration hadoopConfiguration) {
+  private static <T extends InfrastructureProvider> T startInfrastructureProvider(Class<T> providerClass, Configuration hadoopConfiguration, KdcRunner kdc) {
     T providerObject;
 
     try {
@@ -189,6 +205,7 @@ public class SqoopTestCase implements ITest {
 
     providerObject.setRootPath(HdfsUtils.joinPathFragments(ROOT_PATH, suiteName, providerClass.getCanonicalName()));
     providerObject.setHadoopConfiguration(hadoopConfiguration);
+    providerObject.setKdc(kdc);
     providerObject.start();
 
     // Add for recall later.
@@ -310,19 +327,30 @@ public class SqoopTestCase implements ITest {
         .getServerUrl();
   }
 
+  public SqoopClient getClient() {
+    return client;
+  }
+
+  public DelegationTokenAuthenticatedURL.Token getAuthToken() {
+    return authToken;
+  }
+
   /**
    * Create a sqoop client
-   * @return SqoopClient
    */
-  public SqoopClient getClient() {
-    if (client == null) {
-      String serverUrl = getSqoopServerUrl();
+  @BeforeMethod
+  public void initSqoopClient() throws Exception {
+    String serverUrl = getSqoopServerUrl();
 
-      if (serverUrl != null) {
-        client = new SqoopClient(serverUrl);
+    if (serverUrl != null) {
+      client = new SqoopClient(serverUrl);
+
+      KdcInfrastructureProvider kdcProvider = getInfrastructureProvider(KdcInfrastructureProvider.class);
+      if (kdcProvider != null) {
+        kdcProvider.getInstance().authenticateWithSqoopServer(client);
+        kdcProvider.getInstance().authenticateWithSqoopServer(new URL(serverUrl), authToken);
       }
     }
-    return client;
   }
 
   /**

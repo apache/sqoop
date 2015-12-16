@@ -20,30 +20,32 @@ package org.apache.sqoop.test.infrastructure.providers;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.test.kdc.KdcRunner;
-import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
-import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
-import org.apache.sqoop.test.minicluster.SqoopMiniClusterFactory;
+import org.apache.sqoop.test.kdc.KdcRunnerFactory;
+import org.apache.sqoop.test.kdc.MiniKdcRunner;
 
 /**
- * Sqoop infrastructure provider.
+ * Kdc infrastructure provider.
  */
-public class SqoopInfrastructureProvider extends InfrastructureProvider {
-  private static final Logger LOG = Logger.getLogger(SqoopInfrastructureProvider.class);
+public class KdcInfrastructureProvider extends InfrastructureProvider {
+  private static final Logger LOG = Logger.getLogger(KdcInfrastructureProvider.class);
 
-  private SqoopMiniCluster instance;
-  private String rootPath;
-  private Configuration hadoopConf;
-  private KdcRunner kdc;
+  private KdcRunner instance;
+  private Configuration conf;
 
-  public SqoopInfrastructureProvider() {}
+  public KdcInfrastructureProvider() {
+    try {
+      instance = KdcRunnerFactory.getKdc(System.getProperties(), MiniKdcRunner.class);
+    } catch (Exception e) {
+      LOG.error("Error fetching Kdc runner.", e);
+    }
+  }
 
   @Override
   public void start() {
     try {
-      instance = SqoopMiniClusterFactory.getSqoopMiniCluster(System.getProperties(), JettySqoopMiniCluster.class, rootPath, hadoopConf, kdc);
       instance.start();
     } catch (Exception e) {
-      LOG.error("Could not start Sqoop mini cluster.", e);
+      LOG.error("Could not start kdc.", e);
     }
   }
 
@@ -52,35 +54,36 @@ public class SqoopInfrastructureProvider extends InfrastructureProvider {
     try {
       instance.stop();
     } catch (Exception e) {
-      LOG.error("Could not stop Sqoop mini cluster.", e);
+      LOG.error("Could not stop kdc.", e);
     }
+  }
+
+  public KdcRunner getInstance() {
+    return instance;
   }
 
   @Override
   public void setHadoopConfiguration(Configuration conf) {
-    hadoopConf = conf;
+    this.conf = conf;
   }
 
   @Override
   public Configuration getHadoopConfiguration() {
-    return hadoopConf;
+    return conf;
   }
 
   @Override
   public void setRootPath(String path) {
-    rootPath = path;
+    instance.setTemporaryPath(path);
   }
 
   @Override
   public String getRootPath() {
-    return rootPath;
+    return instance.getTemporaryPath();
   }
 
+  @Override
   public void setKdc(KdcRunner kdc) {
-    this.kdc = kdc;
-  }
-
-  public SqoopMiniCluster getInstance() {
-    return instance;
+    // Do nothing as KdcRunner is created by this class.
   }
 }
