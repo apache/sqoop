@@ -57,6 +57,7 @@ import org.apache.sqoop.manager.netezza.NetezzaExportManualTest;
 import org.apache.sqoop.manager.netezza.NetezzaImportManualTest;
 import org.apache.sqoop.manager.oracle.OracleCallExportTest;
 import org.apache.sqoop.manager.oracle.OracleIncrementalImportTest;
+import org.apache.sqoop.manager.oracle.OracleSplitterTest;
 import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeExportDelimitedFileManualTest;
 import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeExportSequenceFileManualTest;
 import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeImportDelimitedFileManualTest;
@@ -96,6 +97,7 @@ public final class ThirdPartyTests extends TestCase {
     suite.addTestSuite(OracleManagerTest.class);
     suite.addTestSuite(OracleCompatTest.class);
     suite.addTestSuite(OracleIncrementalImportTest.class);
+    suite.addTestSuite(OracleSplitterTest.class);
 
     // SQL Server
     suite.addTestSuite(SQLServerDatatypeExportDelimitedFileManualTest.class);

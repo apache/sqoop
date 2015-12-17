@@ -45,7 +45,7 @@ public class OracleDataDrivenDBInputFormat<T extends DBWritable>
    * into InputSplits.
    */
   @Override
-  protected DBSplitter getSplitter(int sqlDataType) {
+  protected DBSplitter getSplitter(int sqlDataType, long splitLimit) {
     switch (sqlDataType) {
     case Types.DATE:
     case Types.TIME:
@@ -53,7 +53,7 @@ public class OracleDataDrivenDBInputFormat<T extends DBWritable>
       return new OracleDateSplitter();
 
     default:
-      return super.getSplitter(sqlDataType);
+      return super.getSplitter(sqlDataType, splitLimit);
     }
   }
 
