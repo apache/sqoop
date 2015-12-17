@@ -361,7 +361,6 @@ public class SqoopTestCase implements ITest {
   public void saveLink(MLink link) {
     SqoopUtils.fillObjectName(link);
     assertEquals(Status.OK, getClient().saveLink(link));
-    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, link.getPersistenceId());
   }
 
   /**
@@ -372,7 +371,6 @@ public class SqoopTestCase implements ITest {
   public void saveJob(MJob job) {
     SqoopUtils.fillObjectName(job);
     assertEquals(Status.OK, getClient().saveJob(job));
-    assertNotSame(MPersistableEntity.PERSISTANCE_ID_DEFAULT, job.getPersistenceId());
   }
 
   /**

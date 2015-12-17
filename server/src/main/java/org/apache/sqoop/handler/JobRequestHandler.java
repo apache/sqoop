@@ -250,7 +250,7 @@ public class JobRequestHandler implements RequestHandler {
         postedJob.setCreationUser(username);
         postedJob.setLastUpdateUser(username);
         repository.createJob(postedJob);
-        validationResultBean.setId(postedJob.getPersistenceId());
+        validationResultBean.setName(postedJob.getName());
       } else {
         AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
             ctx.getRequest().getRemoteAddr(), "update", "job",

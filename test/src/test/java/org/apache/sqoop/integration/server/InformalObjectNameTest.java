@@ -87,8 +87,10 @@ public class InformalObjectNameTest extends SqoopTestCase {
     fillRdbmsLinkConfig(rdbmsLink);
     rdbmsLink.setName(linkName);
     saveLink(rdbmsLink);
-    // read link
-    assertEquals(rdbmsLink, getClient().getLink(linkName));
+    // read link, copy the id to current link, then do the compare.
+    MLink repositoryLink = getClient().getLink(linkName);
+    rdbmsLink.setPersistenceId(repositoryLink.getPersistenceId());
+    assertEquals(rdbmsLink, repositoryLink);
 
     // update link
     getClient().updateLink(rdbmsLink);
@@ -130,8 +132,10 @@ public class InformalObjectNameTest extends SqoopTestCase {
     job.setName(jobName);
     saveJob(job);
 
-    // read job
-    assertEquals(job, getClient().getJob(jobName));
+    // read job, copy the id to current job, then do the compare.
+    MJob repositoryJob = getClient().getJob(jobName);
+    job.setPersistenceId(repositoryJob.getPersistenceId());
+    assertEquals(job, repositoryJob);
 
     // update job
     getClient().updateJob(job);

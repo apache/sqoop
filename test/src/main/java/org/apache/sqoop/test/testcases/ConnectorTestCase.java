@@ -242,7 +242,6 @@ abstract public class  ConnectorTestCase extends JettyTestCase {
   protected void saveLink(MLink link) {
     SqoopUtils.fillObjectName(link);
     assertEquals(getClient().saveLink(link), Status.OK);
-    assertNotSame(link.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
   }
 
  /**
@@ -255,13 +254,12 @@ abstract public class  ConnectorTestCase extends JettyTestCase {
  protected void saveJob(MJob job) {
    SqoopUtils.fillObjectName(job);
    assertEquals(getClient().saveJob(job), Status.OK);
-   assertNotSame(job.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
   }
 
   /**
-   * Run job with given jid.
+   * Run job with given job name.
    *
-   * @param jid Job id
+   * @param jobName Job Name
    * @throws Exception
    */
   protected void executeJob(String jobName) throws Exception {
