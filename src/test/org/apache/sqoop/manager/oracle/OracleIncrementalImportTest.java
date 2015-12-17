@@ -108,6 +108,8 @@ public class OracleIncrementalImportTest extends ImportJobTestCase {
     args.add(getWarehouseDir());
     args.add("--num-mappers");
     args.add("1");
+    args.add("--split-by");
+    args.add(checkColumnName);
     args.add("--table");
     args.add(tableName);
     args.add("--incremental");
@@ -150,6 +152,33 @@ public class OracleIncrementalImportTest extends ImportJobTestCase {
     Path filePath = new Path(warehousePath, "part-m-00000");
     String output = readLineFromPath(filePath);
     String expectedVal = "2,new_data,2000-11-11";
+    assertEquals("Incremental import result expected a different string",
+                 expectedVal, output);
+  }
+
+  public void testIncrementalImportWithLastModifiedTimestamp() throws IOException {
+    tableNames = new ArrayList<String>();
+    String [] types = { "INT", "VARCHAR(10)", "TIMESTAMP", };
+    String [] vals = {
+        "1", "'old_data'",
+        "TO_TIMESTAMP('1999-01-01 11:11:11', 'YYYY-MM-DD HH24:MI:SS')",
+        "2", "'new_data'",
+        "TO_TIMESTAMP('2000-11-11 23:23:23', 'YYYY-MM-DD HH24:MI:SS')", };
+    String tableName = getTableName();
+    tableNames.add(tableName);
+    createTableWithColTypes(types, vals);
+    // Some version of Oracle's jdbc drivers automatically convert date to
+    // timestamp. Since we don't want this to happen for this test,
+    // we must explicitly use a property file to control this behavior.
+    String connPropsFileName = "connection.properties";
+    createFileWithContent(connPropsFileName, "oracle.jdbc.mapDateToTimestamp=false");
+    String[] args = getArgv(tableName, connPropsFileName, getColName(2));
+    runImport(args);
+
+    Path warehousePath = new Path(this.getWarehouseDir());
+    Path filePath = new Path(warehousePath, "part-m-00000");
+    String output = readLineFromPath(filePath);
+    String expectedVal = "2,new_data,2000-11-11 23:23:23.0";
     assertEquals("Incremental import result expected a different string",
                  expectedVal, output);
   }
