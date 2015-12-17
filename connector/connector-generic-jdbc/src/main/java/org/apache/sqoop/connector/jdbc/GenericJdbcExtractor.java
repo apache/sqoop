@@ -70,15 +70,15 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
           switch (schemaColumn.getType()) {
           case DATE:
             // convert the sql date to JODA time as prescribed the Sqoop IDF spec
-            array[i] = LocalDate.fromDateFields((java.sql.Date)resultSet.getObject(i + 1));
+            array[i] = LocalDate.fromDateFields(resultSet.getDate(i + 1));
             break;
           case DATE_TIME:
             // convert the sql date time to JODA time as prescribed the Sqoop IDF spec
-            array[i] = LocalDateTime.fromDateFields((java.sql.Timestamp)resultSet.getObject(i + 1));
+            array[i] = LocalDateTime.fromDateFields(resultSet.getTimestamp(i + 1));
             break;
           case TIME:
             // convert the sql time to JODA time as prescribed the Sqoop IDF spec
-            array[i] = LocalTime.fromDateFields((java.sql.Time)resultSet.getObject(i + 1));
+            array[i] = LocalTime.fromDateFields(resultSet.getTime(i + 1));
             break;
           default:
             //for anything else
