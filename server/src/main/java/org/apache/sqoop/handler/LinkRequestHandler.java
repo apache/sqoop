@@ -174,7 +174,7 @@ public class LinkRequestHandler implements RequestHandler {
         postedLink.setCreationUser(username);
         postedLink.setLastUpdateUser(username);
         repository.createLink(postedLink);
-        linkValidationBean.setName(postedLink.getName());
+        linkValidationBean.setId(postedLink.getPersistenceId());
       } else {
         AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
             ctx.getRequest().getRemoteAddr(), "update", "link",

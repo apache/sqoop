@@ -806,9 +806,9 @@ public class SqoopClient {
     ConfigValidationResult linkConfig = bean.getValidationResults()[0];
     // Apply validation results
     ConfigUtils.applyValidation(link.getConnectorLinkConfig(), linkConfig);
-    String linkName = bean.getName();
-    if (linkName != null) {
-      link.setName(linkName);
+    Long id = bean.getId();
+    if (id != null) {
+      link.setPersistenceId(id);
     }
     return Status.getWorstStatus(linkConfig.getStatus());
   }
@@ -830,9 +830,9 @@ public class SqoopClient {
       driver
     );
 
-    String jobName = bean.getName();
-    if(jobName != null) {
-      job.setName(jobName);
+    Long id = bean.getId();
+    if(id != null) {
+      job.setPersistenceId(id);
     }
 
     return Status.getWorstStatus(fromConfig.getStatus(), toConfig.getStatus(), driver.getStatus());
