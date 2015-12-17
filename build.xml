@@ -350,8 +350,9 @@
       value="${name}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
 
   <!--test related properties -->
-  <property name="sqoop.test.oracle.connectstring"
-            value="jdbc:oracle:thin:@//localhost/xe"/>
+  <property name="sqoop.test.oracle.connectstring" value="jdbc:oracle:thin:@//localhost/xe"/>
+  <property name="sqoop.test.oracle.username" value="SQOOPTEST"/>
+  <property name="sqoop.test.oracle.password" value="12345"/>
 
   <property name="sqoop.test.mysql.connectstring.host_url"
             value="jdbc:mysql://localhost/"/>
@@ -953,6 +954,12 @@
       -->
       <sysproperty key="sqoop.test.oracle.connectstring"
                    value="${sqoop.test.oracle.connectstring}"/>
+
+      <sysproperty key="sqoop.test.oracle.username"
+                   value="${sqoop.test.oracle.username}"/>
+
+      <sysproperty key="sqoop.test.oracle.password"
+                   value="${sqoop.test.oracle.password}"/>
 
       <sysproperty key="sqoop.test.mysql.connectstring.host_url"
                    value="${sqoop.test.mysql.connectstring.host_url}"/>
