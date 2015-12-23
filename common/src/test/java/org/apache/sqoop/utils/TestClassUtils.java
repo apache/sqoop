@@ -171,6 +171,7 @@ public class TestClassUtils {
   @Test
   public void testLoadClassWithClassLoader() throws Exception {
     String classpath = ClassUtils.jarForClass(testAClass);
+    classpath = classpath.startsWith("file:") ? classpath.substring("file:".length()) : classpath;
     assertNotEquals(testAClass, ClassUtils.loadClassWithClassLoader(testAClass.getName(),
         new ConnectorClassLoader(classpath, getClass().getClassLoader(), Arrays.asList("java."))));
   }

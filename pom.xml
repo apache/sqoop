@@ -124,6 +124,8 @@ limitations under the License.
     <groovy.version>2.4.0</groovy.version>
     <jansi.version>1.7</jansi.version>
     <felix.version>2.4.0</felix.version>
+    <!-- maven plugin versions -->
+    <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
   </properties>
 
   <dependencies>
@@ -697,6 +699,7 @@ limitations under the License.
   </dependencyManagement>
 
   <modules>
+    <module>assemblies</module>
     <module>common</module>
     <module>common-test</module>
     <module>core</module>
@@ -802,6 +805,34 @@ limitations under the License.
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
           <version>${felix.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.sqoop</groupId>
+              <artifactId>sqoop-assemblies</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>make-assembly</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <finalName>${project.artifactId}-${project.version}</finalName>
+                <appendAssemblyId>false</appendAssemblyId>
+                <descriptorRefs>
+                  <descriptorRef>sqoop-connector</descriptorRef>
+                </descriptorRefs>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

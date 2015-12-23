@@ -79,6 +79,9 @@ public enum MRExecutionError implements ErrorCode {
   /** Got invalid number of partitions from Partitioner */
   MAPRED_EXEC_0025("Retrieved invalid number of partitions from Partitioner"),
 
+  /** Unable to find connector jar */
+  MAPRED_EXEC_0026("Unable to find connector jar"),
+
   ;
 
   private final String message;

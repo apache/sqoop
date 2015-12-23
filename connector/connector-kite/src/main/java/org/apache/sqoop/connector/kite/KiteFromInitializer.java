@@ -56,24 +56,11 @@ public class KiteFromInitializer extends Initializer<LinkConfiguration,
   public Set<String> getJars(InitializerContext context,
       LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
     Set<String> jars = super.getJars(context, linkConfig, fromJobConfig);
-    jars.add(ClassUtils.jarForClass("org.kitesdk.data.Datasets"));
-    jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.databind.JsonNode"));
-    jars.add(ClassUtils.jarForClass("com.fasterxml.jackson.core.TreeNode"));
-    jars.add(ClassUtils.jarForClass("parquet.hadoop.metadata.CompressionCodecName"));
-    jars.add(ClassUtils.jarForClass("parquet.format.CompressionCodec"));
-    jars.add(ClassUtils.jarForClass("parquet.avro.AvroParquetWriter"));
-    jars.add(ClassUtils.jarForClass("parquet.column.ParquetProperties"));
-    jars.add(ClassUtils.jarForClass("parquet.Version"));
-    jars.add(ClassUtils.jarForClass("parquet.org.codehaus.jackson.type.TypeReference"));
-    jars.add(ClassUtils.jarForClass("parquet.bytes.CapacityByteArrayOutputStream"));
-    jars.add(ClassUtils.jarForClass("parquet.encoding.Generator"));
-    jars.add(ClassUtils.jarForClass("au.com.bytecode.opencsv.CSVWriter"));
+
     if (fromJobConfig.fromJobConfig.uri.startsWith("dataset:hive")) {
       // @TODO(Abe): Remove a deps that aren't used?
       jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.conf.HiveConf"));
       jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.serde2.SerDe"));
-      jars.add(ClassUtils.jarForClass("org.kitesdk.data.spi.hive.MetaStoreUtil"));
-      jars.add(ClassUtils.jarForClass("org.kitesdk.compat.DynConstructors"));
       jars.add(ClassUtils.jarForClass("org.apache.hadoop.hive.metastore.Warehouse"));
       jars.add(ClassUtils.jarForClass("org.apache.hive.common.HiveCompat"));
       jars.add(ClassUtils.jarForClass("com.facebook.fb303.FacebookService"));

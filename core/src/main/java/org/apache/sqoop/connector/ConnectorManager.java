@@ -159,7 +159,11 @@ public class ConnectorManager implements Reconfigurable {
   }
 
   public SqoopConnector getSqoopConnector(String uniqueName) {
-    return handlerMap.get(uniqueName).getSqoopConnector();
+    if (handlerMap != null && handlerMap.get(uniqueName) != null) {
+      return handlerMap.get(uniqueName).getSqoopConnector();
+    } else {
+      return null;
+    }
   }
 
   public synchronized void initialize() {

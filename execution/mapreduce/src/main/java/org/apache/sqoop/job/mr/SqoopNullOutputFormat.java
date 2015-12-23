@@ -19,6 +19,7 @@
 package org.apache.sqoop.job.mr;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -32,6 +33,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.io.SqoopWritable;
+import org.apache.sqoop.utils.ClassUtils;
 
 /**
  * An output format for MapReduce job.
@@ -58,7 +60,8 @@ public class SqoopNullOutputFormat extends OutputFormat<SqoopWritable, NullWrita
 
   private static class SqoopDestroyerOutputCommitter extends OutputCommitter {
     @Override
-    public void setupJob(JobContext jobContext) {
+    public void setupJob(JobContext jobContext) throws IOException {
+      MRUtils.initConnectorClassLoaders(jobContext.getConfiguration());
     }
 
     @Override
@@ -73,10 +76,26 @@ public class SqoopNullOutputFormat extends OutputFormat<SqoopWritable, NullWrita
       invokeDestroyerExecutor(jobContext, false);
     }
 
-    private void invokeDestroyerExecutor(JobContext jobContext, boolean success) {
-      Configuration config = jobContext.getConfiguration();
-      SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.FROM, jobContext.getConfiguration().get(MRJobConstants.SUBMITTING_USER));
-      SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.TO, jobContext.getConfiguration().get(MRJobConstants.SUBMITTING_USER));
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
+    private void invokeDestroyerExecutor(final JobContext jobContext, final boolean success) {
+      final Configuration config = jobContext.getConfiguration();
+
+      ClassUtils.executeWithClassLoader(MRUtils.getConnectorClassLoader(Direction.FROM),
+          new Callable<Void>() {
+        @Override
+        public Void call() throws IOException, InterruptedException {
+          SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.FROM, jobContext.getConfiguration().get(MRJobConstants.SUBMITTING_USER));
+          return null;
+        }
+      });
+      ClassUtils.executeWithClassLoader(MRUtils.getConnectorClassLoader(Direction.TO),
+          new Callable<Void>() {
+        @Override
+        public Void call() throws IOException, InterruptedException {
+          SqoopDestroyerExecutor.executeDestroyer(success, config, Direction.TO, jobContext.getConfiguration().get(MRJobConstants.SUBMITTING_USER));
+          return null;
+        }
+      });
     }
 
     @Override

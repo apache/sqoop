@@ -125,11 +125,11 @@ public class ConnectorClassLoader extends URLClassLoader {
   private final ClassLoader parent;
   private final List<String> systemClasses;
 
-  public ConnectorClassLoader(URL[] urls, ClassLoader parent,
+  public ConnectorClassLoader(URL url, ClassLoader parent,
       List<String> systemClasses, boolean overrideDefaultSystemClasses) throws IOException {
-    super(urls, parent);
+    super(new URL[] {url}, parent);
     if (LOG.isDebugEnabled()) {
-      LOG.debug("urls: " + Arrays.toString(urls));
+      LOG.debug("url: " + url);
       LOG.debug("system classes: " + systemClasses);
     }
     this.parent = parent;
@@ -147,17 +147,17 @@ public class ConnectorClassLoader extends URLClassLoader {
     LOG.info("system classes: " + this.systemClasses);
 
     urlFactory = new ConnectorURLFactory(this);
-    load(urls);
+    load(url);
   }
 
-  public ConnectorClassLoader(String classpath, ClassLoader parent,
+  public ConnectorClassLoader(String connectorJar, ClassLoader parent,
       List<String> systemClasses) throws IOException {
-    this(constructUrlsFromClasspath(classpath), parent, systemClasses, true);
+    this(connectorJar, parent, systemClasses, true);
   }
 
-  public ConnectorClassLoader(String classpath, ClassLoader parent,
+  public ConnectorClassLoader(String connectorJar, ClassLoader parent,
       List<String> systemClasses, boolean overrideDefaultSystemClasses) throws IOException {
-    this(constructUrlsFromClasspath(classpath), parent, systemClasses, overrideDefaultSystemClasses);
+    this(new File(connectorJar).toURI().toURL(), parent, systemClasses, overrideDefaultSystemClasses);
   }
 
   static URL[] constructUrlsFromClasspath(String classpath)
@@ -485,50 +485,48 @@ public class ConnectorClassLoader extends URLClassLoader {
     return resource;
   }
 
-  private void load(URL[] urls) throws IOException {
-    for (URL url : urls) {
-      String jarName = url.getPath();
-      JarFile jarFile = null;
-      try {
-        jarFile = new JarFile(jarName);
-        Manifest manifest = jarFile.getManifest();
+  private void load(URL connectorUrl) throws IOException {
+    String jarName = connectorUrl.getPath();
+    JarFile jarFile = null;
+    try {
+      jarFile = new JarFile(jarName);
+      Manifest manifest = jarFile.getManifest();
 
-        Enumeration<JarEntry> entryEnum = jarFile.entries();
-        while (entryEnum.hasMoreElements()) {
-          JarEntry entry = entryEnum.nextElement();
-          if (entry.isDirectory()) {
-            continue;
-          }
-
-          String entryName = entry.getName();
-          InputStream is = jarFile.getInputStream(entry);
-          if (is == null) {
-            throw new IOException("Unable to load resource " + entryName);
-          }
-          try {
-            if (entryName.startsWith(LIB_PREFIX)) {
-              LOG.debug("Caching " + entryName);
-              loadBytesFromJar(is, entryName);
-            } else if (entryName.endsWith(CLASS)) {
-              // A plain vanilla class file rooted at the top of the jar file.
-              loadBytes(entry, is, "/", manifest);
-              LOG.debug("Loaded class: " + jarFile.getName() + "!/" + entry.getName());
-            } else {
-              // A resource
-              loadBytes(entry, is, "/", manifest);
-              LOG.debug("Loaded resource: " + jarFile.getName() + "!/" + entry.getName());
-            }
-          } finally {
-            is.close();
-          }
+      Enumeration<JarEntry> entryEnum = jarFile.entries();
+      while (entryEnum.hasMoreElements()) {
+        JarEntry entry = entryEnum.nextElement();
+        if (entry.isDirectory()) {
+          continue;
         }
-      } finally {
-        if (jarFile != null) {
-          try {
-            jarFile.close();
-          } catch (IOException e) {
-            LOG.debug("Exception closing jarFile: " + jarName, e);
+
+        String entryName = entry.getName();
+        InputStream is = jarFile.getInputStream(entry);
+        if (is == null) {
+          throw new IOException("Unable to load resource " + entryName);
+        }
+        try {
+          if (entryName.startsWith(LIB_PREFIX)) {
+            LOG.debug("Caching " + entryName);
+            loadBytesFromJar(is, entryName);
+          } else if (entryName.endsWith(CLASS)) {
+            // A plain vanilla class file rooted at the top of the jar file.
+            loadBytes(entry, is, "/", manifest);
+            LOG.debug("Loaded class: " + jarFile.getName() + "!/" + entry.getName());
+          } else {
+            // A resource
+            loadBytes(entry, is, "/", manifest);
+            LOG.debug("Loaded resource: " + jarFile.getName() + "!/" + entry.getName());
           }
+        } finally {
+          is.close();
+        }
+      }
+    } finally {
+      if (jarFile != null) {
+        try {
+          jarFile.close();
+        } catch (IOException e) {
+          LOG.debug("Exception closing jarFile: " + jarName, e);
         }
       }
     }

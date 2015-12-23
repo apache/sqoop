@@ -143,7 +143,7 @@ public class TestConnectorClassLoader {
 
     ClassLoader currentClassLoader = getClass().getClassLoader();
     ClassLoader connectorClassloader = new ConnectorClassLoader(
-        new URL[] { testJar }, currentClassLoader, null, false);
+        testJar, currentClassLoader, null, false);
 
     assertNull(currentClassLoader.getResourceAsStream("resource.txt"),
         "Resource should be null for current classloader");
@@ -164,7 +164,7 @@ public class TestConnectorClassLoader {
 
     ClassLoader currentClassLoader = getClass().getClassLoader();
     ClassLoader connectorClassloader = new ConnectorClassLoader(
-        new URL[] { testJar }, currentClassLoader, null, false);
+        testJar, currentClassLoader, null, false);
 
     List<String> resourceContents = new ArrayList<String>();
     resourceContents.add("hello A");
@@ -185,7 +185,7 @@ public class TestConnectorClassLoader {
 
     ClassLoader currentClassLoader = getClass().getClassLoader();
     ClassLoader connectorClassloader = new ConnectorClassLoader(
-        new URL[] { testJar }, currentClassLoader, null, false);
+        testJar, currentClassLoader, null, false);
 
     try {
       currentClassLoader.loadClass("A");

@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
@@ -509,10 +510,19 @@ public class JobManager implements Reconfigurable {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private void initializeConnector(JobRequest jobRequest, Direction direction, Initializer initializer, InitializerContext initializerContext) {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
+  private void initializeConnector(final JobRequest jobRequest, final Direction direction,
+      final Initializer initializer, final InitializerContext initializerContext) {
     // Initialize submission from the connector perspective
-    initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
-        jobRequest.getJobConfig(direction));
+    ClassUtils.executeWithClassLoader(initializer.getClass().getClassLoader(),
+        new Callable<Void>() {
+      @Override
+      public Void call() {
+        initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
+            jobRequest.getJobConfig(direction));
+        return null;
+      }
+    });
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
