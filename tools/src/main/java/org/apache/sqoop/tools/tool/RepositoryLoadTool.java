@@ -22,10 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -77,6 +74,7 @@ import org.json.simple.JSONObject;
 public class RepositoryLoadTool extends ConfiguredTool {
 
   public static final Logger LOG = Logger.getLogger(RepositoryLoadTool.class);
+  private boolean isInTest = false;
 
   @SuppressWarnings("static-access")
   @Override
@@ -130,14 +128,16 @@ public class RepositoryLoadTool extends ConfiguredTool {
       return false;
     }
 
-    // initialize repository as mutable
-    RepositoryManager.getInstance().initialize(false);
+    if (!isInTest) {
+      // initialize repository as mutable
+      RepositoryManager.getInstance().initialize(false);
+      ConnectorManager.getInstance().initialize();
+      Driver.getInstance().initialize();
+    }
+
     Repository repository = RepositoryManager.getInstance().getRepository();
 
-    ConnectorManager.getInstance().initialize();
-    Driver.getInstance().initialize();
     LOG.info("Loading Connections");
-
     JSONObject jsonLinks = (JSONObject) repo.get(JSONConstants.LINKS);
 
     if (jsonLinks == null) {
@@ -145,28 +145,21 @@ public class RepositoryLoadTool extends ConfiguredTool {
       return false;
     }
 
-    updateConnectorIDUsingName(
-        (JSONArray)jsonLinks.get(JSONConstants.LINKS),
-        JSONConstants.CONNECTOR_ID,
-        JSONConstants.CONNECTOR_NAME,
-        true);
+    removeObjectIfConnectorNotExist(
+            (JSONArray) jsonLinks.get(JSONConstants.LINKS),
+            JSONConstants.CONNECTOR_NAME, true);
 
     LinksBean linksBean = new LinksBean();
     linksBean.restore(jsonLinks);
 
-    HashMap<Long, Long> linkIds = new HashMap<Long, Long>();
-
     for (MLink link : linksBean.getLinks()) {
-      long oldId = link.getPersistenceId();
       long newId = loadLink(link);
       if (newId == link.PERSISTANCE_ID_DEFAULT) {
-        LOG.error("loading connection " + link.getName() + " with previous ID " + oldId
-            + " failed. Aborting repository load. Check log for details.");
+        LOG.error("loading connection " + link.getName() + " failed. Aborting repository load. Check log for details.");
         return false;
       }
-      linkIds.put(oldId, newId);
     }
-    LOG.info("Loaded " + linkIds.size() + " links");
+    LOG.info("Loaded " + linksBean.getLinks().size() + " links");
 
     LOG.info("Loading Jobs");
     JSONObject jsonJobs = (JSONObject) repo.get(JSONConstants.JOBS);
@@ -176,30 +169,22 @@ public class RepositoryLoadTool extends ConfiguredTool {
       return false;
     }
 
-    updateConnectorIDUsingName(
-        (JSONArray)jsonJobs.get(JSONConstants.JOBS),
-        JSONConstants.FROM_CONNECTOR_ID,
-        JSONConstants.FROM_CONNECTOR_NAME,
-        false);
-    updateConnectorIDUsingName(
-        (JSONArray)jsonJobs.get(JSONConstants.JOBS),
-        JSONConstants.TO_CONNECTOR_ID,
-        JSONConstants.TO_CONNECTOR_NAME,
-        false);
+    removeObjectIfConnectorNotExist(
+            (JSONArray) jsonJobs.get(JSONConstants.JOBS),
+            JSONConstants.FROM_CONNECTOR_NAME, false);
+    removeObjectIfConnectorNotExist(
+            (JSONArray) jsonJobs.get(JSONConstants.JOBS),
+            JSONConstants.TO_CONNECTOR_NAME, false);
 
-    updateLinkIdUsingName((JSONArray)jsonJobs.get(JSONConstants.JOBS),
-        JSONConstants.FROM_LINK_ID,
-        JSONConstants.FROM_LINK_NAME);
-    updateLinkIdUsingName((JSONArray)jsonJobs.get(JSONConstants.JOBS),
-        JSONConstants.TO_LINK_ID,
-        JSONConstants.TO_LINK_NAME);
+    removeJobIfLinkNotExist((JSONArray) jsonJobs.get(JSONConstants.JOBS),
+            JSONConstants.FROM_LINK_NAME);
+    removeJobIfLinkNotExist((JSONArray) jsonJobs.get(JSONConstants.JOBS),
+            JSONConstants.TO_LINK_NAME);
 
     JobsBean jobsBean = new JobsBean();
     jobsBean.restore(jsonJobs);
 
-    HashMap<Long, Long> jobIds = new HashMap<Long, Long>();
     for (MJob job : jobsBean.getJobs()) {
-      long oldId = job.getPersistenceId();
       long newId = loadJob(job);
 
       if (newId == job.PERSISTANCE_ID_DEFAULT) {
@@ -207,10 +192,8 @@ public class RepositoryLoadTool extends ConfiguredTool {
             + " failed. Aborting repository load. Check log for details.");
         return false;
       }
-      jobIds.put(oldId, newId);
-
     }
-    LOG.info("Loaded " + jobIds.size() + " jobs");
+    LOG.info("Loaded " + jobsBean.getJobs().size() + " jobs");
 
     LOG.info("Loading Submissions");
     JSONObject jsonSubmissions = (JSONObject) repo.get(JSONConstants.SUBMISSIONS);
@@ -220,17 +203,15 @@ public class RepositoryLoadTool extends ConfiguredTool {
       return false;
     }
 
-    updateJobIdUsingName((JSONArray)jsonSubmissions.get(JSONConstants.SUBMISSIONS));
+    removeSubmissionIfJobNotExist((JSONArray)jsonSubmissions.get(JSONConstants.SUBMISSIONS));
 
     SubmissionsBean submissionsBean = new SubmissionsBean();
     submissionsBean.restore(jsonSubmissions);
-    int submissionCount = 0;
     for (MSubmission submission : submissionsBean.getSubmissions()) {
       resetPersistenceId(submission);
       repository.createSubmission(submission);
-      submissionCount++;
     }
-    LOG.info("Loaded " + submissionCount + " submissions.");
+    LOG.info("Loaded " + submissionsBean.getSubmissions().size() + " submissions.");
     LOG.info("Repository load completed successfully.");
     return true;
   }
@@ -390,97 +371,83 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
   }
 
-  private JSONArray updateConnectorIDUsingName(JSONArray jsonArray, String connectorIdKey, String connectorNameKey, boolean isLink) {
+  private JSONArray removeObjectIfConnectorNotExist(JSONArray jsonArray, String connectorNameKey, boolean isLink) {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     List<MConnector> connectors = repository.findConnectors();
-    Map<String, Long> connectorMap = new HashMap<String, Long>();
+    List<String> connectorNames = new ArrayList<String>();
 
     for (MConnector connector : connectors) {
-      connectorMap.put(connector.getUniqueName(), connector.getPersistenceId());
+      connectorNames.add(connector.getUniqueName());
     }
 
     for (Iterator iterator = jsonArray.iterator(); iterator.hasNext(); ) {
       JSONObject object = (JSONObject) iterator.next();
-      long connectorId = (Long) object.get(connectorIdKey);
       String connectorName = (String) object.get(connectorNameKey);
-      Long currentConnectorId = connectorMap.get(connectorName);
-      String name = (String) object.get(JSONConstants.NAME);
+      String objectName = (String)object.get(JSONConstants.NAME);
 
-      if (currentConnectorId == null) {
+      if (!connectorNames.contains(connectorName)) {
         // If a connector doesn't exist, remove the links and jobs relating to it
         iterator.remove();
+        LOG.warn((isLink ? "Link " : "Job ") + objectName + " won't be loaded because connector "
+                + connectorName + " is missing.");
         continue;
-      }
-
-      // If a given connector now has a different ID, we need to update the ID
-      if (connectorId != currentConnectorId) {
-        LOG.warn((isLink ? "Link " : "Job ") + name + " uses connector " + connectorName + ". "
-            + "Replacing previous ID " + connectorId + " with new ID " + currentConnectorId);
-
-        object.put(connectorIdKey, currentConnectorId);
       }
     }
 
     return jsonArray;
   }
 
-  private JSONArray updateLinkIdUsingName(JSONArray jobsJsonArray, String linkIdKey, String linkNameKey) {
+  private JSONArray removeJobIfLinkNotExist(JSONArray jobsJsonArray, String linkNameKey) {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     List<MLink> links = repository.findLinks();
-    Map<String, Long> linkMap = new HashMap<String, Long>();
+    List<String> linkNames = new ArrayList<String>();
     for (MLink link : links) {
-      linkMap.put(link.getName(), link.getPersistenceId());
+      linkNames.add(link.getName());
     }
 
     for(Iterator iterator = jobsJsonArray.iterator(); iterator.hasNext(); ) {
       JSONObject jobObject = (JSONObject) iterator.next();
-      long linkId = (Long) jobObject.get(linkIdKey);
       String linkName = (String) jobObject.get(linkNameKey);
-      Long currentLinkId = linkMap.get(linkName);
-      String jobName = (String) jobObject.get(JSONConstants.NAME);
+      String jobName = (String)jobObject.get(JSONConstants.NAME);
 
-      if (currentLinkId == null) {
+      if (!linkNames.contains(linkName)) {
         // If a link doesn't exist, remove the jobs relating to it
         iterator.remove();
+        LOG.warn("Job " + jobName + " won't be loaded because link " + linkName + " is missing.");
         continue;
-      }
-
-      if (linkId != currentLinkId) {
-        LOG.warn("Job " + jobName + " uses link " + linkName + "."
-            + "Replacing previous ID " + linkId + " with new ID " + currentLinkId);
-
-        jobObject.put(linkIdKey, currentLinkId);
       }
     }
 
     return jobsJsonArray;
   }
 
-  private JSONArray updateJobIdUsingName(JSONArray submissionsJsonArray) {
+  private JSONArray removeSubmissionIfJobNotExist(JSONArray submissionsJsonArray) {
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     List<MJob> jobs = repository.findJobs();
-    Map<String, Long> jobMap = new HashMap<String, Long>();
+    List<String> jobNames = new ArrayList<String>();
     for (MJob job : jobs) {
-      jobMap.put(job.getName(), job.getPersistenceId());
+      jobNames.add(job.getName());
     }
 
     for(Iterator iterator = submissionsJsonArray.iterator(); iterator.hasNext(); ) {
       JSONObject submissionObject = (JSONObject) iterator.next();
       String jobName = (String) submissionObject.get(JSONConstants.JOB_NAME);
-      Long currentJobId = jobMap.get(jobName);
 
-      if (currentJobId == null) {
+      if (!jobNames.contains(jobName)) {
         // If a job doesn't exist, remove the submissions relating to it
         iterator.remove();
+        LOG.warn("Submission for " + jobName + " won't be loaded because job " + jobName + " is missing.");
         continue;
       }
-
-      submissionObject.put(JSONConstants.JOB_ID, currentJobId);
     }
 
     return submissionsJsonArray;
+  }
+
+  public void setInTest(boolean isInTest) {
+    this.isInTest = isInTest;
   }
 }

@@ -49,6 +49,7 @@ import org.json.simple.JSONObject;
  */
 public class RepositoryDumpTool extends ConfiguredTool {
   public static final Logger LOG = Logger.getLogger(RepositoryDumpTool.class);
+  private boolean isInTest = false;
 
   @Override
   public boolean runToolWithConfiguration(String[] arguments) {
@@ -96,8 +97,10 @@ public class RepositoryDumpTool extends ConfiguredTool {
 
   private JSONObject dump(boolean skipSensitive) {
 
-    RepositoryManager.getInstance().initialize(true);
-    ConnectorManager.getInstance().initialize();
+    if (!isInTest) {
+      RepositoryManager.getInstance().initialize(true);
+      ConnectorManager.getInstance().initialize();
+    }
 
     Repository repository = RepositoryManager.getInstance().getRepository();
 
@@ -108,25 +111,16 @@ public class RepositoryDumpTool extends ConfiguredTool {
     List<MLink> links = repository.findLinks();
     LinksBean linkBeans = new LinksBean(links);
     JSONObject linksJsonObject = linkBeans.extract(skipSensitive);
-    JSONArray linksJsonArray = (JSONArray)linksJsonObject.get(JSONConstants.LINKS);
-    addConnectorName(linksJsonArray, JSONConstants.CONNECTOR_ID, JSONConstants.CONNECTOR_NAME);
     result.put(JSONConstants.LINKS, linksJsonObject);
 
     LOG.info("Dumping Jobs with skipSensitive=" + String.valueOf(skipSensitive));
     JobsBean jobs = new JobsBean(repository.findJobs());
     JSONObject jobsJsonObject = jobs.extract(skipSensitive);
-    JSONArray jobsJsonArray = (JSONArray)jobsJsonObject.get(JSONConstants.JOBS);
-    addConnectorName(jobsJsonArray, JSONConstants.FROM_CONNECTOR_ID, JSONConstants.FROM_CONNECTOR_NAME);
-    addConnectorName(jobsJsonArray, JSONConstants.TO_CONNECTOR_ID, JSONConstants.TO_CONNECTOR_NAME);
-    addLinkName(jobsJsonArray, JSONConstants.FROM_LINK_ID, JSONConstants.FROM_LINK_NAME);
-    addLinkName(jobsJsonArray, JSONConstants.TO_LINK_ID, JSONConstants.TO_LINK_NAME);
     result.put(JSONConstants.JOBS, jobsJsonObject);
 
     LOG.info("Dumping Submissions with skipSensitive=" + String.valueOf(skipSensitive));
     SubmissionsBean submissions = new SubmissionsBean(repository.findSubmissions());
     JSONObject submissionsJsonObject = submissions.extract(skipSensitive);
-    JSONArray submissionsJsonArray = (JSONArray)submissionsJsonObject.get(JSONConstants.SUBMISSIONS);
-    addJobName(submissionsJsonArray, JSONConstants.JOB_ID);
     result.put(JSONConstants.SUBMISSIONS, submissionsJsonObject);
 
     result.put(JSONConstants.METADATA, repoMetadata(skipSensitive));
@@ -145,43 +139,7 @@ public class RepositoryDumpTool extends ConfiguredTool {
     return metadata;
   }
 
-  private JSONArray addConnectorName(JSONArray jsonArray, String connectorKey, String connectorName) {
-    ConnectorManager connectorManager = ConnectorManager.getInstance();
-
-    Iterator<JSONObject> iterator = jsonArray.iterator();
-
-    while (iterator.hasNext()) {
-      JSONObject result = iterator.next();
-      Long connectorId = (Long) result.get(connectorKey);
-      result.put(connectorName,  connectorManager.getConnectorConfigurable(connectorId).getUniqueName());
-    }
-
-    return jsonArray;
-  }
-
-  private JSONArray addLinkName(JSONArray jsonArray, String linkKey, String linkName) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
-    Iterator<JSONObject> iterator = jsonArray.iterator();
-
-    while (iterator.hasNext()) {
-      JSONObject jobObject = iterator.next();
-      Long linkId = (Long) jobObject.get(linkKey);
-      jobObject.put(linkName, repository.findLink(linkId).getName());
-    }
-
-    return jsonArray;
-  }
-
-  private JSONArray addJobName(JSONArray jsonArray, String jobKey) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
-    Iterator<JSONObject> iterator = jsonArray.iterator();
-
-    while (iterator.hasNext()) {
-      JSONObject submissionObject = iterator.next();
-      Long jobId = (Long) submissionObject.get(jobKey);
-      submissionObject.put(JSONConstants.JOB_NAME,  repository.findJob(jobId).getName());
-    }
-
-    return jsonArray;
+  public void setInTest(boolean isInTest) {
+    this.isInTest = isInTest;
   }
 }
