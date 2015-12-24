@@ -79,19 +79,19 @@ public class ShowSubmissionFunction extends SqoopFunction {
     header.add(resourceString(Constants.RES_TABLE_HEADER_STATUS));
     header.add(resourceString(Constants.RES_TABLE_HEADER_DATE));
 
-    List<String> jids = new LinkedList<String>();
+    List<String> jnames = new LinkedList<String>();
     List<String> eids = new LinkedList<String>();
     List<String> status = new LinkedList<String>();
     List<String> dates = new LinkedList<String>();
 
     for (MSubmission submission : submissions) {
-      jids.add(String.valueOf(submission.getJobName()));
+      jnames.add(String.valueOf(submission.getJobName()));
       eids.add(String.valueOf(submission.getExternalJobId()));
       status.add(submission.getStatus().toString());
       dates.add(submission.getLastUpdateDate().toString());
     }
 
-    TableDisplayer.display(header, jids, eids, status, dates);
+    TableDisplayer.display(header, jnames, eids, status, dates);
   }
 
   private void showSubmissions(String jArg) {

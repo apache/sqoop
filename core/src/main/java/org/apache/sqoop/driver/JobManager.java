@@ -475,10 +475,6 @@ public class JobManager implements Reconfigurable {
     return ConnectorManager.getInstance().getSqoopConnector(connnectorName);
   }
 
-  SqoopConnector getSqoopConnector(Long connnectorId) {
-    return ConnectorManager.getInstance().getSqoopConnector(connnectorId);
-  }
-
   void validateSupportedDirection(SqoopConnector connector, Direction direction) {
     // Make sure that connector supports the given direction
     if (!connector.getSupportedDirections().contains(direction)) {

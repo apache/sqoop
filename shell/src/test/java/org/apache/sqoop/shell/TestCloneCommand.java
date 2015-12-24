@@ -123,7 +123,7 @@ public class TestCloneCommand {
     when(client.getLink("link_test")).thenReturn(link);
     when(client.getConnectorConfigBundle("connector_name_test")).thenReturn(resourceBundle);
     when(client.saveLink(link)).thenReturn(Status.OK);
-    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
+    when(client.getConnector(any(String.class))).thenReturn(new MConnector("", "", "", null, null, null));
 
     // clone link -name link_test
     initData("linkname\r" +         // link name
@@ -163,7 +163,7 @@ public class TestCloneCommand {
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.getDriverConfigBundle()).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.saveJob(job)).thenReturn(Status.OK);
-    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
+    when(client.getConnector(any(String.class))).thenReturn(new MConnector("", "", "", null, null, null));
 
     // clone job -name job_test
     Status status = (Status) cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));

@@ -80,14 +80,6 @@ public class TestJobManager {
   }
 
   @Test
-  public void testGetConnector() {
-    when(connectorMgrMock.getSqoopConnector(123l)).thenReturn(sqoopConnectorMock);
-    when(sqoopConnectorMock.getSupportedDirections()).thenReturn(getSupportedDirections());
-    assertEquals(jobManager.getSqoopConnector(123l), sqoopConnectorMock);
-    verify(connectorMgrMock, times(1)).getSqoopConnector(123l);
-  }
-
-  @Test
   public void testUnsupportedDirectionForConnector() {
     // invalid job id/ direction
     SqoopException exception = new SqoopException(DriverError.DRIVER_0011, "Connector: "

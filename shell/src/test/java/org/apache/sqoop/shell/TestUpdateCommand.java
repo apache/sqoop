@@ -126,7 +126,7 @@ public class TestUpdateCommand {
     // Missing option name
     try {
       updateCmd.execute(Arrays.asList(Constants.FN_LINK));
-      fail("Update link should fail as option lid is missing");
+      fail("Update link should fail as option name is missing");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing required option"));
@@ -178,7 +178,7 @@ public class TestUpdateCommand {
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getJob("job_test")).thenReturn(job);
-    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
+    when(client.getConnector(any(String.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.getDriverConfigBundle()).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.updateJob(job)).thenReturn(Status.OK);
@@ -215,7 +215,7 @@ public class TestUpdateCommand {
         new MToConfig(getConfig("toJobConfig"), new ArrayList<MValidator>()),
         new MDriverConfig(getConfig("driverConfig"), new ArrayList<MValidator>()));
     when(client.getJob("job_test")).thenReturn(job);
-    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
+    when(client.getConnector(any(String.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
     when(client.updateJob(job)).thenReturn(Status.OK);

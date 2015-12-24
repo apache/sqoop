@@ -104,15 +104,6 @@ public abstract class Repository {
   public abstract MDriver registerDriver(MDriver mDriverConfig, boolean autoUpgrade);
 
   /**
-   * Search for connector with given id in repository.
-   *
-   * @param id Connector id
-   * @return null if connector is not yet registered in repository or
-   *   loaded representation.
-   */
-  public abstract MConnector findConnector(long id);
-
-  /**
    * Search for connector with given name in repository.
    *
    * And return corresponding entity structure.
@@ -184,15 +175,7 @@ public abstract class Repository {
   public abstract void deleteLink(String linkName);
 
   /**
-   * Find link with given id in repository.
-   *
-   * @param id Link id
-   * @return link that is saved in repository
-   */
-  public abstract MLink findLink(long id);
-
-  /**
-   * Find link with given id in repository.
+   * Find link with given name in repository.
    *
    * @param name unique link name
    * @return link that is saved in repository or null if it does not exists
@@ -263,14 +246,6 @@ public abstract class Repository {
    * @param jobName Job name that should be removed
    */
   public abstract void deleteJob(String jobName);
-
-  /**
-   * Find job object with given id.
-   *
-   * @param id Job id
-   * @return job with given id loaded from repository
-   */
-  public abstract MJob findJob(long id);
 
   /**
    * Find job object with given name.

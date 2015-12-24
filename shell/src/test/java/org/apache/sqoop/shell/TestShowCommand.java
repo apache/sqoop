@@ -233,7 +233,7 @@ public class TestShowCommand {
   @Test
   public void testShowJob() {
     when(client.getJobs()).thenReturn(new ArrayList<MJob>());
-    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
+    when(client.getConnector(any(String.class))).thenReturn(new MConnector("", "", "", null, null, null));
     when(client.getJob("jobName")).thenReturn(new MJob("fromConnectorName", "toConnectorName", "linkName1", "linkName2",
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),

@@ -52,7 +52,7 @@ public class ConnectorRequestHandler implements RequestHandler {
     Locale locale = ctx.getAcceptLanguageHeader();
     String cIdentifier = ctx.getLastURLElement();
 
-    LOG.info("ConnectorRequestHandler handles cid: " + cIdentifier);
+    LOG.info("ConnectorRequestHandler handles cname: " + cIdentifier);
 
     if (cIdentifier.equals("all")) {
       connectors = ConnectorManager.getInstance().getConnectorConfigurables();
@@ -66,8 +66,7 @@ public class ConnectorRequestHandler implements RequestHandler {
       return new ConnectorsBean(connectors, configParamBundles);
 
     } else {
-      // NOTE: we now support using unique name as well as the connector id
-      // NOTE: connectorId is a fallback for older sqoop clients if any, since we want to primarily use unique conenctorNames
+      // support using unique name
       MConnector mConnector = HandlerUtils.getConnectorFromConnectorName(cIdentifier);
 
       configParamBundles = new HashMap<>();

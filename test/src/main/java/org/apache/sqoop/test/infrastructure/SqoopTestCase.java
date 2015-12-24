@@ -374,9 +374,9 @@ public class SqoopTestCase implements ITest {
   }
 
   /**
-   * Run job with given jid.
+   * Run job with given jobName.
    *
-   * @param jid Job id
+   * @param jobName Job name
    * @throws Exception
    */
   public void executeJob(String jobName) throws Exception {

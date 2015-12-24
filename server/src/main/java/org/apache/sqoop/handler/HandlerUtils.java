@@ -47,39 +47,11 @@ public class HandlerUtils {
     return link;
   }
 
-  public static MLink getLinkFromLinkId(Long linkId) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
-    MLink link = repository.findLink(linkId);
-    if (link == null) {
-      throw new SqoopException(ServerError.SERVER_0006, "Invalid link id: " + linkId
-              + " doesn't exist");
-    }
-    return link;
-  }
-
   public static MConnector getConnectorFromConnectorName(String connectorName) {
     Repository repository = RepositoryManager.getInstance().getRepository();
     MConnector connector = repository.findConnector(connectorName);
     if (connector == null) {
-      // TODO: get the connector by id from public API should be dropped.
-      try {
-        connector = repository.findConnector(Long.parseLong(connectorName));
-      } catch (NumberFormatException nfe) {
-        // do nothing, connector should be null, and will thrown exception in the following.
-      }
-    }
-    if (connector == null) {
       throw new SqoopException(ServerError.SERVER_0006, "Connector: " + connectorName
-              + " doesn't exist");
-    }
-    return connector;
-  }
-
-  public static MConnector getConnectorFromConnectorId(Long connectorId) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
-    MConnector connector = repository.findConnector(connectorId);
-    if (connector == null) {
-      throw new SqoopException(ServerError.SERVER_0006, "Connector id: " + connectorId
               + " doesn't exist");
     }
     return connector;

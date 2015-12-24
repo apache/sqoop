@@ -57,7 +57,6 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertNull(handler.findConnector(1L, getDerbyDatabaseConnection()));
     // Load connector into repository
     loadConnectorAndDriverConfig();
-    when(mockConnectorManager.getConnectorConfigurable(1L)).thenReturn(getConnector());
     // Retrieve it
     MConnector connector = handler.findConnector(1L, getDerbyDatabaseConnection());
     assertNotNull(connector);
@@ -73,7 +72,6 @@ public class TestConnectorHandling extends DerbyTestCase {
     assertNull(handler.findConnector("A", getDerbyDatabaseConnection()));
     // Load connector into repository
     loadConnectorAndDriverConfig();
-    when(mockConnectorManager.getConnectorConfigurable(1L)).thenReturn(getConnector());
     // Retrieve it
     MConnector connector = handler.findConnector("A", getDerbyDatabaseConnection());
     assertNotNull(connector);
