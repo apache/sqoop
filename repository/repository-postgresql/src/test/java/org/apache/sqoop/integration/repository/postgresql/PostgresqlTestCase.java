@@ -62,7 +62,8 @@ abstract public class PostgresqlTestCase {
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     provider.start();
-
+    // clear the data for sqoop
+    provider.dropSchema("SQOOP");
     handler = new PostgresqlRepositoryHandler();
     handler.createOrUpgradeRepository(provider.getConnection());
   }
