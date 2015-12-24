@@ -203,7 +203,7 @@ public class LinkRequestHandler implements RequestHandler {
         links = repository.findLinks();
       } else {
         if(repository.findConnector(connectorName) == null) {
-          throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + connectorName);
+          throw new SqoopException(ServerError.SERVER_0006, "Invalid connector: " + connectorName);
         }
         links = repository.findLinksForConnector(connectorName);
       }

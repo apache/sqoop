@@ -62,7 +62,7 @@ public class LinkRestTest extends RestTest {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0005");
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0006");
         assertContains("Invalid connector: i-dont-exists");
       }}),
   };
