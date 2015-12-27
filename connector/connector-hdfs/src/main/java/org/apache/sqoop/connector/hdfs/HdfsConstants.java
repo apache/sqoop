@@ -35,6 +35,4 @@ public final class HdfsConstants extends Constants {
   public static final String WORK_DIRECTORY = PREFIX + "work_dir";
 
   public static final String MAX_IMPORT_DATE = PREFIX + "max_import_date";
-
-  public static final String DELEGATION_TOKENS = PREFIX + "delegation_tokens";
 }

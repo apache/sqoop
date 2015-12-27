@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.hdfs.security;
+package org.apache.sqoop.connector.hadoop.security;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +28,6 @@ import org.apache.hadoop.security.token.Token;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.common.MutableContext;
-import org.apache.sqoop.connector.hdfs.HdfsConstants;
 import org.apache.sqoop.job.etl.TransferableContext;
 
 import java.io.ByteArrayInputStream;
@@ -47,6 +46,8 @@ import java.util.List;
 public class SecurityUtils {
 
   private static final Logger LOG = Logger.getLogger(SecurityUtils.class);
+
+  private static final String DELEGATION_TOKENS = "org.apache.sqoop.connector.delegation_tokens";
 
   /**
    * Creates proxy user for user who submitted the Sqoop job (e.g. who has issued the "start job" commnad)
@@ -87,7 +88,7 @@ public class SecurityUtils {
 
     // The context classes are transferred via "Credentials" rather then with jobconf, so we're not leaking the DT out here
     if(tokens.size() > 0) {
-      context.setString(HdfsConstants.DELEGATION_TOKENS, StringUtils.join(tokens, " "));
+      context.setString(DELEGATION_TOKENS, StringUtils.join(tokens, " "));
     }
   }
 
@@ -95,7 +96,7 @@ public class SecurityUtils {
    * Loads delegation tokens that we created and serialize into the mutable context
    */
   static public void loadDelegationTokensToUGI(UserGroupInformation ugi, ImmutableContext context) throws IOException {
-    String tokenList = context.getString(HdfsConstants.DELEGATION_TOKENS);
+    String tokenList = context.getString(DELEGATION_TOKENS);
     if(tokenList == null) {
       LOG.info("No delegation tokens found");
       return;

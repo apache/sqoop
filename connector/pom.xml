@@ -34,6 +34,7 @@ limitations under the License.
 
   <modules>
     <module>connector-sdk</module>
+    <module>connector-sdk-hadoop</module>
     <module>connector-generic-jdbc</module>
     <module>connector-hdfs</module>
     <module>connector-kite</module>
