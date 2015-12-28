@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.connector.kite;
 
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
@@ -81,7 +82,7 @@ public class TestKiteLoader {
         return null;
       }
     };
-    LoaderContext context = new LoaderContext(null, reader, schema, "test_user");
+    LoaderContext context = new LoaderContext(new MutableMapContext(), reader, schema, "test_user");
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration toJobConfig = new ToJobConfiguration();
 

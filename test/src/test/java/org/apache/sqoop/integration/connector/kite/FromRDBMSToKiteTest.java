@@ -64,6 +64,7 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
     // Kite link
     MLink kiteLink = getClient().createLink("kite-connector");
     kiteLink.getConnectorLinkConfig().getStringInput("linkConfig.authority").setValue(hdfsClient.getUri().getAuthority());
+    kiteLink.getConnectorLinkConfig().getStringInput("linkConfig.confDir").setValue(getCluster().getConfigurationPath());
     saveLink(kiteLink);
 
     // Job creation

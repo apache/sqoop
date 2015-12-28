@@ -17,8 +17,11 @@
  */
 package org.apache.sqoop.connector.kite;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
@@ -31,6 +34,8 @@ import org.apache.sqoop.utils.ClassUtils;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.Datasets;
 
+import java.io.IOException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Set;
 
 /**
@@ -42,16 +47,33 @@ public class KiteFromInitializer extends Initializer<LinkConfiguration,
   private static final Logger LOG = Logger.getLogger(KiteFromInitializer.class);
 
   @Override
-  public void initialize(InitializerContext context,
-      LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    String uri = ConfigUtil.buildDatasetUri(
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
+  public void initialize(final InitializerContext context,
+      final LinkConfiguration linkConfig, final FromJobConfiguration fromJobConfig) {
+    final String uri = ConfigUtil.buildDatasetUri(
         linkConfig.linkConfig, fromJobConfig.fromJobConfig.uri);
     LOG.debug("Constructed dataset URI: " + uri);
-    if (!Datasets.exists(uri)) {
-      LOG.error("Dataset does not exist");
-      throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0002);
+    KiteUtils.addConfigDirToClasspath(linkConfig);
+    try {
+      SecurityUtils.createProxyUser(context).doAs(new PrivilegedExceptionAction<Void>() {
+        public Void run() throws Exception {
+          if (!Datasets.exists(uri)) {
+            LOG.error("Dataset does not exist");
+            throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0002);
+          }
+
+          if (ConfigUtil.isHdfsJob(fromJobConfig.fromJobConfig)) {
+            // Generate delegation tokens if we are on secured cluster
+            SecurityUtils.generateDelegationTokens(context.getContext(), new Path(ConfigUtil.removeDatasetPrefix(uri)), new Configuration());
+          }
+          return null;
+        }
+      });
+    } catch (IOException | InterruptedException e) {
+      throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0005, "Unexpected exception", e);
     }
   }
+
   @Override
   public Set<String> getJars(InitializerContext context,
       LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
@@ -72,12 +94,23 @@ public class KiteFromInitializer extends Initializer<LinkConfiguration,
     return jars;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
   public Schema getSchema(InitializerContext context,
       LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig) {
-    String uri = ConfigUtil.buildDatasetUri(
+    final String uri = ConfigUtil.buildDatasetUri(
         linkConfig.linkConfig, fromJobConfig.fromJobConfig.uri);
-    Dataset dataset = Datasets.load(uri);
+    Dataset dataset = null;
+    try {
+      dataset = SecurityUtils.createProxyUser(context).doAs(new PrivilegedExceptionAction<Dataset>() {
+        public Dataset run() {
+          return Datasets.load(uri);
+        }
+      });
+    } catch (IOException | InterruptedException e) {
+      throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0005, "Unexpected exception", e);
+    }
     org.apache.avro.Schema avroSchema = dataset.getDescriptor().getSchema();
     return AvroDataTypeUtil.createSqoopSchema(avroSchema);
   }

@@ -17,13 +17,19 @@
  */
 package org.apache.sqoop.connector.kite;
 
+import java.io.IOException;
+import java.security.PrivilegedExceptionAction;
+
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.FileFormat;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
+import org.apache.sqoop.error.code.KiteConnectorError;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
@@ -55,32 +61,42 @@ public class KiteLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   }
 
   @Override
-  public void load(LoaderContext context, LinkConfiguration linkConfiguration,
-      ToJobConfiguration toJobConfig) throws Exception {
-    String uri = ConfigUtil.buildDatasetUri(
+  public void load(final LoaderContext context, final LinkConfiguration linkConfiguration,
+      final ToJobConfiguration toJobConfig) throws Exception {
+    final String uri = ConfigUtil.buildDatasetUri(
         linkConfiguration.linkConfig, toJobConfig.toJobConfig);
-    KiteDatasetExecutor executor = getExecutor(
-        linkConfiguration, uri, context.getSchema(), toJobConfig.toJobConfig.fileFormat);
-    LOG.info("Temporary dataset created.");
-
-    DataReader reader = context.getDataReader();
-    Object[] array;
-    boolean success = false;
 
     try {
-      while ((array = reader.readArrayRecord()) != null) {
-        executor.writeRecord(array);
-        rowsWritten++;
-      }
-      LOG.info(rowsWritten + " data record(s) have been written into dataset.");
-      success = true;
-    } finally {
-      executor.closeWriter();
+      SecurityUtils.createProxyUserAndLoadDelegationTokens(context).doAs(new PrivilegedExceptionAction<Void>() {
+        public Void run() throws Exception {
+          KiteDatasetExecutor executor = getExecutor(
+              linkConfiguration, uri, context.getSchema(), toJobConfig.toJobConfig.fileFormat);
+          LOG.info("Temporary dataset created.");
 
-      if (!success) {
-        LOG.error("Fail to write data, dataset will be removed.");
-        executor.deleteDataset();
-      }
+          DataReader reader = context.getDataReader();
+          Object[] array;
+          boolean success = false;
+
+          try {
+            while ((array = reader.readArrayRecord()) != null) {
+              executor.writeRecord(array);
+              rowsWritten++;
+            }
+            LOG.info(rowsWritten + " data record(s) have been written into dataset.");
+            success = true;
+          } finally {
+            executor.closeWriter();
+
+            if (!success) {
+              LOG.error("Fail to write data, dataset will be removed.");
+              executor.deleteDataset();
+            }
+          }
+          return null;
+        }
+      });
+    } catch (IOException | InterruptedException e) {
+      throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0005, "Unexpected exception", e);
     }
   }
 
