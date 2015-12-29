@@ -316,6 +316,45 @@ Hence the pom.xml for the sqoop kite connector built using the kite-sdk  might l
     ....
   </dependencies>
 
+
+Sqoop Connector Build
+=====================
+
+Sqoop 2 supports connectors to package their dependencies into the ``lib`` directory inside the connector jar to provide classpath isolation between connectors. Add the following to the pom.xml for the connector:
+
+::
+
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-assembly-plugin</artifactId>
+      <version>${maven-assembly-plugin.version}</version>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.sqoop</groupId>
+          <artifactId>sqoop-assemblies</artifactId>
+          <version>${sqoop.version}</version>
+        </dependency>
+      </dependencies>
+      <executions>
+        <execution>
+          <id>make-assembly</id>
+          <phase>package</phase>
+          <goals>
+            <goal>single</goal>
+          </goals>
+          <configuration>
+            <finalName>${project.artifactId}-${project.version}</finalName>
+            <appendAssemblyId>false</appendAssemblyId>
+            <descriptorRefs>
+              <descriptorRef>sqoop-connector</descriptorRef>
+            </descriptorRefs>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+
 Configurables
 +++++++++++++
 
