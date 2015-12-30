@@ -20,19 +20,23 @@ package org.apache.sqoop.test.infrastructure;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.client.SubmissionCallback;
+import org.apache.sqoop.common.test.asserts.ProviderAsserts;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.TableName;
+import org.apache.sqoop.common.test.kafka.TestUtil;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.submission.SubmissionStatus;
+import org.apache.sqoop.test.asserts.HdfsAsserts;
 import org.apache.sqoop.test.data.Cities;
 import org.apache.sqoop.test.data.ShortStories;
 import org.apache.sqoop.test.data.UbuntuReleases;
@@ -45,6 +49,7 @@ import org.apache.sqoop.test.kdc.KdcRunner;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.apache.sqoop.test.utils.SqoopUtils;
 import org.apache.sqoop.validation.Status;
+import org.testng.Assert;
 import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.ITestNGMethod;
@@ -52,16 +57,22 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import kafka.message.MessageAndMetadata;
+
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.toText;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotSame;
 
 /**
  * Use Infrastructure annotation to boot up miniclusters.
@@ -98,11 +109,15 @@ public class SqoopTestCase implements ITest {
 
   private static String suiteName;
 
-  private String methodName;
+  protected String methodName;
 
   private SqoopClient client;
 
   private DelegationTokenAuthenticatedURL.Token authToken = new DelegationTokenAuthenticatedURL.Token();
+
+  protected FileSystem hdfsClient;
+
+  protected DatabaseProvider provider;
 
   @BeforeSuite
   public static void findSuiteName(ITestContext context) {
@@ -269,11 +284,9 @@ public class SqoopTestCase implements ITest {
    * @param partitionColumn
    */
   public void fillRdbmsFromConfig(MJob job, String partitionColumn) {
-    DatabaseProvider provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
-
     MConfigList fromConfig = job.getFromJobConfig();
-    fromConfig.getStringInput("fromJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
-    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(provider.escapeColumnName(partitionColumn));
+    fromConfig.getStringInput("fromJobConfig.tableName").setValue(getTableName().getTableName());
+    fromConfig.getStringInput("fromJobConfig.partitionColumn").setValue(partitionColumn);
   }
 
   /**
@@ -281,10 +294,8 @@ public class SqoopTestCase implements ITest {
    * @param job
    */
   public void fillRdbmsToConfig(MJob job) {
-    DatabaseProvider provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
-
     MConfigList toConfig = job.getToJobConfig();
-    toConfig.getStringInput("toJobConfig.tableName").setValue(provider.escapeTableName(getTableName().getTableName()));
+    toConfig.getStringInput("toJobConfig.tableName").setValue(getTableName().getTableName());
   }
 
   /**
@@ -318,6 +329,12 @@ public class SqoopTestCase implements ITest {
     toConfig.getStringInput("toJobConfig.outputDirectory").setValue(getMapreduceDirectory());
   }
 
+  public void fillHdfsLink(MLink link) {
+    MConfigList configs = link.getConnectorLinkConfig();
+    configs.getStringInput("linkConfig.confDir").setValue(
+        (getInfrastructureProvider(SqoopInfrastructureProvider.class)).getInstance().getConfigurationPath());
+  }
+
   public String getSqoopServerUrl() {
     if (getInfrastructureProvider(SqoopInfrastructureProvider.class) == null) {
       return null;
@@ -335,11 +352,8 @@ public class SqoopTestCase implements ITest {
     return authToken;
   }
 
-  /**
-   * Create a sqoop client
-   */
   @BeforeMethod
-  public void initSqoopClient() throws Exception {
+  public void init() throws Exception {
     String serverUrl = getSqoopServerUrl();
 
     if (serverUrl != null) {
@@ -350,6 +364,15 @@ public class SqoopTestCase implements ITest {
         kdcProvider.getInstance().authenticateWithSqoopServer(client);
         kdcProvider.getInstance().authenticateWithSqoopServer(new URL(serverUrl), authToken);
       }
+    }
+
+    if (getInfrastructureProvider(HadoopInfrastructureProvider.class) != null) {
+      hdfsClient = FileSystem.get(getInfrastructureProvider(HadoopInfrastructureProvider.class).getHadoopConfiguration());
+      hdfsClient.delete(new Path(getMapreduceDirectory()), true);
+    }
+
+    if (getInfrastructureProvider(DatabaseInfrastructureProvider.class) != null) {
+      provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
     }
   }
 
@@ -387,6 +410,16 @@ public class SqoopTestCase implements ITest {
       LOG.error("Corresponding error details: " + finalSubmission.getError().getErrorDetails());
     }
     assertEquals(SubmissionStatus.SUCCEEDED, finalSubmission.getStatus(), "Submission finished with error: " + finalSubmission.getError().getErrorSummary());
+  }
+
+  /**
+   * Run given job.
+   *
+   * @param job Job object
+   * @throws Exception
+   */
+  protected void executeJob(MJob job) throws Exception {
+    executeJob(job.getName());
   }
 
   /**
@@ -492,5 +525,109 @@ public class SqoopTestCase implements ITest {
     for(MLink link : getClient().getLinks()) {
       getClient().deleteLink(link.getName());
     }
+  }
+
+  /**
+   * Assert that execution has generated following lines.
+   *
+   * As the lines can be spread between multiple files the ordering do not make
+   * a difference.
+   *
+   * @param lines
+   * @throws IOException
+   */
+  protected void assertTo(String... lines) throws IOException {
+    // TODO(VB): fix this to be not directly dependent on hdfs/MR
+    HdfsAsserts.assertMapreduceOutput(hdfsClient, getMapreduceDirectory(), lines);
+  }
+
+  /**
+   * Verify number of TO files.
+   *
+   * @param expectedFiles Expected number of files
+   */
+  protected void assertToFiles(int expectedFiles) throws IOException {
+    // TODO(VB): fix this to be not directly dependent on hdfs/MR
+    HdfsAsserts.assertMapreduceOutputFiles(hdfsClient, getMapreduceDirectory(), expectedFiles);
+  }
+
+  /**
+   * Assert row in testing table.
+   *
+   * @param conditions Conditions in config that are expected by the database provider
+   * @param values Values that are expected in the table (with corresponding types)
+   */
+  protected void assertRow(Object[] conditions, Object ...values) {
+    DatabaseProvider provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
+    ProviderAsserts.assertRow(provider, getTableName(), conditions, values);
+  }
+
+  /**
+   * Assert row in table "cities".
+   *
+   * @param values Values that are expected
+   */
+  protected void assertRowInCities(Object... values) {
+    assertRow(new Object[]{"id", values[0]}, values);
+  }
+
+  /**
+   * Create FROM file with specified content.
+   *
+   * @param filename Input file name
+   * @param lines Individual lines that should be written into the file
+   * @throws IOException
+   */
+  protected void createFromFile(String filename, String...lines) throws IOException {
+    createFromFile(hdfsClient, filename, lines);
+  }
+
+  /**
+   * Create file on given HDFS instance with given lines
+   */
+  protected void createFromFile(FileSystem hdfsClient, String filename, String...lines) throws IOException {
+    HdfsUtils.createFile(hdfsClient, HdfsUtils.joinPathFragments(getMapreduceDirectory(), filename), lines);
+  }
+
+  /**
+   * Create table cities.
+   */
+  protected void createTableCities() {
+    DatabaseProvider provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
+    new Cities(provider, getTableName()).createTables();
+  }
+
+  protected void fillKafkaLinkConfig(MLink link) {
+    MConfigList configs = link.getConnectorLinkConfig();
+    configs.getStringInput("linkConfig.brokerList").setValue(TestUtil.getInstance().getKafkaServerUrl());
+    configs.getStringInput("linkConfig.zookeeperConnect").setValue(TestUtil.getInstance().getZkUrl());
+
+  }
+
+  protected void fillKafkaToConfig(MJob job, String topic){
+    MConfigList toConfig = job.getToJobConfig();
+    toConfig.getStringInput("toJobConfig.topic").setValue(topic);
+    List<String> topics = new ArrayList<String>(1);
+    topics.add(topic);
+    TestUtil.getInstance().initTopicList(topics);
+  }
+
+  /**
+   * Compare strings in content to the messages in Kafka topic
+   * @param content
+   * @throws UnsupportedEncodingException
+   */
+  protected void validateContent(String[] content, String topic) throws UnsupportedEncodingException {
+
+    Set<String> inputSet = new HashSet<String>(Arrays.asList(content));
+    Set<String> outputSet = new HashSet<String>();
+
+    for(int i = 0; i < content.length; i++) {
+      MessageAndMetadata<byte[],byte[]> fetchedMsg =
+          TestUtil.getInstance().getNextMessageFromConsumer(topic);
+      outputSet.add(toText(new String(fetchedMsg.message(), "UTF-8")));
+    }
+
+    Assert.assertEquals(inputSet, outputSet);
   }
 }

@@ -19,21 +19,23 @@ package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import static org.testng.Assert.assertEquals;
 
-import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.data.Cities;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.testng.annotations.Test;
 
 import java.sql.Timestamp;
 
-/**
- *
- */
-public class TableStagedRDBMSTest extends ConnectorTestCase {
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+public class TableStagedRDBMSTest extends SqoopTestCase {
 
   @Test
   public void testStagedTransfer() throws Exception {

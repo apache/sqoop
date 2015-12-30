@@ -22,7 +22,12 @@ import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -31,7 +36,8 @@ import org.testng.annotations.Test;
 import java.util.List;
 
 @Test
-public class FromRDBMSToKiteTest extends ConnectorTestCase {
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+public class FromRDBMSToKiteTest extends SqoopTestCase {
   @BeforeMethod(alwaysRun = true)
   public void createTable() {
     createAndLoadTableCities();
@@ -51,7 +57,7 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
    */
   @Override
   public String getMapreduceDirectory() {
-    return HdfsUtils.joinPathFragments(hadoopCluster.getTestDirectory(), getClass().getName(), "namespace", getTestName()).replaceAll("/$", "");
+    return HdfsUtils.joinPathFragments(getInfrastructureProvider(HadoopInfrastructureProvider.class).getInstance().getTestDirectory(), getClass().getName(), "namespace", getTestName()).replaceAll("/$", "");
   }
 
   @Test
@@ -64,7 +70,8 @@ public class FromRDBMSToKiteTest extends ConnectorTestCase {
     // Kite link
     MLink kiteLink = getClient().createLink("kite-connector");
     kiteLink.getConnectorLinkConfig().getStringInput("linkConfig.authority").setValue(hdfsClient.getUri().getAuthority());
-    kiteLink.getConnectorLinkConfig().getStringInput("linkConfig.confDir").setValue(getCluster().getConfigurationPath());
+    kiteLink.getConnectorLinkConfig().getStringInput("linkConfig.confDir").setValue(
+        getInfrastructureProvider(SqoopInfrastructureProvider.class).getInstance().getConfigurationPath());
     saveLink(kiteLink);
 
     // Job creation
