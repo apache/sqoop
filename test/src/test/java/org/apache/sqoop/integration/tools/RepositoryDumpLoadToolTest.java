@@ -19,7 +19,6 @@ package org.apache.sqoop.integration.tools;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobsBean;
@@ -27,7 +26,10 @@ import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.*;
 import org.apache.sqoop.submission.SubmissionStatus;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.apache.sqoop.tools.tool.JSONConstants;
 import org.apache.sqoop.tools.tool.RepositoryDumpTool;
@@ -43,9 +45,9 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-public class RepositoryDumpLoadToolTest extends ConnectorTestCase {
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, SqoopInfrastructureProvider.class})
+public class RepositoryDumpLoadToolTest extends SqoopTestCase {
 
-  private static final Logger LOG = Logger.getLogger(RepositoryDumpLoadToolTest.class);
   private String jsonFilePath;
 
   // do the load test and insert data to repo first, then do the dump test.

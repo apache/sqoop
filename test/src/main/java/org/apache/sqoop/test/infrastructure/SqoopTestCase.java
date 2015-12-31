@@ -630,4 +630,12 @@ public class SqoopTestCase implements ITest {
 
     Assert.assertEquals(inputSet, outputSet);
   }
+
+  protected String getTemporaryPath() {
+    return HdfsUtils.joinPathFragments(ROOT_PATH, suiteName);
+  }
+
+  protected String getSqoopMiniClusterTemporaryPath() {
+    return getInfrastructureProvider(SqoopInfrastructureProvider.class).getRootPath();
+  }
 }
