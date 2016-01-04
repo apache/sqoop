@@ -293,9 +293,8 @@ public class JdbcRepository extends Repository {
         if (!link.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0016);
         }
-        if (!handler.existsLink(link.getName(), conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid name: "
-              + link.getName());
+        if (!handler.existsLink(link.getPersistenceId(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0016);
         }
 
         handler.updateLink(link, conn);
@@ -438,9 +437,8 @@ public class JdbcRepository extends Repository {
        if(!job.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0019);
         }
-        if(!handler.existsJob(job.getName(), conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020,
-            "Invalid id: " + job.getPersistenceId());
+        if(!handler.existsJob(job.getPersistenceId(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0019);
         }
 
         handler.updateJob(job, conn);

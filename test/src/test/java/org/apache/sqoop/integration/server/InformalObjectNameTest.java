@@ -93,7 +93,7 @@ public class InformalObjectNameTest extends SqoopTestCase {
     assertEquals(rdbmsLink, repositoryLink);
 
     // update link
-    getClient().updateLink(rdbmsLink);
+    getClient().updateLink(rdbmsLink, rdbmsLink.getName());
 
     // enable link
     getClient().enableLink(linkName, true);
@@ -138,7 +138,7 @@ public class InformalObjectNameTest extends SqoopTestCase {
     assertEquals(job, repositoryJob);
 
     // update job
-    getClient().updateJob(job);
+    getClient().updateJob(job, job.getName());
 
     // enable job
     getClient().enableJob(jobName, true);

@@ -126,8 +126,8 @@ public class SqoopResourceRequests {
     return getLinkResourceRequest().read(serverUrl, linkArg);
   }
 
-  public ValidationResultBean updateLink(MLink link) {
-    return getLinkResourceRequest().update(serverUrl, link);
+  public ValidationResultBean updateLink(MLink link, String oldLinkName) {
+    return getLinkResourceRequest().update(serverUrl, link, oldLinkName);
   }
 
   public void enableLink(String lArg, Boolean enabled) {
@@ -150,8 +150,8 @@ public class SqoopResourceRequests {
     return getJobResourceRequest().readByConnector(serverUrl, cArg);
   }
 
-  public ValidationResultBean updateJob(MJob job) {
-    return getJobResourceRequest().update(serverUrl, job);
+  public ValidationResultBean updateJob(MJob job, String oldJobName) {
+    return getJobResourceRequest().update(serverUrl, job, oldJobName);
   }
 
   public void enableJob(String jArg, Boolean enabled) {

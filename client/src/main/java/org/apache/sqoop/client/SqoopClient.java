@@ -313,8 +313,8 @@ public class SqoopClient {
    * @param link link that should be updated
    * @return
    */
-  public Status updateLink(MLink link) {
-    return applyLinkValidations(resourceRequests.updateLink(link), link);
+  public Status updateLink(MLink link, String oldLinkName) {
+    return applyLinkValidations(resourceRequests.updateLink(link, oldLinkName), link);
   }
 
   /**
@@ -403,8 +403,8 @@ public class SqoopClient {
    * @param job Job that should be updated
    * @return
    */
-  public Status updateJob(MJob job) {
-    return applyJobValidations(resourceRequests.updateJob(job), job);
+  public Status updateJob(MJob job, String oldJobName) {
+    return applyJobValidations(resourceRequests.updateJob(job, oldJobName), job);
   }
 
   /**

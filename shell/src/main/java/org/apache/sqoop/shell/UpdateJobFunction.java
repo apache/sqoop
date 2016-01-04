@@ -67,7 +67,7 @@ public class UpdateJobFunction extends SqoopFunction {
 
     // TODO(SQOOP-1634): using from/to and driver config id, this call can be avoided
     MJob job = client.getJob(jobArg);
-
+    String oldJobName = job.getName();
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
             job.getFromConnectorName());
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
@@ -91,14 +91,14 @@ public class UpdateJobFunction extends SqoopFunction {
         }
 
         // Try to create
-        status = client.updateJob(job);
+        status = client.updateJob(job, oldJobName);
       } while(!status.canProceed());
     } else {
       JobDynamicConfigOptions options = new JobDynamicConfigOptions();
       options.prepareOptions(job);
       CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
       if (fillJob(line, job)) {
-        status = client.updateJob(job);
+        status = client.updateJob(job, oldJobName);
         if (!status.canProceed()) {
           printJobValidationMessages(job);
           return status;

@@ -19,6 +19,7 @@
 package org.apache.sqoop.shell;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -108,7 +109,7 @@ public class TestUpdateCommand {
     MLink link = new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
     when(client.getConnectorConfigBundle("connector_test")).thenReturn(new MapResourceBundle(new HashMap()));
-    when(client.updateLink(any(MLink.class))).thenReturn(Status.OK);
+    when(client.updateLink(any(MLink.class), anyString())).thenReturn(Status.OK);
 
     // update link -name link_test
     Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
@@ -140,7 +141,7 @@ public class TestUpdateCommand {
     when(client.getConnector("connector_test")).thenReturn(new MConnector("", "", "", null, null, null));
     MLink link = new MLink("connector_test", new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
-    when(client.updateLink(any(MLink.class))).thenReturn(Status.OK);
+    when(client.updateLink(any(MLink.class), anyString())).thenReturn(Status.OK);
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
 
     // update link -name link_test
@@ -177,11 +178,12 @@ public class TestUpdateCommand {
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
+    job.setName("job_test");
     when(client.getJob("job_test")).thenReturn(job);
     when(client.getConnector(any(String.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.getDriverConfigBundle()).thenReturn(new MapResourceBundle(new HashMap()));
-    when(client.updateJob(job)).thenReturn(Status.OK);
+    when(client.updateJob(job, "job_test")).thenReturn(Status.OK);
 
     // update job -name job_test
     Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
@@ -218,10 +220,10 @@ public class TestUpdateCommand {
     when(client.getConnector(any(String.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
-    when(client.updateJob(job)).thenReturn(Status.OK);
+    when(client.updateJob(any(MJob.class), any(String.class))).thenReturn(Status.OK);
 
     // update job -name job_test
-    initData("jobname\r" +          // job name
+    initData("job_test\r" +          // job name
         // From job config
         "abc\r" +                   // for input with name "String"
         "12345\r" +                 // for input with name "Integer"
@@ -253,7 +255,7 @@ public class TestUpdateCommand {
         "7654321\r");              // for input with name "DateTime"
     Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     assertTrue(status != null && status == Status.OK);
-    assertEquals(job.getName(), "jobname");
+    assertEquals(job.getName(), "job_test");
     // check from job config
     assertEquals(job.getFromJobConfig().getStringInput("fromJobConfig.String").getValue(), "abc");
     assertEquals(job.getFromJobConfig().getIntegerInput("fromJobConfig.Integer").getValue().intValue(), 12345);

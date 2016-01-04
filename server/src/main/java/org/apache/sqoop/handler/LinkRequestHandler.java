@@ -131,6 +131,7 @@ public class LinkRequestHandler implements RequestHandler {
 
     MLink postedLink = links.get(0);
     MConnector mConnector = HandlerUtils.getConnectorFromConnectorName(postedLink.getConnectorName());
+    String oldLinkName = ctx.getLastURLElement();
 
     // Authorization check
     if (create) {
@@ -138,7 +139,7 @@ public class LinkRequestHandler implements RequestHandler {
               mConnector.getUniqueName());
     } else {
       AuthorizationEngine.updateLink(ctx.getUserName(), mConnector.getUniqueName(),
-              postedLink.getName());
+              oldLinkName);
     }
 
     MLinkConfig linkConfig = ConnectorManager.getInstance()
@@ -148,8 +149,7 @@ public class LinkRequestHandler implements RequestHandler {
     }
     // if update get the link id from the request URI
     if (!create) {
-      String linkName = ctx.getLastURLElement();
-      MLink existingLink = repository.findLink(linkName);
+      MLink existingLink = repository.findLink(oldLinkName);
       if (postedLink.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
         postedLink.setPersistenceId(existingLink.getPersistenceId());
       }

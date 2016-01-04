@@ -65,6 +65,7 @@ public class UpdateLinkFunction extends SqoopFunction {
 
     // TODO(SQOOP-1634): using link config id, this call can be avoided
     MLink link = client.getLink(linkArg);
+    String oldLinkName = link.getName();
     ResourceBundle connectorLinkConfigBundle = client.getConnectorConfigBundle(link.getConnectorName());
 
     Status status = Status.OK;
@@ -84,14 +85,14 @@ public class UpdateLinkFunction extends SqoopFunction {
         }
 
         // Try to create
-        status = client.updateLink(link);
+        status = client.updateLink(link, oldLinkName);
       } while(!status.canProceed());
     } else {
       LinkDynamicConfigOptions options = new LinkDynamicConfigOptions();
       options.prepareOptions(link);
       CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
       if (fillLink(line, link)) {
-        status = client.updateLink(link);
+        status = client.updateLink(link, oldLinkName);
         if (!status.canProceed()) {
           printLinkValidationMessages(link);
           return null;

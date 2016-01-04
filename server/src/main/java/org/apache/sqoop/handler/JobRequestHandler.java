@@ -179,13 +179,14 @@ public class JobRequestHandler implements RequestHandler {
 
     // Job object
     MJob postedJob = jobs.get(0);
+    String oldJobName = ctx.getLastURLElement();
 
     // Authorization check
     if (create) {
       AuthorizationEngine.createJob(ctx.getUserName(), postedJob.getFromLinkName(), postedJob.getToLinkName());
     } else {
       AuthorizationEngine.updateJob(ctx.getUserName(), postedJob.getFromLinkName(), postedJob.getToLinkName(),
-              postedJob.getName());
+              oldJobName);
     }
 
     // Verify that user is not trying to spoof us
@@ -203,8 +204,7 @@ public class JobRequestHandler implements RequestHandler {
 
     // if update get the job id from the request URI
     if (!create) {
-      String jobIdentifier = ctx.getLastURLElement();
-      MJob existingJob = HandlerUtils.getJobFromIdentifier(jobIdentifier);
+      MJob existingJob = HandlerUtils.getJobFromIdentifier(oldJobName);
       if (postedJob.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
         postedJob.setPersistenceId(existingJob.getPersistenceId());
       }

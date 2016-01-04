@@ -466,6 +466,26 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
+  public boolean existsLink(long linkId, Connection conn) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectLinkCheckById())) {
+      stmt.setLong(1, linkId);
+      try (ResultSet rs = stmt.executeQuery()) {
+
+        // Should be always valid in query with count
+        rs.next();
+
+        return rs.getLong(1) == 1;
+      }
+    } catch (SQLException ex) {
+      logException(ex, linkId);
+      throw new SqoopException(CommonRepositoryError.COMMON_0022, ex);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public boolean inUseLink(String linkName, Connection conn) {
 
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobsForLinkCheck())) {
@@ -748,6 +768,26 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, job);
       throw new SqoopException(CommonRepositoryError.COMMON_0024, ex);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean existsJob(long jobId, Connection conn) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobCheckById())) {
+      stmt.setLong(1, jobId);
+      try (ResultSet rs = stmt.executeQuery()) {
+
+        // Should be always valid in query with count
+        rs.next();
+
+        return rs.getLong(1) == 1;
+      }
+    } catch (SQLException ex) {
+      logException(ex, jobId);
+      throw new SqoopException(CommonRepositoryError.COMMON_0026, ex);
     }
   }
 
