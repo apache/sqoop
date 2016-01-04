@@ -68,9 +68,9 @@ public class ThrowableDisplayer {
    */
   protected static void printThrowable(Throwable t, boolean verbose) {
     print("@|red Exception: |@");
-    print(t.getClass().getName());
+    print(t.getCause() == null ? t.getClass().getName() : t.getCause().getClass().getName());
     print(" @|red Message: |@");
-    print(t.getMessage());
+    print(t.getCause() == null ? t.getMessage() : t.getCause().getMessage());
     println();
 
     if(verbose) {
