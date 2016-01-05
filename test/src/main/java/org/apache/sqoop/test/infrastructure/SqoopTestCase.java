@@ -208,7 +208,7 @@ public class SqoopTestCase implements ITest {
    * @param <T>
    * @return
    */
-  private static <T extends InfrastructureProvider> T startInfrastructureProvider(Class<T> providerClass, Configuration hadoopConfiguration, KdcRunner kdc) {
+  protected static <T extends InfrastructureProvider> T startInfrastructureProvider(Class<T> providerClass, Configuration hadoopConfiguration, KdcRunner kdc) {
     T providerObject;
 
     try {
@@ -354,17 +354,7 @@ public class SqoopTestCase implements ITest {
 
   @BeforeMethod
   public void init() throws Exception {
-    String serverUrl = getSqoopServerUrl();
-
-    if (serverUrl != null) {
-      client = new SqoopClient(serverUrl);
-
-      KdcInfrastructureProvider kdcProvider = getInfrastructureProvider(KdcInfrastructureProvider.class);
-      if (kdcProvider != null) {
-        kdcProvider.getInstance().authenticateWithSqoopServer(client);
-        kdcProvider.getInstance().authenticateWithSqoopServer(new URL(serverUrl), authToken);
-      }
-    }
+    initSqoopClient(getSqoopServerUrl());
 
     if (getInfrastructureProvider(HadoopInfrastructureProvider.class) != null) {
       hdfsClient = FileSystem.get(getInfrastructureProvider(HadoopInfrastructureProvider.class).getHadoopConfiguration());
@@ -373,6 +363,18 @@ public class SqoopTestCase implements ITest {
 
     if (getInfrastructureProvider(DatabaseInfrastructureProvider.class) != null) {
       provider = getInfrastructureProvider(DatabaseInfrastructureProvider.class).getInstance();
+    }
+  }
+
+  protected void initSqoopClient(String serverUrl) throws Exception {
+    if (serverUrl != null) {
+      client = new SqoopClient(serverUrl);
+
+      KdcInfrastructureProvider kdcProvider = getInfrastructureProvider(KdcInfrastructureProvider.class);
+      if (kdcProvider != null) {
+        kdcProvider.getInstance().authenticateWithSqoopServer(client);
+        kdcProvider.getInstance().authenticateWithSqoopServer(new URL(serverUrl), authToken);
+      }
     }
   }
 
@@ -637,5 +639,15 @@ public class SqoopTestCase implements ITest {
 
   protected String getSqoopMiniClusterTemporaryPath() {
     return getInfrastructureProvider(SqoopInfrastructureProvider.class).getRootPath();
+  }
+
+  protected Configuration getHadoopConf() {
+    Configuration hadoopConf = null;
+    if (getInfrastructureProvider(HadoopInfrastructureProvider.class) != null) {
+      hadoopConf = getInfrastructureProvider(HadoopInfrastructureProvider.class).getHadoopConfiguration();
+    } else {
+      hadoopConf = new Configuration();
+    }
+    return hadoopConf;
   }
 }
