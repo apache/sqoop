@@ -301,6 +301,16 @@ public class TestCreateCommand {
     assertTrue(status != null && status == Status.OK);
   }
 
+  @Test
+  public void testUnknowOption() {
+    try {
+      createCmd.execute(Arrays.asList(Constants.FN_ROLE, "-unknownOption"));
+      fail("Create command should fail as unknown option encountered!");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Unknown option encountered"));
+    }
+  }
+
   @SuppressWarnings("unchecked")
   private List<MConfig> getConfig(String configName) {
     List<MInput<?>> list = new ArrayList<MInput<?>>();

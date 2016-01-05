@@ -22,16 +22,15 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.cli.SqoopGnuParser;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.JobsBean;
@@ -41,7 +40,6 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.tools.ConfiguredTool;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
@@ -66,7 +64,7 @@ public class RepositoryDumpTool extends ConfiguredTool {
             .withLongOpt("output")
             .create('o'));
 
-    CommandLineParser parser = new GnuParser();
+    CommandLineParser parser = new SqoopGnuParser();
 
     try {
       CommandLine line = parser.parse(options, arguments);

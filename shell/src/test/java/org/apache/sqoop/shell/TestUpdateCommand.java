@@ -295,6 +295,16 @@ public class TestUpdateCommand {
     assertEquals(job.getDriverConfig().getDateTimeInput("driverConfig.DateTime").getValue().getMillis(), 7654321);
   }
 
+  @Test
+  public void testUnknowOption() {
+    try {
+      updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test", "-unknownOption"));
+      fail("Update command should fail as unknown option encountered!");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Unknown option encountered"));
+    }
+  }
+
   @SuppressWarnings("unchecked")
   private List<MConfig> getConfig(String configName) {
     List<MInput<?>> list = new ArrayList<MInput<?>>();

@@ -26,13 +26,13 @@ import java.util.*;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.cli.SqoopGnuParser;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.ConnectorManager;
@@ -84,7 +84,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
     options.addOption(OptionBuilder.isRequired().hasArg().withArgName("filename")
         .withLongOpt("input").create('i'));
 
-    CommandLineParser parser = new GnuParser();
+    CommandLineParser parser = new SqoopGnuParser();
 
     try {
       CommandLine line = parser.parse(options, arguments);

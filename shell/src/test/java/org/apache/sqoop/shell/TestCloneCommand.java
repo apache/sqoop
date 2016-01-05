@@ -274,6 +274,16 @@ public class TestCloneCommand {
     assertEquals(job.getDriverConfig().getDateTimeInput("driverConfig.DateTime").getValue().getMillis(), 7654321);
   }
 
+  @Test
+  public void testUnknowOption() {
+    try {
+      cloneCmd.execute(Arrays.asList(Constants.FN_JOB, "-unknownOption"));
+      fail("Clone command should fail as unknown option encountered!");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Unknown option encountered"));
+    }
+  }
+
   @SuppressWarnings("unchecked")
   private List<MConfig> getConfig(String configName) {
     List<MInput<?>> list = new ArrayList<MInput<?>>();
