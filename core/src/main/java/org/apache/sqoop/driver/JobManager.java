@@ -29,6 +29,7 @@ import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.ConfigurationConstants;
@@ -443,8 +444,10 @@ public class JobManager implements Reconfigurable {
     jobRequest.addJarForClass(MapContext.class);
     // sqoop-core
     jobRequest.addJarForClass(Driver.class);
-    // sqoop-spi
+    // connector-sdk
     jobRequest.addJarForClass(SqoopConnector.class);
+    // connector-sdk-hadoop
+    jobRequest.addJarForClass(SecurityUtils.class);
     // Execution engine jar
     jobRequest.addJarForClass(executionEngine.getClass());
   }
