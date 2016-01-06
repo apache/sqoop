@@ -75,12 +75,12 @@ public abstract class RestTest extends SqoopTestCase {
     }
 
     // Assert given exception from server
-    public void assertServerException(String errorClass, String errorCode) throws Exception {
+    public void assertServerException(String errorMessage, String errorCode) throws Exception {
       // On exception, the error trace can't be null
       assertNotNull(error);
 
       // We're not parsing entire JSON, but rather just looking for sub-strings that are of particular interest
-      assertTrue(error.contains("error-code-class\":\"" + errorClass));
+      assertTrue(error.contains("error-code-message\":\"" + errorMessage));
       assertTrue(error.contains("error-code\":\"" + errorCode));
     }
 

@@ -48,6 +48,7 @@ import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvide
 import org.apache.sqoop.test.kdc.KdcRunner;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.apache.sqoop.test.utils.SqoopUtils;
+import org.apache.sqoop.utils.UrlSafeUtils;
 import org.apache.sqoop.validation.Status;
 import org.testng.Assert;
 import org.testng.ITest;
@@ -261,7 +262,7 @@ public class SqoopTestCase implements ITest {
     return HdfsUtils.joinPathFragments(
         getInfrastructureProvider(HadoopInfrastructureProvider.class).getInstance().getTestDirectory(),
         getClass().getName(),
-        getTestName());
+        UrlSafeUtils.urlPathEncode((getTestName())));
   }
 
   /**

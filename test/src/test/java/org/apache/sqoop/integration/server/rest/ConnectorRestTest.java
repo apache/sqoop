@@ -31,11 +31,6 @@ public class ConnectorRestTest extends RestTest {
       void validate() throws Exception {
         assertResponseCode(200);
       }}),
-    new TestDescription("Get connector by ID", "v1/connector/1", "GET", null, new Validator() {
-      @Override
-      void validate() throws Exception {
-        assertResponseCode(200);
-      }}),
     new TestDescription("Get connector by name", "v1/connector/generic-jdbc-connector", "GET", null, new Validator() {
       @Override
       void validate() throws Exception {
@@ -45,13 +40,13 @@ public class ConnectorRestTest extends RestTest {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0006");
+        assertServerException("Entity requested doesn't exist", "SERVER_0006");
       }}),
     new TestDescription("Invalid post request", "v1/connector", "POST", "Random data", new Validator() {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0002");
+        assertServerException("Unsupported HTTP method", "SERVER_0002");
       }}),
   };
 
