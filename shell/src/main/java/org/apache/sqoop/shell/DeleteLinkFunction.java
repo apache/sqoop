@@ -34,16 +34,16 @@ public class DeleteLinkFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public DeleteLinkFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
-      .withLongOpt(Constants.OPT_LID)
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_NAME))
+      .withLongOpt(Constants.OPT_NAME)
       .isRequired()
       .hasArg()
-      .create(Constants.OPT_LID_CHAR));
+      .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
-    client.deleteLink(line.getOptionValue(Constants.OPT_LID));
+    client.deleteLink(line.getOptionValue(Constants.OPT_NAME));
     return Status.OK;
   }
 }

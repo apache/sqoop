@@ -36,8 +36,8 @@ public class TestMJob {
   public void testInitialization() {
     // Test default constructor
     MJob job = job();
-    assertEquals(123l, job.getFromConnectorId());
-    assertEquals(456l, job.getToConnectorId());
+    assertEquals("fromConnectorName", job.getFromConnectorName());
+    assertEquals("toConnectorName", job.getToConnectorName());
     assertEquals("Buffy", job.getCreationUser());
     assertEquals("Vampire", job.getName());
     assertEquals(fromConfig(), job.getFromJobConfig());
@@ -46,8 +46,8 @@ public class TestMJob {
 
     // Test copy constructor
     MJob copy = new MJob(job);
-    assertEquals(123l, copy.getFromConnectorId());
-    assertEquals(456l, copy.getToConnectorId());
+    assertEquals("fromConnectorName", copy.getFromConnectorName());
+    assertEquals("toConnectorName", copy.getToConnectorName());
     assertEquals("Buffy", copy.getCreationUser());
     assertEquals("Vampire", copy.getName());
     assertEquals(fromConfig(), copy.getFromJobConfig());
@@ -56,8 +56,8 @@ public class TestMJob {
 
     // Test constructor for metadata upgrade (the order of configs is different)
     MJob upgradeCopy = new MJob(job, fromConfig(), toConfig(), driverConfig());
-    assertEquals(123l, upgradeCopy.getFromConnectorId());
-    assertEquals(456l, upgradeCopy.getToConnectorId());
+    assertEquals("fromConnectorName", upgradeCopy.getFromConnectorName());
+    assertEquals("toConnectorName", upgradeCopy.getToConnectorName());
     assertEquals("Buffy", upgradeCopy.getCreationUser());
     assertEquals("Vampire", upgradeCopy.getName());
     assertEquals(fromConfig(), upgradeCopy.getFromJobConfig());
@@ -98,7 +98,8 @@ public class TestMJob {
         .getConfig("CONFIGFROMNAME").getInput("STRING-INPUT").getValue());  }
 
   private MJob job() {
-    MJob job = new MJob(123l, 456l, 1L, 2L, fromConfig(), toConfig(), driverConfig());
+    MJob job = new MJob("fromConnectorName", "toConnectorName", "fromLinkName", "toLinkName",
+            fromConfig(), toConfig(), driverConfig());
     job.setName("Vampire");
     job.setCreationUser("Buffy");
     return job;

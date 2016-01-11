@@ -45,8 +45,8 @@ public class TestConnectorBean {
     connectors.add(BeanTestUtil.getConnector(1L, "jdbc"));
 
     // Create testing bundles
-    Map<Long, ResourceBundle> configBundles = new HashMap<Long, ResourceBundle>();
-    configBundles.put(1L, ConfigTestUtil.getResourceBundle());
+    Map<String, ResourceBundle> configBundles = new HashMap<String, ResourceBundle>();
+    configBundles.put("jdbc", ConfigTestUtil.getResourceBundle());
 
     // Serialize it to JSON object
     ConnectorBean connectorBean = new ConnectorBean(connectors, configBundles);
@@ -62,7 +62,7 @@ public class TestConnectorBean {
     assertEquals(connectors.size(), 1);
     assertEquals(connectors.size(), parsedConnectorBean.getConnectors().size());
     assertEquals(connectors.get(0), parsedConnectorBean.getConnectors().get(0));
-    ResourceBundle retrievedBundle = parsedConnectorBean.getResourceBundles().get(1L);
+    ResourceBundle retrievedBundle = parsedConnectorBean.getResourceBundles().get("jdbc");
     assertNotNull(retrievedBundle);
     assertEquals("a", retrievedBundle.getString("a"));
     assertEquals("b", retrievedBundle.getString("b"));

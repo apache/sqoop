@@ -86,11 +86,11 @@ public class JobResourceRequest extends ResourceRequest {
     return validationResultBean;
   }
 
-  public ValidationResultBean update(String serverUrl, MJob job) {
+  public ValidationResultBean update(String serverUrl, MJob job, String oldJobName) {
     JobBean jobBean = new JobBean(job);
     // Extract all config inputs including sensitive inputs
     JSONObject jobJson = jobBean.extract(false);
-    String response = super.put(serverUrl + RESOURCE + job.getPersistenceId(),
+    String response = super.put(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(oldJobName),
         jobJson.toJSONString());
     ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore(JSONUtils.parse(response));

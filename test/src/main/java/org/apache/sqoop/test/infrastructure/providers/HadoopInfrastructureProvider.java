@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunnerFactory;
+import org.apache.sqoop.test.kdc.KdcRunner;
 
 /**
  * Hadoop infrastructure provider.
@@ -83,5 +84,10 @@ public class HadoopInfrastructureProvider extends InfrastructureProvider {
 
   public HadoopRunner getInstance() {
     return instance;
+  }
+
+  @Override
+  public void setKdc(KdcRunner kdc) {
+    // Do nothing for the time being. Need to handle this when we support kerberos enabled MiniCluster.
   }
 }

@@ -21,9 +21,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.IncrementalType;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
@@ -32,7 +32,6 @@ import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 
 
@@ -62,7 +61,7 @@ public class HdfsFromInitializer extends Initializer<LinkConfiguration, FromJobC
 
     // In case of incremental import, we need to persist the highest last modified
     try {
-      UserGroupInformation.createProxyUser(context.getUser(), UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+      SecurityUtils.createProxyUser(context).doAs(new PrivilegedExceptionAction<Void>() {
         public Void run() throws Exception {
           FileSystem fs = FileSystem.get(configuration);
           Path path = new Path(jobConfig.fromJobConfig.inputDirectory);
@@ -89,6 +88,10 @@ public class HdfsFromInitializer extends Initializer<LinkConfiguration, FromJobC
             LOG.info("Maximal age of file is: " + maxModifiedTime);
             context.getContext().setLong(HdfsConstants.MAX_IMPORT_DATE, maxModifiedTime);
           }
+
+          // Generate delegation tokens if we are on secured cluster
+          SecurityUtils.generateDelegationTokens(context.getContext(), path, configuration);
+
           return null;
         }
       });

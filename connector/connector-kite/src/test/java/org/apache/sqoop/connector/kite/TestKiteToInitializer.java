@@ -18,9 +18,11 @@
 
 package org.apache.sqoop.connector.kite;
 
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
+import org.apache.sqoop.job.etl.InitializerContext;
 import org.apache.sqoop.schema.Schema;
 import org.kitesdk.data.Datasets;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -36,10 +38,11 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @PrepareForTest(Datasets.class)
-@PowerMockIgnore("org.apache.sqoop.common.ErrorCode")
+@PowerMockIgnore({"org.apache.sqoop.common.ErrorCode", "com.sun.security.auth.UnixPrincipal"})
 public class TestKiteToInitializer extends PowerMockTestCase {
 
   private KiteToInitializer initializer;
+  private InitializerContext initializerContext;
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
@@ -47,6 +50,7 @@ public class TestKiteToInitializer extends PowerMockTestCase {
     mockStatic(Datasets.class);
 
     initializer = new KiteToInitializer();
+    initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
   }
 
   @Test
@@ -59,7 +63,7 @@ public class TestKiteToInitializer extends PowerMockTestCase {
         .thenReturn(false);
 
     // exercise
-    initializer.initialize(null, linkConfig, toJobConfig);
+    initializer.initialize(initializerContext, linkConfig, toJobConfig);
   }
 
   @Test(expectedExceptions = SqoopException.class)
@@ -72,7 +76,7 @@ public class TestKiteToInitializer extends PowerMockTestCase {
         .thenReturn(true);
 
     // exercise
-    initializer.initialize(null, linkConfig, toJobConfig);
+    initializer.initialize(initializerContext, linkConfig, toJobConfig);
   }
 
   @Test

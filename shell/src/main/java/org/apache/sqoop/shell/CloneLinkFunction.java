@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.shell;
 
-import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.model.MLink;
@@ -30,6 +29,8 @@ import org.apache.sqoop.validation.Status;
 import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import jline.console.ConsoleReader;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 import static org.apache.sqoop.shell.utils.ConfigFiller.*;
@@ -44,18 +45,18 @@ public class CloneLinkFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public CloneLinkFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
-      .withLongOpt(Constants.OPT_LID)
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_NAME))
+      .withLongOpt(Constants.OPT_NAME)
       .hasArg()
       .isRequired()
-      .create(Constants.OPT_LID_CHAR)
+      .create(Constants.OPT_NAME_CHAR)
     );
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return cloneLink(line.getOptionValue(Constants.OPT_LID), line.getArgList(), isInteractive);
+    return cloneLink(line.getOptionValue(Constants.OPT_NAME), line.getArgList(), isInteractive);
   }
 
   private Status cloneLink(String linkArg, List<String> args, boolean isInteractive) throws IOException {
@@ -69,7 +70,7 @@ public class CloneLinkFunction extends SqoopFunction {
 
     Status status = Status.OK;
 
-    ResourceBundle linkConfigBundle = client.getConnectorConfigBundle(link.getConnectorId());
+    ResourceBundle linkConfigBundle = client.getConnectorConfigBundle(link.getConnectorName());
 
     if (isInteractive) {
       printlnResource(Constants.RES_PROMPT_UPDATE_LINK_CONFIG);

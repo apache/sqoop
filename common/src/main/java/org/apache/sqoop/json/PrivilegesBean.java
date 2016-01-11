@@ -56,7 +56,7 @@ public class PrivilegesBean extends PrivilegeBean {
 
   @Override
   public void restore(JSONObject json) {
-    JSONArray rolesArray = (JSONArray) json.get(PRIVILEGES);
+    JSONArray rolesArray = JSONUtils.getJSONArray(json, PRIVILEGES);
     restorePrivileges(rolesArray);
   }
 

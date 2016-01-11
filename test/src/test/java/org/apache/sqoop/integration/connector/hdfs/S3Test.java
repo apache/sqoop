@@ -25,7 +25,12 @@ import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.asserts.HdfsAsserts;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 
@@ -42,7 +47,8 @@ import static org.testng.Assert.assertEquals;
  *   -Dorg.apache.sqoop.integration.connector.hdfs.s3.access=AKI...
  *   -Dorg.apache.sqoop.integration.connector.hdfs.s3.secret=93JKx...
  */
-public class S3Test extends ConnectorTestCase {
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+public class S3Test extends SqoopTestCase {
 
   public static final String PROPERTY_BUCKET = "org.apache.sqoop.integration.connector.hdfs.s3.bucket";
   public static final String PROPERTY_ACCESS = "org.apache.sqoop.integration.connector.hdfs.s3.access";
@@ -90,7 +96,7 @@ public class S3Test extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // DB -> S3
-    MJob db2aws = getClient().createJob(rdbmsLink.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob db2aws = getClient().createJob(rdbmsLink.getName(), hdfsLink.getName());
     fillRdbmsFromConfig(db2aws, "id");
     fillHdfsToConfig(db2aws, ToFormat.TEXT_FILE);
 
@@ -110,7 +116,7 @@ public class S3Test extends ConnectorTestCase {
     assertEquals(provider.rowCount(getTableName()), 0);
 
     // S3 -> DB
-    MJob aws2db = getClient().createJob(hdfsLink.getPersistenceId(), rdbmsLink.getPersistenceId());
+    MJob aws2db = getClient().createJob(hdfsLink.getName(), rdbmsLink.getName());
     fillHdfsFromConfig(aws2db);
     fillRdbmsToConfig(aws2db);
 
@@ -145,7 +151,7 @@ public class S3Test extends ConnectorTestCase {
     saveLink(hdfsLink);
 
     // S3 -> HDFS
-    MJob aws2hdfs = getClient().createJob(s3Link.getPersistenceId(), hdfsLink.getPersistenceId());
+    MJob aws2hdfs = getClient().createJob(s3Link.getName(), hdfsLink.getName());
     fillHdfsFromConfig(aws2hdfs);
     aws2hdfs.getFromJobConfig().getEnumInput("incremental.incrementalType").setValue(IncrementalType.NEW_FILES);
 

@@ -62,7 +62,8 @@ abstract public class PostgresqlTestCase {
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
     provider.start();
-
+    // clear the data for sqoop
+    provider.dropSchema("SQOOP");
     handler = new PostgresqlRepositoryHandler();
     handler.createOrUpgradeRepository(provider.getConnection());
   }
@@ -83,7 +84,7 @@ abstract public class PostgresqlTestCase {
   }
 
   protected MLink getLink(String name, MConnector connector) {
-    MLink link = new MLink(connector.getPersistenceId(), connector.getLinkConfig());
+    MLink link = new MLink(connector.getUniqueName(), connector.getLinkConfig());
     link.setName(name);
     fillLink(link);
     return link;
@@ -92,10 +93,10 @@ abstract public class PostgresqlTestCase {
   protected MJob getJob(String name, MConnector connectorA, MConnector connectorB, MLink linkA, MLink linkB) {
     MDriver driver = handler.findDriver(MDriver.DRIVER_NAME, provider.getConnection());
     MJob job = new MJob(
-        connectorA.getPersistenceId(),
-        connectorB.getPersistenceId(),
-        linkA.getPersistenceId(),
-        linkB.getPersistenceId(),
+        connectorA.getUniqueName(),
+        connectorB.getUniqueName(),
+        linkA.getName(),
+        linkB.getName(),
         connectorA.getFromConfig(),
         connectorB.getToConfig(),
         driver.getDriverConfig());
@@ -106,7 +107,7 @@ abstract public class PostgresqlTestCase {
   }
 
   protected MSubmission getSubmission(MJob job, SubmissionStatus submissionStatus) {
-    MSubmission submission = new MSubmission(job.getPersistenceId(), new Date(), submissionStatus);
+    MSubmission submission = new MSubmission(job.getName(), new Date(), submissionStatus);
     fillSubmission(submission);
     return submission;
   }

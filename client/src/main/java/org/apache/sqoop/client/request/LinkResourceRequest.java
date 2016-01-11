@@ -72,11 +72,12 @@ public class LinkResourceRequest extends ResourceRequest {
     return validationBean;
   }
 
-  public ValidationResultBean update(String serverUrl, MLink link) {
+  public ValidationResultBean update(String serverUrl, MLink link, String oldLinkName) {
     LinkBean linkBean = new LinkBean(link);
     // Extract all config inputs including sensitive inputs
     JSONObject linkJson = linkBean.extract(false);
-    String response = super.put(serverUrl + LINK_RESOURCE + link.getPersistenceId(), linkJson.toJSONString());
+    String response = super.put(serverUrl + LINK_RESOURCE + UrlSafeUtils.urlPathEncode(oldLinkName),
+            linkJson.toJSONString());
     ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore(JSONUtils.parse(response));
     return validationBean;
@@ -88,9 +89,9 @@ public class LinkResourceRequest extends ResourceRequest {
 
   public void enable(String serverUrl, String lArg, Boolean enabled) {
     if (enabled) {
-      super.put(serverUrl + LINK_RESOURCE + lArg + ENABLE, null);
+      super.put(serverUrl + LINK_RESOURCE + UrlSafeUtils.urlPathEncode(lArg) + ENABLE, null);
     } else {
-      super.put(serverUrl + LINK_RESOURCE + lArg + DISABLE, null);
+      super.put(serverUrl + LINK_RESOURCE + UrlSafeUtils.urlPathEncode(lArg) + DISABLE, null);
     }
   }
 }

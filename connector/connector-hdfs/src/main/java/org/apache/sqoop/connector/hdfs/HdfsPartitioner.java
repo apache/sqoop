@@ -39,9 +39,9 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.hadoop.net.NodeBase;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.IncrementalType;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
@@ -83,8 +83,7 @@ public class HdfsPartitioner extends Partitioner<LinkConfiguration, FromJobConfi
 
     final List<Partition> partitions = new ArrayList<>();
     try {
-      UserGroupInformation.createProxyUser(context.getUser(),
-        UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+      SecurityUtils.createProxyUserAndLoadDelegationTokens(context).doAs(new PrivilegedExceptionAction<Void>() {
         public Void run() throws Exception {
           long numInputBytes = getInputSize(conf, fromJobConfig.fromJobConfig.inputDirectory);
           maxSplitSize = numInputBytes / context.getMaxPartitions();

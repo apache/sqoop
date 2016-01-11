@@ -38,12 +38,11 @@ import java.util.Set;
 public class ValidationResultBean implements JsonBean {
 
   private static final String VALIDATION_RESULT = "validation-result";
-  private static final String ID = "id";
   private static final String STATUS = "status";
   private static final String MESSAGE = "message";
 
   private ConfigValidationResult[] results;
-  private Long id;
+  private String name;
 
   public ValidationResultBean() {
     // Empty, for restore
@@ -60,12 +59,12 @@ public class ValidationResultBean implements JsonBean {
     return results.clone();
   }
 
-  public void setId(Long id) {
-    this.id = id;
+  public String getName() {
+    return name;
   }
 
-  public Long getId() {
-    return id;
+  public void setName(String name) {
+    this.name = name;
   }
 
   @SuppressWarnings("unchecked")
@@ -80,8 +79,8 @@ public class ValidationResultBean implements JsonBean {
 
     JSONObject object = new JSONObject();
     object.put(VALIDATION_RESULT, array);
-    if(id != null) {
-      object.put(ID, id);
+    if(name != null) {
+      object.put(NAME, name);
     }
     return object;
   }
@@ -118,14 +117,14 @@ public class ValidationResultBean implements JsonBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray array = (JSONArray) jsonObject.get(VALIDATION_RESULT);
+    JSONArray array = JSONUtils.getJSONArray(jsonObject, VALIDATION_RESULT);
     results = new ConfigValidationResult[array.size()];
     int i = 0;
     for(Object item : array) {
       results[i++] = restoreValidationResult((JSONObject) item);
     }
-    if(jsonObject.containsKey(ID)) {
-      id = (Long) jsonObject.get(ID);
+    if(jsonObject.containsKey(NAME)) {
+      name = JSONUtils.getString(jsonObject, NAME);
     }
   }
 
@@ -150,9 +149,6 @@ public class ValidationResultBean implements JsonBean {
   }
 
   private Message restoreMessage(JSONObject item) {
-    return new Message(
-      Status.valueOf((String) item.get(STATUS)),
-      (String) item.get(MESSAGE)
-    );
+    return new Message(Status.valueOf(JSONUtils.getString(item, STATUS)), JSONUtils.getString(item, MESSAGE));
   }
 }

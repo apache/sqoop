@@ -22,12 +22,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.ConfigurationConstants;
@@ -140,6 +142,16 @@ public class JobManager implements Reconfigurable {
   private UpdateThread updateThread = null;
 
   /**
+   * Lock for purge thread.
+   */
+  private Object purgeThreadLock = new Object();
+
+  /**
+   * Lock for update thread.
+   */
+  private Object updateThreadLock = new Object();
+
+  /**
    * Synchronization variable between threads.
    */
   private boolean running;
@@ -196,20 +208,24 @@ public class JobManager implements Reconfigurable {
 
     running = false;
 
-    try {
-      purgeThread.interrupt();
-      purgeThread.join();
-    } catch (InterruptedException e) {
-      // TODO(jarcec): Do I want to wait until it actually finish here?
-      LOG.error("Interrupted joining purgeThread");
+    synchronized(purgeThreadLock) {
+      try {
+        purgeThread.interrupt();
+        purgeThread.join();
+      } catch (InterruptedException e) {
+        // TODO(jarcec): Do I want to wait until it actually finish here?
+        LOG.error("Interrupted joining purgeThread");
+      }
     }
 
-    try {
-      updateThread.interrupt();
-      updateThread.join();
-    } catch (InterruptedException e) {
-      // TODO(jarcec): Do I want to wait until it actually finish here?
-      LOG.error("Interrupted joining updateThread");
+    synchronized(updateThreadLock) {
+      try {
+        updateThread.interrupt();
+        updateThread.join();
+      } catch (InterruptedException e) {
+        // TODO(jarcec): Do I want to wait until it actually finish here?
+        LOG.error("Interrupted joining updateThread");
+      }
     }
 
     if (submissionEngine != null) {
@@ -297,7 +313,7 @@ public class JobManager implements Reconfigurable {
     if (!job.getEnabled()) {
       throw new SqoopException(DriverError.DRIVER_0009, "Job: " + jobName);
     }
-    MSubmission mSubmission = createJobSubmission(ctx, job.getPersistenceId());
+    MSubmission mSubmission = createJobSubmission(ctx, job.getName());
     JobRequest jobRequest = createJobRequest(mSubmission, job);
     // Bootstrap job to execute in the configured execution engine
     prepareJob(jobRequest);
@@ -325,22 +341,22 @@ public class JobManager implements Reconfigurable {
 
   private JobRequest createJobRequest(MSubmission submission, MJob job) {
     // get from/to connections for the job
-    MLink fromConnection = getLink(job.getFromLinkId());
-    MLink toConnection = getLink(job.getToLinkId());
+    MLink fromLink = getLink(job.getFromLinkName());
+    MLink toLink = getLink(job.getToLinkName());
 
     // get from/to connectors for the connection
-    SqoopConnector fromConnector = getSqoopConnector(fromConnection.getConnectorId());
+    SqoopConnector fromConnector = getSqoopConnector(fromLink.getConnectorName());
     validateSupportedDirection(fromConnector, Direction.FROM);
-    SqoopConnector toConnector = getSqoopConnector(toConnection.getConnectorId());
+    SqoopConnector toConnector = getSqoopConnector(toLink.getConnectorName());
     validateSupportedDirection(toConnector, Direction.TO);
 
     // link config for the FROM part of the job
     Object fromLinkConfig = ClassUtils.instantiate(fromConnector.getLinkConfigurationClass());
-    ConfigUtils.fromConfigs(fromConnection.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
+    ConfigUtils.fromConfigs(fromLink.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
 
     // link config for the TO part of the job
     Object toLinkConfig = ClassUtils.instantiate(toConnector.getLinkConfigurationClass());
-    ConfigUtils.fromConfigs(toConnection.getConnectorLinkConfig().getConfigs(), toLinkConfig);
+    ConfigUtils.fromConfigs(toLink.getConnectorLinkConfig().getConfigs(), toLinkConfig);
 
     // from config for the job
     Object fromJob = ClassUtils.instantiate(fromConnector.getJobConfigurationClass(Direction.FROM));
@@ -428,8 +444,10 @@ public class JobManager implements Reconfigurable {
     jobRequest.addJarForClass(MapContext.class);
     // sqoop-core
     jobRequest.addJarForClass(Driver.class);
-    // sqoop-spi
+    // connector-sdk
     jobRequest.addJarForClass(SqoopConnector.class);
+    // connector-sdk-hadoop
+    jobRequest.addJarForClass(SecurityUtils.class);
     // Execution engine jar
     jobRequest.addJarForClass(executionEngine.getClass());
   }
@@ -449,15 +467,15 @@ public class JobManager implements Reconfigurable {
     }
   }
 
-  MSubmission createJobSubmission(HttpEventContext ctx, long jobId) {
-    MSubmission summary = new MSubmission(jobId);
+  MSubmission createJobSubmission(HttpEventContext ctx, String jobName) {
+    MSubmission summary = new MSubmission(jobName);
     summary.setCreationUser(ctx.getUsername());
     summary.setLastUpdateUser(ctx.getUsername());
     return summary;
   }
 
-  SqoopConnector getSqoopConnector(long connnectorId) {
-    return ConnectorManager.getInstance().getSqoopConnector(connnectorId);
+  SqoopConnector getSqoopConnector(String connnectorName) {
+    return ConnectorManager.getInstance().getSqoopConnector(connnectorName);
   }
 
   void validateSupportedDirection(SqoopConnector connector, Direction direction) {
@@ -468,9 +486,9 @@ public class JobManager implements Reconfigurable {
     }
   }
 
-  MLink getLink(long linkId) {
+  MLink getLink(String linkName) {
     MLink link = RepositoryManager.getInstance().getRepository()
-        .findLink(linkId);
+        .findLink(linkName);
     if (!link.getEnabled()) {
       throw new SqoopException(DriverError.DRIVER_0010, "Connection: "
           + link.getName());
@@ -478,23 +496,32 @@ public class JobManager implements Reconfigurable {
     return link;
   }
 
-  MJob getJob(long jobId) {
-    MJob job = RepositoryManager.getInstance().getRepository().findJob(jobId);
+  MJob getJob(String jobName) {
+    MJob job = RepositoryManager.getInstance().getRepository().findJob(jobName);
     if (job == null) {
-      throw new SqoopException(DriverError.DRIVER_0004, "Unknown job id: " + jobId);
+      throw new SqoopException(DriverError.DRIVER_0004, "Unknown job name: " + jobName);
     }
 
     if (!job.getEnabled()) {
-      throw new SqoopException(DriverError.DRIVER_0009, "Job: " + job.getName());
+      throw new SqoopException(DriverError.DRIVER_0009, "Job: " + jobName);
     }
     return job;
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private void initializeConnector(JobRequest jobRequest, Direction direction, Initializer initializer, InitializerContext initializerContext) {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
+  private void initializeConnector(final JobRequest jobRequest, final Direction direction,
+      final Initializer initializer, final InitializerContext initializerContext) {
     // Initialize submission from the connector perspective
-    initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
-        jobRequest.getJobConfig(direction));
+    ClassUtils.executeWithClassLoader(initializer.getClass().getClassLoader(),
+        new Callable<Void>() {
+      @Override
+      public Void call() {
+        initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
+            jobRequest.getJobConfig(direction));
+        return null;
+      }
+    });
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -549,13 +576,13 @@ public class JobManager implements Reconfigurable {
 
   void invokeDestroyerOnJobSuccess(MSubmission submission) {
     try {
-      MJob job = getJob(submission.getJobId());
+      MJob job = getJob(submission.getJobName());
 
-      SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorId());
-      SqoopConnector toConnector = getSqoopConnector(job.getToConnectorId());
+      SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorName());
+      SqoopConnector toConnector = getSqoopConnector(job.getToConnectorName());
 
-      MLink fromConnection = getLink(job.getFromLinkId());
-      MLink toConnection = getLink(job.getToLinkId());
+      MLink fromConnection = getLink(job.getFromLinkName());
+      MLink toConnection = getLink(job.getToLinkName());
 
       Object fromLinkConfig = ClassUtils.instantiate(fromConnector.getLinkConfigurationClass());
       ConfigUtils.fromConfigs(fromConnection.getConnectorLinkConfig().getConfigs(), fromLinkConfig);
@@ -763,11 +790,15 @@ public class JobManager implements Reconfigurable {
         try {
           LOG.info("Purging old submissions");
           Date threshold = new Date((new Date()).getTime() - purgeThreshold);
-          RepositoryManager.getInstance().getRepository()
-            .purgeSubmissions(threshold);
+          synchronized(purgeThreadLock) {
+            RepositoryManager.getInstance().getRepository()
+              .purgeSubmissions(threshold);
+          }
           Thread.sleep(purgeSleep);
         } catch (InterruptedException e) {
           LOG.debug("Purge thread interrupted", e);
+        } catch (SqoopException ex) {
+          LOG.error("Purge thread encountered exception", ex);
         }
       }
 
@@ -787,18 +818,21 @@ public class JobManager implements Reconfigurable {
         try {
           LOG.debug("Updating running submissions");
 
-          // Let's get all running submissions from repository to check them out
-          List<MSubmission> unfinishedSubmissions =
-            RepositoryManager.getInstance().getRepository()
-              .findUnfinishedSubmissions();
+          synchronized(updateThreadLock) {
+            // Let's get all running submissions from repository to check them out
+            List<MSubmission> unfinishedSubmissions =
+              RepositoryManager.getInstance().getRepository()
+                .findUnfinishedSubmissions();
 
-          for (MSubmission submission : unfinishedSubmissions) {
-            updateSubmission(submission);
+            for (MSubmission submission : unfinishedSubmissions) {
+              updateSubmission(submission);
+            }
           }
-
           Thread.sleep(updateSleep);
         } catch (InterruptedException e) {
-          LOG.debug("Purge thread interrupted", e);
+          LOG.debug("Update thread interrupted", e);
+        } catch (SqoopException ex) {
+          LOG.error("Update thread encountered exception", ex);
         }
       }
 

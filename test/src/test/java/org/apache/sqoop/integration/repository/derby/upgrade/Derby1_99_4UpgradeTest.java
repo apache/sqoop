@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.integration.repository.derby.upgrade;
 
+import org.testng.annotations.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +44,7 @@ import java.util.Map;
  * Job with id 4 has been disabled
  * Job with id 5 has been disabled
  */
+@Test(groups = "no-real-cluster")
 public class Derby1_99_4UpgradeTest extends DerbyRepositoryUpgradeTest {
 
   @Override

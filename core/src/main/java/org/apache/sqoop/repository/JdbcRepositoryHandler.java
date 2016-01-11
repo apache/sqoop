@@ -233,6 +233,15 @@ public abstract class JdbcRepositoryHandler {
   public abstract boolean existsLink(String linkName, Connection conn);
 
   /**
+   * Check if given link exists in repository.
+   *
+   * @param linkId Link id
+   * @param conn Connection to the repository
+   * @return True if the link exists
+   */
+  public abstract boolean existsLink(long linkId, Connection conn);
+
+  /**
    * Check if given link is referenced somewhere and thus can't
    * be removed.
    *
@@ -321,6 +330,15 @@ public abstract class JdbcRepositoryHandler {
    * @return True if the job exists
    */
   public abstract boolean existsJob(String jobName, Connection conn);
+
+  /**
+   * Check if given job exists in the repository.
+   *
+   * @param jobId Job id
+   * @param conn Connection to the repository
+   * @return True if the job exists
+   */
+  public abstract boolean existsJob(long jobId, Connection conn);
 
   /**
    * Check if given job is referenced somewhere and thus can't

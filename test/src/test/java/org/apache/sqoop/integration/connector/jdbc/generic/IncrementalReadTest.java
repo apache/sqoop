@@ -18,32 +18,34 @@
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import com.google.common.collect.Iterables;
+import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
-import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
-import java.lang.reflect.Method;
-
 import static org.testng.Assert.assertEquals;
 
-/**
- */
-public class IncrementalReadTest extends ConnectorTestCase implements ITest {
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+public class IncrementalReadTest extends SqoopTestCase {
 
   public static Object[] COLUMNS = new Object [][] {
-    //       column -   last value - new max value
-    {          "id",          "9",         "19"},
-    {     "version",       "8.10",      "13.10"},
-    {"release_date", "2008-10-18", "2013-10-17"},
+    //       column -                last value -               new max value
+    {          "id",                         "9",                        "19"},
+    {     "version",                      "8.10",                     "13.10"},
+    {"release_date",     "2008-10-18 00:00:00.0",     "2013-10-17 00:00:00.0"},
   };
 
   private static String testName;
@@ -73,6 +75,11 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
     } else {
       return methodName + "[" + checkColumn + "]";
     }
+  }
+
+  @BeforeMethod
+  public void cleanUpHDFS() throws Exception {
+    hdfsClient.delete(new Path(getMapreduceDirectory()), true);
   }
 
   @Test
@@ -107,17 +114,17 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
 
     // Assert correct output
     assertTo(
-        "10,'Jaunty Jackalope',9.04,'2009-04-23',false",
-        "11,'Karmic Koala',9.10,'2009-10-29',false",
-        "12,'Lucid Lynx',10.04,'2010-04-29',true",
-        "13,'Maverick Meerkat',10.10,'2010-10-10',false",
-        "14,'Natty Narwhal',11.04,'2011-04-28',false",
-        "15,'Oneiric Ocelot',11.10,'2011-10-10',false",
-        "16,'Precise Pangolin',12.04,'2012-04-26',true",
-        "17,'Quantal Quetzal',12.10,'2012-10-18',false",
-        "18,'Raring Ringtail',13.04,'2013-04-25',false",
-        "19,'Saucy Salamander',13.10,'2013-10-17',false"
-      );
+      "10,'Jaunty Jackalope',9.04,'2009-04-23 00:00:00.000'",
+      "11,'Karmic Koala',9.10,'2009-10-29 00:00:00.000'",
+      "12,'Lucid Lynx',10.04,'2010-04-29 00:00:00.000'",
+      "13,'Maverick Meerkat',10.10,'2010-10-10 00:00:00.000'",
+      "14,'Natty Narwhal',11.04,'2011-04-28 00:00:00.000'",
+      "15,'Oneiric Ocelot',11.10,'2011-10-10 00:00:00.000'",
+      "16,'Precise Pangolin',12.04,'2012-04-26 00:00:00.000'",
+      "17,'Quantal Quetzal',12.10,'2012-10-18 00:00:00.000'",
+      "18,'Raring Ringtail',13.04,'2013-04-25 00:00:00.000'",
+      "19,'Saucy Salamander',13.10,'2013-10-17 00:00:00.000'"
+    );
 
     // Verify new last value
     MJob updatedJob = getClient().getJob(job.getName());
@@ -162,17 +169,17 @@ public class IncrementalReadTest extends ConnectorTestCase implements ITest {
 
     // Assert correct output
     assertTo(
-        "10,'Jaunty Jackalope',9.04,'2009-04-23',false",
-        "11,'Karmic Koala',9.10,'2009-10-29',false",
-        "12,'Lucid Lynx',10.04,'2010-04-29',true",
-        "13,'Maverick Meerkat',10.10,'2010-10-10',false",
-        "14,'Natty Narwhal',11.04,'2011-04-28',false",
-        "15,'Oneiric Ocelot',11.10,'2011-10-10',false",
-        "16,'Precise Pangolin',12.04,'2012-04-26',true",
-        "17,'Quantal Quetzal',12.10,'2012-10-18',false",
-        "18,'Raring Ringtail',13.04,'2013-04-25',false",
-        "19,'Saucy Salamander',13.10,'2013-10-17',false"
-      );
+      "10,'Jaunty Jackalope',9.04,'2009-04-23 00:00:00.000'",
+      "11,'Karmic Koala',9.10,'2009-10-29 00:00:00.000'",
+      "12,'Lucid Lynx',10.04,'2010-04-29 00:00:00.000'",
+      "13,'Maverick Meerkat',10.10,'2010-10-10 00:00:00.000'",
+      "14,'Natty Narwhal',11.04,'2011-04-28 00:00:00.000'",
+      "15,'Oneiric Ocelot',11.10,'2011-10-10 00:00:00.000'",
+      "16,'Precise Pangolin',12.04,'2012-04-26 00:00:00.000'",
+      "17,'Quantal Quetzal',12.10,'2012-10-18 00:00:00.000'",
+      "18,'Raring Ringtail',13.04,'2013-04-25 00:00:00.000'",
+      "19,'Saucy Salamander',13.10,'2013-10-17 00:00:00.000'"
+    );
 
     // Verify new last value
     MJob updatedJob = getClient().getJob(job.getName());

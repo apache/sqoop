@@ -17,10 +17,10 @@
  */
 package org.apache.sqoop.shell;
 
-import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.ConfigDisplayer;
@@ -31,6 +31,8 @@ import org.apache.sqoop.validation.Status;
 import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import jline.console.ConsoleReader;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 import static org.apache.sqoop.shell.utils.ConfigFiller.*;
@@ -45,17 +47,17 @@ public class UpdateJobFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public UpdateJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
-      .withLongOpt(Constants.OPT_JID)
+      .withDescription(resourceString(Constants.RES_PROMPT_JOB_NAME))
+      .withLongOpt(Constants.OPT_NAME)
       .isRequired()
       .hasArg()
-      .create(Constants.OPT_JID_CHAR));
+      .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return updateJob(line.getOptionValue(Constants.OPT_JID), line.getArgList(), isInteractive);
+    return updateJob(line.getOptionValue(Constants.OPT_NAME), line.getArgList(), isInteractive);
   }
 
   private Status updateJob(String jobArg, List<String> args, boolean isInteractive) throws IOException {
@@ -65,11 +67,11 @@ public class UpdateJobFunction extends SqoopFunction {
 
     // TODO(SQOOP-1634): using from/to and driver config id, this call can be avoided
     MJob job = client.getJob(jobArg);
-
+    String oldJobName = job.getName();
     ResourceBundle fromConnectorBundle = client.getConnectorConfigBundle(
-        job.getFromConnectorId());
+            job.getFromConnectorName());
     ResourceBundle toConnectorBundle = client.getConnectorConfigBundle(
-        job.getToConnectorId());
+            job.getToConnectorName());
     ResourceBundle driverConfigBundle = client.getDriverConfigBundle();
 
     Status status = Status.OK;
@@ -89,14 +91,14 @@ public class UpdateJobFunction extends SqoopFunction {
         }
 
         // Try to create
-        status = client.updateJob(job);
+        status = client.updateJob(job, oldJobName);
       } while(!status.canProceed());
     } else {
       JobDynamicConfigOptions options = new JobDynamicConfigOptions();
       options.prepareOptions(job);
       CommandLine line = ConfigOptions.parseOptions(options, 0, args, false);
       if (fillJob(line, job)) {
-        status = client.updateJob(job);
+        status = client.updateJob(job, oldJobName);
         if (!status.canProceed()) {
           printJobValidationMessages(job);
           return status;

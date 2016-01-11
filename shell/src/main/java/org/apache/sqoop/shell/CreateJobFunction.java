@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.shell;
 
-import jline.ConsoleReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.common.Direction;
@@ -33,6 +32,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import jline.console.ConsoleReader;
+
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 import static org.apache.sqoop.shell.utils.ConfigFiller.*;
 
@@ -46,14 +47,14 @@ public class CreateJobFunction extends  SqoopFunction {
   @SuppressWarnings("static-access")
   public CreateJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_NAME))
       .withLongOpt(Constants.OPT_FROM)
       .isRequired()
       .hasArg()
       .create(Constants.OPT_FROM_CHAR)
     );
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_NAME))
       .withLongOpt(Constants.OPT_TO)
       .isRequired()
       .hasArg()
@@ -76,22 +77,22 @@ public class CreateJobFunction extends  SqoopFunction {
     ConsoleReader reader = getConsoleReader();
     MJob job = getClient().createJob(fromLinkArg, toLinkArg);
 
-    MConnector fromConnector = getClient().getConnector(job.getFromConnectorId());
+    MConnector fromConnector = getClient().getConnector(job.getFromConnectorName());
     if (!fromConnector.getSupportedDirections().isDirectionSupported(Direction.FROM)) {
       errorMessage("Connector " + fromConnector.getUniqueName() + " does not support direction " + Direction.FROM);
       return Status.ERROR;
     }
 
-    MConnector toConnector = getClient().getConnector(job.getToConnectorId());
+    MConnector toConnector = getClient().getConnector(job.getToConnectorName());
     if (!toConnector.getSupportedDirections().isDirectionSupported(Direction.TO)) {
       errorMessage("Connector " + toConnector.getUniqueName() + " does not support direction " + Direction.TO);
       return Status.ERROR;
     }
 
     ResourceBundle fromConfigBundle = getClient().getConnectorConfigBundle(
-        job.getFromConnectorId());
+            fromConnector.getUniqueName());
     ResourceBundle toConfigBundle = getClient().getConnectorConfigBundle(
-        job.getToConnectorId());
+            toConnector.getUniqueName());
     ResourceBundle driverConfigBundle = getClient().getDriverConfigBundle();
 
     Status status = Status.OK;
@@ -130,7 +131,7 @@ public class CreateJobFunction extends  SqoopFunction {
     }
 
     ConfigDisplayer.displayConfigWarning(job);
-    printlnResource(Constants.RES_CREATE_JOB_SUCCESSFUL, status.name(), job.getPersistenceId());
+    printlnResource(Constants.RES_CREATE_JOB_SUCCESSFUL, status.name(), job.getName());
 
     return status;
   }

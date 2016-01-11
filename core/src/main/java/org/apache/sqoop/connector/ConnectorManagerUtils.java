@@ -17,14 +17,17 @@
  */
 package org.apache.sqoop.connector;
 
+import org.apache.sqoop.classloader.ConnectorClassLoader;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.ConfigurationConstants;
-import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.error.code.ConnectorError;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -94,6 +97,29 @@ public class ConnectorManagerUtils {
       return entry != null;
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  public static String getConnectorJarPath(URL configFileUrl) {
+    return configFileUrl.getPath().substring("file:".length(),
+        configFileUrl.getPath().length() -
+        ("!/" + ConfigurationConstants.FILENAME_CONNECTOR_PROPERTIES).length());
+  }
+
+  public static ClassLoader createConnectorClassLoader(
+      final String connectorJarPath, final List<String> systemClasses) {
+    try {
+      return AccessController.doPrivileged(
+        new PrivilegedExceptionAction<ClassLoader>() {
+          @Override
+          public ClassLoader run() throws IOException {
+            return new ConnectorClassLoader(connectorJarPath,
+                Thread.currentThread().getContextClassLoader(),
+                systemClasses, false);
+          }
+        });
+    } catch (PrivilegedActionException e) {
+      throw new SqoopException(ConnectorError.CONN_0011, e);
     }
   }
 }

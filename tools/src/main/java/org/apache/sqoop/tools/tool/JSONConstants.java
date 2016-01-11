@@ -24,18 +24,12 @@ public final class JSONConstants {
     // restrict instantiation
   }
 
-  public static final String CONNECTOR_ID = "connector-id";
-  public static final String FROM_CONNECTOR_ID = "from-connector-id";
-  public static final String TO_CONNECTOR_ID = "to-connector-id";
   public static final String CONNECTOR_NAME = "connector-name";
   public static final String FROM_CONNECTOR_NAME = "from-connector-name";
   public static final String TO_CONNECTOR_NAME = "to-connector-name";
   public static final String NAME = "name";
-  public static final String FROM_LINK_ID = "from-link-id";
-  public static final String TO_LINK_ID = "to-link-id";
   public static final String FROM_LINK_NAME = "from-link-name";
   public static final String TO_LINK_NAME = "to-link-name";
-  public static final String JOB_ID = "job-id";
   public static final String JOB_NAME = "job-name";
   public static final String LINKS = "links";
   public static final String JOBS = "jobs";

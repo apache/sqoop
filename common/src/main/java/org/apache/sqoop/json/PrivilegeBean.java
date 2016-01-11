@@ -94,7 +94,7 @@ public class PrivilegeBean implements JsonBean {
   @Override
   public void restore(JSONObject json) {
     privileges = new ArrayList<MPrivilege>();
-    JSONObject obj = (JSONObject) json.get(PRIVILEGE);
+    JSONObject obj = JSONUtils.getJSONObject(json, PRIVILEGE);
     privileges.add(restorePrivilege(obj));
   }
 
@@ -107,9 +107,7 @@ public class PrivilegeBean implements JsonBean {
 
   private MPrivilege restorePrivilege(Object obj) {
     JSONObject object = (JSONObject) obj;
-    MResource resource = new MResource(
-            (String) object.get(RESOURCE_NAME), (String) object.get(RESOURCE_TYPE));
-    return new MPrivilege(resource, (String) object.get(ACTION),
-            Boolean.valueOf(object.get(WITH_GRANT_OPTION).toString()));
+    MResource resource = new MResource(JSONUtils.getString(object, RESOURCE_NAME), JSONUtils.getString(object,  RESOURCE_TYPE));
+    return new MPrivilege(resource, JSONUtils.getString(object, ACTION), JSONUtils.getBoolean(object, WITH_GRANT_OPTION));
   }
 }

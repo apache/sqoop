@@ -34,16 +34,16 @@ public class EnableJobFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public EnableJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_JOB_ID))
-      .withLongOpt(Constants.OPT_JID)
+      .withDescription(resourceString(Constants.RES_PROMPT_JOB_NAME))
+      .withLongOpt(Constants.OPT_NAME)
       .isRequired()
       .hasArg()
-      .create('j'));
+      .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
-    client.enableJob(line.getOptionValue(Constants.OPT_JID), true);
+    client.enableJob(line.getOptionValue(Constants.OPT_NAME), true);
     return Status.OK;
   }
 }

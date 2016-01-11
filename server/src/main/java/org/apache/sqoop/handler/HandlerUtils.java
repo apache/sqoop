@@ -47,56 +47,13 @@ public class HandlerUtils {
     return link;
   }
 
-  public static MLink getLinkFromLinkId(Long linkId) {
+  public static MConnector getConnectorFromConnectorName(String connectorName) {
     Repository repository = RepositoryManager.getInstance().getRepository();
-    MLink link = repository.findLink(linkId);
-    if (link == null) {
-      throw new SqoopException(ServerError.SERVER_0006, "Invalid link id: " + linkId
+    MConnector connector = repository.findConnector(connectorName);
+    if (connector == null) {
+      throw new SqoopException(ServerError.SERVER_0006, "Connector: " + connectorName
               + " doesn't exist");
     }
-    return link;
-  }
-
-  public static long getConnectorIdFromIdentifier(String identifier) {
-    long connectorId;
-    Repository repository = RepositoryManager.getInstance().getRepository();
-    MConnector connector = repository.findConnector(identifier);
-    if (connector != null) {
-      connectorId = connector.getPersistenceId();
-    } else {
-      try {
-        connectorId = Long.parseLong(identifier);
-      } catch (NumberFormatException ex) {
-        // this means name nor Id existed and we want to throw a user friendly
-        // message than a number format exception
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + identifier
-            + " requested");
-      }
-    }
-    return connectorId;
-  }
-
-  public static String getConnectorNameFromIdentifier(String identifier) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
-    MConnector connector = repository.findConnector(identifier);
-    if (connector == null) {
-      long connectorId;
-      try {
-        connectorId = Long.parseLong(identifier);
-      } catch (NumberFormatException ex) {
-        // this means name nor Id existed and we want to throw a user friendly
-        // message than a number format exception
-        throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + identifier
-            + " requested");
-      }
-
-      connector = repository.findConnector(connectorId);
-      if (connector == null) {
-        throw new SqoopException(ServerError.SERVER_0006, "Connector: " + identifier
-            + " doesn't exist");
-      }
-    }
-
-    return connector.getUniqueName();
+    return connector;
   }
 }

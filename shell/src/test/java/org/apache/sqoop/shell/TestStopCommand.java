@@ -21,6 +21,9 @@ package org.apache.sqoop.shell;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 
@@ -31,7 +34,6 @@ import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.Groovysh;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -54,17 +56,27 @@ public class TestStopCommand {
     MSubmission submission = new MSubmission();
     when(client.stopJob(any(String.class))).thenReturn(submission);
 
-    // stop job -jid job_test
-    Status status = (Status) stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    // stop job -name job_test
+    Status status = (Status) stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
+    assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for jid
+    // Missing argument for name
     try {
-      stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
-      Assert.fail("Stop job should fail as parameters aren't complete!");
+      stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
+      fail("Stop job should fail as parameters aren't complete!");
     } catch (SqoopException e) {
-      Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
-      Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
+      assertEquals(ShellError.SHELL_0003, e.getErrorCode());
+      assertTrue(e.getMessage().contains("Missing argument for option"));
+    }
+  }
+
+  @Test
+  public void testUnknowOption() {
+    try {
+      stopCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test", "-unknownOption"));
+      fail("Stop command should fail as unknown option encountered!");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Unknown option encountered"));
     }
   }
 }

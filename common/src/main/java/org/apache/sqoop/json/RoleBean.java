@@ -87,7 +87,7 @@ public class RoleBean implements JsonBean {
   @Override
   public void restore(JSONObject json) {
     roles = new ArrayList<MRole>();
-    JSONObject obj = (JSONObject) json.get(ROLE);
+    JSONObject obj = JSONUtils.getJSONObject(json, ROLE);
     roles.add(restoreRole(obj));
   }
 
@@ -100,6 +100,6 @@ public class RoleBean implements JsonBean {
 
   private MRole restoreRole(Object obj) {
     JSONObject object = (JSONObject) obj;
-    return new MRole((String) object.get(NAME));
+    return new MRole(JSONUtils.getString(object, NAME));
   }
 }

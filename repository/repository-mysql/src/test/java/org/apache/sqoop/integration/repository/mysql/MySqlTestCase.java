@@ -94,7 +94,7 @@ abstract public class MySqlTestCase {
   }
 
   protected MLink getLink(String name, MConnector connector) {
-    MLink link = new MLink(connector.getPersistenceId(),
+    MLink link = new MLink(connector.getUniqueName(),
         connector.getLinkConfig());
     link.setName(name);
     fillLink(link);
@@ -105,9 +105,9 @@ abstract public class MySqlTestCase {
       MConnector connectorB, MLink linkA, MLink linkB) {
     MDriver driver = handler.findDriver(MDriver.DRIVER_NAME,
         provider.getConnection());
-    MJob job = new MJob(connectorA.getPersistenceId(),
-        connectorB.getPersistenceId(), linkA.getPersistenceId(),
-        linkB.getPersistenceId(), connectorA.getFromConfig(),
+    MJob job = new MJob(connectorA.getUniqueName(),
+        connectorB.getUniqueName(), linkA.getName(),
+        linkB.getName(), connectorA.getFromConfig(),
         connectorB.getToConfig(), driver.getDriverConfig());
     job.setName(name);
     fillJob(job);
@@ -117,7 +117,7 @@ abstract public class MySqlTestCase {
 
   protected MSubmission getSubmission(MJob job,
       SubmissionStatus submissionStatus) {
-    MSubmission submission = new MSubmission(job.getPersistenceId(),
+    MSubmission submission = new MSubmission(job.getName(),
         new Date(), submissionStatus);
     fillSubmission(submission);
     return submission;

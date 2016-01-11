@@ -18,6 +18,9 @@
 package org.apache.sqoop.test.minicluster;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.client.SqoopClient;
+import org.apache.sqoop.model.MJob;
+import org.apache.sqoop.model.MLink;
 
 /**
  */
@@ -27,10 +30,14 @@ public class RealSqoopCluster extends SqoopMiniCluster {
 
   private String serverUrl;
 
+  private SqoopClient client;
+
   public RealSqoopCluster(String temporaryPath) throws Exception {
     super(temporaryPath);
 
     serverUrl = System.getProperty(SERVER_URL_KEY);
+
+    client = new SqoopClient(serverUrl);
 
     if(serverUrl == null) {
       throw new RuntimeException("Missing URL for real Sqoop 2 server: " + SERVER_URL_KEY);
@@ -44,16 +51,21 @@ public class RealSqoopCluster extends SqoopMiniCluster {
 
   @Override
   public void start() throws Exception {
-    // Void operation
+    client.deleteAllLinksAndJobs();
   }
 
   @Override
   public void stop() throws Exception {
-    // Void operation
+    client.deleteAllLinksAndJobs();
   }
 
   @Override
   public String getServerUrl() {
     return serverUrl;
+  }
+
+  @Override
+  public String getConfigurationPath() {
+    return "/etc/hadoop/conf/";
   }
 }

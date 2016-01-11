@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfigList;
@@ -163,8 +164,8 @@ public final class ConfigInputSerialization {
     List<MValidator> mValidators = new ArrayList<>();
     for (int validatorCounter = 0; validatorCounter < jsonValidators.size(); validatorCounter++) {
       JSONObject jsonValidator = (JSONObject) jsonValidators.get(validatorCounter);
-      String validatorClassName = (String) jsonValidator.get(ConfigValidatorConstants.VALIDATOR_CLASS);
-      String validatorStrArg = (String) jsonValidator.get(ConfigValidatorConstants.VALIDATOR_STR_ARG);
+      String validatorClassName = JSONUtils.getString(jsonValidator, ConfigValidatorConstants.VALIDATOR_CLASS);
+      String validatorStrArg = JSONUtils.getString(jsonValidator, ConfigValidatorConstants.VALIDATOR_STR_ARG);
       mValidators.add(new MValidator(validatorClassName, validatorStrArg));
     }
     return mValidators;
@@ -194,28 +195,23 @@ public final class ConfigInputSerialization {
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
   static MConfig restoreConfig(JSONObject config) {
-    JSONArray inputs = (JSONArray) config.get(ConfigInputConstants.CONFIG_INPUTS);
+    JSONArray inputs = JSONUtils.getJSONArray(config, ConfigInputConstants.CONFIG_INPUTS);
 
     List<MInput<?>> mInputs = new ArrayList<MInput<?>>();
     for (int i = 0; i < inputs.size(); i++) {
       JSONObject input = (JSONObject) inputs.get(i);
-      MInputType type =
-          MInputType.valueOf((String) input.get(ConfigInputConstants.CONFIG_INPUT_TYPE));
-      String name = (String) input.get(ConfigInputConstants.CONFIG_INPUT_NAME);
-      Boolean sensitive = (Boolean) input.get(ConfigInputConstants.CONFIG_INPUT_SENSITIVE);
-      InputEditable editable =  (input.containsKey(ConfigInputConstants.CONFIG_INPUT_EDITABLE)) ?
-          InputEditable.valueOf((String)input.get(ConfigInputConstants.CONFIG_INPUT_EDITABLE))
-              : InputEditable.USER_ONLY;
-      String overrides = (String) input.get(ConfigInputConstants.CONFIG_INPUT_OVERRIDES);
-      String sensitveKeyPattern = (String) input.get(ConfigInputConstants.CONFIG_INPUT_SENSITIVE_KEY_PATTERN);
-
-      List<MValidator> mValidatorsForInput = restoreValidator((JSONArray)
-        input.get(ConfigInputConstants.CONFIG_VALIDATORS));
+      MInputType type =  MInputType.valueOf(JSONUtils.getString(input, ConfigInputConstants.CONFIG_INPUT_TYPE));
+      String name = JSONUtils.getString(input, ConfigInputConstants.CONFIG_INPUT_NAME);
+      Boolean sensitive = JSONUtils.getBoolean(input, ConfigInputConstants.CONFIG_INPUT_SENSITIVE);
+      InputEditable editable =  (input.containsKey(ConfigInputConstants.CONFIG_INPUT_EDITABLE)) ? InputEditable.valueOf(JSONUtils.getString(input, ConfigInputConstants.CONFIG_INPUT_EDITABLE)) : InputEditable.USER_ONLY;
+      String overrides = JSONUtils.getString(input, ConfigInputConstants.CONFIG_INPUT_OVERRIDES);
+      String sensitveKeyPattern = input.containsKey(ConfigInputConstants.CONFIG_INPUT_SENSITIVE_KEY_PATTERN) ? JSONUtils.getString(input, ConfigInputConstants.CONFIG_INPUT_SENSITIVE_KEY_PATTERN) : null;
+      List<MValidator> mValidatorsForInput = restoreValidator(JSONUtils.getJSONArray(input, ConfigInputConstants.CONFIG_VALIDATORS));
 
       MInput mInput = null;
       switch (type) {
       case STRING: {
-        long size = (Long) input.get(ConfigInputConstants.CONFIG_INPUT_SIZE);
+        long size = JSONUtils.getLong(input, ConfigInputConstants.CONFIG_INPUT_SIZE);
         mInput = new MStringInput(name, sensitive.booleanValue(), editable, overrides, (short) size, mValidatorsForInput);
         break;
       }
@@ -236,7 +232,7 @@ public final class ConfigInputSerialization {
         break;
       }
       case ENUM: {
-        String values = (String) input.get(ConfigInputConstants.CONFIG_INPUT_ENUM_VALUES);
+        String values = JSONUtils.getString(input, ConfigInputConstants.CONFIG_INPUT_ENUM_VALUES);
         mInput = new MEnumInput(name, sensitive.booleanValue(), editable, overrides, values.split(","), mValidatorsForInput);
         break;
       }
@@ -254,7 +250,7 @@ public final class ConfigInputSerialization {
       }
 
       // Propagate config ID
-      Long id = (Long)input.get(ConfigInputConstants.INPUT_ID);
+      Long id = JSONUtils.getLong(input, ConfigInputConstants.INPUT_ID);
       if(id == null) {
         throw new SqoopException(SerializationError.SERIALIZATION_002, "Missing field: " + ConfigInputConstants.INPUT_ID);
       }
@@ -271,24 +267,20 @@ public final class ConfigInputSerialization {
           }
           break;
         default:
-          mInput.restoreFromUrlSafeValueString(
-              (String) input.get(ConfigInputConstants.CONFIG_INPUT_VALUE));
+          mInput.restoreFromUrlSafeValueString(JSONUtils.getString(input, ConfigInputConstants.CONFIG_INPUT_VALUE));
           break;
         }
       }
       mInputs.add(mInput);
     }
 
+    List<MValidator> mValidatorsForConfig = restoreValidator(JSONUtils.getJSONArray(config, ConfigInputConstants.CONFIG_VALIDATORS));
+    MConfig mConfig = new MConfig(JSONUtils.getString(config, ConfigInputConstants.CONFIG_NAME), mInputs, mValidatorsForConfig);
+    mConfig.setPersistenceId(JSONUtils.getLong(config, ConfigInputConstants.CONFIG_ID));
+    return mConfig;
+  }
 
-
-    List<MValidator> mValidatorsForConfig = restoreValidator((JSONArray)
-      config.get(ConfigInputConstants.CONFIG_VALIDATORS));
-    MConfig mConfig = new MConfig((String) config.get(ConfigInputConstants.CONFIG_NAME), mInputs, mValidatorsForConfig);
-    mConfig.setPersistenceId((Long) config.get(ConfigInputConstants.CONFIG_ID));
-      return mConfig;
-    }
-
-    private ConfigInputSerialization() {
+  private ConfigInputSerialization() {
     // Do not instantiate
   }
 }

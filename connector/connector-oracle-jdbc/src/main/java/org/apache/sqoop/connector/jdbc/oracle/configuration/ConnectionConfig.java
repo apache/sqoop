@@ -27,6 +27,7 @@ import org.apache.sqoop.validation.validators.StartsWith;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,7 +57,7 @@ public class ConnectionConfig {
   public Integer fetchSize;
 
   @Input
-  public String initializationStatements;
+  public List<String> initializationStatements;
 
   @Input
   public Boolean jdbcUrlVerbatim;

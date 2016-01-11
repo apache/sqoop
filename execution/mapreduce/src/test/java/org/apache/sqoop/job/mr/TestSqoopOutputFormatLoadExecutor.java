@@ -182,7 +182,8 @@ public class TestSqoopOutputFormatLoadExecutor {
         writer.write(writable, null);
       }
     } catch (SqoopException ex) {
-      throw ex.getCause();
+      Assert.assertTrue(ex.getCause() instanceof SqoopException);
+      throw ex.getCause().getCause();
     }
   }
 
@@ -267,7 +268,8 @@ public class TestSqoopOutputFormatLoadExecutor {
       }
       writer.close(null);
     } catch (SqoopException ex) {
-      throw ex.getCause();
+      Assert.assertTrue(ex.getCause() instanceof SqoopException);
+      throw ex.getCause().getCause();
     }
   }
 

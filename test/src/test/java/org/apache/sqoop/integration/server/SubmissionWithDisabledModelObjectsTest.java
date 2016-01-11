@@ -19,6 +19,7 @@ package org.apache.sqoop.integration.server;
 
 import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.error.code.DriverError;
 import org.apache.sqoop.model.MLink;
@@ -27,6 +28,7 @@ import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -43,7 +45,7 @@ import static org.testng.Assert.fail;
  * Ensure that server will reject starting job when either job itself
  * or corresponding link is disabled.
  */
-@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
 public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
 
   private boolean enabledLink;
@@ -72,6 +74,8 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
   @AfterMethod
   public void tearDownRdbmsTable() {
     dropTable();
+    clearJob();
+    clearLink();
   }
 
   @Test
@@ -126,5 +130,11 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
         fail("Unexpected expception retrieved from server " + cause);
       }
     }
+  }
+
+  // The default table name is too long for oracle
+  @Override
+  public TableName getTableName() {
+    return new TableName("DisabledObjectsTest");
   }
 }

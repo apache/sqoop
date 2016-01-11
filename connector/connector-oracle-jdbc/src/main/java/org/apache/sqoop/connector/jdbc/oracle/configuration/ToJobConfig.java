@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.connector.jdbc.oracle.configuration;
 
+import java.util.List;
+
+import org.apache.sqoop.connector.jdbc.oracle.util.OracleUtilities;
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
@@ -31,6 +34,9 @@ public class ToJobConfig {
   @Input(size = 2000, validators = { @Validator(NotEmpty.class)})
   public String tableName;
 
+  @Input
+  public List<String> columns;
+
   @Input(size = 2000)
   public String templateTable;
 
@@ -40,8 +46,8 @@ public class ToJobConfig {
   @Input
   public Boolean nologging;
 
-  @Input(size = 2000)
-  public String updateKey;
+  @Input
+  public List<String> updateKey;
 
   @Input
   public Boolean updateMerge;
@@ -55,8 +61,8 @@ public class ToJobConfig {
   @Input(size = 2000)
   public String temporaryStorageClause;
 
-  @Input(size = 2000)
-  public String appendValuesHint;
+  @Input
+  public OracleUtilities.AppendValuesHintUsage appendValuesHint;
 
   @Input
   public Boolean parallel;

@@ -18,11 +18,13 @@
 package org.apache.sqoop.integration.repository.derby.upgrade;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
-import org.apache.sqoop.test.testcases.JettyTestCase;
+import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
 import org.apache.sqoop.test.utils.CompressionUtils;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.ITestContext;
@@ -30,7 +32,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import org.apache.log4j.Logger;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,11 +54,13 @@ import static org.testng.Assert.assertNotNull;
  * methods describing content of the repository (what links/jobs it have, ...).
  *
  */
-public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class})
+public abstract class DerbyRepositoryUpgradeTest extends SqoopTestCase {
 
-  private static final Logger LOG = Logger.getLogger(DerbyRepositoryUpgradeTest.class);
   protected Map<Long, String> jobIdToNameMap;
   protected Map<Long, String> linkIdToNameMap;
+
+  private SqoopMiniCluster sqoopMiniCluster;
 
   /**
    * Custom Sqoop mini cluster that points derby repository to real on-disk structures.
@@ -131,17 +134,7 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
     return HdfsUtils.joinPathFragments(getTemporaryPath(), getClass().getCanonicalName(), getTestName());
   }
 
-  @Override
-  public void startSqoop() throws Exception {
-    // Do nothing so that Sqoop isn't started before Suite.
-  }
-
-  @Override
-  public void stopSqoop() throws Exception {
-    // Do nothing so that Sqoop isn't stopped after Suite.
-  }
-
-  @BeforeMethod
+  @BeforeMethod(dependsOnMethods = { "init" })
   public void startSqoopMiniCluster(ITestContext context) throws Exception {
     // Prepare older repository structures
     InputStream tarballStream = getClass().getResourceAsStream(getPathToRepositoryTarball());
@@ -149,13 +142,13 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
     CompressionUtils.untarStreamToDirectory(tarballStream, getRepositoryPath());
 
     // And use them for new Derby repo instance
-    setCluster(new DerbySqoopMiniCluster(getRepositoryPath(), getTemporaryJettyPath() + "/sqoop-mini-cluster", hadoopCluster.getConfiguration()));
+    sqoopMiniCluster  = new DerbySqoopMiniCluster(getRepositoryPath(), getTemporaryJettyPath() + "/sqoop-mini-cluster", getHadoopConf());
 
     // Start server
-    getCluster().start();
+    sqoopMiniCluster.start();
 
     // Initialize Sqoop Client API
-    setClient(new SqoopClient(getServerUrl()));
+    initSqoopClient(sqoopMiniCluster.getServerUrl());
 
     jobIdToNameMap = new HashMap<Long, String>();
     for(MJob job : getClient().getJobs()) {
@@ -170,7 +163,7 @@ public abstract class DerbyRepositoryUpgradeTest extends JettyTestCase {
 
   @AfterMethod
   public void stopSqoopMiniCluster() throws Exception {
-    getCluster().stop();
+    sqoopMiniCluster.stop();
   }
 
   @Test

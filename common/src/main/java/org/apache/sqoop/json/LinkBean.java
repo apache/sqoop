@@ -47,7 +47,7 @@ import org.json.simple.JSONObject;
 @InterfaceStability.Unstable
 public class LinkBean implements JsonBean {
 
-  static final String CONNECTOR_ID = "connector-id";
+  static final String CONNECTOR_NAME = "connector-name";
   static final String LINK_CONFIG_VALUES = "link-config-values";
   static final String LINK = "link";
 
@@ -57,7 +57,7 @@ public class LinkBean implements JsonBean {
   private List<MLink> links;
 
   // Optional
-  private Map<Long, ResourceBundle> linkConfigBundles;
+  private Map<String, ResourceBundle> linkConfigBundles;
 
   // For "extract"
   public LinkBean(MLink link) {
@@ -73,23 +73,23 @@ public class LinkBean implements JsonBean {
 
   // For "restore"
   public LinkBean() {
-    linkConfigBundles = new HashMap<Long, ResourceBundle>();
+    linkConfigBundles = new HashMap<String, ResourceBundle>();
   }
 
-  public void addConnectorConfigBundle(Long id, ResourceBundle connectorConfigBundle) {
-    linkConfigBundles.put(id, connectorConfigBundle);
+  public void addConnectorConfigBundle(String connectorName, ResourceBundle connectorConfigBundle) {
+    linkConfigBundles.put(connectorName, connectorConfigBundle);
   }
 
-  public boolean hasConnectorConfigBundle(Long id) {
-    return linkConfigBundles.containsKey(id);
+  public boolean hasConnectorConfigBundle(String connectorName) {
+    return linkConfigBundles.containsKey(connectorName);
   }
 
   public List<MLink> getLinks() {
     return links;
   }
 
-  public ResourceBundle getConnectorConfigBundle(Long id) {
-    return linkConfigBundles.get(id);
+  public ResourceBundle getConnectorConfigBundle(String connectorName) {
+    return linkConfigBundles.get(connectorName);
   }
 
   @SuppressWarnings("unchecked")
@@ -119,7 +119,7 @@ public class LinkBean implements JsonBean {
     linkJsonObject.put(CREATION_DATE, link.getCreationDate().getTime());
     linkJsonObject.put(UPDATE_USER, link.getLastUpdateUser());
     linkJsonObject.put(UPDATE_DATE, link.getLastUpdateDate().getTime());
-    linkJsonObject.put(CONNECTOR_ID, link.getConnectorId());
+    linkJsonObject.put(CONNECTOR_NAME, link.getConnectorName());
     linkJsonObject.put(LINK_CONFIG_VALUES,
       extractConfigList(link.getConnectorLinkConfig(), skipSensitive));
     return linkJsonObject;
@@ -128,7 +128,7 @@ public class LinkBean implements JsonBean {
   @Override
   public void restore(JSONObject jsonObject) {
     links = new ArrayList<MLink>();
-    JSONObject obj = (JSONObject) jsonObject.get(LINK);
+    JSONObject obj = JSONUtils.getJSONObject(jsonObject, LINK);
     links.add(restoreLink(obj));
   }
 
@@ -141,18 +141,18 @@ public class LinkBean implements JsonBean {
 
   private MLink restoreLink(Object obj) {
     JSONObject object = (JSONObject) obj;
-    long connectorId = (Long) object.get(CONNECTOR_ID);
-    JSONObject connectorLinkConfig = (JSONObject) object.get(LINK_CONFIG_VALUES);
-    List<MConfig> linkConfigs = restoreConfigs((JSONArray) connectorLinkConfig.get(ConfigInputConstants.CONFIGS));
-    List<MValidator> linkValidators = restoreValidator((JSONArray) connectorLinkConfig.get(ConfigInputConstants.CONFIG_VALIDATORS));
-    MLink link = new MLink(connectorId, new MLinkConfig(linkConfigs, linkValidators));
-    link.setPersistenceId((Long) object.get(ID));
-    link.setName((String) object.get(NAME));
-    link.setEnabled((Boolean) object.get(ENABLED));
-    link.setCreationUser((String) object.get(CREATION_USER));
-    link.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
-    link.setLastUpdateUser((String) object.get(UPDATE_USER));
-    link.setLastUpdateDate(new Date((Long) object.get(UPDATE_DATE)));
+    String connectorName = (String) object.get(CONNECTOR_NAME);
+    JSONObject connectorLinkConfig = JSONUtils.getJSONObject(object, LINK_CONFIG_VALUES);
+    List<MConfig> linkConfigs = restoreConfigs(JSONUtils.getJSONArray(connectorLinkConfig, ConfigInputConstants.CONFIGS));
+    List<MValidator> linkValidators = restoreValidator(JSONUtils.getJSONArray(connectorLinkConfig, ConfigInputConstants.CONFIG_VALIDATORS));
+    MLink link = new MLink(connectorName, new MLinkConfig(linkConfigs, linkValidators));
+    link.setPersistenceId(JSONUtils.getLong(object, ID));
+    link.setName(JSONUtils.getString(object, NAME));
+    link.setEnabled(JSONUtils.getBoolean(object, ENABLED));
+    link.setCreationUser(JSONUtils.getString(object, CREATION_USER));
+    link.setCreationDate(new Date(JSONUtils.getLong(object, CREATION_DATE)));
+    link.setLastUpdateUser(JSONUtils.getString(object, UPDATE_USER));
+    link.setLastUpdateDate(new Date(JSONUtils.getLong(object, UPDATE_DATE)));
     return link;
   }
 }

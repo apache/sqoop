@@ -228,8 +228,9 @@ public class TestJdbcRepository {
 
     // prepare the links and jobs
     // the connector Id for both are the same
-    List<MLink> linkList = links(link(1, "LA", 1), link(2, "LB", 1));
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 2));
+    List<MLink> linkList = links(link(1, "LA", oldConnector.getUniqueName()), link(2, "LB", oldConnector.getUniqueName()));
+    List<MJob> jobList = jobs(job(1, "JA", "A1", "A1", "linkName1", "linkName1"),
+            job(2, "JB", "A1", "A1", "linkName2", "linkName2"));
 
     // mock necessary methods for upgradeConnector() procedure
     doReturn(linkList).when(repoSpy).findLinksForConnectorUpgrade(anyString());
@@ -277,7 +278,8 @@ public class TestJdbcRepository {
 
     when(driverMock.getConfigurableUpgrader(DriverBean.CURRENT_DRIVER_VERSION)).thenReturn(driverUpgraderMock);
     when(driverMock.getDriverJobConfigurationClass()).thenReturn(ValidConfiguration.class);
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
 
     doReturn(jobList).when(repoSpy).findJobs();
     doNothing().when(repoSpy).updateLink(any(MLink.class), any(RepositoryTransaction.class));
@@ -315,7 +317,8 @@ public class TestJdbcRepository {
 
     when(driverMock.getConfigurableUpgrader(DriverBean.CURRENT_DRIVER_VERSION)).thenReturn(driverUpgraderMock);
     when(driverMock.getDriverJobConfigurationClass()).thenReturn(InvalidConfiguration.class);
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
 
     doReturn(jobList).when(repoSpy).findJobs();
     doNothing().when(repoSpy).updateJob(any(MJob.class), any(RepositoryTransaction.class));
@@ -390,7 +393,7 @@ public class TestJdbcRepository {
     when(sqconnector.getConfigurableUpgrader(oldConnector.getVersion())).thenReturn(connectorUpgraderMock);
     when(connectorMgrMock.getSqoopConnector(anyString())).thenReturn(sqconnector);
 
-    List<MLink> linkList = links(link(1, "LA", 1), link(2, "LB", 1));
+    List<MLink> linkList = links(link(1, "LA", oldConnector.getUniqueName()), link(2, "LB", oldConnector.getUniqueName()));
     doReturn(linkList).when(repoHandlerMock).findLinksForConnectorUpgrade(anyString(), any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
@@ -424,8 +427,9 @@ public class TestJdbcRepository {
     when(sqconnector.getConfigurableUpgrader(oldConnector.getVersion())).thenReturn(connectorUpgraderMock);
     when(connectorMgrMock.getSqoopConnector(anyString())).thenReturn(sqconnector);
 
-    List<MLink> linkList = links(link(1, "LA", 1), link(2, "LB", 1));
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MLink> linkList = links(link(1, "LA", oldConnector.getUniqueName()), link(2, "LB", oldConnector.getUniqueName()));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
     doReturn(linkList).when(repoHandlerMock).findLinksForConnectorUpgrade(anyString(), any(Connection.class));
     doReturn(jobList).when(repoHandlerMock).findJobsForConnectorUpgrade
       (anyLong(), any(Connection.class));
@@ -462,8 +466,9 @@ public class TestJdbcRepository {
     when(sqconnector.getConfigurableUpgrader(oldConnector.getVersion())).thenReturn(connectorUpgraderMock);
     when(connectorMgrMock.getSqoopConnector(anyString())).thenReturn(sqconnector);
 
-    List<MLink> linkList = links(link(1, "LA", 1), link(2, "LB", 1));
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MLink> linkList = links(link(1, "LA", oldConnector.getUniqueName()), link(2, "LB", oldConnector.getUniqueName()));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
     doReturn(linkList).when(repoHandlerMock).findLinksForConnectorUpgrade(anyString(), any(Connection.class));
     doReturn(jobList).when(repoHandlerMock).findJobsForConnectorUpgrade(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyString(), any(Connection.class));
@@ -500,8 +505,9 @@ public class TestJdbcRepository {
     when(sqconnector.getConfigurableUpgrader(oldConnector.getVersion())).thenReturn(connectorUpgraderMock);
     when(connectorMgrMock.getSqoopConnector(anyString())).thenReturn(sqconnector);
 
-    List<MLink> linkList = links(link(1, "LA", 1), link(2, "LB", 1));
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MLink> linkList = links(link(1, "LA", oldConnector.getUniqueName()), link(2, "LB", oldConnector.getUniqueName()));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
     doReturn(linkList).when(repoHandlerMock).findLinksForConnectorUpgrade(anyString(), any(Connection.class));
     doReturn(jobList).when(repoHandlerMock).findJobsForConnectorUpgrade(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyString(), any(Connection.class));
@@ -542,8 +548,9 @@ public class TestJdbcRepository {
     when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(ValidConfiguration.class);
     when(connectorMgrMock.getSqoopConnector(anyString())).thenReturn(sqconnector);
 
-    List<MLink> linkList = links(link(1, "LA", 1), link(2, "LB", 1));
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MLink> linkList = links(link(1, "LA", oldConnector.getUniqueName()), link(2, "LB", oldConnector.getUniqueName()));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
     doReturn(linkList).when(repoHandlerMock).findLinksForConnectorUpgrade(anyString(), any(Connection.class));
     doReturn(jobList).when(repoHandlerMock).findJobsForConnectorUpgrade(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyString(), any(Connection.class));
@@ -551,8 +558,7 @@ public class TestJdbcRepository {
     doNothing().when(repoHandlerMock).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsLink(anyString(), any(Connection.class));
 
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
-        "update link error.");
+    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0016);
     doThrow(exception).when(repoHandlerMock).updateLink(any(MLink.class), any(Connection.class));
 
     try {
@@ -564,9 +570,6 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteLinkInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(1)).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
-      verify(repoHandlerMock, times(1)).existsLink(anyString(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).updateLink(any(MLink.class), any(Connection.class));
-      verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
 
@@ -588,8 +591,9 @@ public class TestJdbcRepository {
     when(sqconnector.getJobConfigurationClass(any(Direction.class))).thenReturn(ValidConfiguration.class);
     when(connectorMgrMock.getSqoopConnector(anyString())).thenReturn(sqconnector);
 
-    List<MLink> linkList = links(link(1, "LA", 1), link(2, "LB", 1));;
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MLink> linkList = links(link(1, "LA", oldConnector.getUniqueName()), link(2, "LB", oldConnector.getUniqueName()));;
+    List<MJob> jobList = jobs(job(1, "JA", "A1", "A1", "linkName1", "linkName1"),
+            job(2, "JB", "A1", "A1", "linkName2", "linkName1"));
     doReturn(linkList).when(repoHandlerMock).findLinksForConnectorUpgrade(anyString(), any(Connection.class));
     doReturn(jobList).when(repoHandlerMock).findJobsForConnectorUpgrade(anyLong(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyString(), any(Connection.class));
@@ -599,8 +603,7 @@ public class TestJdbcRepository {
     doReturn(true).when(repoHandlerMock).existsLink(anyString(), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsJob(anyString(), any(Connection.class));
 
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
-        "update job error.");
+    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0016);
     doThrow(exception).when(repoHandlerMock).updateJob(any(MJob.class), any(Connection.class));
 
     try {
@@ -612,10 +615,7 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteLinkInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(1)).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
-      verify(repoHandlerMock, times(2)).existsLink(anyString(), any(Connection.class));
-      verify(repoHandlerMock, times(2)).updateLink(any(MLink.class), any(Connection.class));
-      verify(repoHandlerMock, times(1)).existsJob(anyString(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).updateJob(any(MJob.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).existsLink(anyLong(), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -659,7 +659,8 @@ public class TestJdbcRepository {
 
     when(driverMock.getConfigurableUpgrader(DriverBean.CURRENT_DRIVER_VERSION)).thenReturn(driverUpgraderMock);
 
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
     doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
 
     SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
@@ -689,7 +690,8 @@ public class TestJdbcRepository {
 
     when(driverMock.getConfigurableUpgrader(DriverBean.CURRENT_DRIVER_VERSION)).thenReturn(driverUpgraderMock);
 
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
     doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyString(), any(Connection.class));
     doNothing().when(repoHandlerMock).deleteLinkInputs(anyString(), any(Connection.class));
@@ -723,14 +725,14 @@ public class TestJdbcRepository {
 
     when(driverMock.getConfigurableUpgrader(DriverBean.CURRENT_DRIVER_VERSION)).thenReturn(driverUpgraderMock);
     when(driverMock.getDriverJobConfigurationClass()).thenReturn(ValidConfiguration.class);
-    List<MJob> jobList = jobs(job(1, "JA", 1, 1, 1, 1), job(2, "JB", 1, 1, 2, 1));
+    List<MJob> jobList = jobs(job(1, "JA", "fromConnectorName", "toConnectorName", "linkName1", "linkName1"),
+            job(2, "JB", "fromConnectorName", "toConnectorName", "linkName2", "linkName1"));
     doReturn(jobList).when(repoHandlerMock).findJobs(any(Connection.class));
     doNothing().when(repoHandlerMock).deleteJobInputs(anyString(), any(Connection.class));
     doNothing().when(repoHandlerMock).upgradeDriverAndConfigs(any(MDriver.class), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsJob(anyString(), any(Connection.class));
 
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
-        "update job error.");
+    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0019);
     doThrow(exception).when(repoHandlerMock).updateJob(any(MJob.class), any(Connection.class));
 
     try {
@@ -740,9 +742,7 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(1)).upgradeDriverAndConfigs(any(MDriver.class), any(Connection.class));
-      verify(repoHandlerMock, times(1)).existsJob(anyString(), any(Connection.class));
-      verify(repoHandlerMock, times(1)).updateJob(any(MJob.class), any(Connection.class));
-      verifyNoMoreInteractions(repoHandlerMock);
+      verify(repoHandlerMock, times(1)).existsJob(anyLong(), any(Connection.class));
       return ;
     }
 
@@ -775,15 +775,16 @@ public class TestJdbcRepository {
     return driver;
   }
 
-  private MLink link(long linkId, String linkName, long connectorId) {
-    MLink link = new MLink(connectorId, new MLinkConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()));
+  private MLink link(long linkId, String linkName, String connectorName) {
+    MLink link = new MLink(connectorName, new MLinkConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()));
     link.setPersistenceId(linkId);
     link.setName(linkName);
     return link;
   }
 
-  private MJob job(long id, String jobName, long fromConnectorId, long toConnectorId, long fromLinkId, long toLinkId) {
-    MJob job = new MJob(fromConnectorId, toConnectorId, fromLinkId, toLinkId,
+  private MJob job(long id, String jobName, String fromConnectorName, String toConnectorName,
+                   String fromLinkName, String toLinkName) {
+    MJob job = new MJob(fromConnectorName, toConnectorName, fromLinkName, toLinkName,
         new MFromConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()),
         new MToConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()),
         new MDriverConfig(new LinkedList<MConfig>(), new LinkedList<MValidator>()));

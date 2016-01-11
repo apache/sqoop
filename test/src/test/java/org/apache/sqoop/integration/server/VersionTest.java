@@ -22,6 +22,7 @@ import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.json.VersionBean;
 import org.testng.annotations.Test;
@@ -31,12 +32,12 @@ import static org.testng.Assert.assertEquals;
 /**
  * Basic test to check that server is working and returning correct version info.
  */
-@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
 public class VersionTest extends SqoopTestCase {
 
   @Test
   public void testVersion() {
-    VersionResourceRequest versionRequest = new VersionResourceRequest();
+    VersionResourceRequest versionRequest = new VersionResourceRequest(getAuthToken());
     VersionBean versionBean = versionRequest.read(getSqoopServerUrl());
 
     assertEquals(versionBean.getBuildVersion(), VersionInfo.getBuildVersion());

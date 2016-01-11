@@ -25,9 +25,9 @@ import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
@@ -56,8 +56,7 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   @Override
   public void load(final LoaderContext context, final LinkConfiguration linkConfiguration,
                    final ToJobConfiguration toJobConfig) throws Exception {
-    UserGroupInformation.createProxyUser(context.getUser(),
-      UserGroupInformation.getLoginUser()).doAs(new PrivilegedExceptionAction<Void>() {
+    SecurityUtils.createProxyUserAndLoadDelegationTokens(context).doAs(new PrivilegedExceptionAction<Void>() {
       public Void run() throws Exception {
         Configuration conf = new Configuration();
         HdfsUtils.contextToConfiguration(context.getContext(), conf);

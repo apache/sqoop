@@ -35,11 +35,10 @@ public class MJob extends MAccountableEntity implements MClonable {
    * dependency through link object, but having this dependency explicitly
    * carried along helps with not having to make the DB call everytime
    */
-  private final long fromConnectorId;
-  private final long toConnectorId;
-  private final long fromLinkId;
-  private final long toLinkId;
-
+  private final String fromConnectorName;
+  private final String toConnectorName;
+  private final String fromLinkName;
+  private final String toLinkName;
   private final MFromConfig fromConfig;
   private final MToConfig toConfig;
   private final MDriverConfig driverConfig;
@@ -49,23 +48,23 @@ public class MJob extends MAccountableEntity implements MClonable {
    *
    * @param fromConnectorId FROM Connector id
    * @param toConnectorId TO Connector id
-   * @param fromLinkId FROM Link id
-   * @param toLinkId TO Link id
+   * @param fromLinkName FROM Link name
+   * @param toLinkName TO Link name
    * @param fromConfig FROM job config
    * @param toConfig TO job config
    * @param driverConfig driver config
    */
-  public MJob(long fromConnectorId,
-              long toConnectorId,
-              long fromLinkId,
-              long toLinkId,
+  public MJob(String fromConnectorName,
+              String toConnectorName,
+              String fromLinkName,
+              String toLinkName,
               MFromConfig fromConfig,
               MToConfig toConfig,
               MDriverConfig driverConfig) {
-    this.fromConnectorId = fromConnectorId;
-    this.toConnectorId = toConnectorId;
-    this.fromLinkId = fromLinkId;
-    this.toLinkId = toLinkId;
+    this.fromConnectorName = fromConnectorName;
+    this.toConnectorName = toConnectorName;
+    this.fromLinkName = fromLinkName;
+    this.toLinkName = toLinkName;
     this.fromConfig = fromConfig;
     this.toConfig = toConfig;
     this.driverConfig = driverConfig;
@@ -97,10 +96,10 @@ public class MJob extends MAccountableEntity implements MClonable {
   public MJob(MJob other, MFromConfig fromConfig, MToConfig toConfig, MDriverConfig driverConfig) {
     super(other);
 
-    this.fromConnectorId = other.getFromConnectorId();
-    this.toConnectorId = other.getToConnectorId();
-    this.fromLinkId = other.getFromLinkId();
-    this.toLinkId = other.getToLinkId();
+    this.fromConnectorName = other.getFromConnectorName();
+    this.toConnectorName = other.getToConnectorName();
+    this.fromLinkName = other.getFromLinkName();
+    this.toLinkName = other.getToLinkName();
     this.fromConfig = fromConfig;
     this.toConfig = toConfig;
     this.driverConfig = driverConfig;
@@ -117,20 +116,20 @@ public class MJob extends MAccountableEntity implements MClonable {
     return sb.toString();
   }
 
-  public long getFromLinkId() {
-    return fromLinkId;
+  public String getFromLinkName() {
+    return fromLinkName;
   }
 
-  public long getToLinkId() {
-    return toLinkId;
+  public String getToLinkName() {
+    return toLinkName;
   }
 
-  public long getFromConnectorId() {
-    return fromConnectorId;
+  public String getFromConnectorName() {
+    return fromConnectorName;
   }
 
-  public long getToConnectorId() {
-    return toConnectorId;
+  public String getToConnectorName() {
+    return toConnectorName;
   }
 
   public MFromConfig getFromJobConfig() {
@@ -151,10 +150,10 @@ public class MJob extends MAccountableEntity implements MClonable {
       return new MJob(this);
     } else {
       return new MJob(
-          getFromConnectorId(),
-          getToConnectorId(),
-          getFromLinkId(),
-          getToLinkId(),
+          getFromConnectorName(),
+          getToConnectorName(),
+          getFromLinkName(),
+          getToLinkName(),
           getFromJobConfig().clone(false),
           getToJobConfig().clone(false),
           getDriverConfig().clone(false));
@@ -172,10 +171,10 @@ public class MJob extends MAccountableEntity implements MClonable {
     }
 
     MJob job = (MJob)object;
-    return (job.getFromConnectorId() == this.getFromConnectorId())
-        && (job.getToConnectorId() == this.getToConnectorId())
-        && (job.getFromLinkId() == this.getFromLinkId())
-        && (job.getToLinkId() == this.getToLinkId())
+    return (job.getFromConnectorName().equals(this.getFromConnectorName()))
+        && (job.getToConnectorName().equals(this.getToConnectorName()))
+        && (job.getFromLinkName().equals(this.getFromLinkName()))
+        && (job.getToLinkName().equals(this.getToLinkName()))
         && (job.getPersistenceId() == this.getPersistenceId())
         && (job.getFromJobConfig().equals(this.getFromJobConfig()))
         && (job.getToJobConfig().equals(this.getToJobConfig()))
@@ -184,10 +183,10 @@ public class MJob extends MAccountableEntity implements MClonable {
 
   @Override
   public int hashCode() {
-    int result = (int) (fromConnectorId ^ (fromConnectorId >>> 32));
-    result = 31 * result + (int) (toConnectorId ^ (toConnectorId >>> 32));
-    result = 31 * result + (int) (fromLinkId ^ (fromLinkId >>> 32));
-    result = 31 * result + (int) (toLinkId ^ (toLinkId >>> 32));
+    int result = fromConnectorName != null ? fromConnectorName.hashCode() : 0;
+    result = 31 * result + (toConnectorName != null ? toConnectorName.hashCode() : 0);
+    result = 31 * result + (fromLinkName != null ? fromLinkName.hashCode() : 0);
+    result = 31 * result + (toLinkName != null ? toLinkName.hashCode() : 0);
     result = 31 * result + (fromConfig != null ? fromConfig.hashCode() : 0);
     result = 31 * result + (toConfig != null ? toConfig.hashCode() : 0);
     result = 31 * result + (driverConfig != null ? driverConfig.hashCode() : 0);

@@ -85,14 +85,13 @@ public class DriverBean extends ConfigurableBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-    long id = (Long) jsonObject.get(ID);
-    String driverVersion = (String) jsonObject.get(CONFIGURABLE_VERSION);
-    JSONObject driverJobConfig = (JSONObject) jsonObject.get(DRIVER_JOB_CONFIG);
-    List<MConfig> driverConfigs = restoreConfigs((JSONArray) driverJobConfig.get(ConfigInputConstants.CONFIGS));
-    List<MValidator> driverValidators = restoreValidator((JSONArray)
-      driverJobConfig.get(ConfigInputConstants.CONFIG_VALIDATORS));
+    long id = JSONUtils.getLong(jsonObject, ID);
+    String driverVersion = JSONUtils.getString(jsonObject, CONFIGURABLE_VERSION);
+    JSONObject driverJobConfig = JSONUtils.getJSONObject(jsonObject, DRIVER_JOB_CONFIG);
+    List<MConfig> driverConfigs = restoreConfigs(JSONUtils.getJSONArray(driverJobConfig, ConfigInputConstants.CONFIGS));
+    List<MValidator> driverValidators = restoreValidator(JSONUtils.getJSONArray(driverJobConfig, ConfigInputConstants.CONFIG_VALIDATORS));
     driver = new MDriver(new MDriverConfig(driverConfigs, driverValidators), driverVersion);
     driver.setPersistenceId(id);
-    driverConfigBundle = restoreConfigParamBundle((JSONObject) jsonObject.get(ALL_CONFIGS));
+    driverConfigBundle = restoreConfigParamBundle(JSONUtils.getJSONObject(jsonObject, ALL_CONFIGS));
   }
 }

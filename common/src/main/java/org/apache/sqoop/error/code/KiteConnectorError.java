@@ -33,6 +33,11 @@ public enum KiteConnectorError implements ErrorCode {
   /** Error occurred while creating partitions */
   GENERIC_KITE_CONNECTOR_0003("Error occurred while creating partitions"),
 
+  /** Error occurred while adding configuration directory to classpath */
+  GENERIC_KITE_CONNECTOR_0004("Error occurred while adding configuration directory to classpath"),
+
+  GENERIC_KITE_CONNECTOR_0005("Invalid kite dataset uri"),
+
   ;
 
   private final String message;

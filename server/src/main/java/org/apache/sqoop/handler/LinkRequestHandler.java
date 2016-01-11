@@ -33,11 +33,7 @@ import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.ValidationResultBean;
-import org.apache.sqoop.model.ConfigUtils;
-import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.model.MLinkConfig;
-import org.apache.sqoop.model.MPersistableEntity;
-import org.apache.sqoop.model.MResource;
+import org.apache.sqoop.model.*;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.security.authorization.AuthorizationEngine;
@@ -134,33 +130,33 @@ public class LinkRequestHandler implements RequestHandler {
     }
 
     MLink postedLink = links.get(0);
+    MConnector mConnector = HandlerUtils.getConnectorFromConnectorName(postedLink.getConnectorName());
+    String oldLinkName = ctx.getLastURLElement();
 
     // Authorization check
     if (create) {
       AuthorizationEngine.createLink(ctx.getUserName(),
-          HandlerUtils.getConnectorNameFromIdentifier(String.valueOf(postedLink.getConnectorId())));
+              mConnector.getUniqueName());
     } else {
-      AuthorizationEngine.updateLink(ctx.getUserName(),
-          HandlerUtils.getConnectorNameFromIdentifier(String.valueOf(postedLink.getConnectorId())),
-          postedLink.getName());
+      AuthorizationEngine.updateLink(ctx.getUserName(), mConnector.getUniqueName(),
+              oldLinkName);
     }
 
     MLinkConfig linkConfig = ConnectorManager.getInstance()
-        .getConnectorConfigurable(postedLink.getConnectorId()).getLinkConfig();
+        .getConnectorConfigurable(postedLink.getConnectorName()).getLinkConfig();
     if (!linkConfig.equals(postedLink.getConnectorLinkConfig())) {
       throw new SqoopException(ServerError.SERVER_0003, "Detected incorrect link config structure");
     }
     // if update get the link id from the request URI
     if (!create) {
-      String linkName = ctx.getLastURLElement();
-      MLink existingLink = repository.findLink(linkName);
+      MLink existingLink = repository.findLink(oldLinkName);
       if (postedLink.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
         postedLink.setPersistenceId(existingLink.getPersistenceId());
       }
     }
     // Associated connector for this link
     SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
-        postedLink.getConnectorId());
+        postedLink.getConnectorName());
 
     // Validate user supplied config data
     ConfigValidationResult connectorLinkConfigValidation = ConfigUtils.validateConfigs(postedLink
@@ -178,7 +174,7 @@ public class LinkRequestHandler implements RequestHandler {
         postedLink.setCreationUser(username);
         postedLink.setLastUpdateUser(username);
         repository.createLink(postedLink);
-        linkValidationBean.setId(postedLink.getPersistenceId());
+        linkValidationBean.setName(postedLink.getName());
       } else {
         AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
             ctx.getRequest().getRemoteAddr(), "update", "link",
@@ -207,7 +203,7 @@ public class LinkRequestHandler implements RequestHandler {
         links = repository.findLinks();
       } else {
         if(repository.findConnector(connectorName) == null) {
-          throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + connectorName);
+          throw new SqoopException(ServerError.SERVER_0006, "Invalid connector: " + connectorName);
         }
         links = repository.findLinksForConnector(connectorName);
       }
@@ -244,10 +240,10 @@ public class LinkRequestHandler implements RequestHandler {
   private void addConnectorConfigBundle(Locale locale, LinkBean bean) {
     // Add associated resources into the bean
     for (MLink link : bean.getLinks()) {
-      long connectorId = link.getConnectorId();
-      if (!bean.hasConnectorConfigBundle(connectorId)) {
-        bean.addConnectorConfigBundle(connectorId, ConnectorManager.getInstance()
-            .getResourceBundle(connectorId, locale));
+      String connectorName = link.getConnectorName();
+      if (!bean.hasConnectorConfigBundle(connectorName)) {
+        bean.addConnectorConfigBundle(connectorName, ConnectorManager.getInstance()
+            .getResourceBundle(connectorName, locale));
       }
     }
   }

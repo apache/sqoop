@@ -120,6 +120,12 @@ limitations under the License.
     <jcommander.version>1.27</jcommander.version>
     <findbugs.version>1.3.2</findbugs.version>
     <jetty.version>9.2.13.v20150730</jetty.version>
+    <jline.version>2.13</jline.version>
+    <groovy.version>2.4.0</groovy.version>
+    <jansi.version>1.7</jansi.version>
+    <felix.version>2.4.0</felix.version>
+    <!-- maven plugin versions -->
+    <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
   </properties>
 
   <dependencies>
@@ -227,6 +233,33 @@ limitations under the License.
       </build>
     </profile>
 
+    <profile>
+      <id>realcluster</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <excludedGroups>no-real-cluster</excludedGroups>
+              <reportNameSuffix>real-cluster-integration</reportNameSuffix>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <excludedGroups>no-real-cluster</excludedGroups>
+              <reportNameSuffix>real-cluster-integration</reportNameSuffix>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <!-- Sign profile for releasing artifacts to Nexus repository -->
     <profile>
       <id>sign</id>
@@ -257,10 +290,10 @@ limitations under the License.
         <artifactId>sqoop-client</artifactId>
         <version>${project.version}</version>
       </dependency>
-	  <dependency>
-		<groupId>org.apache.sqoop</groupId>
-		<artifactId>sqoop-shell</artifactId>
-		<version>${project.version}</version>
+      <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>sqoop-shell</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.sqoop</groupId>
@@ -311,6 +344,11 @@ limitations under the License.
       <dependency>
         <groupId>org.apache.sqoop</groupId>
         <artifactId>connector-sdk</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>connector-sdk-hadoop</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -424,6 +462,11 @@ limitations under the License.
       </dependency>
       <dependency>
         <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-minikdc</artifactId>
+        <version>${hadoop.2.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-auth</artifactId>
         <version>${hadoop.2.version}</version>
       </dependency>
@@ -497,10 +540,10 @@ limitations under the License.
         <artifactId>commons-cli</artifactId>
         <version>${commons-cli.version}</version>
       </dependency>
-       <dependency>
-         <groupId>commons-io</groupId>
-         <artifactId>commons-io</artifactId>
-         <version>${commons-io.version}</version>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
@@ -637,9 +680,9 @@ limitations under the License.
         <version>${hadoop.2.version}</version>
       </dependency>
       <dependency>
-       <groupId>org.apache.avro</groupId>
-       <artifactId>avro</artifactId>
-       <version>${avro.version}</version>
+        <groupId>org.apache.avro</groupId>
+        <artifactId>avro</artifactId>
+        <version>${avro.version}</version>
       </dependency>
       <dependency>
         <groupId>net.sourceforge.findbugs</groupId>
@@ -657,10 +700,11 @@ limitations under the License.
         <artifactId>jetty-servlet</artifactId>
         <version>${jetty.version}</version>
       </dependency>
-   </dependencies>
+    </dependencies>
   </dependencyManagement>
 
   <modules>
+    <module>assemblies</module>
     <module>common</module>
     <module>common-test</module>
     <module>core</module>
@@ -761,6 +805,39 @@ limitations under the License.
             <!-- See SQOOP-2120 for details about use of -XX:-UseSplitVerifier -->
             <argLine>-Xms512m -Xmx2g -XX:MaxPermSize=1024m -XX:-UseSplitVerifier</argLine>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>${felix.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.sqoop</groupId>
+              <artifactId>sqoop-assemblies</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>make-assembly</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <finalName>${project.artifactId}-${project.version}</finalName>
+                <appendAssemblyId>false</appendAssemblyId>
+                <descriptorRefs>
+                  <descriptorRef>sqoop-connector</descriptorRef>
+                </descriptorRefs>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

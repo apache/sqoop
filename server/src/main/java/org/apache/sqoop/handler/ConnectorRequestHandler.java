@@ -48,11 +48,11 @@ public class ConnectorRequestHandler implements RequestHandler {
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
     List<MConnector> connectors;
-    Map<Long, ResourceBundle> configParamBundles;
+    Map<String, ResourceBundle> configParamBundles;
     Locale locale = ctx.getAcceptLanguageHeader();
     String cIdentifier = ctx.getLastURLElement();
 
-    LOG.info("ConnectorRequestHandler handles cid: " + cIdentifier);
+    LOG.info("ConnectorRequestHandler handles cname: " + cIdentifier);
 
     if (cIdentifier.equals("all")) {
       connectors = ConnectorManager.getInstance().getConnectorConfigurables();
@@ -66,18 +66,17 @@ public class ConnectorRequestHandler implements RequestHandler {
       return new ConnectorsBean(connectors, configParamBundles);
 
     } else {
-      // NOTE: we now support using unique name as well as the connector id
-      // NOTE: connectorId is a fallback for older sqoop clients if any, since we want to primarily use unique conenctorNames
-      String cName = HandlerUtils.getConnectorNameFromIdentifier(cIdentifier);
+      // support using unique name
+      MConnector mConnector = HandlerUtils.getConnectorFromConnectorName(cIdentifier);
 
       configParamBundles = new HashMap<>();
 
-      MConnector connector = ConnectorManager.getInstance().getConnectorConfigurable(cName);
-      configParamBundles.put(connector.getPersistenceId(),
-          ConnectorManager.getInstance().getResourceBundle(cName, locale));
+      MConnector connector = ConnectorManager.getInstance().getConnectorConfigurable(mConnector.getUniqueName());
+      configParamBundles.put(connector.getUniqueName(),
+          ConnectorManager.getInstance().getResourceBundle(mConnector.getUniqueName(), locale));
 
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "connector", String.valueOf(cIdentifier));
+          ctx.getRequest().getRemoteAddr(), "get", "connector", mConnector.getUniqueName());
 
       // Authorization check
       AuthorizationEngine.readConnector(ctx.getUserName(), connector.getUniqueName());

@@ -18,103 +18,33 @@
 import sys
 import os
 
-# eventlet/gevent should not monkey patch anything.
+#
+# Sphinx configuration
+#
+# Please refer to the sphinx documentation for details of what and how
+# can be configured in this file:
+#
+# http://sphinx-doc.org/config.html
+#
+
 os.environ["GEVENT_NOPATCH"] = "yes"
 os.environ["EVENTLET_NOPATCH"] = "yes"
-#os.environ["CELERY_LOADER"] = "default"
-
 this = os.path.dirname(os.path.abspath(__file__))
 
-# If your extensions are in another directory, add it here. If the directory
-# is relative to the documentation root, use os.path.abspath to make it
-# absolute, like shown here.
-sys.path.append(os.path.join(os.pardir, "tests"))
-sys.path.append(os.path.join(this, "_ext"))
-#import celery
-
-
-
-# General configuration
-# ---------------------
-
-extensions = [
-  'sphinx.ext.autodoc',
-  'sphinx.ext.coverage',
-  'sphinx.ext.pngmath',
-  'sphinx.ext.intersphinx',
-]
-
-html_show_sphinx = False
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['.templates', 'themes']
-
-# The suffix of source filenames.
-source_suffix = '.rst'
-
-# The master toctree document.
+# Docs configuration
 master_doc = 'index'
-
-# General information about the project.
 project = 'Apache Sqoop'
-copyright = '2009-2013 The Apache Software Foundation'
+copyright = '2009-2015 The Apache Software Foundation'
 
+# Build configuration
 keep_warnings = True
-
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-#
-# The short X.Y version.
-#version = ".".join(map(str, celery.VERSION[0:2]))
-# The full version, including alpha/beta/rc tags.
-#release = celery.__version__
-
-exclude_trees = ['.build']
-
-# If true, '()' will be appended to :func: etc. cross-reference text.
-add_function_parentheses = True
-
-#intersphinx_mapping = {
-#  "http://docs.python.org/dev": None,
-#  "http://kombu.readthedocs.org/en/latest/": None,
-#  "http://django-celery.readthedocs.org/en/latest": None,
-#}
-
-# The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'trac'
 highlight_language = 'none'
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['../resources/images']
-
+# Output configuration
+html_theme = 'sphinxdoc'
+html_show_sphinx = False
 html_logo = 'sqoop-logo.png'
-
-html_use_smartypants = True
-
-# If false, no module index is generated.
-html_use_modindex = True
-
-# If false, no index is generated.
-html_use_index = True
-
-#html_theme = 'default'
-
 html_sidebars = {
-  '**': ['localtoc.html', 'relations.html', 'sourcelink.html'],
+  '**': ['globaltoc.html'],
 }
-
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-html_theme = 'haiku'
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#html_theme_options = {
-#}
-
-# Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['themes']

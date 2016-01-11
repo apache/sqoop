@@ -335,6 +335,13 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
       STMT_SELECT_LINK_ALL
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
 
+  // DML Select link id by name
+  private static final String STMT_SELECT_LINK_ID_BY_NAME =
+      "SELECT "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
+
   // DML: Select all links for a specific connector.
   private static final String STMT_SELECT_LINK_FOR_CONNECTOR_CONFIGURABLE =
       "SELECT "
@@ -356,6 +363,11 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
   private static final String STMT_SELECT_LINK_CHECK_BY_NAME =
       "SELECT count(*) FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + " = ?";
+
+  // DML: Check if given link exists
+  private static final String STMT_SELECT_LINK_CHECK_BY_ID =
+          "SELECT count(*) FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME)
+                  + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID) + " = ?";
 
   /**
    * *******JOB TABLE *************
@@ -412,6 +424,11 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
       "SELECT count(*) FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?";
 
+  // DML: Check if given job exists
+  private static final String STMT_SELECT_JOB_CHECK_BY_ID =
+          "SELECT count(*) FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+                  + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID) + " = ?";
+
   // DML: Check if there are jobs for given link
   private static final String STMT_SELECT_JOBS_FOR_LINK_CHECK =
       "SELECT SUM(CNT) FROM ("
@@ -442,7 +459,9 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_USER) + ", "
           + "JOB." + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE) + ", "
           + "FROM_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
-          + "TO_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
+          + "TO_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
+          + "FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME) + ", "
+          + "TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_NAME)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " JOB"
           + " LEFT JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_NAME) + " FROM_CONNECTOR"
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_FROM_LINK) + " = FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_ID)
@@ -527,8 +546,11 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS)
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
+          + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID)
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_STATUS) + " = ?";
 
   // DML : Get all submissions
@@ -544,8 +566,11 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS)
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
+          + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID)
           + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + " DESC";
 
   // DML: Get submissions for a job
@@ -561,13 +586,21 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_ID) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_EXTERNAL_LINK) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_SUMMARY) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS)
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ERROR_DETAILS) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_SUBMISSION_NAME)
           + " INNER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_JOB) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID)
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?"
           + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQS_UPDATE_DATE) + "DESC ,"
             + CommonRepoUtils.escapeColumnName(COLUMN_SQS_ID) + " DESC";
+
+  // DML Select link id by name
+  private static final String STMT_SELECT_JOB_ID_BY_NAME =
+      "SELECT "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQB_ID)
+          + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME)
+          + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQB_NAME) + " = ?";
 
   // DML: Select context type
   private static final String STMT_SELECT_CONTEXT_TYPE =
@@ -800,6 +833,12 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
     return STMT_SELECT_LINK_SINGLE_BY_NAME;
   }
 
+  public String getStmtSelectLinkIdByName() {return STMT_SELECT_LINK_ID_BY_NAME;}
+
+  public String getStmtSelectJobIdByName() {
+    return STMT_SELECT_JOB_ID_BY_NAME;
+  }
+
   public String getStmtSelectLinkAll() {
     return STMT_SELECT_LINK_ALL;
   }
@@ -810,6 +849,10 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   public String getStmtSelectLinkCheckByName() {
     return STMT_SELECT_LINK_CHECK_BY_NAME;
+  }
+
+  public String getStmtSelectLinkCheckById() {
+    return STMT_SELECT_LINK_CHECK_BY_ID;
   }
 
   public String getStmtInsertJob() {
@@ -838,6 +881,10 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   public String getStmtSelectJobCheckByName() {
     return STMT_SELECT_JOB_CHECK_BY_NAME;
+  }
+
+  public String getStmtSelectJobCheckById() {
+    return STMT_SELECT_JOB_CHECK_BY_ID;
   }
 
   public String getStmtSelectJobsForLinkCheck() {

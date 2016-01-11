@@ -47,26 +47,24 @@ public class ShowJobFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_JOBS))
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_CID)
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOBS_CID))
-        .withLongOpt(Constants.OPT_CID)
-        .create(Constants.OPT_CID_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOB_JID))
-        .withLongOpt(Constants.OPT_JID)
-        .create(Constants.OPT_JID_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_CONNECTOR_NAME)
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOBS_CN))
+        .withLongOpt(Constants.OPT_CONNECTOR_NAME)
+        .create(Constants.OPT_CONNECTOR_NAME_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_NAME)
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_JOB_NAME))
+        .withLongOpt(Constants.OPT_NAME)
+        .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_ALL)) {
       showJobs(null);
-    } else if (line.hasOption(Constants.OPT_CID)) {
-      //showJobs(getLong(line, Constants.OPT_CID));
-      showJobs(line.getOptionValue(Constants.OPT_CID));
-    } else if (line.hasOption(Constants.OPT_JID)) {
-      //showJob(getLong(line, Constants.OPT_JID));
-      showJob(line.getOptionValue(Constants.OPT_JID));
+    } else if (line.hasOption(Constants.OPT_CONNECTOR_NAME)) {
+      showJobs(line.getOptionValue(Constants.OPT_CONNECTOR_NAME));
+    } else if (line.hasOption(Constants.OPT_NAME)) {
+      showJob(line.getOptionValue(Constants.OPT_NAME));
     } else {
       showSummary();
     }
@@ -92,32 +90,9 @@ public class ShowJobFunction extends SqoopFunction {
     for(MJob job : jobs) {
       ids.add(String.valueOf(job.getPersistenceId()));
       names.add(job.getName());
-
       // From link and connnector
-      String fromLinkName = "";
-      MLink fromLink = client.getLink(job.getFromLinkId());
-      if (fromLink != null) {
-        fromLinkName = fromLink.getName();
-      }
-      String fromConnectorName = "";
-      MConnector fromConnector = client.getConnector(job.getFromConnectorId());
-      if (fromConnector != null) {
-        fromConnectorName = fromConnector.getUniqueName();
-      }
-      fromConnectors.add(fromLinkName + " (" + fromConnectorName + ")");
-
-      // To link and connector
-      String toLinkName = "";
-      MLink toLink = client.getLink(job.getToLinkId());
-      if (toLink != null) {
-        toLinkName = toLink.getName();
-      }
-      String toConnnectorName = "";
-      MConnector toConnector = client.getConnector(job.getToConnectorId());
-      if (toConnector != null) {
-        toConnnectorName = toConnector.getUniqueName();
-      }
-      toConnectors.add(toLinkName + " (" + toConnnectorName + ")");
+      fromConnectors.add(job.getFromLinkName() + " (" + job.getFromConnectorName() + ")");
+      toConnectors.add(job.getToLinkName() + " (" + job.getToConnectorName() + ")");
 
       availabilities.add(String.valueOf(job.getEnabled()));
     }
@@ -151,7 +126,6 @@ public class ShowJobFunction extends SqoopFunction {
 
     printlnResource(
       Constants.RES_SHOW_PROMPT_JOB_INFO,
-      job.getPersistenceId(),
       job.getName(),
       job.getEnabled(),
       job.getCreationUser(),
@@ -159,15 +133,16 @@ public class ShowJobFunction extends SqoopFunction {
       job.getLastUpdateUser(),
       formatter.format(job.getLastUpdateDate())
     );
+
     displayConfig(job.getDriverConfig().getConfigs(),
             client.getDriverConfigBundle());
-    printlnResource(Constants.RES_SHOW_PROMPT_JOB_FROM_LID_INFO,
-        job.getFromLinkId());
+    printlnResource(Constants.RES_SHOW_PROMPT_JOB_FROM_LN_INFO,
+        job.getFromLinkName());
     displayConfig(job.getFromJobConfig().getConfigs(),
-                 client.getConnectorConfigBundle(job.getFromConnectorId()));
-    printlnResource(Constants.RES_SHOW_PROMPT_JOB_TO_LID_INFO,
-            job.getToLinkId());
+                 client.getConnectorConfigBundle(job.getFromConnectorName()));
+    printlnResource(Constants.RES_SHOW_PROMPT_JOB_TO_LN_INFO,
+            job.getToLinkName());
     displayConfig(job.getToJobConfig().getConfigs(),
-                 client.getConnectorConfigBundle(job.getToConnectorId()));
+                 client.getConnectorConfigBundle(job.getToConnectorName()));
   }
 }

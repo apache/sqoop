@@ -23,6 +23,7 @@ import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.Validator;
 import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.DirectoryExistsValidator;
 import org.apache.sqoop.validation.validators.HostAndPortValidator;
 
 @ConfigClass(validators = {@Validator(LinkConfig.ConfigValidator.class)})
@@ -30,6 +31,9 @@ public class LinkConfig {
 
   @Input(size = 255)
   public String authority;
+
+  @Input(size = 255, validators = { @Validator(DirectoryExistsValidator.class)})
+  public String confDir;
 
   public static class ConfigValidator extends AbstractValidator<LinkConfig> {
 

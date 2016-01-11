@@ -40,23 +40,23 @@ public class ShowSubmissionFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS))
         .withLongOpt(Constants.OPT_DETAIL)
         .create(Constants.OPT_DETAIL_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_JID)
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS_JOB_ID))
-        .withLongOpt(Constants.OPT_JID)
-        .create(Constants.OPT_JID_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_WITH_JOB)
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS_JN))
+        .withLongOpt(Constants.OPT_WITH_JOB)
+        .create(Constants.OPT_WITH_JOB_CHAR));
   }
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_DETAIL)) {
-      if (line.hasOption(Constants.OPT_JID)) {
-        showSubmissions(line.getOptionValue(Constants.OPT_JID));
+      if (line.hasOption(Constants.OPT_WITH_JOB)) {
+        showSubmissions(line.getOptionValue(Constants.OPT_WITH_JOB));
       } else {
         showSubmissions(null);
       }
     } else {
-      if (line.hasOption(Constants.OPT_JID)) {
-        showSummary(line.getOptionValue(Constants.OPT_JID));
+      if (line.hasOption(Constants.OPT_WITH_JOB)) {
+        showSummary(line.getOptionValue(Constants.OPT_WITH_JOB));
       } else {
         showSummary(null);
       }
@@ -74,24 +74,24 @@ public class ShowSubmissionFunction extends SqoopFunction {
     }
 
     List<String> header = new LinkedList<String>();
-    header.add(resourceString(Constants.RES_TABLE_HEADER_JOB_ID));
+    header.add(resourceString(Constants.RES_TABLE_HEADER_JOB_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_EXTERNAL_ID));
     header.add(resourceString(Constants.RES_TABLE_HEADER_STATUS));
     header.add(resourceString(Constants.RES_TABLE_HEADER_DATE));
 
-    List<String> jids = new LinkedList<String>();
+    List<String> jnames = new LinkedList<String>();
     List<String> eids = new LinkedList<String>();
     List<String> status = new LinkedList<String>();
     List<String> dates = new LinkedList<String>();
 
     for (MSubmission submission : submissions) {
-      jids.add(String.valueOf(submission.getJobId()));
+      jnames.add(String.valueOf(submission.getJobName()));
       eids.add(String.valueOf(submission.getExternalJobId()));
       status.add(submission.getStatus().toString());
       dates.add(submission.getLastUpdateDate().toString());
     }
 
-    TableDisplayer.display(header, jids, eids, status, dates);
+    TableDisplayer.display(header, jnames, eids, status, dates);
   }
 
   private void showSubmissions(String jArg) {

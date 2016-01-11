@@ -21,6 +21,10 @@ package org.apache.sqoop.shell;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -50,7 +54,6 @@ import org.apache.sqoop.utils.MapResourceBundle;
 import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.Groovysh;
 import org.codehaus.groovy.tools.shell.IO;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -75,47 +78,47 @@ public class TestShowCommand {
     // show server -host -port -webapp
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SERVER, "-host", "-port", "-webapp"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Server host:"));
-    Assert.assertTrue(str.contains("Server port:"));
-    Assert.assertTrue(str.contains("Server webapp:"));
+    assertTrue(str.contains("Server host:"));
+    assertTrue(str.contains("Server port:"));
+    assertTrue(str.contains("Server webapp:"));
 
     // show server -all
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SERVER, "-all"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Server host:"));
-    Assert.assertTrue(str.contains("Server port:"));
-    Assert.assertTrue(str.contains("Server webapp:"));
+    assertTrue(str.contains("Server host:"));
+    assertTrue(str.contains("Server port:"));
+    assertTrue(str.contains("Server webapp:"));
 
     // show server -host
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SERVER, "-host"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Server host:"));
-    Assert.assertFalse(str.contains("Server port:"));
-    Assert.assertFalse(str.contains("Server webapp:"));
+    assertTrue(str.contains("Server host:"));
+    assertFalse(str.contains("Server port:"));
+    assertFalse(str.contains("Server webapp:"));
 
     // show server -port
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SERVER, "-port"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertFalse(str.contains("Server host:"));
-    Assert.assertTrue(str.contains("Server port:"));
-    Assert.assertFalse(str.contains("Server webapp:"));
+    assertFalse(str.contains("Server host:"));
+    assertTrue(str.contains("Server port:"));
+    assertFalse(str.contains("Server webapp:"));
 
     // show server -webapp
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SERVER, "-webapp"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertFalse(str.contains("Server host:"));
-    Assert.assertFalse(str.contains("Server port:"));
-    Assert.assertTrue(str.contains("Server webapp:"));
+    assertFalse(str.contains("Server host:"));
+    assertFalse(str.contains("Server port:"));
+    assertTrue(str.contains("Server webapp:"));
   }
 
   @Test
@@ -125,36 +128,36 @@ public class TestShowCommand {
     // show version -server -client -api
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_VERSION, "-server", "-client", "-api"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("server version:"));
-    Assert.assertTrue(str.contains("client version:"));
-    Assert.assertTrue(str.contains("API versions:"));
+    assertTrue(str.contains("server version:"));
+    assertTrue(str.contains("client version:"));
+    assertTrue(str.contains("API versions:"));
 
     // show version -all
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_VERSION, "-all"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("server version:"));
-    Assert.assertTrue(str.contains("client version:"));
-    Assert.assertTrue(str.contains("API versions:"));
+    assertTrue(str.contains("server version:"));
+    assertTrue(str.contains("client version:"));
+    assertTrue(str.contains("API versions:"));
 
     // show client version when no option is specified
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_VERSION));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertFalse(str.contains("server version:"));
-    Assert.assertTrue(str.contains("client version:"));
-    Assert.assertFalse(str.contains("API versions:"));
+    assertFalse(str.contains("server version:"));
+    assertTrue(str.contains("client version:"));
+    assertFalse(str.contains("API versions:"));
   }
 
   @Test
   public void testShowConnector() {
     when(client.getConnectors()).thenReturn(new ArrayList<MConnector>());
     when(client.getConnector(any(String.class))).thenReturn(
-        new MConnector("", "", "",
+        new MConnector("test_connector", "", "",
             new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
@@ -162,27 +165,26 @@ public class TestShowCommand {
     // show connector summary
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Id"));
-    Assert.assertTrue(str.contains("Name"));
-    Assert.assertTrue(str.contains("Version"));
-    Assert.assertTrue(str.contains("Class"));
-    Assert.assertTrue(str.contains("Supported Directions"));
+    assertTrue(str.contains("Name"));
+    assertTrue(str.contains("Version"));
+    assertTrue(str.contains("Class"));
+    assertTrue(str.contains("Supported Directions"));
 
     // show connector -all
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-all"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("connector(s) to show:"));
+    assertTrue(str.contains("connector(s) to show:"));
 
-    // show connector -cid 1
+    // show connector -name test_connector
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-cid", "1"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-name", "test_connector"));
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Connector with id"));
+    assertTrue(str.contains("Connector with Name: test_connector"));
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -195,125 +197,126 @@ public class TestShowCommand {
     // show driver
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_DRIVER_CONFIG));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Driver specific options:"));
+    assertTrue(str.contains("Driver specific options:"));
   }
 
   @Test
   public void testShowLink() {
+    MLink fakeLink = new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
+    fakeLink.setName("linkName");
     when(client.getLinks()).thenReturn(new ArrayList<MLink>());
-    when(client.getLink(any(String.class))).thenReturn(new MLink(1L, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
+    when(client.getLink(any(String.class))).thenReturn(fakeLink);
 
     // show link summary
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_LINK));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Id"));
-    Assert.assertTrue(str.contains("Name"));
-    Assert.assertTrue(str.contains("Connector Id"));
-    Assert.assertTrue(str.contains("Connector Name"));
-    Assert.assertTrue(str.contains("Enabled"));
+    assertTrue(str.contains("Name"));
+    assertTrue(str.contains("Connector Name"));
+    assertTrue(str.contains("Enabled"));
 
     // show link -all
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_LINK, "-all"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("link(s) to show:"));
+    assertTrue(str.contains("link(s) to show:"));
 
-    // show link -lid 1
+    // show link -name linkName
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "1"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "linkName"));
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("link with id"));
+    assertTrue(str.contains("link with name"));
   }
 
   @Test
   public void testShowJob() {
     when(client.getJobs()).thenReturn(new ArrayList<MJob>());
-    when(client.getJob("1")).thenReturn(new MJob(1L, 2L, 1L, 2L,
+    when(client.getConnector(any(String.class))).thenReturn(new MConnector("", "", "", null, null, null));
+    when(client.getJob("jobName")).thenReturn(new MJob("fromConnectorName", "toConnectorName", "linkName1", "linkName2",
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
-    when(client.getJobsByConnector("2")).thenReturn(Arrays.asList(new MJob(1L, 2L, 1L, 2L,
-        new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+    when(client.getJobsByConnector("fromConnectorName")).thenReturn(Arrays.asList(new MJob("fromConnectorName", "toConnectorName",
+        "linkName1", "linkName2", new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()))));
 
     // show job summary
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Id"));
-    Assert.assertTrue(str.contains("Name"));
-    Assert.assertTrue(str.contains("From Connector"));
-    Assert.assertTrue(str.contains("To Connector"));
-    Assert.assertTrue(str.contains("Enabled"));
+    assertTrue(str.contains("Id"));
+    assertTrue(str.contains("Name"));
+    assertTrue(str.contains("From Connector"));
+    assertTrue(str.contains("To Connector"));
+    assertTrue(str.contains("Enabled"));
 
     // show job -all
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-all"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("job(s) to show:"));
+    assertTrue(str.contains("job(s) to show:"));
 
-    // show job -jid 1
+    // show job -name jobName
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "1"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "jobName"));
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Job with id"));
+    assertTrue(str.contains("Job with name"));
 
-    // show job -cid 2
+    // show job -connector fromConnectorName
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-cid", "2"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_JOB, "-connector", "fromConnectorName"));
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("job(s) to show:"));
+    assertTrue(str.contains("job(s) to show:"));
   }
 
   @Test
   public void testShowSubmission() {
-    when(client.getSubmissions()).thenReturn(Arrays.asList(new MSubmission(1L)));
-    when(client.getSubmissionsForJob(any(String.class))).thenReturn(Arrays.asList(new MSubmission(1L)));
+    when(client.getSubmissions()).thenReturn(Arrays.asList(new MSubmission("jobName")));
+    when(client.getSubmissionsForJob(any(String.class))).thenReturn(Arrays.asList(new MSubmission("jobName")));
 
-    // show submission -details -jid 1
+    // show submission -details -job jobName
     out.reset();
-    Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-detail", "-jid", "1"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-detail", "-job", "jobName"));
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Submission details"));
+    assertTrue(str.contains("Submission details"));
 
     // show submission -details
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-detail"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Submission details"));
+    assertTrue(str.contains("Submission details"));
 
-    // show submission -jid 1
+    // show submission -job jobName
     out.reset();
-    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-jid", "1"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION, "-job", "jobName"));
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Job Id"));
-    Assert.assertTrue(str.contains("External Id"));
-    Assert.assertTrue(str.contains("Status"));
-    Assert.assertTrue(str.contains("Last Update Date"));
+    assertTrue(str.contains("Job Name"));
+    assertTrue(str.contains("External Id"));
+    assertTrue(str.contains("Status"));
+    assertTrue(str.contains("Last Update Date"));
 
     // show submission
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_SUBMISSION));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Job Id"));
-    Assert.assertTrue(str.contains("External Id"));
-    Assert.assertTrue(str.contains("Status"));
-    Assert.assertTrue(str.contains("Last Update Date"));
+    assertTrue(str.contains("Job Name"));
+    assertTrue(str.contains("External Id"));
+    assertTrue(str.contains("Status"));
+    assertTrue(str.contains("Last Update Date"));
   }
 
   @Test
@@ -321,24 +324,24 @@ public class TestShowCommand {
     // show option -name verbose
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_OPTION, "-name", "verbose"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Verbose ="));
+    assertTrue(str.contains("Verbose ="));
 
     // show option -name poll-timeout
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_OPTION, "-name", "poll-timeout"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Poll-timeout ="));
+    assertTrue(str.contains("Poll-timeout ="));
 
     // show all options
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_OPTION));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Verbose ="));
-    Assert.assertTrue(str.contains("Poll-timeout ="));
+    assertTrue(str.contains("Verbose ="));
+    assertTrue(str.contains("Poll-timeout ="));
   }
 
   @Test
@@ -347,17 +350,17 @@ public class TestShowCommand {
     // show role -principal-type user -principal principal_1
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_ROLE, "-principal-type", "user", "-principal", "principal_1"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Role Name"));
+    assertTrue(str.contains("Role Name"));
 
     when(client.getRoles()).thenReturn(new ArrayList<MRole>());
     // show role
     out.reset();
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_ROLE));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Role Name"));
+    assertTrue(str.contains("Role Name"));
   }
 
   @Test
@@ -366,17 +369,17 @@ public class TestShowCommand {
     // show principal -role role_test
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_PRINCIPAL, "-role", "role_test"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Principal Name"));
-    Assert.assertTrue(str.contains("Principal Type"));
+    assertTrue(str.contains("Principal Name"));
+    assertTrue(str.contains("Principal Type"));
 
     // Missing option role name
     try {
       showCmd.execute(Arrays.asList(Constants.FN_PRINCIPAL));
-      Assert.fail("Show principal should fail as role name is missing!");
+      fail("Show principal should fail as role name is missing!");
     } catch (Exception e) {
-      Assert.assertTrue(e.getMessage().contains("Missing required option"));
+      assertTrue(e.getMessage().contains("Missing required option"));
     }
   }
 
@@ -387,52 +390,62 @@ public class TestShowCommand {
     out.reset();
     Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_PRIVILEGE,
         "-principal-type", "user", "-principal", "principal_test", "-resource-type", "connector", "-resource", "resource_test"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     String str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Action"));
-    Assert.assertTrue(str.contains("Resource Name"));
-    Assert.assertTrue(str.contains("Resource Type"));
-    Assert.assertTrue(str.contains("With Grant"));
+    assertTrue(str.contains("Action"));
+    assertTrue(str.contains("Resource Name"));
+    assertTrue(str.contains("Resource Type"));
+    assertTrue(str.contains("With Grant"));
 
     // show privilege -principal-type user -principal principal_test
     status = (Status) showCmd.execute(Arrays.asList(Constants.FN_PRIVILEGE, "-principal-type", "user", "-principal", "principal_test"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
-    Assert.assertTrue(str.contains("Action"));
-    Assert.assertTrue(str.contains("Resource Name"));
-    Assert.assertTrue(str.contains("Resource Type"));
-    Assert.assertTrue(str.contains("With Grant"));
+    assertTrue(str.contains("Action"));
+    assertTrue(str.contains("Resource Name"));
+    assertTrue(str.contains("Resource Type"));
+    assertTrue(str.contains("With Grant"));
 
     // options resource-type and resource must be used together: missing option resource
     try {
       showCmd.execute(Arrays.asList(Constants.FN_PRIVILEGE, "-principal-type", "user", "-principal", "principal_test", "-resource-type", "connector"));
-      Assert.fail("Show principal should fail as option resource is missing!");
+      fail("Show principal should fail as option resource is missing!");
     } catch (SqoopException e) {
-      Assert.assertEquals(e.getErrorCode(), ShellError.SHELL_0003);
+      assertEquals(e.getErrorCode(), ShellError.SHELL_0003);
     }
 
     // options resource-type and resource must be used together: missing option resource-type
     try {
       showCmd.execute(Arrays.asList(Constants.FN_PRIVILEGE, "-principal-type", "user", "-principal", "principal_test", "-resource", "resource_test"));
-      Assert.fail("Show principal should fail as option resource-type is missing!");
+      fail("Show principal should fail as option resource-type is missing!");
     } catch (SqoopException e) {
-      Assert.assertEquals(e.getErrorCode(), ShellError.SHELL_0003);
+      assertEquals(e.getErrorCode(), ShellError.SHELL_0003);
     }
 
     // Missing option principal-type
     try {
       showCmd.execute(Arrays.asList(Constants.FN_PRIVILEGE, "-principal", "principal_test", "-resource-type", "connector", "-resource", "resource_test"));
-      Assert.fail("Show privilege should fail as option principal-type is missing!");
+      fail("Show privilege should fail as option principal-type is missing!");
     } catch (Exception e) {
-      Assert.assertTrue(e.getMessage().contains("Missing required option"));
+      assertTrue(e.getMessage().contains("Missing required option"));
     }
 
     // Missing option principal
     try {
-      showCmd.execute(Arrays.asList(Constants.FN_PRINCIPAL, "-principal-type", "group", "-resource-type", "connector", "-resource", "resource_test"));
-      Assert.fail("Show privilege should fail as option principal is missing!");
+      showCmd.execute(Arrays.asList(Constants.FN_PRIVILEGE, "-principal-type", "group", "-resource-type", "connector", "-resource", "resource_test"));
+      fail("Show privilege should fail as option principal is missing!");
     } catch (Exception e) {
-      Assert.assertTrue(e.getMessage().contains("Missing required option"));
+      assertTrue(e.getMessage().contains("Missing required option"));
+    }
+  }
+
+  @Test
+  public void testUnknowOption() {
+    try {
+      showCmd.execute(Arrays.asList(Constants.FN_PRIVILEGE, "-unknownOption"));
+      fail("Show principal should fail as unknown option encountered!");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Unknown option encountered"));
     }
   }
 }

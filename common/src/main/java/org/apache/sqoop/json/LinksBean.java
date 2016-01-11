@@ -55,7 +55,7 @@ public class LinksBean extends LinkBean {
 
   @Override
   public void restore(JSONObject jsonObject) {
-    JSONArray array = (JSONArray) jsonObject.get(LINKS);
+    JSONArray array = JSONUtils.getJSONArray(jsonObject, LINKS);
     super.restoreLinks(array);
   }
 }

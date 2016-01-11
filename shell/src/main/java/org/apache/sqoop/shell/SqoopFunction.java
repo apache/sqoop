@@ -44,7 +44,7 @@ abstract public class SqoopFunction extends Options {
   }
 
   public Object execute(List<String> args) {
-    CommandLine line = ConfigOptions.parseOptions(this, 1, args, true);
+    CommandLine line = ConfigOptions.parseOptions(this, 1, args, false);
 
     try {
       if (validateArgs(line)) {

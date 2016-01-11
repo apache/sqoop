@@ -56,7 +56,7 @@ public class RolesBean extends RoleBean {
 
   @Override
   public void restore(JSONObject json) {
-    JSONArray rolesArray = (JSONArray) json.get(ROLES);
+    JSONArray rolesArray = JSONUtils.getJSONArray(json, ROLES);
     restoreRoles(rolesArray);
   }
 

@@ -44,9 +44,7 @@ import org.json.simple.JSONObject;
 public class SubmissionBean implements JsonBean {
 
   private static final String SUBMISSION = "submission";
-  @Deprecated
-  private static final String JOB = "job";
-  private static final String JOB_ID = "job-id";
+  private static final String JOB_NAME = "job-name";
   private static final String CREATION_USER = "creation-user";
   private static final String CREATION_DATE = "creation-date";
   private static final String LAST_UPDATE_USER = "last-udpate-user";
@@ -104,8 +102,7 @@ public class SubmissionBean implements JsonBean {
   private JSONObject extractSubmission(MSubmission submission) {
     JSONObject object = new JSONObject();
 
-    object.put(JOB, submission.getJobId());
-    object.put(JOB_ID, submission.getJobId());
+    object.put(JOB_NAME, submission.getJobName());
     object.put(STATUS, submission.getStatus().name());
     object.put(PROGRESS, submission.getProgress());
 
@@ -162,7 +159,7 @@ public class SubmissionBean implements JsonBean {
   @Override
   public void restore(JSONObject json) {
     submissions = new ArrayList<MSubmission>();
-    JSONObject obj = (JSONObject) json.get(SUBMISSION);
+    JSONObject obj = JSONUtils.getJSONObject(json, SUBMISSION);
     submissions.add(restoreSubmission(obj));
   }
 
@@ -176,47 +173,43 @@ public class SubmissionBean implements JsonBean {
   private MSubmission restoreSubmission(Object obj) {
     JSONObject object = (JSONObject) obj;
     MSubmission submission = new MSubmission();
-    Long jobId = (Long) object.get(JOB_ID);
-    if (jobId == null) {
-      jobId = (Long) object.get(JOB);
-    }
-    submission.setJobId(jobId);
-    submission.setStatus(SubmissionStatus.valueOf((String) object.get(STATUS)));
-    submission.setProgress((Double) object.get(PROGRESS));
+    submission.setJobName(JSONUtils.getString(object, JOB_NAME));
+    submission.setStatus(SubmissionStatus.valueOf(JSONUtils.getString(object, STATUS)));
+    submission.setProgress(JSONUtils.getDouble(object, PROGRESS));
 
     if (object.containsKey(CREATION_USER)) {
-      submission.setCreationUser((String) object.get(CREATION_USER));
+      submission.setCreationUser(JSONUtils.getString(object, CREATION_USER));
     }
     if (object.containsKey(CREATION_DATE)) {
-      submission.setCreationDate(new Date((Long) object.get(CREATION_DATE)));
+      submission.setCreationDate(JSONUtils.getDate(object, CREATION_DATE));
     }
     if (object.containsKey(LAST_UPDATE_USER)) {
-      submission.setLastUpdateUser((String) object.get(LAST_UPDATE_USER));
+      submission.setLastUpdateUser(JSONUtils.getString(object, LAST_UPDATE_USER));
     }
     if (object.containsKey(LAST_UPDATE_DATE)) {
-      submission.setLastUpdateDate(new Date((Long) object.get(LAST_UPDATE_DATE)));
+      submission.setLastUpdateDate(JSONUtils.getDate(object, LAST_UPDATE_DATE));
     }
     if (object.containsKey(EXTERNAL_ID)) {
-      submission.setExternalJobId((String) object.get(EXTERNAL_ID));
+      submission.setExternalJobId(JSONUtils.getString(object, EXTERNAL_ID));
     }
     if (object.containsKey(EXTERNAL_LINK)) {
-      submission.setExternalLink((String) object.get(EXTERNAL_LINK));
+      submission.setExternalLink(JSONUtils.getString(object, EXTERNAL_LINK));
     }
     if (object.containsKey(ERROR_SUMMARY)) {
-      submission.getError().setErrorSummary((String) object.get(ERROR_SUMMARY));
+      submission.getError().setErrorSummary(JSONUtils.getString(object, ERROR_SUMMARY));
     }
     if (object.containsKey(ERROR_DETAILS)) {
-      submission.getError().setErrorDetails((String) object.get(ERROR_DETAILS));
+      submission.getError().setErrorDetails(JSONUtils.getString(object, ERROR_DETAILS));
     }
     if (object.containsKey(COUNTERS)) {
-      submission.setCounters(restoreCounters((JSONObject) object.get(COUNTERS)));
+      submission.setCounters(restoreCounters(JSONUtils.getJSONObject(object, COUNTERS)));
     }
 
     if (object.containsKey(FROM_SCHEMA)) {
-      submission.setFromSchema(restoreSchema((JSONObject) object.get(FROM_SCHEMA)));
+      submission.setFromSchema(restoreSchema(JSONUtils.getJSONObject(object, FROM_SCHEMA)));
     }
     if (object.containsKey(TO_SCHEMA)) {
-      submission.setToSchema(restoreSchema((JSONObject) object.get(TO_SCHEMA)));
+      submission.setToSchema(restoreSchema(JSONUtils.getJSONObject(object, TO_SCHEMA)));
     }
     return submission;
   }

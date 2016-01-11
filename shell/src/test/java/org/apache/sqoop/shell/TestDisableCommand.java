@@ -22,6 +22,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 
@@ -31,7 +34,6 @@ import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.Groovysh;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -53,17 +55,17 @@ public class TestDisableCommand {
   public void testDisableLink() {
     doNothing().when(client).enableLink("link_test", false);
 
-    // disable link -l link_test
-    Status status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-l", "link_test"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    // disable link -name link_test
+    Status status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
+    assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option lid
+    // Missing argument for option name
     try {
-      status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid"));
-      Assert.fail("Disable link should fail as link id/name is missing!");
+      status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name"));
+      fail("Disable link should fail as link name is missing!");
     } catch (SqoopException e) {
-      Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
-      Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
+      assertEquals(ShellError.SHELL_0003, e.getErrorCode());
+      assertTrue(e.getMessage().contains("Missing argument for option"));
     }
   }
 
@@ -72,10 +74,10 @@ public class TestDisableCommand {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "link doesn't exist")).when(client).enableLink(any(String.class), any(Boolean.class));
 
     try {
-      disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
-      Assert.fail("Disable link should fail as requested link doesn't exist!");
+      disableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
+      fail("Disable link should fail as requested link doesn't exist!");
     } catch (SqoopException e) {
-      Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
+      assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
     }
   }
 
@@ -84,16 +86,16 @@ public class TestDisableCommand {
     doNothing().when(client).enableJob("job_test", false);
 
     // disable job -j job_test
-    Status status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-j", "job_test"));
-    Assert.assertTrue(status != null && status == Status.OK);
+    Status status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
+    assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option jid
+    // Missing argument for option name
     try {
-      status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid"));
-      Assert.fail("Disable job should fail as job id/name is missing!");
+      status = (Status) disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
+      fail("Disable job should fail as job name is missing!");
     } catch (SqoopException e) {
-      Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
-      Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
+      assertEquals(ShellError.SHELL_0003, e.getErrorCode());
+      assertTrue(e.getMessage().contains("Missing argument for option"));
     }
   }
 
@@ -102,10 +104,20 @@ public class TestDisableCommand {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "job doesn't exist")).when(client).enableJob(any(String.class), any(Boolean.class));
 
     try {
-      disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-jid", "job_test"));
-      Assert.fail("Disable job should fail as requested job doesn't exist!");
+      disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
+      fail("Disable job should fail as requested job doesn't exist!");
     } catch (SqoopException e) {
-      Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
+      assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
+    }
+  }
+
+  @Test
+  public void testUnknowOption() {
+    try {
+      disableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test", "-unknownOption"));
+      fail("Disable command should fail as unknown option encountered!");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Unknown option encountered"));
     }
   }
 }

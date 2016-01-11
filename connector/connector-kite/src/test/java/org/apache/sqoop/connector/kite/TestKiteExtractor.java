@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.connector.kite;
 
+import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.etl.io.DataWriter;
@@ -73,7 +74,7 @@ public class TestKiteExtractor {
     // setup
     Schema schema = new Schema("testExtractor");
     schema.addColumn(new Text("TextCol"));
-    ExtractorContext context = new ExtractorContext(null, writerMock, schema, "test_user");
+    ExtractorContext context = new ExtractorContext(new MutableMapContext(), writerMock, schema, "test_user");
     LinkConfiguration linkConfig = new LinkConfiguration();
     FromJobConfiguration jobConfig = new FromJobConfiguration();
     KiteDatasetPartition partition = new KiteDatasetPartition();

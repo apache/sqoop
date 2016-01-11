@@ -38,7 +38,7 @@ public class ShortStories extends DataSet {
         "id",
         "id", "int",
         "name", "varchar(64)",
-        "story", "varchar(10000)"
+        "story", "varchar(1000)"
     );
 
     return this;

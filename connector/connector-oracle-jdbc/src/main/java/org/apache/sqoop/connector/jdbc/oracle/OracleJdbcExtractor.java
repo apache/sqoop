@@ -248,8 +248,7 @@ public class OracleJdbcExtractor extends
     }
 
     OracleUtilities.OracleTableImportWhereClauseLocation whereClauseLocation =
-        OracleUtilities.getTableImportWhereClauseLocation(jobConfig,
-            OracleUtilities.OracleTableImportWhereClauseLocation.SUBSPLIT);
+        OracleUtilities.getTableImportWhereClauseLocation(jobConfig);
 
     int numberOfDataChunks = this.dbInputSplit.getNumberOfDataChunks();
     for (int idx = 0; idx < numberOfDataChunks; idx++) {

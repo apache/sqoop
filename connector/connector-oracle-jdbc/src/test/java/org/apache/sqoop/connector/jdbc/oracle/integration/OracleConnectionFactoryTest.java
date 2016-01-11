@@ -24,6 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -223,15 +224,19 @@ public class OracleConnectionFactoryTest extends OracleTestCase {
 
     // Check that the absence of session-initialization statements is reflected
     // in the log...
+    List<String> statements = new ArrayList<String>();
+    statements.add(" ");
     stringWriter.getBuffer().setLength(0);
-    checkExecuteOraOopSessionInitializationStatements(";");
+    checkExecuteOraOopSessionInitializationStatements(statements);
     checkLogContainsText(stringWriter.toString(),
         "No Oracle 'session initialization' statements were found to execute");
 
     // This should throw an exception, as Oracle won't know what to do with
     // this...
+    statements.clear();
+    statements.add("loremipsum");
     stringWriter.getBuffer().setLength(0);
-    checkExecuteOraOopSessionInitializationStatements("loremipsum");
+    checkExecuteOraOopSessionInitializationStatements(statements);
     checkLogContainsText(stringWriter.toString(), "loremipsum");
     checkLogContainsText(stringWriter.toString(),
         "ORA-00900: invalid SQL statement");
@@ -240,22 +245,24 @@ public class OracleConnectionFactoryTest extends OracleTestCase {
     try {
 
       // Try a session-initialization statement that creates a table...
+      statements.clear();
+      statements.add("create table " + TEST_TABLE_NAME + " (col1 varchar2(1))");
       dropTable(conn, TEST_TABLE_NAME);
-      checkExecuteOraOopSessionInitializationStatements("create table "
-          + TEST_TABLE_NAME + " (col1 varchar2(1))");
+      checkExecuteOraOopSessionInitializationStatements(statements);
       if (!doesTableExist(conn, TEST_TABLE_NAME)) {
         Assert.fail("The session-initialization statement to create the table "
             + TEST_TABLE_NAME + " did not work.");
       }
 
       // Try a sequence of a few statements...
+      statements.clear();
+      statements.add("create table " + TEST_TABLE_NAME + " (col1 number)");
+      statements.add("insert into " + TEST_TABLE_NAME + " values (1) ");
+      statements.add("--update " + TEST_TABLE_NAME + " set col1 = col1 + 1");
+      statements.add("update " + TEST_TABLE_NAME + " set col1 = col1 + 1");
+      statements.add("commit");
       dropTable(conn, TEST_TABLE_NAME);
-      checkExecuteOraOopSessionInitializationStatements("create table "
-          + TEST_TABLE_NAME + " (col1 number);insert into "
-          + TEST_TABLE_NAME + " values (1) ; --update "
-          + TEST_TABLE_NAME + " set col1 = col1 + 1; update "
-          + TEST_TABLE_NAME
-          + " set col1 = col1 + 1; commit ;;");
+      checkExecuteOraOopSessionInitializationStatements(statements);
 
       ResultSet resultSet =
           conn.createStatement().executeQuery(
@@ -273,105 +280,6 @@ public class OracleConnectionFactoryTest extends OracleTestCase {
       Assert.fail(ex.getMessage());
     }
     log.removeAppender(writerAppender);
-  }
-
-  @Test
-  public void testParseOraOopSessionInitializationStatements() {
-
-    List<String> statements = null;
-
-    statements =
-        OracleConnectionFactory
-            .parseOraOopSessionInitializationStatements(null);
-    Assert.assertEquals(0, statements.size());
-
-    statements =
-        OracleConnectionFactory
-            .parseOraOopSessionInitializationStatements("");
-    Assert.assertEquals(0, statements.size());
-
-    statements =
-        OracleConnectionFactory
-            .parseOraOopSessionInitializationStatements(";");
-    Assert.assertEquals(0, statements.size());
-
-    statements =
-        OracleConnectionFactory
-            .parseOraOopSessionInitializationStatements(";--;\t--");
-    Assert.assertEquals(0, statements.size());
-
-    statements =
-        OracleConnectionFactory
-            .parseOraOopSessionInitializationStatements("\ta");
-    Assert.assertEquals(1, statements.size());
-    if (!statements.get(0).equalsIgnoreCase("a")) {
-      Assert.fail("Expected a session initialization statement of \"a\"");
-    }
-
-    statements =
-        OracleConnectionFactory
-            .parseOraOopSessionInitializationStatements("a;b;--c;d;");
-    Assert.assertEquals(3, statements.size());
-    if (!statements.get(0).equalsIgnoreCase("a")) {
-      Assert.fail("Expected a session initialization statement of \"a\"");
-    }
-    if (!statements.get(1).equalsIgnoreCase("b")) {
-      Assert.fail("Expected a session initialization statement of \"b\"");
-    }
-    if (!statements.get(2).equalsIgnoreCase("d")) {
-      Assert.fail("Expected a session initialization statement of \"d\"");
-    }
-
-    // Expressions without default values...
-    /*conf.set(OraOopConstants.ORAOOP_SESSION_INITIALIZATION_STATEMENTS,
-        "set a={expr1};b={expr2}/{expr3};");
-    conf.set("expr1", "1");
-    conf.set("expr2", "2");
-    conf.set("expr3", "3");
-    statements =
-        OracleConnectionFactory
-            .parseOraOopSessionInitializationStatements(conf);
-    Assert.assertEquals(2, statements.size());
-    String actual = statements.get(0);
-    String expected = "set a=1";
-    if (!actual.equalsIgnoreCase(expected)) {
-      Assert.fail(String.format(
-        "Expected a session initialization statement of \"%s\", but got \"%s\"."
-                  , expected, actual));
-    }
-    actual = statements.get(1);
-    expected = "b=2/3";
-    if (!actual.equalsIgnoreCase(expected)) {
-      Assert.fail(String.format(
-        "Expected a session initialization statement of \"%s\", but got \"%s\"."
-                  , expected, actual));
-    }
-
-    // Expressions with default values...
-    conf.set(OraOopConstants.ORAOOP_SESSION_INITIALIZATION_STATEMENTS,
-        "set c={expr3|66};d={expr4|15}/{expr5|90};");
-    conf.set("expr3", "20");
-    // conf.set("expr4", "21");
-    // conf.set("expr5", "23");
-    statements =
-        OracleConnectionFactory
-            .parseOraOopSessionInitializationStatements(conf);
-    Assert.assertEquals(2, statements.size());
-    actual = statements.get(0);
-    expected = "set c=20";
-    if (!actual.equalsIgnoreCase(expected)) {
-      Assert.fail(String.format(
-        "Expected a session initialization statement of \"%s\", but got \"%s\"."
-                  , expected, actual));
-    }
-    actual = statements.get(1);
-    expected = "d=15/90";
-    if (!actual.equalsIgnoreCase(expected)) {
-      Assert.fail(String.format(
-        "Expected a session initialization statement of \"%s\", but got \"%s\"."
-                  , expected, actual));
-    }*/
-
   }
 
   private void dropTable(Connection conn, String tableName) {
@@ -417,7 +325,7 @@ public class OracleConnectionFactoryTest extends OracleTestCase {
   }
 
   private void checkExecuteOraOopSessionInitializationStatements(
-      String statements) {
+      List<String> statements) {
 
     Connection conn = getConnection();
 

@@ -22,11 +22,11 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.sqoop.cli.SqoopGnuParser;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MInput;
@@ -105,7 +105,7 @@ public class ConfigOptions {
   public static CommandLine parseOptions(Options options, int start, List<String> arglist, boolean stopAtNonOption) {
     String[] args = arglist.subList(start, arglist.size()).toArray(new String[arglist.size() - start]);
 
-    CommandLineParser parser = new GnuParser();
+    CommandLineParser parser = new SqoopGnuParser();
     CommandLine line;
     try {
       line = parser.parse(options, args, stopAtNonOption);

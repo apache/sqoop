@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.client.SqoopClient;
@@ -80,14 +79,13 @@ public class TestCreateCommand {
   public void setup() throws IOException {
     Groovysh shell = new Groovysh();
     createCmd = new CreateCommand(shell);
-    ShellEnvironment.setInteractive(false);
     ShellEnvironment.setIo(shell.getIo());
     client = mock(SqoopClient.class);
     ShellEnvironment.setClient(client);
 
     data = new byte[1000];
     in = new ByteArrayInputStream(data);
-    reader = new ConsoleReader(in, new OutputStreamWriter(System.out));
+    reader = new ConsoleReader(in, System.out);
     ShellEnvironment.setConsoleReader(reader);
     resourceBundle = new ResourceBundle() {
       @Override
@@ -104,38 +102,27 @@ public class TestCreateCommand {
 
   @Test
   public void testCreateLink() {
+    ShellEnvironment.setInteractive(false);
     when(client.getConnector("connector_test")).thenReturn(new MConnector("", "", "", null, null, null));
-    when(client.createLink("connector_test")).thenReturn(new MLink(1, new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
+    when(client.createLink("connector_test")).thenReturn(
+            new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
     when(client.saveLink(any(MLink.class))).thenReturn(Status.OK);
 
     // create link -c connector_test
     Status status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c", "connector_test"));
     assertTrue(status != null && status == Status.OK);
 
-    // create link -cid connector_test
-    status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-cid", "connector_test"));
+    // create link -connector connector_test
+    status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-connector", "connector_test"));
     assertTrue(status != null && status == Status.OK);
 
     // incorrect command: create link -c
     try {
       status = (Status) createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c"));
-      fail("Create link should fail as connector id/name is missing!");
+      fail("Create link should fail as connector name is missing!");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing argument for option"));
-    }
-  }
-
-  @Test
-  public void testCreateLinkWithNonExistingConnector() {
-    when(client.getConnector(any(String.class))).thenThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "Connector doesn't exist"));
-    when(client.getConnector(any(Integer.class))).thenThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "Connector doesn't exist"));
-
-    try {
-      createCmd.execute(Arrays.asList(Constants.FN_LINK, "-c", "connector_test"));
-      fail("Create link should fail as requested connector doesn't exist!");
-    } catch (SqoopException e) {
-      assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
     }
   }
 
@@ -144,10 +131,10 @@ public class TestCreateCommand {
     ShellEnvironment.setInteractive(true);
     initEnv();
     when(client.getConnector("connector_test")).thenReturn(new MConnector("", "", "", null, null, null));
-    MLink link = new MLink(1, new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
+    MLink link = new MLink("connector_test", new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
     when(client.createLink("connector_test")).thenReturn(link);
     when(client.saveLink(any(MLink.class))).thenReturn(Status.OK);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(resourceBundle);
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
 
     // create link -c connector_test
     initData("linkname\r" +         // link name
@@ -177,14 +164,16 @@ public class TestCreateCommand {
 
   @Test
   public void testCreateJob() {
+    ShellEnvironment.setInteractive(false);
     MConnector fromConnector = new MConnector("connector_from", "", "", null, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()), null);
     MConnector toConnector = new MConnector("connector_to", "", "", null, null, new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.createJob("link_from", "link_to")).thenReturn(
-        new MJob(1, 2, 1, 2, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+            new MJob("fromConnectorName", "toConnectorName", "link_from", "link_to",
+            new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
             new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
-    when(client.getConnector(1)).thenReturn(fromConnector);
-    when(client.getConnector(2)).thenReturn(toConnector);
+    when(client.getConnector("fromConnectorName")).thenReturn(fromConnector);
+    when(client.getConnector("toConnectorName")).thenReturn(toConnector);
     when(client.saveJob(any(MJob.class))).thenReturn(Status.OK);
 
     // create job -f link_from -to link_to
@@ -203,6 +192,7 @@ public class TestCreateCommand {
 
   @Test
   public void testCreateJobWithNonExistingLink() {
+    ShellEnvironment.setInteractive(false);
     when(client.createJob("link_from", "link_to")).thenThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "From link doesn't exist"));
 
     try {
@@ -219,14 +209,15 @@ public class TestCreateCommand {
     initEnv();
     MConnector fromConnector = new MConnector("connector_from", "", "", null, new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()), null);
     MConnector toConnector = new MConnector("connector_to", "", "", null, null, new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
-    MJob job = new MJob(1, 2, 1, 2, new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
+    MJob job = new MJob("fromConnectorName", "toConnectorName", "link_from", "link_to",
+        new MFromConfig(getConfig("fromJobConfig"), new ArrayList<MValidator>()),
         new MToConfig(getConfig("toJobConfig"), new ArrayList<MValidator>()),
         new MDriverConfig(getConfig("driverConfig"), new ArrayList<MValidator>()));
     when(client.createJob("link_from", "link_to")).thenReturn(job);
-    when(client.getConnector(1)).thenReturn(fromConnector);
-    when(client.getConnector(2)).thenReturn(toConnector);
+    when(client.getConnector("fromConnectorName")).thenReturn(fromConnector);
+    when(client.getConnector("toConnectorName")).thenReturn(toConnector);
     when(client.saveJob(any(MJob.class))).thenReturn(Status.OK);
-    when(client.getConnectorConfigBundle(any(Long.class))).thenReturn(resourceBundle);
+    when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
 
     // create job -f link_from -to link_to
@@ -304,9 +295,20 @@ public class TestCreateCommand {
 
   @Test
   public void testCreateRole() {
+    ShellEnvironment.setInteractive(false);
     // create role -r role_test
     Status status = (Status) createCmd.execute(Arrays.asList(Constants.FN_ROLE, "-r", "role_test"));
     assertTrue(status != null && status == Status.OK);
+  }
+
+  @Test
+  public void testUnknowOption() {
+    try {
+      createCmd.execute(Arrays.asList(Constants.FN_ROLE, "-unknownOption"));
+      fail("Create command should fail as unknown option encountered!");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Unknown option encountered"));
+    }
   }
 
   @SuppressWarnings("unchecked")
