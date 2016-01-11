@@ -40,6 +40,13 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>connector-sdk</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.sqoop</groupId>
+      <artifactId>connector-sdk-hadoop</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -68,4 +75,12 @@ limitations under the License.
 
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>

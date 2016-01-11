@@ -18,7 +18,6 @@
 
 package org.apache.sqoop.integration.connectorloading;
 
-import org.apache.commons.collections.ListUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.core.ConfigurationConstants;
@@ -26,38 +25,39 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.testcases.ConnectorClasspathTestCase;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
 
 @Test(groups = "no-real-cluster")
-public class ClasspathTest extends ConnectorTestCase {
+public class ClasspathTest extends ConnectorClasspathTestCase {
 
   private static final String TEST_CONNECTOR_JAR_NAME = "test-connector.jar";
   private static final String TEST_DEPENDENCY_JAR_NAME = "test-dependency.jar";
+
+  private static final String[] CONNECTOR_SOURCE_FILES = {
+    "TestConnector/TestConnector.java",
+    "TestConnector/TestLinkConfiguration.java",
+    "TestConnector/TestLoader.java",
+    "TestConnector/TestToDestroyer.java",
+    "TestConnector/TestToInitializer.java",
+    "TestConnector/TestToJobConfiguration.java"
+  };
+
+  private static final String[] CONNECTOR_DEPENDENCY_SOURCE_FILES = {
+    "TestConnector/TestDependency.java"
+  };
+
+  private static final String[] CONNECTOR_PROPERTY_FILES = {
+    "TestConnector/sqoopconnector.properties"
+  };
 
   private ClassLoader classLoader;
 
@@ -88,24 +88,6 @@ public class ClasspathTest extends ConnectorTestCase {
     }
   }
 
-  class JarContents {
-    private List<File> sourceFiles;
-    private List<File> properitesFiles;
-
-    public JarContents(List<File> sourceFiles, List<File> properitesFiles){
-      this.sourceFiles = sourceFiles;
-      this.properitesFiles = properitesFiles;
-    }
-
-    public List<File> getSourceFiles() {
-      return sourceFiles;
-    }
-
-    public List<File> getProperitesFiles() {
-      return properitesFiles;
-    }
-  }
-
   public void startSqoopMiniCluster(String extraClasspath, String jobExtraClasspath) throws Exception {
     // And use them for new Derby repo instance
     setCluster(new DerbySqoopMiniCluster(HdfsUtils.joinPathFragments(super.getSqoopMiniClusterTemporaryPath(), getTestName()), hadoopCluster.getConfiguration(), extraClasspath, jobExtraClasspath));
@@ -129,7 +111,13 @@ public class ClasspathTest extends ConnectorTestCase {
 
   @Test
   public void testClasspathSqoopProperties() throws Exception {
-    Map<String, String> jarMap = compileTestConnectorAndDependency();
+    Map<String, String> jarMap = compileTestConnectorAndDependency(
+        CONNECTOR_SOURCE_FILES,
+        CONNECTOR_DEPENDENCY_SOURCE_FILES,
+        CONNECTOR_PROPERTY_FILES,
+        TEST_CONNECTOR_JAR_NAME,
+        TEST_DEPENDENCY_JAR_NAME,
+        false);
     startSqoopMiniCluster(jarMap.get(TEST_CONNECTOR_JAR_NAME), jarMap.get
       (TEST_DEPENDENCY_JAR_NAME));
     createAndLoadTableCities();
@@ -148,7 +136,13 @@ public class ClasspathTest extends ConnectorTestCase {
 
   @Test
   public void testClasspathDriverInput() throws Exception{
-    Map<String, String> jarMap = compileTestConnectorAndDependency();
+    Map<String, String> jarMap = compileTestConnectorAndDependency(
+        CONNECTOR_SOURCE_FILES,
+        CONNECTOR_DEPENDENCY_SOURCE_FILES,
+        CONNECTOR_PROPERTY_FILES,
+        TEST_CONNECTOR_JAR_NAME,
+        TEST_DEPENDENCY_JAR_NAME,
+        false);
     startSqoopMiniCluster(jarMap.get(TEST_CONNECTOR_JAR_NAME), null);
     createAndLoadTableCities();
 
@@ -188,143 +182,6 @@ public class ClasspathTest extends ConnectorTestCase {
     driverConfig.getIntegerInput("throttlingConfig.numExtractors").setValue(3);
 
     return driverConfig;
-  }
-
-  private Map<String, String> compileTestConnectorAndDependency() throws Exception {
-    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-    if (compiler == null) {
-      throw new IllegalStateException(
-        "Cannot find the system Java compiler. "
-          + "Check that your class path includes tools.jar");
-    }
-
-    Path outputDir = Files.createTempDirectory(null);
-
-    Map<String, JarContents> sourceFileToJarMap = new HashMap<>();
-
-    ClassLoader classLoader = getClass().getClassLoader();
-    List<File> sourceFiles = new ArrayList<>();
-    File file = new File(classLoader.getResource("TestConnector/TestConnector.java").getFile());
-    sourceFiles.add(file);
-    file = new File(classLoader.getResource("TestConnector/TestLinkConfiguration.java").getFile());
-    sourceFiles.add(file);
-    file = new File(classLoader.getResource("TestConnector/TestLoader.java").getFile());
-    sourceFiles.add(file);
-    file = new File(classLoader.getResource("TestConnector/TestToDestroyer.java").getFile());
-    sourceFiles.add(file);
-    file = new File(classLoader.getResource("TestConnector/TestToInitializer.java").getFile());
-    sourceFiles.add(file);
-    file = new File(classLoader.getResource("TestConnector/TestToJobConfiguration.java").getFile());
-    sourceFiles.add(file);
-
-    List<File> propertiesFiles = new ArrayList<>();
-    file = new File(classLoader.getResource("TestConnector/sqoopconnector.properties").getFile());
-    propertiesFiles.add(file);
-    sourceFileToJarMap.put("test-connector.jar", new JarContents(sourceFiles, propertiesFiles));
-
-    sourceFiles = new ArrayList<>();
-    file = new File(classLoader.getResource("TestConnector/TestDependency.java").getFile());
-    sourceFiles.add(file);
-    sourceFileToJarMap.put("test-dependency.jar", new JarContents(sourceFiles, ListUtils.EMPTY_LIST));
-
-    return buildJar(outputDir.toString(), sourceFileToJarMap);
-  }
-
-  private Map<String, String> buildJar(String outputDir, Map<String, JarContents> sourceFileToJarMap) throws Exception {
-    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-    StandardJavaFileManager fileManager = compiler.getStandardFileManager
-      (null, null, null);
-
-    List<File> sourceFiles = new ArrayList<>();
-    for(JarContents jarContents : sourceFileToJarMap.values()) {
-      sourceFiles.addAll(jarContents.sourceFiles);
-    }
-
-    fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
-      Arrays.asList(new File(outputDir.toString())));
-
-    Iterable<? extends JavaFileObject> compilationUnits1 =
-      fileManager.getJavaFileObjectsFromFiles(sourceFiles);
-
-    boolean compiled = compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call();
-    if (!compiled) {
-      throw new RuntimeException("failed to compile");
-    }
-
-    for(Map.Entry<String, JarContents> jarNameAndContents : sourceFileToJarMap.entrySet()) {
-      Manifest manifest = new Manifest();
-      manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-      manifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, ".");
-
-
-      JarOutputStream target = new JarOutputStream(new FileOutputStream(outputDir.toString() + File.separator + jarNameAndContents.getKey()), manifest);
-      List<String> classesForJar = new ArrayList<>();
-      for(File sourceFile : jarNameAndContents.getValue().getSourceFiles()) {
-        //split the file on dot to get the filename from FILENAME.java
-        String fileName = sourceFile.getName().split("\\.")[0];
-        classesForJar.add(fileName);
-      }
-
-      File dir = new File(outputDir);
-      File[] directoryListing = dir.listFiles();
-      for (File compiledClass : directoryListing) {
-        String classFileName = compiledClass.getName().split("\\$")[0].split("\\.")[0];
-        if (classesForJar.contains(classFileName)){
-          addFileToJar(compiledClass, target);
-        }
-      }
-
-      for (File propertiesFile : jarNameAndContents.getValue().getProperitesFiles()) {
-        addFileToJar(propertiesFile, target);
-      }
-
-      target.close();
-
-
-    }
-    //delete non jar files
-    File dir = new File(outputDir);
-    File[] directoryListing = dir.listFiles();
-    for (File file : directoryListing) {
-      String extension = file.getName().split("\\.")[1];
-      if (!extension.equals("jar")) {
-        file.delete();
-      }
-    }
-
-    Map<String, String> jarMap = new HashMap<>();
-    jarMap.put(TEST_CONNECTOR_JAR_NAME, outputDir.toString() + File.separator
-      + TEST_CONNECTOR_JAR_NAME);
-    jarMap.put(TEST_DEPENDENCY_JAR_NAME, outputDir.toString() + File.separator + TEST_DEPENDENCY_JAR_NAME);
-    return jarMap;
-  }
-
-  private void addFileToJar(File source, JarOutputStream target) throws Exception {
-    JarEntry entry = new JarEntry(source.getName());
-    entry.setTime(source.lastModified());
-    target.putNextEntry(entry);
-    BufferedInputStream in = new BufferedInputStream(new FileInputStream(source));
-
-    long bufferSize = source.length();
-    if (bufferSize < Integer.MIN_VALUE || bufferSize > Integer.MAX_VALUE) {
-      throw new RuntimeException("file to large to be added to jar");
-    }
-
-    byte[] buffer = new byte[(int) bufferSize];
-    while (true) {
-      int count = in.read(buffer);
-      if (count == -1)
-        break;
-      target.write(buffer, 0, count);
-    }
-    target.closeEntry();
-    if (in != null) in.close();
-  }
-
-  private void deleteJars(Map<String, String> jarMap) throws Exception {
-    for (String jarPath : jarMap.values()) {
-      (new File(jarPath)).delete();
-    }
   }
 
   @Override

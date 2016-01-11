@@ -37,6 +37,16 @@ import org.apache.sqoop.job.etl.To;
 @InterfaceStability.Evolving
 public abstract class SqoopConnector {
 
+  private String connectorName;
+
+  public void setConnectorName(String connectorName) {
+    this.connectorName = connectorName;
+  }
+
+  public String getConnectorName() {
+    return this.connectorName;
+  }
+
   /**
    * Retrieve connector version.
    *

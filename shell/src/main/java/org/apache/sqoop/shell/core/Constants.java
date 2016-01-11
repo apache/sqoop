@@ -34,7 +34,6 @@ public class Constants {
 
   // Options
 
-  public static final String OPT_LID = "lid";
   public static final String OPT_FROM = "from";
   public static final String OPT_TO = "to";
   public static final String OPT_ALL = "all";
@@ -61,7 +60,6 @@ public class Constants {
   public static final String OPT_WITH_GRANT = "with-grant";
   public static final String OPT_WITH_JOB = "job";
 
-  public static final char OPT_LID_CHAR = 'l';
   public static final char OPT_FROM_CHAR = 'f';
   public static final char OPT_TO_CHAR = 't';
   public static final char OPT_ALL_CHAR = 'a';
@@ -162,8 +160,8 @@ public class Constants {
   public static final String RES_ARGS_VALUE_MISSING =
       "args.value_missing";
 
-  public static final String RES_PROMPT_LINK_ID =
-      "prompt.link_id";
+  public static final String RES_PROMPT_LINK_NAME =
+      "prompt.link_name";
   public static final String RES_PROMPT_JOB_NAME =
       "prompt.job_name";
   public static final String RES_CONNECTOR_NAME =
@@ -257,8 +255,8 @@ public class Constants {
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_LINKS =
       "show.prompt_display_all_links";
-  public static final String RES_SHOW_PROMPT_DISPLAY_LINK_LID =
-      "show.prompt_display_link_lid";
+  public static final String RES_SHOW_PROMPT_DISPLAY_LINK_LN =
+      "show.prompt_display_link_name";
   public static final String RES_SHOW_PROMPT_LINKS_TO_SHOW =
       "show.prompt_links_to_show";
   public static final String RES_SHOW_PROMPT_LINK_INFO =
@@ -294,10 +292,10 @@ public class Constants {
       "show.prompt_jobs_to_show";
   public static final String RES_SHOW_PROMPT_JOB_INFO =
       "show.prompt_job_info";
-  public static final String RES_SHOW_PROMPT_JOB_FROM_LID_INFO =
-      "show.prompt_job_from_lid_info";
-  public static final String RES_SHOW_PROMPT_JOB_TO_LID_INFO =
-      "show.prompt_job_to_lid_info";
+  public static final String RES_SHOW_PROMPT_JOB_FROM_LN_INFO =
+      "show.prompt_job_from_ln_info";
+  public static final String RES_SHOW_PROMPT_JOB_TO_LN_INFO =
+      "show.prompt_job_to_ln_info";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_SUBMISSIONS =
       "show.prompt_display_all_submissions";
@@ -371,8 +369,8 @@ public class Constants {
       "table.header.connector.from";
   public static final String RES_TABLE_HEADER_TO_CONNECTOR =
       "table.header.connector.to";
-  public static final String RES_TABLE_HEADER_JOB_ID =
-      "table.header.jid";
+  public static final String RES_TABLE_HEADER_JOB_NAME =
+      "table.header.job.name";
   public static final String RES_TABLE_HEADER_EXTERNAL_ID =
       "table.header.eid";
   public static final String RES_TABLE_HEADER_STATUS =
@@ -432,8 +430,8 @@ public class Constants {
 
   public static final String RES_SUBMISSION_SUBMISSION_DETAIL =
       "submission.submission_detail";
-  public static final String RES_SUBMISSION_JOB_ID =
-      "submission.job_id";
+  public static final String RES_SUBMISSION_JOB_NAME =
+      "submission.job_name";
   public static final String RES_SUBMISSION_CREATION_USER =
       "submission.creation_user";
   public static final String RES_SUBMISSION_CREATION_DATE =

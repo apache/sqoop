@@ -127,6 +127,7 @@ public class TestMatching {
   public void testSchemaMatching() throws Exception {
     Configuration conf = new Configuration();
     conf.set(MRJobConstants.JOB_ETL_PARTITIONER, DummyPartitioner.class.getName());
+    conf.set(MRJobConstants.JOB_ETL_PARTITION, DummyPartition.class.getName());
     conf.set(MRJobConstants.JOB_ETL_EXTRACTOR, DummyExtractor.class.getName());
     conf.set(MRJobConstants.FROM_INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());
     conf.set(MRJobConstants.TO_INTERMEDIATE_DATA_FORMAT, CSVIntermediateDataFormat.class.getName());

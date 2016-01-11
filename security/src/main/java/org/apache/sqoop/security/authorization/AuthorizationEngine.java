@@ -33,18 +33,14 @@ import java.util.List;
 
 public class AuthorizationEngine {
 
-  private static String getResourceName(MResource.TYPE resourceType, long resourceId) {
-    Repository repository = RepositoryManager.getInstance().getRepository();
-
-    switch (resourceType) {
-    case CONNECTOR:
-      return repository.findConnector(resourceId).getUniqueName();
-    case LINK:
-      return repository.findLink(resourceId).getName();
-    case JOB:
-      return repository.findJob(resourceId).getName();
+  private static String getResourceName(Object resource) {
+    if (resource instanceof MConnector) {
+      return ((MConnector)resource).getUniqueName();
+    } else if (resource instanceof MLink) {
+      return ((MLink)resource).getName();
+    } else if (resource instanceof MJob) {
+      return ((MJob)resource).getName();
     }
-
     return null;
   }
 
@@ -56,7 +52,7 @@ public class AuthorizationEngine {
       @Override
       public boolean apply(T input) {
         try {
-          String name = getResourceName(type, input.getPersistenceId());
+          String name = getResourceName(input);
           checkPrivilege(doUserName, getPrivilege(type, name, MPrivilege.ACTION.READ));
           // add valid resource
           return true;
@@ -149,8 +145,7 @@ public class AuthorizationEngine {
       @Override
       public boolean apply(MSubmission input) {
         try {
-          String jobName = getResourceName(MResource.TYPE.JOB, input.getJobId());
-          checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, jobName, MPrivilege.ACTION.READ));
+          checkPrivilege(doUserName, getPrivilege(MResource.TYPE.JOB, input.getJobName(), MPrivilege.ACTION.READ));
           // add valid submission
           return true;
         } catch (RuntimeException e) {

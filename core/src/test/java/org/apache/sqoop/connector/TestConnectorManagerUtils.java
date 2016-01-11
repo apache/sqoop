@@ -18,6 +18,7 @@
  */
 package org.apache.sqoop.connector;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -71,4 +72,9 @@ public class TestConnectorManagerUtils {
     assertFalse(ConnectorManagerUtils.isBlacklisted(url, blacklistedConnectors));
   }
 
+  @Test
+  public void testGetConnectorJarPath() throws Exception {
+    URL url = new URL("jar:file:" +  testConnectorPath + "!/" + ConfigurationConstants.FILENAME_CONNECTOR_PROPERTIES);
+    assertEquals(ConnectorManagerUtils.getConnectorJarPath(url), testConnectorPath);
+  }
 }

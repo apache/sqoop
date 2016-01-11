@@ -24,6 +24,7 @@ import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -35,7 +36,7 @@ import static org.testng.Assert.assertEquals;
 /**
  * Ensure that jobs will be shown in order
  */
-@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
 public class ShowJobInOrderTest extends SqoopTestCase {
 
   public ShowJobInOrderTest() {

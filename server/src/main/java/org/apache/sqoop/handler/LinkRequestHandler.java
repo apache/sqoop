@@ -131,6 +131,7 @@ public class LinkRequestHandler implements RequestHandler {
 
     MLink postedLink = links.get(0);
     MConnector mConnector = HandlerUtils.getConnectorFromConnectorName(postedLink.getConnectorName());
+    String oldLinkName = ctx.getLastURLElement();
 
     // Authorization check
     if (create) {
@@ -138,7 +139,7 @@ public class LinkRequestHandler implements RequestHandler {
               mConnector.getUniqueName());
     } else {
       AuthorizationEngine.updateLink(ctx.getUserName(), mConnector.getUniqueName(),
-              postedLink.getName());
+              oldLinkName);
     }
 
     MLinkConfig linkConfig = ConnectorManager.getInstance()
@@ -148,8 +149,7 @@ public class LinkRequestHandler implements RequestHandler {
     }
     // if update get the link id from the request URI
     if (!create) {
-      String linkName = ctx.getLastURLElement();
-      MLink existingLink = repository.findLink(linkName);
+      MLink existingLink = repository.findLink(oldLinkName);
       if (postedLink.getPersistenceId() == MPersistableEntity.PERSISTANCE_ID_DEFAULT) {
         postedLink.setPersistenceId(existingLink.getPersistenceId());
       }
@@ -174,7 +174,7 @@ public class LinkRequestHandler implements RequestHandler {
         postedLink.setCreationUser(username);
         postedLink.setLastUpdateUser(username);
         repository.createLink(postedLink);
-        linkValidationBean.setId(postedLink.getPersistenceId());
+        linkValidationBean.setName(postedLink.getName());
       } else {
         AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
             ctx.getRequest().getRemoteAddr(), "update", "link",
@@ -203,7 +203,7 @@ public class LinkRequestHandler implements RequestHandler {
         links = repository.findLinks();
       } else {
         if(repository.findConnector(connectorName) == null) {
-          throw new SqoopException(ServerError.SERVER_0005, "Invalid connector: " + connectorName);
+          throw new SqoopException(ServerError.SERVER_0006, "Invalid connector: " + connectorName);
         }
         links = repository.findLinksForConnector(connectorName);
       }

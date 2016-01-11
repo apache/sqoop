@@ -189,19 +189,6 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MConnector findConnector(final long id) {
-    return (MConnector) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) throws Exception {
-        return handler.findConnector(id, conn);
-      }
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public MConnector findConnector(final String shortName) {
     return (MConnector) doWithConnection(new DoWithConnection() {
       @Override
@@ -306,9 +293,8 @@ public class JdbcRepository extends Repository {
         if (!link.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0016);
         }
-        if (!handler.existsLink(link.getName(), conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0017, "Invalid name: "
-              + link.getName());
+        if (!handler.existsLink(link.getPersistenceId(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0016);
         }
 
         handler.updateLink(link, conn);
@@ -355,19 +341,6 @@ public class JdbcRepository extends Repository {
 
         handler.deleteLink(linkName, conn);
         return null;
-      }
-    });
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MLink findLink(final long id) {
-    return (MLink) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) {
-        return handler.findLink(id, conn);
       }
     });
   }
@@ -464,9 +437,8 @@ public class JdbcRepository extends Repository {
        if(!job.hasPersistenceId()) {
           throw new SqoopException(RepositoryError.JDBCREPO_0019);
         }
-        if(!handler.existsJob(job.getName(), conn)) {
-          throw new SqoopException(RepositoryError.JDBCREPO_0020,
-            "Invalid id: " + job.getPersistenceId());
+        if(!handler.existsJob(job.getPersistenceId(), conn)) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0019);
         }
 
         handler.updateJob(job, conn);
@@ -514,20 +486,6 @@ public class JdbcRepository extends Repository {
       }
     });
   }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MJob findJob(final long id) {
-    return (MJob) doWithConnection(new DoWithConnection() {
-      @Override
-      public Object doIt(Connection conn) {
-        return handler.findJob(id, conn);
-      }
-    });
-  }
-
 
   /**
    * {@inheritDoc}

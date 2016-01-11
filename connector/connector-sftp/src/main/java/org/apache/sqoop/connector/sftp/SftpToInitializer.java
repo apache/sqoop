@@ -23,9 +23,6 @@ import org.apache.sqoop.connector.sftp.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.sftp.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
-import org.apache.sqoop.utils.ClassUtils;
-
-import java.util.Set;
 
 /**
  * Perform any required initialization before execution of job.
@@ -43,19 +40,4 @@ public class SftpToInitializer extends Initializer<LinkConfiguration, ToJobConfi
     LOG.info("Running SFTP Connector TO initializer.");
     // do nothing at this point
   }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public Set<String> getJars(InitializerContext context,
-                             LinkConfiguration linkConfiguration,
-                             ToJobConfiguration toJobConfiguration) {
-    Set<String> jars =
-      super.getJars(context, linkConfiguration, toJobConfiguration);
-    // Jar for jsch library:
-    jars.add(ClassUtils.jarForClass("com.jcraft.jsch.JSch"));
-    return jars;
-  }
-
 }

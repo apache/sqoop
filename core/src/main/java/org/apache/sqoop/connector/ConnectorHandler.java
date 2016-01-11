@@ -71,13 +71,18 @@ public final class ConnectorHandler {
       throw new SqoopException(ConnectorError.CONN_0008, connectorClassName);
     }
 
-    Class<?> connectorClass = ClassUtils.loadClass(connectorClassName);
+    String connectorJarPath = ConnectorManagerUtils.getConnectorJarPath(configFileUrl);
+    ClassLoader connectorClassLoader = ConnectorManagerUtils
+        .createConnectorClassLoader(connectorJarPath, null);
+    Class<?> connectorClass = ClassUtils.loadClassWithClassLoader(
+        connectorClassName, connectorClassLoader);
     if(connectorClass == null) {
       throw new SqoopException(ConnectorError.CONN_0005, connectorClassName);
     }
 
     try {
       connector = (SqoopConnector) connectorClass.newInstance();
+      connector.setConnectorName(connectorUniqueName);
     } catch (IllegalAccessException ex) {
       throw new SqoopException(ConnectorError.CONN_0005,
               connectorClassName, ex);

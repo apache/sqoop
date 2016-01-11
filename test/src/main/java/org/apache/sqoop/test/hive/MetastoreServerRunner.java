@@ -23,7 +23,6 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.test.utils.NetworkUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
@@ -40,6 +39,11 @@ public abstract class MetastoreServerRunner {
   private final String hostname;
   private final int port;
   private final String warehouseDirectory;
+
+  /**
+   * Temporary path that can be used as a root for other directories of metastore.
+   */
+  private String temporaryPath;
 
   public MetastoreServerRunner(String hostname, int port) throws Exception {
     this.hostname = hostname;
@@ -131,12 +135,30 @@ public abstract class MetastoreServerRunner {
     return this.port;
   }
 
+  /**
+   * Get temporary path.
+   *
+   * @return
+   */
+  public String getTemporaryPath() {
+    return temporaryPath;
+  }
+
+  /**
+   * Set temporary path.
+   *
+   * @param temporaryPath
+   */
+  public void setTemporaryPath(String temporaryPath) {
+    this.temporaryPath = temporaryPath;
+  }
+
   private void printConfig() {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      config.logVars(new PrintStream(baos.toString("UTF-8"), "UTF-8"));
+      config.logVars(new PrintStream(baos, false, "UTF-8"));
       LOG.debug("Hive server runner configuration:\n" + baos.toString("UTF-8"));
-    } catch (UnsupportedEncodingException |FileNotFoundException e) {
+    } catch (UnsupportedEncodingException e) {
       LOG.warn("Error to print the Hive server runner configuration.", e);
     }
   }

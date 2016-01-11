@@ -36,8 +36,10 @@ To run the desired tool, execute binary ``sqoop2-tool`` with desired tool name. 
 
 .. note:: Stop the Sqoop Server before running Sqoop tools. Running tools while Sqoop Server is running can lead to a data corruption and service disruption.
 
-Verify
-======
+.. _tool-verify:
+
+Verify tool
+===========
 
 The verify tool will verify Sqoop server configuration by starting all subsystems with the exception of servlets and tearing them down.
 
@@ -57,8 +59,10 @@ If the verification process will find any inconsistencies, it will print out the
 
 Further details why the verification has failed will be available in the Sqoop server log - same file as the Sqoop Server logs into.
 
-Upgrade
-=======
+.. _tool-upgrade:
+
+Upgrade tool
+============
 
 Upgrades all versionable components inside Sqoop2. This includes structural changes inside the repository and stored metadata.
 Running this tool on Sqoop deployment that was already upgraded will have no effect.

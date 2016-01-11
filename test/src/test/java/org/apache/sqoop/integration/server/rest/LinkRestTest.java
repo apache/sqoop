@@ -55,14 +55,14 @@ public class LinkRestTest extends RestTest {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0006");
+        assertServerException("Entity requested doesn't exist", "SERVER_0006");
         assertContains("Invalid link name: i-dont-exists");
       }}),
     new TestDescription("Get links for non existing connector", "v1/link/all?cname=i-dont-exists", "GET", null, new Validator() {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0005");
+        assertServerException("Entity requested doesn't exist", "SERVER_0006");
         assertContains("Invalid connector: i-dont-exists");
       }}),
   };

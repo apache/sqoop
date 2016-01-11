@@ -49,7 +49,7 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
 
   @Override
   public List<Partition> getPartitions(PartitionerContext context, LinkConfiguration linkConfig,
-      FromJobConfiguration fromJobConfig) {
+                                       FromJobConfiguration fromJobConfig) {
     List<Partition> partitions = new LinkedList<Partition>();
 
     numberPartitions = context.getMaxPartitions();
@@ -65,14 +65,14 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
 
     if (partitionMinValue == null && partitionMaxValue == null) {
       GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(partitionColumnName + " IS NULL");
+      partition.setCondition(partitionColumnName + " IS NULL");
       partitions.add(partition);
       return partitions;
     }
 
     if (allowNullValueInPartitionColumn) {
       GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(partitionColumnName + " IS NULL");
+      partition.setCondition(partitionColumnName + " IS NULL");
       partitions.add(partition);
       if (numberPartitions > 1) {
         numberPartitions -= 1;
@@ -83,48 +83,48 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     }
 
     switch (partitionColumnType) {
-    case Types.TINYINT:
-    case Types.SMALLINT:
-    case Types.INTEGER:
-    case Types.BIGINT:
-      // Integer column
-      partitions.addAll(partitionIntegerColumn());
-      break;
+      case Types.TINYINT:
+      case Types.SMALLINT:
+      case Types.INTEGER:
+      case Types.BIGINT:
+        // Integer column
+        partitions.addAll(partitionIntegerColumn(partitionColumnType));
+        break;
 
-    case Types.REAL:
-    case Types.FLOAT:
-    case Types.DOUBLE:
-      // Floating point column
-      partitions.addAll(partitionFloatingPointColumn());
-      break;
+      case Types.REAL:
+      case Types.FLOAT:
+      case Types.DOUBLE:
+        // Floating point column
+        partitions.addAll(partitionFloatingPointColumn(partitionColumnType));
+        break;
 
-    case Types.NUMERIC:
-    case Types.DECIMAL:
-      // Decimal column
-      partitions.addAll(partitionNumericColumn());
-      break;
+      case Types.NUMERIC:
+      case Types.DECIMAL:
+        // Decimal column
+        partitions.addAll(partitionNumericColumn(partitionColumnType));
+        break;
 
-    case Types.BIT:
-    case Types.BOOLEAN:
-      // Boolean column
-      return partitionBooleanColumn();
+      case Types.BIT:
+      case Types.BOOLEAN:
+        // Boolean column
+        return partitionBooleanColumn();
 
-    case Types.DATE:
-    case Types.TIME:
-    case Types.TIMESTAMP:
-      // Date time column
-      partitions.addAll(partitionDateTimeColumn());
-      break;
+      case Types.DATE:
+      case Types.TIME:
+      case Types.TIMESTAMP:
+        // Date time column
+        partitions.addAll(partitionDateTimeColumn());
+        break;
 
-    case Types.CHAR:
-    case Types.VARCHAR:
-    case Types.LONGVARCHAR:
-      // Text column
-      partitions.addAll(partitionTextColumn());
-      break;
+      case Types.CHAR:
+      case Types.VARCHAR:
+      case Types.LONGVARCHAR:
+        // Text column
+        partitions.addAll(partitionTextColumn());
+        break;
 
-    default:
-      throw new SqoopException(
+      default:
+        throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0011,
           String.valueOf(partitionColumnType));
     }
@@ -135,33 +135,8 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
   protected List<Partition> partitionDateTimeColumn() {
     List<Partition> partitions = new LinkedList<Partition>();
 
-    long minDateValue = 0;
-    long maxDateValue = 0;
-    SimpleDateFormat sdf = null;
-    switch(partitionColumnType) {
-      case Types.DATE:
-        sdf = new SimpleDateFormat("yyyy-MM-dd");
-        minDateValue = Date.valueOf(partitionMinValue).getTime();
-        maxDateValue = Date.valueOf(partitionMaxValue).getTime();
-        break;
-      case Types.TIME:
-        sdf = new SimpleDateFormat("HH:mm:ss");
-        minDateValue = Time.valueOf(partitionMinValue).getTime();
-        maxDateValue = Time.valueOf(partitionMaxValue).getTime();
-        break;
-      // Here should be the type of Types.TIMESTAMP:
-      default:
-        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        minDateValue = Timestamp.valueOf(partitionMinValue).getTime();
-        maxDateValue = Timestamp.valueOf(partitionMaxValue).getTime();
-        break;
-    }
-
-
-    minDateValue += TimeZone.getDefault().getOffset(minDateValue);
-    maxDateValue += TimeZone.getDefault().getOffset(maxDateValue);
-
-    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+    long minDateValue = Long.parseLong(partitionMinValue);
+    long maxDateValue = Long.parseLong(partitionMaxValue);
 
     long interval =  (maxDateValue - minDateValue) / numberPartitions;
     long remainder = (maxDateValue - minDateValue) % numberPartitions;
@@ -173,57 +148,41 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     long lowerBound;
     long upperBound = minDateValue;
 
-    Object objLB = null;
-    Object objUB = null;
-
+    GenericJdbcPartition partition;
     for (int i = 1; i < numberPartitions; i++) {
       lowerBound = upperBound;
       upperBound = lowerBound + interval;
       upperBound += (i <= remainder) ? 1 : 0;
 
+      partition = new GenericJdbcPartition();
       switch(partitionColumnType) {
         case Types.DATE:
-          objLB = new Date(lowerBound);
-          objUB = new Date(upperBound);
+          constructDateConditions(partition, Types.DATE, new Date(lowerBound), new Date(upperBound), false);
           break;
         case Types.TIME:
-          objLB = new Time(lowerBound);
-          objUB = new Time(upperBound);
-
+          constructDateConditions(partition, Types.TIME, new Time(lowerBound), new Time(upperBound), false);
           break;
         // Here should be the type of Types.TIMESTAMP:
         default:
-          objLB = new Timestamp(lowerBound);
-          objUB = new Timestamp(upperBound);
+          constructDateConditions(partition, Types.TIMESTAMP, new Timestamp(lowerBound), new Timestamp(upperBound), false);
           break;
       }
-
-      GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(
-          constructDateConditions(sdf, objLB, objUB, false));
       partitions.add(partition);
     }
 
+    partition = new GenericJdbcPartition();
     switch(partitionColumnType) {
       case Types.DATE:
-        objLB = new Date(upperBound);
-        objUB = new Date(maxDateValue);
+        constructDateConditions(partition, Types.DATE, new Date(upperBound), new Date(maxDateValue), true);
         break;
       case Types.TIME:
-        objLB = new Time(upperBound);
-        objUB = new Time(maxDateValue);
+        constructDateConditions(partition, Types.TIME, new Time(upperBound), new Time(maxDateValue), true);
         break;
       // Here should be the type of Types.TIMESTAMP:
       default:
-        objLB = new Timestamp(upperBound);
-        objUB = new Timestamp(maxDateValue);
+        constructDateConditions(partition, Types.TIMESTAMP, new Timestamp(upperBound), new Timestamp(maxDateValue), true);
         break;
     }
-
-
-    GenericJdbcPartition partition = new GenericJdbcPartition();
-    partition.setConditions(
-        constructDateConditions(sdf, objLB, objUB, true));
     partitions.add(partition);
     return partitions;
   }
@@ -236,7 +195,7 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
 
     // Remove common prefix if any as it does not affect outcome.
     int maxPrefixLen = Math.min(partitionMinValue.length(),
-        partitionMaxValue.length());
+      partitionMaxValue.length());
     // Calculate common prefix length
     int cpLen = 0;
 
@@ -259,8 +218,8 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     // Having one single value means that we can create only one single split
     if(minStringBD.equals(maxStringBD)) {
       GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(constructTextConditions(prefix, 0, 0,
-        partitionMinValue, partitionMaxValue, true, true));
+      constructTextConditions(partition, prefix, 0, 0,
+        partitionMinValue, partitionMaxValue, true, true);
       partitions.add(partition);
       return partitions;
     }
@@ -269,7 +228,7 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     List<BigDecimal> splitPoints = new LinkedList<BigDecimal>();
 
     BigDecimal splitSize = divide(maxStringBD.subtract(minStringBD),
-        new BigDecimal(numberPartitions));
+      new BigDecimal(numberPartitions));
     if (splitSize.compareTo(NUMERIC_MIN_INCREMENT) < 0) {
       splitSize = NUMERIC_MIN_INCREMENT;
     }
@@ -289,12 +248,12 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     }
 
     if (splitPoints.size() == 0
-        || splitPoints.get(0).compareTo(minStringBD) != 0) {
+      || splitPoints.get(0).compareTo(minStringBD) != 0) {
       splitPoints.add(0, minStringBD);
     }
 
     if (splitPoints.get(splitPoints.size() - 1).compareTo(maxStringBD) != 0
-        || splitPoints.size() == 1) {
+      || splitPoints.size() == 1) {
       splitPoints.add(maxStringBD);
     }
 
@@ -304,8 +263,8 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
       BigDecimal end = splitPoints.get(i);
 
       GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(constructTextConditions(prefix, start, end,
-        partitionMinValue, partitionMaxValue, i == 1, i == splitPoints.size() - 1));
+      constructTextConditions(partition, prefix, start, end,
+        partitionMinValue, partitionMaxValue, i == 1, i == splitPoints.size() - 1);
       partitions.add(partition);
 
       start = end;
@@ -315,7 +274,7 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
   }
 
 
-  protected List<Partition> partitionIntegerColumn() {
+  protected List<Partition> partitionIntegerColumn(int sqlType) {
     List<Partition> partitions = new LinkedList<Partition>();
 
     long minValue = partitionMinValue == null ? Long.MIN_VALUE
@@ -337,20 +296,18 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
       upperBound += (i <= remainder) ? 1 : 0;
 
       GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(
-          constructConditions(lowerBound, upperBound, false));
+      constructConditions(partition, sqlType, lowerBound, upperBound, false);
       partitions.add(partition);
     }
 
     GenericJdbcPartition partition = new GenericJdbcPartition();
-    partition.setConditions(
-        constructConditions(upperBound, maxValue, true));
+    constructConditions(partition, sqlType, upperBound, maxValue, true);
     partitions.add(partition);
 
     return partitions;
   }
 
-  protected List<Partition> partitionFloatingPointColumn() {
+  protected List<Partition> partitionFloatingPointColumn(int sqlType) {
     List<Partition> partitions = new LinkedList<Partition>();
 
 
@@ -367,20 +324,18 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
       upperBound = lowerBound + interval;
 
       GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(
-          constructConditions(lowerBound, upperBound, false));
+      constructConditions(partition, sqlType, lowerBound, upperBound, false);
       partitions.add(partition);
     }
 
     GenericJdbcPartition partition = new GenericJdbcPartition();
-    partition.setConditions(
-        constructConditions(upperBound, maxValue, true));
+    constructConditions(partition, sqlType, upperBound, maxValue, true);
     partitions.add(partition);
 
     return partitions;
   }
 
-  protected List<Partition> partitionNumericColumn() {
+  protected List<Partition> partitionNumericColumn(int sqlType) {
     List<Partition> partitions = new LinkedList<Partition>();
     // Having one end in null is not supported
     if (partitionMinValue == null || partitionMaxValue == null) {
@@ -393,7 +348,7 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     // Having one single value means that we can create only one single split
     if(minValue.equals(maxValue)) {
       GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(constructConditions(minValue));
+      constructConditions(partition, sqlType, minValue);
       partitions.add(partition);
       return partitions;
     }
@@ -420,16 +375,19 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     }
 
     // Turn the split points into a set of intervals.
-    BigDecimal start = splitPoints.get(0);
-    for (int i = 1; i < splitPoints.size(); i++) {
-      BigDecimal end = splitPoints.get(i);
+    BigDecimal end = splitPoints.get(0);
+    for (int i = 0; i < numberPartitions - 1; i++) {
+      BigDecimal start = splitPoints.get(i);
+      end = splitPoints.get(i + 1);
 
       GenericJdbcPartition partition = new GenericJdbcPartition();
-      partition.setConditions(constructConditions(start, end, i == splitPoints.size() - 1));
+      constructConditions(partition, sqlType, start, end, false);
       partitions.add(partition);
-
-      start = end;
     }
+
+    GenericJdbcPartition partition = new GenericJdbcPartition();
+    constructConditions(partition, sqlType, end, maxValue, true);
+    partitions.add(partition);
 
     return partitions;
   }
@@ -447,9 +405,9 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     if(minValue.equals(maxValue)) {
       GenericJdbcPartition partition = new GenericJdbcPartition();
 
-      conditions.append(partitionColumnName).append(" = ")
-          .append(maxValue);
-      partition.setConditions(conditions.toString());
+      conditions.append(partitionColumnName).append(" = ?");
+      partition.setCondition(conditions.toString());
+      partition.addParam(Types.BOOLEAN, maxValue);
       partitions.add(partition);
       return partitions;
     }
@@ -459,18 +417,18 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     if (partitionMinValue == null) {
       conditions = new StringBuilder();
       conditions.append(partitionColumnName).append(" IS NULL");
-      partition.setConditions(conditions.toString());
+      partition.setCondition(conditions.toString());
       partitions.add(partition);
     }
     partition = new GenericJdbcPartition();
     conditions = new StringBuilder();
     conditions.append(partitionColumnName).append(" = TRUE");
-    partition.setConditions(conditions.toString());
+    partition.setCondition(conditions.toString());
     partitions.add(partition);
     partition = new GenericJdbcPartition();
     conditions = new StringBuilder();
     conditions.append(partitionColumnName).append(" = FALSE");
-    partition.setConditions(conditions.toString());
+    partition.setCondition(conditions.toString());
     partitions.add(partition);
     return partitions;
   }
@@ -493,58 +451,53 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
     }
   }
 
-  protected String constructConditions(
-      Object lowerBound, Object upperBound, boolean lastOne) {
+  protected void constructConditions(
+    GenericJdbcPartition partition, int sqlType, Object lowerBound, Object upperBound, boolean lastOne) {
     StringBuilder conditions = new StringBuilder();
-    conditions.append(lowerBound);
-    conditions.append(" <= ");
+    partition.addParam(sqlType, lowerBound);
+    conditions.append("? <= ");
     conditions.append(partitionColumnName);
     conditions.append(" AND ");
     conditions.append(partitionColumnName);
-    conditions.append(lastOne ? " <= " : " < ");
-    conditions.append(upperBound);
-    return conditions.toString();
+    conditions.append(lastOne ? " <= ?" : " < ?");
+    partition.addParam(sqlType, upperBound);
+
+    partition.setCondition(conditions.toString());
   }
 
-  protected String constructConditions(Object value) {
-    return new StringBuilder()
-      .append(partitionColumnName)
-      .append(" = ")
-      .append(value)
-      .toString()
-     ;
+  protected void constructConditions(GenericJdbcPartition partition, int sqlType, Object value) {
+    String condition = partitionColumnName + " = ?";
+    partition.addParam(sqlType, value);
+    partition.setCondition(condition);
   }
 
-  protected String constructDateConditions(SimpleDateFormat sdf,
-      Object lowerBound, Object upperBound, boolean lastOne) {
+  protected void constructDateConditions(GenericJdbcPartition partition, int dateType,
+                                         Object lowerBound, Object upperBound, boolean lastOne) {
     StringBuilder conditions = new StringBuilder();
-    conditions.append('\'').append(sdf.format((java.util.Date)lowerBound)).append('\'');
-    conditions.append(" <= ");
+    partition.addParam(dateType, lowerBound);
+    conditions.append("? <= ");
     conditions.append(partitionColumnName);
     conditions.append(" AND ");
     conditions.append(partitionColumnName);
-    conditions.append(lastOne ? " <= " : " < ");
-    conditions.append('\'').append(sdf.format((java.util.Date)upperBound)).append('\'');
-    return conditions.toString();
+    conditions.append(lastOne ? " <= ?" : " < ?");
+    partition.setCondition(conditions.toString());
+    partition.addParam(dateType, upperBound);
   }
 
-  protected String constructTextConditions(String prefix, Object lowerBound, Object upperBound,
-      String lowerStringBound, String upperStringBound, boolean firstOne, boolean lastOne) {
+  protected void constructTextConditions(GenericJdbcPartition partition, String prefix, Object lowerBound, Object upperBound,
+                                         String lowerStringBound, String upperStringBound, boolean firstOne, boolean lastOne) {
     StringBuilder conditions = new StringBuilder();
-    BigDecimal lower = new BigDecimal((Integer)lowerBound);
-    BigDecimal upper = new BigDecimal((Integer)upperBound);
-//    String lbString = prefix + bigDecimalToText((BigDecimal)lowerBound);
-    String lbString = prefix + bigDecimalToText(lower);
-    String ubString = prefix + bigDecimalToText(upper);
-//    String ubString = prefix + bigDecimalToText((BigDecimal)upperBound);
-    conditions.append('\'').append(firstOne ? lowerStringBound : lbString).append('\'');
-    conditions.append(" <= ");
+    String lbString = prefix + bigDecimalToText((BigDecimal)lowerBound);
+    String ubString = prefix + bigDecimalToText((BigDecimal)upperBound);
+    partition.addParam(Types.VARCHAR, firstOne ? lowerStringBound : lbString);
+    conditions.append("? <= ");
     conditions.append(partitionColumnName);
     conditions.append(" AND ");
     conditions.append(partitionColumnName);
-    conditions.append(lastOne ? " <= " : " < ");
-    conditions.append('\'').append(lastOne ? upperStringBound : ubString).append('\'');
-    return conditions.toString();
+    conditions.append(lastOne ? " <= ?" : " < ?");
+    partition.addParam(Types.VARCHAR, lastOne ? upperStringBound : ubString);
+
+    partition.setCondition(conditions.toString());
   }
 
   /**
@@ -611,5 +564,4 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
 
     return sb.toString();
   }
-
 }

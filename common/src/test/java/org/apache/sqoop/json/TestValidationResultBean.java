@@ -71,11 +71,11 @@ public class TestValidationResultBean {
 
   @Test
   public void testId() {
-    long id = transfer(10L);
-    assertEquals(10L, id);
+    String name = transfer("testName");
+    assertEquals("testName", name);
 
-    Long idNull = transfer((Long)null);
-    assertNull(idNull);
+    String nameNull = transfer((String)null);
+    assertNull(nameNull);
   }
 
   public void verifyResultA(ConfigValidationResult result) {
@@ -107,9 +107,9 @@ public class TestValidationResultBean {
   }
 
 
-  private Long transfer(Long id) {
+  private String transfer(String name) {
     ValidationResultBean bean = new ValidationResultBean(new ConfigValidationResult[0]);
-    bean.setId(id);
+    bean.setName(name);
     JSONObject json = bean.extract(false);
 
     String string = json.toString();
@@ -118,7 +118,7 @@ public class TestValidationResultBean {
     ValidationResultBean retrievedBean = new ValidationResultBean();
     retrievedBean.restore(retrievedJson);
 
-    return retrievedBean.getId();
+    return retrievedBean.getName();
   }
 
   private ConfigValidationResult[] transfer(ConfigValidationResult [] results) {

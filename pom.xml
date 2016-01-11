@@ -125,6 +125,9 @@ limitations under the License.
     <jline.version>2.13</jline.version>
     <groovy.version>2.4.0</groovy.version>
     <jansi.version>1.7</jansi.version>
+    <felix.version>2.4.0</felix.version>
+    <!-- maven plugin versions -->
+    <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
   </properties>
 
   <dependencies>
@@ -346,6 +349,11 @@ limitations under the License.
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.sqoop</groupId>
+        <artifactId>connector-sdk-hadoop</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.sqoop.connector</groupId>
         <artifactId>sqoop-connector-generic-jdbc</artifactId>
         <version>${project.version}</version>
@@ -452,6 +460,11 @@ limitations under the License.
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-minicluster</artifactId>
+        <version>${hadoop.2.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-minikdc</artifactId>
         <version>${hadoop.2.version}</version>
       </dependency>
       <dependency>
@@ -719,6 +732,7 @@ limitations under the License.
   </dependencyManagement>
 
   <modules>
+    <module>assemblies</module>
     <module>common</module>
     <module>common-test</module>
     <module>core</module>
@@ -819,6 +833,39 @@ limitations under the License.
             <!-- See SQOOP-2120 for details about use of -XX:-UseSplitVerifier -->
             <argLine>-Xms512m -Xmx2g -XX:MaxPermSize=1024m -XX:-UseSplitVerifier</argLine>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>${felix.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.sqoop</groupId>
+              <artifactId>sqoop-assemblies</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>make-assembly</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <finalName>${project.artifactId}-${project.version}</finalName>
+                <appendAssemblyId>false</appendAssemblyId>
+                <descriptorRefs>
+                  <descriptorRef>sqoop-connector</descriptorRef>
+                </descriptorRefs>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

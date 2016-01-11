@@ -15,11 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.connector.hdfs.security;
+package org.apache.sqoop.connector.hadoop.security;
 
 import org.apache.hadoop.io.Text;
 import org.testng.annotations.Test;
 import org.apache.hadoop.security.token.Token;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;

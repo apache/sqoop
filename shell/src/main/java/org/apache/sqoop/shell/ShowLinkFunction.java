@@ -49,18 +49,18 @@ public class ShowLinkFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_ALL_LINKS))
         .withLongOpt(Constants.OPT_ALL)
         .create(Constants.OPT_ALL_CHAR));
-    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_LID)
-        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_LINK_LID))
-        .withLongOpt(Constants.OPT_LID)
-        .create(Constants.OPT_LID_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_NAME)
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_LINK_LN))
+        .withLongOpt(Constants.OPT_NAME)
+        .create(Constants.OPT_NAME_CHAR));
   }
 
   @Override
   public Object executeFunction(CommandLine line, boolean isInteractive) {
     if (line.hasOption(Constants.OPT_ALL)) {
       showLinks();
-    } else if (line.hasOption(Constants.OPT_LID)) {
-      showLink(line.getOptionValue(Constants.OPT_LID));
+    } else if (line.hasOption(Constants.OPT_NAME)) {
+      showLink(line.getOptionValue(Constants.OPT_NAME));
     } else {
       showSummary();
     }
@@ -72,24 +72,21 @@ public class ShowLinkFunction extends SqoopFunction {
     List<MLink> links = client.getLinks();
 
     List<String> header = new LinkedList<String>();
-    header.add(resourceString(Constants.RES_TABLE_HEADER_ID));
     header.add(resourceString(Constants.RES_TABLE_HEADER_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_CONNECTOR_NAME));
     header.add(resourceString(Constants.RES_TABLE_HEADER_ENABLED));
 
-    List<String> ids = new LinkedList<String>();
     List<String> names = new LinkedList<String>();
     List<String> connectorNames = new LinkedList<String>();
     List<String> availabilities = new LinkedList<String>();
 
     for (MLink link : links) {
-      ids.add(String.valueOf(link.getPersistenceId()));
       names.add(link.getName());
       connectorNames.add(link.getConnectorName());
       availabilities.add(String.valueOf(link.getEnabled()));
     }
 
-    TableDisplayer.display(header, ids, names, connectorNames, availabilities);
+    TableDisplayer.display(header, names, connectorNames, availabilities);
   }
 
   private void showLinks() {
@@ -114,7 +111,6 @@ public class ShowLinkFunction extends SqoopFunction {
     DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 
     printlnResource(Constants.RES_SHOW_PROMPT_LINK_INFO,
-      link.getPersistenceId(),
       link.getName(),
       link.getEnabled(),
       link.getCreationUser(),

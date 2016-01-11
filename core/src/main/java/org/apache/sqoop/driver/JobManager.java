@@ -22,12 +22,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.idf.IntermediateDataFormat;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.ConfigurationConstants;
@@ -311,7 +313,7 @@ public class JobManager implements Reconfigurable {
     if (!job.getEnabled()) {
       throw new SqoopException(DriverError.DRIVER_0009, "Job: " + jobName);
     }
-    MSubmission mSubmission = createJobSubmission(ctx, job.getPersistenceId());
+    MSubmission mSubmission = createJobSubmission(ctx, job.getName());
     JobRequest jobRequest = createJobRequest(mSubmission, job);
     // Bootstrap job to execute in the configured execution engine
     prepareJob(jobRequest);
@@ -444,8 +446,10 @@ public class JobManager implements Reconfigurable {
     jobRequest.addJarForClass(MapContext.class);
     // sqoop-core
     jobRequest.addJarForClass(Driver.class);
-    // sqoop-spi
+    // connector-sdk
     jobRequest.addJarForClass(SqoopConnector.class);
+    // connector-sdk-hadoop
+    jobRequest.addJarForClass(SecurityUtils.class);
     // Execution engine jar
     jobRequest.addJarForClass(executionEngine.getClass());
   }
@@ -465,8 +469,8 @@ public class JobManager implements Reconfigurable {
     }
   }
 
-  MSubmission createJobSubmission(HttpEventContext ctx, long jobId) {
-    MSubmission summary = new MSubmission(jobId);
+  MSubmission createJobSubmission(HttpEventContext ctx, String jobName) {
+    MSubmission summary = new MSubmission(jobName);
     summary.setCreationUser(ctx.getUsername());
     summary.setLastUpdateUser(ctx.getUsername());
     return summary;
@@ -474,10 +478,6 @@ public class JobManager implements Reconfigurable {
 
   SqoopConnector getSqoopConnector(String connnectorName) {
     return ConnectorManager.getInstance().getSqoopConnector(connnectorName);
-  }
-
-  SqoopConnector getSqoopConnector(Long connnectorId) {
-    return ConnectorManager.getInstance().getSqoopConnector(connnectorId);
   }
 
   void validateSupportedDirection(SqoopConnector connector, Direction direction) {
@@ -498,19 +498,6 @@ public class JobManager implements Reconfigurable {
     return link;
   }
 
-  // TODO: this method should be removed when MSubmission link job with jobName
-  MJob getJob(long jobId) {
-    MJob job = RepositoryManager.getInstance().getRepository().findJob(jobId);
-    if (job == null) {
-      throw new SqoopException(DriverError.DRIVER_0004, "Unknown job id: " + jobId);
-    }
-
-    if (!job.getEnabled()) {
-      throw new SqoopException(DriverError.DRIVER_0009, "Job: " + job.getName());
-    }
-    return job;
-  }
-
   MJob getJob(String jobName) {
     MJob job = RepositoryManager.getInstance().getRepository().findJob(jobName);
     if (job == null) {
@@ -524,10 +511,19 @@ public class JobManager implements Reconfigurable {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private void initializeConnector(JobRequest jobRequest, Direction direction, Initializer initializer, InitializerContext initializerContext) {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
+  private void initializeConnector(final JobRequest jobRequest, final Direction direction,
+      final Initializer initializer, final InitializerContext initializerContext) {
     // Initialize submission from the connector perspective
-    initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
-        jobRequest.getJobConfig(direction));
+    ClassUtils.executeWithClassLoader(initializer.getClass().getClassLoader(),
+        new Callable<Void>() {
+      @Override
+      public Void call() {
+        initializer.initialize(initializerContext, jobRequest.getConnectorLinkConfig(direction),
+            jobRequest.getJobConfig(direction));
+        return null;
+      }
+    });
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -582,7 +578,7 @@ public class JobManager implements Reconfigurable {
 
   void invokeDestroyerOnJobSuccess(MSubmission submission) {
     try {
-      MJob job = getJob(submission.getJobId());
+      MJob job = getJob(submission.getJobName());
 
       SqoopConnector fromConnector = getSqoopConnector(job.getFromConnectorName());
       SqoopConnector toConnector = getSqoopConnector(job.getToConnectorName());

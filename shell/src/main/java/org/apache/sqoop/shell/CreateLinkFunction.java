@@ -106,7 +106,7 @@ public class CreateLinkFunction extends SqoopFunction {
     }
 
     ConfigDisplayer.displayConfigWarning(link);
-    printlnResource(Constants.RES_CREATE_LINK_SUCCESSFUL, status.name(), link.getPersistenceId());
+    printlnResource(Constants.RES_CREATE_LINK_SUCCESSFUL, status.name(), link.getName());
 
     return status;
   }

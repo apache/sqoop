@@ -36,9 +36,6 @@ public enum ServerError implements ErrorCode {
   /** Invalid argument in HTTP request */
   SERVER_0004("Invalid argument in HTTP request"),
 
-  /** Invalid entity requested */
-  SERVER_0005("Invalid entity requested"),
-
   /** Entity requested doesn't exist*/
   SERVER_0006("Entity requested doesn't exist"),
   ;

@@ -22,13 +22,16 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.test.db.types.DatabaseTypeList;
 import org.apache.sqoop.common.test.db.types.DefaultTypeList;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,7 +43,9 @@ import java.util.List;
  * supported database server have it's own concrete implementation that fills
  * the gaps in database differences.
  */
-@edu.umd.cs.findbugs.annotations.SuppressWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings
+  ({"SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+    "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"})
 abstract public class DatabaseProvider {
 
   private static final Logger LOG = Logger.getLogger(DatabaseProvider.class);
@@ -266,86 +271,111 @@ abstract public class DatabaseProvider {
    * @param values List of objects that should be inserted
    */
   public void insertRow(TableName tableName, Object ...values) {
-    insertRow(tableName, true, values);
-  }
+    try {
+      StringBuilder sb = new StringBuilder("INSERT INTO ");
+      sb.append(getTableFragment(tableName));
+      sb.append(" VALUES (");
 
-  /**
-   * Insert new row into the table.
-   *
-   * @param tableName Table name
-   * @param escapeValues Should the values be escaped based on their type or not
-   * @param values List of objects that should be inserted
-   */
-  public void insertRow(TableName tableName, boolean escapeValues, Object ...values) {
-    StringBuilder sb = new StringBuilder("INSERT INTO ");
-    sb.append(getTableFragment(tableName));
-    sb.append(" VALUES (");
+      for (int i = 0; i < values.length - 1; i++) {
+        sb.append("?, ");
+      }
+      sb.append("?)");
 
-    List<String> valueList = new LinkedList<String>();
-    for(Object value : values) {
-      valueList.add(escapeValues ? convertObjectToQueryString(value) : value.toString());
+      PreparedStatement statement = null;
+      try {
+        statement = databaseConnection.prepareStatement(sb.toString());
+        for (int i = 0; i < values.length; i++) {
+          insertObjectIntoPreparedStatement(statement, i +1, values[i]);
+        }
+
+        statement.executeUpdate();
+      } finally {
+        if (statement != null) {
+          statement.close();
+        }
+      }
+    } catch (SQLException sqlException) {
+      throw new RuntimeException("can't insert row", sqlException);
     }
 
-    sb.append(StringUtils.join(valueList, ", "));
-    sb.append(")");
-
-    executeUpdate(sb.toString());
   }
 
   /**
    * Return rows that match given conditions.
    *
    * @param tableName Table name
-   * @param escapeValues Should the values be escaped based on their type or not
    * @param conditions Conditions in form of double values - column name and value, for example: "id", 1 or "last_update_date", null
-   * @return ResultSet with given criteria
+   * @return PreparedStatement representing the requested query
    */
-  public String getRowsSql(TableName tableName, boolean escapeValues, Object []conditions) {
-    // Columns are in form of two strings - name and value
-    if(conditions.length % 2 != 0) {
-      throw new RuntimeException("Incorrect number of parameters.");
-    }
-
-    StringBuilder sb = new StringBuilder("SELECT * FROM ");
-    sb.append(getTableFragment(tableName));
-
-    List<String> conditionList = new LinkedList<String>();
-    for(int i = 0; i < conditions.length; i += 2) {
-      Object columnName = conditions[i];
-      Object value = conditions[i + 1];
-
-      if( !(columnName instanceof String)) {
-        throw new RuntimeException("Each odd item should be a string with column name.");
+  public PreparedStatement getRowsPreparedStatement(TableName tableName, Object[] conditions) {
+    try {
+      // Columns are in form of two strings - name and value
+      if(conditions.length % 2 != 0) {
+        throw new RuntimeException("Incorrect number of parameters.");
       }
 
-      if(value == null) {
-        conditionList.add(escapeColumnName((String) columnName) + " IS NULL");
-      } else {
-        conditionList.add(escapeColumnName((String) columnName) + " = " + (escapeValues ? convertObjectToQueryString(value) : value));
+      StringBuilder sb = new StringBuilder("SELECT * FROM ");
+      sb.append(getTableFragment(tableName));
+
+      List<String> conditionList = new LinkedList<String>();
+      for(int i = 0; i < conditions.length; i += 2) {
+        Object columnName = conditions[i];
+        Object value = conditions[i + 1];
+
+        if( !(columnName instanceof String)) {
+          throw new RuntimeException("Each odd item should be a string with column name.");
+        }
+
+        if(value == null) {
+          conditionList.add(escapeColumnName((String) columnName) + " IS NULL");
+        } else {
+          conditionList.add(escapeColumnName((String) columnName) + " = ?");
+        }
       }
-    }
 
-    if(conditionList.size() != 0) {
-      sb.append(" WHERE ").append(StringUtils.join(conditionList, " AND "));
-    }
+      if(conditionList.size() != 0) {
+        sb.append(" WHERE ").append(StringUtils.join(conditionList, " AND "));
+      }
 
-    return sb.toString();
+      PreparedStatement preparedStatement = getConnection().prepareStatement(sb.toString());
+      for(int i = 1; i < conditions.length; i += 2) {
+        Object value = conditions[i];
+        if (value != null) {
+          insertObjectIntoPreparedStatement(preparedStatement, i, value);
+        }
+      }
+
+      return preparedStatement;
+    } catch (SQLException sqlException) {
+      throw new RuntimeException("can't insert row", sqlException);
+    }
   }
 
-  /**
-   * Convert given object to it's representation that can be safely used inside
-   * query.
-   *
-   * @param value Value to convert
-   * @return Query safe string representation
-   */
-  public String convertObjectToQueryString(Object value) {
-    if(value == null) {
-      return nullConstant();
-    } else if(value.getClass() == String.class) {
-      return escapeValueString((String)value);
+  private void insertObjectIntoPreparedStatement(PreparedStatement preparedStatement, int parameterIndex, Object value) throws SQLException {
+    if (value instanceof String) {
+      preparedStatement.setString(parameterIndex, (String) value);
+    } else if (value instanceof Short) {
+      preparedStatement.setShort(parameterIndex, ((Short) value).shortValue());
+    } else if (value instanceof Integer) {
+      preparedStatement.setInt(parameterIndex, ((Integer) value).intValue());
+    } else if (value instanceof Long) {
+      preparedStatement.setLong(parameterIndex, ((Long) value).longValue());
+    } else if (value instanceof Float) {
+      preparedStatement.setFloat(parameterIndex, ((Float) value).floatValue());
+    } else if (value instanceof Double) {
+      preparedStatement.setDouble(parameterIndex, ((Double) value).doubleValue());
+    } else if (value instanceof Boolean) {
+      preparedStatement.setBoolean(parameterIndex, ((Boolean) value).booleanValue());
+    } else if (value instanceof Byte) {
+      preparedStatement.setByte(parameterIndex, ((Byte) value).byteValue());
+    } else if (value instanceof Character) {
+      preparedStatement.setString(parameterIndex, value.toString());
+    } else if (value instanceof Timestamp) {
+      preparedStatement.setTimestamp(parameterIndex, (Timestamp) value);
+    } else if (value instanceof BigDecimal) {
+      preparedStatement.setBigDecimal(parameterIndex, (BigDecimal) value);
     } else {
-      return value.toString();
+      preparedStatement.setObject(parameterIndex, value);
     }
   }
 

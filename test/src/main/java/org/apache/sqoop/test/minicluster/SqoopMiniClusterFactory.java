@@ -18,6 +18,7 @@
 package org.apache.sqoop.test.minicluster;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.test.kdc.KdcRunner;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -29,10 +30,12 @@ public class SqoopMiniClusterFactory {
 
   public static final String MINICLUSTER_CLASS_PROPERTY = "sqoop.minicluster.class";
 
-  public static SqoopMiniCluster getSqoopMiniCluster(Properties properties, Class<? extends SqoopMiniCluster> defaultClusterClass, String temporaryPath, Configuration configuration) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+  public static SqoopMiniCluster getSqoopMiniCluster(Properties properties, Class<? extends SqoopMiniCluster> defaultClusterClass, String temporaryPath, Configuration configuration, KdcRunner kdc) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
     String className = properties.getProperty(MINICLUSTER_CLASS_PROPERTY);
     Class<?> klass = className == null ? defaultClusterClass : Class.forName(className);
     Constructor konstructor = klass.getConstructor(String.class, Configuration.class);
-    return (SqoopMiniCluster)konstructor.newInstance(temporaryPath, configuration);
+    SqoopMiniCluster cluster = (SqoopMiniCluster)konstructor.newInstance(temporaryPath, configuration);
+    cluster.setKdc(kdc);
+    return cluster;
   }
 }

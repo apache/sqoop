@@ -67,6 +67,7 @@ public class TestUtil {
   }
 
   public void initTopicList(List<String> topics) {
+    kafkaConsumer = new KafkaConsumer();
     getKafkaConsumer().initTopicList(topics);
   }
 
@@ -85,7 +86,6 @@ public class TestUtil {
     } catch (InterruptedException e) {
       // ignore
     }
-    getKafkaConsumer();
     logger.info("Completed the prepare phase.");
   }
 

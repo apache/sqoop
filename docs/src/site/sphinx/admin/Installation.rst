@@ -18,16 +18,25 @@
 Installation
 ============
 
-Sqoop ships as one binary package however it's compound from two separate parts - client and server. You need to install server on single node in your cluster. This node will then serve as an entry point for all connecting Sqoop clients. Server acts as a mapreduce client and therefore Hadoop must be installed and configured on machine hosting Sqoop server. Clients can be installed on any arbitrary number of machines. Client is not acting as a mapreduce client and thus you do not need to install Hadoop on nodes that will act only as a Sqoop client.
+Sqoop ships as one binary package that incorporates two separate parts - client and server.
+
+* **Server** You need to install server on single node in your cluster. This node will then serve as an entry point for all Sqoop clients.
+* **Client** Clients can be installed on any number of machines.
 
 Server installation
 ===================
 
-Copy Sqoop artifact on machine where you want to run Sqoop server. This machine must have installed and configured Hadoop. You don't need to run any Hadoop related services there, however the machine must be able to act as an Hadoop client. You should be able to list a HDFS for example: ::
+Copy the Sqoop artifact to the machine where you want to run Sqoop server. The Sqoop server acts as a Hadoop client, therefore Hadoop libraries (Yarn, Mapreduce, and HDFS jar files) and configuration files (``core-site.xml``, ``mapreduce-site.xml``, ...) must be available on this node. You do not need to run any Hadoop related services - running the server on a "gateway" node is perfectly fine.
+
+You should be able to list a HDFS for example:
+
+.. code-block:: bash
 
   hadoop dfs -ls
 
-Sqoop server supports multiple Hadoop versions. However as Hadoop major versions are not compatible with each other, Sqoop have multiple binary artefacts - one for each supported major version of Hadoop. You need to make sure that you're using appropriated binary artifact for your specific Hadoop version. To install Sqoop server decompress appropriate distribution artifact in location at your convenience and change your working directory to this folder. ::
+Sqoop currently supports Hadoop version 2.6.0 or later. To install the Sqoop server, decompress the tarball (in a location of your choosing) and set the newly created forder as your working directory.
+
+.. code-block:: bash
 
   # Decompress Sqoop distribution tarball
   tar -xvf sqoop-<version>-bin-hadoop<hadoop-version>.tar.gz
@@ -39,63 +48,140 @@ Sqoop server supports multiple Hadoop versions. However as Hadoop major versions
   cd /usr/lib/sqoop
 
 
-Installing Dependencies
------------------------
+Hadoop dependencies
+-------------------
 
-Hadoop libraries must be available on node where you are planning to run Sqoop server with proper configuration for major services - ``NameNode`` and either ``JobTracker`` or ``ResourceManager`` depending whether you are running Hadoop 1 or 2. There is no need to run any Hadoop service on the same node as Sqoop server, just the libraries and configuration files must be available.
+Sqoop server needs following environmental variables pointing at Hadoop libraries - ``$HADOOP_COMMON_HOME``, ``$HADOOP_HDFS_HOME``, ``$HADOOP_MAPRED_HOME`` and ``$HADOOP_YARN_HOME``. You have to make sure that those variables are defined and pointing to a valid Hadoop installation. Sqoop server will not start if Hadoop libraries can't be found.
 
-Path to Hadoop libraries is stored in environment ``HADOOP_COMMON_HOME``, ``HADOOP_HDFS_HOME``, ``HADOOP_MAPRED_HOME`` and ``HADOOP_YARN_HOME``. You need to set the environment with your Hadoop libraries. If the environment ``HADOOP_HOME`` is set, the default expected locations are ``$HADOOP_HOME/share/hadoop/common``, ``$HADOOP_HOME/share/hadoop/hdfs``, ``$HADOOP_HOME/share/hadoop/mapreduce`` and ``$HADOOP_HOME/share/hadoop/yarn``.
+The Sqoop server uses environment variables to find Hadoop libraries. If the environment variable ``$HADOOP_HOME`` is set, Sqoop will look for jars in the following locations: ``$HADOOP_HOME/share/hadoop/common``, ``$HADOOP_HOME/share/hadoop/hdfs``, ``$HADOOP_HOME/share/hadoop/mapreduce`` and ``$HADOOP_HOME/share/hadoop/yarn``. You can specify where the Sqoop server should look for the common, hdfs, mapreduce, and yarn jars indepently with the ``$HADOOP_COMMON_HOME``, ``$HADOOP_HDFS_HOME``, ``$HADOOP_MAPRED_HOME`` and ``$HADOOP_YARN_HOME`` environment variables.
 
-Lastly you might need to install JDBC drivers that are not bundled with Sqoop because of incompatible licenses. You can add any arbitrary Java jar file to Sqoop server by copying it into ``lib/`` directory. You can create this directory if it do not exists already.
 
-Configuring PATH
+.. code-block:: bash
+
+  # Export HADOOP_HOME variable
+  export HADOOP_HOME=/...
+
+  # Or alternatively HADOOP_*_HOME variables
+  export HADOOP_COMMON_HOME=/...
+  export HADOOP_HDFS_HOME=/...
+  export HADOOP_MAPRED_HOME=/...
+  export HADOOP_YARN_HOME=/...
+
+.. note::
+
+  If the environment ``$HADOOP_HOME`` is set, Sqoop will usee the following locations: ``$HADOOP_HOME/share/hadoop/common``, ``$HADOOP_HOME/share/hadoop/hdfs``, ``$HADOOP_HOME/share/hadoop/mapreduce`` and ``$HADOOP_HOME/share/hadoop/yarn``.
+
+Hadoop configuration
+--------------------
+
+Sqoop server will need to impersonate users to access HDFS and other resources in or outside of the cluster as the user who started given job rather then user who is running the server. You need to configure Hadoop to explicitly allow this impersonation via so called proxyuser system. You need to create two properties in  ``core-site.xml`` file - ``hadoop.proxyuser.$SERVER_USER.hosts`` and ``hadoop.proxyuser.$SERVER_USER.groups`` where ``$SERVER_USER`` is the user who will be running Sqoop 2 server. In most scenarios configuring ``*`` is sufficient. Please refer to Hadoop documentation for details how to use those properties.
+
+Example fragment that needs to be present in ``core-site.xml`` file for case when server is running under ``sqoop2`` user:
+
+.. code-block:: xml
+
+  <property>
+    <name>hadoop.proxyuser.sqoop2.hosts</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.sqoop2.groups</name>
+    <value>*</value>
+  </property>
+
+If you're running Sqoop 2 server under a so called system user (user with ID less then ``min.user.id`` - 1000 by default), then YARN will by default refuse to run Sqoop 2 jobs. You will need to add the user name who is running Sqoop 2 server (most likely user ``sqoop2``) to a ``allowed.system.users`` property of ``container-executor.cfg``. Please refer to YARN documentation for further details.
+
+Example fragment that needs to be present in ``container-executor.cfg`` file for case when server is running under ``sqoop2`` user:
+
+.. code-block:: xml
+
+  allowed.system.users=sqoop2
+
+Third party jars
 ----------------
 
-All user and administrator facing shell commands are stored in ``bin/`` directory. It's recommended to add this directory to your ``$PATH`` for their easier execution, for example::
+To propagate any third party jars to Sqoop server classpath, create a directory anywhere on the file system and export it's location in ``SQOOP_SERVER_EXTRA_LIB`` variable.
+
+.. code-block:: bash
+
+  # Create directory for extra jars
+  mkdir -p /var/lib/sqoop2/
+
+  # Copy all your JDBC drivers to this directory
+  cp mysql-jdbc*.jar /var/lib/sqoop2/
+  cp postgresql-jdbc*.jar /var/lib/sqoop2/
+
+  # And finally export this directory to SQOOP_SERVER_EXTRA_LIB
+  export SQOOP_SERVER_EXTRA_LIB=/var/lib/sqoop2/
+
+.. note::
+
+  Sqoop doesn't ship with any JDBC drivers due to incompatible licenses. You will need to use this mechanism to install all JDBC drivers that are needed.
+
+Configuring ``PATH``
+--------------------
+
+All user and administrator facing shell commands are stored in ``bin/`` directory. It's recommended to add this directory to your ``$PATH`` for easier execution, for example:
+
+.. code-block:: bash
 
   PATH=$PATH:`pwd`/bin/
 
-Further documentation pages will assume that you have the binaries on your ``$PATH``. You will need to call them specifying full path if you decide to skip this step.
+The remainder of the Sqoop 2 documentation assumes that the shell commands are in your ``$PATH``.
 
 Configuring Server
 ------------------
 
-Before starting server you should revise configuration to match your specific environment. Server configuration files are stored in ``conf`` directory.
+Server configuration files are stored in ``conf`` directory. File ``sqoop_bootstrap.properties`` specifies which configuration provider should be used for loading configuration for rest of Sqoop server. Default value ``PropertiesConfigurationProvider`` should be sufficient.
 
-File ``sqoop_bootstrap.properties`` specifies which configuration provider should be used for loading configuration for rest of Sqoop server. Default value ``PropertiesConfigurationProvider`` should be sufficient.
+Second configuration file called ``sqoop.properties`` contains remaining configuration properties that can affect Sqoop server. The configuration file is very well documented, so check if all configuration properties fits your environment. Default or very little tweaking should be sufficient in most common cases.
 
+Repository Initialization
+-------------------------
 
-Second configuration file ``sqoop.properties`` contains remaining configuration properties that can affect Sqoop server. File is very well documented, so check if all configuration properties fits your environment. Default or very little tweaking should be sufficient most common cases.
+The metadata repository needs to be initialized before starting Sqoop 2 server for the first time. Use :ref:`tool-upgrade` to initialize the repository:
 
-You can verify the Sqoop server configuration using `Verify Tool <Tools.html#verify>`__, for example::
+.. code-block:: bash
+
+  sqoop2-tool upgrade
+
+You can verify if everything have been configured correctly using :ref:`tool-verify`:
+
+.. code-block:: bash
 
   sqoop2-tool verify
-
-Upon running the ``verify`` tool, you should see messages similar to the following::
-
+  ...
   Verification was successful.
   Tool class org.apache.sqoop.tools.tool.VerifyTool has finished correctly
-
-Consult `Verify Tool <Tools.html#upgrade>`__ documentation page in case of any failure.
 
 Server Life Cycle
 -----------------
 
-After installation and configuration you can start Sqoop server with following command: ::
+After installation and configuration you can start Sqoop server with following command:
+
+.. code-block:: bash
 
   sqoop2-server start
 
-Similarly you can stop server using following command: ::
+You can stop the server using the following command:
+
+.. code-block:: bash
 
   sqoop2-server stop
 
-By default Sqoop server daemons use ports 12000. You can set ``org.apache.sqoop.jetty.port`` in configuration file ``conf/sqoop.properties`` to use different ports.
+By default Sqoop server daemon use port ``12000``. You can set ``org.apache.sqoop.jetty.port`` in configuration file ``conf/sqoop.properties`` to use different port.
 
 Client installation
 ===================
 
-Client do not need extra installation and configuration steps. Just copy Sqoop distribution artifact on target machine and unzip it in desired location. You can start client with following command: ::
+Just copy Sqoop distribution artifact on target machine and unzip it in desired location. You can start client with following command:
+
+.. code-block:: bash
 
   sqoop2-shell
 
-You can find more documentation to Sqoop client in `Command Line Client <CommandLineClient.html>`_ section.
+You can find more documentation for Sqoop shell in :doc:`/user/CommandLineClient`.
+
+.. note::
+
+  Client is not acting as a Hadoop client and thus you do not need to be installed on node with Hadoop libraries and configuration files.

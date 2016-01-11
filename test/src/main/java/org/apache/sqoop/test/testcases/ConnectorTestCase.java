@@ -48,7 +48,7 @@ import org.testng.annotations.BeforeSuite;
  * the database provider prior every test execution.
  */
 @edu.umd.cs.findbugs.annotations.SuppressWarnings({"MS_PKGPROTECT", "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"})
-abstract public class ConnectorTestCase extends JettyTestCase {
+abstract public class  ConnectorTestCase extends JettyTestCase {
 
   private static final Logger LOG = Logger.getLogger(ConnectorTestCase.class);
 
@@ -101,10 +101,6 @@ abstract public class ConnectorTestCase extends JettyTestCase {
 
   protected void insertRow(Object ...values) {
     provider.insertRow(getTableName(), values);
-  }
-
-  protected void insertRow(Boolean escapeValues, Object ...values) {
-    provider.insertRow(getTableName(), escapeValues, values);
   }
 
   protected long rowCount() {
@@ -228,17 +224,6 @@ abstract public class ConnectorTestCase extends JettyTestCase {
   }
 
   /**
-   * Assert row in testing table.
-   *
-   * @param conditions Conditions in config that are expected by the database provider
-   * @param escapeValues Flag whether the values should be escaped based on their type when using in the generated queries or not
-   * @param values Values that are expected in the table (with corresponding types)
-   */
-  protected void assertRow(Object []conditions, Boolean escapeValues, Object ...values) {
-    ProviderAsserts.assertRow(provider, getTableName(), escapeValues, conditions, values);
-  }
-
-  /**
    * Assert row in table "cities".
    *
    * @param values Values that are expected
@@ -257,7 +242,6 @@ abstract public class ConnectorTestCase extends JettyTestCase {
   protected void saveLink(MLink link) {
     SqoopUtils.fillObjectName(link);
     assertEquals(getClient().saveLink(link), Status.OK);
-    assertNotSame(link.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
   }
 
  /**
@@ -270,13 +254,12 @@ abstract public class ConnectorTestCase extends JettyTestCase {
  protected void saveJob(MJob job) {
    SqoopUtils.fillObjectName(job);
    assertEquals(getClient().saveJob(job), Status.OK);
-   assertNotSame(job.getPersistenceId(), MPersistableEntity.PERSISTANCE_ID_DEFAULT);
   }
 
   /**
-   * Run job with given jid.
+   * Run job with given job name.
    *
-   * @param jid Job id
+   * @param jobName Job Name
    * @throws Exception
    */
   protected void executeJob(String jobName) throws Exception {

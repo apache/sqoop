@@ -19,6 +19,7 @@ package org.apache.sqoop.test.infrastructure.providers;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
+import org.apache.sqoop.test.kdc.KdcRunner;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniClusterFactory;
@@ -32,13 +33,14 @@ public class SqoopInfrastructureProvider extends InfrastructureProvider {
   private SqoopMiniCluster instance;
   private String rootPath;
   private Configuration hadoopConf;
+  private KdcRunner kdc;
 
   public SqoopInfrastructureProvider() {}
 
   @Override
   public void start() {
     try {
-      instance = SqoopMiniClusterFactory.getSqoopMiniCluster(System.getProperties(), JettySqoopMiniCluster.class, rootPath, hadoopConf);
+      instance = SqoopMiniClusterFactory.getSqoopMiniCluster(System.getProperties(), JettySqoopMiniCluster.class, rootPath, hadoopConf, kdc);
       instance.start();
     } catch (Exception e) {
       LOG.error("Could not start Sqoop mini cluster.", e);
@@ -72,6 +74,10 @@ public class SqoopInfrastructureProvider extends InfrastructureProvider {
   @Override
   public String getRootPath() {
     return rootPath;
+  }
+
+  public void setKdc(KdcRunner kdc) {
+    this.kdc = kdc;
   }
 
   public SqoopMiniCluster getInstance() {

@@ -25,6 +25,7 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -38,7 +39,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class})
 public abstract class RestTest extends SqoopTestCase {
 
   private static final Logger LOG = Logger.getLogger(RestTest.class);
@@ -74,12 +75,12 @@ public abstract class RestTest extends SqoopTestCase {
     }
 
     // Assert given exception from server
-    public void assertServerException(String errorClass, String errorCode) throws Exception {
+    public void assertServerException(String errorMessage, String errorCode) throws Exception {
       // On exception, the error trace can't be null
       assertNotNull(error);
 
       // We're not parsing entire JSON, but rather just looking for sub-strings that are of particular interest
-      assertTrue(error.contains("error-code-class\":\"" + errorClass));
+      assertTrue(error.contains("error-code-message\":\"" + errorMessage));
       assertTrue(error.contains("error-code\":\"" + errorCode));
     }
 
@@ -150,7 +151,7 @@ public abstract class RestTest extends SqoopTestCase {
     LOG.info("Start: " + getTestName());
 
     URL url = new URL(getSqoopServerUrl() +  desc.rest);
-    HttpURLConnection connection = new DelegationTokenAuthenticatedURL().openConnection(url, new DelegationTokenAuthenticatedURL.Token());
+    HttpURLConnection connection = new DelegationTokenAuthenticatedURL().openConnection(url, getAuthToken());
     connection.setRequestMethod(desc.method);
 
     if(desc.data != null) {

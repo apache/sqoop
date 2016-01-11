@@ -19,6 +19,7 @@
 package org.apache.sqoop.shell;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -108,25 +109,25 @@ public class TestUpdateCommand {
     MLink link = new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
     when(client.getConnectorConfigBundle("connector_test")).thenReturn(new MapResourceBundle(new HashMap()));
-    when(client.updateLink(any(MLink.class))).thenReturn(Status.OK);
+    when(client.updateLink(any(MLink.class), anyString())).thenReturn(Status.OK);
 
-    // update link -lid link_test
-    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
+    // update link -name link_test
+    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
     assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option lid
+    // Missing argument for option name
     try {
-      updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid"));
+      updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-name"));
       fail("Update link should fail as parameters aren't complete!");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing argument for option"));
     }
 
-    // Missing option lid
+    // Missing option name
     try {
       updateCmd.execute(Arrays.asList(Constants.FN_LINK));
-      fail("Update link should fail as option lid is missing");
+      fail("Update link should fail as option name is missing");
     } catch (SqoopException e) {
       assertEquals(ShellError.SHELL_0003, e.getErrorCode());
       assertTrue(e.getMessage().contains("Missing required option"));
@@ -140,10 +141,10 @@ public class TestUpdateCommand {
     when(client.getConnector("connector_test")).thenReturn(new MConnector("", "", "", null, null, null));
     MLink link = new MLink("connector_test", new MLinkConfig(getConfig("CONFIGFROMNAME"), new ArrayList<MValidator>()));
     when(client.getLink("link_test")).thenReturn(link);
-    when(client.updateLink(any(MLink.class))).thenReturn(Status.OK);
+    when(client.updateLink(any(MLink.class), anyString())).thenReturn(Status.OK);
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
 
-    // update link -lid link_test
+    // update link -name link_test
     initData("linkname\r" +         // link name
         "abc\r" +                   // for input with name "String"
         "12345\r" +                 // for input with name "Integer"
@@ -153,7 +154,7 @@ public class TestUpdateCommand {
         "0\r" +                     // for input with name "Enum"
         "l1\rl2\rl3\r\r" +          // for input with name "List"
         "12345678\r");              // for input with name "DateTime"
-    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
+    Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
     assertTrue(status != null && status == Status.OK);
     assertEquals(link.getName(), "linkname");
     assertEquals(link.getConnectorLinkConfig("CONFIGFROMNAME").getStringInput("CONFIGFROMNAME.String").getValue(), "abc");
@@ -177,11 +178,12 @@ public class TestUpdateCommand {
         new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
         new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
+    job.setName("job_test");
     when(client.getJob("job_test")).thenReturn(job);
-    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
+    when(client.getConnector(any(String.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(new MapResourceBundle(new HashMap()));
     when(client.getDriverConfigBundle()).thenReturn(new MapResourceBundle(new HashMap()));
-    when(client.updateJob(job)).thenReturn(Status.OK);
+    when(client.updateJob(job, "job_test")).thenReturn(Status.OK);
 
     // update job -name job_test
     Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
@@ -215,13 +217,13 @@ public class TestUpdateCommand {
         new MToConfig(getConfig("toJobConfig"), new ArrayList<MValidator>()),
         new MDriverConfig(getConfig("driverConfig"), new ArrayList<MValidator>()));
     when(client.getJob("job_test")).thenReturn(job);
-    when(client.getConnector(any(Long.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
+    when(client.getConnector(any(String.class))).thenReturn(new MConnector("connect_test", "", "", null, null, null));
     when(client.getConnectorConfigBundle(any(String.class))).thenReturn(resourceBundle);
     when(client.getDriverConfigBundle()).thenReturn(resourceBundle);
-    when(client.updateJob(job)).thenReturn(Status.OK);
+    when(client.updateJob(any(MJob.class), any(String.class))).thenReturn(Status.OK);
 
     // update job -name job_test
-    initData("jobname\r" +          // job name
+    initData("job_test\r" +          // job name
         // From job config
         "abc\r" +                   // for input with name "String"
         "12345\r" +                 // for input with name "Integer"
@@ -253,7 +255,7 @@ public class TestUpdateCommand {
         "7654321\r");              // for input with name "DateTime"
     Status status = (Status) updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
     assertTrue(status != null && status == Status.OK);
-    assertEquals(job.getName(), "jobname");
+    assertEquals(job.getName(), "job_test");
     // check from job config
     assertEquals(job.getFromJobConfig().getStringInput("fromJobConfig.String").getValue(), "abc");
     assertEquals(job.getFromJobConfig().getIntegerInput("fromJobConfig.Integer").getValue().intValue(), 12345);
@@ -291,6 +293,16 @@ public class TestUpdateCommand {
     assertEquals(job.getDriverConfig().getEnumInput("driverConfig.Enum").getValue(), "YES");
     assertEquals(StringUtils.join(job.getDriverConfig().getListInput("driverConfig.List").getValue(), "&"), "l1&l2&l3");
     assertEquals(job.getDriverConfig().getDateTimeInput("driverConfig.DateTime").getValue().getMillis(), 7654321);
+  }
+
+  @Test
+  public void testUnknowOption() {
+    try {
+      updateCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test", "-unknownOption"));
+      fail("Update command should fail as unknown option encountered!");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Unknown option encountered"));
+    }
   }
 
   @SuppressWarnings("unchecked")

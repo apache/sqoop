@@ -157,7 +157,7 @@ public class TestSubmissionHandling extends MySqlTestCase {
     driverContext.setString("driver2", "value2");
 
     MSubmission submission = new MSubmission();
-    submission.setJobId(1);
+    submission.setJobName(JOB_A_NAME);
     submission.setStatus(SubmissionStatus.RUNNING);
     submission.setCreationDate(creationDate);
     submission.setLastUpdateDate(updateDate);
@@ -183,7 +183,7 @@ public class TestSubmissionHandling extends MySqlTestCase {
 
     submission = submissions.get(0);
 
-    assertEquals(1, submission.getJobId());
+    assertEquals(JOB_A_NAME, submission.getJobName());
     assertEquals(SubmissionStatus.RUNNING, submission.getStatus());
     long exceptedData = creationDate.getTime();
     long actualData = submission.getCreationDate().getTime();
@@ -240,7 +240,7 @@ public class TestSubmissionHandling extends MySqlTestCase {
     assertEquals(submission.getDriverContext().getString("driver2"), "value2");
 
     // Let's create second (simpler) connection
-    submission = new MSubmission(1, new Date(), SubmissionStatus.SUCCEEDED,
+    submission = new MSubmission(JOB_A_NAME, new Date(), SubmissionStatus.SUCCEEDED,
         "job-x");
     handler.createSubmission(submission, provider.getConnection());
 
@@ -285,7 +285,7 @@ public class TestSubmissionHandling extends MySqlTestCase {
         + " it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happe"
         + "nsYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happens";
     MSubmission submission = new MSubmission();
-    submission.setJobId(1);
+    submission.setJobName(JOB_A_NAME);
     submission.setStatus(SubmissionStatus.RUNNING);
     submission.setCreationDate(new Date());
     submission.setLastUpdateDate(new Date());
