@@ -109,7 +109,8 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    String fullTableName = executor.encloseIdentifier(schemalessTableName);
+    //String fullTableName = executor.encloseIdentifier(schemalessTableName);
+    String fullTableName = schemalessTableName;
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
