@@ -756,6 +756,7 @@ limitations under the License.
               <exclude>patch-process/*</exclude>
               <exclude>.metadata/</exclude>
               <exclude>**/target/*</exclude>
+              <exclude>src/site/sphinx/_themes/**</exclude>
             </excludes>
           </configuration>
         </plugin>

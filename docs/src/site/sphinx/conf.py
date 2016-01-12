@@ -34,7 +34,7 @@ this = os.path.dirname(os.path.abspath(__file__))
 # Docs configuration
 master_doc = 'index'
 project = 'Apache Sqoop'
-copyright = '2009-2015 The Apache Software Foundation'
+copyright = '2009-2016 The Apache Software Foundation'
 
 # Build configuration
 keep_warnings = True
@@ -42,7 +42,8 @@ pygments_style = 'trac'
 highlight_language = 'none'
 
 # Output configuration
-html_theme = 'sphinxdoc'
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = ["_themes"]
 html_show_sphinx = False
 html_logo = 'sqoop-logo.png'
 html_sidebars = {
