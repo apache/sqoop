@@ -22,7 +22,7 @@ limitations under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache</groupId>
+    <groupId>com.stratio.sqoop</groupId>
     <artifactId>sqoop</artifactId>
     <version>2.0.0-SNAPSHOT</version>
   </parent>
@@ -41,12 +41,6 @@ limitations under the License.
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <dependency>

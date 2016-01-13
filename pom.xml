@@ -18,72 +18,19 @@ limitations under the License.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.apache</groupId>
-    <artifactId>apache</artifactId>
-    <version>9</version>
+    <groupId>com.stratio</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.5.0</version>
   </parent>
 
-  <groupId>org.apache</groupId>
+  <groupId>com.stratio.sqoop</groupId>
   <artifactId>sqoop</artifactId>
   <version>2.0.0-SNAPSHOT</version>
-  <description>Apache Sqoop</description>
-  <name>Sqoop</name>
+  <description>Stratio Sqoop</description>
+  <name>Stratio Sqoop</name>
   <packaging>pom</packaging>
 
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
-  <organization>
-    <name>Apache Software Foundation</name>
-    <url>http://www.apache.org/</url>
-  </organization>
-
-  <issueManagement>
-    <system>JIRA</system>
-    <url>https://issues.apache.org/jira/browse/sqoop</url>
-  </issueManagement>
-
-  <ciManagement>
-    <system>Jenkins</system>
-    <url>https://builds.apache.org/job/sqoop/</url>
-  </ciManagement>
-
-  <inceptionYear>2011</inceptionYear>
-
-  <mailingLists>
-    <mailingList>
-      <name>sqoop-user</name>
-      <subscribe>user-subscribe@sqoop.apache.org</subscribe>
-      <unsubscribe>user-unsubscribe@sqoop.apache.org</unsubscribe>
-      <post>user@sqoop.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/sqoop-user/</archive>
-    </mailingList>
-    <mailingList>
-      <name>sqoop-dev</name>
-      <subscribe>dev-subscribe@sqoop.apache.org</subscribe>
-      <unsubscribe>dev-unsubscribe@sqoop.apache.org</unsubscribe>
-      <post>dev@sqoop.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/sqoop-dev/</archive>
-    </mailingList>
-    <mailingList>
-      <name>sqoop-commits</name>
-      <subscribe>commits-subscribe@sqoop.apache.org</subscribe>
-      <unsubscribe>commits-unsubscribe@sqoop.apache.org</unsubscribe>
-      <post>commits@sqoop.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/sqoop-commits/</archive>
-    </mailingList>
-  </mailingLists>
-
-  <scm>
-    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/sqoop.git</connection>
-    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/sqoop.git</developerConnection>
-    <url>https://git-wip-us.apache.org/repos/asf?p=sqoop.git</url>
-  </scm>
+  <inceptionYear>2016</inceptionYear>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -143,144 +90,6 @@ limitations under the License.
       <artifactId>annotations</artifactId>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <!-- Integration tests related profiles -->
-    <profile>
-      <id>fast</id>
-
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <excludedGroups>slow</excludedGroups>
-              <reportNameSuffix>fast</reportNameSuffix>
-            </configuration>
-          </plugin>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <configuration>
-              <excludedGroups>slow</excludedGroups>
-              <reportNameSuffix>fast</reportNameSuffix>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>slow</id>
-
-      <activation>
-        <property>
-          <name>slow</name>
-        </property>
-      </activation>
-
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <groups>slow</groups>
-              <reportNameSuffix>slow</reportNameSuffix>
-            </configuration>
-          </plugin>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <configuration>
-              <groups>slow</groups>
-              <reportNameSuffix>slow</reportNameSuffix>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!-- Run all groups that should run as part of precommit hook. That currently means ALL tests -->
-    <profile>
-      <id>precommit</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <configuration>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>realcluster</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <excludedGroups>no-real-cluster</excludedGroups>
-              <reportNameSuffix>real-cluster-integration</reportNameSuffix>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <configuration>
-              <excludedGroups>no-real-cluster</excludedGroups>
-              <reportNameSuffix>real-cluster-integration</reportNameSuffix>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!-- Sign profile for releasing artifacts to Nexus repository -->
-    <profile>
-      <id>sign</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-  </profiles>
 
   <dependencyManagement>
     <dependencies>
@@ -553,6 +362,7 @@ limitations under the License.
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
         <version>${testng.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>log4j</groupId>
@@ -731,7 +541,6 @@ limitations under the License.
     <module>execution</module>
     <module>submission</module>
     <module>security</module>
-    <module>dist</module>
     <module>test</module>
     <module>tools</module>
   </modules>
@@ -739,50 +548,31 @@ limitations under the License.
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.8.1</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
       </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
-          <configuration>
-            <source>${maven.compile.source}</source>
-            <target>${maven.compile.target}</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.rat</groupId>
-          <artifactId>apache-rat-plugin</artifactId>
-          <version>0.8</version>
-          <configuration>
-            <excludes>
-              <exclude>.git/</exclude>
-              <exclude>.gitignore</exclude>
-              <exclude>.idea/</exclude>
-              <exclude>**/*.iml</exclude>
-              <exclude>*.log</exclude>
-              <exclude>**/nb-configuration.xml</exclude>
-              <exclude>**.patch</exclude>
-              <exclude>patch-process/*</exclude>
-              <exclude>.metadata/</exclude>
-              <exclude>**/target/*</exclude>
-            </excludes>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <version>2.3.2</version>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>3.3</version>
-        </plugin>
+
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -823,46 +613,7 @@ limitations under the License.
       </plugins>
     </pluginManagement>
 
-
   </build>
-
-  <!-- All reports might be generated using mvn site command -->
-  <reporting>
-    <plugins>
-      <!-- Test code coverage might be executed with mvn cobertura:cobertura command -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.6</version>
-      </plugin>
-
-      <!-- Find bugs report can be executed with: mvn clean compile site -DskipTests -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>3.0.1</version>
-        <configuration>
-          <effort>Max</effort>
-          <threshold>Low</threshold>
-          <htmlOutput>true</htmlOutput>
-          <xmlOutput>true</xmlOutput>
-          <details>true</details>
-        </configuration>
-      </plugin>
-
-      <!-- Turning off standard reports as they collide with sphinx -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.4</version>
-        <reportSets>
-          <reportSet>
-            <reports/>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    </plugins>
-  </reporting>
 
   <developers>
     <!-- alphabetical by id -->
