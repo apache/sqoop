@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.integration.repository.mysql;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,13 +145,9 @@ public class TestJobHandling extends MySqlTestCase {
         .findJobsForConnectorUpgrade(
           handler.findConnector("A", provider.getConnection())
             .getPersistenceId(), provider.getConnection());
-    List<String> jobNames = new ArrayList<String>();
-    for (MJob job : list) {
-      jobNames.add(job.getName());
-    }
     assertEquals(2, list.size());
-    assertTrue(jobNames.contains(JOB_A_NAME));
-    assertTrue(jobNames.contains(JOB_B_NAME));
+    assertEquals(JOB_A_NAME, list.get(0).getName());
+    assertEquals(JOB_B_NAME, list.get(1).getName());
   }
 
   @Test

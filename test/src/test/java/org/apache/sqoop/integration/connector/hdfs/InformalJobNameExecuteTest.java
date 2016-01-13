@@ -21,20 +21,12 @@ package org.apache.sqoop.integration.connector.hdfs;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.*;
-
-import java.sql.Timestamp;
 
 import static org.testng.Assert.assertEquals;
 
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
-public class InformalJobNameExecuteTest extends SqoopTestCase {
+public class InformalJobNameExecuteTest extends ConnectorTestCase {
 
   private String jobName;
 
@@ -62,8 +54,8 @@ public class InformalJobNameExecuteTest extends SqoopTestCase {
   @Test
   public void test() throws Exception {
     createFromFile("input-0001",
-      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
-      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'"
+            "1,'USA','2004-10-23','San Francisco'",
+            "2,'USA','2004-10-24','Sunnyvale'"
     );
 
     // RDBMS link
@@ -94,7 +86,7 @@ public class InformalJobNameExecuteTest extends SqoopTestCase {
     executeJob(job);
 
     assertEquals(2L, provider.rowCount(getTableName()));
-    assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
-    assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
+    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
+    assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
   }
 }

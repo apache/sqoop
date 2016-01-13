@@ -43,8 +43,8 @@ public final class SubmissionDisplayer {
     SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
     println("@|bold "+ resourceString(Constants.RES_SUBMISSION_SUBMISSION_DETAIL) +"|@");
 
-    print(resourceString(Constants.RES_SUBMISSION_JOB_NAME)+": ");
-    println(submission.getJobName());
+    print(resourceString(Constants.RES_SUBMISSION_JOB_ID)+": ");
+    println(submission.getJobId());
 
     print(resourceString(Constants.RES_SUBMISSION_SERVER_URL)+": ");
     println(getServerUrl());

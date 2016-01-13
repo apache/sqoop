@@ -466,26 +466,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public boolean existsLink(long linkId, Connection conn) {
-    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectLinkCheckById())) {
-      stmt.setLong(1, linkId);
-      try (ResultSet rs = stmt.executeQuery()) {
-
-        // Should be always valid in query with count
-        rs.next();
-
-        return rs.getLong(1) == 1;
-      }
-    } catch (SQLException ex) {
-      logException(ex, linkId);
-      throw new SqoopException(CommonRepositoryError.COMMON_0022, ex);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public boolean inUseLink(String linkName, Connection conn) {
 
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobsForLinkCheck())) {
@@ -656,23 +636,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       }
     } catch (SQLException ex) {
       logException(ex);
-      throw new SqoopException(CommonRepositoryError.COMMON_0000, ex);
-    }
-  }
-
-  public Long findJobIdByName(String jobName, Connection conn) {
-    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobIdByName())) {
-      stmt.setString(1,jobName);
-      try (ResultSet rs = stmt.executeQuery()) {
-        if (rs.next()) {
-          return rs.getLong(1);
-        } else {
-          throw new SqoopException(CommonRepositoryError.COMMON_0028);
-        }
-      }
-    } catch (SQLException ex) {
-      logException(ex);
-      throw new SqoopException(CommonRepositoryError.COMMON_0000, ex);
+      throw new SqoopException(CommonRepositoryError.COMMON_0036, ex);
     }
   }
 
@@ -768,26 +732,6 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     } catch (SQLException ex) {
       logException(ex, job);
       throw new SqoopException(CommonRepositoryError.COMMON_0024, ex);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean existsJob(long jobId, Connection conn) {
-    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectJobCheckById())) {
-      stmt.setLong(1, jobId);
-      try (ResultSet rs = stmt.executeQuery()) {
-
-        // Should be always valid in query with count
-        rs.next();
-
-        return rs.getLong(1) == 1;
-      }
-    } catch (SQLException ex) {
-      logException(ex, jobId);
-      throw new SqoopException(CommonRepositoryError.COMMON_0026, ex);
     }
   }
 
@@ -944,10 +888,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public void createSubmission(MSubmission submission, Connection conn) {
     int result;
-    Long jobId = findJobIdByName(submission.getJobName(), conn);
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertSubmission(),
           Statement.RETURN_GENERATED_KEYS)) {
-      stmt.setLong(1, jobId);
+      stmt.setLong(1, submission.getJobId());
       stmt.setString(2, submission.getStatus().name());
       stmt.setString(3, submission.getCreationUser());
       stmt.setTimestamp(4, new Timestamp(submission.getCreationDate().getTime()));
@@ -1424,7 +1367,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     MSubmission submission = new MSubmission();
 
     submission.setPersistenceId(rs.getLong(1));
-    submission.setJobName(rs.getString(12));
+    submission.setJobId(rs.getLong(2));
     submission.setStatus(SubmissionStatus.valueOf(rs.getString(3)));
     submission.setCreationUser(rs.getString(4));
     submission.setCreationDate(rs.getTimestamp(5));

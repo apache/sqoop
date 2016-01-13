@@ -21,9 +21,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -37,6 +34,9 @@ import org.apache.sqoop.validation.Status;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestToInitializer {
   private final String schemaName;
@@ -86,8 +86,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-//    String fullTableName = executor.encloseIdentifier(schemalessTableName);
-    String fullTableName = schemalessTableName;
+    String fullTableName = executor.encloseIdentifier(schemalessTableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -109,8 +108,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    //String fullTableName = executor.encloseIdentifier(schemalessTableName);
-    String fullTableName = schemalessTableName;
+    String fullTableName = executor.encloseIdentifier(schemalessTableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;
@@ -302,8 +300,7 @@ public class TestToInitializer {
     LinkConfiguration linkConfig = new LinkConfiguration();
     ToJobConfiguration jobConfig = new ToJobConfiguration();
 
-    //String fullStageTableName = executor.encloseIdentifier(stageTableName);
-    String fullStageTableName = stageTableName;
+    String fullStageTableName = executor.encloseIdentifier(stageTableName);
 
     linkConfig.linkConfig.jdbcDriver = GenericJdbcTestConstants.DRIVER;
     linkConfig.linkConfig.connectionString = GenericJdbcTestConstants.URL;

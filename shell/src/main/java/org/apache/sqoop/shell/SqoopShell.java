@@ -22,9 +22,6 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import jline.console.history.History;
-import jline.console.history.PersistentHistory;
-
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.ThrowableDisplayer;
 import org.codehaus.groovy.runtime.MethodClosure;
@@ -59,8 +56,8 @@ public final class SqoopShell {
 
   static {
     commandsToKeep = new HashSet<String>();
-    commandsToKeep.add(":exit");
-    commandsToKeep.add(":history");
+    commandsToKeep.add("exit");
+    commandsToKeep.add("history");
   }
 
   /**
@@ -71,25 +68,10 @@ public final class SqoopShell {
    */
   public static void main (String[] args) throws Exception {
     System.setProperty("groovysh.prompt", Constants.SQOOP_PROMPT);
-    final Groovysh shell = new Groovysh();
+    Groovysh shell = new Groovysh();
 
     // Install our error hook (exception handling)
     shell.setErrorHook(new MethodClosure(ThrowableDisplayer.class, "errorHook"));
-
-    // Install shutdown hook
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        History history = shell.getRunner().getReader().getHistory();
-        if (history instanceof PersistentHistory) {
-          try {
-            ((PersistentHistory)history).flush();
-          } catch (IOException e) {
-            // Ignore this exception as it only affects history
-          }
-        }
-      }
-    });
 
     CommandRegistry registry = shell.getRegistry();
     @SuppressWarnings("unchecked")

@@ -17,9 +17,6 @@
  */
 package org.apache.sqoop.test.utils;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Locale;
 import java.util.Random;
 
 import org.apache.sqoop.model.MAccountableEntity;
@@ -42,16 +39,5 @@ public class SqoopUtils {
       prefix = "job_";
     }
     object.setName(prefix + rand.nextLong());
-  }
-
-  //Retrieve the FQDN of the current host
-  public static String getLocalHostName() {
-    String fqdn;
-    try {
-      fqdn = InetAddress.getLocalHost().getCanonicalHostName().toLowerCase(Locale.getDefault());
-    } catch (UnknownHostException e1) {
-      fqdn = "localhost";
-    }
-    return fqdn;
   }
 }

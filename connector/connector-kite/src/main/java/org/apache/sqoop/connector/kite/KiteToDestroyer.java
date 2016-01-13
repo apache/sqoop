@@ -17,19 +17,13 @@
  */
 package org.apache.sqoop.connector.kite;
 
-import java.io.IOException;
-import java.security.PrivilegedExceptionAction;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.FileFormat;
-import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
-import org.apache.sqoop.error.code.KiteConnectorError;
 import org.apache.sqoop.job.etl.Destroyer;
 import org.apache.sqoop.job.etl.DestroyerContext;
 import org.apache.sqoop.schema.Schema;
@@ -48,25 +42,16 @@ public class KiteToDestroyer extends Destroyer<LinkConfiguration,
   private static final Logger LOG = Logger.getLogger(KiteToDestroyer.class);
 
   @Override
-  public void destroy(final DestroyerContext context,
-      final LinkConfiguration linkConfig, final ToJobConfiguration toJobConfig) {
+  public void destroy(DestroyerContext context,
+      LinkConfiguration linkConfig, ToJobConfiguration toJobConfig) {
     LOG.info("Running Kite connector destroyer");
-    final String uri = ConfigUtil.buildDatasetUri(
+    String uri = ConfigUtil.buildDatasetUri(
         linkConfig.linkConfig, toJobConfig.toJobConfig);
 
-    try {
-      SecurityUtils.createProxyUserAndLoadDelegationTokens(context).doAs(new PrivilegedExceptionAction<Void>() {
-        public Void run() throws Exception {
-          if (ConfigUtil.isHBaseJob(toJobConfig.toJobConfig)) {
-            destroyHBaseJob(context, uri, toJobConfig);
-          } else {
-            destroyHdfsJob(context, uri, toJobConfig);
-          }
-          return null;
-        }
-      });
-    } catch (IOException | InterruptedException e) {
-      throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0005, "Unexpected exception", e);
+    if (ConfigUtil.isHBaseJob(toJobConfig.toJobConfig)) {
+      destroyHBaseJob(context, uri, toJobConfig);
+    } else {
+      destroyHdfsJob(context, uri, toJobConfig);
     }
   }
 

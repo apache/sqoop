@@ -26,6 +26,8 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
 /**
  * Provides operations for link resource
  *
+ * GET /v1/link/{lid}
+ *  Return details about one particular link with id lid
  * GET /v1/link/{lname}
  *  Return details about one particular link with name lname
  * GET /v1/link/all
@@ -33,14 +35,18 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
  * GET /v1/link/all?cname={cname}
  *  Return details about all links for given connector (by name)
  *
- * POST /v1/link/ with {connector-name} and {link-config-id} in the post data
- *  Create link for connector with name connector-name
- * PUT /v1/link/ with {connector-name} and {link-config-id} in the post data
- *  Edit/Update link for connector with name connector-name
+ * POST /v1/link/ with {connector-id} and {link-config-id} in the post data
+ *  Create link for connector with id connector-id
+ * PUT /v1/link/ with {connector-id} and {link-config-id} in the post data
+ *  Edit/Update link for connector with id connector-id
  *
+ * PUT /v1/link/{lid}
+ *  Edit/Update details about one particular link with id lid
  * PUT /v1/link/{lname}
  *  Edit/Update details about one particular link with name lname
  *
+ * DELETE /v1/link/{lid}
+ *  Delete/Remove one particular link with id lid
  * DELETE /v1/link/{lname}
  *  Delete/Remove one particular link with name lname
  *

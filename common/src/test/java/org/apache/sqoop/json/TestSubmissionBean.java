@@ -54,24 +54,24 @@ public class TestSubmissionBean {
   @Test
   public void testTransferJobId() {
     MSubmission source = new MSubmission();
-    source.setJobName("jobName1");
+    source.setJobId(666);
 
     MSubmission target = transfer(source);
-    assertEquals("jobName1", target.getJobName());
+    assertEquals(666, target.getJobId());
 
     List<MSubmission> sources = new ArrayList<MSubmission>();
     MSubmission sourcex = new MSubmission();
-    sourcex.setJobName("jobName2");
+    sourcex.setJobId(777);
     sources.add(sourcex);
     MSubmission sourcey = new MSubmission();
-    sourcey.setJobName("jobName3");
+    sourcey.setJobId(888);
     sources.add(sourcey);
 
     List<MSubmission> targets = transfer(sources);
     assertNotNull(targets.get(0));
-    assertEquals("jobName2", targets.get(0).getJobName());
+    assertEquals(777, targets.get(0).getJobId());
     assertNotNull(targets.get(1));
-    assertEquals("jobName3", targets.get(1).getJobName());
+    assertEquals(888, targets.get(1).getJobId());
   }
 
   @Test

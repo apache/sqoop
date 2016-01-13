@@ -37,11 +37,11 @@ import java.util.Date;
 public class MSubmission extends MAccountableEntity {
 
   /**
-   * Job name that this submission object belongs.
+   * Job id that this submission object belongs.
    *
    * This property is required and will be always present.
    */
-  private String jobName;
+  private long jobId;
 
   /**
    * Last known submission status.
@@ -122,36 +122,36 @@ public class MSubmission extends MAccountableEntity {
     progress = -1;
   }
 
-  public MSubmission(String jobName, Date creationDate, SubmissionStatus status) {
+  public MSubmission(long jobId, Date creationDate, SubmissionStatus status) {
     this();
-    this.jobName = jobName;
+    this.jobId = jobId;
     this.status = status;
     setCreationDate(creationDate);
   }
 
-  public MSubmission(String jobName) {
-    this(jobName, new Date(), SubmissionStatus.BOOTING);
+  public MSubmission(long jobId) {
+    this(jobId, new Date(), SubmissionStatus.BOOTING);
   }
 
-  public MSubmission(String jobName, Date creationDate, SubmissionStatus status,
+  public MSubmission(long jobId, Date creationDate, SubmissionStatus status,
                      String externalId) {
-    this(jobName, creationDate, status);
+    this(jobId, creationDate, status);
     this.externalJobId = externalId;
   }
 
-  public MSubmission(String jobName, Date creationDate, SubmissionStatus status,
+  public MSubmission(long jobId, Date creationDate, SubmissionStatus status,
                      String externalId, String externalLink, Counters counters){
-    this(jobName, creationDate, status, externalId);
+    this(jobId, creationDate, status, externalId);
     this.externalLink = externalLink;
     this.counters = counters;
   }
 
-  public String getJobName() {
-    return jobName;
+  public void setJobId(long jobId) {
+    this.jobId = jobId;
   }
 
-  public void setJobName(String jobName) {
-    this.jobName = jobName;
+  public long getJobId() {
+    return jobId;
   }
 
   public void setStatus(SubmissionStatus status) {
@@ -247,7 +247,7 @@ public class MSubmission extends MAccountableEntity {
 
   @Override
   public String toString() {
-    return "MSubmission [jobName=" + jobName + ", status=" + status + ", externalId=" + externalJobId
+    return "MSubmission [jobId=" + jobId + ", status=" + status + ", externalId=" + externalJobId
         + ", progress=" + progress + ", counters=" + counters + ", externalLink=" + externalLink
         + ", error=" + error + ", fromSchema=" + fromSchema + ", toSchema=" + toSchema + "]";
   }

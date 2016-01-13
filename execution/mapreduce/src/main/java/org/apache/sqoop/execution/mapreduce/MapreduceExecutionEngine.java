@@ -81,11 +81,6 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
     if(mrJobRequest.getExtractors() != null) {
       context.setInteger(MRJobConstants.JOB_ETL_EXTRACTOR_NUM, mrJobRequest.getExtractors());
     }
-
-    context.setString(MRJobConstants.JOB_CONNECTOR_FROM_NAME,
-        mrJobRequest.getConnector(Direction.FROM).getConnectorName());
-    context.setString(MRJobConstants.JOB_CONNECTOR_TO_NAME,
-        mrJobRequest.getConnector(Direction.TO).getConnectorName());
   }
 
 

@@ -18,12 +18,9 @@
 
 package org.apache.sqoop.connector.kite;
 
-import org.apache.sqoop.common.MutableContext;
-import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
-import org.apache.sqoop.job.etl.InitializerContext;
 import org.kitesdk.data.Datasets;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -36,11 +33,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @PrepareForTest(Datasets.class)
-@PowerMockIgnore({"org.apache.sqoop.common.ErrorCode", "com.sun.security.auth.UnixPrincipal"})
+@PowerMockIgnore("org.apache.sqoop.common.ErrorCode")
 public class TestKiteFromInitializer extends PowerMockTestCase {
 
   private KiteFromInitializer initializer;
-  private InitializerContext initializerContext;
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
@@ -48,7 +44,6 @@ public class TestKiteFromInitializer extends PowerMockTestCase {
     mockStatic(Datasets.class);
 
     initializer = new KiteFromInitializer();
-    initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
   }
 
   @Test
@@ -59,7 +54,7 @@ public class TestKiteFromInitializer extends PowerMockTestCase {
     when(Datasets.exists(jobConfig.fromJobConfig.uri)).thenReturn(true);
 
     // exercise
-    initializer.initialize(initializerContext, new LinkConfiguration(), jobConfig);
+    initializer.initialize(null, new LinkConfiguration(), jobConfig);
   }
 
   @Test(expectedExceptions = SqoopException.class)
@@ -70,7 +65,7 @@ public class TestKiteFromInitializer extends PowerMockTestCase {
     when(Datasets.exists(jobConfig.fromJobConfig.uri)).thenReturn(false);
 
     // exercise
-    initializer.initialize(initializerContext, new LinkConfiguration(), jobConfig);
+    initializer.initialize(null, new LinkConfiguration(), jobConfig);
   }
 
 }

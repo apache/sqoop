@@ -17,18 +17,12 @@
  */
 package org.apache.sqoop.connector.kite;
 
-import java.io.IOException;
-import java.security.PrivilegedExceptionAction;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.kite.configuration.ConfigUtil;
 import org.apache.sqoop.connector.kite.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
-import org.apache.sqoop.error.code.KiteConnectorError;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
 import org.apache.sqoop.job.etl.ExtractorContext;
@@ -53,34 +47,25 @@ public class KiteExtractor extends Extractor<LinkConfiguration,
   }
 
   @Override
-  public void extract(final ExtractorContext context, final LinkConfiguration linkConfig,
-      final FromJobConfiguration fromJobConfig, final KiteDatasetPartition partition) {
-    final String uri = ConfigUtil.buildDatasetUri(
+  public void extract(ExtractorContext context, LinkConfiguration linkConfig,
+      FromJobConfiguration fromJobConfig, KiteDatasetPartition partition) {
+    String uri = ConfigUtil.buildDatasetUri(
         linkConfig.linkConfig, partition.getUri());
     LOG.info("Loading data from " + uri);
 
-    try {
-      SecurityUtils.createProxyUserAndLoadDelegationTokens(context).doAs(new PrivilegedExceptionAction<Void>() {
-        public Void run() throws Exception {
-          KiteDatasetExecutor executor = getExecutor(uri);
-          DataWriter writer = context.getDataWriter();
-          Object[] array;
-          rowsRead = 0L;
+    KiteDatasetExecutor executor = getExecutor(uri);
+    DataWriter writer = context.getDataWriter();
+    Object[] array;
+    rowsRead = 0L;
 
-          try {
-            while ((array = executor.readRecord()) != null) {
-              // TODO: SQOOP-1616 will cover more column data types. Use schema and do data type conversion (e.g. datatime).
-              writer.writeArrayRecord(array);
-              rowsRead++;
-            }
-          } finally {
-            executor.closeReader();
-          }
-          return null;
-        }
-      });
-    } catch (IOException | InterruptedException e) {
-      throw new SqoopException(KiteConnectorError.GENERIC_KITE_CONNECTOR_0005, "Unexpected exception", e);
+    try {
+      while ((array = executor.readRecord()) != null) {
+        // TODO: SQOOP-1616 will cover more column data types. Use schema and do data type conversion (e.g. datatime).
+        writer.writeArrayRecord(array);
+        rowsRead++;
+      }
+    } finally {
+      executor.closeReader();
     }
   }
 

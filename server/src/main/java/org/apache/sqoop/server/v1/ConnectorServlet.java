@@ -31,6 +31,8 @@ import org.apache.sqoop.server.SqoopProtocolServlet;
  *  Return all connectors registered in the sqoop system with their corresponding config params
  * GET /v1/connector/{cname}
  *  Return details about one particular connector with name {cname} with its config params
+ * GET /v1/connector/{cid}
+ *  Return details about one particular connector with id {cid} with its config params
  *
  */
 @SuppressWarnings("serial")

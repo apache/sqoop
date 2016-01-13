@@ -34,9 +34,9 @@ Workflow
 
 Given workflow has to be followed for executing a sqoop job in Sqoop server.
 
-  1. Create LINK object for a given connector name              - Creates Link object and returns it
-  2. Create a JOB for a given "from" and "to" link name         - Create Job object and returns it
-  3. Start the JOB for a given job name                         - Start Job on the server and creates a submission record
+  1. Create LINK object for a given connectorId             - Creates Link object and returns linkId (lid)
+  2. Create a JOB for a given "from" and "to" linkId            - Create Job object and returns jobId (jid)
+  3. Start the JOB for a given jobId                        - Start Job on the server and creates a submission record
 
 Project Dependencies
 ====================
@@ -76,12 +76,13 @@ you can get the list of all the config/inputs using `Display Config and Input Na
 Save Link
 ---------
 
-First create a new link by invoking ``createLink(connectorName)`` method with connector name and it returns a MLink object with dummy id and the unfilled link config inputs for that connector. Then fill the config inputs with relevant values. Invoke ``saveLink`` passing it the filled MLink object.
+First create a new link by invoking ``createLink(cid)`` method with connector Id and it returns a MLink object with dummy id and the unfilled link config inputs for that connector. Then fill the config inputs with relevant values. Invoke ``saveLink`` passing it the filled MLink object.
 
 ::
 
   // create a placeholder for link
-  MLink link = client.createLink("connectorName");
+  long connectorId = 1;
+  MLink link = client.createLink(connectorId);
   link.setName("Vampire");
   link.setCreationUser("Buffy");
   MLinkConfig linkConfig = link.getConnectorLinkConfig();
@@ -93,21 +94,21 @@ First create a new link by invoking ``createLink(connectorName)`` method with co
   // save the link object that was filled
   Status status = client.saveLink(link);
   if(status.canProceed()) {
-   System.out.println("Created Link with Link Name : " + link.getName());
+   System.out.println("Created Link with Link Id : " + link.getPersistenceId());
   } else {
    System.out.println("Something went wrong creating the link");
   }
 
 ``status.canProceed()`` returns true if status is OK or a WARNING. Before sending the status, the link config values are validated using the corresponding validator associated with th link config inputs.
 
-On successful execution of the saveLink method, new link name is assigned to the link object else an exception is thrown. ``link.getName()`` method returns the unique name for this object persisted in the sqoop repository.
+On successful execution of the saveLink method, new link Id is assigned to the link object else an exception is thrown. ``link.getPersistenceId()`` method returns the unique Id for this object persisted in the sqoop repository.
 
 User can retrieve a link using the following methods
 
 +----------------------------+--------------------------------------+
 |   Method                   | Description                          |
 +============================+======================================+
-| ``getLink(linkName)``      | Returns a link by name               |
+| ``getLink(lid)``           | Returns a link by id                 |
 +----------------------------+--------------------------------------+
 | ``getLinks()``             | Returns list of links in the sqoop   |
 +----------------------------+--------------------------------------+
@@ -117,7 +118,7 @@ Job
 
 A sqoop job holds the ``From`` and ``To`` parts for transferring data from the ``From`` data source to the ``To`` data source. Both the ``From`` and the ``To`` are uniquely identified by their corresponding connector Link Ids. i.e when creating a job we have to specifiy the ``FromLinkId`` and the ``ToLinkId``. Thus the pre-requisite for creating a job is to first create the links as described above.
 
-Once the link names for the ``From`` and ``To`` are given, then the job configs for the associated connector for the link object have to be filled. You can get the list of all the from and to job config/inputs using `Display Config and Input Names For Connector`_ for that connector. A connector can have one or more links. We then use the links in the ``From`` and ``To`` direction to populate the corresponding ``MFromConfig`` and ``MToConfig`` respectively.
+Once the linkIds for the ``From`` and ``To`` are given, then the job configs for the associated connector for the link object have to be filled. You can get the list of all the from and to job config/inputs using `Display Config and Input Names For Connector`_ for that connector. A connector can have one or more links. We then use the links in the ``From`` and ``To`` direction to populate the corresponding ``MFromConfig`` and ``MToConfig`` respectively.
 
 In addition to filling the job configs for the ``From`` and the ``To`` representing the link, we also need to fill the driver configs that control the job execution engine environment. For example, if the job execution engine happens to be the MapReduce we will specifiy the number of mappers to be used in reading data from the ``From`` data source.
 
@@ -129,7 +130,9 @@ Here is the code to create and then save a job
   String url = "http://localhost:12000/sqoop/";
   SqoopClient client = new SqoopClient(url);
   //Creating dummy job object
-  MJob job = client.createJob("fromLinkName", "toLinkName");
+  long fromLinkId = 1;// for jdbc connector
+  long toLinkId = 2; // for HDFS connector
+  MJob job = client.createJob(fromLinkId, toLinkId);
   job.setName("Vampire");
   job.setCreationUser("Buffy");
   // set the "FROM" link job config values
@@ -146,7 +149,7 @@ Here is the code to create and then save a job
 
   Status status = client.saveJob(job);
   if(status.canProceed()) {
-   System.out.println("Created Job with Job Name: "+ job.getName());
+   System.out.println("Created Job with Job Id: "+ job.getPersistenceId());
   } else {
    System.out.println("Something went wrong creating the job");
   }
@@ -156,7 +159,7 @@ User can retrieve a job using the following methods
 +----------------------------+--------------------------------------+
 |   Method                   | Description                          |
 +============================+======================================+
-| ``getJob(jobName)``        | Returns a job by name                |
+| ``getJob(jid)``            | Returns a job by id                  |
 +----------------------------+--------------------------------------+
 | ``getJobs()``              | Returns list of jobs in the sqoop    |
 +----------------------------+--------------------------------------+
@@ -216,22 +219,23 @@ After creating link or job in the repository, you can update or delete a link or
 +==================================+====================================================================================+
 | ``updateLink(link)``             | Invoke update with link and check status for any errors or warnings                |
 +----------------------------------+------------------------------------------------------------------------------------+
-| ``deleteLink(linkName)``         | Delete link. Deletes only if specified link is not used by any job                 |
+| ``deleteLink(lid)``              | Delete link. Deletes only if specified link is not used by any job                 |
 +----------------------------------+------------------------------------------------------------------------------------+
 | ``updateJob(job)``               | Invoke update with job and check status for any errors or warnings                 |
 +----------------------------------+------------------------------------------------------------------------------------+
-| ``deleteJob(jobName)``           | Delete job                                                                         |
+| ``deleteJob(jid)``               | Delete job                                                                         |
 +----------------------------------+------------------------------------------------------------------------------------+
 
 Job Start
 ==============
 
-Starting a job requires a job name. On successful start, getStatus() method returns "BOOTING" or "RUNNING".
+Starting a job requires a job id. On successful start, getStatus() method returns "BOOTING" or "RUNNING".
 
 ::
 
   //Job start
-  MSubmission submission = client.startJob("jobName");
+  long jobId = 1;
+  MSubmission submission = client.startJob(jobId);
   System.out.println("Job Submission Status : " + submission.getStatus());
   if(submission.getStatus().isRunning() && submission.getProgress() != -1) {
     System.out.println("Progress : " + String.format("%.2f %%", submission.getProgress() * 100));
@@ -258,15 +262,15 @@ Starting a job requires a job name. On successful start, getStatus() method retu
 
 
   //Check job status for a running job
-  MSubmission submission = client.getJobStatus("jobName");
+  MSubmission submission = client.getJobStatus(jobId);
   if(submission.getStatus().isRunning() && submission.getProgress() != -1) {
     System.out.println("Progress : " + String.format("%.2f %%", submission.getProgress() * 100));
   }
 
   //Stop a running job
-  submission.stopJob("jobName");
+  submission.stopJob(jobId);
 
-Above code block, job start is asynchronous. For synchronous job start, use ``startJob(jobName, callback, pollTime)`` method. If you are not interested in getting the job status, then invoke the same method with "null" as the value for the callback parameter and this returns the final job status. ``pollTime`` is the request interval for getting the job status from sqoop server and the value should be greater than zero. We will frequently hit the sqoop server if a low value is given for the ``pollTime``. When a synchronous job is started with a non null callback, it first invokes the callback's ``submitted(MSubmission)`` method on successful start, after every poll time interval, it then invokes the ``updated(MSubmission)`` method on the callback API and finally on finishing the job executuon it invokes the ``finished(MSubmission)`` method on the callback API.
+Above code block, job start is asynchronous. For synchronous job start, use ``startJob(jid, callback, pollTime)`` method. If you are not interested in getting the job status, then invoke the same method with "null" as the value for the callback parameter and this returns the final job status. ``pollTime`` is the request interval for getting the job status from sqoop server and the value should be greater than zero. We will frequently hit the sqoop server if a low value is given for the ``pollTime``. When a synchronous job is started with a non null callback, it first invokes the callback's ``submitted(MSubmission)`` method on successful start, after every poll time interval, it then invokes the ``updated(MSubmission)`` method on the callback API and finally on finishing the job executuon it invokes the ``finished(MSubmission)`` method on the callback API.
 
 Display Config and Input Names For Connector
 ============================================
@@ -277,13 +281,13 @@ You can view the config/input names for the link and job config types per connec
 
   String url = "http://localhost:12000/sqoop/";
   SqoopClient client = new SqoopClient(url);
-  String connectorName = "connectorName";
+  long connectorId = 1;
   // link config for connector
-  describe(client.getConnector(connectorName).getLinkConfig().getConfigs(), client.getConnectorConfigBundle(connectorName));
+  describe(client.getConnector(connectorId).getLinkConfig().getConfigs(), client.getConnectorConfigBundle(connectorId));
   // from job config for connector
-  describe(client.getConnector(connectorName).getFromConfig().getConfigs(), client.getConnectorConfigBundle(connectorName));
+  describe(client.getConnector(connectorId).getFromConfig().getConfigs(), client.getConnectorConfigBundle(connectorId));
   // to job config for the connector
-  describe(client.getConnector(connectorName).getToConfig().getConfigs(), client.getConnectorConfigBundle(connectorName));
+  describe(client.getConnector(connectorId).getToConfig().getConfigs(), client.getConnectorConfigBundle(connectorId));
 
   void describe(List<MConfig> configs, ResourceBundle resource) {
     for (MConfig config : configs) {

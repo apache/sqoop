@@ -17,25 +17,23 @@
  */
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.sql.Timestamp;
-
 import static org.testng.Assert.assertEquals;
 
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
-public class FromHDFSToRDBMSTest extends SqoopTestCase {
+/**
+ *
+ */
+public class FromHDFSToRDBMSTest extends ConnectorTestCase {
   @BeforeMethod(alwaysRun = true)
   public void createTable() {
     createTableCities();
@@ -49,11 +47,12 @@ public class FromHDFSToRDBMSTest extends SqoopTestCase {
   @Test
   public void testBasic() throws Exception {
     createFromFile("input-0001",
-      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
-      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+        "1,'USA','2004-10-23','San Francisco'",
+        "2,'USA','2004-10-24','Sunnyvale'",
+        "3,'Czech Republic','2004-10-25','Brno'",
+        "4,'USA','2004-10-26','Palo Alto'"
     );
+
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
     fillRdbmsLinkConfig(rdbmsLink);
@@ -81,9 +80,9 @@ public class FromHDFSToRDBMSTest extends SqoopTestCase {
     executeJob(job);
 
     assertEquals(4L, provider.rowCount(getTableName()));
-    assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
-    assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
-    assertRowInCities(3, "Czech Republic", Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
-    assertRowInCities(4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
+    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
+    assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
+    assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");
+    assertRowInCities(4, "USA", "2004-10-26", "Palo Alto");
   }
 }

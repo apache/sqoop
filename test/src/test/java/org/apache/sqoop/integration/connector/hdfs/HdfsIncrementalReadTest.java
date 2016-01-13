@@ -20,22 +20,14 @@ package org.apache.sqoop.integration.connector.hdfs;
 import org.apache.sqoop.connector.hdfs.configuration.IncrementalType;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.sql.Timestamp;
-
 import static org.testng.Assert.assertEquals;
 
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
-public class HdfsIncrementalReadTest extends SqoopTestCase {
+public class HdfsIncrementalReadTest extends ConnectorTestCase {
 
   @BeforeMethod(alwaysRun = true)
   public void createTable() {
@@ -50,7 +42,7 @@ public class HdfsIncrementalReadTest extends SqoopTestCase {
   @Test
   public void testBasic() throws Exception {
     createFromFile("input-0001",
-      "1,'USA','2004-10-23 00:00:00.000','San Francisco'"
+        "1,'USA','2004-10-23','San Francisco'"
     );
 
     // RDBMS link
@@ -73,29 +65,29 @@ public class HdfsIncrementalReadTest extends SqoopTestCase {
     // Execute for the first time
     executeJob(job);
     assertEquals(provider.rowCount(getTableName()), 1);
-    assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
+    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
 
     // Second execution
     createFromFile("input-0002",
-      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'"
+      "2,'USA','2004-10-24','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25','Brno'"
     );
     executeJob(job);
     assertEquals(provider.rowCount(getTableName()), 3);
-    assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
-    assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
-    assertRowInCities(3, "Czech Republic", Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
+    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
+    assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
+    assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");
 
     // And last execution
     createFromFile("input-0003",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "4,'USA','2004-10-26','Palo Alto'"
     );
     executeJob(job);
     assertEquals(provider.rowCount(getTableName()), 4);
-    assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
-    assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
-    assertRowInCities(3, "Czech Republic", Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
-    assertRowInCities(4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
+    assertRowInCities(1, "USA", "2004-10-23", "San Francisco");
+    assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
+    assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");
+    assertRowInCities(4, "USA", "2004-10-26", "Palo Alto");
   }
 
 }

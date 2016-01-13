@@ -20,8 +20,6 @@ package org.apache.sqoop.test.data;
 import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.sqoop.common.test.db.TableName;
 
-import java.sql.Timestamp;
-
 /**
  * Simple listing of few world's cities to do basic sanity tests.
  */
@@ -38,7 +36,7 @@ public class Cities extends DataSet {
       "id",
       "id", "int",
       "country", "varchar(50)",
-      "some_date", "timestamp",
+      "some_date", "date",
       "city", "varchar(50)"
     );
 
@@ -47,10 +45,10 @@ public class Cities extends DataSet {
 
   @Override
   public DataSet loadBasicData() {
-    provider.insertRow(tableBaseName, 1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"),"San Francisco");
-    provider.insertRow(tableBaseName, 2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
-    provider.insertRow(tableBaseName, 3, "Czech Republic", Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
-    provider.insertRow(tableBaseName, 4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
+    provider.insertRow(tableBaseName, 1, "USA", "2004-10-23","San Francisco");
+    provider.insertRow(tableBaseName, 2, "USA", "2004-10-24", "Sunnyvale");
+    provider.insertRow(tableBaseName, 3, "Czech Republic", "2004-10-25", "Brno");
+    provider.insertRow(tableBaseName, 4, "USA", "2004-10-26", "Palo Alto");
 
     return this;
   }

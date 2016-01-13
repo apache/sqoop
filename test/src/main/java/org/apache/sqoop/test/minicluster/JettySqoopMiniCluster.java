@@ -18,12 +18,9 @@
 
 package org.apache.sqoop.test.minicluster;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.server.SqoopJettyServer;
-import org.apache.sqoop.test.utils.SqoopUtils;
 
 /**
 * Embedded jetty Sqoop server mini cluster.
@@ -60,17 +57,7 @@ public class JettySqoopMiniCluster extends SqoopMiniCluster {
   @Override
   public String getServerUrl() {
     if (sqoopJettyServer != null) {
-      String serverUrl = sqoopJettyServer.getServerUrl();
-      // Replace the hostname of server url with FQDN
-      String host;
-      try {
-        host = new URL(serverUrl).getHost();
-      } catch (MalformedURLException e) {
-        throw new RuntimeException("Invalid sqoop server url: " + serverUrl);
-      }
-
-      String fqdn = SqoopUtils.getLocalHostName();
-      return serverUrl.replaceFirst(host, fqdn);
+      return sqoopJettyServer.getServerUrl();
     }
     throw new RuntimeException("Jetty server wasn't started.");
   }

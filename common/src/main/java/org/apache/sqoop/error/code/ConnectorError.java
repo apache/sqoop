@@ -59,12 +59,7 @@ public enum ConnectorError implements ErrorCode {
       + "changed since it was registered previously."),
 
   /** A connector is not assigned with a valid id yet. */
-  CONN_0010("A connector is not assigned with a valid id yet"),
-
-  /** Failed to create ConnectorClassLoader. */
-  CONN_0011("Failed to create ConnectorClassLoader"),
-
-  ;
+  CONN_0010("A connector is not assigned with a valid id yet");
 
   private final String message;
 

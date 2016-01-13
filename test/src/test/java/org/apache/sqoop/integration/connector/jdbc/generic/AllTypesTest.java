@@ -27,13 +27,9 @@ import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
+import org.testng.ITest;
 import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
@@ -47,8 +43,7 @@ import static org.testng.Assert.assertEquals;
  * Test transfer of all supported data types.
  */
 @Test(groups = "slow")
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
-public class AllTypesTest extends SqoopTestCase {
+public class AllTypesTest extends ConnectorTestCase implements ITest {
 
   private static String testName;
 
@@ -85,7 +80,7 @@ public class AllTypesTest extends SqoopTestCase {
 
     int i = 1;
     for(ExampleValue value: type.values) {
-      insertRow(i++, value.getObjectValue());
+      insertRow(false, Integer.toString(i++), value.getInsertStatement());
     }
 
     // RDBMS link
@@ -161,7 +156,8 @@ public class AllTypesTest extends SqoopTestCase {
     assertEquals(type.values.size(), rowCount());
     for(ExampleValue value : type.values) {
       assertRow(
-        new Object[] {"value", value.getObjectValue()},
+        new Object[] {"value", value.getInsertStatement()},
+        false,
         value.getObjectValue());
     }
 

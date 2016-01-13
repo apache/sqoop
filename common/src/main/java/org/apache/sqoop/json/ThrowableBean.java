@@ -19,9 +19,7 @@ package org.apache.sqoop.json;
 
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
-import org.apache.sqoop.common.ErrorCode;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.error.code.SqoopError;
 import org.apache.sqoop.utils.ClassUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -44,7 +42,7 @@ public class ThrowableBean implements JsonBean {
   public static final String LINE = "line";
   public static final String CAUSE = "cause";
   public static final String ERROR_CODE = "error-code";
-  public static final String ERROR_CODE_MESSAGE = "error-code-message";
+  public static final String ERROR_CODE_CLASS = "error-code-class";
 
   private Throwable throwable;
 
@@ -72,7 +70,7 @@ public class ThrowableBean implements JsonBean {
     if(throwable instanceof SqoopException ) {
       SqoopException sqoopException = (SqoopException) throwable;
       result.put(ERROR_CODE, sqoopException.getErrorCode().getCode());
-      result.put(ERROR_CODE_MESSAGE, sqoopException.getErrorCode().getMessage());
+      result.put(ERROR_CODE_CLASS, sqoopException.getErrorCode().getClass().getName());
       // Override message with the original message
       result.put(MESSAGE, sqoopException.getOriginalMessage());
     }
@@ -109,11 +107,15 @@ public class ThrowableBean implements JsonBean {
     }
 
     // Special handling for SqoopException as we need to transfer ERROR_CODE from the other side
-    if(jsonObject.containsKey(ERROR_CODE)) {
-      String errorCode = (String) jsonObject.get(ERROR_CODE);
-      String errorCodeMessage = (String) jsonObject.get(ERROR_CODE_MESSAGE);
-      ErrorCode code = new SqoopError(errorCode, errorCodeMessage);
-      throwable = (Throwable) ClassUtils.instantiate(exceptionClass, code, message);
+    if(jsonObject.containsKey(ERROR_CODE_CLASS)) {
+      Class e = ClassUtils.loadClass((String) jsonObject.get(ERROR_CODE_CLASS));
+
+      // Only if the error code class is known to this JVM, let's instantiate the real SqoopException
+      if( e != null) {
+        String errorCode = (String) jsonObject.get(ERROR_CODE);
+        Enum enumValue = Enum.valueOf(e, errorCode);
+        throwable = (Throwable) ClassUtils.instantiate(exceptionClass, enumValue, message);
+      }
     }
 
     // Let's try to instantiate same class that was originally on remote side.

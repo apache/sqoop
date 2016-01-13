@@ -18,7 +18,6 @@
 package org.apache.sqoop.test.infrastructure.providers;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.test.kdc.KdcRunner;
 
 /**
  * Infrastructure classes enable the development of integration tests.
@@ -63,9 +62,4 @@ public abstract class InfrastructureProvider {
    * @return root path for component.
    */
   abstract public String getRootPath();
-
-  /**
-   * Set the KdcRunner to be used by this infrastructure component.
-   */
-  abstract public void setKdc(KdcRunner kdc);
 }

@@ -47,14 +47,14 @@ public class CreateJobFunction extends  SqoopFunction {
   @SuppressWarnings("static-access")
   public CreateJobFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_LINK_NAME))
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
       .withLongOpt(Constants.OPT_FROM)
       .isRequired()
       .hasArg()
       .create(Constants.OPT_FROM_CHAR)
     );
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_LINK_NAME))
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
       .withLongOpt(Constants.OPT_TO)
       .isRequired()
       .hasArg()

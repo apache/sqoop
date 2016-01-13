@@ -45,18 +45,18 @@ public class CloneLinkFunction extends SqoopFunction {
   @SuppressWarnings("static-access")
   public CloneLinkFunction() {
     this.addOption(OptionBuilder
-      .withDescription(resourceString(Constants.RES_PROMPT_LINK_NAME))
-      .withLongOpt(Constants.OPT_NAME)
+      .withDescription(resourceString(Constants.RES_PROMPT_LINK_ID))
+      .withLongOpt(Constants.OPT_LID)
       .hasArg()
       .isRequired()
-      .create(Constants.OPT_NAME_CHAR)
+      .create(Constants.OPT_LID_CHAR)
     );
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public Object executeFunction(CommandLine line, boolean isInteractive) throws IOException {
-    return cloneLink(line.getOptionValue(Constants.OPT_NAME), line.getArgList(), isInteractive);
+    return cloneLink(line.getOptionValue(Constants.OPT_LID), line.getArgList(), isInteractive);
   }
 
   private Status cloneLink(String linkArg, List<String> args, boolean isInteractive) throws IOException {

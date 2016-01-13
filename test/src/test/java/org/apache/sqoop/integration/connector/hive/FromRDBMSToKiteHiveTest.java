@@ -18,20 +18,16 @@
 package org.apache.sqoop.integration.connector.hive;
 
 import org.apache.sqoop.common.test.asserts.ProviderAsserts;
-import org.apache.sqoop.common.test.db.HiveProvider;
+import org.apache.sqoop.common.test.db.DatabaseProvider;
+import org.apache.sqoop.common.test.db.DatabaseProviderFactory;
 import org.apache.sqoop.common.test.db.TableName;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HiveInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.testcases.HiveConnectorTestCase;
+import org.testng.ITest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -42,14 +38,14 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 @Test(groups = {"slow", "no-real-cluster"})
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, HiveInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
-public class FromRDBMSToKiteHiveTest extends SqoopTestCase {
+public class FromRDBMSToKiteHiveTest extends HiveConnectorTestCase implements ITest {
   private String testName;
 
   private FileFormat fileFormat;
 
   private MLink rdbmsLink;
   private MLink kiteLink;
+  private String hiveTableName;
 
   @Factory(dataProvider="rdbms-to-kite-hive-test")
   public FromRDBMSToKiteHiveTest(FileFormat fileFormat) {
@@ -58,6 +54,7 @@ public class FromRDBMSToKiteHiveTest extends SqoopTestCase {
 
   @DataProvider(name="rdbms-to-kite-hive-test", parallel=true)
   public static Object[][] data() throws Exception {
+    DatabaseProvider provider = DatabaseProviderFactory.getProvider(System.getProperties());
     return new Object[][]{
         {FileFormat.AVRO},
         {FileFormat.PARQUET}
@@ -102,7 +99,7 @@ public class FromRDBMSToKiteHiveTest extends SqoopTestCase {
     // Kite link
     kiteLink = getClient().createLink("kite-connector");
     kiteLink.getConnectorLinkConfig().getStringInput("linkConfig.authority")
-        .setValue(getInfrastructureProvider(HiveInfrastructureProvider.class).getHiveMetastore().getAuthority());
+        .setValue(metastoreServerRunner.getAuthority());
     saveLink(kiteLink);
   }
 
@@ -129,7 +126,6 @@ public class FromRDBMSToKiteHiveTest extends SqoopTestCase {
     saveJob(job);
     executeJob(job);
 
-    HiveProvider hiveProvider = getInfrastructureProvider(HiveInfrastructureProvider.class).getHiveProvider();
     // Assert correct output
     ProviderAsserts.assertRow(hiveProvider, new TableName(getHiveTableName()), new Object[]{"id", 1}, "1");
     ProviderAsserts.assertRow(hiveProvider, new TableName(getHiveTableName()), new Object[]{"id", 2}, "2");

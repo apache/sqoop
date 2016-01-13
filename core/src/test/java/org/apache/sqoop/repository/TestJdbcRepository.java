@@ -558,7 +558,8 @@ public class TestJdbcRepository {
     doNothing().when(repoHandlerMock).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsLink(anyString(), any(Connection.class));
 
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0016);
+    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
+        "update link error.");
     doThrow(exception).when(repoHandlerMock).updateLink(any(MLink.class), any(Connection.class));
 
     try {
@@ -570,6 +571,9 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteLinkInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(1)).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).existsLink(anyString(), any(Connection.class));
+      verify(repoHandlerMock, times(1)).updateLink(any(MLink.class), any(Connection.class));
+      verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
 
@@ -603,7 +607,8 @@ public class TestJdbcRepository {
     doReturn(true).when(repoHandlerMock).existsLink(anyString(), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsJob(anyString(), any(Connection.class));
 
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0016);
+    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
+        "update job error.");
     doThrow(exception).when(repoHandlerMock).updateJob(any(MJob.class), any(Connection.class));
 
     try {
@@ -615,7 +620,10 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteLinkInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(1)).upgradeConnectorAndConfigs(any(MConnector.class), any(Connection.class));
-      verify(repoHandlerMock, times(1)).existsLink(anyLong(), any(Connection.class));
+      verify(repoHandlerMock, times(2)).existsLink(anyString(), any(Connection.class));
+      verify(repoHandlerMock, times(2)).updateLink(any(MLink.class), any(Connection.class));
+      verify(repoHandlerMock, times(1)).existsJob(anyString(), any(Connection.class));
+      verify(repoHandlerMock, times(1)).updateJob(any(MJob.class), any(Connection.class));
       verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
@@ -732,7 +740,8 @@ public class TestJdbcRepository {
     doNothing().when(repoHandlerMock).upgradeDriverAndConfigs(any(MDriver.class), any(Connection.class));
     doReturn(true).when(repoHandlerMock).existsJob(anyString(), any(Connection.class));
 
-    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0019);
+    SqoopException exception = new SqoopException(RepositoryError.JDBCREPO_0000,
+        "update job error.");
     doThrow(exception).when(repoHandlerMock).updateJob(any(MJob.class), any(Connection.class));
 
     try {
@@ -742,7 +751,9 @@ public class TestJdbcRepository {
       verify(repoHandlerMock, times(1)).findJobs(any(Connection.class));
       verify(repoHandlerMock, times(2)).deleteJobInputs(anyString(), any(Connection.class));
       verify(repoHandlerMock, times(1)).upgradeDriverAndConfigs(any(MDriver.class), any(Connection.class));
-      verify(repoHandlerMock, times(1)).existsJob(anyLong(), any(Connection.class));
+      verify(repoHandlerMock, times(1)).existsJob(anyString(), any(Connection.class));
+      verify(repoHandlerMock, times(1)).updateJob(any(MJob.class), any(Connection.class));
+      verifyNoMoreInteractions(repoHandlerMock);
       return ;
     }
 

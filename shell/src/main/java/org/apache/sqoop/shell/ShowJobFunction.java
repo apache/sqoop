@@ -136,11 +136,11 @@ public class ShowJobFunction extends SqoopFunction {
 
     displayConfig(job.getDriverConfig().getConfigs(),
             client.getDriverConfigBundle());
-    printlnResource(Constants.RES_SHOW_PROMPT_JOB_FROM_LN_INFO,
+    printlnResource(Constants.RES_SHOW_PROMPT_JOB_FROM_LID_INFO,
         job.getFromLinkName());
     displayConfig(job.getFromJobConfig().getConfigs(),
                  client.getConnectorConfigBundle(job.getFromConnectorName()));
-    printlnResource(Constants.RES_SHOW_PROMPT_JOB_TO_LN_INFO,
+    printlnResource(Constants.RES_SHOW_PROMPT_JOB_TO_LID_INFO,
             job.getToLinkName());
     displayConfig(job.getToJobConfig().getConfigs(),
                  client.getConnectorConfigBundle(job.getToConnectorName()));

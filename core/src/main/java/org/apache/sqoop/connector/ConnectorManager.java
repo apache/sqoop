@@ -98,6 +98,8 @@ public class ConnectorManager implements Reconfigurable {
     instance = newInstance;
   }
 
+  // key: connector id, value: connector name
+  private Map<Long, String> idToNameMap;
   private Set<String> connectorNames = new HashSet<String>();
 
   // key: connector name, value: connector handler
@@ -111,6 +113,10 @@ public class ConnectorManager implements Reconfigurable {
     return connectors;
   }
 
+  public Set<Long> getConnectorIds() {
+    return idToNameMap.keySet();
+  }
+
   public Map<String, ResourceBundle> getResourceBundles(Locale locale) {
     Map<String, ResourceBundle> bundles = new HashMap<String, ResourceBundle>();
     for (ConnectorHandler handler : handlerMap.values()) {
@@ -121,9 +127,22 @@ public class ConnectorManager implements Reconfigurable {
     return bundles;
   }
 
+  public ResourceBundle getResourceBundle(long connectorId, Locale locale) {
+    return getResourceBundle(idToNameMap.get(connectorId), locale);
+  }
+
   public ResourceBundle getResourceBundle(String connectorName, Locale locale) {
     ConnectorHandler handler = handlerMap.get(connectorName);
     return handler.getSqoopConnector().getBundle(locale);
+  }
+
+  public MConnector getConnectorConfigurable(long connectorId) {
+    String connectorName = idToNameMap.get(connectorId);
+    if (connectorName == null) {
+      throw new SqoopException(CommonRepositoryError.COMMON_0057, "Couldn't find"
+          + " connector with id " + connectorId);
+    }
+    return getConnectorConfigurable(connectorName);
   }
 
   public MConnector getConnectorConfigurable(String connectorName) {
@@ -135,12 +154,12 @@ public class ConnectorManager implements Reconfigurable {
     return handler.getConnectorConfigurable();
   }
 
+  public SqoopConnector getSqoopConnector(long connectorId) {
+    return getSqoopConnector(idToNameMap.get(connectorId));
+  }
+
   public SqoopConnector getSqoopConnector(String uniqueName) {
-    if (handlerMap != null && handlerMap.get(uniqueName) != null) {
-      return handlerMap.get(uniqueName).getSqoopConnector();
-    } else {
-      return null;
-    }
+    return handlerMap.get(uniqueName).getSqoopConnector();
   }
 
   public synchronized void initialize() {
@@ -150,6 +169,9 @@ public class ConnectorManager implements Reconfigurable {
   public synchronized void initialize(boolean autoUpgrade) {
     if (handlerMap == null) {
       handlerMap = new HashMap<String, ConnectorHandler>();
+    }
+    if (idToNameMap == null) {
+      idToNameMap = new HashMap<Long, String>();
     }
     if (connectorNames == null) {
       connectorNames = new HashSet<String>();
@@ -215,6 +237,7 @@ public class ConnectorManager implements Reconfigurable {
         if (!handler.getConnectorConfigurable().hasPersistenceId()) {
           throw new SqoopException(ConnectorError.CONN_0010, connectorName);
         }
+        idToNameMap.put(handler.getConnectorConfigurable().getPersistenceId(), connectorName);
         connectorNames.add(connectorName);
         LOG.debug("Registered connector: " + handler.getConnectorConfigurable());
       }
@@ -233,6 +256,7 @@ public class ConnectorManager implements Reconfigurable {
 
   public synchronized void destroy() {
     handlerMap = null;
+    idToNameMap = null;
     connectorNames = null;
     blacklistedConnectors = null;
   }

@@ -34,7 +34,7 @@ public class MySQLProvider extends DatabaseProvider {
 
   private static final String CONNECTION = System.getProperties().getProperty(
     "sqoop.provider.mysql.jdbc",
-    "jdbc:mysql://localhost:3306/test?createDatabaseIfNotExist=true"
+    "jdbc:mysql://localhost:3306/test?createDatabaseIfNotExist=true&sessionVariables=sql_mode='ANSI_QUOTES'"
   );
 
   private static final String USERNAME = System.getProperties().getProperty(
@@ -64,16 +64,16 @@ public class MySQLProvider extends DatabaseProvider {
 
   @Override
   public String escapeColumnName(String columnName) {
-    return escapeName(columnName);
+    return escape(columnName);
   }
 
   @Override
   public String escapeTableName(String tableName) {
-    return escapeName(tableName);
+    return escape(tableName);
   }
 
   public String escapeDatabaseName(String databaseName) {
-    return escapeName(databaseName);
+    return escape(databaseName);
   }
 
   // the scheme name is the same as database name.
@@ -84,7 +84,7 @@ public class MySQLProvider extends DatabaseProvider {
 
   @Override
   public String escapeValueString(String value) {
-    return escapeValue(value);
+    return escape(value);
   }
 
   @Override
@@ -109,11 +109,7 @@ public class MySQLProvider extends DatabaseProvider {
     }
   }
 
-  public String escapeName(String entity) {
-    return "`" + entity + "`";
-  }
-
-  public String escapeValue(String entity) {
-    return "\'" + entity + "\'";
+  public String escape(String entity) {
+    return "\"" + entity + "\"";
   }
 }

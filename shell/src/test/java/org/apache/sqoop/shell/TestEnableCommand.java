@@ -22,9 +22,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 
@@ -34,6 +31,7 @@ import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.validation.Status;
 import org.codehaus.groovy.tools.shell.Groovysh;
+import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -55,17 +53,17 @@ public class TestEnableCommand {
   public void testEnableLink() {
     doNothing().when(client).enableLink("link_test", true);
 
-    // enable link -name link_test
-    Status status = (Status) enableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
-    assertTrue(status != null && status == Status.OK);
+    // enable link -l link_test
+    Status status = (Status) enableCmd.execute(Arrays.asList(Constants.FN_LINK, "-l", "link_test"));
+    Assert.assertTrue(status != null && status == Status.OK);
 
-    // Missing argument for option name
+    // Missing argument for option lid
     try {
-      status = (Status) enableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name"));
-      fail("Enable link should fail as link name is missing!");
+      status = (Status) enableCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid"));
+      Assert.fail("Enable link should fail as link id/name is missing!");
     } catch (SqoopException e) {
-      assertEquals(ShellError.SHELL_0003, e.getErrorCode());
-      assertTrue(e.getMessage().contains("Missing argument for option"));
+      Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
+      Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
     }
   }
 
@@ -74,10 +72,10 @@ public class TestEnableCommand {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "link doesn't exist")).when(client).enableLink(any(String.class), any(Boolean.class));
 
     try {
-      enableCmd.execute(Arrays.asList(Constants.FN_LINK, "-name", "link_test"));
-      fail("Enable link should fail as requested link doesn't exist!");
+      enableCmd.execute(Arrays.asList(Constants.FN_LINK, "-lid", "link_test"));
+      Assert.fail("Enable link should fail as requested link doesn't exist!");
     } catch (SqoopException e) {
-      assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
+      Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
     }
   }
 
@@ -87,15 +85,15 @@ public class TestEnableCommand {
 
     // enable job -j job_test
     Status status = (Status) enableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
-    assertTrue(status != null && status == Status.OK);
+    Assert.assertTrue(status != null && status == Status.OK);
 
     // Missing argument for option name
     try {
       status = (Status) enableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name"));
-      fail("Enable job should fail as job id/name is missing!");
+      Assert.fail("Enable job should fail as job id/name is missing!");
     } catch (SqoopException e) {
-      assertEquals(ShellError.SHELL_0003, e.getErrorCode());
-      assertTrue(e.getMessage().contains("Missing argument for option"));
+      Assert.assertEquals(ShellError.SHELL_0003, e.getErrorCode());
+      Assert.assertTrue(e.getMessage().contains("Missing argument for option"));
     }
   }
 
@@ -105,19 +103,9 @@ public class TestEnableCommand {
 
     try {
       enableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test"));
-      fail("Enable job should fail as requested job doesn't exist!");
+      Assert.fail("Enable job should fail as requested job doesn't exist!");
     } catch (SqoopException e) {
-      assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
-    }
-  }
-
-  @Test
-  public void testUnknowOption() {
-    try {
-      enableCmd.execute(Arrays.asList(Constants.FN_JOB, "-name", "job_test", "-unknownOption"));
-      fail("Enable command should fail as unknown option encountered!");
-    } catch (Exception e) {
-      assertTrue(e.getMessage().contains("Unknown option encountered"));
+      Assert.assertEquals(TestShellError.TEST_SHELL_0000, e.getErrorCode());
     }
   }
 }

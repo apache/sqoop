@@ -18,13 +18,13 @@
 package org.apache.sqoop.job.mr;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapred.MRConstants;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
@@ -61,24 +61,9 @@ public class SqoopMapper extends Mapper<SqoopSplit, NullWritable, SqoopWritable,
   private IntermediateDataFormat<Object> toIDF = null;
   private Matcher matcher;
 
-  @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
-  public void run(final Context context) throws IOException, InterruptedException {
-    // Set context ClassLoader for this thread to the ClassLoader for from connector
-    MRUtils.initConnectorClassLoaders(context.getConfiguration());
-
-    ClassUtils.executeWithClassLoader(MRUtils.getConnectorClassLoader(Direction.FROM),
-        new Callable<Void>() {
-      @Override
-      public Void call() throws IOException, InterruptedException {
-        runInternal(context);
-        return null;
-      }
-    });
-  }
-
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private void runInternal(Context context) throws IOException, InterruptedException {
+  @Override
+  public void run(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
 
     String extractorName = conf.get(MRJobConstants.JOB_ETL_EXTRACTOR);

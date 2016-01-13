@@ -18,7 +18,6 @@
 
 package org.apache.sqoop.connector.kite;
 
-import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.connector.common.FileFormat;
 import org.apache.sqoop.connector.kite.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.kite.configuration.ToJobConfiguration;
@@ -39,7 +38,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @PrepareForTest({KiteDatasetExecutor.class, Datasets.class})
-@PowerMockIgnore({"org.apache.sqoop.common.ErrorCode", "com.sun.security.auth.UnixPrincipal"})
+@PowerMockIgnore("org.apache.sqoop.common.ErrorCode")
 public class TestKiteToDestroyer extends PowerMockTestCase {
 
   private KiteToDestroyer destroyer;
@@ -79,7 +78,7 @@ public class TestKiteToDestroyer extends PowerMockTestCase {
   @Test
   public void testDestroyForSuccessfulJob() {
     // setup
-    DestroyerContext context = new DestroyerContext(new MutableMapContext(), true, null, user);
+    DestroyerContext context = new DestroyerContext(null, true, null, user);
     when(KiteDatasetExecutor.listTemporaryDatasetUris(toJobConfig.toJobConfig.uri))
         .thenReturn(expectedUris);
 
@@ -95,7 +94,7 @@ public class TestKiteToDestroyer extends PowerMockTestCase {
   @Test
   public void testDestroyForFailedJob() {
     // setup
-    DestroyerContext context = new DestroyerContext(new MutableMapContext(), false, null, user);
+    DestroyerContext context = new DestroyerContext(null, false, null, user);
     when(KiteDatasetExecutor.listTemporaryDatasetUris(toJobConfig.toJobConfig.uri))
         .thenReturn(expectedUris);
     for (String uri : expectedUris) {

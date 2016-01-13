@@ -152,7 +152,7 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
     driverContext.setString("driver2", "value2");
 
     MSubmission submission = new MSubmission();
-    submission.setJobName(JOB_A_NAME);
+    submission.setJobId(1);
     submission.setStatus(SubmissionStatus.RUNNING);
     submission.setCreationDate(creationDate);
     submission.setLastUpdateDate(updateDate);
@@ -177,7 +177,7 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
 
     submission = submissions.get(0);
 
-    assertEquals(JOB_A_NAME, submission.getJobName());
+    assertEquals(1, submission.getJobId());
     assertEquals(SubmissionStatus.RUNNING, submission.getStatus());
     assertEquals(creationDate, submission.getCreationDate());
     assertEquals(updateDate, submission.getLastUpdateDate());
@@ -224,7 +224,7 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
     assertEquals(submission.getDriverContext().getString("driver2"), "value2");
 
     // Let's create second (simpler) connection
-    submission = new MSubmission(JOB_A_NAME, new Date(), SubmissionStatus.SUCCEEDED, "job-x");
+    submission = new MSubmission(1, new Date(), SubmissionStatus.SUCCEEDED, "job-x");
     handler.createSubmission(submission, provider.getConnection());
 
     assertEquals(2, submission.getPersistenceId());
@@ -265,7 +265,7 @@ public class TestSubmissionHandling extends PostgresqlTestCase {
         + " it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happe"
         + "nsYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happensYeah it happens";
     MSubmission submission = new MSubmission();
-    submission.setJobName(JOB_A_NAME);
+    submission.setJobId(1);
     submission.setStatus(SubmissionStatus.RUNNING);
     submission.setCreationDate(new Date());
     submission.setLastUpdateDate(new Date());

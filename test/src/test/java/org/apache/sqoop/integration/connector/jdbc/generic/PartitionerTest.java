@@ -18,17 +18,15 @@
 package org.apache.sqoop.integration.connector.jdbc.generic;
 
 import com.google.common.collect.Iterables;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
+import org.testng.ITest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
@@ -37,8 +35,7 @@ import org.testng.annotations.Test;
  *
  */
 @Test(groups = "slow")
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
-public class PartitionerTest extends SqoopTestCase {
+public class PartitionerTest extends ConnectorTestCase implements ITest {
 
   /**
    * Columns that we will use as partition column with maximal number of
@@ -113,26 +110,26 @@ public class PartitionerTest extends SqoopTestCase {
     // Assert correct output
     assertToFiles((extractors > maxOutputFiles) ? maxOutputFiles : extractors);
     assertTo(
-      "1,'Warty Warthog',4.10,'2004-10-20 00:00:00.000'",
-      "2,'Hoary Hedgehog',5.04,'2005-04-08 00:00:00.000'",
-      "3,'Breezy Badger',5.10,'2005-10-13 00:00:00.000'",
-      "4,'Dapper Drake',6.06,'2006-06-01 00:00:00.000'",
-      "5,'Edgy Eft',6.10,'2006-10-26 00:00:00.000'",
-      "6,'Feisty Fawn',7.04,'2007-04-19 00:00:00.000'",
-      "7,'Gutsy Gibbon',7.10,'2007-10-18 00:00:00.000'",
-      "8,'Hardy Heron',8.04,'2008-04-24 00:00:00.000'",
-      "9,'Intrepid Ibex',8.10,'2008-10-18 00:00:00.000'",
-      "10,'Jaunty Jackalope',9.04,'2009-04-23 00:00:00.000'",
-      "11,'Karmic Koala',9.10,'2009-10-29 00:00:00.000'",
-      "12,'Lucid Lynx',10.04,'2010-04-29 00:00:00.000'",
-      "13,'Maverick Meerkat',10.10,'2010-10-10 00:00:00.000'",
-      "14,'Natty Narwhal',11.04,'2011-04-28 00:00:00.000'",
-      "15,'Oneiric Ocelot',11.10,'2011-10-10 00:00:00.000'",
-      "16,'Precise Pangolin',12.04,'2012-04-26 00:00:00.000'",
-      "17,'Quantal Quetzal',12.10,'2012-10-18 00:00:00.000'",
-      "18,'Raring Ringtail',13.04,'2013-04-25 00:00:00.000'",
-      "19,'Saucy Salamander',13.10,'2013-10-17 00:00:00.000'"
-    );
+        "1,'Warty Warthog',4.10,'2004-10-20'",
+        "2,'Hoary Hedgehog',5.04,'2005-04-08'",
+        "3,'Breezy Badger',5.10,'2005-10-13'",
+        "4,'Dapper Drake',6.06,'2006-06-01'",
+        "5,'Edgy Eft',6.10,'2006-10-26'",
+        "6,'Feisty Fawn',7.04,'2007-04-19'",
+        "7,'Gutsy Gibbon',7.10,'2007-10-18'",
+        "8,'Hardy Heron',8.04,'2008-04-24'",
+        "9,'Intrepid Ibex',8.10,'2008-10-18'",
+        "10,'Jaunty Jackalope',9.04,'2009-04-23'",
+        "11,'Karmic Koala',9.10,'2009-10-29'",
+        "12,'Lucid Lynx',10.04,'2010-04-29'",
+        "13,'Maverick Meerkat',10.10,'2010-10-10'",
+        "14,'Natty Narwhal',11.04,'2011-04-28'",
+        "15,'Oneiric Ocelot',11.10,'2011-10-10'",
+        "16,'Precise Pangolin',12.04,'2012-04-26'",
+        "17,'Quantal Quetzal',12.10,'2012-10-18'",
+        "18,'Raring Ringtail',13.04,'2013-04-25'",
+        "19,'Saucy Salamander',13.10,'2013-10-17'"
+      );
 
     // Clean up testing table
     dropTable();

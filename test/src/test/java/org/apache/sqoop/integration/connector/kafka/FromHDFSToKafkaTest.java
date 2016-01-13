@@ -20,17 +20,11 @@ package org.apache.sqoop.integration.connector.kafka;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KafkaInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.testcases.KafkaConnectorTestCase;
 import org.testng.annotations.Test;
 
 @Test(groups = "no-real-cluster")
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, KafkaInfrastructureProvider.class, SqoopInfrastructureProvider.class})
-public class FromHDFSToKafkaTest extends SqoopTestCase {
+public class FromHDFSToKafkaTest extends KafkaConnectorTestCase {
 
   public static final String[] input = {
           "A BIRD came down the walk:",
@@ -38,10 +32,9 @@ public class FromHDFSToKafkaTest extends SqoopTestCase {
           "He bit an angle-worm in halves",
           "And ate the fellow raw."
   };
-
   @Test
-  public void testFromHDFSToKafka() throws Exception {
-    String topic = getTestName();
+  public void testBasic() throws Exception {
+    topic = getTestName();
 
     createFromFile("input-0001",input);
 
@@ -60,7 +53,7 @@ public class FromHDFSToKafkaTest extends SqoopTestCase {
 
     // Job connector configs
     fillHdfsFromConfig(job);
-    fillKafkaToConfig(job, topic);
+    fillKafkaToConfig(job);
 
     // driver config
     MDriverConfig driverConfig = job.getDriverConfig();
@@ -70,7 +63,7 @@ public class FromHDFSToKafkaTest extends SqoopTestCase {
     executeJob(job);
 
     // this will assert the content of the array matches the content of the topic
-    validateContent(input, topic);
+    validateContent(input);
   }
 
 

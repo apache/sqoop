@@ -17,10 +17,10 @@
  */
 package org.apache.sqoop.job.etl;
 
-import java.util.List;
-
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
+
+import java.util.List;
 
 /**
  * This allows connector to define how input data from the FROM source can be partitioned.
@@ -37,7 +37,7 @@ public abstract class Partitioner<LinkConfiguration, FromJobConfiguration> {
    *
    * @param context Partitioner context object
    * @param linkConfiguration link configuration object
-   * @param fromJobConfiguration job configuration object
+   * @param jobConfiguration job configuration object
    * @return
    */
   public abstract List<Partition> getPartitions(PartitionerContext context,

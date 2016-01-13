@@ -22,6 +22,9 @@ import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
+import org.apache.sqoop.utils.ClassUtils;
+
+import java.util.Set;
 
 public class KafkaToInitializer extends Initializer<LinkConfiguration,ToJobConfiguration> {
 
@@ -31,4 +34,18 @@ public class KafkaToInitializer extends Initializer<LinkConfiguration,ToJobConfi
   public void initialize(InitializerContext context,LinkConfiguration linkConfiguration, ToJobConfiguration jobConfiguration) {
     LOG.info("Running Kafka Connector initializer. This does nothing except log this message.");
   }
+
+
+  @Override
+  public Set<String> getJars(InitializerContext context, LinkConfiguration
+          linkConfiguration, ToJobConfiguration toJobConfiguration) {
+    Set<String> jars = super.getJars(context, linkConfiguration, toJobConfiguration);
+    // Jars for Kafka, Scala and Yammer (required by Kafka)
+    jars.add(ClassUtils.jarForClass("kafka.javaapi.producer.Producer"));
+    jars.add(ClassUtils.jarForClass("scala.collection.immutable.StringLike"));
+    jars.add(ClassUtils.jarForClass("com.yammer.metrics.Metrics"));
+    return jars;
+  }
+
+
 }

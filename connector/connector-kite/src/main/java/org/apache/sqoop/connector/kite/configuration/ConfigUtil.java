@@ -68,19 +68,4 @@ public class ConfigUtil {
     return toJobConfig.uri.startsWith("dataset:hbase:");
   }
 
-  public static boolean isHdfsJob(ToJobConfig toJobConfig) {
-    return toJobConfig.uri.startsWith("dataset:hdfs:");
-  }
-
-  public static boolean isHdfsJob(FromJobConfig fromJobConfig) {
-    return fromJobConfig.uri.startsWith("dataset:hdfs:");
-  }
-
-  public static String removeDatasetPrefix(String uri) {
-    if (uri.startsWith("dataset:")) {
-      return uri.substring("dataset:".length());
-    } else {
-      return uri;
-    }
-  }
 }

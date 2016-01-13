@@ -66,12 +66,6 @@ public final class MRJobConstants extends Constants {
   public static final String PREFIX_CONNECTOR_TO_CONTEXT =
       PREFIX_JOB_CONFIG + "connector.to.context.";
 
-  public static final String JOB_CONNECTOR_FROM_NAME = PREFIX_JOB_CONFIG
-      + "connector.from.name";
-
-   public static final String JOB_CONNECTOR_TO_NAME = PREFIX_JOB_CONFIG
-      + "connector.to.name";
-
   // Hadoop specific constants
   // We're using constants from Hadoop 1. Hadoop 2 has different names, but
   // provides backward compatibility layer for those names as well.

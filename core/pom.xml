@@ -57,10 +57,6 @@ limitations under the License.
       <groupId>org.apache.sqoop</groupId>
       <artifactId>connector-sdk</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
-      <artifactId>connector-sdk-hadoop</artifactId>
-    </dependency>
   </dependencies>
 
   <build>

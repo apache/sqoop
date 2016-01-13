@@ -28,7 +28,6 @@ import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.utils.ParametrizedUtils;
 import org.testng.annotations.AfterMethod;
@@ -36,7 +35,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
 public class InformalObjectNameTest extends SqoopTestCase {
 
   private String target;
@@ -87,13 +86,11 @@ public class InformalObjectNameTest extends SqoopTestCase {
     fillRdbmsLinkConfig(rdbmsLink);
     rdbmsLink.setName(linkName);
     saveLink(rdbmsLink);
-    // read link, copy the id to current link, then do the compare.
-    MLink repositoryLink = getClient().getLink(linkName);
-    rdbmsLink.setPersistenceId(repositoryLink.getPersistenceId());
-    assertEquals(rdbmsLink, repositoryLink);
+    // read link
+    assertEquals(rdbmsLink, getClient().getLink(linkName));
 
     // update link
-    getClient().updateLink(rdbmsLink, rdbmsLink.getName());
+    getClient().updateLink(rdbmsLink);
 
     // enable link
     getClient().enableLink(linkName, true);
@@ -132,13 +129,11 @@ public class InformalObjectNameTest extends SqoopTestCase {
     job.setName(jobName);
     saveJob(job);
 
-    // read job, copy the id to current job, then do the compare.
-    MJob repositoryJob = getClient().getJob(jobName);
-    job.setPersistenceId(repositoryJob.getPersistenceId());
-    assertEquals(job, repositoryJob);
+    // read job
+    assertEquals(job, getClient().getJob(jobName));
 
     // update job
-    getClient().updateJob(job, job.getName());
+    getClient().updateJob(job);
 
     // enable job
     getClient().enableJob(jobName, true);

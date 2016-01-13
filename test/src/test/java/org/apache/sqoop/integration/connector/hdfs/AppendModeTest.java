@@ -17,20 +17,17 @@
  */
 package org.apache.sqoop.integration.connector.hdfs;
 
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.Test;
 
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
-public class AppendModeTest extends SqoopTestCase {
+/**
+ */
+public class AppendModeTest extends ConnectorTestCase {
 
   @Test
   public void test() throws Exception {
@@ -63,23 +60,23 @@ public class AppendModeTest extends SqoopTestCase {
     // First execution
     executeJob(job);
     assertTo(
-      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
-      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "1,'USA','2004-10-23','San Francisco'",
+      "2,'USA','2004-10-24','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25','Brno'",
+      "4,'USA','2004-10-26','Palo Alto'"
     );
 
     // Second execution
     executeJob(job);
     assertTo(
-      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
-      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
-      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
-      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "1,'USA','2004-10-23','San Francisco'",
+      "2,'USA','2004-10-24','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25','Brno'",
+      "4,'USA','2004-10-26','Palo Alto'",
+      "1,'USA','2004-10-23','San Francisco'",
+      "2,'USA','2004-10-24','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25','Brno'",
+      "4,'USA','2004-10-26','Palo Alto'"
     );
 
     dropTable();

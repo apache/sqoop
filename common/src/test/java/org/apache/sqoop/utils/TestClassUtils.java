@@ -32,7 +32,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import org.apache.sqoop.classloader.ConnectorClassLoader;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -171,7 +170,6 @@ public class TestClassUtils {
   @Test
   public void testLoadClassWithClassLoader() throws Exception {
     String classpath = ClassUtils.jarForClass(testAClass);
-    classpath = classpath.startsWith("file:") ? classpath.substring("file:".length()) : classpath;
     assertNotEquals(testAClass, ClassUtils.loadClassWithClassLoader(testAClass.getName(),
         new ConnectorClassLoader(classpath, getClass().getClassLoader(), Arrays.asList("java."))));
   }

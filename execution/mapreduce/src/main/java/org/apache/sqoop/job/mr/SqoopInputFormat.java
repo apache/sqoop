@@ -20,7 +20,6 @@ package org.apache.sqoop.job.mr;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -33,8 +32,6 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.job.PrefixContext;
 import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.ConnectorManager;
-import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.error.code.MRExecutionError;
 import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.etl.Partition;
@@ -57,29 +54,9 @@ public class SqoopInputFormat extends InputFormat<SqoopSplit, NullWritable> {
     return new SqoopRecordReader();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings({"SIC_INNER_SHOULD_BE_STATIC_ANON"})
-  public List<InputSplit> getSplits(final JobContext context)
-      throws IOException, InterruptedException {
-    SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(
-        context.getConfiguration().get(MRJobConstants.JOB_CONNECTOR_FROM_NAME));
-    ClassLoader loader = null;
-    if (connector != null) {
-      loader = connector.getClass().getClassLoader();
-    }
-
-    return (List<InputSplit>) ClassUtils.executeWithClassLoader(loader,
-        new Callable<List<InputSplit>>() {
-      @Override
-      public List<InputSplit> call() throws IOException, InterruptedException {
-        return getSplitsInternal(context);
-      }
-    });
-  }
-
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private List<InputSplit> getSplitsInternal(JobContext context)
+  @Override
+  public List<InputSplit> getSplits(JobContext context)
       throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
 

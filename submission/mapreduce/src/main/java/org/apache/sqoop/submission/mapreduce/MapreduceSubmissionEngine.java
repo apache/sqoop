@@ -47,6 +47,7 @@ import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.mr.MRConfigurationUtils;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.SubmissionError;
+import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;

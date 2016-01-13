@@ -35,7 +35,7 @@ public class VersionRestTest extends RestTest {
       @Override
       void validate() throws Exception {
         assertResponseCode(500);
-        assertServerException("Unsupported HTTP method", "SERVER_0002");
+        assertServerException("org.apache.sqoop.server.common.ServerError", "SERVER_0002");
       }}),
   };
 

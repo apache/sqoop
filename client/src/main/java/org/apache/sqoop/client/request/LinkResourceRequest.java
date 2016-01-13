@@ -72,11 +72,11 @@ public class LinkResourceRequest extends ResourceRequest {
     return validationBean;
   }
 
-  public ValidationResultBean update(String serverUrl, MLink link, String oldLinkName) {
+  public ValidationResultBean update(String serverUrl, MLink link) {
     LinkBean linkBean = new LinkBean(link);
     // Extract all config inputs including sensitive inputs
     JSONObject linkJson = linkBean.extract(false);
-    String response = super.put(serverUrl + LINK_RESOURCE + UrlSafeUtils.urlPathEncode(oldLinkName),
+    String response = super.put(serverUrl + LINK_RESOURCE + UrlSafeUtils.urlPathEncode(link.getName()),
             linkJson.toJSONString());
     ValidationResultBean validationBean = new ValidationResultBean();
     validationBean.restore(JSONUtils.parse(response));

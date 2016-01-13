@@ -53,8 +53,8 @@ public class TestThrowableBean {
     assertNotNull(retrieved);
     assertEquals(SqoopException.class, retrieved.getClass());
     SqoopException sqoopRetrieved = (SqoopException) retrieved;
-    assertEquals(SerializationError.SERIALIZATION_001.getCode(), sqoopRetrieved.getErrorCode().getCode());
-    assertEquals(SerializationError.SERIALIZATION_001.getMessage(), sqoopRetrieved.getErrorCode().getMessage());
+    assertEquals(SerializationError.class, sqoopRetrieved.getErrorCode().getClass());
+    assertEquals(SerializationError.SERIALIZATION_001, sqoopRetrieved.getErrorCode());
     assertEquals("SERIALIZATION_001:Attempt to pass a non-map object to MAP type. - Secret", sqoopRetrieved.getMessage());
   }
 

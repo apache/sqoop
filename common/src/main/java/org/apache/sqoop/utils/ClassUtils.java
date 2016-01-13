@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.concurrent.Callable;
 
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
@@ -270,25 +269,6 @@ public final class ClassUtils {
       classLoader = ClassUtils.class.getClassLoader();
     }
     return classLoader;
-  }
-
-  public static Object executeWithClassLoader(ClassLoader loader, Callable<?> callable) {
-    ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
-    if (loader != null) {
-      Thread.currentThread().setContextClassLoader(loader);
-    }
-    try {
-      return callable.call();
-    } catch (Exception e) {
-      if (e instanceof SqoopException) {
-        throw (SqoopException) e;
-      } else {
-        throw new SqoopException(CoreError.CORE_0000, e);
-      }
-    } finally {
-      // Restore the old context ClassLoader
-      Thread.currentThread().setContextClassLoader(oldContextClassLoader);
-    }
   }
 
   private ClassUtils() {

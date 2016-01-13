@@ -74,9 +74,17 @@ public class TestJobManager {
 
     HttpEventContext testCtx = new HttpEventContext();
     testCtx.setUsername("testUser");
-    MSubmission jobSubmission = jobManager.createJobSubmission(testCtx, "jobName");
+    MSubmission jobSubmission = jobManager.createJobSubmission(testCtx, 1234L);
     assertEquals(jobSubmission.getCreationUser(), "testUser");
     assertEquals(jobSubmission.getLastUpdateUser(), "testUser");
+  }
+
+  @Test
+  public void testGetConnector() {
+    when(connectorMgrMock.getSqoopConnector(123l)).thenReturn(sqoopConnectorMock);
+    when(sqoopConnectorMock.getSupportedDirections()).thenReturn(getSupportedDirections());
+    assertEquals(jobManager.getSqoopConnector(123l), sqoopConnectorMock);
+    verify(connectorMgrMock, times(1)).getSqoopConnector(123l);
   }
 
   @Test
@@ -165,15 +173,17 @@ public class TestJobManager {
 
   @Test
   public void testUnknownJob() {
-    SqoopException exception = new SqoopException(DriverError.DRIVER_0004, "Unknown job name: testJobName");
+    long testJobId = 555l;
+    SqoopException exception = new SqoopException(DriverError.DRIVER_0004, "Unknown job id: "
+        + testJobId);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
-    when(jdbcRepoMock.findJob("testJobName")).thenReturn(null);
+    when(jdbcRepoMock.findJob(testJobId)).thenReturn(null);
     try {
-      jobManager.getJob("testJobName");
+      jobManager.getJob(testJobId);
     } catch (SqoopException ex) {
       assertEquals(ex.getMessage(), exception.getMessage());
       verify(repositoryManagerMock, times(1)).getRepository();
-      verify(jdbcRepoMock, times(1)).findJob("testJobName");
+      verify(jdbcRepoMock, times(1)).findJob(testJobId);
     }
   }
 

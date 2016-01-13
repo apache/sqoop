@@ -84,6 +84,7 @@ abstract public class DerbyTestCase {
 
     mockConnectorManager = mock(ConnectorManager.class);
 
+    when(mockConnectorManager.getConnectorConfigurable(1L)).thenReturn(getConnector());
     when(mockConnectorManager.getConnectorConfigurable("A")).thenReturn(getConnector());
 
     ConnectorManager.setInstance(mockConnectorManager);

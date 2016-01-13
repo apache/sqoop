@@ -76,20 +76,20 @@ Creating Link Object
 Check for the registered connectors on your Sqoop server: ::
 
   sqoop:000> show connector
-  +------------------------+----------------+------------------------------------------------------+----------------------+
-  |          Name          |    Version     |                        Class                         | Supported Directions |
-  +------------------------+----------------+------------------------------------------------------+----------------------+
-  | hdfs-connector         | 2.0.0-SNAPSHOT | org.apache.sqoop.connector.hdfs.HdfsConnector        | FROM/TO              |
-  | generic-jdbc-connector | 2.0.0-SNAPSHOT | org.apache.sqoop.connector.jdbc.GenericJdbcConnector | FROM/TO              |
-  +------------------------+----------------+------------------------------------------------------+----------------------+
+  +----+------------------------+----------------+------------------------------------------------------+----------------------+
+  | Id |          Name          |    Version     |                        Class                         | Supported Directions |
+  +----+------------------------+----------------+------------------------------------------------------+----------------------+
+  | 1  | hdfs-connector         | 2.0.0-SNAPSHOT | org.apache.sqoop.connector.hdfs.HdfsConnector        | FROM/TO              |
+  | 2  | generic-jdbc-connector | 2.0.0-SNAPSHOT | org.apache.sqoop.connector.jdbc.GenericJdbcConnector | FROM/TO              |
+  +----+------------------------+----------------+------------------------------------------------------+----------------------+
 
-Our example contains two connectors. The ``generic-jdbc-connector`` is a basic connector relying on the Java JDBC interface for communicating with data sources. It should work with the most common databases that are providing JDBC drivers. Please note that you must install JDBC drivers separately. They are not bundled in Sqoop due to incompatible licenses.
+Our example contains two connectors. The one with connector Id 2 is called the ``generic-jdbc-connector``. This is a basic connector relying on the Java JDBC interface for communicating with data sources. It should work with the most common databases that are providing JDBC drivers. Please note that you must install JDBC drivers separately. They are not bundled in Sqoop due to incompatible licenses.
 
-Generic JDBC Connector in our example has a name ``generic-jdbc-connector`` and we will use this value to create new link object for this connector. Note that the link name should be unique.
+Generic JDBC Connector in our example has a persistence Id 2 and we will use this value to create new link object for this connector. Note that the link name should be unique.
 ::
 
-  sqoop:000> create link -connector generic-jdbc-connector
-  Creating link for connector with name generic-jdbc-connector
+  sqoop:000> create link -c 2
+  Creating link for connector with id 2
   Please fill following values to create new link object
   Name: First Link
 
@@ -101,22 +101,22 @@ Generic JDBC Connector in our example has a name ``generic-jdbc-connector`` and 
   JDBC Connection Properties:
   There are currently 0 values in the map:
   entry#protocol=tcp
-  New link was successfully created with validation status OK name First Link
+  New link was successfully created with validation status OK and persistent id 1
 
-Our new link object was created with assigned name First Link.
+Our new link object was created with assigned id 1.
 
-In the ``show connector -all`` we see that there is a hdfs-connector registered. Let us create another link object but this time for the  hdfs-connector instead.
+In the ``show connector -all`` we see that there is a hdfs-connector registered in sqoop with the persistent id 1. Let us create another link object but this time for the  hdfs-connector instead.
 
 ::
 
-  sqoop:000> create link -connector hdfs-connector
-  Creating link for connector with name hdfs-connector
+  sqoop:000> create link -c 1
+  Creating link for connector with id 1
   Please fill following values to create new link object
   Name: Second Link
 
   Link configuration
   HDFS URI: hdfs://nameservice1:8020/
-  New link was successfully created with validation status OK and name Second Link
+  New link was successfully created with validation status OK and persistent id 2
 
 Creating Job Object
 ===================
@@ -127,8 +127,8 @@ Connectors implement the ``From`` for reading data from and/or ``To`` for writin
 
   sqoop:000> show link --all
   2 link(s) to show:
-  link with name First Link (Enabled: true, Created by root at 11/4/14 4:27 PM, Updated by root at 11/4/14 4:27 PM)
-  Using Connector with name generic-jdbc-connector
+  link with id 1 and name First Link (Enabled: true, Created by root at 11/4/14 4:27 PM, Updated by root at 11/4/14 4:27 PM)
+  Using Connector id 2
     Link configuration
       JDBC Driver Class: com.mysql.jdbc.Driver
       JDBC Connection String: jdbc:mysql://mysql.ent.cloudera.com/sqoop
@@ -136,16 +136,16 @@ Connectors implement the ``From`` for reading data from and/or ``To`` for writin
       Password:
       JDBC Connection Properties:
         protocol = tcp
-  link with name Second Link (Enabled: true, Created by root at 11/4/14 4:38 PM, Updated by root at 11/4/14 4:38 PM)
-  Using Connector with name hdfs-connector
+  link with id 2 and name Second Link (Enabled: true, Created by root at 11/4/14 4:38 PM, Updated by root at 11/4/14 4:38 PM)
+  Using Connector id 1
     Link configuration
       HDFS URI: hdfs://nameservice1:8020/
 
-Next, we can use the two link names to associate the ``From`` and ``To`` for the job.
+Next, we can use the two link Ids to associate the ``From`` and ``To`` for the job.
 ::
 
-   sqoop:000> create job -f "First Link" -t "Second Link"
-   Creating job for links with from name First Link and to name Second Link
+   sqoop:000> create job -f 1 -t 2
+   Creating job for links with from id 1 and to id 2
    Please fill following values to create new job object
    Name: Sqoopy
 
@@ -182,9 +182,9 @@ Next, we can use the two link names to associate the ``From`` and ``To`` for the
     Driver Config
     Extractors:(Optional) 2
     Loaders:(Optional) 2
-    New job was successfully created with validation status OK  and name jobName
+    New job was successfully created with validation status OK  and persistent id 1
 
-Our new job object was created with assigned name Sqoopy. Note that if null value is allowed for the partition column,
+Our new job object was created with assigned id 1. Note that if null value is allowed for the partition column,
 at least 2 extractors are needed for Sqoop to carry out the data transfer. On specifying 1 extractor in this
 scenario, Sqoop shall ignore this setting and continue with 2 extractors.
 
@@ -194,9 +194,9 @@ Start Job ( a.k.a Data transfer )
 You can start a sqoop job with the following command:
 ::
 
-  sqoop:000> start job -name Sqoopy
+  sqoop:000> start job -j 1
   Submission details
-  Job Name: Sqoopy
+  Job ID: 1
   Server URL: http://localhost:12000/sqoop/
   Created by: root
   Creation date: 2014-11-04 19:43:29 PST
@@ -209,9 +209,9 @@ You can iteratively check your running job status with ``status job`` command:
 
 ::
 
-  sqoop:000> status job -n Sqoopy
+  sqoop:000> status job -j 1
   Submission details
-  Job Name: Sqoopy
+  Job ID: 1
   Server URL: http://localhost:12000/sqoop/
   Created by: root
   Creation date: 2014-11-04 19:43:29 PST
@@ -224,9 +224,9 @@ Alternatively you can start a sqoop job and observe job running status with the 
 
 ::
 
-  sqoop:000> start job -n Sqoopy -s
+  sqoop:000> start job -j 1 -s
   Submission details
-  Job Name: Sqoopy
+  Job ID: 1
   Server URL: http://localhost:12000/sqoop/
   Created by: root
   Creation date: 2014-11-04 19:43:29 PST
@@ -239,4 +239,4 @@ Alternatively you can start a sqoop job and observe job running status with the 
 
 And finally you can stop running the job at any time using ``stop job`` command: ::
 
-  sqoop:000> stop job -n Sqoopy
+  sqoop:000> stop job -j 1

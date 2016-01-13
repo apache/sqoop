@@ -22,12 +22,7 @@ import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
-import org.apache.sqoop.test.infrastructure.Infrastructure;
-import org.apache.sqoop.test.infrastructure.SqoopTestCase;
-import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -35,8 +30,7 @@ import java.util.List;
 /**
  * Import simple table with various configurations.
  */
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
-public class FromRDBMSToHDFSTest extends SqoopTestCase {
+public class FromRDBMSToHDFSTest extends ConnectorTestCase {
 
   @Test
   public void testCities() throws Exception {
@@ -70,10 +64,10 @@ public class FromRDBMSToHDFSTest extends SqoopTestCase {
 
     // Assert correct output
     assertTo(
-      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
-      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "1,'USA','2004-10-23','San Francisco'",
+      "2,'USA','2004-10-24','Sunnyvale'",
+      "3,'Czech Republic','2004-10-25','Brno'",
+      "4,'USA','2004-10-26','Palo Alto'"
     );
 
     // Clean up testing table
@@ -289,10 +283,10 @@ public class FromRDBMSToHDFSTest extends SqoopTestCase {
 
     // Assert correct output
     assertTo(
-      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
-      "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
-      "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+            "1,'USA','2004-10-23','San Francisco'",
+            "2,'USA','2004-10-24','Sunnyvale'",
+            "3,'Czech Republic','2004-10-25','Brno'",
+            "4,'USA','2004-10-26','Palo Alto'"
     );
 
     // Clean up testing table

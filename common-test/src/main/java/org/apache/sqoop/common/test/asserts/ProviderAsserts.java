@@ -21,7 +21,6 @@ import org.apache.sqoop.common.test.db.DatabaseProvider;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.test.db.TableName;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -45,9 +44,23 @@ public class ProviderAsserts {
    * @param conditions Conditions for identifying the row
    * @param values Values that should be present in the table
    */
-  public static void assertRow(DatabaseProvider provider, TableName tableName,  Object[] conditions, Object ...values) {
-    try (PreparedStatement preparedStatement = provider.getRowsPreparedStatement(tableName, conditions);
-         ResultSet rs = preparedStatement.executeQuery()) {
+  public static void assertRow(DatabaseProvider provider, TableName tableName,  Object []conditions, Object ...values) {
+    assertRow(provider, tableName, true, conditions, values);
+  }
+
+  /**
+   * Assert row in the table.
+   *
+   * @param provider Provider that should be used to query the database
+   * @param tableName Table name
+   * @param escapeValues Flag whether the values should be escaped based on their type when using in the generated queries or not
+   * @param conditions Conditions for identifying the row
+   * @param values Values that should be present in the table
+   */
+  public static void assertRow(DatabaseProvider provider, TableName tableName, boolean escapeValues, Object []conditions, Object ...values) {
+    try (Statement stmt = provider.getConnection().createStatement();
+         ResultSet rs = stmt.executeQuery(provider.getRowsSql(tableName, escapeValues, conditions))) {
+
       if(! rs.next()) {
         fail("No rows found.");
       }

@@ -110,13 +110,12 @@ Each input object in a config is structured below:
 
 
 To send a filled config in the request, you should always use config id and input id to map the values to their correspondig names.
-For example, the following request contains an input value ``com.mysql.jdbc.Driver`` with input id ``7`` inside a config with id ``4`` that belongs to a link with name ``linkName``
+For example, the following request contains an input value ``com.mysql.jdbc.Driver`` with input id ``7`` inside a config with id ``4`` that belongs to a link with id ``3``
 
 ::
 
       link: {
-            id : 3,
-            name: "linkName",
+            id: 3,
             enabled: true,
             link-config-values: [{
                 id: 4,
@@ -354,10 +353,10 @@ Get all the connectors registered in Sqoop
     }]
   }
 
-/v1/connector/[cname] - [GET] - Get Connector
+/v1/connector/[cname] or /v1/connector/[cid] - [GET] - Get Connector
 ---------------------------------------------------------------------
 
-Provide the unique name of the connector in the url ``[cname]`` part.
+Provide the id or unique name of the connector in the url ``[cid]`` or ``[cname]`` part.
 
 * Method: ``GET``
 * Format: ``JSON``
@@ -368,7 +367,7 @@ Provide the unique name of the connector in the url ``[cname]`` part.
 +--------------------------+----------------------------------------------------------------------------------------+
 |   Field                  | Description                                                                            |
 +==========================+========================================================================================+
-| ``name``                 | The name for the connector ( registered as a configurable )                            |
+| ``id``                   | The id for the connector ( registered as a configurable )                              |
 +--------------------------+----------------------------------------------------------------------------------------+
 | ``job-config``           | Connector job config and inputs for both FROM and TO                                   |
 +--------------------------+----------------------------------------------------------------------------------------+
@@ -386,7 +385,6 @@ Provide the unique name of the connector in the url ``[cname]`` part.
    {
     connector: {
         id: 1,
-        name: "connectorName",
         job-config: {
             TO: [{
                 id: 3,
@@ -552,7 +550,7 @@ Get all the links created in Sqoop
         link-config-values: [],
         name: "First Link",
         creation-date: 1415309361756,
-        connector-name: "connectorName1",
+        connector-id: 1,
         update-date: 1415309361756,
         creation-user: "root"
       },
@@ -563,7 +561,7 @@ Get all the links created in Sqoop
         link-config-values: [],
         name: "Second Link",
         creation-date: 1415309390807,
-        connector-name: "connectorName2",
+        connector-id: 2,
         update-date: 1415309390807,
         creation-user: "root"
       }
@@ -576,12 +574,12 @@ Get all the links created in Sqoop
 Get all the links for a given connector identified by ``[cname]`` part.
 
 
-/v1/link/[lname]  - [GET] - Get Link
+/v1/link/[lname]  or /v1/link/[lid] - [GET] - Get Link
 -------------------------------------------------------------------------------
 
-Provide the unique name of the link in the url ``[lname]`` part.
+Provide the id or unique name of the link in the url ``[lid]`` or ``[lname]`` part.
 
-Get all the details of the link including the name, type and the corresponding config input values for the link
+Get all the details of the link including the id, name, type and the corresponding config input values for the link
 
 
 * Method: ``GET``
@@ -612,7 +610,7 @@ Get all the details of the link including the name, type and the corresponding c
         update-user: "root",
         name: "First Link",
         creation-date: 1415287846371,
-        connector-name: "connectorName",
+        connector-id: 1,
         update-date: 1415287846371,
         creation-user: "root"
     }
@@ -675,7 +673,7 @@ Create a new link object. Provide values to the link config inputs for the ones 
         update-user: "root",
         name: "testLink",
         creation-date: 1415202223048,
-        connector-name: "connectorName",
+        connector-id: 1,
         update-date: 1415202223048,
         creation-user: "root"
     }
@@ -686,7 +684,7 @@ Create a new link object. Provide values to the link config inputs for the ones 
 +---------------------------+--------------------------------------------------------------------------------------+
 |   Field                   | Description                                                                          |
 +===========================+======================================================================================+
-| ``name``                  | The name assigned for this new created link                                          |
+| ``id``                    | The id assigned for this new created link                                            |
 +---------------------------+--------------------------------------------------------------------------------------+
 | ``validation-result``     | The validation status for the  link config inputs given in the post data             |
 +---------------------------+--------------------------------------------------------------------------------------+
@@ -709,10 +707,10 @@ Create a new link object. Provide values to the link config inputs for the ones 
    }
 
 
-/v1/link/[lname] - [PUT] - Update Link
+/v1/link/[lname]  or /v1/link/[lid] - [PUT] - Update Link
 ---------------------------------------------------------
 
-Update an existing link object with name [lname]. To make the procedure of filling inputs easier, the general practice
+Update an existing link object with name [lname] or id [lid]. To make the procedure of filling inputs easier, the general practice
 is get the link first and then change some of the values for the inputs.
 
 * Method: ``PUT``
@@ -728,30 +726,30 @@ is get the link first and then change some of the values for the inputs.
     ]
   }
 
-/v1/link/[lname]  - [DELETE] - Delete Link
+/v1/link/[lname]  or /v1/link/[lid]  - [DELETE] - Delete Link
 -----------------------------------------------------------------
 
-Delete a link with name [lname]
+Delete a link with name [lname] or id [lid]
 
 * Method: ``DELETE``
 * Format: ``JSON``
 * Request Content: ``None``
 * Response Content: ``None``
 
-/v1/link/[lname]/enable  - [PUT] - Enable Link
+/v1/link/[lid]/enable  or /v1/link/[lname]/enable  - [PUT] - Enable Link
 --------------------------------------------------------------------------------
 
-Enable a link with name ``lname``
+Enable a link with id ``lid`` or name ``lname``
 
 * Method: ``PUT``
 * Format: ``JSON``
 * Request Content: ``None``
 * Response Content: ``None``
 
-/v1/link/[lname]/disable - [PUT] - Disable Link
+/v1/link/[lid]/disable - [PUT] - Disable Link
 ---------------------------------------------------------
 
-Disable a link with name ``lname``
+Disable a link with id ``lid`` or name ``lname``
 
 * Method: ``PUT``
 * Format: ``JSON``
@@ -775,33 +773,33 @@ Get all the jobs created in Sqoop
      jobs: [{
         driver-config-values: [],
             enabled: true,
-            from-connector-name: "fromConnectorName",
+            from-connector-id: 1,
             update-user: "root",
             to-config-values: [],
-            to-connector-name: "toConnectorName",
+            to-connector-id: 2,
             creation-date: 1415310157618,
             update-date: 1415310157618,
             creation-user: "root",
             id: 1,
-            to-link-name: "toLinkName",
+            to-link-id: 2,
             from-config-values: [],
             name: "First Job",
-            from-link-name: "fromLinkName"
+            from-link-id: 1
        },{
         driver-config-values: [],
             enabled: true,
-            from-connector-name: "fromConnectorName",
+            from-connector-id: 2,
             update-user: "root",
             to-config-values: [],
-            to-connector-name: "toConnectorName",
+            to-connector-id: 1,
             creation-date: 1415310650600,
             update-date: 1415310650600,
             creation-user: "root",
             id: 2,
-            to-link-name: "toLinkName",
+            to-link-id: 1,
             from-config-values: [],
             name: "Second Job",
-            from-link-name: "fromLinkName"
+            from-link-id: 2
        }]
   }
 
@@ -810,10 +808,11 @@ Get all the jobs created in Sqoop
 Get all the jobs for a given connector identified by ``[cname]`` part.
 
 
-/v1/job/[jname] - [GET] - Get Job
+/v1/job/[jname] or /v1/job/[jid] - [GET] - Get Job
 -----------------------------------------------------
 
-Provide the name of the job in the url [jname] part.
+Provide the name or the id of the job in the url [jname]
+part or [jid] part.
 
 * Method: ``GET``
 * Format: ``JSON``
@@ -844,7 +843,7 @@ Provide the name of the job in the url [jname] part.
                 type: "JOB"
             }],
             enabled: true,
-            from-connector-name: "fromConnectorName",
+            from-connector-id: 1,
             update-user: "root",
             to-config-values: [{
                 id: 6,
@@ -888,12 +887,12 @@ Provide the name of the job in the url [jname] part.
                 name: "toJobConfig",
                 type: "JOB"
             }],
-            to-connector-name: "toConnectorName",
+            to-connector-id: 2,
             creation-date: 1415310157618,
             update-date: 1415310157618,
             creation-user: "root",
             id: 1,
-            to-link-name: "toLinkName",
+            to-link-id: 2,
             from-config-values: [{
                 id: 2,
                 inputs: [{
@@ -908,7 +907,7 @@ Provide the name of the job in the url [jname] part.
                 type: "JOB"
             }],
             name: "First Job",
-            from-link-name: "fromLinkName"
+            from-link- id: 1
     }
  }
 
@@ -929,9 +928,9 @@ Create a new job object with the corresponding config values.
 +==========================+======================================================================================+
 | ``job``                  | The root of the post data in JSON                                                    |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``from-link-name``       | The name of the from link for the job                                                |
+| ``from-link-id``         | The id of the from link for the job                                                  |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``to-link-name``         | The name of the to link for the job                                                  |
+| ``to-link-id``           | The id of the to link for the job                                                    |
 +--------------------------+--------------------------------------------------------------------------------------+
 | ``id``                   | The id of the link can be left blank in the post data                                |
 +--------------------------+--------------------------------------------------------------------------------------+
@@ -953,10 +952,9 @@ Create a new job object with the corresponding config values.
 +--------------------------+--------------------------------------------------------------------------------------+
 | ``driver-config-values`` | Config input values for driver                                                       |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``from-connector-name``  | The name of the from connector for the job                                           |
+| ``connector-id``         | The id of the connector used for this link                                           |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``to-connector-name``    | The name of the to connector for the job                                             |
-+--------------------------+--------------------------------------------------------------------------------------+
+
 
 * Request Example:
 
@@ -988,7 +986,7 @@ Create a new job object with the corresponding config values.
        }
      ],
      enabled: true,
-     from-connector-name: "fromConnectorName",
+     from-connector-id: 1,
      update-user: "root",
      to-config-values: [
        {
@@ -1041,12 +1039,12 @@ Create a new job object with the corresponding config values.
          type: "JOB"
        }
      ],
-     to-connector-name: "toConnectorName",
+     to-connector-id: 2,
      creation-date: 1415310157618,
      update-date: 1415310157618,
      creation-user: "root",
      id: -1,
-     to-link-name: "toLinkName",
+     to-link-id: 2,
      from-config-values: [
        {
          id: 2,
@@ -1065,7 +1063,7 @@ Create a new job object with the corresponding config values.
        }
      ],
      name: "Test Job",
-     from-link-name: "fromLinkName"
+     from-link-id: 1
     }
   }
 
@@ -1074,7 +1072,7 @@ Create a new job object with the corresponding config values.
 +---------------------------+--------------------------------------------------------------------------------------+
 |   Field                   | Description                                                                          |
 +===========================+======================================================================================+
-| ``name``                  | The name assigned for this new created job                                           |
+| ``id``                    | The id assigned for this new created job                                             |
 +--------------------------+---------------------------------------------------------------------------------------+
 | ``validation-result``     | The validation status for the job config and driver config inputs in the post data   |
 +---------------------------+--------------------------------------------------------------------------------------+
@@ -1098,10 +1096,10 @@ Create a new job object with the corresponding config values.
    }
 
 
-/v1/job/[jname] - [PUT] - Update Job
+/v1/job/[jid] - [PUT] - Update Job
 ---------------------------------------------------------
 
-Update an existing job object with name [jname]. To make the procedure of filling inputs easier, the general practice
+Update an existing job object with id [jid]. To make the procedure of filling inputs easier, the general practice
 is get the existing job object first and then change some of the inputs.
 
 * Method: ``PUT``
@@ -1120,30 +1118,30 @@ The same as Create Job.
   }
 
 
-/v1/job/[jname] - [DELETE] - Delete Job
+/v1/job/[jid] - [DELETE] - Delete Job
 ---------------------------------------------------------
 
-Delete a job with name ``jname``.
+Delete a job with id ``jid``.
 
 * Method: ``DELETE``
 * Format: ``JSON``
 * Request Content: ``None``
 * Response Content: ``None``
 
-/v1/job/[jname]/enable - [PUT] - Enable Job
+/v1/job/[jid]/enable - [PUT] - Enable Job
 ---------------------------------------------------------
 
-Enable a job with name ``jname``.
+Enable a job with id ``jid``.
 
 * Method: ``PUT``
 * Format: ``JSON``
 * Request Content: ``None``
 * Response Content: ``None``
 
-/v1/job/[jname]/disable - [PUT] - Disable Job
+/v1/job/[jid]/disable - [PUT] - Disable Job
 ---------------------------------------------------------
 
-Disable a job with name ``jname``.
+Disable a job with id ``jid``.
 
 * Method: ``PUT``
 * Format: ``JSON``
@@ -1151,10 +1149,10 @@ Disable a job with name ``jname``.
 * Response Content: ``None``
 
 
-/v1/job/[jname]/start - [PUT]- Start Job
+/v1/job/[jid]/start or /v1/job/[jname]/start - [PUT]- Start Job
 ---------------------------------------------------------------------------------
 
-Start a job with name ``[jname]`` to trigger the job execution
+Start a job with name ``[jname]`` or with id ``[jid]`` to trigger the job execution
 
 * Method: ``POST``
 * Format: ``JSON``
@@ -1172,7 +1170,6 @@ Start a job with name ``[jname]`` to trigger the job execution
       "external-id": "job_1412137947693_0004",
       "status": "BOOTING",
       "job": 2,
-      "job-name": "jobName",
       "creation-date": 1415312531188,
       "to-schema": {
         "created": 1415312531426,
@@ -1213,7 +1210,6 @@ Start a job with name ``[jname]`` to trigger the job execution
        external-id: "job_1412137947693_0004",
        status: "SUCCEEDED",
        job: 2,
-       job-name: "jobName",
        creation-date: 1415312531188,
        external-link: "http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0004/",
        counters: {
@@ -1275,7 +1271,6 @@ Start a job with name ``[jname]`` to trigger the job execution
       "status": "FAILURE_ON_SUBMIT",
       "error-summary": "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner run",
       "job": 1,
-      "job-name": "jobName",
       "creation-date": 1415312390570,
       "to-schema": {
         "created": 1415312390797,
@@ -1306,20 +1301,20 @@ Start a job with name ``[jname]`` to trigger the job execution
     }
   }
 
-/v1/job/[jname]/stop  - [PUT]- Stop Job
+/v1/job/[jid]/stop or /v1/job/[jname]/stop  - [PUT]- Stop Job
 ---------------------------------------------------------------------------------
 
-Stop a job with name ``[jname]`` to abort the running job.
+Stop a job with name ``[janme]`` or with id ``[jid]`` to abort the running job.
 
 * Method: ``PUT``
 * Format: ``JSON``
 * Request Content: ``None``
 * Response Content: ``Submission Record``
 
-/v1/job/[jname]/status  - [GET]- Get Job Status
+/v1/job/[jid]/status or /v1/job/[jname]/status  - [GET]- Get Job Status
 ---------------------------------------------------------------------------------
 
-Get status of the running job with name ``[jname]``
+Get status of the running job with name ``[janme]`` or with id ``[jid]``
 
 * Method: ``GET``
 * Format: ``JSON``
@@ -1335,7 +1330,6 @@ Get status of the running job with name ``[jname]``
           "external-id": "job_1412137947693_0004",
           "status": "RUNNING",
           "job": 2,
-          "job-name": "jobName",
           "creation-date": 1415312531188,
           "external-link": "http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0004/"
       }
@@ -1365,8 +1359,6 @@ Provide the name of the job in the url [jname] part.
 +--------------------------+--------------------------------------------------------------------------------------+
 | ``job``                  | The id of the Sqoop job                                                              |
 +--------------------------+--------------------------------------------------------------------------------------+
-| ``job-name``             | The name of the Sqoop job                                                            |
-+--------------------------+--------------------------------------------------------------------------------------+
 | ``creation-date``        | The submission timestamp                                                             |
 +--------------------------+--------------------------------------------------------------------------------------+
 | ``last-update-date``     | The timestamp of the last status update                                              |
@@ -1390,7 +1382,6 @@ Provide the name of the job in the url [jname] part.
         external-id: "job_1412137947693_0004",
         status: "SUCCEEDED",
         job: 2,
-        job-name: "jobName",
         creation-date: 1415312531188,
         external-link: "http://vbsqoop-1.ent.cloudera.com:8088/proxy/application_1412137947693_0004/",
         counters: {
@@ -1444,7 +1435,6 @@ Provide the name of the job in the url [jname] part.
         status: "FAILURE_ON_SUBMIT",
         error-summary: "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner run",
         job: 1,
-        job-name: "jobName",
         creation-date: 1415312390570,
         error-details: "org.apache.sqoop.common.SqoopException: GENERIC_HDFS_CONNECTOR_0000:Error occurs during partitioner...."
       }

@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -36,8 +35,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(
-  {"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
+@edu.umd.cs.findbugs.annotations.SuppressWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
 public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobConfiguration, GenericJdbcPartition> {
 
  public static final Logger LOG = Logger.getLogger(GenericJdbcExtractor.class);
@@ -45,14 +43,19 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
  private long rowsRead = 0;
   @Override
   public void extract(ExtractorContext context, LinkConfiguration linkConfig, FromJobConfiguration fromJobConfig, GenericJdbcPartition partition) {
+    GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig);
+
+    String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL);
+    String conditions = partition.getConditions();
+    query = query.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, conditions);
+    LOG.info("Using query: " + query);
+
     rowsRead = 0;
     Schema schema = context.getSchema();
     Column[] schemaColumns = schema.getColumnsArray();
-    try (
-      GenericJdbcExecutor executor = new GenericJdbcExecutor(linkConfig);
-      PreparedStatement preparedStatement = createPreparedStatement(context, executor, partition);
-      ResultSet resultSet = preparedStatement.executeQuery()
-    ) {
+    try (Statement statement = executor.getConnection().createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+         ResultSet resultSet = statement.executeQuery(query);) {
       ResultSetMetaData metaData = resultSet.getMetaData();
       int columnCount = metaData.getColumnCount();
       if (schemaColumns.length != columnCount) {
@@ -70,15 +73,15 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
           switch (schemaColumn.getType()) {
           case DATE:
             // convert the sql date to JODA time as prescribed the Sqoop IDF spec
-            array[i] = LocalDate.fromDateFields(resultSet.getDate(i + 1));
+            array[i] = LocalDate.fromDateFields((java.sql.Date)resultSet.getObject(i + 1));
             break;
           case DATE_TIME:
             // convert the sql date time to JODA time as prescribed the Sqoop IDF spec
-            array[i] = LocalDateTime.fromDateFields(resultSet.getTimestamp(i + 1));
+            array[i] = LocalDateTime.fromDateFields((java.sql.Timestamp)resultSet.getObject(i + 1));
             break;
           case TIME:
             // convert the sql time to JODA time as prescribed the Sqoop IDF spec
-            array[i] = LocalTime.fromDateFields(resultSet.getTime(i + 1));
+            array[i] = LocalTime.fromDateFields((java.sql.Time)resultSet.getObject(i + 1));
             break;
           default:
             //for anything else
@@ -93,6 +96,8 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0004, e);
 
+    } finally {
+      executor.close();
     }
   }
 
@@ -101,16 +106,4 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
     return rowsRead;
   }
 
-  private PreparedStatement createPreparedStatement(ExtractorContext context, GenericJdbcExecutor executor, GenericJdbcPartition partition) throws SQLException {
-    String query = context.getString(GenericJdbcConnectorConstants.CONNECTOR_JDBC_FROM_DATA_SQL);
-    String condition = partition.getCondition();
-    query = query.replace(GenericJdbcConnectorConstants.SQL_CONDITIONS_TOKEN, condition);
-
-    LOG.info("Creating PreparedStatement with query: " + query);
-
-    PreparedStatement preparedStatement = executor.getConnection().prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    partition.addParamsToPreparedStatement(preparedStatement);
-
-    return preparedStatement;
-  }
 }
