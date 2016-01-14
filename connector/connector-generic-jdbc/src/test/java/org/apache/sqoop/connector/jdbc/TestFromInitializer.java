@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import static org.testng.Assert.assertEquals;
+
 import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,8 +26,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.job.Constants;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
@@ -36,8 +38,6 @@ import org.apache.sqoop.schema.type.Text;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
 
 public class TestFromInitializer {
 
@@ -137,7 +137,8 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "SELECT * FROM " + schemalessTableName + " WHERE ${CONDITIONS}",
+        //    "SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
         "\"ICOL\", \"DCOL\", \"VCOL\"",
         "\"ICOL\"",
         String.valueOf(Types.INTEGER),
@@ -165,7 +166,8 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+            "SELECT * FROM " + schemalessTableName + " WHERE ${CONDITIONS}",
+        //"SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
         "\"ICOL\", \"DCOL\", \"VCOL\"",
         "\"ICOL\"",
         String.valueOf(Types.INTEGER),
@@ -195,7 +197,8 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+        "SELECT * FROM " + schemalessTableName + " WHERE ${CONDITIONS}",
+        //"SELECT * FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
         "\"ICOL\", \"DCOL\", \"VCOL\"",
         "\"ICOL\"",
         String.valueOf(Types.INTEGER),
@@ -224,7 +227,8 @@ public class TestFromInitializer {
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     verifyResult(context,
-        "SELECT \"ICOL\", \"VCOL\" FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
+            "SELECT \"ICOL\", \"VCOL\" FROM " + schemalessTableName + " WHERE ${CONDITIONS}",
+        //"SELECT \"ICOL\", \"VCOL\" FROM " + executor.encloseIdentifier(schemalessTableName) + " WHERE ${CONDITIONS}",
         "\"" + StringUtils.join(tableColumns, "\", \"") + "\"",
         "\"ICOL\"",
         String.valueOf(Types.INTEGER),
