@@ -28,7 +28,6 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.ConnectorBean;
-import org.apache.sqoop.json.ConnectorsBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MResource;
@@ -63,7 +62,7 @@ public class ConnectorRequestHandler implements RequestHandler {
       // Authorization check
       connectors = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.CONNECTOR, connectors);
 
-      return new ConnectorsBean(connectors, configParamBundles);
+      return new ConnectorBean(connectors, configParamBundles);
 
     } else {
       // support using unique name

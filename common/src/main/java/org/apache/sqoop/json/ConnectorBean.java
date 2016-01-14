@@ -54,7 +54,7 @@ public class ConnectorBean extends ConfigurableBean {
   // to represent the config and inputs with values
   public static final String CONNECTOR_LINK_CONFIG = "link-config";
   public static final String CONNECTOR_JOB_CONFIG = "job-config";
-  private static final String CONNECTOR = "connector";
+  private static final String CONNECTORS = "connectors";
 
   private List<MConnector> connectors;
   private Map<String, ResourceBundle> connectorConfigBundles;
@@ -80,9 +80,16 @@ public class ConnectorBean extends ConfigurableBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
-    JSONObject connector = new JSONObject();
-    connector.put(CONNECTOR, extractConnector(skipSensitive, connectors.get(0)));
-    return connector;
+    JSONArray connectorArray = extractConnectors(skipSensitive);
+    JSONObject connectors = new JSONObject();
+    connectors.put(CONNECTORS, connectorArray);
+    return connectors;
+  }
+
+  @Override
+  public void restore(JSONObject jsonObject) {
+    JSONArray array = JSONUtils.getJSONArray(jsonObject, CONNECTORS);
+    restoreConnectors(array);
   }
 
   @SuppressWarnings("unchecked")
@@ -126,17 +133,9 @@ public class ConnectorBean extends ConfigurableBean {
     return connectorJsonObject;
   }
 
-  @Override
-  public void restore(JSONObject jsonObject) {
-    connectors = new ArrayList<MConnector>();
-    connectorConfigBundles = new HashMap<String, ResourceBundle>();
-    JSONObject obj = JSONUtils.getJSONObject(jsonObject, CONNECTOR);
-    connectors.add(restoreConnector(obj));
-  }
-
   protected void restoreConnectors(JSONArray array) {
-    connectors = new ArrayList<MConnector>();
-    connectorConfigBundles = new HashMap<String, ResourceBundle>();
+    connectors = new ArrayList<>();
+    connectorConfigBundles = new HashMap<>();
     for (Object obj : array) {
       connectors.add(restoreConnector(obj));
     }

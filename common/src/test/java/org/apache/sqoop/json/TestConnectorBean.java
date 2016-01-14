@@ -67,4 +67,98 @@ public class TestConnectorBean {
     assertEquals("a", retrievedBundle.getString("a"));
     assertEquals("b", retrievedBundle.getString("b"));
   }
+
+
+  @Test
+  public void testConnectorsSerialization() {
+    // Create testing connector
+    List<MConnector> connectors = new LinkedList<>();
+    connectors.add(BeanTestUtil.getConnector(1L, "jdbc"));
+    connectors.add(BeanTestUtil.getConnector(2L, "mysql"));
+
+    // Create testing bundles
+    Map<String, ResourceBundle> configBundles = new HashMap<>();
+    configBundles.put("jdbc", ConfigTestUtil.getResourceBundle());
+    configBundles.put("mysql", ConfigTestUtil.getResourceBundle());
+
+    // Serialize it to JSON object
+    ConnectorBean connectorsBean = new ConnectorBean(connectors, configBundles);
+    JSONObject connectorsJSON = connectorsBean.extract(false);
+
+    // "Move" it across network in text form
+    String connectorsJSONString = connectorsJSON.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject parsedConnectors = JSONUtils.parse(connectorsJSONString);
+    ConnectorBean parsedConnectorsBean = new ConnectorBean();
+    parsedConnectorsBean.restore(parsedConnectors);
+
+    assertEquals(connectors.size(), parsedConnectorsBean.getConnectors().size());
+    assertEquals(connectors.get(0), parsedConnectorsBean.getConnectors().get(0));
+    assertEquals(connectors.get(1), parsedConnectorsBean.getConnectors().get(1));
+
+    ResourceBundle retrievedBundle = parsedConnectorsBean.getResourceBundles().get("jdbc");
+    assertNotNull(retrievedBundle);
+    assertEquals("a", retrievedBundle.getString("a"));
+    assertEquals("b", retrievedBundle.getString("b"));
+  }
+
+  @Test
+  public void testSingleDirection() {
+    // Create testing connector
+    List<MConnector> connectors = new LinkedList<>();
+    connectors.add(BeanTestUtil.getConnector(1L, "jdbc", true, false));
+    connectors.add(BeanTestUtil.getConnector(2L, "mysql", false, true));
+
+    // Create testing bundles
+    Map<String, ResourceBundle> bundles = new HashMap<>();
+    bundles.put("jdbc", ConfigTestUtil.getResourceBundle());
+    bundles.put("mysql", ConfigTestUtil.getResourceBundle());
+
+    // Serialize it to JSON object
+    ConnectorBean bean = new ConnectorBean(connectors, bundles);
+    JSONObject json = bean.extract(false);
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = JSONUtils.parse(string);
+    ConnectorBean retrievedBean = new ConnectorBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
+    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
+    assertEquals(connectors.get(1), retrievedBean.getConnectors().get(1));
+  }
+
+  @Test
+  public void testNoDirection() {
+    // Create testing connector
+    List<MConnector> connectors = new LinkedList<>();
+    connectors.add(BeanTestUtil.getConnector(1L, "jdbc", false, false));
+    connectors.add(BeanTestUtil.getConnector(2L, "mysql", false, false));
+
+    // Create testing bundles
+    Map<String, ResourceBundle> bundles = new HashMap<>();
+    bundles.put("jdbc", ConfigTestUtil.getResourceBundle());
+    bundles.put("mysql", ConfigTestUtil.getResourceBundle());
+
+    // Serialize it to JSON object
+    ConnectorBean bean = new ConnectorBean(connectors, bundles);
+    JSONObject json = bean.extract(false);
+
+    // "Move" it across network in text form
+    String string = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject retrievedJson = JSONUtils.parse(string);
+    ConnectorBean retrievedBean = new ConnectorBean();
+    retrievedBean.restore(retrievedJson);
+
+    assertEquals(connectors.size(), retrievedBean.getConnectors().size());
+    assertEquals(connectors.get(0), retrievedBean.getConnectors().get(0));
+    assertEquals(connectors.get(1), retrievedBean.getConnectors().get(1));
+  }
+
 }
