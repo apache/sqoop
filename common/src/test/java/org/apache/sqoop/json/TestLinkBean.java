@@ -22,6 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class TestLinkBean {
     JSONObject json = linkBean.extract(false);
 
     // Check for sensitivity
-    JSONObject linkObj = (JSONObject) json.get(LinkBean.LINK);
+    JSONObject linkObj = (JSONObject)((JSONArray) json.get(LinkBean.LINKS)).get(0);
     JSONObject linkConfigList = (JSONObject) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
     JSONArray linkConfigs = (JSONArray) linkConfigList.get(ConfigInputConstants.CONFIGS);
     List<MValidator> linkValidators = restoreValidator((JSONArray)
@@ -108,7 +109,7 @@ public class TestLinkBean {
     JSONObject jsonFiltered = bean.extract(true);
 
     // Sensitive values should exist
-    JSONObject linkObj = (JSONObject) json.get(LinkBean.LINK);
+    JSONObject linkObj = (JSONObject)((JSONArray) json.get(LinkBean.LINKS)).get(0);
     JSONObject linkConfigList = (JSONObject) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
     JSONArray linkConfigs = (JSONArray) linkConfigList.get(ConfigInputConstants.CONFIGS);
     JSONObject linkConfigObj = (JSONObject) linkConfigs.get(0);
@@ -119,7 +120,7 @@ public class TestLinkBean {
     assertTrue(password.containsKey(ConfigInputConstants.CONFIG_INPUT_VALUE));
 
     // Sensitive values should not exist
-    linkObj = (JSONObject) jsonFiltered.get(LinkBean.LINK);
+    linkObj = (JSONObject)((JSONArray) jsonFiltered.get(LinkBean.LINKS)).get(0);
     linkConfigList = (JSONObject) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
     linkConfigs = (JSONArray) linkConfigList.get(ConfigInputConstants.CONFIGS);
     linkConfigObj = (JSONObject) linkConfigs.get(0);
@@ -128,5 +129,66 @@ public class TestLinkBean {
     // Inputs are ordered when creating link
     password = (JSONObject) inputs.get(2);
     assertFalse(password.containsKey(ConfigInputConstants.CONFIG_INPUT_VALUE));
+  }
+
+  @Test
+  public void testLinksSerialization() {
+    Date created = new Date();
+    Date updated = new Date();
+    MLink link1 = BeanTestUtil.createLink("ahoj", "link1", 666L, created, updated);
+    MLink link2 = BeanTestUtil.createLink("jhoa", "link2", 888L, created, updated);
+
+    List<MLink> links = new ArrayList<>();
+    links.add(link1);
+    links.add(link2);
+
+    // Fill some data at the beginning
+    MStringInput input = (MStringInput) link1.getConnectorLinkConfig().getConfigs().get(0)
+        .getInputs().get(0);
+    input.setValue("Hi there!");
+
+    // Serialize it to JSON object
+    LinkBean linkBean = new LinkBean(links);
+    JSONObject json = linkBean.extract(false);
+
+    // Check for sensitivity
+    JSONArray linksObj = (JSONArray) json.get(LinkBean.LINKS);
+    JSONObject linkObj = (JSONObject) linksObj.get(0);
+
+    JSONObject linkConfigList = (JSONObject) linkObj.get(LinkBean.LINK_CONFIG_VALUES);
+    JSONArray linkConfigs = (JSONArray) linkConfigList.get(ConfigInputConstants.CONFIGS);
+    JSONObject linkConfig = (JSONObject) linkConfigs.get(0);
+    JSONArray inputs = (JSONArray) linkConfig.get(ConfigInputConstants.CONFIG_INPUTS);
+    for (Object inp : inputs) {
+      assertTrue(((JSONObject) inp).containsKey(ConfigInputConstants.CONFIG_INPUT_SENSITIVE));
+    }
+
+    // "Move" it across network in text form
+    String linkJsonString = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject parsedLinkJson = JSONUtils.parse(linkJsonString);
+    LinkBean retrievedBean = new LinkBean();
+    retrievedBean.restore(parsedLinkJson);
+    MLink targetLink1 = retrievedBean.getLinks().get(0);
+    MLink targetLink2 = retrievedBean.getLinks().get(1);
+
+    // Check id and name
+    assertEquals(666L, targetLink1.getPersistenceId());
+    assertEquals(888L, targetLink2.getPersistenceId());
+
+    assertEquals("link1", targetLink1.getName());
+    assertEquals("link2", targetLink2.getName());
+
+    assertEquals("admin", targetLink1.getCreationUser());
+    assertEquals(created, targetLink1.getCreationDate());
+    assertEquals("user", targetLink1.getLastUpdateUser());
+    assertEquals(updated, targetLink1.getLastUpdateDate());
+    assertEquals(false, targetLink1.getEnabled());
+
+    // Test that value was correctly moved
+    MStringInput targetInput = (MStringInput) targetLink1.getConnectorLinkConfig().getConfigs()
+        .get(0).getInputs().get(0);
+    assertEquals("Hi there!", targetInput.getValue());
   }
 }

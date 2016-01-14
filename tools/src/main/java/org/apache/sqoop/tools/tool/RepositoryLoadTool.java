@@ -42,7 +42,7 @@ import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobsBean;
-import org.apache.sqoop.json.LinksBean;
+import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
@@ -149,7 +149,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
             (JSONArray) jsonLinks.get(JSONConstants.LINKS),
             JSONConstants.CONNECTOR_NAME, true);
 
-    LinksBean linksBean = new LinksBean();
+    LinkBean linksBean = new LinkBean();
     linksBean.restore(jsonLinks);
 
     for (MLink link : linksBean.getLinks()) {

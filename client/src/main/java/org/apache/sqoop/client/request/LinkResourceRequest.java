@@ -20,7 +20,6 @@ package org.apache.sqoop.client.request;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.LinkBean;
-import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.utils.UrlSafeUtils;
@@ -54,7 +53,7 @@ public class LinkResourceRequest extends ResourceRequest {
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
-    LinkBean bean = new LinksBean();
+    LinkBean bean = new LinkBean();
     if (linkArg != null) {
       bean = new LinkBean();
     }

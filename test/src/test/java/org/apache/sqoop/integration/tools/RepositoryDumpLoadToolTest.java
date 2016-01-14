@@ -22,7 +22,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobsBean;
-import org.apache.sqoop.json.LinksBean;
+import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.*;
 import org.apache.sqoop.submission.SubmissionStatus;
@@ -69,7 +69,7 @@ public class RepositoryDumpLoadToolTest extends SqoopTestCase {
 
       // verify the links
       JSONObject jsonLinks = (JSONObject) json.get(JSONConstants.LINKS);
-      LinksBean linksBean = new LinksBean();
+      LinkBean linksBean = new LinkBean();
       linksBean.restore(jsonLinks);
       verifyLinks(linksBean.getLinks());
 

@@ -49,7 +49,7 @@ public class LinkBean implements JsonBean {
 
   static final String CONNECTOR_NAME = "connector-name";
   static final String LINK_CONFIG_VALUES = "link-config-values";
-  static final String LINK = "link";
+  static final String LINKS = "links";
 
 
   // Required
@@ -62,10 +62,9 @@ public class LinkBean implements JsonBean {
   // For "extract"
   public LinkBean(MLink link) {
     this();
-    this.links = new ArrayList<MLink>();
+    this.links = new ArrayList<>();
     this.links.add(link);
   }
-
   public LinkBean(List<MLink> links) {
     this();
     this.links = links;
@@ -73,7 +72,7 @@ public class LinkBean implements JsonBean {
 
   // For "restore"
   public LinkBean() {
-    linkConfigBundles = new HashMap<String, ResourceBundle>();
+    linkConfigBundles = new HashMap<>();
   }
 
   public void addConnectorConfigBundle(String connectorName, ResourceBundle connectorConfigBundle) {
@@ -95,9 +94,16 @@ public class LinkBean implements JsonBean {
   @SuppressWarnings("unchecked")
   @Override
   public JSONObject extract(boolean skipSensitive) {
-    JSONObject link = new JSONObject();
-    link.put(LINK, extractLink(skipSensitive, links.get(0)));
-    return link;
+    JSONArray linkArray = extractLinks(skipSensitive);
+    JSONObject links = new JSONObject();
+    links.put(LINKS, linkArray);
+    return links;
+  }
+
+  @Override
+  public void restore(JSONObject jsonObject) {
+    JSONArray array = JSONUtils.getJSONArray(jsonObject, LINKS);
+    restoreLinks(array);
   }
 
   @SuppressWarnings("unchecked")
@@ -125,15 +131,8 @@ public class LinkBean implements JsonBean {
     return linkJsonObject;
   }
 
-  @Override
-  public void restore(JSONObject jsonObject) {
-    links = new ArrayList<MLink>();
-    JSONObject obj = JSONUtils.getJSONObject(jsonObject, LINK);
-    links.add(restoreLink(obj));
-  }
-
   protected void restoreLinks(JSONArray array) {
-    links = new ArrayList<MLink>();
+    links = new ArrayList<>();
     for (Object obj : array) {
       links.add(restoreLink(obj));
     }

@@ -31,7 +31,6 @@ import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.LinkBean;
-import org.apache.sqoop.json.LinksBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.*;
 import org.apache.sqoop.repository.Repository;
@@ -189,7 +188,6 @@ public class LinkRequestHandler implements RequestHandler {
 
   private JsonBean getLinks(RequestContext ctx) {
     String linkName = ctx.getLastURLElement();
-    LinkBean linkBean;
     List<MLink> links;
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();
@@ -216,25 +214,14 @@ public class LinkRequestHandler implements RequestHandler {
     // Authorization check
     links = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.LINK, links);
 
-    // Return bean entity (we have to separate what we're returning here)
-    if(linkName.equals("all")) {
-      linkBean = createLinksBean(links, locale);
-    } else {
-      linkBean = createLinkBean(links, locale);
-    }
-    return linkBean;
+    // And return resulting links
+    return createLinkBean(links, locale);
   }
 
   private LinkBean createLinkBean(List<MLink> links, Locale locale) {
     LinkBean linkBean = new LinkBean(links);
     addConnectorConfigBundle(locale, linkBean);
     return linkBean;
-  }
-
-  private LinksBean createLinksBean(List<MLink> links, Locale locale) {
-    LinksBean linksBean = new LinksBean(links);
-    addConnectorConfigBundle(locale, linksBean);
-    return linksBean;
   }
 
   private void addConnectorConfigBundle(Locale locale, LinkBean bean) {

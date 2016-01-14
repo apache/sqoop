@@ -34,7 +34,7 @@ import org.apache.sqoop.cli.SqoopGnuParser;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.JobsBean;
-import org.apache.sqoop.json.LinksBean;
+import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.repository.Repository;
@@ -107,7 +107,7 @@ public class RepositoryDumpTool extends ConfiguredTool {
 
     LOG.info("Dumping Links with skipSensitive=" + String.valueOf(skipSensitive));
     List<MLink> links = repository.findLinks();
-    LinksBean linkBeans = new LinksBean(links);
+    LinkBean linkBeans = new LinkBean(links);
     JSONObject linksJsonObject = linkBeans.extract(skipSensitive);
     result.put(JSONConstants.LINKS, linksJsonObject);
 
