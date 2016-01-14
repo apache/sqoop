@@ -15,21 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.shell;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Groovysh;
+import org.apache.sqoop.job.etl.Extractor;
+import org.apache.sqoop.job.etl.ExtractorContext;
 
-public class StopCommand extends SqoopCommand {
+public class TestExtractorForShell extends Extractor<TestLinkConfigurationForShell, TestFromJobConfigurationForShell, TestPartitionForShell> {
 
-  public StopCommand(Groovysh shell) {
-    super(shell,
-      Constants.CMD_STOP,
-      Constants.CMD_STOP_SC,
-      new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
-        .put(Constants.FN_JOB, StopJobFunction.class)
-        .build()
-    );
+  @Override
+  public void extract(ExtractorContext context,
+      TestLinkConfigurationForShell linkConfiguration,
+      TestFromJobConfigurationForShell jobConfiguration,
+      TestPartitionForShell partition) {
+  }
+
+  @Override
+  public long getRowsRead() {
+    return 0;
   }
 }

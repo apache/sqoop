@@ -23,7 +23,7 @@ import org.codehaus.groovy.tools.shell.Groovysh;
 
 public class StatusCommand extends SqoopCommand {
 
-  protected StatusCommand(Groovysh shell) {
+  public StatusCommand(Groovysh shell) {
     super(shell,
       Constants.CMD_STATUS,
       Constants.CMD_STATUS_SC,

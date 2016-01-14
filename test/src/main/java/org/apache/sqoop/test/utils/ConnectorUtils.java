@@ -15,9 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.sqoop.test.utils;
 
-package org.apache.sqoop.test.testcases;
+import org.apache.commons.collections.ListUtils;
 
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.StandardLocation;
+import javax.tools.ToolProvider;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,15 +42,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
-
-import org.apache.commons.collections.ListUtils;
-
-public class ConnectorClasspathTestCase extends ConnectorTestCase {
+public class ConnectorUtils {
 
   static class JarContents {
     private List<File> sourceFiles;
@@ -71,28 +69,30 @@ public class ConnectorClasspathTestCase extends ConnectorTestCase {
   }
 
   @SuppressWarnings("unchecked")
-  protected Map<String, String> compileTestConnectorAndDependency(String[] connectorSourceFiles,
+  public static Map<String, String> compileTestConnectorAndDependency(String[] connectorSourceFiles,
       String[] connectorDependencySourceFiles, String[] connectorPropertyFiles, String connectorJarName,
       String connectorDependencyJarName, boolean dependencyBuiltInsideConnectorJar) throws Exception {
+    ClassLoader classLoader = ConnectorUtils.class.getClassLoader();
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     if (compiler == null) {
       throw new IllegalStateException(
-        "Cannot find the system Java compiler. "
-          + "Check that your class path includes tools.jar");
+              "Cannot find the system Java compiler. "
+                      + "Check that your class path includes tools.jar");
     }
 
     Path outputDir = Files.createTempDirectory(null);
 
     Map<String, JarContents> sourceFileToJarMap = new LinkedHashMap<>();
 
-    ClassLoader classLoader = getClass().getClassLoader();
     List<File> sourceFiles = new ArrayList<>();
 
     for (String connectorDependencySourceFile : connectorDependencySourceFiles) {
       File file = new File(classLoader.getResource(connectorDependencySourceFile).getFile());
       sourceFiles.add(file);
     }
-    sourceFileToJarMap.put(connectorDependencyJarName, new JarContents(sourceFiles, ListUtils.EMPTY_LIST, ListUtils.EMPTY_LIST));
+    if (connectorDependencySourceFiles.length > 0) {
+      sourceFileToJarMap.put(connectorDependencyJarName, new JarContents(sourceFiles, ListUtils.EMPTY_LIST, ListUtils.EMPTY_LIST));
+    }
 
     sourceFiles = new ArrayList<>();
     for (String connectorSourceFile : connectorSourceFiles) {
@@ -121,10 +121,10 @@ public class ConnectorClasspathTestCase extends ConnectorTestCase {
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-  private void buildJar(String outputDir, Map<String, JarContents> sourceFileToJarMap) throws IOException {
+  private static void buildJar(String outputDir, Map<String, JarContents> sourceFileToJarMap) throws IOException {
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     StandardJavaFileManager fileManager = compiler.getStandardFileManager
-      (null, null, null);
+            (null, null, null);
 
     List<File> sourceFiles = new ArrayList<>();
     for(JarContents jarContents : sourceFileToJarMap.values()) {
@@ -132,10 +132,10 @@ public class ConnectorClasspathTestCase extends ConnectorTestCase {
     }
 
     fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
-      Arrays.asList(new File(outputDir)));
+            Arrays.asList(new File(outputDir)));
 
     Iterable<? extends JavaFileObject> compilationUnits1 =
-      fileManager.getJavaFileObjectsFromFiles(sourceFiles);
+            fileManager.getJavaFileObjectsFromFiles(sourceFiles);
 
     boolean compiled = compiler.getTask(null, fileManager, null, null, null, compilationUnits1).call();
     if (!compiled) {
@@ -191,7 +191,7 @@ public class ConnectorClasspathTestCase extends ConnectorTestCase {
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings("OS_OPEN_STREAM_EXCEPTION_PATH")
-  private void addFileToJar(File source, JarOutputStream target) throws IOException {
+  private static void addFileToJar(File source, JarOutputStream target) throws IOException {
     String entryName;
     if (source.getName().endsWith(".jar")) {
       // put dependency jars into directory "lib"
@@ -227,9 +227,10 @@ public class ConnectorClasspathTestCase extends ConnectorTestCase {
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-  protected void deleteJars(Map<String, String> jarMap) {
+  public static void deleteJars(Map<String, String> jarMap) {
     for (String jarPath : jarMap.values()) {
       (new File(jarPath)).delete();
     }
   }
+
 }

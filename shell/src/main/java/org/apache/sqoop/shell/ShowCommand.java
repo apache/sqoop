@@ -23,7 +23,7 @@ import org.codehaus.groovy.tools.shell.Groovysh;
 
 public class ShowCommand extends SqoopCommand {
 
-  protected ShowCommand(Groovysh shell) {
+  public ShowCommand(Groovysh shell) {
     super(shell,
       Constants.CMD_SHOW,
       Constants.CMD_SHOW_SC,

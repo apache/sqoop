@@ -15,21 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.shell;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Groovysh;
+import org.apache.sqoop.model.ConfigurationClass;
+import org.apache.sqoop.model.Config;
 
-public class StopCommand extends SqoopCommand {
+@ConfigurationClass
+public class TestLinkConfigurationForShell {
+  @Config public TestLinkConfigForShell testLinkConfigForShell;
 
-  public StopCommand(Groovysh shell) {
-    super(shell,
-      Constants.CMD_STOP,
-      Constants.CMD_STOP_SC,
-      new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
-        .put(Constants.FN_JOB, StopJobFunction.class)
-        .build()
-    );
+  public TestLinkConfigurationForShell() {
+    testLinkConfigForShell = new TestLinkConfigForShell();
   }
 }

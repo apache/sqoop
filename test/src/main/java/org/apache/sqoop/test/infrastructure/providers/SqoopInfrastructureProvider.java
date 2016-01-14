@@ -30,10 +30,10 @@ import org.apache.sqoop.test.minicluster.SqoopMiniClusterFactory;
 public class SqoopInfrastructureProvider extends InfrastructureProvider {
   private static final Logger LOG = Logger.getLogger(SqoopInfrastructureProvider.class);
 
-  private SqoopMiniCluster instance;
-  private String rootPath;
-  private Configuration hadoopConf;
-  private KdcRunner kdc;
+  protected SqoopMiniCluster instance;
+  protected String rootPath;
+  protected Configuration hadoopConf;
+  protected KdcRunner kdc;
 
   public SqoopInfrastructureProvider() {}
 

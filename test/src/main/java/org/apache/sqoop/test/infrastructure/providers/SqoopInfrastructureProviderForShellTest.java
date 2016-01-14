@@ -15,21 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.shell;
+package org.apache.sqoop.test.infrastructure.providers;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Groovysh;
+import org.apache.log4j.Logger;
+import org.apache.sqoop.test.minicluster.JettySqoopMiniClusterWithExternalConnector;
+import org.apache.sqoop.test.minicluster.SqoopMiniClusterFactory;
 
-public class StopCommand extends SqoopCommand {
+public class SqoopInfrastructureProviderForShellTest extends SqoopInfrastructureProvider {
+  private static final Logger LOG = Logger.getLogger(SqoopInfrastructureProviderForShellTest.class);
 
-  public StopCommand(Groovysh shell) {
-    super(shell,
-      Constants.CMD_STOP,
-      Constants.CMD_STOP_SC,
-      new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
-        .put(Constants.FN_JOB, StopJobFunction.class)
-        .build()
-    );
+  @Override
+  public void start() {
+    try {
+      instance = SqoopMiniClusterFactory.getSqoopMiniCluster(System.getProperties(),
+              JettySqoopMiniClusterWithExternalConnector.class, rootPath, hadoopConf, kdc);
+      instance.start();
+    } catch (Exception e) {
+      LOG.error("Could not start Sqoop mini cluster.", e);
+    }
   }
 }

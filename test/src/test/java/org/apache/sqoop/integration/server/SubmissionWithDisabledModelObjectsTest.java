@@ -110,7 +110,7 @@ public class SubmissionWithDisabledModelObjectsTest extends SqoopTestCase {
 
     // Try to execute the job and verify that the it was not executed
     try {
-      executeJob(jobName);
+      executeJob(jobName, true);
       fail("Expected exception as the model classes are disabled.");
     } catch(SqoopException ex) {
       // Top level exception should be CLIENT_0001

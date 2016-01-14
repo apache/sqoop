@@ -42,6 +42,11 @@ limitations under the License.
 
     <dependency>
       <groupId>org.apache.sqoop</groupId>
+      <artifactId>sqoop-shell</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-core</artifactId>
     </dependency>
 
@@ -269,6 +274,21 @@ limitations under the License.
               </suiteXmlFiles>
               <properties>
                 <suitename>tools-tests</suitename>
+              </properties>
+            </configuration>
+          </execution>
+          <execution>
+            <id>shell-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <suiteXmlFiles>
+                <suiteXmlFile>src/test/resources/shell-tests-suite.xml</suiteXmlFile>
+              </suiteXmlFiles>
+              <properties>
+                <suitename>shell-tests</suitename>
               </properties>
             </configuration>
           </execution>

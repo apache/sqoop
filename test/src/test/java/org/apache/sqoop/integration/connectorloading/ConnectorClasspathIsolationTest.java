@@ -30,14 +30,15 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
-import org.apache.sqoop.test.testcases.ConnectorClasspathTestCase;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.utils.ConnectorUtils;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @Test(groups = "no-real-cluster")
-public class ConnectorClasspathIsolationTest extends ConnectorClasspathTestCase {
+public class ConnectorClasspathIsolationTest extends ConnectorTestCase {
 
   private static final String TEST_FROM_CONNECTOR_JAR_NAME = "test-from-connector.jar";
   private static final String TEST_TO_CONNECTOR_JAR_NAME = "test-to-connector.jar";
@@ -126,14 +127,14 @@ public class ConnectorClasspathIsolationTest extends ConnectorClasspathTestCase 
 
   @Test
   public void testConnectorClasspathIsolation() throws Exception {
-    Map<String, String> fromConnectorJarMap = compileTestConnectorAndDependency(
+    Map<String, String> fromConnectorJarMap = ConnectorUtils.compileTestConnectorAndDependency(
         FROM_CONNECTOR_SOURCE_FILES,
         FROM_CONNECTOR_DEPENDENCY_SOURCE_FILES,
         FROM_CONNECTOR_PROPERTY_FILES,
         TEST_FROM_CONNECTOR_JAR_NAME,
         TEST_FROM_DEPENDENCY_JAR_NAME,
         true);
-    Map<String, String> toConnectorJarMap = compileTestConnectorAndDependency(
+    Map<String, String> toConnectorJarMap = ConnectorUtils.compileTestConnectorAndDependency(
         TO_CONNECTOR_SOURCE_FILES,
         TO_CONNECTOR_DEPENDENCY_SOURCE_FILES,
         TO_CONNECTOR_PROPERTY_FILES,
@@ -152,7 +153,7 @@ public class ConnectorClasspathIsolationTest extends ConnectorClasspathTestCase 
     executeJob(job);
 
     stopSqoop();
-    deleteJars(fromConnectorJarMap);
+    ConnectorUtils.deleteJars(fromConnectorJarMap);
   }
 
   private MJob prepareJob() {

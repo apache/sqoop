@@ -23,7 +23,7 @@ import org.codehaus.groovy.tools.shell.Groovysh;
 
 public class StartCommand extends SqoopCommand {
 
-  protected StartCommand(Groovysh shell) {
+  public StartCommand(Groovysh shell) {
     super(shell,
       Constants.CMD_START,
       Constants.CMD_START_SC,

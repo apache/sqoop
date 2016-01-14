@@ -23,7 +23,7 @@ import org.codehaus.groovy.tools.shell.Groovysh;
 
 public class SetCommand extends SqoopCommand {
 
-  protected SetCommand(Groovysh shell) {
+  public SetCommand(Groovysh shell) {
     super(shell,
       Constants.CMD_SET,
       Constants.CMD_SET_SC,

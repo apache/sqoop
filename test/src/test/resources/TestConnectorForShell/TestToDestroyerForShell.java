@@ -15,21 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.shell;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Groovysh;
+import org.apache.sqoop.job.etl.Destroyer;
+import org.apache.sqoop.job.etl.DestroyerContext;
 
-public class StopCommand extends SqoopCommand {
-
-  public StopCommand(Groovysh shell) {
-    super(shell,
-      Constants.CMD_STOP,
-      Constants.CMD_STOP_SC,
-      new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
-        .put(Constants.FN_JOB, StopJobFunction.class)
-        .build()
-    );
+public class TestToDestroyerForShell extends Destroyer<TestLinkConfigurationForShell, TestToJobConfigurationForShell> {
+  @Override
+  public void destroy(DestroyerContext context, TestLinkConfigurationForShell linkConfig,
+                      TestToJobConfigurationForShell jobConfig) {
   }
 }

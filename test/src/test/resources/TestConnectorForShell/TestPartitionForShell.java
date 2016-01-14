@@ -15,21 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.shell;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Groovysh;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-public class StopCommand extends SqoopCommand {
+import org.apache.sqoop.job.etl.Partition;
 
-  public StopCommand(Groovysh shell) {
-    super(shell,
-      Constants.CMD_STOP,
-      Constants.CMD_STOP_SC,
-      new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
-        .put(Constants.FN_JOB, StopJobFunction.class)
-        .build()
-    );
-  }
+public class TestPartitionForShell extends Partition {
+  public TestPartitionForShell() {}
+
+  @Override
+  public void readFields(DataInput in) throws IOException {}
+
+  @Override
+  public void write(DataOutput out) throws IOException {}
+
+  @Override
+  public String toString() {return "";}
 }

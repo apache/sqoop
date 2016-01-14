@@ -15,21 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.shell;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Groovysh;
+import java.util.ArrayList;
+import java.util.List;
 
-public class StopCommand extends SqoopCommand {
+import org.apache.sqoop.job.etl.Partition;
+import org.apache.sqoop.job.etl.Partitioner;
+import org.apache.sqoop.job.etl.PartitionerContext;
 
-  public StopCommand(Groovysh shell) {
-    super(shell,
-      Constants.CMD_STOP,
-      Constants.CMD_STOP_SC,
-      new ImmutableMap.Builder<String, Class<? extends SqoopFunction>>()
-        .put(Constants.FN_JOB, StopJobFunction.class)
-        .build()
-    );
+public class TestPartitionerForShell extends Partitioner<TestLinkConfigurationForShell, TestFromJobConfigurationForShell> {
+  public TestPartitionerForShell() {
+  }
+
+  @Override
+  public List<Partition> getPartitions(PartitionerContext context,
+      TestLinkConfigurationForShell linkConfiguration, TestFromJobConfigurationForShell fromJobConfiguration) {
+    List<Partition> partitionList = new ArrayList<Partition>();
+    partitionList.add(new TestPartitionForShell());
+    return partitionList;
   }
 }

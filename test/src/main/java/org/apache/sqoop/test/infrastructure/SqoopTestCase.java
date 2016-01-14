@@ -18,9 +18,9 @@
 package org.apache.sqoop.test.infrastructure;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.Logger;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
@@ -225,7 +225,14 @@ public class SqoopTestCase implements ITest {
     providerObject.start();
 
     // Add for recall later.
-    PROVIDERS.put(providerClass.getCanonicalName(), providerObject);
+    if (providerObject instanceof SqoopInfrastructureProvider) {
+      // there will be some child class of SqoopInfrastructureProvider,
+      // put all these kind of the providers with key SqoopInfrastructureProvider.class.getCanonicalName()
+      // then, getSqoopServerUrl() will get the correct value
+      PROVIDERS.put(SqoopInfrastructureProvider.class.getCanonicalName(), providerObject);
+    } else {
+      PROVIDERS.put(providerClass.getCanonicalName(), providerObject);
+    }
 
     System.out.println("Infrastructure Provider " + providerClass.getCanonicalName());
 
@@ -405,14 +412,17 @@ public class SqoopTestCase implements ITest {
    * @param jobName Job name
    * @throws Exception
    */
-  public void executeJob(String jobName) throws Exception {
+  public void executeJob(String jobName, boolean isAssertStatus) throws Exception {
     MSubmission finalSubmission = getClient().startJob(jobName, DEFAULT_SUBMISSION_CALLBACKS, 100);
 
     if(finalSubmission.getStatus().isFailure()) {
       LOG.error("Submission has failed: " + finalSubmission.getError().getErrorSummary());
       LOG.error("Corresponding error details: " + finalSubmission.getError().getErrorDetails());
     }
-    assertEquals(SubmissionStatus.SUCCEEDED, finalSubmission.getStatus(), "Submission finished with error: " + finalSubmission.getError().getErrorSummary());
+    if (isAssertStatus) {
+      assertEquals(finalSubmission.getStatus(), SubmissionStatus.SUCCEEDED,
+              "Submission finished with error: " + finalSubmission.getError().getErrorSummary());
+    }
   }
 
   /**
@@ -422,7 +432,7 @@ public class SqoopTestCase implements ITest {
    * @throws Exception
    */
   protected void executeJob(MJob job) throws Exception {
-    executeJob(job.getName());
+    executeJob(job.getName(), true);
   }
 
   /**
@@ -651,4 +661,12 @@ public class SqoopTestCase implements ITest {
     }
     return hadoopConf;
   }
+
+  protected MLink createLink(String linkName, String connectorName) {
+    MLink link = getClient().createLink(connectorName);
+    link.setName(linkName);
+    saveLink(link);
+    return link;
+  }
+
 }

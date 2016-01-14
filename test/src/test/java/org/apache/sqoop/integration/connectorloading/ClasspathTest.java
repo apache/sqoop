@@ -25,7 +25,8 @@ import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
-import org.apache.sqoop.test.testcases.ConnectorClasspathTestCase;
+import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.utils.ConnectorUtils;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 @Test(groups = "no-real-cluster")
-public class ClasspathTest extends ConnectorClasspathTestCase {
+public class ClasspathTest extends ConnectorTestCase {
 
   private static final String TEST_CONNECTOR_JAR_NAME = "test-connector.jar";
   private static final String TEST_DEPENDENCY_JAR_NAME = "test-dependency.jar";
@@ -111,13 +112,13 @@ public class ClasspathTest extends ConnectorClasspathTestCase {
 
   @Test
   public void testClasspathSqoopProperties() throws Exception {
-    Map<String, String> jarMap = compileTestConnectorAndDependency(
-        CONNECTOR_SOURCE_FILES,
-        CONNECTOR_DEPENDENCY_SOURCE_FILES,
-        CONNECTOR_PROPERTY_FILES,
-        TEST_CONNECTOR_JAR_NAME,
-        TEST_DEPENDENCY_JAR_NAME,
-        false);
+    Map<String, String> jarMap = ConnectorUtils.compileTestConnectorAndDependency(
+            CONNECTOR_SOURCE_FILES,
+            CONNECTOR_DEPENDENCY_SOURCE_FILES,
+            CONNECTOR_PROPERTY_FILES,
+            TEST_CONNECTOR_JAR_NAME,
+            TEST_DEPENDENCY_JAR_NAME,
+            false);
     startSqoopMiniCluster(jarMap.get(TEST_CONNECTOR_JAR_NAME), jarMap.get
       (TEST_DEPENDENCY_JAR_NAME));
     createAndLoadTableCities();
@@ -131,12 +132,12 @@ public class ClasspathTest extends ConnectorClasspathTestCase {
     executeJob(job);
 
     stopSqoop();
-    deleteJars(jarMap);
+    ConnectorUtils.deleteJars(jarMap);
   }
 
   @Test
   public void testClasspathDriverInput() throws Exception{
-    Map<String, String> jarMap = compileTestConnectorAndDependency(
+    Map<String, String> jarMap = ConnectorUtils.compileTestConnectorAndDependency(
         CONNECTOR_SOURCE_FILES,
         CONNECTOR_DEPENDENCY_SOURCE_FILES,
         CONNECTOR_PROPERTY_FILES,
@@ -159,7 +160,7 @@ public class ClasspathTest extends ConnectorClasspathTestCase {
     executeJob(job);
 
     stopSqoop();
-    deleteJars(jarMap);
+    ConnectorUtils.deleteJars(jarMap);
   }
 
   private MJob prepareJob() {
