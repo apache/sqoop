@@ -531,12 +531,13 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
   protected String constructTextConditions(String prefix, Object lowerBound, Object upperBound,
       String lowerStringBound, String upperStringBound, boolean firstOne, boolean lastOne) {
     StringBuilder conditions = new StringBuilder();
-    //BigDecimal lower = new BigDecimal((Integer)lowerBound);
-    //BigDecimal upper = new BigDecimal((Integer)upperBound);
-    String lbString = prefix + bigDecimalToText((BigDecimal)lowerBound);
-//    String lbString = prefix + bigDecimalToText(lower);
-//    String ubString = prefix + bigDecimalToText(upper);
-    String ubString = prefix + bigDecimalToText((BigDecimal)upperBound);
+    BigDecimal lower = new BigDecimal((Integer)lowerBound);
+    BigDecimal upper = new BigDecimal((Integer)upperBound);
+    //String lbString = prefix + bigDecimalToText((BigDecimal)lowerBound);
+    //String ubString = prefix + bigDecimalToText((BigDecimal)upperBound);
+    String lbString = prefix + bigDecimalToText(lower);
+    String ubString = prefix + bigDecimalToText(upper);
+
 
     conditions.append('\'').append(firstOne ? lowerStringBound : lbString).append('\'');
     conditions.append(" <= ");
