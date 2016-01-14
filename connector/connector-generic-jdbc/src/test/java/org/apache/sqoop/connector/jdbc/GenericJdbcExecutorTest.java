@@ -17,18 +17,18 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 public class GenericJdbcExecutorTest {
   private final String table;
@@ -119,9 +119,13 @@ public class GenericJdbcExecutorTest {
 
   @Test
   public void testEncloseIdentifiers() {
-    assertEquals(executor.encloseIdentifiers("a"), "\"a\"");
-    assertEquals(executor.encloseIdentifiers(null, "a"), "\"a\"");
-    assertEquals(executor.encloseIdentifiers("a", "b"), "\"a\".\"b\"");
+//    assertEquals(executor.encloseIdentifiers("a"), "\"a\"");
+//    assertEquals(executor.encloseIdentifiers(null, "a"), "\"a\"");
+//    assertEquals(executor.encloseIdentifiers("a", "b"), "\"a\".\"b\"");
+    assertEquals(executor.encloseIdentifiers("a"), "a");
+    assertEquals(executor.encloseIdentifiers(null, "a"), "a");
+    assertEquals(executor.encloseIdentifiers("a", "b"), "a.b");
+
   }
 
   @Test
