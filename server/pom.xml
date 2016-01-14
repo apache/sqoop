@@ -120,7 +120,6 @@ limitations under the License.
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -183,6 +182,9 @@ limitations under the License.
                             <copyConfigurationDirectory>true</copyConfigurationDirectory>
                             <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
                             <assembleDirectory>target/appassembler</assembleDirectory>
+                            <extraJvmArguments> -Dsqoop.config.dir=/home/eruiz/Proyectos/sqoop/server/target/appassembler/config
+                            </extraJvmArguments>
+
                             <programs>
                                 <program>
                                     <mainClass>org.apache.sqoop.server.SqoopJettyServer</mainClass>
