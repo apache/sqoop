@@ -884,15 +884,24 @@ limitations under the License.
     </plugins>
   </reporting>
 
+  <!-- Alphabetical by apache id -->
   <developers>
-    <!-- alphabetical by id -->
     <developer>
       <id>abayer</id>
       <name>Andrew Bayer</name>
       <organization>Cloudera</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>abe</id>
+      <name>Abraham Elmahrek</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -906,7 +915,7 @@ limitations under the License.
     <developer>
       <id>ahmed</id>
       <name>Ahmed Radwan</name>
-      <organization>Cloudera</organization>
+      <organization>Apple</organization>
       <roles>
         <role>committer</role>
         <role>PMC member</role>
@@ -915,45 +924,77 @@ limitations under the License.
     <developer>
       <id>arvind</id>
       <name>Arvind Prabhakar</name>
-      <organization>Cloudera</organization>
+      <organization>StreamSets</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
       <id>blee</id>
       <name>Bilung Lee</name>
-      <organization>Cloudera</organization>
+      <organization>Apple</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
       <id>cheolsoo</id>
       <name>Cheolsoo Park</name>
-      <organization>Cloudera</organization>
+      <organization>StreamSets</organization>
       <roles>
-        <role>Committer</role>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>colin</id>
+      <name>Colin Ma</name>
+      <organization>Intel</organization>
+      <roles>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>david</id>
+      <name>David Robson</name>
+      <organization>Dell Software</organization>
+      <roles>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>dianfu</id>
+      <name>Dian Fu</name>
+      <organization>Intel</organization>
+      <roles>
+        <role>committer</role>
       </roles>
     </developer>
     <developer>
       <id>gcottman</id>
       <name>Greg Cottman</name>
-      <organization>Quest</organization>
+      <organization>Dell Software</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
       <id>guylemar</id>
       <name>Guy le Mar</name>
-      <organization>Quest</organization>
+      <organization>Dell Software</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>gwenshap</id>
+      <name>Gwen Shapira</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>committer</role>
       </roles>
     </developer>
     <developer>
@@ -961,7 +1002,7 @@ limitations under the License.
       <name>Hari Shreedharan</name>
       <organization>Cloudera</organization>
       <roles>
-        <role>Committer</role>
+        <role>committer</role>
       </roles>
     </developer>
     <developer>
@@ -969,8 +1010,8 @@ limitations under the License.
       <name>Jaroslav Cecho</name>
       <organization>Cloudera</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -978,8 +1019,8 @@ limitations under the License.
       <name>Jonathan Hsieh</name>
       <organization>Cloudera</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -988,16 +1029,16 @@ limitations under the License.
       <organization>Cloudera</organization>
       <roles>
         <role>committer</role>
-        <role>PMC Member</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
       <id>kimballa</id>
       <name>Aaron Kimball</name>
-      <organization>WibiData</organization>
+      <organization>Zymergen</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -1011,18 +1052,18 @@ limitations under the License.
     <developer>
       <id>olamy</id>
       <name>Olivier Lamy</name>
-      <organization>Talend</organization>
+      <organization>ecetera.com.au</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
       <id>posix4e</id>
       <name>Alex Newman</name>
-      <organization>Opower</organization>
+      <organization>WANdisco</organization>
       <roles>
-        <role>Committer</role>
+        <role>committer</role>
       </roles>
     </developer>
     <developer>
@@ -1030,25 +1071,25 @@ limitations under the License.
       <name>Paul Zimdars</name>
       <organization>JPL</organization>
       <roles>
+        <role>committer</role>
+        <role>PMC member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>qxu</id>
+      <name>Qian Xu</name>
+      <organization>Intel</organization>
+      <roles>
         <role>Committer</role>
-        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
       <id>rvs</id>
       <name>Roman Shaposhnik</name>
-      <organization>Cloudera</organization>
+      <organization>Pivotal</organization>
       <roles>
-        <role>Committer</role>
-        <role>PMC Member</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>venkatnrangan</id>
-      <name>Venkat Ranganathan</name>
-      <organization>Hortonworks</organization>
-      <roles>
-        <role>Committer</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
     <developer>
@@ -1060,11 +1101,12 @@ limitations under the License.
       </roles>
     </developer>
     <developer>
-      <id>qxu</id>
-      <name>Qian Xu</name>
-      <organization>Intel</organization>
+      <id>venkatnrangan</id>
+      <name>Venkat Ranganathan</name>
+      <organization>Hortonworks</organization>
       <roles>
-        <role>Committer</role>
+        <role>committer</role>
+        <role>PMC member</role>
       </roles>
     </developer>
   </developers>
