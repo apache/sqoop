@@ -164,7 +164,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
       MRole role = new MRole(role_name);
       manager.logAuditEvent(ctx.getUserName(),
               ctx.getRequest().getRemoteAddr(), "get", "principals by role", role.toString());
-      return new PrincipalsBean(handler.getPrincipalsByRole(role));
+      return new PrincipalBean(handler.getPrincipalsByRole(role));
     } else {
       throw new SqoopException(SecurityError.AUTH_0012, "Can't get role name");
     }
@@ -259,7 +259,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
 
     RolesBean rolesBean = new RolesBean();
-    PrincipalsBean principalsBean = new PrincipalsBean();
+    PrincipalBean principalsBean = new PrincipalBean();
 
     try {
       JSONObject json = JSONUtils.parse(ctx.getRequest().getReader());
@@ -290,7 +290,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
     AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
 
-    PrincipalsBean principalsBean = new PrincipalsBean();
+    PrincipalBean principalsBean = new PrincipalBean();
     PrivilegesBean privilegesBean = new PrivilegesBean();
 
     try {

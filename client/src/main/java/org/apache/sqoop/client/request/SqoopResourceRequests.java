@@ -202,7 +202,7 @@ public class SqoopResourceRequests {
     return getAuthorizationRequest().readRolesByPrincipal(serverUrl, principal);
   }
 
-  public PrincipalsBean readPrincipalsByRole(MRole role) {
+  public PrincipalBean readPrincipalsByRole(MRole role) {
     return getAuthorizationRequest().readPrincipalsByRole(serverUrl, role);
   }
 

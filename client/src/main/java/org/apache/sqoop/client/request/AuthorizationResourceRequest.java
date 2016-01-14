@@ -73,7 +73,7 @@ public class AuthorizationResourceRequest extends ResourceRequest {
 
   public void grantRevokeRole(String serverUrl, List<MRole> roles, List<MPrincipal> principals, boolean isGrant) {
     RolesBean rolesBean = new RolesBean(roles);
-    PrincipalsBean principalsBean = new PrincipalsBean(principals);
+    PrincipalBean principalsBean = new PrincipalBean(principals);
     // Extract all config inputs including sensitive inputs
     JSONObject jsonObject = new JSONObject();
     jsonObject.putAll(rolesBean.extract(false));
@@ -95,17 +95,17 @@ public class AuthorizationResourceRequest extends ResourceRequest {
     return bean;
   }
 
-  public PrincipalsBean readPrincipalsByRole(String serverUrl, MRole role) {
+  public PrincipalBean readPrincipalsByRole(String serverUrl, MRole role) {
     String response = super.get(serverUrl + RESOURCE + PRINCIPALS
             + "?role_name=" + UrlSafeUtils.urlEncode(role.getName()));
     JSONObject jsonObject = JSONUtils.parse(response);
-    PrincipalsBean bean = new PrincipalsBean();
+    PrincipalBean bean = new PrincipalBean();
     bean.restore(jsonObject);
     return bean;
   }
 
   public void grantRevokePrivilege(String serverUrl, List<MPrincipal> principals, List<MPrivilege> privileges, boolean isGrant) {
-    PrincipalsBean principalsBean = new PrincipalsBean(principals);
+    PrincipalBean principalsBean = new PrincipalBean(principals);
     // Extract all config inputs including sensitive inputs
     JSONObject jsonObject = new JSONObject();
     jsonObject.putAll(principalsBean.extract(false));

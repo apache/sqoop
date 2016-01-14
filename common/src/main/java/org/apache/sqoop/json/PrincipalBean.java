@@ -33,7 +33,7 @@ import java.util.List;
 @InterfaceStability.Unstable
 public class PrincipalBean implements JsonBean {
 
-  public static final String PRINCIPAL = "principal";
+  private static final String PRINCIPALS = "principals";
   private static final String NAME = "name";
   private static final String TYPE = "type";
 
@@ -46,7 +46,7 @@ public class PrincipalBean implements JsonBean {
   // For "extract"
   public PrincipalBean(MPrincipal principal) {
     this();
-    this.principals = new ArrayList<MPrincipal>();
+    this.principals = new ArrayList<>();
     this.principals.add(principal);
   }
 
@@ -62,9 +62,16 @@ public class PrincipalBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONObject principal = new JSONObject();
-    principal.put(PRINCIPAL, extractPrincipal(principals.get(0)));
-    return principal;
+    JSONArray principalsArray = extractPrincipals();
+    JSONObject principals = new JSONObject();
+    principals.put(PRINCIPALS, principalsArray);
+    return principals;
+  }
+
+  @Override
+  public void restore(JSONObject json) {
+    JSONArray principalsArray = JSONUtils.getJSONArray(json, PRINCIPALS);
+    restorePrincipals(principalsArray);
   }
 
   @SuppressWarnings("unchecked")
@@ -86,15 +93,8 @@ public class PrincipalBean implements JsonBean {
     return object;
   }
 
-  @Override
-  public void restore(JSONObject json) {
-    principals = new ArrayList<MPrincipal>();
-    JSONObject obj = JSONUtils.getJSONObject(json, PRINCIPAL);
-    principals.add(restorePrincipal(obj));
-  }
-
   protected void restorePrincipals(JSONArray array) {
-    principals = new ArrayList<MPrincipal>();
+    principals = new ArrayList<>();
     for (Object obj : array) {
       principals.add(restorePrincipal(obj));
     }
