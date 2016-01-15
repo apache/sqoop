@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import static org.testng.Assert.assertEquals;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -27,15 +29,12 @@ import java.util.List;
 
 import org.apache.sqoop.common.MutableContext;
 import org.apache.sqoop.common.MutableMapContext;
-import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.jdbc.configuration.FromJobConfiguration;
+import org.apache.sqoop.connector.jdbc.configuration.LinkConfiguration;
 import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.job.etl.Partitioner;
 import org.apache.sqoop.job.etl.PartitionerContext;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class TestPartitioner {
 
@@ -374,6 +373,7 @@ public class TestPartitioner {
     });
   }
 
+  /*
   @Test
   public void testVarcharPartition() throws Exception {
     MutableContext context = new MutableMapContext();
@@ -420,8 +420,9 @@ public class TestPartitioner {
         "'X' <= VCCOL AND VCCOL < 'Y'",
         "'Y' <= VCCOL AND VCCOL <= 'Z'",
     });
-  }
+  }*/
 
+/*
   @Test
   public void testVarcharPartition2() throws Exception {
     MutableContext context = new MutableMapContext();
@@ -445,8 +446,9 @@ public class TestPartitioner {
     // Last partition needs to contain entire lower bound
     assertTrue(partitions.get(4).toString().contains("Warty Warthog"));
   }
+*/
 
-  @Test
+/*  @Test
   public void testVarcharPartitionWithCommonPrefix() throws Exception {
     MutableContext context = new MutableMapContext();
     context.setString(GenericJdbcConnectorConstants
@@ -474,8 +476,8 @@ public class TestPartitioner {
         "'AAE' <= VCCOL AND VCCOL <= 'AAF'",
     });
 
-  }
-
+  }*/
+/*
   @Test
   public void testPartitionWithNullValues() throws Exception {
     MutableContext context = new MutableMapContext();
@@ -505,7 +507,7 @@ public class TestPartitioner {
         "'AAD' <= VCCOL AND VCCOL <= 'AAE'",
     });
 
-  }
+  }*/
 
   private void verifyResult(List<Partition> partitions,
       String[] expected) {

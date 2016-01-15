@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,14 +37,15 @@ import org.apache.sqoop.job.etl.PartitionerContext;
 
 public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJobConfiguration> {
 
-    private static final BigDecimal NUMERIC_MIN_INCREMENT = BigDecimal.valueOf(10000 * Double.MIN_VALUE);
+  private static final BigDecimal NUMERIC_MIN_INCREMENT = BigDecimal.valueOf(10000 * Double.MIN_VALUE);
 
-    private long numberPartitions;
-    private String partitionColumnName;
-    private int partitionColumnType;
-    private String partitionMinValue;
-    private String partitionMaxValue;
-    private Boolean allowNullValueInPartitionColumn;
+
+  private long numberPartitions;
+  private String partitionColumnName;
+  private int partitionColumnType;
+  private String partitionMinValue;
+  private String partitionMaxValue;
+  private Boolean allowNullValueInPartitionColumn;
 
     @Override
     public List<Partition> getPartitions(PartitionerContext context, LinkConfiguration linkConfig,
@@ -539,6 +540,7 @@ public class GenericJdbcPartitioner extends Partitioner<LinkConfiguration, FromJ
         conditions.append(lastOne ? " <= " : " < ");
         conditions.append('\'').append(lastOne ? upperStringBound : ubString).append('\'');
         return conditions.toString();
+
     }
 
     /**
