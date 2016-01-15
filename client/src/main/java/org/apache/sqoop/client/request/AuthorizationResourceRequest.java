@@ -52,10 +52,10 @@ public class AuthorizationResourceRequest extends ResourceRequest {
     super(token);
   }
 
-  public RolesBean readRoles(String serverUrl) {
+  public RoleBean readRoles(String serverUrl) {
     String response = super.get(serverUrl + RESOURCE + ROLES);
     JSONObject jsonObject = JSONUtils.parse(response);
-    RolesBean bean = new RolesBean();
+    RoleBean bean = new RoleBean();
     bean.restore(jsonObject);
     return bean;
   }
@@ -72,7 +72,7 @@ public class AuthorizationResourceRequest extends ResourceRequest {
   }
 
   public void grantRevokeRole(String serverUrl, List<MRole> roles, List<MPrincipal> principals, boolean isGrant) {
-    RolesBean rolesBean = new RolesBean(roles);
+    RoleBean rolesBean = new RoleBean(roles);
     PrincipalBean principalsBean = new PrincipalBean(principals);
     // Extract all config inputs including sensitive inputs
     JSONObject jsonObject = new JSONObject();
@@ -85,12 +85,12 @@ public class AuthorizationResourceRequest extends ResourceRequest {
     }
   }
 
-  public RolesBean readRolesByPrincipal(String serverUrl, MPrincipal principal) {
+  public RoleBean readRolesByPrincipal(String serverUrl, MPrincipal principal) {
     String response = super.get(serverUrl + RESOURCE + ROLES
             + "?principal_name=" + UrlSafeUtils.urlEncode(principal.getName())
             + "&principal_type=" + UrlSafeUtils.urlEncode(principal.getType()));
     JSONObject jsonObject = JSONUtils.parse(response);
-    RolesBean bean = new RolesBean();
+    RoleBean bean = new RoleBean();
     bean.restore(jsonObject);
     return bean;
   }

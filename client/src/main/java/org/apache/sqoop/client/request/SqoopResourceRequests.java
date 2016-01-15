@@ -178,7 +178,7 @@ public class SqoopResourceRequests {
     return getSubmissionResourceRequest().read(serverUrl, jArg);
   }
 
-  public RolesBean readRoles() {
+  public RoleBean readRoles() {
     return getAuthorizationRequest().readRoles(serverUrl);
   }
 
@@ -198,7 +198,7 @@ public class SqoopResourceRequests {
     getAuthorizationRequest().grantRevokeRole(serverUrl, roles, principals, false);
   }
 
-  public RolesBean readRolesByPrincipal(MPrincipal principal) {
+  public RoleBean readRolesByPrincipal(MPrincipal principal) {
     return getAuthorizationRequest().readRolesByPrincipal(serverUrl, principal);
   }
 

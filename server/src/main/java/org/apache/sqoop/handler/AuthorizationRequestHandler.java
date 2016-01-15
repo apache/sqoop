@@ -145,12 +145,12 @@ public class AuthorizationRequestHandler implements RequestHandler {
       MPrincipal principal = new MPrincipal(principal_name, principal_type);
       manager.logAuditEvent(ctx.getUserName(),
               ctx.getRequest().getRemoteAddr(), "get", "roles by principal", principal.toString());
-      return new RolesBean(handler.getRolesByPrincipal(principal));
+      return new RoleBean(handler.getRolesByPrincipal(principal));
     } else {
       // get all roles in the system
       manager.logAuditEvent(ctx.getUserName(),
               ctx.getRequest().getRemoteAddr(), "get", "roles", "all");
-      return new RolesBean(handler.getAllRoles());
+      return new RoleBean(handler.getAllRoles());
     }
   }
 
@@ -258,7 +258,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
     AuthorizationHandler handler = AuthorizationManager.getInstance().getAuthorizationHandler();
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
 
-    RolesBean rolesBean = new RolesBean();
+    RoleBean rolesBean = new RoleBean();
     PrincipalBean principalsBean = new PrincipalBean();
 
     try {

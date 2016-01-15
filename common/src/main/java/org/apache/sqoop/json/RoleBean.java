@@ -33,7 +33,7 @@ import java.util.List;
 @InterfaceStability.Unstable
 public class RoleBean implements JsonBean {
 
-  public static final String ROLE = "role";
+  private static final String ROLES = "roles";
   private static final String NAME = "name";
 
   private List<MRole> roles;
@@ -45,7 +45,7 @@ public class RoleBean implements JsonBean {
   // For "extract"
   public RoleBean(MRole role) {
     this();
-    this.roles = new ArrayList<MRole>();
+    this.roles = new ArrayList<>();
     this.roles.add(role);
   }
 
@@ -61,9 +61,16 @@ public class RoleBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONObject role = new JSONObject();
-    role.put(ROLE, extractRole(roles.get(0)));
-    return role;
+    JSONArray rolesArray = extractRoles();
+    JSONObject roles = new JSONObject();
+    roles.put(ROLES, rolesArray);
+    return roles;
+  }
+
+  @Override
+  public void restore(JSONObject json) {
+    JSONArray rolesArray = JSONUtils.getJSONArray(json, ROLES);
+    restoreRoles(rolesArray);
   }
 
   @SuppressWarnings("unchecked")
@@ -84,15 +91,8 @@ public class RoleBean implements JsonBean {
     return object;
   }
 
-  @Override
-  public void restore(JSONObject json) {
-    roles = new ArrayList<MRole>();
-    JSONObject obj = JSONUtils.getJSONObject(json, ROLE);
-    roles.add(restoreRole(obj));
-  }
-
   protected void restoreRoles(JSONArray array) {
-    roles = new ArrayList<MRole>();
+    roles = new ArrayList<>();
     for (Object obj : array) {
       roles.add(restoreRole(obj));
     }
