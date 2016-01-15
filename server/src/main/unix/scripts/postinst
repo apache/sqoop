@@ -1,0 +1,48 @@
+#!/bin/sh
+
+set -e
+
+
+#DEB
+
+GROUP='stratio'
+USER='stratio'
+DIR_INSTALL='/opt/sds/sqoop-server'
+DIR_CONF='/opt/sds/sqoop-server/config'
+DIR_LOG='/var/log/sds/sqoop-server'
+DIR_RUN='/opt/sds/sqoop-server/bin'
+
+    chmod 755 /opt/sds/sqoop-server/bin
+    chmod 755 /opt/sds/sqoop-server/bin/*
+
+case "$1" in
+  configure)
+
+  # Add stratio group if it doesn't already exists
+  if ! getent group $GROUP >/dev/null 2>&1; then
+    groupadd ${GROUP}
+  fi
+
+  # Add stratio user if it doesn't already exists
+  if ! getent passwd $USER >/dev/null 2>&1; then
+    [ -d /opt ] || mkdir /opt
+    useradd -M -d /opt/sds -g ${GROUP} -s /bin/bash ${USER}
+  else
+    usermod -G $GROUP $USER
+  fi
+
+  if [ ! -d "$DIR_LOG" ]; then
+    mkdir $DIR_LOG
+  fi
+
+
+  chown -R ${USER}:${GROUP} $DIR_INSTALL
+  chown -R ${USER}:${GROUP} $DIR_CONF
+  chown -R ${USER}:${GROUP} $DIR_LOG
+  chmod -R 775 $DIR_INSTALL
+  chmod 775 $DIR_LOG
+
+  chown -R ${USER}:${GROUP} $DIR_RUN
+
+esac
+exit 0

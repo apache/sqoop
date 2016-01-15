@@ -1,0 +1,7 @@
+#!/bin/sh
+# Copyright (c) 2016 Stratio (http://stratio.com)
+#
+
+set -e
+
+chmod 0755 /opt/sds/sqoop-shell/bin/*
