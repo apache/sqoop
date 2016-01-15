@@ -19,7 +19,9 @@ package org.apache.sqoop.json;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.json.util.BeanTestUtil;
@@ -78,5 +80,61 @@ public class TestJobBean {
     assertEquals("Hi there again!", targetInput.getValue());
   }
 
+  @Test
+  public void testJobsSerialization() throws ParseException {
+    Date created = new Date();
+    Date updated = new Date();
+    MJob job1 = BeanTestUtil.createJob("ahoj", "The big Job", 22L, created, updated);
+    MJob job2 = BeanTestUtil.createJob("ahoj", "The small Job", 44L, created, updated);
+
+    List<MJob> jobs = new ArrayList<>();
+    jobs.add(job1);
+    jobs.add(job2);
+
+    // Fill some data at the beginning
+    MStringInput input = (MStringInput) job1.getFromJobConfig().getConfigs().get(0)
+        .getInputs().get(0);
+    input.setValue("Hi there!");
+    input = (MStringInput) job1.getToJobConfig().getConfigs().get(0).getInputs().get(0);
+    input.setValue("Hi there again!");
+
+    // Serialize it to JSON object
+    JobBean jobsBean = new JobBean(jobs);
+    JSONObject json = jobsBean.extract(false);
+
+    // "Move" it across network in text form
+    String jobJsonString = json.toJSONString();
+
+    // Retrieved transferred object
+    JSONObject parsedJobsJson = JSONUtils.parse(jobJsonString);
+    JobBean parsedJobsBean = new JobBean();
+    parsedJobsBean.restore(parsedJobsJson);
+    assertEquals(parsedJobsBean.getJobs().size(), 2);
+    MJob retrievedJob1 = parsedJobsBean.getJobs().get(0);
+    MJob retrievedJob2 = parsedJobsBean.getJobs().get(1);
+
+    // Check id and name
+    assertEquals(22L, retrievedJob1.getPersistenceId());
+    assertEquals("The big Job", retrievedJob1.getName());
+
+    assertEquals(44L, retrievedJob2.getPersistenceId());
+    assertEquals("The small Job", retrievedJob2.getName());
+
+    assertEquals(retrievedJob1.getFromLinkName(), "fromLinkName");
+    assertEquals(retrievedJob1.getToLinkName(), "toLinkName");
+    assertEquals(retrievedJob1.getFromConnectorName(), "from_ahoj");
+    assertEquals(retrievedJob1.getToConnectorName(), "to_ahoj");
+    assertEquals(created, retrievedJob1.getCreationDate());
+    assertEquals(updated, retrievedJob1.getLastUpdateDate());
+    assertEquals(false, retrievedJob1.getEnabled());
+
+    // Test that value was correctly moved
+    MStringInput targetInput = (MStringInput) retrievedJob1.getFromJobConfig()
+        .getConfigs().get(0).getInputs().get(0);
+    assertEquals("Hi there!", targetInput.getValue());
+    targetInput = (MStringInput) retrievedJob1.getToJobConfig().getConfigs().get(0)
+        .getInputs().get(0);
+    assertEquals("Hi there again!", targetInput.getValue());
+  }
 
 }

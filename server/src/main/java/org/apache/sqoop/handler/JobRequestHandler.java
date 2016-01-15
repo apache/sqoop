@@ -33,7 +33,6 @@ import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.JobManager;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.JobsBean;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.json.ValidationResultBean;
@@ -279,7 +278,7 @@ public class JobRequestHandler implements RequestHandler {
       // Authorization check
       jobList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.JOB, jobList);
 
-      jobBean = createJobsBean(jobList, locale);
+      jobBean = createJobBean(jobList, locale);
     } else
     // all jobs in the system
     if (ctx.getPath().contains(JOBS_PATH)
@@ -291,7 +290,7 @@ public class JobRequestHandler implements RequestHandler {
       // Authorization check
       jobList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.JOB, jobList);
 
-      jobBean = createJobsBean(jobList, locale);
+      jobBean = createJobBean(jobList, locale);
     }
     // job by Id
     else {
@@ -313,12 +312,6 @@ public class JobRequestHandler implements RequestHandler {
     JobBean jobBean = new JobBean(jobs);
     addConnectorConfigBundle(jobBean, locale);
     return jobBean;
-  }
-
-  private JobsBean createJobsBean(List<MJob> jobs, Locale locale) {
-    JobsBean jobsBean = new JobsBean(jobs);
-    addConnectorConfigBundle(jobsBean, locale);
-    return jobsBean;
   }
 
   private void addConnectorConfigBundle(JobBean bean, Locale locale) {

@@ -55,7 +55,7 @@ public class JobBean implements JsonBean {
   static final String FROM_CONFIG_VALUES = "from-config-values";
   static final String TO_CONFIG_VALUES = "to-config-values";
   static final String DRIVER_CONFIG_VALUES = "driver-config-values";
-  private static final String JOB = "job";
+  private static final String JOBS = "jobs";
 
   // Required
   private List<MJob> jobs;
@@ -67,7 +67,7 @@ public class JobBean implements JsonBean {
   // For "extract"
   public JobBean(MJob job) {
     this();
-    this.jobs = new ArrayList<MJob>();
+    this.jobs = new ArrayList<>();
     this.jobs.add(job);
   }
 
@@ -78,7 +78,7 @@ public class JobBean implements JsonBean {
 
   // For "restore"
   public JobBean() {
-    connectorConfigBundles = new HashMap<String, ResourceBundle>();
+    connectorConfigBundles = new HashMap<>();
   }
 
   public void setDriverConfigBundle(ResourceBundle driverConfigBundle) {
@@ -108,12 +108,19 @@ public class JobBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONObject job = new JSONObject();
-    job.put(JOB, extractJob(skipSensitive, jobs.get(0)));
-    return job;
+    JSONArray jobArray = extractJobs(skipSensitive);
+    JSONObject jobs = new JSONObject();
+    jobs.put(JOBS, jobArray);
+    return jobs;
   }
 
+  @Override
   @SuppressWarnings("unchecked")
+  public void restore(JSONObject jsonObject) {
+    JSONArray array = JSONUtils.getJSONArray(jsonObject, JOBS);
+    restoreJobs(array);
+  }
+
   protected JSONArray extractJobs(boolean skipSensitive) {
     JSONArray jobArray = new JSONArray();
     for (MJob job : jobs) {
@@ -152,15 +159,8 @@ public class JobBean implements JsonBean {
     return object;
   }
 
-  @Override
-  public void restore(JSONObject jsonObject) {
-    jobs = new ArrayList<MJob>();
-    JSONObject obj = JSONUtils.getJSONObject(jsonObject, JOB);
-    jobs.add(restoreJob(obj));
-  }
-
   protected void restoreJobs(JSONArray array) {
-    jobs = new ArrayList<MJob>();
+    jobs = new ArrayList<>();
     for (Object obj : array) {
       jobs.add(restoreJob(obj));
     }

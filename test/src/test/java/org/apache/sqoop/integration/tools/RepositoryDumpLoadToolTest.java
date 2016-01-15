@@ -21,7 +21,7 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.JSONUtils;
-import org.apache.sqoop.json.JobsBean;
+import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.*;
@@ -75,7 +75,7 @@ public class RepositoryDumpLoadToolTest extends SqoopTestCase {
 
       // verify the job
       JSONObject jsonJobs = (JSONObject) json.get(JSONConstants.JOBS);
-      JobsBean jobsBean = new JobsBean();
+      JobBean jobsBean = new JobBean();
       jobsBean.restore(jsonJobs);
       verifyJobs(jobsBean.getJobs());
 

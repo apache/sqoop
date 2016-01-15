@@ -20,7 +20,6 @@ package org.apache.sqoop.client.request;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
-import org.apache.sqoop.json.JobsBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.json.ValidationResultBean;
 import org.apache.sqoop.model.MJob;
@@ -50,7 +49,7 @@ public class JobResourceRequest extends ResourceRequest {
   }
 
   public JobBean readByConnector(String serverUrl, String cArg) {
-    JobsBean bean = new JobsBean();
+    JobBean bean = new JobBean();
     if (cArg != null) {
       String response = super.get(serverUrl + RESOURCE + "?cname=" + UrlSafeUtils.urlEncode(cArg));
       JSONObject jsonObject = JSONUtils.parse(response);
@@ -68,7 +67,7 @@ public class JobResourceRequest extends ResourceRequest {
     }
     JSONObject jsonObject = JSONUtils.parse(response);
     // defaults to all
-    JobBean bean = new JobsBean();
+    JobBean bean = new JobBean();
     if (jobArg != null) {
       bean = new JobBean();
     }

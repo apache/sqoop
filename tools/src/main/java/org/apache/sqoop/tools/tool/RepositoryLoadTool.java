@@ -41,7 +41,7 @@ import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.JSONUtils;
-import org.apache.sqoop.json.JobsBean;
+import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.SubmissionsBean;
 import org.apache.sqoop.model.ConfigUtils;
@@ -181,7 +181,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
     removeJobIfLinkNotExist((JSONArray) jsonJobs.get(JSONConstants.JOBS),
             JSONConstants.TO_LINK_NAME);
 
-    JobsBean jobsBean = new JobsBean();
+    JobBean jobsBean = new JobBean();
     jobsBean.restore(jsonJobs);
 
     for (MJob job : jobsBean.getJobs()) {
