@@ -36,7 +36,6 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-// NOTE: This tests both the submission and submissions list bean
 public class TestSubmissionBean {
 
   private static final double EPSILON = 0.01;
@@ -460,13 +459,13 @@ public class TestSubmissionBean {
    * @return
    */
   private MSubmission transfer(MSubmission submission) {
-    SubmissionsBean bean = new SubmissionsBean(submission);
+    SubmissionBean bean = new SubmissionBean(submission);
     JSONObject json = bean.extract(false);
 
     String string = json.toString();
 
     JSONObject retrievedJson = JSONUtils.parse(string);
-    SubmissionsBean retrievedBean = new SubmissionsBean();
+    SubmissionBean retrievedBean = new SubmissionBean();
     retrievedBean.restore(retrievedJson);
 
     return retrievedBean.getSubmissions().get(0);
@@ -479,13 +478,13 @@ public class TestSubmissionBean {
    * @return
    */
   private List<MSubmission> transfer(List<MSubmission> submissions) {
-    SubmissionsBean bean = new SubmissionsBean(submissions);
+    SubmissionBean bean = new SubmissionBean(submissions);
     JSONObject json = bean.extract(false);
 
     String string = json.toString();
 
     JSONObject retrievedJson = JSONUtils.parse(string);
-    SubmissionsBean retrievedBean = new SubmissionsBean();
+    SubmissionBean retrievedBean = new SubmissionBean();
     retrievedBean.restore(retrievedJson);
 
     return retrievedBean.getSubmissions();

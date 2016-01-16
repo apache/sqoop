@@ -23,7 +23,7 @@ import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.LinkBean;
-import org.apache.sqoop.json.SubmissionsBean;
+import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.model.*;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
@@ -81,7 +81,7 @@ public class RepositoryDumpLoadToolTest extends SqoopTestCase {
 
       // verify the submission
       JSONObject jsonSubmissions = (JSONObject) json.get(JSONConstants.SUBMISSIONS);
-      SubmissionsBean submissionsBean = new SubmissionsBean();
+      SubmissionBean submissionsBean = new SubmissionBean();
       submissionsBean.restore(jsonSubmissions);
       verifySubmissions(submissionsBean.getSubmissions());
     }

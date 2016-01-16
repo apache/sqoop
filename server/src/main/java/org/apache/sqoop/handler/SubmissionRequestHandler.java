@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.JsonBean;
-import org.apache.sqoop.json.SubmissionsBean;
+import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.repository.RepositoryManager;
@@ -72,7 +72,7 @@ public class SubmissionRequestHandler implements RequestHandler {
     //Authorization check
     submissions = AuthorizationEngine.filterSubmission(ctx.getUserName(), submissions);
 
-    return new SubmissionsBean(submissions);
+    return new SubmissionBean(submissions);
   }
 
   private JsonBean getSubmissionsForJob(String jobIdentifier, RequestContext ctx) {
@@ -85,6 +85,6 @@ public class SubmissionRequestHandler implements RequestHandler {
     List<MSubmission> submissions = RepositoryManager.getInstance().getRepository()
         .findSubmissionsForJob(jobName);
 
-    return new SubmissionsBean(submissions);
+    return new SubmissionBean(submissions);
   }
 }

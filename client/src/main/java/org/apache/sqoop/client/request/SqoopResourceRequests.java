@@ -174,7 +174,7 @@ public class SqoopResourceRequests {
     return getJobResourceRequest().stop(serverUrl, jArg);
   }
 
-  public SubmissionsBean readSubmission(String jArg) {
+  public SubmissionBean readSubmission(String jArg) {
     return getSubmissionResourceRequest().read(serverUrl, jArg);
   }
 

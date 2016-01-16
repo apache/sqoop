@@ -43,7 +43,7 @@ import org.json.simple.JSONObject;
 @InterfaceStability.Unstable
 public class SubmissionBean implements JsonBean {
 
-  private static final String SUBMISSION = "submission";
+  private static final String SUBMISSIONS = "submissions";
   private static final String JOB_NAME = "job-name";
   private static final String CREATION_USER = "creation-user";
   private static final String CREATION_DATE = "creation-date";
@@ -84,9 +84,16 @@ public class SubmissionBean implements JsonBean {
   @Override
   @SuppressWarnings("unchecked")
   public JSONObject extract(boolean skipSensitive) {
-    JSONObject submission = new JSONObject();
-    submission.put(SUBMISSION, extractSubmission(submissions.get(0)));
-    return submission;
+    JSONArray submissionsArray = extractSubmissions();
+    JSONObject submissions = new JSONObject();
+    submissions.put(SUBMISSIONS, submissionsArray);
+    return submissions;
+  }
+
+  @Override
+  public void restore(JSONObject json) {
+    JSONArray submissionsArray = JSONUtils.getJSONArray(json, SUBMISSIONS);
+    restoreSubmissions(submissionsArray);
   }
 
   @SuppressWarnings("unchecked")
@@ -156,15 +163,8 @@ public class SubmissionBean implements JsonBean {
     return counterArray;
   }
 
-  @Override
-  public void restore(JSONObject json) {
-    submissions = new ArrayList<MSubmission>();
-    JSONObject obj = JSONUtils.getJSONObject(json, SUBMISSION);
-    submissions.add(restoreSubmission(obj));
-  }
-
   protected void restoreSubmissions(JSONArray array) {
-    submissions = new ArrayList<MSubmission>();
+    submissions = new ArrayList<>();
     for (Object obj : array) {
       submissions.add(restoreSubmission(obj));
     }

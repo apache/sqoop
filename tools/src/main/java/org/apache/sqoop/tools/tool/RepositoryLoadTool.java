@@ -43,7 +43,7 @@ import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.LinkBean;
-import org.apache.sqoop.json.SubmissionsBean;
+import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConnector;
@@ -205,7 +205,7 @@ public class RepositoryLoadTool extends ConfiguredTool {
 
     removeSubmissionIfJobNotExist((JSONArray)jsonSubmissions.get(JSONConstants.SUBMISSIONS));
 
-    SubmissionsBean submissionsBean = new SubmissionsBean();
+    SubmissionBean submissionsBean = new SubmissionBean();
     submissionsBean.restore(jsonSubmissions);
     for (MSubmission submission : submissionsBean.getSubmissions()) {
       resetPersistenceId(submission);

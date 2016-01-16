@@ -35,7 +35,7 @@ import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.LinkBean;
-import org.apache.sqoop.json.SubmissionsBean;
+import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.repository.Repository;
 import org.apache.sqoop.repository.RepositoryManager;
@@ -117,7 +117,7 @@ public class RepositoryDumpTool extends ConfiguredTool {
     result.put(JSONConstants.JOBS, jobsJsonObject);
 
     LOG.info("Dumping Submissions with skipSensitive=" + String.valueOf(skipSensitive));
-    SubmissionsBean submissions = new SubmissionsBean(repository.findSubmissions());
+    SubmissionBean submissions = new SubmissionBean(repository.findSubmissions());
     JSONObject submissionsJsonObject = submissions.extract(skipSensitive);
     result.put(JSONConstants.SUBMISSIONS, submissionsJsonObject);
 
