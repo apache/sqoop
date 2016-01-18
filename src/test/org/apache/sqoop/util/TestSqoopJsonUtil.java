@@ -26,9 +26,10 @@ public class TestSqoopJsonUtil {
   }
 
   @Test
-  public void testGetJsonStringFromMap() {
+  public void testMapToStringAndBack() {
     String resultJsonStr = SqoopJsonUtil.getJsonStringforMap(paramMap);
-    assertEquals(jsonStr, resultJsonStr);
+    Map<String, String> resultMap = SqoopJsonUtil.getMapforJsonString(jsonStr);
+    assertEquals(paramMap, resultMap);
   }
 
   @Test
