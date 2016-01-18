@@ -1,0 +1,29 @@
+#!/bin/sh
+
+set -e
+
+#DEB
+
+GROUP='stratio'
+USER='stratio'
+
+case "$1" in
+  configure)
+
+  # Add stratio group if it doesn't already exists
+  if ! getent group $GROUP >/dev/null 2>&1; then
+    groupadd ${GROUP}
+  fi
+
+  # Add stratio user if it doesn't already exists
+  if ! getent passwd $USER >/dev/null 2>&1; then
+    [ -d /opt ] || mkdir /opt
+    useradd -M -d /opt/sds -g ${GROUP} -s /bin/bash ${USER}
+  else
+    usermod -G $GROUP $USER
+  fi
+
+esac
+
+
+exit 0
