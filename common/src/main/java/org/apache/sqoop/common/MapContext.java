@@ -17,21 +17,22 @@
  */
 package org.apache.sqoop.common;
 
-import org.apache.sqoop.classification.InterfaceAudience;
-import org.apache.sqoop.classification.InterfaceStability;
-
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
+
 /**
  * ImmutableContext implementation based on (Hash)Map.
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class MapContext implements ImmutableContext {
+public class MapContext implements ImmutableContext, Serializable{
 
   private final Map<String, String> options;
 

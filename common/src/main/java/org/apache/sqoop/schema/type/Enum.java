@@ -17,11 +17,12 @@
  */
 package org.apache.sqoop.schema.type;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
-
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * Enum is a set of predefined values of its own type
@@ -30,7 +31,7 @@ import java.util.HashSet;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class Enum extends Column {
+public class Enum extends Column implements Serializable {
 
   // The options set contains the possible values for the Enum
   private Set<String> options;

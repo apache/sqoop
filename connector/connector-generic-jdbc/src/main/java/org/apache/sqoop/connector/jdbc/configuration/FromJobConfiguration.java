@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Config;
 
@@ -24,7 +26,7 @@ import org.apache.sqoop.model.Config;
  *
  */
 @ConfigurationClass
-public class FromJobConfiguration {
+public class FromJobConfiguration implements Serializable{
   @Config public FromJobConfig fromJobConfig;
 
   @Config public IncrementalRead incrementalRead;

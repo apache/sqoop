@@ -20,11 +20,9 @@ import org.apache.sqoop.job.etl.Partition;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.utils.ClassUtils;
 
-@SuppressWarnings("serial")
 public class SqoopExtractFunction implements Function<Partition, List<IntermediateDataFormat<?>>>,
         Serializable {
-
-    private static SparkJobRequest req;
+    private SparkJobRequest req;
     public static final Logger LOG = Logger.getLogger(SqoopExtractFunction.class);
 
     public SqoopExtractFunction(SparkJobRequest request) {
@@ -70,7 +68,6 @@ public class SqoopExtractFunction implements Function<Partition, List<Intermedia
         try {
             LOG.info("Starting extractor... ");
             extractor.extract(extractorContext, fromLinkConfig, fromJobConfig, p);
-
         } catch (Exception e) {
             throw new SqoopException(SparkExecutionError.SPARK_EXEC_0000, e);
         } finally {

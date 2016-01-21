@@ -18,13 +18,14 @@
 
 package org.apache.sqoop.driver.configuration;
 
+import java.io.Serializable;
+import java.util.List;
+
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 
-import java.util.List;
-
 @ConfigClass
-public class JarConfig {
+public class JarConfig implements Serializable{
   // A list of the FQDNs of additional jars that are needed to execute the job
   @Input public List<String> extraJars;
 }

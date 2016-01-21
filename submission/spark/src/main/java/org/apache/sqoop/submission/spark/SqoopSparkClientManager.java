@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.sqoop.driver.JobRequest;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -18,6 +19,10 @@ public abstract class SqoopSparkClientManager implements SqoopSparkClient {
     protected List<String> localJars = new ArrayList<String>();
 
     protected List<String> localFiles = new ArrayList<String>();
+
+    @Override public void execute(JobRequest request) throws Exception {
+
+    }
 
     public SparkConf getSparkConf() {
         return context.getConf();

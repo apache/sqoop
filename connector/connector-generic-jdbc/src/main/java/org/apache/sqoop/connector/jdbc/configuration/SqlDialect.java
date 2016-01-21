@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 
@@ -25,7 +27,7 @@ import org.apache.sqoop.model.Input;
  * SQL queries.
  */
 @ConfigClass
-public class SqlDialect {
+public class SqlDialect implements Serializable{
   /**
    * Character(s) that we should use to escape SQL identifiers (tables, column names, ...)
    */

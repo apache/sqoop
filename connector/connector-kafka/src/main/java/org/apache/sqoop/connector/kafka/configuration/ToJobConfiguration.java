@@ -17,15 +17,17 @@
  */
 package org.apache.sqoop.connector.kafka.configuration;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.model.Config;
 import org.apache.sqoop.model.ConfigurationClass;
 
 @ConfigurationClass
-public class ToJobConfiguration {
+public class ToJobConfiguration implements Serializable{
   @Config
   public ToJobConfig toJobConfig;
 
-  public ToJobConfiguration() {
+  public ToJobConfiguration()  {
     toJobConfig = new ToJobConfig();
   }
 }

@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.schema.type;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
@@ -27,7 +29,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class DateTime extends AbstractDateTime {
+public class DateTime extends AbstractDateTime implements Serializable {
 
   /**
    * The column can contain fractions of seconds (a.k.a nanos)

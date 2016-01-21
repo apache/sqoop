@@ -17,19 +17,20 @@
  */
 package org.apache.sqoop.common;
 
-import org.apache.sqoop.classification.InterfaceAudience;
-import org.apache.sqoop.classification.InterfaceStability;
-
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import org.apache.sqoop.classification.InterfaceAudience;
+import org.apache.sqoop.classification.InterfaceStability;
 
 /**
  * Mutable variant of context class for "special" usage
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class MutableMapContext extends MapContext implements MutableContext {
+public class MutableMapContext extends MapContext implements MutableContext, Serializable {
 
   public MutableMapContext(Map<String, String> options) {
     super(options);

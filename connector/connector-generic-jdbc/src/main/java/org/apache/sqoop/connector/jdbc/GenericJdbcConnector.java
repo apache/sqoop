@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.connector.jdbc;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -30,7 +31,7 @@ import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 
-public class GenericJdbcConnector extends SqoopConnector {
+public class GenericJdbcConnector extends SqoopConnector implements Serializable{
 
   private static final From FROM = new From(
       GenericJdbcFromInitializer.class,

@@ -140,12 +140,6 @@ limitations under the License.
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.sqoop.submission</groupId>
-            <artifactId>sqoop-submission-spark</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.sqoop.execution</groupId>
             <artifactId>sqoop-execution-mapreduce</artifactId>
@@ -170,6 +164,7 @@ limitations under the License.
             <id>package</id>
             <build>
                 <plugins>
+
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>appassembler-maven-plugin</artifactId>
@@ -198,6 +193,52 @@ limitations under the License.
                                 <goals>
                                     <goal>assemble</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>2.3</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <exclude>META-INF/*.SF</exclude>
+                                                <exclude>META-INF/*.DSA</exclude>
+                                                <exclude>META-INF/*.RSA</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                    <artifactSet>
+                                        <excludes>
+                                            <exclude>classworlds:classworlds</exclude>
+                                            <exclude>junit:junit</exclude>
+                                            <exclude>jmock:*</exclude>
+                                            <exclude>*:xml-apis</exclude>
+                                            <exclude>org.apache.maven:lib:tests</exclude>
+                                        </excludes>
+                                    </artifactSet>
+                                    <transformers>
+                                        <transformer
+                                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                        <!--
+                                        Some care is required:
+                                        http://doc.akka.io/docs/akka/snapshot/general/configuration.html
+                                        -->
+                                        <transformer
+                                                implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                            <resource>spark-defaults.conf</resource>
+                                        </transformer>
+                                    </transformers>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

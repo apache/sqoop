@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Config;
 
@@ -24,7 +26,7 @@ import org.apache.sqoop.model.Config;
  *
  */
 @ConfigurationClass
-public class LinkConfiguration {
+public class LinkConfiguration implements Serializable{
 
   @Config public LinkConfig linkConfig;
 

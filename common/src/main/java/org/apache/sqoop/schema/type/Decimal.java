@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.schema.type;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
@@ -27,7 +29,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class Decimal extends AbstractNumber {
+public class Decimal extends AbstractNumber implements Serializable {
 
   /**
    * Numeric precision refers to the maximum number of digits that are present in the number.

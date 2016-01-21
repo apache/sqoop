@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.schema.type;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
@@ -27,7 +29,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class Date extends AbstractDateTime {
+public class Date extends AbstractDateTime implements Serializable {
 
   public Date(String name) {
     super(name);

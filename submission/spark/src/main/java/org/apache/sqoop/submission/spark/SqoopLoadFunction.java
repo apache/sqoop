@@ -26,7 +26,7 @@ import org.apache.sqoop.utils.ClassUtils;
 public class SqoopLoadFunction implements
         FlatMapFunction<Iterator<List<IntermediateDataFormat<?>>>, Void>, Serializable {
 
-    private static SparkJobRequest reqLoad;
+    private SparkJobRequest reqLoad;
 
     public static final Logger LOG = Logger.getLogger(SqoopLoadFunction.class);
 

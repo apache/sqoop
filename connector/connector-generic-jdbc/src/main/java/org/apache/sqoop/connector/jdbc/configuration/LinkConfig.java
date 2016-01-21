@@ -17,26 +17,27 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
-import org.apache.sqoop.model.ConfigClass;
-import org.apache.sqoop.model.Input;
-import org.apache.sqoop.model.Validator;
-import org.apache.sqoop.validation.Status;
-import org.apache.sqoop.validation.validators.AbstractValidator;
-import org.apache.sqoop.validation.validators.InRange;
-import org.apache.sqoop.validation.validators.NotEmpty;
-import org.apache.sqoop.validation.validators.ClassAvailable;
-import org.apache.sqoop.validation.validators.StartsWith;
-
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
 
+import org.apache.sqoop.model.ConfigClass;
+import org.apache.sqoop.model.Input;
+import org.apache.sqoop.model.Validator;
+import org.apache.sqoop.validation.Status;
+import org.apache.sqoop.validation.validators.AbstractValidator;
+import org.apache.sqoop.validation.validators.ClassAvailable;
+import org.apache.sqoop.validation.validators.InRange;
+import org.apache.sqoop.validation.validators.NotEmpty;
+import org.apache.sqoop.validation.validators.StartsWith;
+
 /**
  *
  */
 @ConfigClass(validators = {@Validator(LinkConfig.ConfigValidator.class)})
-public class LinkConfig {
+public class LinkConfig implements Serializable{
   @Input(size = 128, validators = {@Validator(NotEmpty.class), @Validator(ClassAvailable.class)} )
   public String jdbcDriver;
 

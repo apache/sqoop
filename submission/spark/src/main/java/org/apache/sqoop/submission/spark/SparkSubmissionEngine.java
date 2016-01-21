@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,7 +67,7 @@ public class SparkSubmissionEngine extends SubmissionEngine {
         //TODO: Create spark client, for now a local one
         try {
 
-            sqoopConf.add(Constants.SPARK_UI_ENABLED, "false");
+            sqoopConf.add(Constants.SPARK_UI_ENABLED, "true");
             sqoopConf.add(Constants.SPARK_DRIVER_ALLOWMULTIPLECONTEXTS, "true");
 
             sparkClient = SqoopSparkClientFactory.createSqoopSparkClient(sqoopConf);
@@ -118,23 +118,21 @@ public class SparkSubmissionEngine extends SubmissionEngine {
 
         try {
             sparkClient.execute(jobRequest);
-            request.getJobSubmission().setExternalJobId(jobRequest.getJobName());
-            request.getJobSubmission().setProgress(progress(request));
-            SubmissionStatus successful=convertSparkState(sparkClient.getSparkContext().statusTracker()
-                    .getJobInfo(sparkClient.getSparkContext().sc().jobProgressListener().jobIdToData().size()-1)
-                    .status());
-            if (successful==SubmissionStatus.SUCCEEDED) {
-                request.getJobSubmission().setStatus(SubmissionStatus.SUCCEEDED);
-            } else {
-                // treat any other state as failed
-                request.getJobSubmission().setStatus(SubmissionStatus.FAILED);
-            }
-
-            // there is no failure info in this job api, unlike the running job
-            request.getJobSubmission().setError(null);
-            request.getJobSubmission().setLastUpdateDate(new Date());
-
-
+            //            request.getJobSubmission().setExternalJobId(jobRequest.getJobName());
+            //            request.getJobSubmission().setProgress(progress(request));
+            //            SubmissionStatus successful=convertSparkState(sparkClient.getSparkContext().statusTracker()
+            //                    .getJobInfo(sparkClient.getSparkContext().sc().jobProgressListener().jobIdToData().size()-1)
+            //                    .status());
+            //            if (successful==SubmissionStatus.SUCCEEDED) {
+            //                request.getJobSubmission().setStatus(SubmissionStatus.SUCCEEDED);
+            //            } else {
+            //                // treat any other state as failed
+            //                request.getJobSubmission().setStatus(SubmissionStatus.FAILED);
+            //            }
+            //
+            //            // there is no failure info in this job api, unlike the running job
+            //            request.getJobSubmission().setError(null);
+            //            request.getJobSubmission().setLastUpdateDate(new Date());
 
         } catch (Exception e) {
             SubmissionError error = new SubmissionError();
@@ -154,7 +152,6 @@ public class SparkSubmissionEngine extends SubmissionEngine {
     }
 
     //TODO: Review how to stop a Spark job
-
 
     /**
      * {@inheritDoc}
@@ -180,21 +177,20 @@ public class SparkSubmissionEngine extends SubmissionEngine {
         String externalJobId = submission.getExternalJobId();
         try {
 
-
             // these properties change as the job runs, rest of the submission attributes
             // do not change as job runs
             SubmissionStatus newStatus = convertSparkState(sparkClient.getSparkContext().statusTracker()
-                    .getJobInfo(sparkClient.getSparkContext().sc().jobProgressListener().jobIdToData().size()-1)
+                    .getJobInfo(sparkClient.getSparkContext().sc().jobProgressListener().jobIdToData().size() - 1)
                     .status());
             if (newStatus.isRunning()) {
-                progress = (Double.valueOf(sqoopConf.get("mapTime"))+Double.valueOf(sqoopConf.get
-                        ("reduceTime")))/2;
+                progress = (Double.valueOf(sqoopConf.get("mapTime")) + Double.valueOf(sqoopConf.get
+                        ("reduceTime"))) / 2;
             }
-//            else {
-//                counters = counters(sparkClient.getSparkContext().sc().jobProgressListener().);
-//            }
+            //            else {
+            //                counters = counters(sparkClient.getSparkContext().sc().jobProgressListener().);
+            //            }
             submission.setStatus(newStatus);
-//            submission.setCounters(counters);
+            //            submission.setCounters(counters);
             submission.setProgress(progress);
             submission.setLastUpdateDate(new Date());
         } catch (Exception e) {
@@ -228,30 +224,33 @@ public class SparkSubmissionEngine extends SubmissionEngine {
     private double progress(SparkJobRequest sparkJobRequest) {
         try {
             if (sparkClient.getSparkContext().statusTracker()
-                    .getJobInfo(sparkClient.getSparkContext().sc().jobProgressListener().jobIdToData().size()-1)
-                    .status()== null) {
+                    .getJobInfo(sparkClient.getSparkContext().sc().jobProgressListener().jobIdToData().size() - 1)
+                    .status() == null) {
                 // Return default value
                 return -1;
 
             }
-            return (Double.valueOf(sparkJobRequest.getConf().get("mapTime"))+Double.valueOf(sparkJobRequest.getConf()
-                    .get("reduceTime")))/2;
+            return 0.0;
+            //            return (Double.valueOf(sparkJobRequest.getConf().get("mapTime"))+Double.valueOf(sparkJobRequest.getConf()
+            //                    .get("reduceTime")))/2;
             //return sparkClient.getSparkContext().sc().jobProgressListener().activeJobs();
-//            return System.currentTimeMillis()-sparkClient.getSparkContext().sc().jobProgressListener().startTime();
+            //            return System.currentTimeMillis()-sparkClient.getSparkContext().sc().jobProgressListener().startTime();
 
-//            return JobManager.getInstance().status(jobId).getProgress();
+            //            return JobManager.getInstance().status(jobId).getProgress();
         } catch (Exception e) {
             throw new SqoopException(MapreduceSubmissionError.MAPREDUCE_0003, e);
         }
     }
+
     /**
      * Detect MapReduce local mode.
      *
      * @return True if we're running in local mode
      */
     private boolean isLocal() {
-        if (sparkClient.getSparkConf().get(Constants.SPARK_MASTER).startsWith("yarn"))
+        if (sparkClient.getSparkConf().get(Constants.SPARK_MASTER).startsWith("yarn")) {
             return false;
+        }
         return true;
     }
 

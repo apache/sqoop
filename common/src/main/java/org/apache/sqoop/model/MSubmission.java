@@ -17,14 +17,15 @@
  */
 package org.apache.sqoop.model;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.ImmutableContext;
 import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counters;
-
-import java.util.Date;
 
 /**
  * Metadata object for submission (executed job).
@@ -34,7 +35,7 @@ import java.util.Date;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class MSubmission extends MAccountableEntity {
+public class MSubmission extends MAccountableEntity implements Serializable{
 
   /**
    * Job id that this submission object belongs.

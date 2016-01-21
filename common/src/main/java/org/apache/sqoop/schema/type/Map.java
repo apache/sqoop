@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.schema.type;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
@@ -27,7 +29,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class Map extends AbstractComplexType {
+public class Map extends AbstractComplexType implements Serializable {
 
   // They key can be either a string or number
   private AbstractPrimitiveType key;

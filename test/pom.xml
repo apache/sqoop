@@ -88,6 +88,7 @@ limitations under the License.
     <dependency>
       <groupId>org.apache.sqoop</groupId>
       <artifactId>sqoop-server</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>

@@ -18,22 +18,22 @@
 
 package org.apache.sqoop.connector.kafka;
 
-import org.apache.sqoop.common.Direction;
-import org.apache.sqoop.common.VersionInfo;
-import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
-import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
-import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
-import org.apache.sqoop.connector.spi.SqoopConnector;
-import org.apache.sqoop.job.etl.From;
-import org.apache.sqoop.job.etl.To;
-
-
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class KafkaConnector extends SqoopConnector {
+import org.apache.sqoop.common.Direction;
+import org.apache.sqoop.common.VersionInfo;
+import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
+import org.apache.sqoop.connector.spi.ConnectorConfigurableUpgrader;
+import org.apache.sqoop.connector.spi.SqoopConnector;
+import org.apache.sqoop.job.etl.From;
+import org.apache.sqoop.job.etl.To;
+
+public class KafkaConnector extends SqoopConnector implements Serializable{
 
   private static final To TO = new To(
           KafkaToInitializer.class,

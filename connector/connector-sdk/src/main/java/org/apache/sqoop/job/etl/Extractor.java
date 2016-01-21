@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.job.etl;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
@@ -26,7 +28,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public abstract class Extractor<LinkConfiguration, FromJobConfiguration, SqoopPartition> {
+public abstract class Extractor<LinkConfiguration, FromJobConfiguration, SqoopPartition> implements Serializable{
 
   /**
    * Extract data from source and pass them into the Sqoop.

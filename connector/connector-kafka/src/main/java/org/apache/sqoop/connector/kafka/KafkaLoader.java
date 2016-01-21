@@ -17,21 +17,22 @@
  */
 package org.apache.sqoop.connector.kafka;
 
-import kafka.producer.KeyedMessage;
-import kafka.javaapi.producer.Producer;
-import kafka.producer.ProducerConfig;
-import org.apache.log4j.Logger;
-import org.apache.sqoop.common.SqoopException;
-import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
-import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
-import org.apache.sqoop.error.code.KafkaConnectorErrors;
-import org.apache.sqoop.job.etl.Loader;
-import org.apache.sqoop.job.etl.LoaderContext;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+
+import org.apache.log4j.Logger;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
+import org.apache.sqoop.error.code.KafkaConnectorErrors;
+import org.apache.sqoop.job.etl.Loader;
+import org.apache.sqoop.job.etl.LoaderContext;
+
+import kafka.javaapi.producer.Producer;
+import kafka.producer.KeyedMessage;
+import kafka.producer.ProducerConfig;
 
 public class KafkaLoader extends Loader<LinkConfiguration,ToJobConfiguration> {
   private static final Logger LOG = Logger.getLogger(KafkaLoader.class);
@@ -72,6 +73,7 @@ public class KafkaLoader extends Loader<LinkConfiguration,ToJobConfiguration> {
 
   private void sendToKafka(List<KeyedMessage<String,String>> messageList) {
     try {
+      LOG.info("LISTA DE MENSAJES"+messageList);
       producer.send(messageList);
       messageList.clear();
     } catch (Exception ex) {

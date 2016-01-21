@@ -17,6 +17,10 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.sqoop.connector.jdbc.GenericJdbcConnectorConstants;
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
@@ -25,14 +29,11 @@ import org.apache.sqoop.validation.Status;
 import org.apache.sqoop.validation.validators.AbstractValidator;
 import org.apache.sqoop.validation.validators.NullOrContains;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  *
  */
 @ConfigClass(validators = { @Validator(FromJobConfig.ConfigValidator.class) })
-public class FromJobConfig {
+public class FromJobConfig implements Serializable{
   @Input(size = 50)
   public String schemaName;
 

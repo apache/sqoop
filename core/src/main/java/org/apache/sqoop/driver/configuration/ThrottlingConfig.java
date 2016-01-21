@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.driver.configuration;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 
@@ -24,7 +26,7 @@ import org.apache.sqoop.model.Input;
  * Config to set up number of loaders and extractors
  */
 @ConfigClass
-public class ThrottlingConfig {
+public class ThrottlingConfig implements Serializable {
 
   @Input public Integer numExtractors;
 

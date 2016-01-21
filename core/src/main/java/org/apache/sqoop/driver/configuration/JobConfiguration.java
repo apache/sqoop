@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.driver.configuration;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.model.ConfigurationClass;
 import org.apache.sqoop.model.Config;
 
@@ -24,7 +26,7 @@ import org.apache.sqoop.model.Config;
  * Representing the driver job configuration
  */
 @ConfigurationClass
-public class JobConfiguration {
+public class JobConfiguration implements Serializable{
   @Config
   public ThrottlingConfig throttlingConfig;
 

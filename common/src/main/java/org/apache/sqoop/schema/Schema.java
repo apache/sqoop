@@ -23,6 +23,7 @@ import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.schema.type.Column;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,7 +38,7 @@ import java.util.Set;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public class Schema {
+public class Schema implements Serializable{
 
   /**
    * Name of the schema, usually a table name.

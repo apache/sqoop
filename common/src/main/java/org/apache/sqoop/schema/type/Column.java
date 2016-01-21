@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.schema.type;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
@@ -28,7 +30,7 @@ import org.apache.sqoop.schema.SchemaError;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
-public abstract class Column {
+public abstract class Column implements Serializable {
 
   /**
    * Name of the column. It is optional

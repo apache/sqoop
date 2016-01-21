@@ -17,6 +17,10 @@
  */
 package org.apache.sqoop.driver;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.DirectionError;
 import org.apache.sqoop.common.MutableMapContext;
@@ -27,15 +31,12 @@ import org.apache.sqoop.job.etl.Transferable;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.utils.ClassUtils;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Submission details class is used when creating new submission and contains
  * all information that we need to create a new submission (including mappers,
  * reducers, ...).
  */
-public class JobRequest {
+public class JobRequest implements Serializable{
 
   /**
    * Job Submission

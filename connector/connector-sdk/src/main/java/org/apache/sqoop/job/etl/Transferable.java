@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.job.etl;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
@@ -27,7 +29,7 @@ import org.apache.sqoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public abstract class Transferable {
+public abstract class Transferable implements Serializable{
 
   private Class<? extends Initializer> initializer;
   private Class<? extends Destroyer> destroyer;

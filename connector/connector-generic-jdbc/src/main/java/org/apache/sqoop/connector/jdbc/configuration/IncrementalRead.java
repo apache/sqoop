@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.connector.jdbc.configuration;
 
+import java.io.Serializable;
+
 import org.apache.sqoop.model.ConfigClass;
 import org.apache.sqoop.model.Input;
 import org.apache.sqoop.model.InputEditable;
@@ -27,7 +29,7 @@ import org.apache.sqoop.validation.validators.AbstractValidator;
 /**
  */
 @ConfigClass(validators = {@Validator(IncrementalRead.ConfigValidator.class)})
-public class IncrementalRead {
+public class IncrementalRead implements Serializable{
   @Input(size = 50)
   public String checkColumn;
 
