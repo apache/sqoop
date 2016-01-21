@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.common;
 
+import org.apache.log4j.Logger;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 
@@ -33,6 +34,8 @@ import java.util.regex.Pattern;
 @InterfaceStability.Unstable
 public class MapContext implements ImmutableContext {
 
+  private static final Logger LOG = Logger.getLogger(MapContext.class);
+
   private final Map<String, String> options;
 
   public MapContext(Map<String, String> options) {
@@ -48,7 +51,11 @@ public class MapContext implements ImmutableContext {
    */
   @Override
   public String getString(String key) {
-    return options.get(key);
+    String value = options.get(key);
+    if (value == null || value.trim().length() == 0) {
+      LOG.debug("Value not found in configuration for key: " + key);
+    }
+    return value;
   }
 
   @Override
@@ -80,6 +87,7 @@ public class MapContext implements ImmutableContext {
   @Override
   public long getLong(String key, long defaultValue) {
     if (!options.containsKey(key)) {
+      LOG.debug("Value not found in configuration for key: " + key);
       return defaultValue;
     }
 
@@ -94,6 +102,7 @@ public class MapContext implements ImmutableContext {
   @Override
   public int getInt(String key, int defaultValue) {
     if (!options.containsKey(key)) {
+      LOG.debug("Value not found in configuration for key: " + key);
       return defaultValue;
     }
 
@@ -114,6 +123,10 @@ public class MapContext implements ImmutableContext {
       if(entry.getKey().startsWith(prefix)) {
         subProps.put(entry.getKey().substring(prefix.length()), entry.getValue());
       }
+    }
+
+    if (subProps.isEmpty()) {
+      LOG.debug("Value not found in configuration for prefix: " + prefix);
     }
 
     return subProps;
@@ -137,6 +150,11 @@ public class MapContext implements ImmutableContext {
         result.put(item, getString(item));
       }
     }
+
+    if (result.isEmpty()) {
+      LOG.debug("Value not found in configuration for regex: " + regex);
+    }
+
     return result;
   }
 
