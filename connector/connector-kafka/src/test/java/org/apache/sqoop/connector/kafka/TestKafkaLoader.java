@@ -17,22 +17,23 @@
  */
 package org.apache.sqoop.connector.kafka;
 
-import kafka.message.MessageAndMetadata;
-import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
-import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
-import org.apache.sqoop.common.test.kafka.TestUtil;
-import org.apache.sqoop.etl.io.DataReader;
-import org.apache.sqoop.job.etl.LoaderContext;
-import org.testng.annotations.AfterClass;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Test(groups="slow")
+import org.apache.sqoop.common.test.kafka.TestUtil;
+import org.apache.sqoop.connector.kafka.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.kafka.configuration.ToJobConfiguration;
+import org.apache.sqoop.etl.io.DataReader;
+import org.apache.sqoop.job.etl.LoaderContext;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import kafka.message.MessageAndMetadata;
+
+@Test
 public class TestKafkaLoader {
 
   private static TestUtil testUtil = TestUtil.getInstance();

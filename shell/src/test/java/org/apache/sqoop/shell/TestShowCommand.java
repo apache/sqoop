@@ -428,7 +428,7 @@ public class TestShowCommand {
 
     // Missing option principal
     try {
-      showCmd.execute(Arrays.asList(Constants.FN_PRINCIPAL, "-principal-type", "group", "-resource-type", "connector", "-resource", "resource_test"));
+      showCmd.execute(Arrays.asList(Constants.FN_PRIVILEGE, "-principal-type", "group", "-resource-type", "connector", "-resource", "resource_test"));
       Assert.fail("Show privilege should fail as option principal is missing!");
     } catch (Exception e) {
       Assert.assertTrue(e.getMessage().contains("Missing required option"));
