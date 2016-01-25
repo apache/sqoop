@@ -4,13 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class TestSqoopJsonUtil {
 
-  private SqoopJsonUtil jsonUtil;
   private static Map<String, String> paramMap;
   private static String jsonStr;
 
