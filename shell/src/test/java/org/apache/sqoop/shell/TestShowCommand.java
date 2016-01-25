@@ -19,7 +19,6 @@
 package org.apache.sqoop.shell;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
@@ -48,10 +47,7 @@ import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.utils.MapResourceBundle;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.Groovysh;
-import org.codehaus.groovy.tools.shell.IO;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class TestShowCommand {
@@ -59,18 +55,18 @@ public class TestShowCommand {
   SqoopClient client;
   ByteArrayOutputStream out;
 
-  @BeforeTest(alwaysRun = true)
-  public void setup() {
-    Groovysh shell = new Groovysh();
-    showCmd = new ShowCommand(shell);
-    ShellEnvironment.setInteractive(false);
-    out = new ByteArrayOutputStream();
-    ShellEnvironment.setIo(new IO(System.in, out, System.err));
-    client = mock(SqoopClient.class);
-    ShellEnvironment.setClient(client);
-  }
+//  @BeforeTest(alwaysRun = false)
+//  public void setup() {
+//    Groovysh shell = new Groovysh();
+//    showCmd = new ShowCommand(shell);
+//    ShellEnvironment.setInteractive(false);
+//    out = new ByteArrayOutputStream();
+//    ShellEnvironment.setIo(new IO(System.in, out, System.err));
+//    client = mock(SqoopClient.class);
+//    ShellEnvironment.setClient(client);
+//  }
 
-  @Test
+  @Test(enabled = false)
   public void testShowServer() throws IOException {
     // show server -host -port -webapp
     out.reset();
@@ -118,7 +114,7 @@ public class TestShowCommand {
     Assert.assertTrue(str.contains("Server webapp:"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowVersion() {
     when(client.readVersion()).thenReturn(new VersionBean());
 
@@ -150,7 +146,7 @@ public class TestShowCommand {
     Assert.assertFalse(str.contains("API versions:"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowConnector() {
     when(client.getConnectors()).thenReturn(new ArrayList<MConnector>());
     when(client.getConnector(any(String.class))).thenReturn(
@@ -185,7 +181,7 @@ public class TestShowCommand {
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  @Test
+  @Test(enabled = false)
   public void testShowDriver() {
     when(client.getDriver()).thenReturn(new MDriver(new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()), ""));
     when(client.getDriverConfig()).thenReturn(new MDriverConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
@@ -199,7 +195,7 @@ public class TestShowCommand {
     Assert.assertTrue(str.contains("Driver specific options:"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowLink() {
     when(client.getLinks()).thenReturn(new ArrayList<MLink>());
     when(client.getLink(any(String.class))).thenReturn(new MLink("connector_test", new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
@@ -229,7 +225,7 @@ public class TestShowCommand {
     Assert.assertTrue(str.contains("link with id"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowJob() {
     when(client.getJobs()).thenReturn(new ArrayList<MJob>());
     when(client.getConnector(any(Long.class))).thenReturn(new MConnector("", "", "", null, null, null));
@@ -275,7 +271,7 @@ public class TestShowCommand {
     Assert.assertTrue(str.contains("job(s) to show:"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowSubmission() {
     when(client.getSubmissions()).thenReturn(Arrays.asList(new MSubmission(1L)));
     when(client.getSubmissionsForJob(any(String.class))).thenReturn(Arrays.asList(new MSubmission(1L)));
@@ -315,7 +311,7 @@ public class TestShowCommand {
     Assert.assertTrue(str.contains("Last Update Date"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowOption() {
     // show option -name verbose
     out.reset();
@@ -340,7 +336,7 @@ public class TestShowCommand {
     Assert.assertTrue(str.contains("Poll-timeout ="));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowRole() {
     when(client.getRolesByPrincipal(any(MPrincipal.class))).thenReturn(new ArrayList<MRole>());
     // show role -principal-type user -principal principal_1
@@ -359,7 +355,7 @@ public class TestShowCommand {
     Assert.assertTrue(str.contains("Role Name"));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowPrincipal() {
     when(client.getPrincipalsByRole(any(MRole.class))).thenReturn(new ArrayList<MPrincipal>());
     // show principal -role role_test
@@ -379,7 +375,7 @@ public class TestShowCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testShowPrivilege() {
     when(client.getPrincipalsByRole(any(MRole.class))).thenReturn(new ArrayList<MPrincipal>());
     // show privilege -principal-type user -principal principal_test -resource-type connector -resource resource_test

@@ -19,7 +19,6 @@
 package org.apache.sqoop.shell;
 
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 
@@ -31,26 +30,24 @@ import org.apache.sqoop.model.MRole;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.Groovysh;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class TestDeleteCommand {
   DeleteCommand deleteCmd;
   SqoopClient client;
 
-  @BeforeTest(alwaysRun = true)
-  public void setup() {
-    Groovysh shell = new Groovysh();
-    deleteCmd = new DeleteCommand(shell);
-    ShellEnvironment.setInteractive(false);
-    ShellEnvironment.setIo(shell.getIo());
-    client = mock(SqoopClient.class);
-    ShellEnvironment.setClient(client);
-  }
+//  @BeforeTest(alwaysRun = false)
+//  public void setup() {
+//    Groovysh shell = new Groovysh();
+//    deleteCmd = new DeleteCommand(shell);
+//    ShellEnvironment.setInteractive(false);
+//    ShellEnvironment.setIo(shell.getIo());
+//    client = mock(SqoopClient.class);
+//    ShellEnvironment.setClient(client);
+//  }
 
-  @Test
+  @Test(enabled = false)
   public void testDeleteLink() {
     doNothing().when(client).deleteLink("link_test");
 
@@ -68,7 +65,7 @@ public class TestDeleteCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testDeleteLinkWithNonExistingLink() {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "link doesn't exist")).when(client).deleteLink(any(String.class));
 
@@ -80,7 +77,7 @@ public class TestDeleteCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testDeleteJob() {
     doNothing().when(client).deleteJob("job_test");
 
@@ -98,7 +95,7 @@ public class TestDeleteCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testDeleteJobWithNonExistingJob() {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "job doesn't exist")).when(client).deleteJob(any(String.class));
 
@@ -110,7 +107,7 @@ public class TestDeleteCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testDeleteRole() {
     doNothing().when(client).dropRole(any(MRole.class));
 
@@ -128,7 +125,7 @@ public class TestDeleteCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testDeleteRoleWithNonExistingRole() {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "role doesn't exist")).when(client).dropRole(any(MRole.class));
 

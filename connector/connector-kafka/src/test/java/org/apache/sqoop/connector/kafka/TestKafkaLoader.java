@@ -41,7 +41,7 @@ public class TestKafkaLoader {
   private static KafkaLoader loader;
   private static String TOPIC = "mytopic";
 
-  @BeforeClass(alwaysRun = true)
+  @BeforeClass(alwaysRun = false)
   public static void setup() throws Exception {
     testUtil.prepare();
     List<String> topics = new ArrayList<String>(1);
@@ -50,12 +50,12 @@ public class TestKafkaLoader {
     loader = new KafkaLoader();
   }
 
-  @AfterClass(alwaysRun = true)
+  @AfterClass(alwaysRun = false)
   public static void tearDown() throws IOException {
     testUtil.tearDown();
   }
 
-  @Test
+  @Test(enabled = false)
   public void testLoader() throws Exception {
     LoaderContext context = new LoaderContext(null, new DataReader() {
       private long index = 0L;

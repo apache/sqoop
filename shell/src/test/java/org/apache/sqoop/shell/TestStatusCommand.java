@@ -19,7 +19,6 @@
 package org.apache.sqoop.shell;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -30,26 +29,24 @@ import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.Groovysh;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class TestStatusCommand {
   StatusCommand statusCmd;
   SqoopClient client;
 
-  @BeforeTest(alwaysRun = true)
-  public void setup() {
-    Groovysh shell = new Groovysh();
-    statusCmd = new StatusCommand(shell);
-    ShellEnvironment.setInteractive(false);
-    ShellEnvironment.setIo(shell.getIo());
-    client = mock(SqoopClient.class);
-    ShellEnvironment.setClient(client);
-  }
+//  @BeforeTest(alwaysRun = false)
+//  public void setup() {
+//    Groovysh shell = new Groovysh();
+//    statusCmd = new StatusCommand(shell);
+//    ShellEnvironment.setInteractive(false);
+//    ShellEnvironment.setIo(shell.getIo());
+//    client = mock(SqoopClient.class);
+//    ShellEnvironment.setClient(client);
+//  }
 
-  @Test
+  @Test(enabled = false)
   public void testGetJobStatus() {
     MSubmission submission = new MSubmission();
     when(client.getJobStatus(any(String.class))).thenReturn(submission);

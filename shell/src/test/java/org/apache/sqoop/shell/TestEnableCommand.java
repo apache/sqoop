@@ -19,7 +19,6 @@
 package org.apache.sqoop.shell;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 
@@ -30,26 +29,24 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.validation.Status;
-import org.codehaus.groovy.tools.shell.Groovysh;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class TestEnableCommand {
   EnableCommand enableCmd;
   SqoopClient client;
 
-  @BeforeTest(alwaysRun = true)
-  public void setup() {
-    Groovysh shell = new Groovysh();
-    enableCmd = new EnableCommand(shell);
-    ShellEnvironment.setInteractive(false);
-    ShellEnvironment.setIo(shell.getIo());
-    client = mock(SqoopClient.class);
-    ShellEnvironment.setClient(client);
-  }
+//  @BeforeTest(alwaysRun = false)
+//  public void setup() {
+//    Groovysh shell = new Groovysh();
+//    enableCmd = new EnableCommand(shell);
+//    ShellEnvironment.setInteractive(false);
+//    ShellEnvironment.setIo(shell.getIo());
+//    client = mock(SqoopClient.class);
+//    ShellEnvironment.setClient(client);
+//  }
 
-  @Test
+  @Test(enabled = false)
   public void testEnableLink() {
     doNothing().when(client).enableLink("link_test", true);
 
@@ -67,7 +64,7 @@ public class TestEnableCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testEnableLinkWithNonExistingLink() {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "link doesn't exist")).when(client).enableLink(any(String.class), any(Boolean.class));
 
@@ -79,7 +76,7 @@ public class TestEnableCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testEnableJob() {
     doNothing().when(client).enableJob("job_test", true);
 
@@ -97,7 +94,7 @@ public class TestEnableCommand {
     }
   }
 
-  @Test
+  @Test(enabled = false)
   public void testEnableJobWithNonExistingJob() {
     doThrow(new SqoopException(TestShellError.TEST_SHELL_0000, "job doesn't exist")).when(client).enableJob(any(String.class), any(Boolean.class));
 

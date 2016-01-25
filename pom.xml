@@ -583,7 +583,7 @@ limitations under the License.
             <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <!-- See SQOOP-2120 for details about use of -XX:-UseSplitVerifier -->
-            <argLine>-Xms512m -Xmx2g -XX:MaxPermSize=1024m -XX:-UseSplitVerifier</argLine>
+            <argLine>-Xmx2g </argLine>
             <properties>
               <property>
                 <name>usedefaultlisteners</name>
@@ -607,7 +607,7 @@ limitations under the License.
           <version>2.18.1</version>
           <configuration>
             <!-- See SQOOP-2120 for details about use of -XX:-UseSplitVerifier -->
-            <argLine>-Xms512m -Xmx2g -XX:MaxPermSize=1024m -XX:-UseSplitVerifier</argLine>
+            <argLine>-Xmx2g</argLine>
           </configuration>
         </plugin>
       </plugins>
