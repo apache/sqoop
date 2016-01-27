@@ -32,14 +32,16 @@ Argument                      Description
 +\--hive-table <table-name>+  Sets the table name to use when importing\
                               to Hive.
 +\--hive-drop-import-delims+  Drops '\n', '\r', and '\01' from string\
-			      fields when importing to Hive.
+                  fields when importing to Hive.
 +\--hive-delims-replacement+  Replace '\n', '\r', and '\01' from string\
-			      fields with user defined string when importing to Hive.
-+\--hive-partition-key+	      Name of a hive field to partition are \
-			      sharded on
+                  fields with user defined string when importing to Hive.
++\--hive-partition-key+       Name of a hive field to partition are \
+                  sharded on
 +\--hive-partition-value <v>+ String-value that serves as partition key\
-			      for this imported into hive in this job.
+                  for this imported into hive in this job.
 +\--map-column-hive <map>+    Override default mapping from SQL type to\
-                              Hive type for configured columns.
+                  Hive type for configured columns. If specify commas in\
+                  this argument, use URL encoded keys and values, for example,\
+                  use DECIMAL(1%2C%201) instead of DECIMAL(1, 1).
 --------------------------------------------------------------------------
 

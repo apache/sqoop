@@ -328,6 +328,9 @@ Sqoop is expecting comma separated list of mapping in form <name of column>=<new
 $ sqoop import ... --map-column-java id=String,value=Integer
 ----
 
+Notice that specifying commas in --map-column-hive option, you should use URL encoded
+keys and values, for example, use DECIMAL(1%2C%201) instead of DECIMAL(1, 1).
+
 Sqoop will rise exception in case that some configured mapping will not be used.
 
 Schema name handling
