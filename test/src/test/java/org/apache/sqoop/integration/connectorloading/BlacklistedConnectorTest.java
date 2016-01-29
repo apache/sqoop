@@ -18,20 +18,26 @@
 package org.apache.sqoop.integration.connectorloading;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.ConfigurationConstants;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Test(groups = "no-real-cluster")
-public class BlacklistedConnectorTest extends ConnectorTestCase {
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class})
+public class BlacklistedConnectorTest extends SqoopTestCase {
+  private SqoopMiniCluster sqoopMiniCluster;
+
   public static class DerbySqoopMiniCluster extends JettySqoopMiniCluster {
     public DerbySqoopMiniCluster(String temporaryPath, Configuration configuration) throws Exception {
       super(temporaryPath, configuration);
@@ -46,33 +52,30 @@ public class BlacklistedConnectorTest extends ConnectorTestCase {
     }
   }
 
+  @BeforeMethod(dependsOnMethods = { "init" })
   public void startSqoopMiniCluster() throws Exception {
     // And use them for new Derby repo instance
-    setCluster(new DerbySqoopMiniCluster(HdfsUtils.joinPathFragments(super
-      .getSqoopMiniClusterTemporaryPath(), getTestName()), hadoopCluster.getConfiguration()));
+    sqoopMiniCluster = new DerbySqoopMiniCluster(HdfsUtils.joinPathFragments(super
+        .getTemporaryPath(), getTestName()), getHadoopConf());
+    KdcInfrastructureProvider kdcProvider = getInfrastructureProvider(KdcInfrastructureProvider.class);
+    if (kdcProvider != null) {
+      sqoopMiniCluster.setKdc(kdcProvider.getInstance());
+    }
 
     // Start server
-    getCluster().start();
+    sqoopMiniCluster.start();
 
     // Initialize Sqoop Client API
-    setClient(new SqoopClient(getServerUrl()));
+    initSqoopClient(sqoopMiniCluster.getServerUrl());
   }
 
   @Test(expectedExceptions = {SqoopException.class})
   public void testCreateLinkWithNonexistantConnector() throws Exception {
-    startSqoopMiniCluster();
     getClient().createLink("generic-jdbc-connector");
   }
 
   @AfterMethod
   public void stopCluster() throws Exception {
-    if (getCluster() != null) {
-      getCluster().stop();
-    }
-  }
-
-  @Override
-  public void startSqoop() throws Exception {
-    // Do nothing so that Sqoop isn't started before Suite.
+    sqoopMiniCluster.stop();
   }
 }

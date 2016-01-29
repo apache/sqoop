@@ -92,4 +92,8 @@ public final class MRUtils {
 
     throw new SqoopException(MRExecutionError.MAPRED_EXEC_0026, connectorName);
   }
+
+  public static synchronized void destroy() {
+    connectorClassLoaderInited = false;
+  }
 }

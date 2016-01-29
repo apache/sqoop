@@ -26,6 +26,7 @@ import org.apache.sqoop.job.MRJobConstants;
 import org.apache.sqoop.job.etl.From;
 import org.apache.sqoop.job.etl.To;
 import org.apache.sqoop.job.io.SqoopWritable;
+import org.apache.sqoop.job.mr.MRUtils;
 import org.apache.sqoop.job.mr.SqoopInputFormat;
 import org.apache.sqoop.job.mr.SqoopMapper;
 import org.apache.sqoop.job.mr.SqoopNullOutputFormat;
@@ -100,5 +101,11 @@ public class MapreduceExecutionEngine extends ExecutionEngine {
   protected void addDependencies(MRJobRequest jobrequest) {
     // Guava
     jobrequest.addJarForClass(ThreadFactoryBuilder.class);
+  }
+
+  @Override
+  public void destroy() {
+    super.destroy();
+    MRUtils.destroy();
   }
 }

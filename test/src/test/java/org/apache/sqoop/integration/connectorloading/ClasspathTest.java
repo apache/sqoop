@@ -19,13 +19,16 @@
 package org.apache.sqoop.integration.connectorloading;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.test.infrastructure.Infrastructure;
+import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
-import org.apache.sqoop.test.testcases.ConnectorTestCase;
+import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
 import org.apache.sqoop.test.utils.ConnectorUtils;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.testng.annotations.AfterMethod;
@@ -38,7 +41,8 @@ import java.util.List;
 import java.util.Map;
 
 @Test(groups = "no-real-cluster")
-public class ClasspathTest extends ConnectorTestCase {
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+public class ClasspathTest extends SqoopTestCase {
 
   private static final String TEST_CONNECTOR_JAR_NAME = "test-connector.jar";
   private static final String TEST_DEPENDENCY_JAR_NAME = "test-dependency.jar";
@@ -61,6 +65,7 @@ public class ClasspathTest extends ConnectorTestCase {
   };
 
   private ClassLoader classLoader;
+  private SqoopMiniCluster sqoopMiniCluster;
 
   public static class DerbySqoopMiniCluster extends JettySqoopMiniCluster {
 
@@ -91,13 +96,18 @@ public class ClasspathTest extends ConnectorTestCase {
 
   public void startSqoopMiniCluster(String extraClasspath, String jobExtraClasspath) throws Exception {
     // And use them for new Derby repo instance
-    setCluster(new DerbySqoopMiniCluster(HdfsUtils.joinPathFragments(super.getSqoopMiniClusterTemporaryPath(), getTestName()), hadoopCluster.getConfiguration(), extraClasspath, jobExtraClasspath));
+    sqoopMiniCluster = new DerbySqoopMiniCluster(HdfsUtils.joinPathFragments
+        (super.getTemporaryPath(), getTestName()), getHadoopConf(), extraClasspath, jobExtraClasspath);
+    KdcInfrastructureProvider kdcProvider = getInfrastructureProvider(KdcInfrastructureProvider.class);
+    if (kdcProvider != null) {
+      sqoopMiniCluster.setKdc(kdcProvider.getInstance());
+    }
 
     // Start server
-    getCluster().start();
+    sqoopMiniCluster.start();
 
     // Initialize Sqoop Client API
-    setClient(new SqoopClient(getServerUrl()));
+    initSqoopClient(sqoopMiniCluster.getServerUrl());
   }
 
   @BeforeMethod
@@ -185,8 +195,7 @@ public class ClasspathTest extends ConnectorTestCase {
     return driverConfig;
   }
 
-  @Override
-  public void startSqoop() throws Exception {
-    // Do nothing so that Sqoop isn't started before Suite.
+  private void stopSqoop() throws Exception {
+    sqoopMiniCluster.stop();
   }
 }
