@@ -118,12 +118,12 @@ public class TestAvroImport extends ImportJobTestCase {
    *                  to those that {@link #getOutputArgv(boolean, String[])}
    *                  returns
    */
-  private void avroImportTestHelper(String[] extraArgs, String codec)
-    throws IOException {
+  protected void avroImportTestHelper(String[] extraArgs, String codec)
+      throws IOException {
     String[] types =
       {"BIT", "INTEGER", "BIGINT", "REAL", "DOUBLE", "VARCHAR(6)",
-        "VARBINARY(2)", };
-    String[] vals = {"true", "100", "200", "1.0", "2.0", "'s'", "'0102'", };
+        "VARBINARY(2)", "DECIMAL(3,2)"};
+    String[] vals = {"true", "100", "200", "1.0", "2.0", "'s'", "'0102'", "'1.00'"};
     createTableWithColTypes(types, vals);
 
     runImport(getOutputArgv(true, extraArgs));
@@ -142,6 +142,7 @@ public class TestAvroImport extends ImportJobTestCase {
     checkField(fields.get(4), "DATA_COL4", Schema.Type.DOUBLE);
     checkField(fields.get(5), "DATA_COL5", Schema.Type.STRING);
     checkField(fields.get(6), "DATA_COL6", Schema.Type.BYTES);
+    checkField(fields.get(7), "DATA_COL7", Schema.Type.STRING);
 
     GenericRecord record1 = reader.next();
     assertEquals("DATA_COL0", true, record1.get("DATA_COL0"));
@@ -155,6 +156,7 @@ public class TestAvroImport extends ImportJobTestCase {
     ByteBuffer b = ((ByteBuffer) object);
     assertEquals((byte) 1, b.get(0));
     assertEquals((byte) 2, b.get(1));
+    assertEquals("DATA_COL7", "1.00", record1.get("DATA_COL7").toString());
 
     if (codec != null) {
       assertEquals(codec, reader.getMetaString(DataFileConstants.CODEC));
@@ -248,7 +250,7 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals("TEST_A_V_R_O", 2015, record1.get("TEST_A_V_R_O"));
   }
 
-  private void checkField(Field field, String name, Type type) {
+  protected void checkField(Field field, String name, Type type) {
     assertEquals(name, field.name());
     assertEquals(Schema.Type.UNION, field.schema().getType());
     assertEquals(Schema.Type.NULL, field.schema().getTypes().get(0).getType());
@@ -270,7 +272,7 @@ public class TestAvroImport extends ImportJobTestCase {
 
   }
 
-  private DataFileReader<GenericRecord> read(Path filename) throws IOException {
+  protected DataFileReader<GenericRecord> read(Path filename) throws IOException {
     Configuration conf = new Configuration();
     if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
       conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
@@ -281,7 +283,7 @@ public class TestAvroImport extends ImportJobTestCase {
     return new DataFileReader<GenericRecord>(fsInput, datumReader);
   }
 
-  private void checkSchemaFile(final Schema schema) throws IOException {
+  protected void checkSchemaFile(final Schema schema) throws IOException {
     final File schemaFile = new File(schema.getName() + ".avsc");
     assertTrue(schemaFile.exists());
     assertEquals(schema, new Schema.Parser().parse(schemaFile));

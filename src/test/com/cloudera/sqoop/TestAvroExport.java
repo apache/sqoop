@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,6 +36,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.avro.Conversions;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileWriter;
@@ -301,6 +304,8 @@ public class TestAvroExport extends ExportJobTestCase {
   }
 
   public void testSupportedAvroTypes() throws IOException, SQLException {
+    GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
+
     String[] argv = {};
     final int TOTAL_RECORDS = 1 * 10;
 
@@ -308,6 +313,8 @@ public class TestAvroExport extends ExportJobTestCase {
     Schema fixed = Schema.createFixed("myfixed", null, null, 2);
     Schema enumeration = Schema.createEnum("myenum", null, null,
         Lists.newArrayList("a", "b"));
+    Schema decimalSchema = LogicalTypes.decimal(3,2)
+        .addToSchema(Schema.createFixed("dec1", null, null, 2));
 
     ColumnGenerator[] gens = new ColumnGenerator[] {
       colGenerator(true, Schema.create(Schema.Type.BOOLEAN), true, "BIT"),
@@ -323,6 +330,10 @@ public class TestAvroExport extends ExportJobTestCase {
           b, "BINARY(2)"),
       colGenerator(new GenericData.EnumSymbol(enumeration, "a"), enumeration,
           "a", "VARCHAR(8)"),
+      colGenerator(new BigDecimal("2.00"), decimalSchema,
+          new BigDecimal("2.00"), "DECIMAL(3,2)"),
+      colGenerator("22.00", Schema.create(Schema.Type.STRING),
+          new BigDecimal("22.00"), "DECIMAL(4,2)"),
     };
     createAvroFile(0, TOTAL_RECORDS, gens);
     createTable(gens);

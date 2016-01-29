@@ -21,7 +21,9 @@ package org.apache.sqoop.mapreduce;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import com.cloudera.sqoop.orm.ClassWriter;
+import org.apache.avro.Conversions;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -76,6 +78,9 @@ public class GenericRecordExportMapper<K, V>
 
     columnTypes = DefaultStringifier.load(conf, AVRO_COLUMN_TYPES_MAP,
         MapWritable.class);
+
+    // Add decimal support
+    GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
   }
 
   protected SqoopRecord toSqoopRecord(GenericRecord record) throws IOException {

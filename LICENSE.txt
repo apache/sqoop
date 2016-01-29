@@ -362,3 +362,7 @@ For lib/slf4j-api-<version>.jar:
 For lib/snappy-java-<version>.jar:
 
   The Apache License, Version 2.0
+
+Some parts of the code were copied from the Apache Hive Project:
+
+  The Apache License, Version 2.0

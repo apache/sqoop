@@ -19,11 +19,13 @@
 package org.apache.sqoop.orm;
 
 import java.io.IOException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.avro.LogicalType;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -34,6 +36,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import org.apache.sqoop.avro.AvroUtil;
 
+import org.apache.sqoop.config.ConfigurationConstants;
 import org.codehaus.jackson.node.NullNode;
 
 /**
@@ -43,6 +46,20 @@ public class AvroSchemaGenerator {
 
   public static final Log LOG =
       LogFactory.getLog(AvroSchemaGenerator.class.getName());
+
+  /**
+   * Map precision to the number bytes needed for binary conversion.
+   * @see <a href="https://github.com/apache/hive/blob/release-1.1/ql/src/java/org/apache/hadoop/hive/ql/io/parquet/serde/ParquetHiveSerDe.java#L90">Apache Hive</a>.
+   */
+  public static final int MAX_PRECISION = 38;
+  public static final int PRECISION_TO_BYTE_COUNT[] = new int[MAX_PRECISION];
+  static {
+    for (int prec = 1; prec <= MAX_PRECISION; prec++) {
+      // Estimated number of bytes needed.
+      PRECISION_TO_BYTE_COUNT[prec - 1] = (int)
+          Math.ceil((Math.log(Math.pow(10, prec) - 1) / Math.log(2) + 1) / 8);
+    }
+  }
 
   private final SqoopOptions options;
   private final ConnManager connManager;
@@ -65,14 +82,18 @@ public class AvroSchemaGenerator {
   public Schema generate(String schemaNameOverride) throws IOException {
     ClassWriter classWriter = new ClassWriter(options, connManager,
         tableName, null);
+    Map<String, List<Integer>> columnInfo = classWriter.getColumnInfo();
     Map<String, Integer> columnTypes = classWriter.getColumnTypes();
     String[] columnNames = classWriter.getColumnNames(columnTypes);
 
     List<Field> fields = new ArrayList<Field>();
     for (String columnName : columnNames) {
       String cleanedCol = AvroUtil.toAvroIdentifier(ClassWriter.toJavaIdentifier(columnName));
-      int sqlType = columnTypes.get(columnName);
-      Schema avroSchema = toAvroSchema(sqlType, columnName);
+      List<Integer> columnInfoList = columnInfo.get(columnName);
+      int sqlType = columnInfoList.get(0);
+      Integer precision = columnInfoList.get(1);
+      Integer scale = columnInfoList.get(2);
+      Schema avroSchema = toAvroSchema(sqlType, columnName, precision, scale);
       Field field = new Field(cleanedCol, avroSchema, null,  NullNode.getInstance());
       field.addProp("columnName", columnName);
       field.addProp("sqlType", Integer.toString(sqlType));
@@ -98,17 +119,27 @@ public class AvroSchemaGenerator {
    *
    * @param sqlType Original SQL type (might be overridden by user)
    * @param columnName Column name from the query
+   * @param precision Fixed point precision
+   * @param scale Fixed point scale
    * @return Schema
    */
-  public Schema toAvroSchema(int sqlType, String columnName) {
+  public Schema toAvroSchema(int sqlType, String columnName, Integer precision, Integer scale) {
     List<Schema> childSchemas = new ArrayList<Schema>();
     childSchemas.add(Schema.create(Schema.Type.NULL));
-    childSchemas.add(Schema.create(toAvroType(columnName, sqlType)));
+    if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL, false)
+        && isLogicalType(sqlType)) {
+      childSchemas.add(
+          toAvroLogicalType(columnName, sqlType, precision, scale)
+              .addToSchema(Schema.create(Type.BYTES))
+      );
+    } else {
+      childSchemas.add(Schema.create(toAvroType(columnName, sqlType)));
+    }
     return Schema.createUnion(childSchemas);
   }
 
   public Schema toAvroSchema(int sqlType) {
-    return toAvroSchema(sqlType, null);
+    return toAvroSchema(sqlType, null, null, null);
   }
 
   private Type toAvroType(String columnName, int sqlType) {
@@ -133,5 +164,19 @@ public class AvroSchemaGenerator {
     }
 
     return connManager.toAvroType(tableName, columnName, sqlType);
+  }
+
+  private LogicalType toAvroLogicalType(String columnName, int sqlType, Integer precision, Integer scale) {
+    return connManager.toAvroLogicalType(tableName, columnName, sqlType, precision, scale);
+  }
+
+  private static boolean isLogicalType(int sqlType) {
+    switch(sqlType) {
+      case Types.DECIMAL:
+      case Types.NUMERIC:
+        return true;
+      default:
+        return false;
+    }
   }
 }
