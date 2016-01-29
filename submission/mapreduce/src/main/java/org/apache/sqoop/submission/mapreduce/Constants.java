@@ -27,6 +27,9 @@ public class Constants {
   public static final String CONF_CONFIG_DIR =
     PREFIX_MAPREDUCE + "configuration.directory";
 
+  public static final String CONF_SQOOP_MR_LOG_LEVEL =
+    PREFIX_MAPREDUCE + "configuration.loglevel";
+
   public static final String SQOOP_JOB = "sqoop.job";
 
   private Constants() {

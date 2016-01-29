@@ -72,6 +72,8 @@ public final class MRJobConstants extends Constants {
    public static final String JOB_CONNECTOR_TO_NAME = PREFIX_JOB_CONFIG
       + "connector.to.name";
 
+  public static final String SYSPROP_MR_LOG_LEVEL = "sqoop.mr.loglevel";
+
   // Hadoop specific constants
   // We're using constants from Hadoop 1. Hadoop 2 has different names, but
   // provides backward compatibility layer for those names as well.

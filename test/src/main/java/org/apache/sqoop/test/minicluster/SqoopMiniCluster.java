@@ -193,6 +193,7 @@ public abstract class SqoopMiniCluster {
 
     properties.put("org.apache.sqoop.submission.engine", "org.apache.sqoop.submission.mapreduce.MapreduceSubmissionEngine");
     properties.put("org.apache.sqoop.submission.engine.mapreduce.configuration.directory", getConfigurationPath());
+    properties.put("org.apache.sqoop.submission.engine.mapreduce.configuration.loglevel", "DEBUG");
 
     return properties;
   }

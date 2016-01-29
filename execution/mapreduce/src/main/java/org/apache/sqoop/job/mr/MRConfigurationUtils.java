@@ -268,6 +268,9 @@ public final class MRConfigurationUtils {
   }
 
   public static void configureLogging() {
+    if (System.getProperty(MRJobConstants.SYSPROP_MR_LOG_LEVEL) == null) {
+      System.setProperty(MRJobConstants.SYSPROP_MR_LOG_LEVEL, "INFO");
+    }
     try (InputStream resourceAsStream =
                  SqoopMapper.class.getResourceAsStream("/META-INF/log4j.properties")) {
       Properties props = new Properties();

@@ -34,6 +34,7 @@ import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.MapContext;
@@ -106,6 +107,15 @@ public class MapreduceSubmissionEngine extends SubmissionEngine {
         LOG.error("Can't load configuration file: " + file, e);
       }
     }
+
+    // Log level for sqoop mapper and reducer
+    String mrLogLevel = context.getString(prefix + Constants.CONF_SQOOP_MR_LOG_LEVEL);
+    if (globalConfiguration.get(MRJobConfig.MR_AM_COMMAND_OPTS) == null) {
+      globalConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS, MRJobConfig.DEFAULT_MR_AM_COMMAND_OPTS + " -Dsqoop.mr.loglevel=" + mrLogLevel);
+    } else {
+      globalConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS, globalConfiguration.get(MRJobConfig.MR_AM_COMMAND_OPTS) + " -Dsqoop.mr.loglevel=" + mrLogLevel);
+    }
+
 
     // Save our own property inside the job to easily identify Sqoop jobs
     globalConfiguration.setBoolean(Constants.SQOOP_JOB, true);
