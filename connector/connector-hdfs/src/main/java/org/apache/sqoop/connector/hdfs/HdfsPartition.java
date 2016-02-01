@@ -72,6 +72,12 @@ public class HdfsPartition extends Partition {
     return lengths[i];
   }
 
+  public String[] getLocations() {
+    String[] locationsCopy = new String[locations.length];
+    System.arraycopy(locations, 0, locationsCopy, 0, locations.length);
+    return locationsCopy;
+  }
+
   @Override
   public void readFields(DataInput in) throws IOException {
     numFiles = in.readInt();

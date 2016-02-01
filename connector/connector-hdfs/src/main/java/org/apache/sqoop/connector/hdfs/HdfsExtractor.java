@@ -26,10 +26,13 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.Seekable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileRecordReader;
 import org.apache.hadoop.util.LineReader;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
@@ -69,7 +72,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
           LOG.info("Working on partition: " + p);
           int numFiles = p.getNumberOfFiles();
           for (int i = 0; i < numFiles; i++) {
-            extractFile(linkConfiguration, jobConfiguration, p.getFile(i), p.getOffset(i), p.getLength(i));
+            extractFile(linkConfiguration, jobConfiguration, p.getFile(i), p.getOffset(i), p.getLength(i), p.getLocations());
           }
           return null;
         }
@@ -81,7 +84,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
 
   private void extractFile(LinkConfiguration linkConfiguration,
                            FromJobConfiguration fromJobConfiguration,
-                           Path file, long start, long length)
+                           Path file, long start, long length, String[] locations)
       throws IOException {
     long end = start + length;
     LOG.info("Extracting file " + file);
@@ -89,9 +92,9 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     LOG.info("\t to offset " + end);
     LOG.info("\t of length " + length);
     if(isSequenceFile(file)) {
-      extractSequenceFile(linkConfiguration, fromJobConfiguration, file, start, length);
+      extractSequenceFile(linkConfiguration, fromJobConfiguration, file, start, length, locations);
     } else {
-      extractTextFile(linkConfiguration, fromJobConfiguration, file, start, length);
+      extractTextFile(linkConfiguration, fromJobConfiguration, file, start, length, locations);
     }
   }
 
@@ -105,29 +108,22 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
   @SuppressWarnings("deprecation")
   private void extractSequenceFile(LinkConfiguration linkConfiguration,
                                    FromJobConfiguration fromJobConfiguration,
-                                   Path file, long start, long length)
+                                   Path file, long start, long length, String[] locations)
       throws IOException {
     LOG.info("Extracting sequence file");
-    long end = start + length;
-    SequenceFile.Reader filereader = new SequenceFile.Reader(
-        file.getFileSystem(conf), file, conf);
+    SequenceFileRecordReader<Text, NullWritable> sequenceFileRecordReader = new SequenceFileRecordReader();
 
-    if (start > filereader.getPosition()) {
-      filereader.sync(start); // sync to start
-    }
-
-    Text line = new Text();
-    boolean hasNext = filereader.next(line);
-    while (hasNext) {
-      rowsRead++;
-      extractRow(linkConfiguration, fromJobConfiguration, line);
-      line = new Text();
-      hasNext = filereader.next(line);
-      if (filereader.getPosition() >= end && filereader.syncSeen()) {
-        break;
+    try {
+      sequenceFileRecordReader.initialize(new FileSplit(file, start, length, locations), new SqoopTaskAttemptContext(conf) );
+      while (sequenceFileRecordReader.nextKeyValue()) {
+        rowsRead++;
+        extractRow(linkConfiguration, fromJobConfiguration, sequenceFileRecordReader.getCurrentKey());
       }
+    } catch (InterruptedException e) {
+      throw new IOException(e);
+    } finally {
+      sequenceFileRecordReader.close();
     }
-    filereader.close();
   }
 
   /**
@@ -140,7 +136,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
   @SuppressWarnings("resource")
   private void extractTextFile(LinkConfiguration linkConfiguration,
                                FromJobConfiguration fromJobConfiguration,
-                               Path file, long start, long length)
+                               Path file, long start, long length, String[] locations)
       throws IOException {
     LOG.info("Extracting text file");
     long end = start + length;
