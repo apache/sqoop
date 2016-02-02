@@ -38,6 +38,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -308,34 +309,38 @@ public class GenericJdbcExecutor implements AutoCloseable {
     try {
       Column[] schemaColumns = schema.getColumnsArray();
       for (int i = 0; i < array.length; i++) {
-        Column schemaColumn = schemaColumns[i];
-        switch (schemaColumn.getType()) {
-        case DATE:
-          // convert the JODA date to sql date
-          LocalDate date = (LocalDate) array[i];
-          java.sql.Date sqlDate = new java.sql.Date(date.toDateTimeAtCurrentTime().getMillis());
-          preparedStatement.setObject(i + 1, sqlDate);
-          break;
-        case DATE_TIME:
-          // convert the JODA date time to sql date
-          DateTime dateTime = null;
-          if (array[i] instanceof org.joda.time.LocalDateTime) {
-            dateTime = ((org.joda.time.LocalDateTime) array[i]).toDateTime();
-          } else {
-            dateTime = (DateTime) array[i];
+        if (array[i] == null) {
+          preparedStatement.setObject(i + 1, null);
+        } else {
+          Column schemaColumn = schemaColumns[i];
+          switch (schemaColumn.getType()) {
+            case DATE:
+              // convert the JODA date to sql date
+              LocalDate date = (LocalDate) array[i];
+              java.sql.Date sqlDate = new java.sql.Date(date.toDateTimeAtCurrentTime().getMillis());
+              preparedStatement.setObject(i + 1, sqlDate);
+              break;
+            case DATE_TIME:
+              // convert the JODA date time to sql date
+              DateTime dateTime = null;
+              if (array[i] instanceof org.joda.time.LocalDateTime) {
+                dateTime = ((org.joda.time.LocalDateTime) array[i]).toDateTime();
+              } else {
+                dateTime = (DateTime) array[i];
+              }
+              Timestamp timestamp = new Timestamp(dateTime.getMillis());
+              preparedStatement.setObject(i + 1, timestamp);
+              break;
+            case TIME:
+              LocalTime time = (LocalTime) array[i];
+              // convert the JODA time to sql date
+              java.sql.Time sqlTime = new java.sql.Time(time.toDateTimeToday().getMillis());
+              preparedStatement.setObject(i + 1, sqlTime);
+              break;
+            default:
+              // for anything else
+              preparedStatement.setObject(i + 1, array[i]);
           }
-          Timestamp timestamp = new Timestamp(dateTime.getMillis());
-          preparedStatement.setObject(i + 1, timestamp);
-          break;
-        case TIME:
-          // convert the JODA time to sql date
-          LocalTime time = (LocalTime) array[i];
-          java.sql.Time sqlTime = new java.sql.Time(time.toDateTimeToday().getMillis());
-          preparedStatement.setObject(i + 1, sqlTime);
-          break;
-        default:
-          // for anything else
-          preparedStatement.setObject(i + 1, array[i]);
         }
       }
       preparedStatement.addBatch();

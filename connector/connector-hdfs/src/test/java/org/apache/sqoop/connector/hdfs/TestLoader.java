@@ -203,7 +203,7 @@ public class TestLoader extends TestHdfsBase {
     Assert.assertEquals(1, fs.listStatus(outputPath).length);
 
     for (FileStatus status : fs.listStatus(outputPath)) {
-      verifyOutput(fs, status.getPath(), "%d,%f,'\\\\N',%s");
+      verifyOutput(fs, status.getPath(), "%d,%f,\\N,%s");
     }
 
     loader.load(context, linkConf, jobConf);

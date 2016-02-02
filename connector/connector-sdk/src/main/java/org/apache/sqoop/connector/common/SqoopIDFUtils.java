@@ -63,7 +63,7 @@ import java.util.Collections;
 @edu.umd.cs.findbugs.annotations.SuppressWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
 public class SqoopIDFUtils {
 
-  public static final String NULL_VALUE = "NULL";
+  public static final String DEFAULT_NULL_VALUE = "NULL";
 
   // ISO-8859-1 is an 8-bit codec that is supported in every java
   // implementation.
@@ -578,8 +578,12 @@ public class SqoopIDFUtils {
    *
    * @param objectArray
    */
-  @SuppressWarnings("unchecked")
   public static String toCSV(Object[] objectArray, Schema schema) {
+    return toCSV(objectArray, schema, DEFAULT_NULL_VALUE);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static String toCSV(Object[] objectArray, Schema schema, String nullValue) {
     Column[] columns = schema.getColumnsArray();
 
     StringBuilder csvString = new StringBuilder();
@@ -589,7 +593,7 @@ public class SqoopIDFUtils {
             columns[i].getName() + " does not support null values");
       }
       if (objectArray[i] == null) {
-        csvString.append(NULL_VALUE);
+        csvString.append(nullValue);
       } else {
         switch (columns[i].getType()) {
           case ARRAY:
@@ -756,6 +760,10 @@ public class SqoopIDFUtils {
    * @return Object[]
    */
   public static Object[] fromCSV(String csvText, Schema schema) {
+    return fromCSV(csvText, schema, DEFAULT_NULL_VALUE);
+  }
+
+  public static Object[] fromCSV(String csvText, Schema schema, String nullValue){
     String[] csvArray = parseCSVString(csvText);
 
     if (csvArray == null) {
@@ -771,11 +779,11 @@ public class SqoopIDFUtils {
 
     Object[] objectArray = new Object[csvArray.length];
     for (int i = 0; i < csvArray.length; i++) {
-      if (csvArray[i].equals(NULL_VALUE) && !columns[i].isNullable()) {
+      if (csvArray[i].equals(nullValue) && !columns[i].isNullable()) {
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
             columns[i].getName() + " does not support null values");
       }
-      if (csvArray[i].equals(NULL_VALUE)) {
+      if (csvArray[i].equals(nullValue)) {
         objectArray[i] = null;
         continue;
       }

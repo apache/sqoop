@@ -84,11 +84,11 @@ public class TestExtractor extends TestHdfsBase {
     FileUtils.mkdirs(inputDirectory);
     switch (this.outputFileType) {
       case TEXT_FILE:
-        createTextInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\\\N");
+        createTextInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\N");
         break;
 
       case SEQUENCE_FILE:
-        createSequenceInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\\\N");
+        createSequenceInput(inputDirectory, this.compressionClass, NUMBER_OF_FILES, NUMBER_OF_ROWS_PER_FILE, "%d,%f,NULL,%s,\\N");
         break;
     }
   }
@@ -131,7 +131,7 @@ public class TestExtractor extends TestHdfsBase {
         Assert.assertEquals(String.valueOf((double) index), components[1]);
         Assert.assertEquals("NULL", components[2]);
         Assert.assertEquals("'" + index + "'", components[3]);
-        Assert.assertEquals("\\\\N", components[4]);
+        Assert.assertEquals("\\N", components[4]);
 
         assertTestUser(TEST_USER);
 
@@ -180,7 +180,7 @@ public class TestExtractor extends TestHdfsBase {
 
         Assert.assertFalse(visited[index - 1]);
         Assert.assertEquals(String.valueOf((double) index), array[1].toString());
-        Assert.assertEquals(null, array[2]);
+        Assert.assertEquals("NULL", array[2]);
         Assert.assertEquals(String.valueOf(index), array[3]);
         Assert.assertNull(array[4]);
 

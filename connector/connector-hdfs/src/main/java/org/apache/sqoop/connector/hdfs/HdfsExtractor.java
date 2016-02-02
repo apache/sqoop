@@ -210,12 +210,11 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
   private void extractRow(LinkConfiguration linkConfiguration, FromJobConfiguration fromJobConfiguration, Text line) throws UnsupportedEncodingException {
     if (schema instanceof ByteArraySchema) {
       dataWriter.writeArrayRecord(new Object[] {line.toString().getBytes(SqoopIDFUtils.BYTE_FIELD_CHARSET)});
-    } else if (!HdfsUtils.hasCustomFormat(linkConfiguration,
-      fromJobConfiguration)) {
+    } else if (!HdfsUtils.hasCustomFormat(linkConfiguration, fromJobConfiguration)) {
       dataWriter.writeStringRecord(line.toString());
     } else {
-      Object[] data = SqoopIDFUtils.fromCSV(line.toString(), schema);
-      dataWriter.writeArrayRecord(HdfsUtils.formatRecord(linkConfiguration, fromJobConfiguration, data));
+      Object[] data = SqoopIDFUtils.fromCSV(line.toString(), schema, fromJobConfiguration.fromJobConfig.nullValue);
+      dataWriter.writeArrayRecord(data);
     }
   }
 

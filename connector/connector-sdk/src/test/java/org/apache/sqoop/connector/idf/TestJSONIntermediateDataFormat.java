@@ -18,7 +18,7 @@
  */
 package org.apache.sqoop.connector.idf;
 
-import static org.apache.sqoop.connector.common.SqoopIDFUtils.NULL_VALUE;
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.DEFAULT_NULL_VALUE;
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertEquals;
@@ -414,7 +414,7 @@ public class TestJSONIntermediateDataFormat {
     String[] textValues = csvText.split(",");
     assertEquals(15, textValues.length);
     for (String text : textValues) {
-      assertEquals(text, NULL_VALUE);
+      assertEquals(text, DEFAULT_NULL_VALUE);
     }
   }
 
@@ -454,7 +454,7 @@ public class TestJSONIntermediateDataFormat {
     String[] textValues = csvText.split(",");
     assertEquals(15, textValues.length);
     for (String text : textValues) {
-      assertEquals(text, NULL_VALUE);
+      assertEquals(text, DEFAULT_NULL_VALUE);
     }
   }
 
@@ -472,7 +472,7 @@ public class TestJSONIntermediateDataFormat {
     String[] textValues = csvText.split(",");
     assertEquals(15, textValues.length);
     for (String text : textValues) {
-      assertEquals(text, NULL_VALUE);
+      assertEquals(text, DEFAULT_NULL_VALUE);
     }
   }
 
@@ -507,7 +507,7 @@ public class TestJSONIntermediateDataFormat {
   public void testSchemaNotNullableWithCSV() {
     dataFormat = new JSONIntermediateDataFormat();
     dataFormat.setSchema(new Schema("Test").addColumn(new Text("t").setNullable(false)));
-    dataFormat.setCSVTextData(NULL_VALUE);
+    dataFormat.setCSVTextData(DEFAULT_NULL_VALUE);
   }
 
   @SuppressWarnings("unchecked")

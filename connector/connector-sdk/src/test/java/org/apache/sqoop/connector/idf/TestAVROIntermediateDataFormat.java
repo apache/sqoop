@@ -19,7 +19,7 @@
 package org.apache.sqoop.connector.idf;
 
 import static org.apache.sqoop.connector.common.SqoopAvroUtils.createEnumSchema;
-import static org.apache.sqoop.connector.common.SqoopIDFUtils.NULL_VALUE;
+import static org.apache.sqoop.connector.common.SqoopIDFUtils.DEFAULT_NULL_VALUE;
 import static org.apache.sqoop.connector.common.TestSqoopIDFUtils.getByteFieldString;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertEquals;
@@ -419,7 +419,7 @@ public class TestAVROIntermediateDataFormat {
     String[] textValues = csvText.split(",");
     assertEquals(15, textValues.length);
     for (String text : textValues) {
-      assertEquals(text, NULL_VALUE);
+      assertEquals(text, DEFAULT_NULL_VALUE);
     }
   }
 
@@ -459,7 +459,7 @@ public class TestAVROIntermediateDataFormat {
     String[] textValues = csvText.split(",");
     assertEquals(15, textValues.length);
     for (String text : textValues) {
-      assertEquals(text, NULL_VALUE);
+      assertEquals(text, DEFAULT_NULL_VALUE);
     }
   }
 
@@ -474,7 +474,7 @@ public class TestAVROIntermediateDataFormat {
     String[] textValues = csvText.split(",");
     assertEquals(15, textValues.length);
     for (String text : textValues) {
-      assertEquals(text, NULL_VALUE);
+      assertEquals(text, DEFAULT_NULL_VALUE);
     }
   }
 
@@ -528,7 +528,7 @@ public class TestAVROIntermediateDataFormat {
   public void testSchemaNotNullableWithCSV() {
     Schema overrideSchema = new Schema("Test").addColumn(new Text("one").setNullable(false));
     AVROIntermediateDataFormat dataFormat = new AVROIntermediateDataFormat(overrideSchema);
-    dataFormat.setCSVTextData(NULL_VALUE);
+    dataFormat.setCSVTextData(DEFAULT_NULL_VALUE);
   }
 
   // no validation happens when the setAvro and getAvro is used

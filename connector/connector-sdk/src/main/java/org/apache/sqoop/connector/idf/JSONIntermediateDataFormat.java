@@ -146,12 +146,12 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
     }
     JSONObject object = new JSONObject();
     for (int i = 0; i < csvStringArray.length; i++) {
-      if (csvStringArray[i].equals(NULL_VALUE) && !columns[i].isNullable()) {
+      if (csvStringArray[i].equals(DEFAULT_NULL_VALUE) && !columns[i].isNullable()) {
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
             columns[i].getName() + " does not support null values");
       }
       // check for NULL field and bail out immediately
-      if (csvStringArray[i].equals(NULL_VALUE)) {
+      if (csvStringArray[i].equals(DEFAULT_NULL_VALUE)) {
         object.put(columns[i].getName(), null);
         continue;
       }
@@ -299,7 +299,7 @@ public class JSONIntermediateDataFormat extends IntermediateDataFormat<JSONObjec
             columns[i].getName() + " does not support null values");
       }
       if (obj == null) {
-        csvString.append(NULL_VALUE);
+        csvString.append(DEFAULT_NULL_VALUE);
       } else {
         switch (columns[i].getType()) {
         case ARRAY:

@@ -106,7 +106,7 @@ public class TestCSVIntermediateDataFormat {
     String[] textValues = csvText.split(",");
     assertEquals(14, textValues.length);
     for (String text : textValues) {
-      assertEquals(text, NULL_VALUE);
+      assertEquals(text, DEFAULT_NULL_VALUE);
     }
   }
 
@@ -176,7 +176,7 @@ public class TestCSVIntermediateDataFormat {
     String csvText = dataFormat.getCSVTextData();
     String[] textValues = csvText.split(",");
     for (String text : textValues) {
-      assertEquals(text, NULL_VALUE);
+      assertEquals(text, DEFAULT_NULL_VALUE);
     }
   }
 

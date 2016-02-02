@@ -103,12 +103,8 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
         }
       } else {
         Object[] record;
-
         while ((record = reader.readArrayRecord()) != null) {
-          filewriter.write(
-            SqoopIDFUtils.toCSV(
-              HdfsUtils.formatRecord(linkConfiguration, toJobConfig, record),
-              context.getSchema()));
+          filewriter.write(SqoopIDFUtils.toCSV(record, context.getSchema(), toJobConfig.toJobConfig.nullValue));
           rowsWritten++;
         }
       }

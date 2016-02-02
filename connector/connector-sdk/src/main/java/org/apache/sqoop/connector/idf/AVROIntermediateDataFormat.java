@@ -162,11 +162,11 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     }
     GenericRecord avroObject = new GenericData.Record(avroSchema);
     for (int i = 0; i < csvStringArray.length; i++) {
-      if (csvStringArray[i].equals(NULL_VALUE) && !columns[i].isNullable()) {
+      if (csvStringArray[i].equals(DEFAULT_NULL_VALUE) && !columns[i].isNullable()) {
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
             columns[i].getName() + " does not support null values");
       }
-      if (csvStringArray[i].equals(NULL_VALUE)) {
+      if (csvStringArray[i].equals(DEFAULT_NULL_VALUE)) {
         avroObject.put(columns[i].getName(), null);
         continue;
       }
@@ -323,7 +323,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
             columns[i].getName() + " does not support null values");
       }
       if (obj == null) {
-        csvString.append(NULL_VALUE);
+        csvString.append(DEFAULT_NULL_VALUE);
       } else {
 
         switch (columns[i].getType()) {

@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
 
 /**
@@ -55,8 +56,12 @@ public class ProviderAsserts {
       int i = 1;
       for(Object expectedValue : values) {
         Object actualValue = rs.getObject(i);
-        assertEquals(expectedValue.toString(), actualValue.toString(),
-                "Columns do not match on position: " + i);
+        if (expectedValue == null) {
+          assertNull(actualValue);
+        } else {
+          assertEquals(expectedValue.toString(), actualValue.toString(),
+            "Columns do not match on position: " + i);
+        }
         i++;
       }
 
