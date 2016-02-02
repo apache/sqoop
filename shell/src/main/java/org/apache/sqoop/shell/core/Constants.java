@@ -141,6 +141,8 @@ public class Constants {
   public static final String PROP_CURDIR = "user.dir";
   public static final String SQOOP_PROMPT = "sqoop";
 
+  public static final String SYSTEM_RC_DIR = "/etc/sqoop2/conf";
+
   // Shared resources
   public static final String RES_SHARED_USAGE = "shared.usage";
   public static final String RES_SHARED_UNKNOWN_FUNCTION =  "shared.unknown.function";

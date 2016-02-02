@@ -46,6 +46,7 @@ public final class SqoopShell {
    * Location of resource file that can contain few initial commands that will
    * be loaded during each client execution.
    */
+  private static final String SYSTEM_RC_FILE = "sqoop2rc";
   private static final String RC_FILE = ".sqoop2rc";
 
   /**
@@ -124,14 +125,23 @@ public final class SqoopShell {
     // We're running in batch mode by default
     setInteractive(false);
 
+    // Let's see if there is a system level RC file with some initial commands
+    File systemRcFile = new File(Constants.SYSTEM_RC_DIR, SYSTEM_RC_FILE);
+
+    if(systemRcFile.exists()) {
+      printlnResource(Constants.RES_SQOOP_PROMPT_SHELL_LOADRC, SYSTEM_RC_FILE);
+      interpretFileContent(systemRcFile, shell);
+      printlnResource(Constants.RES_SQOOP_PROMPT_SHELL_LOADEDRC);
+    }
+
     // Let's see if user do have resource file with initial commands that he
     // would like to apply.
     String homeDir = System.getProperty(Constants.PROP_HOMEDIR);
-    File rcFile = new File(homeDir, RC_FILE);
+    File userRcFile = new File(homeDir, RC_FILE);
 
-    if(rcFile.exists()) {
+    if(userRcFile.exists()) {
       printlnResource(Constants.RES_SQOOP_PROMPT_SHELL_LOADRC, RC_FILE);
-      interpretFileContent(rcFile, shell);
+      interpretFileContent(userRcFile, shell);
       printlnResource(Constants.RES_SQOOP_PROMPT_SHELL_LOADEDRC);
     }
 
