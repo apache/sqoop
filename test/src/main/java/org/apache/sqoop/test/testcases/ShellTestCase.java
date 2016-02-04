@@ -26,12 +26,14 @@ import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.codehaus.groovy.tools.shell.Groovysh;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+@Test(groups = "no-real-cluster")
 abstract public class ShellTestCase extends SqoopTestCase {
 
   protected SqoopCommand command = null;
