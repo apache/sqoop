@@ -34,7 +34,7 @@ It's strongly advised to back up the repository before moving on to next steps. 
 Upgrading Server using upgrade tool
 -----------------------------------
 
-Preferred upgrade path is to explicitly run the `Upgrade Tool <Tools.html#upgrade>`_. First step is to however shutdown the server as having both the server and upgrade utility accessing the same repository might corrupt it::
+Preferred upgrade path is to explicitly run the :ref:`tool-upgrade`. First step is to however shutdown the server as having both the server and upgrade utility accessing the same repository might corrupt it::
 
   sqoop2-server stop
 
@@ -46,7 +46,7 @@ You should see that the upgrade process has been successful::
 
   Tool class org.apache.sqoop.tools.tool.UpgradeTool has finished correctly.
 
-In case of any failure, please take a look into `Upgrade Tool <Tools.html#upgrade>`_ documentation page.
+In case of any failure, please take a look into :ref:`tool-upgrade` documentation page.
 
 Upgrading Server on start-up
 ----------------------------

@@ -18,7 +18,7 @@
 Sqoop 5 Minutes Demo
 ====================
 
-This page will walk you through the basic usage of Sqoop. You need to have installed and configured Sqoop server and client in order to follow this guide. Installation procedure is described on `Installation page <Installation.html>`_. Please note that exact output shown in this page might differ from yours as Sqoop evolves. All major information should however remain the same.
+This page will walk you through the basic usage of Sqoop. You need to have installed and configured Sqoop server and client in order to follow this guide. Installation procedure is described in :doc:`/admin/Installation`. Please note that exact output shown in this page might differ from yours as Sqoop evolves. All major information should however remain the same.
 
 Sqoop uses unique names or persistent ids to identify connectors, links, jobs and configs. We support querying a entity by its unique name or by its perisent database Id.
 

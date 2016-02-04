@@ -36,7 +36,7 @@ Sqoop uses Maven 3 for building the project. Download `Maven <http://maven.apach
 Eclipse Setup
 =============
 
-Steps for downloading source code is given in `Building Sqoop2 <BuildingSqoop2.html>`_
+Steps for downloading source code are given in :doc:`/dev/BuildingSqoop2`.
 
 Sqoop 2 project has multiple modules where one module is depend on another module for e.g. sqoop 2 client module has sqoop 2 common module dependency. Follow below step for creating eclipse's project and classpath for each module.
 
