@@ -169,7 +169,7 @@ public class DerbyProvider extends DatabaseProvider {
   }
 
   @Override
-  public DatabaseTypeList getDatabaseTypes() {
+  public DatabaseTypeList getDatabaseTypes() throws Exception {
     return new DerbyTypeList();
   }
 }

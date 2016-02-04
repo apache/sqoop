@@ -23,8 +23,8 @@ import org.apache.sqoop.common.test.db.TableName;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Blob;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -37,6 +37,7 @@ import static org.testng.Assert.fail;
 public class ProviderAsserts {
 
   private static final Logger LOG = Logger.getLogger(ProviderAsserts.class);
+  private static final String ERROR_MESSAGE_PRFIX = "Columns do not match on position: ";
 
   /**
    * Assert row in the table.
@@ -59,8 +60,11 @@ public class ProviderAsserts {
         if (expectedValue == null) {
           assertNull(actualValue);
         } else {
-          assertEquals(expectedValue.toString(), actualValue.toString(),
-            "Columns do not match on position: " + i);
+          if (expectedValue instanceof Blob) {
+            assertBlob(rs.getBlob(i), (Blob) expectedValue, i);
+          } else {
+            assertEquals(expectedValue.toString(), actualValue.toString(), ERROR_MESSAGE_PRFIX + i);
+          }
         }
         i++;
       }
@@ -72,6 +76,12 @@ public class ProviderAsserts {
       LOG.error("Unexpected SQLException", e);
       fail("Unexpected SQLException: " + e);
     }
+  }
+
+  private static void assertBlob(Blob actualValue, Blob expectedValue, int colPosition) throws SQLException {
+    byte[] actual = actualValue.getBytes(1, (int)actualValue.length());
+    byte[] expected = expectedValue.getBytes(1, (int)expectedValue.length());
+    assertEquals(actual, expected, ERROR_MESSAGE_PRFIX + colPosition);
   }
 
   private ProviderAsserts() {

@@ -17,29 +17,23 @@
  */
 package org.apache.sqoop.schema.type;
 
-import org.apache.sqoop.classification.InterfaceAudience;
-import org.apache.sqoop.classification.InterfaceStability;
+public class Blob extends Binary {
 
-/**
- * All {@link #Column} types supported by Sqoop.
- */
-@InterfaceAudience.Private
-@InterfaceStability.Unstable
-public enum ColumnType {
-  ARRAY,
-  BINARY,
-  BIT,
-  BLOB,
-  DATE,
-  DATE_TIME,
-  DECIMAL,
-  ENUM,
-  FIXED_POINT,
-  FLOATING_POINT,
-  MAP,
-  SET,
-  TEXT,
-  TIME,
-  UNKNOWN,
-  ;
+  public Blob(String name) {
+    super(name);
+  }
+
+  @Override
+  public ColumnType getType() {
+    return ColumnType.BLOB;
+  }
+
+  @Override
+  public String toString() {
+    return new StringBuilder("Blob{")
+            .append(super.toString())
+            .append("}")
+            .toString();
+  }
+
 }

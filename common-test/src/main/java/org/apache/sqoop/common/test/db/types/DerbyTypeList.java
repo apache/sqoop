@@ -17,14 +17,17 @@
  */
 package org.apache.sqoop.common.test.db.types;
 
+import javax.sql.rowset.serial.SerialBlob;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 
 /**
  * Source: https://db.apache.org/derby/docs/10.7/ref/crefsqlj31068.html
  */
 public class DerbyTypeList extends DatabaseTypeList {
-  public DerbyTypeList() {
+  public DerbyTypeList() throws SQLException, UnsupportedEncodingException {
     super();
 
     // Numeric types
@@ -106,6 +109,10 @@ public class DerbyTypeList extends DatabaseTypeList {
       .build());
 
     // BLOB
+    add(DatabaseType.builder("BLOB(1K)")
+      .addExample("", new SerialBlob("test data".getBytes("ISO-8859-1")), "'test data'")
+      .build());
+
     // CLOB
     // Time
     // Timestamp

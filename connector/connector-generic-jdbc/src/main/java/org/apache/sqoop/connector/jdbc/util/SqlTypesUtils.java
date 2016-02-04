@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.jdbc.util;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.Binary;
 import org.apache.sqoop.schema.type.Bit;
+import org.apache.sqoop.schema.type.Blob;
 import org.apache.sqoop.schema.type.Date;
 import org.apache.sqoop.schema.type.DateTime;
 import org.apache.sqoop.schema.type.Decimal;
@@ -88,9 +89,11 @@ public class SqlTypesUtils {
       case Types.BOOLEAN:
         return new Bit(columnName);
 
+      case Types.BLOB:
+        return new Blob(columnName);
+
       case Types.BINARY:
       case Types.VARBINARY:
-      case Types.BLOB:
       case Types.LONGVARBINARY:
         return new Binary(columnName);
 

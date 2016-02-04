@@ -24,7 +24,6 @@ import org.apache.sqoop.common.test.db.types.DefaultTypeList;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,6 +31,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Blob;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -157,7 +157,7 @@ abstract public class DatabaseProvider {
    *
    * @return
    */
-  public DatabaseTypeList getDatabaseTypes() {
+  public DatabaseTypeList getDatabaseTypes() throws Exception {
     return new DefaultTypeList();
   }
 
@@ -304,7 +304,9 @@ abstract public class DatabaseProvider {
    * Return rows that match given conditions.
    *
    * @param tableName Table name
-   * @param conditions Conditions in form of double values - column name and value, for example: "id", 1 or "last_update_date", null
+   * @param conditions Conditions in form of double values - column name and value, for example:
+   *                   "id", 1 or "last_update_date", null.
+   *                   For Blob data type, it can't be used as a condition in where clause directly, skip it.
    * @return PreparedStatement representing the requested query
    */
   public PreparedStatement getRowsPreparedStatement(TableName tableName, Object[] conditions) {
@@ -326,9 +328,10 @@ abstract public class DatabaseProvider {
           throw new RuntimeException("Each odd item should be a string with column name.");
         }
 
-        if(value == null) {
+        // Blob can't be used in where clause directly, skip the where clause for Blob
+        if (value == null) {
           conditionList.add(escapeColumnName((String) columnName) + " IS NULL");
-        } else {
+        } else if (! (value instanceof Blob)) {
           conditionList.add(escapeColumnName((String) columnName) + " = ?");
         }
       }
@@ -340,7 +343,8 @@ abstract public class DatabaseProvider {
       PreparedStatement preparedStatement = getConnection().prepareStatement(sb.toString());
       for(int i = 1; i < conditions.length; i += 2) {
         Object value = conditions[i];
-        if (value != null) {
+        // skip the Blob data type
+        if (value != null && ! (value instanceof Blob)) {
           insertObjectIntoPreparedStatement(preparedStatement, i, value);
         }
       }
@@ -374,6 +378,8 @@ abstract public class DatabaseProvider {
       preparedStatement.setTimestamp(parameterIndex, (Timestamp) value);
     } else if (value instanceof BigDecimal) {
       preparedStatement.setBigDecimal(parameterIndex, (BigDecimal) value);
+    } else if (value instanceof Blob) {
+      preparedStatement.setBlob(parameterIndex, (Blob) value);
     } else {
       preparedStatement.setObject(parameterIndex, value);
     }

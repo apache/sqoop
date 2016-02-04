@@ -608,6 +608,7 @@ public class SqoopIDFUtils {
             csvString.append(toCSVString(objectArray[i].toString()));
             break;
           case BINARY:
+          case BLOB:
           case UNKNOWN:
             csvString.append(toCSVByteArray((byte[]) objectArray[i]));
             break;
@@ -714,6 +715,7 @@ public class SqoopIDFUtils {
         returnValue = toText(csvString);
         break;
       case BINARY:
+      case BLOB:
         // Unknown is treated as a binary type
       case UNKNOWN:
         returnValue = toByteArray(csvString);

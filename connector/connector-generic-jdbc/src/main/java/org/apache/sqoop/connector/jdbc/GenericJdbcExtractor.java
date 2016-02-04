@@ -21,7 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.Blob;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
@@ -68,6 +68,11 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
           // check type of the column
           Column schemaColumn = schemaColumns[i];
           switch (schemaColumn.getType()) {
+          case BLOB:
+            // convert the blob to byte[]
+            Blob blob = resultSet.getBlob(i + 1);
+            array[i] = blob.getBytes(1, (int)blob.length());
+            break;
           case DATE:
             // convert the sql date to JODA time as prescribed the Sqoop IDF spec
             array[i] = LocalDate.fromDateFields(resultSet.getDate(i + 1));
@@ -83,7 +88,6 @@ public class GenericJdbcExtractor extends Extractor<LinkConfiguration, FromJobCo
           default:
             //for anything else
             array[i] = resultSet.getObject(i + 1);
-
           }
         }
         context.getDataWriter().writeArrayRecord(array);

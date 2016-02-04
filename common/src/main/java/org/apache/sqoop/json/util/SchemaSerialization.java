@@ -31,6 +31,7 @@ import org.apache.sqoop.schema.type.AbstractString;
 import org.apache.sqoop.schema.type.Array;
 import org.apache.sqoop.schema.type.Binary;
 import org.apache.sqoop.schema.type.Bit;
+import org.apache.sqoop.schema.type.Blob;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.schema.type.ColumnType;
 import org.apache.sqoop.schema.type.Date;
@@ -237,6 +238,9 @@ public class SchemaSerialization {
       break;
     case BIT:
       output = new Bit(name);
+      break;
+    case BLOB:
+      output = new Blob(name);
       break;
     case DATE:
       output = new Date(name);
