@@ -100,7 +100,7 @@ public class NullValueTest extends SqoopTestCase {
 
   private String[] getCsv() {
     return new String[] {
-      "1,'USA'," + nullValue + ",'San Francisco'",
+      "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
       "2,'USA','2004-10-24 00:00:00.000'," + nullValue,
       "3," + nullValue + ",'2004-10-25 00:00:00.000','Brno'",
       "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
@@ -158,7 +158,7 @@ public class NullValueTest extends SqoopTestCase {
     executeJob(job);
 
     Assert.assertEquals(4L, provider.rowCount(getTableName()));
-    assertRowInCities(1, "USA", null, "San Francisco");
+    assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
     assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), (String) null);
     assertRowInCities(3, (String) null, Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
     assertRowInCities(4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
@@ -166,7 +166,7 @@ public class NullValueTest extends SqoopTestCase {
 
   @Test
   public void testToHdfs() throws Exception {
-    provider.insertRow(getTableName(), 1, "USA", (java.sql.Timestamp) null, "San Francisco");
+    provider.insertRow(getTableName(), 1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
     provider.insertRow(getTableName(), 2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), (String) null);
     provider.insertRow(getTableName(), 3, (String) null, Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
     provider.insertRow(getTableName(), 4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
