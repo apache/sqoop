@@ -194,6 +194,15 @@ if options.verbose:
 print "Getting details for JIRA %s" % (options.jira)
 jiraDetails = jira_get_issue(options)
 
+# Verify that JIRA is properly marked with versions (otherwise precommit hook would fail)
+versions = []
+for version in jiraDetails.get("fields").get("versions"):
+  versions = versions + [version.get("name")]
+for version in jiraDetails.get("fields").get("fixVersions"):
+  versions = versions + [version.get("name")]
+if not versions:
+  exit("Both 'Affected Version(s)' and 'Fix Version(s)' JIRA fields are empty. Please fill one of them with desired version first.")
+
 # Review board handling
 rbClient = RBClient(options.rb_url, username=options.rb_user, password=options.rb_password)
 rbRoot = rbClient.get_root()
