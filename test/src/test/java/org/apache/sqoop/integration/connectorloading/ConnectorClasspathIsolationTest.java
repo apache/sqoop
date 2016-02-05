@@ -30,6 +30,7 @@ import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
@@ -40,7 +41,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @Test(groups = "no-real-cluster")
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class})
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class})
 public class ConnectorClasspathIsolationTest extends SqoopTestCase {
 
   private static final String TEST_FROM_CONNECTOR_JAR_NAME = "test-from-connector.jar";

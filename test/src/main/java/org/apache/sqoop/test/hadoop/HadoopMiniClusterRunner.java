@@ -45,15 +45,20 @@ public class HadoopMiniClusterRunner extends HadoopRunner {
   @Override
   public Configuration prepareConfiguration(Configuration config)
       throws Exception {
-    config.set("dfs.block.access.token.enable", "false");
     config.set("dfs.permissions", "true");
-    config.set("hadoop.security.authentication", "simple");
     config.set("mapred.tasktracker.map.tasks.maximum", "1");
     config.set("mapred.tasktracker.reduce.tasks.maximum", "1");
     config.set("mapred.submit.replication", "1");
     config.set("yarn.resourcemanager.scheduler.class", "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler");
     config.set("yarn.application.classpath",
         System.getProperty("java.class.path"));
+
+    config.set("dfs.datanode.address", "0.0.0.0:0");
+    config.set("dfs.datanode.ipc.address", "0.0.0.0:0");
+    config.set("dfs.datanode.http.address", "0.0.0.0:0");
+    config.set("dfs.datanode.https.address", "0.0.0.0:0");
+    config.set("dfs.namenode.http-address", "0.0.0.0:0");
+    config.set("dfs.namenode.https-address", "0.0.0.0:0");
     return config;
   }
 
@@ -68,7 +73,12 @@ public class HadoopMiniClusterRunner extends HadoopRunner {
 
     // Start DFS server
     LOG.info("Starting DFS cluster...");
-    dfsCluster = new MiniDFSCluster(config, 1, true, null);
+    dfsCluster = new MiniDFSCluster.Builder(config)
+        .numDataNodes(1)
+        .format(true)
+        .racks(null)
+        .checkDataNodeAddrConfig(true)
+        .build();
     if (dfsCluster.isClusterUp()) {
       LOG.info("Started DFS cluster on port: " + dfsCluster.getNameNodePort());
     } else {

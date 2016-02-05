@@ -26,6 +26,7 @@ import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
@@ -41,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 @Test(groups = "no-real-cluster")
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, DatabaseInfrastructureProvider.class, HadoopInfrastructureProvider.class})
 public class ClasspathTest extends SqoopTestCase {
 
   private static final String TEST_CONNECTOR_JAR_NAME = "test-connector.jar";

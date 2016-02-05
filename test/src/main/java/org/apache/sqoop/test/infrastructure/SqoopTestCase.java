@@ -140,7 +140,7 @@ public class SqoopTestCase implements ITest {
    * @param context TestNG context that helps get all the test methods and classes.
    */
   @BeforeSuite(dependsOnMethods = "findSuiteName")
-  public static void startInfrastructureProviders(ITestContext context) {
+  public static void startInfrastructureProviders(ITestContext context) throws Exception {
     // Find infrastructure provider classes to be used.
     Set<Class<? extends InfrastructureProvider>> providers = new HashSet<Class<? extends InfrastructureProvider>>();
     for (ITestNGMethod method : context.getSuite().getAllMethods()) {
@@ -182,6 +182,10 @@ public class SqoopTestCase implements ITest {
       KdcInfrastructureProvider kdcProviderObject = startInfrastructureProvider(KdcInfrastructureProvider.class, conf, null);
       kdc = kdcProviderObject.getInstance();
       providers.remove(KdcInfrastructureProvider.class);
+      conf = kdc.prepareHadoopConfiguration(conf);
+    } else {
+      conf.set("dfs.block.access.token.enable", "false");
+      conf.set("hadoop.security.authentication", "simple");
     }
 
     // Start hadoop secondly.

@@ -43,6 +43,7 @@ public class OutputDirectoryTest extends SqoopTestCase {
   public void testOutputDirectoryIsAFile() throws Exception {
     createAndLoadTableCities();
 
+    hdfsClient.delete(new Path(getMapreduceDirectory()), true);
     hdfsClient.createNewFile(new Path(getMapreduceDirectory()));
 
     // RDBMS link

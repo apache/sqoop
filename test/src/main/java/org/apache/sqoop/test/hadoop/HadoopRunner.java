@@ -71,7 +71,7 @@ public abstract class HadoopRunner {
    * This directory might be on local filesystem in case of local mode.
    */
   public String getTestDirectory() {
-    return "/mapreduce-job-io";
+    return "/tmp/mapreduce-job-io";
   }
 
   /**

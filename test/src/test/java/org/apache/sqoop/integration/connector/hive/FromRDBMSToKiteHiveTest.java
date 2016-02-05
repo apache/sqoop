@@ -30,7 +30,6 @@ import org.apache.sqoop.test.infrastructure.SqoopTestCase;
 import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.HiveInfrastructureProvider;
-import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -42,7 +41,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 @Test(groups = {"slow", "no-real-cluster"})
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, HiveInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
+@Infrastructure(dependencies = {HadoopInfrastructureProvider.class, HiveInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
 public class FromRDBMSToKiteHiveTest extends SqoopTestCase {
   private String testName;
 
@@ -103,6 +102,8 @@ public class FromRDBMSToKiteHiveTest extends SqoopTestCase {
     kiteLink = getClient().createLink("kite-connector");
     kiteLink.getConnectorLinkConfig().getStringInput("linkConfig.authority")
         .setValue(getInfrastructureProvider(HiveInfrastructureProvider.class).getHiveMetastore().getAuthority());
+    kiteLink.getConnectorLinkConfig().getStringInput("linkConfig.confDir")
+        .setValue(getInfrastructureProvider(SqoopInfrastructureProvider.class).getInstance().getConfigurationPath());
     saveLink(kiteLink);
   }
 

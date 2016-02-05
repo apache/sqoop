@@ -18,21 +18,15 @@ limitations under the License.
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="IntegrationTests" verbose="2" parallel="false">
+<suite name="HiveTests" verbose="2" parallel="false">
 
   <listeners>
     <listener class-name="org.apache.sqoop.test.testng.SqoopTestListener" />
   </listeners>
 
-  <test name="ConnectorTests">
+  <test name="HiveTests">
     <packages>
-      <package name="org.apache.sqoop.integration.connector.*">
-        <!--
-             Exclude hive tests for the time being as there are currently some blocking issues
-             (SQOOP-2756) which make it impossible to run hive tests in kerberos environment.
-        -->
-        <exclude name="org.apache.sqoop.integration.connector.hive"></exclude>
-      </package>
+      <package name="org.apache.sqoop.integration.connector.hive"/>
     </packages>
   </test>
 </suite>

@@ -18,7 +18,9 @@
 package org.apache.sqoop.test.kdc;
 
 import java.net.URL;
+import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
 import org.apache.sqoop.client.SqoopClient;
 
@@ -36,6 +38,11 @@ public abstract class KdcRunner {
    * Temporary path that can be used as a root for other directories of kdc.
    */
   private String temporaryPath;
+
+  public abstract Configuration prepareHadoopConfiguration(Configuration config)
+      throws Exception;
+
+  public abstract Map<String, String> prepareSqoopConfiguration(Map<String, String> properties);
 
   /**
    * Start kdc.
@@ -64,12 +71,6 @@ public abstract class KdcRunner {
    */
   public abstract void authenticateWithSqoopServer(final URL url,
       final DelegationTokenAuthenticatedURL.Token authToken) throws Exception;
-
-  public abstract boolean isKerberosEnabled();
-
-  public abstract String getSpnegoPrincipal();
-
-  public abstract String getSqoopServerKeytabFile();
 
   /**
    * Get temporary path.

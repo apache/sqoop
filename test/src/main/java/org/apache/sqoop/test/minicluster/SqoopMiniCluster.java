@@ -209,17 +209,13 @@ public abstract class SqoopMiniCluster {
   protected Map<String, String> getSecurityConfiguration() {
     Map<String, String> properties = new HashMap<String, String>();
 
-    if (kdc != null && kdc.isKerberosEnabled()) {
-      // Sqoop Server is kerberos enabled
-      properties.put("org.apache.sqoop.security.authentication.type", "KERBEROS");
-      properties.put("org.apache.sqoop.security.authentication.kerberos.http.principal", kdc.getSpnegoPrincipal());
-      properties.put("org.apache.sqoop.security.authentication.kerberos.http.keytab", kdc.getSqoopServerKeytabFile());
+    if (kdc != null) {
+      properties = kdc.prepareSqoopConfiguration(properties);
     } else {
       properties.put("org.apache.sqoop.security.authentication.type", "SIMPLE");
+      // Sqoop Server do simple authentication with other services
+      properties.put("org.apache.sqoop.security.authentication.handler", "org.apache.sqoop.security.authentication.SimpleAuthenticationHandler");
     }
-
-    // Sqoop Server do simple authentication with other services
-    properties.put("org.apache.sqoop.security.authentication.handler", "org.apache.sqoop.security.authentication.SimpleAuthenticationHandler");
 
     /**
      * Due to the fact that we share a JVM with hadoop during unit testing,
@@ -232,6 +228,8 @@ public abstract class SqoopMiniCluster {
     String user = System.getProperty("user.name");
     properties.put("org.apache.sqoop.authentication.proxyuser." + user + ".groups", "*");
     properties.put("org.apache.sqoop.authentication.proxyuser." + user + ".hosts", "*");
+    properties.put("org.apache.sqoop.authentication.proxyuser." + "hadoop" + ".groups", "*");
+    properties.put("org.apache.sqoop.authentication.proxyuser." + "hadoop" + ".hosts", "*");
 
     return properties;
   }

@@ -22,6 +22,7 @@ import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.minicluster.SqoopMiniCluster;
@@ -34,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Test(groups = "no-real-cluster")
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class})
+@Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class})
 public class BlacklistedConnectorTest extends SqoopTestCase {
   private SqoopMiniCluster sqoopMiniCluster;
 
