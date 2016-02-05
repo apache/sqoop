@@ -17,46 +17,50 @@
  */
 package org.apache.sqoop.connector.hdfs.hdfsWriter;
 
-import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.sqoop.connector.hdfs.HdfsConstants;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.sqoop.connector.idf.AVROIntermediateDataFormat;
 import org.apache.sqoop.schema.Schema;
 
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 
-public class HdfsTextWriter extends GenericHdfsWriter {
+public class HdfsParquetWriter extends GenericHdfsWriter {
 
-  private BufferedWriter filewriter;
+  private ParquetWriter avroParquetWriter;
+  private Schema sqoopSchema;
+  private AVROIntermediateDataFormat avroIntermediateDataFormat;
 
   @Override
-  public void initialize(Path filepath, Schema schema, Configuration conf, CompressionCodec codec) throws IOException {
-    FileSystem fs = filepath.getFileSystem(conf);
+  public void initialize(Path filepath, Schema schema, Configuration conf, CompressionCodec hadoopCodec) throws IOException {
+    sqoopSchema = schema;
+    avroIntermediateDataFormat = new AVROIntermediateDataFormat(sqoopSchema);
 
-    DataOutputStream filestream = fs.create(filepath, false);
-    if (codec != null) {
-      filewriter = new BufferedWriter(new OutputStreamWriter(
-              codec.createOutputStream(filestream, codec.createCompressor()),
-              Charsets.UTF_8));
+    CompressionCodecName parquetCodecName;
+    if (hadoopCodec == null) {
+      parquetCodecName = CompressionCodecName.UNCOMPRESSED;
     } else {
-      filewriter = new BufferedWriter(new OutputStreamWriter(
-              filestream, Charsets.UTF_8));
+      parquetCodecName = CompressionCodecName.fromCompressionCodec(hadoopCodec.getClass());
     }
+
+    avroParquetWriter =
+      AvroParquetWriter.builder(filepath)
+        .withSchema(avroIntermediateDataFormat.getAvroSchema())
+        .withCompressionCodec(parquetCodecName)
+        .withConf(conf).build();
+
   }
 
   @Override
   public void write(String csv) throws IOException {
-    filewriter.write(csv + HdfsConstants.DEFAULT_RECORD_DELIMITER);
-
+    avroParquetWriter.write(avroIntermediateDataFormat.toAVRO(csv));
   }
 
   @Override
   public void destroy() throws IOException {
-    filewriter.close();
+    avroParquetWriter.close();
   }
 }

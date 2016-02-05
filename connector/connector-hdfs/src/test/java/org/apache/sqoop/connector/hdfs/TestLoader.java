@@ -17,9 +17,6 @@
  */
 package org.apache.sqoop.connector.hdfs;
 
-import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
-import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -35,11 +33,17 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
+import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.format.converter.ParquetMetadataConverter;
+import org.apache.parquet.hadoop.ParquetFileReader;
+import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.sqoop.common.MutableMapContext;
+import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToCompression;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
+import org.apache.sqoop.connector.idf.AVROIntermediateDataFormat;
 import org.apache.sqoop.etl.io.DataReader;
 import org.apache.sqoop.job.etl.Loader;
 import org.apache.sqoop.job.etl.LoaderContext;
@@ -47,12 +51,17 @@ import org.apache.sqoop.schema.Schema;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
-import org.testng.annotations.AfterMethod;
+import org.apache.sqoop.utils.ClassUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
+
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.PARQUET_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
+import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
 
 public class TestLoader extends TestHdfsBase {
   private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
@@ -63,6 +72,7 @@ public class TestLoader extends TestHdfsBase {
   private final String outputDirectory;
   private Loader loader;
   private String user = "test_user";
+  private Schema schema;
 
   @Factory(dataProvider="test-hdfs-loader")
   public TestLoader(ToFormat outputFormat,
@@ -80,9 +90,10 @@ public class TestLoader extends TestHdfsBase {
     for (ToCompression compression : new ToCompression[]{
         ToCompression.DEFAULT,
         ToCompression.BZIP2,
+        ToCompression.GZIP,
         ToCompression.NONE
     }) {
-      for (Object outputFileType : new Object[]{TEXT_FILE, SEQUENCE_FILE}) {
+      for (Object outputFileType : new Object[]{TEXT_FILE, SEQUENCE_FILE, PARQUET_FILE}) {
         parameters.add(new Object[]{outputFileType, compression});
       }
     }
@@ -100,7 +111,7 @@ public class TestLoader extends TestHdfsBase {
   @Test
   public void testLoader() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
-    Schema schema = new Schema("schema").addColumn(new FixedPoint("col1", 8L, true))
+    schema = new Schema("schema").addColumn(new FixedPoint("col1", 8L, true))
         .addColumn(new FloatingPoint("col2", 4L))
         .addColumn(new Text("col3"));
 
@@ -130,14 +141,22 @@ public class TestLoader extends TestHdfsBase {
         assertTestUser(user);
         return null;
       }
-    }, null, user);
+    }, schema, user);
     LinkConfiguration linkConf = new LinkConfiguration();
     ToJobConfiguration jobConf = new ToJobConfiguration();
     jobConf.toJobConfig.compression = compression;
     jobConf.toJobConfig.outputFormat = outputFormat;
     Path outputPath = new Path(outputDirectory);
 
-    loader.load(context, linkConf, jobConf);
+    try {
+      loader.load(context, linkConf, jobConf);
+    } catch (Exception e) {
+      // we may wait to fail if the compression format selected is not supported by the
+      // output format
+      Assert.assertTrue(compressionNotSupported());
+      return;
+    }
+
     Assert.assertEquals(1, fs.listStatus(outputPath).length);
 
     for (FileStatus status : fs.listStatus(outputPath)) {
@@ -152,10 +171,26 @@ public class TestLoader extends TestHdfsBase {
     Assert.assertEquals(5, fs.listStatus(outputPath).length);
   }
 
+  private boolean compressionNotSupported() {
+    switch (outputFormat) {
+      case SEQUENCE_FILE:
+        return compression == ToCompression.GZIP;
+      case PARQUET_FILE:
+        return compression == ToCompression.BZIP2 || compression == ToCompression.DEFAULT;
+    }
+    return false;
+  }
+
   @Test
   public void testOverrideNull() throws Exception {
+    // Parquet supports an actual "null" value so overriding null would not make
+    // sense here
+    if (outputFormat == PARQUET_FILE) {
+      return;
+    }
+
     FileSystem fs = FileSystem.get(new Configuration());
-    Schema schema = new Schema("schema").addColumn(new FixedPoint("col1", 8L, true))
+    schema = new Schema("schema").addColumn(new FixedPoint("col1", 8L, true))
         .addColumn(new FloatingPoint("col2", 8L))
         .addColumn(new Text("col3"))
         .addColumn(new Text("col4"));
@@ -199,7 +234,15 @@ public class TestLoader extends TestHdfsBase {
     jobConf.toJobConfig.nullValue = "\\N";
     Path outputPath = new Path(outputDirectory);
 
-    loader.load(context, linkConf, jobConf);
+    try {
+      loader.load(context, linkConf, jobConf);
+    } catch (Exception e) {
+      // we may wait to fail if the compression format selected is not supported by the
+      // output format
+      assert(compressionNotSupported());
+      return;
+    }
+
     Assert.assertEquals(1, fs.listStatus(outputPath).length);
 
     for (FileStatus status : fs.listStatus(outputPath)) {
@@ -214,7 +257,7 @@ public class TestLoader extends TestHdfsBase {
     Assert.assertEquals(5, fs.listStatus(outputPath).length);
   }
 
-  private void verifyOutput(FileSystem fs, Path file, String format) throws IOException {
+  private void verifyOutput(FileSystem fs, Path file, String format) throws Exception {
     Configuration conf = new Configuration();
     FSDataInputStream fsin = fs.open(file);
     CompressionCodec codec;
@@ -228,7 +271,9 @@ public class TestLoader extends TestHdfsBase {
           case BZIP2:
             Assert.assertTrue(codec.getClass().getCanonicalName().indexOf("BZip2") != -1);
             break;
-
+          case GZIP:
+            Assert.assertTrue(codec.getClass().getCanonicalName().indexOf("Gzip") != -1);
+            break;
           case DEFAULT:
             if(org.apache.hadoop.util.VersionInfo.getVersion().matches("\\b1\\.\\d\\.\\d")) {
               Assert.assertTrue(codec.getClass().getCanonicalName().indexOf("Default") != -1);
@@ -283,10 +328,46 @@ public class TestLoader extends TestHdfsBase {
           line = new org.apache.hadoop.io.Text();
         }
         break;
+      case PARQUET_FILE:
+        String compressionCodecClassName = ParquetFileReader.readFooter(conf, file,  ParquetMetadataConverter.NO_FILTER).getBlocks().get(0).getColumns().get(0).getCodec().getHadoopCompressionCodecClassName();
+
+        if (compressionCodecClassName == null) {
+          codec = null;
+        } else {
+          codec = (CompressionCodec) ClassUtils.loadClass(compressionCodecClassName).newInstance();
+        }
+
+        // Verify compression
+        switch(compression) {
+          case GZIP:
+            Assert.assertTrue(codec.getClass().getCanonicalName().indexOf("Gzip") != -1);
+            break;
+
+          case NONE:
+          default:
+            Assert.assertNull(codec);
+            break;
+        }
+
+
+        ParquetReader<GenericRecord> avroParquetReader = AvroParquetReader.builder(file).build();
+        AVROIntermediateDataFormat avroIntermediateDataFormat = new AVROIntermediateDataFormat();
+        avroIntermediateDataFormat.setSchema(schema);
+        GenericRecord record;
+        index = 1;
+        while ((record = avroParquetReader.read()) != null) {
+          List<Object> objects = new ArrayList<>();
+          for (int i = 0; i < record.getSchema().getFields().size(); i++) {
+            objects.add(record.get(i));
+          }
+          Assert.assertEquals(SqoopIDFUtils.toText(avroIntermediateDataFormat.toCSV(record)), formatRow(format, index++));
+        }
+
+        break;
     }
   }
 
-  private void verifyOutput(FileSystem fs, Path file) throws IOException {
+  private void verifyOutput(FileSystem fs, Path file) throws Exception {
     verifyOutput(fs, file, "%d,%f,%s");
   }
 }

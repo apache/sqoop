@@ -20,12 +20,13 @@ package org.apache.sqoop.connector.hdfs.hdfsWriter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.sqoop.schema.Schema;
 
 import java.io.IOException;
 
 public abstract class GenericHdfsWriter {
 
-  public abstract void initialize(Path filepath, Configuration conf, CompressionCodec codec) throws IOException;
+  public abstract void initialize(Path filepath, Schema schema, Configuration conf, CompressionCodec codec) throws IOException;
 
   public abstract void write(String csv) throws IOException;
 

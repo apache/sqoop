@@ -20,17 +20,27 @@ package org.apache.sqoop.integration.connector.hdfs;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multiset;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.log4j.Logger;
+import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
+import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsParquetWriter;
+import org.apache.sqoop.connector.idf.AVROIntermediateDataFormat;
 import org.apache.sqoop.model.MDriverConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.schema.Schema;
+import org.apache.sqoop.schema.type.DateTime;
+import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.test.asserts.HdfsAsserts;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
@@ -51,6 +61,7 @@ import org.testng.annotations.Test;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 @Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
@@ -63,6 +74,9 @@ public class NullValueTest extends SqoopTestCase {
 
   // The custom nullValue to use (set to null if default)
   private String nullValue;
+
+
+  private Schema sqoopSchema;
 
   @DataProvider(name="nul-value-test")
   public static Object[][] data(ITestContext context) {
@@ -80,12 +94,19 @@ public class NullValueTest extends SqoopTestCase {
   }
 
   @Override
+
   public String getTestName() {
     return methodName + "[" + format.name() + ", " + nullValue + "]";
   }
 
   @BeforeMethod
   public void setup() throws Exception {
+    sqoopSchema = new Schema("cities");
+    sqoopSchema.addColumn(new FixedPoint("id", Long.valueOf(Integer.SIZE), true));
+    sqoopSchema.addColumn(new org.apache.sqoop.schema.type.Text("country"));
+    sqoopSchema.addColumn(new DateTime("some_date", true, false));
+    sqoopSchema.addColumn(new org.apache.sqoop.schema.type.Text("city"));
+
     createTableCities();
   }
 
@@ -128,6 +149,27 @@ public class NullValueTest extends SqoopTestCase {
         }
         sequenceFileWriter.close();
         break;
+      case PARQUET_FILE:
+        // Parquet file format does not support using custom null values
+        if (usingCustomNullValue()) {
+          return;
+        } else {
+          HdfsParquetWriter parquetWriter = new HdfsParquetWriter();
+
+          Configuration conf = new Configuration();
+          FileSystem.setDefaultUri(conf, hdfsClient.getUri());
+
+          parquetWriter.initialize(
+            new Path(HdfsUtils.joinPathFragments(getMapreduceDirectory(), "input-0001.parquet")),
+            sqoopSchema, conf, null);
+
+          for (String line : getCsv()) {
+            parquetWriter.write(line);
+          }
+
+          parquetWriter.destroy();
+          break;
+        }
       default:
         Assert.fail();
     }
@@ -166,6 +208,11 @@ public class NullValueTest extends SqoopTestCase {
 
   @Test
   public void testToHdfs() throws Exception {
+    // Parquet file format does not support using custom null values
+    if (usingCustomNullValue() && format == ToFormat.PARQUET_FILE) {
+      return;
+    }
+
     provider.insertRow(getTableName(), 1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
     provider.insertRow(getTableName(), 2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), (String) null);
     provider.insertRow(getTableName(), 3, (String) null, Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
@@ -203,16 +250,16 @@ public class NullValueTest extends SqoopTestCase {
 
     executeJob(job);
 
+
+    Multiset<String> setLines = HashMultiset.create(Arrays.asList(getCsv()));
+    Path[] files = HdfsUtils.getOutputMapreduceFiles(hdfsClient, HdfsUtils.joinPathFragments(getMapreduceDirectory(), "TO"));
+    List<String> notFound = new ArrayList<>();
     switch (format) {
       case TEXT_FILE:
         HdfsAsserts.assertMapreduceOutput(hdfsClient,
           HdfsUtils.joinPathFragments(getMapreduceDirectory(), "TO"), getCsv());
-        break;
+        return;
       case SEQUENCE_FILE:
-        Multiset<String> setLines = HashMultiset.create(Arrays.asList(getCsv()));
-        List<String> notFound = new ArrayList<>();
-        Path[] files = HdfsUtils.getOutputMapreduceFiles(hdfsClient, HdfsUtils.joinPathFragments(getMapreduceDirectory(), "TO"));
-
         for(Path file : files) {
           SequenceFile.Reader.Option optPath = SequenceFile.Reader.file(file);
           SequenceFile.Reader sequenceFileReader = new SequenceFile.Reader(getHadoopConf(), optPath);
@@ -224,17 +271,32 @@ public class NullValueTest extends SqoopTestCase {
             }
           }
         }
-        if(!setLines.isEmpty() || !notFound.isEmpty()) {
-          LOG.error("Output do not match expectations.");
-          LOG.error("Expected lines that weren't present in the files:");
-          LOG.error("\t'" + StringUtils.join(setLines, "'\n\t'") + "'");
-          LOG.error("Extra lines in files that weren't expected:");
-          LOG.error("\t'" + StringUtils.join(notFound, "'\n\t'") + "'");
-          Assert.fail("Output do not match expectations.");
+        break;
+      case PARQUET_FILE:
+        AVROIntermediateDataFormat avroIntermediateDataFormat = new AVROIntermediateDataFormat(sqoopSchema);
+        notFound = new LinkedList<>();
+        for (Path file : files) {
+          ParquetReader<GenericRecord> avroParquetReader = AvroParquetReader.builder(file).build();
+          GenericRecord record;
+          while ((record = avroParquetReader.read()) != null) {
+            String recordAsCsv = avroIntermediateDataFormat.toCSV(record);
+            if (!setLines.remove(recordAsCsv)) {
+              notFound.add(recordAsCsv);
+            }
+          }
         }
         break;
       default:
         Assert.fail();
+    }
+
+    if(!setLines.isEmpty() || !notFound.isEmpty()) {
+      LOG.error("Output do not match expectations.");
+      LOG.error("Expected lines that weren't present in the files:");
+      LOG.error("\t'" + StringUtils.join(setLines, "'\n\t'") + "'");
+      LOG.error("Extra lines in files that weren't expected:");
+      LOG.error("\t'" + StringUtils.join(notFound, "'\n\t'") + "'");
+      Assert.fail("Output do not match expectations.");
     }
   }
 }

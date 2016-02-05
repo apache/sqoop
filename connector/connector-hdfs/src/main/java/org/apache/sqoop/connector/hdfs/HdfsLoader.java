@@ -32,6 +32,7 @@ import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.GenericHdfsWriter;
+import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsParquetWriter;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsSequenceWriter;
 import org.apache.sqoop.connector.hdfs.hdfsWriter.HdfsTextWriter;
 import org.apache.sqoop.error.code.HdfsConnectorError;
@@ -89,7 +90,7 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
           GenericHdfsWriter filewriter = getWriter(toJobConfig);
 
-          filewriter.initialize(filepath, conf, codec);
+          filewriter.initialize(filepath, context.getSchema(), conf, codec);
 
       if (!HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfig) || (context.getSchema() instanceof ByteArraySchema)) {
         String record;
@@ -119,8 +120,14 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
   }
 
   private GenericHdfsWriter getWriter(ToJobConfiguration toJobConf) {
-    return (toJobConf.toJobConfig.outputFormat == ToFormat.SEQUENCE_FILE) ? new HdfsSequenceWriter()
-        : new HdfsTextWriter();
+    switch(toJobConf.toJobConfig.outputFormat) {
+      case SEQUENCE_FILE:
+        return new HdfsSequenceWriter();
+      case PARQUET_FILE:
+        return new HdfsParquetWriter();
+      default:
+        return new HdfsTextWriter();
+    }
   }
 
   private String getCompressionCodecName(ToJobConfiguration toJobConf) {
@@ -151,11 +158,16 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
   //TODO: We should probably support configurable extensions at some point
   private static String getExtension(ToJobConfiguration toJobConf, CompressionCodec codec) {
-    if (toJobConf.toJobConfig.outputFormat == ToFormat.SEQUENCE_FILE)
-      return ".seq";
-    if (codec == null)
-      return ".txt";
-    return codec.getDefaultExtension();
+    switch(toJobConf.toJobConfig.outputFormat) {
+      case SEQUENCE_FILE:
+        return ".seq";
+      case PARQUET_FILE:
+        return ".parquet";
+      default:
+        if (codec == null)
+          return ".txt";
+        return codec.getDefaultExtension();
+    }
   }
 
   /* (non-Javadoc)

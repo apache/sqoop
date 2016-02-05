@@ -19,10 +19,14 @@ package org.apache.sqoop.connector.hdfs;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.PrivilegedExceptionAction;
+import java.util.Arrays;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.Seekable;
@@ -33,13 +37,18 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileRecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.util.LineReader;
 import org.apache.log4j.Logger;
+import org.apache.parquet.avro.AvroReadSupport;
+import org.apache.parquet.hadoop.ParquetInputFormat;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hadoop.security.SecurityUtils;
 import org.apache.sqoop.connector.hdfs.configuration.FromJobConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
+import org.apache.sqoop.connector.idf.AVROIntermediateDataFormat;
 import org.apache.sqoop.error.code.HdfsConnectorError;
 import org.apache.sqoop.etl.io.DataWriter;
 import org.apache.sqoop.job.etl.Extractor;
@@ -54,6 +63,10 @@ import org.apache.sqoop.schema.Schema;
 public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfiguration, HdfsPartition> {
 
   public static final Logger LOG = Logger.getLogger(HdfsExtractor.class);
+
+  // the sequence of bytes that appears at the beginning and end of every
+  // parquet file
+  private static final byte[] PARQUET_MAGIC = "PAR1".getBytes(Charset.forName("ASCII"));
 
   private Configuration conf = new Configuration();
   private DataWriter dataWriter;
@@ -85,7 +98,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
   private void extractFile(LinkConfiguration linkConfiguration,
                            FromJobConfiguration fromJobConfiguration,
                            Path file, long start, long length, String[] locations)
-      throws IOException {
+    throws IOException, InterruptedException {
     long end = start + length;
     LOG.info("Extracting file " + file);
     LOG.info("\t from offset " + start);
@@ -93,8 +106,10 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     LOG.info("\t of length " + length);
     if(isSequenceFile(file)) {
       extractSequenceFile(linkConfiguration, fromJobConfiguration, file, start, length, locations);
-    } else {
-      extractTextFile(linkConfiguration, fromJobConfiguration, file, start, length, locations);
+    } else if(isParquetFile(file)) {
+      extractParquetFile(linkConfiguration, fromJobConfiguration, file, start, length, locations);
+      } else {
+      extractTextFile(linkConfiguration, fromJobConfiguration, file, start, length);
     }
   }
 
@@ -136,7 +151,7 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
   @SuppressWarnings("resource")
   private void extractTextFile(LinkConfiguration linkConfiguration,
                                FromJobConfiguration fromJobConfiguration,
-                               Path file, long start, long length, String[] locations)
+                               Path file, long start, long length)
       throws IOException {
     LOG.info("Extracting text file");
     long end = start + length;
@@ -185,6 +200,35 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
     filestream.close();
   }
 
+  private void extractParquetFile(LinkConfiguration linkConfiguration,
+                                  FromJobConfiguration fromJobConfiguration,
+                                  Path file, long start, long length,
+                                  String[] locations) throws IOException, InterruptedException {
+    // Parquet does not expose a way to directly deal with file splits
+    // except through the ParquetInputFormat (ParquetInputSplit is @private)
+    FileSplit fileSplit = new FileSplit(file, start, length, locations);
+    conf.set(ParquetInputFormat.READ_SUPPORT_CLASS, AvroReadSupport.class.getName());
+    ParquetInputFormat parquetInputFormat = new ParquetInputFormat();
+
+    // ParquetReader needs a TaskAttemptContext to pass through the
+    // configuration object.
+    TaskAttemptContext taskAttemptContext = new SqoopTaskAttemptContext(conf);
+
+    RecordReader<Void, GenericRecord> recordReader = parquetInputFormat.createRecordReader(fileSplit, taskAttemptContext);
+    recordReader.initialize(fileSplit, taskAttemptContext);
+
+    AVROIntermediateDataFormat idf = new AVROIntermediateDataFormat(schema);
+    while (recordReader.nextKeyValue() != false) {
+      GenericRecord record = recordReader.getCurrentValue();
+      rowsRead++;
+      if (schema instanceof ByteArraySchema) {
+        dataWriter.writeArrayRecord(new Object[]{idf.toObject(record)});
+      } else {
+        dataWriter.writeArrayRecord(idf.toObject(record));
+      }
+    }
+  }
+
   @Override
   public long getRowsRead() {
     return rowsRead;
@@ -205,6 +249,41 @@ public class HdfsExtractor extends Extractor<LinkConfiguration, FromJobConfigura
       return false;
     }
     return true;
+  }
+
+  private boolean isParquetFile(Path file) {
+    try {
+      FileSystem fileSystem = file.getFileSystem(conf);
+      FileStatus fileStatus = fileSystem.getFileStatus(file);
+      FSDataInputStream fsDataInputStream = fileSystem.open(file);
+
+      long fileLength = fileStatus.getLen();
+
+      byte[] fileStart = new byte[PARQUET_MAGIC.length];
+      fsDataInputStream.readFully(fileStart);
+
+      if (LOG.isDebugEnabled()) {
+        LOG.error("file start: " + new String(fileStart, Charset.forName("ASCII")));
+      }
+
+      if (!Arrays.equals(fileStart, PARQUET_MAGIC)) {
+        return false;
+      }
+
+      long fileEndIndex = fileLength - PARQUET_MAGIC.length;
+      fsDataInputStream.seek(fileEndIndex);
+
+      byte[] fileEnd = new byte[PARQUET_MAGIC.length];
+      fsDataInputStream.readFully(fileEnd);
+
+      if (LOG.isDebugEnabled()) {
+        LOG.error("file end: " + new String(fileEnd, Charset.forName("ASCII")));
+      }
+
+      return Arrays.equals(fileEnd, PARQUET_MAGIC);
+    } catch (IOException e) {
+      return false;
+    }
   }
 
   private void extractRow(LinkConfiguration linkConfiguration, FromJobConfiguration fromJobConfiguration, Text line) throws UnsupportedEncodingException {

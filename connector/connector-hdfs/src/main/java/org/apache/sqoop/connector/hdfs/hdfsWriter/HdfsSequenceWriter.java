@@ -23,16 +23,17 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.sqoop.schema.Schema;
 
 import java.io.IOException;
 
-public class HdfsSequenceWriter  extends GenericHdfsWriter {
+public class HdfsSequenceWriter extends GenericHdfsWriter {
 
   private SequenceFile.Writer filewriter;
   private Text text;
 
   @SuppressWarnings("deprecation")
-  public void initialize(Path filepath, Configuration conf, CompressionCodec codec) throws IOException {
+  public void initialize(Path filepath, Schema schema, Configuration conf, CompressionCodec codec) throws IOException {
     if (codec != null) {
       filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
               conf, filepath, Text.class, NullWritable.class,

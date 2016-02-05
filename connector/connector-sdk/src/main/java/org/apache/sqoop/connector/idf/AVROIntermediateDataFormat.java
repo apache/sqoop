@@ -148,7 +148,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     return jars;
   }
 
-  private GenericRecord toAVRO(String csv) {
+  public GenericRecord toAVRO(String csv) {
 
     String[] csvStringArray = parseCSVString(csv);
 
@@ -175,7 +175,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     return avroObject;
   }
 
-  private Object toAVRO(String csvString, Column column) {
+  public Object toAVRO(String csvString, Column column) {
     Object returnValue = null;
 
     switch (column.getType()) {
@@ -232,7 +232,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     return returnValue;
   }
 
-  private GenericRecord toAVRO(Object[] objectArray) {
+  public GenericRecord toAVRO(Object[] objectArray) {
 
     if (objectArray == null) {
       return null;
@@ -311,7 +311,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
   }
 
   @SuppressWarnings("unchecked")
-  private String toCSV(GenericRecord record) {
+  public String toCSV(GenericRecord record) {
     Column[] columns = this.schema.getColumnsArray();
 
     StringBuilder csvString = new StringBuilder();
@@ -387,7 +387,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
   }
 
   @SuppressWarnings("unchecked")
-  private Object[] toObject(GenericRecord record) {
+  public Object[] toObject(GenericRecord record) {
 
     if (record == null) {
       return null;
@@ -458,5 +458,9 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
 
     }
     return object;
+  }
+
+  public Schema getAvroSchema() {
+    return avroSchema;
   }
 }

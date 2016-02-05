@@ -124,6 +124,7 @@ limitations under the License.
     <groovy.version>2.4.0</groovy.version>
     <jansi.version>1.7</jansi.version>
     <felix.version>2.4.0</felix.version>
+    <parquet.version>1.8.1</parquet.version>
     <!-- maven plugin versions -->
     <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
   </properties>
@@ -699,6 +700,16 @@ limitations under the License.
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-servlet</artifactId>
         <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.parquet</groupId>
+        <artifactId>parquet-hadoop</artifactId>
+        <version>${parquet.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.parquet</groupId>
+        <artifactId>parquet-avro</artifactId>
+        <version>${parquet.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

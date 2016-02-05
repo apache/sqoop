@@ -43,7 +43,8 @@ public class SqoopAvroUtils {
    * Creates an Avro schema from a Sqoop schema.
    */
   public static Schema createAvroSchema(org.apache.sqoop.schema.Schema sqoopSchema) {
-    String name = sqoopSchema.getName();
+    // avro schema names cannot start with quotes, lets just remove them
+    String name = sqoopSchema.getName().replace("\"", "");
     String doc = sqoopSchema.getNote();
     String namespace = SQOOP_SCHEMA_NAMESPACE;
     Schema schema = Schema.createRecord(name, doc, namespace, false);

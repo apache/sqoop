@@ -30,4 +30,9 @@ public enum ToFormat {
    * Sequence file
    */
   SEQUENCE_FILE,
+
+  /**
+   * Parquet file
+   */
+  PARQUET_FILE,
 }
