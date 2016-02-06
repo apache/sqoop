@@ -266,18 +266,18 @@ public abstract class Repository {
    * Retrieve jobs which use the given link deriving structure entirely from
    * the repository (rather than the connector itself).
    *
-   * @param connectorId Connector ID whose jobs should be fetched
+   * @param connectorName Connector ID whose jobs should be fetched
    * @return List of MJobs that use <code>linkID</code>.
    */
-  public abstract List<MJob> findJobsForConnectorUpgrade(long connectorId);
+  public abstract List<MJob> findJobsForConnectorUpgrade(String connectorName);
 
   /**
    * Retrieve jobs which use the given link.
    *
-   * @param connectorId Connector ID whose jobs should be fetched
+   * @param connectorName Connector ID whose jobs should be fetched
    * @return List of MJobs that use <code>linkID</code>.
    */
-  public abstract List<MJob> findJobsForConnector(long connectorId);
+  public abstract List<MJob> findJobsForConnector(String connectorName);
 
   /**
    * Create new submission record in repository.
@@ -437,7 +437,7 @@ public abstract class Repository {
       // 2. Get all links associated with the connector.
       List<MLink> existingLinksByConnector = findLinksForConnectorUpgrade(oldConnectorName);
       // 3. Get all jobs associated with the connector.
-      List<MJob> existingJobsByConnector = findJobsForConnectorUpgrade(connectorId);
+      List<MJob> existingJobsByConnector = findJobsForConnectorUpgrade(oldConnectorName);
       // -- BEGIN TXN --
       tx = getTransaction();
       tx.begin();

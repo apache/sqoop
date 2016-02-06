@@ -137,9 +137,7 @@ public class TestJobHandling extends PostgresqlTestCase {
 
   @Test
   public void testFindJobsByConnector() throws Exception {
-    List<MJob> list = handler.findJobsForConnectorUpgrade(
-      handler.findConnector("A", provider.getConnection()).getPersistenceId(),
-      provider.getConnection());
+    List<MJob> list = handler.findJobsForConnectorUpgrade("A", provider.getConnection());
     assertEquals(2, list.size());
     assertEquals(JOB_A_NAME, list.get(0).getName());
     assertEquals(JOB_B_NAME, list.get(1).getName());
@@ -147,8 +145,7 @@ public class TestJobHandling extends PostgresqlTestCase {
 
   @Test
   public void testFindJobsForNonExistingConnector() throws Exception {
-    List<MJob> list = handler.findJobsForConnectorUpgrade(11, provider
-      .getConnection());
+    List<MJob> list = handler.findJobsForConnectorUpgrade("NONEXISTING", provider.getConnection());
     assertEquals(0, list.size());
   }
 

@@ -186,15 +186,15 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public List<MJob> findJobsForConnectorUpgrade(long connectorId, Connection conn) {
+  public List<MJob> findJobsForConnectorUpgrade(String connectorName, Connection conn) {
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectAllJobsForConnectorConfigurable())) {
 
-      stmt.setLong(1, connectorId);
-      stmt.setLong(2, connectorId);
+      stmt.setString(1, connectorName);
+      stmt.setString(2, connectorName);
       return loadJobsForUpgrade(stmt, conn);
 
     } catch (SQLException ex) {
-      logException(ex, connectorId);
+      logException(ex, connectorName);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
     }
   }
@@ -203,15 +203,15 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * {@inheritDoc}
    */
   @Override
-  public List<MJob> findJobsForConnector(long connectorId, Connection conn) {
+  public List<MJob> findJobsForConnector(String connectorName, Connection conn) {
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectAllJobsForConnectorConfigurable())) {
 
-      stmt.setLong(1, connectorId);
-      stmt.setLong(2, connectorId);
+      stmt.setString(1, connectorName);
+      stmt.setString(2, connectorName);
       return loadJobs(stmt, conn);
 
     } catch (SQLException ex) {
-      logException(ex, connectorId);
+      logException(ex, connectorName);
       throw new SqoopException(CommonRepositoryError.COMMON_0028, ex);
     }
   }

@@ -101,20 +101,20 @@ public abstract class JdbcRepositoryHandler {
    * Retrieve jobs which use the given link and derive their structure
    * entirely from the repository.
    *
-   * @param connectorId Connector ID whose jobs should be fetched
+   * @param connectorName Connector ID whose jobs should be fetched
    * @param conn JDBC link for querying repository
    * @return List of MJobs that use <code>linkID</code>.
    */
-  public abstract List<MJob> findJobsForConnectorUpgrade(long c, Connection conn);
+  public abstract List<MJob> findJobsForConnectorUpgrade(String connectorName, Connection conn);
 
   /**
    * Retrieve jobs which use the given link.
    *
-   * @param connectorId Connector ID whose jobs should be fetched
+   * @param connectorName Connector ID whose jobs should be fetched
    * @param conn JDBC link for querying repository
    * @return List of MJobs that use <code>linkID</code>.
    */
-  public abstract List<MJob> findJobsForConnector(long c, Connection conn);
+  public abstract List<MJob> findJobsForConnector(String connectorName, Connection conn);
 
   /**
    * Upgrade the connector with the new data supplied in the <tt>newConnector</tt>.

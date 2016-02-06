@@ -519,11 +519,11 @@ public class JdbcRepository extends Repository {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public List<MJob> findJobsForConnectorUpgrade(final long connectorId) {
+  public List<MJob> findJobsForConnectorUpgrade(final String connectorName) {
     return (List<MJob>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.findJobsForConnectorUpgrade(connectorId, conn);
+        return handler.findJobsForConnectorUpgrade(connectorName, conn);
       }
     });
   }
@@ -533,11 +533,11 @@ public class JdbcRepository extends Repository {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public List<MJob> findJobsForConnector(final long connectorId) {
+  public List<MJob> findJobsForConnector(final String connectorName) {
     return (List<MJob>) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
-        return handler.findJobsForConnector(connectorId, conn);
+        return handler.findJobsForConnector(connectorName, conn);
       }
     });
   }

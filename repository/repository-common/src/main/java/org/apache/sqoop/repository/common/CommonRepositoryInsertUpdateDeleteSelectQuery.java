@@ -490,8 +490,8 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
   // DML: Select all jobs for a Connector
   private static final String STMT_SELECT_ALL_JOBS_FOR_CONNECTOR_CONFIGURABLE =
       STMT_SELECT_JOB_ALL +
-          " WHERE FROM_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = ?" +
-          " OR TO_CONNECTOR." + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNK_CONFIGURABLE) + " = ?";
+          " WHERE FROM_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + " = ?" +
+          " OR TO_CONF_NAME." + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + " = ?";
 
   /**
    * *******SUBMISSION TABLE *************

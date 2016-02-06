@@ -120,7 +120,7 @@ public class TestJobHandling extends DerbyTestCase {
     loadJobsForLatestVersion();
 
     // Load all 4 jobs on loaded repository
-    list = handler.findJobsForConnector(1, derbyConnection);
+    list = handler.findJobsForConnector("A", derbyConnection);
     assertEquals(4, list.size());
 
     assertEquals("JA0", list.get(0).getName());
@@ -138,7 +138,7 @@ public class TestJobHandling extends DerbyTestCase {
     loadJobsForLatestVersion();
 
     // Load all 4 jobs on loaded repository
-    list = handler.findJobsForConnectorUpgrade(1, derbyConnection);
+    list = handler.findJobsForConnectorUpgrade("A", derbyConnection);
     assertEquals(4, list.size());
 
     assertEquals("JA0", list.get(0).getName());
@@ -155,7 +155,7 @@ public class TestJobHandling extends DerbyTestCase {
     assertEquals(0, list.size());
     loadJobsForLatestVersion();
 
-    list = handler.findJobsForConnectorUpgrade(11, derbyConnection);
+    list = handler.findJobsForConnectorUpgrade("NONEXISTING", derbyConnection);
     assertEquals(0, list.size());
   }
 

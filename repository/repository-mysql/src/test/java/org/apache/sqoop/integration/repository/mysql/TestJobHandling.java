@@ -142,10 +142,7 @@ public class TestJobHandling extends MySqlTestCase {
 
   @Test
   public void testFindJobsByConnector() throws Exception {
-    List<MJob> list = handler
-        .findJobsForConnectorUpgrade(
-          handler.findConnector("A", provider.getConnection())
-            .getPersistenceId(), provider.getConnection());
+    List<MJob> list = handler.findJobsForConnectorUpgrade("A", provider.getConnection());
     List<String> jobNames = new ArrayList<String>();
     for (MJob job : list) {
       jobNames.add(job.getName());
@@ -157,8 +154,7 @@ public class TestJobHandling extends MySqlTestCase {
 
   @Test
   public void testFindJobsForNonExistingConnector() throws Exception {
-    List<MJob> list = handler
-        .findJobsForConnectorUpgrade(11, provider.getConnection());
+    List<MJob> list = handler.findJobsForConnectorUpgrade("NONEXISTING", provider.getConnection());
     assertEquals(0, list.size());
   }
 
