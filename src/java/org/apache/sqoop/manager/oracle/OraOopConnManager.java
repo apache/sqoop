@@ -544,7 +544,7 @@ public class OraOopConnManager extends GenericJdbcManager {
   @Override
   public String escapeColName(String colName) {
 
-    return super.escapeColName(colName); // <- See notes at top about escaped
+    return escapeOracleColumnName(colName); // <- See notes at top about escaped
                                          // column names
   }
 

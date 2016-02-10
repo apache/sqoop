@@ -167,6 +167,46 @@ public class TestSavedJobs extends TestCase {
     storage.close();
   }
 
+    public void testCreateJobWithExtraArgs() throws IOException {
+        Configuration conf = newConf();
+        JobStorageFactory ssf = new JobStorageFactory(conf);
+
+        Map<String, String> descriptor = new TreeMap<String, String>();
+        JobStorage storage = ssf.getJobStorage(descriptor);
+
+        storage.open(descriptor);
+
+        // Job list should start out empty.
+        List<String> jobs = storage.list();
+        assertEquals(0, jobs.size());
+
+        // Create a job with extra args
+        com.cloudera.sqoop.SqoopOptions opts = new SqoopOptions();
+        String[] args = {"-schema", "test"};
+        opts.setExtraArgs(args);
+        JobData data = new JobData(opts, new VersionTool());
+        storage.create("versionJob", data);
+
+        jobs = storage.list();
+        assertEquals(1, jobs.size());
+        assertEquals("versionJob", jobs.get(0));
+
+        // Restore our job, check that it exists.
+        JobData outData = storage.read("versionJob");
+        assertEquals(new VersionTool().getToolName(),
+                outData.getSqoopTool().getToolName());
+
+        String[] storedArgs = outData.getSqoopOptions().getExtraArgs();
+        for(int index = 0; index < args.length; ++index) {
+            assertEquals(args[index], storedArgs[index]);
+        }
+
+        // Now delete the job.
+        storage.delete("versionJob");
+
+        storage.close();
+    }
+
   public void testMultiConnections() throws IOException {
     // Ensure that a job can be retrieved when the storage is
     // closed and reopened.
@@ -209,5 +249,6 @@ public class TestSavedJobs extends TestCase {
 
     storage.close();
   }
+
 }
 

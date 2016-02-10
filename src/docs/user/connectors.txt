@@ -1743,6 +1743,13 @@ $ +sqoop import ... --table customers --columns "\"\"first name\"\""+
 +
 This is the equivalent of: `select "first name" from customers`
 
+If multiple columns need to be quoted, use::
+$ +sqoop import ... --table customers --columns "\"\"first name\",\"last
+name\",\"region name\"\""+
++
+This is the equivalent of: `select "first name", "last name", "region name"
+from customers`
+
 Confirm The Data Connector for Oracle and Hadoop Can Initialize The Oracle Session
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

@@ -280,8 +280,13 @@ class OraOopDBRecordReader<T extends SqoopRecord> extends
       }
       String fieldName = fieldNames[i];
 
+      String unescapedFieldName = fieldName;
+      if (fieldName.charAt(0) == '"' && fieldName.charAt(fieldName.length() - 1) == '"') {
+        unescapedFieldName = fieldName.substring(1, fieldName.length() - 1);
+      }
+
       OracleTableColumn oracleTableColumn =
-          tableColumns.findColumnByName(fieldName);
+          tableColumns.findColumnByName(unescapedFieldName);
       if (oracleTableColumn != null) {
         if (oracleTableColumn.getDataType().equals(
             OraOopConstants.Oracle.URITYPE)) {

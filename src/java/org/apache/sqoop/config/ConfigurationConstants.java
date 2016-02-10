@@ -100,6 +100,11 @@ public final class ConfigurationConstants {
    */
   public static final String PROP_SPLIT_LIMIT = "split.limit";
 
+  /**
+   * Enable avro logical types (decimal support only).
+   */
+  public static final String PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL = "sqoop.avro.logical_types.decimal.enable";
+
   private ConfigurationConstants() {
     // Disable Explicit Object Creation
   }

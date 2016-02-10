@@ -23,10 +23,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
 
+import org.apache.avro.Conversions;
 import org.apache.avro.Schema;
 import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.mapred.AvroWrapper;
+import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -34,9 +36,9 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import static org.apache.avro.file.CodecFactory.DEFAULT_DEFLATE_LEVEL;
 import static org.apache.avro.file.DataFileConstants.DEFAULT_SYNC_INTERVAL;
 import static org.apache.avro.file.DataFileConstants.DEFLATE_CODEC;
-import static org.apache.avro.mapred.AvroOutputFormat.DEFAULT_DEFLATE_LEVEL;
 import static org.apache.avro.mapred.AvroOutputFormat.DEFLATE_LEVEL_KEY;
 import static org.apache.avro.mapred.AvroOutputFormat.EXT;
 import static org.apache.avro.mapred.AvroOutputFormat.SYNC_INTERVAL_KEY;
@@ -53,6 +55,7 @@ public class AvroOutputFormat<T>
   static <T> void configureDataFileWriter(DataFileWriter<T> writer,
     TaskAttemptContext context) throws UnsupportedEncodingException {
     if (FileOutputFormat.getCompressOutput(context)) {
+      // Default level must be greater than 0.
       int level = context.getConfiguration()
         .getInt(DEFLATE_LEVEL_KEY, DEFAULT_DEFLATE_LEVEL);
       String codecName = context.getConfiguration()
@@ -89,6 +92,9 @@ public class AvroOutputFormat<T>
     Schema schema =
       isMapOnly ? AvroJob.getMapOutputSchema(context.getConfiguration())
         : AvroJob.getOutputSchema(context.getConfiguration());
+
+    // Add decimal support
+    ReflectData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
 
     final DataFileWriter<T> WRITER =
       new DataFileWriter<T>(new ReflectDatumWriter<T>());

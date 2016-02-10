@@ -29,6 +29,9 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,6 +50,8 @@ import com.cloudera.sqoop.util.TaskId;
  * life.
  */
 public class LargeObjectLoader implements Closeable  {
+
+  public static final Log LOG = LogFactory.getLog(LargeObjectLoader.class.getName());
 
   // Spill to external storage for BLOB/CLOB objects > 16 MB.
   public static final long DEFAULT_MAX_LOB_LENGTH = 16 * 1024 * 1024;
@@ -117,6 +122,7 @@ public class LargeObjectLoader implements Closeable  {
   private Path getNextLobFilePath() throws IOException {
     Path p = new Path(workPath, getNextLobFileName());
     Path parent = p.getParent();
+    LOG.info("Using lob file: " + p.toString());
     if (!fs.exists(parent)) {
       fs.mkdirs(parent);
     }

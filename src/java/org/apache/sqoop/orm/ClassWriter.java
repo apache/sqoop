@@ -26,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -1845,6 +1846,14 @@ public class ClassWriter {
       return connManager.getColumnTypes(tableName, options.getSqlQuery());
     } else {
       return connManager.getColumnTypesForProcedure(options.getCall());
+    }
+  }
+
+  protected Map<String, List<Integer>> getColumnInfo() throws IOException {
+    if (options.getCall() == null) {
+      return connManager.getColumnInfo(tableName, options.getSqlQuery());
+    } else {
+      return connManager.getColumnInfoForProcedure(options.getCall());
     }
   }
 

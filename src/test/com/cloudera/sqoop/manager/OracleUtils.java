@@ -37,11 +37,9 @@ public final class OracleUtils {
   // Express edition hardcoded name.
   public static final String ORACLE_DATABASE_NAME = "xe";
 
-  public static final String CONNECT_STRING =
-      System.getProperty("sqoop.test.oracle.connectstring",
-      "jdbc:oracle:thin:@//localhost/" + ORACLE_DATABASE_NAME);
-  public static final String ORACLE_USER_NAME = "SQOOPTEST";
-  public static final String ORACLE_USER_PASS = "12345";
+  public static final String CONNECT_STRING = System.getProperty("sqoop.test.oracle.connectstring", "jdbc:oracle:thin:@//localhost/" + ORACLE_DATABASE_NAME);
+  public static final String ORACLE_USER_NAME = System.getProperty("sqoop.test.oracle.username", "SQOOPTEST");
+  public static final String ORACLE_USER_PASS = System.getProperty("sqoop.test.oracle.password", "12345");
 
   public static final String ORACLE_SECONDARY_USER_NAME = "SQOOPTEST2";
   public static final String ORACLE_SECONDARY_USER_PASS = "ABCDEF";

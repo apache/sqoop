@@ -39,10 +39,14 @@ import org.apache.commons.logging.LogFactory;
 public class TextExportMapper
     extends AutoProgressMapper<LongWritable, Text, SqoopRecord, NullWritable> {
 
+  private static final String DUMP_DATA_ON_ERROR_KEY = "org.apache.sqoop.export.text.dump_data_on_error";
+
   public static final Log LOG =
     LogFactory.getLog(TextExportMapper.class.getName());
 
   private SqoopRecord recordImpl;
+
+  boolean enableDataDumpOnError;
 
   public TextExportMapper() {
   }
@@ -74,6 +78,8 @@ public class TextExportMapper
       throw new IOException("Could not instantiate object of type "
           + recordClassName);
     }
+
+    enableDataDumpOnError = conf.getBoolean(DUMP_DATA_ON_ERROR_KEY, false);
   }
 
 
@@ -89,7 +95,11 @@ public class TextExportMapper
       LOG.error("");
 
       LOG.error("Exception: ", e);
-      LOG.error("On input: " + val);
+      if(enableDataDumpOnError) {
+        LOG.error("On input: " + val);
+      } else {
+        LOG.error("Dumping data is not allowed by default, please run the job with -D" + DUMP_DATA_ON_ERROR_KEY + "=true to get corrupted line.");
+      }
 
       InputSplit is = context.getInputSplit();
       if (is instanceof FileSplit) {

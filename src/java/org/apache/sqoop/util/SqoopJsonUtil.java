@@ -35,6 +35,9 @@ public class SqoopJsonUtil {
   public static final Log LOG = LogFactory
     .getLog(SqoopJsonUtil.class.getName());
 
+  private SqoopJsonUtil() {
+  }
+
   public static String getJsonStringforMap(Map<String, String> map) {
     JSONObject pathPartMap = new JSONObject(map);
     return pathPartMap.toString();

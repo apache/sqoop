@@ -4,13 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class TestSqoopJsonUtil {
 
-  private SqoopJsonUtil jsonUtil;
   private static Map<String, String> paramMap;
   private static String jsonStr;
 
@@ -26,9 +24,10 @@ public class TestSqoopJsonUtil {
   }
 
   @Test
-  public void testGetJsonStringFromMap() {
+  public void testMapToStringAndBack() {
     String resultJsonStr = SqoopJsonUtil.getJsonStringforMap(paramMap);
-    assertEquals(jsonStr, resultJsonStr);
+    Map<String, String> resultMap = SqoopJsonUtil.getMapforJsonString(jsonStr);
+    assertEquals(paramMap, resultMap);
   }
 
   @Test

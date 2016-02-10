@@ -354,7 +354,7 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V> extends
         if (colCount > 0) {
           sqlNames.append("\n,");
         }
-        sqlNames.append(columnName);
+        sqlNames.append("\"").append(columnName).append("\"");
 
         // column values...
         if (colCount > 0) {

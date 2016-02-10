@@ -68,8 +68,7 @@ public class AvroImportMapper
       throw new IOException(sqlE);
     }
 
-    GenericRecord outKey = AvroUtil.toGenericRecord(val.getFieldMap(),
-        schema, bigDecimalFormatString);
+    GenericRecord outKey = AvroUtil.toGenericRecord(val.getFieldMap(), schema, bigDecimalFormatString);
     wrapper.datum(outKey);
     context.write(wrapper, NullWritable.get());
   }

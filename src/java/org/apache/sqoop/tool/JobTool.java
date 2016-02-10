@@ -210,21 +210,6 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     SqoopOptions clonedOpts = (SqoopOptions) childOpts.clone();
     clonedOpts.setParent(childOpts);
 
-    int dashPos = getDashPosition(extraArguments);
-    String [] childArgv;
-    if (dashPos >= extraArguments.length) {
-      childArgv = new String[0];
-    } else {
-      childArgv = Arrays.copyOfRange(extraArguments, dashPos + 1,
-          extraArguments.length);
-    }
-
-    int confRet = configureChildTool(clonedOpts, childTool, childArgv);
-    if (0 != confRet) {
-      // Error.
-      return confRet;
-    }
-
     return childTool.run(clonedOpts);
   }
 
