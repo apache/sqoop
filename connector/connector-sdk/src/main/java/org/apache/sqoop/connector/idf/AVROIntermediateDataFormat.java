@@ -352,7 +352,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
           break;
         case DECIMAL:
           // stored as string
-          csvString.append(toCSVDecimal(obj));
+          csvString.append(toCSVDecimal(new BigDecimal(obj.toString())));
           break;
         case DATE:
           // stored as long
@@ -417,9 +417,11 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
         // stored as enum symbol
       case TEXT:
         // stored as UTF8
+        object[nameIndex] = obj.toString();
+        break;
       case DECIMAL:
           // stored as string
-        object[nameIndex] = obj.toString();
+        object[nameIndex] = new BigDecimal(obj.toString());
         break;
       case BINARY:
       case UNKNOWN:

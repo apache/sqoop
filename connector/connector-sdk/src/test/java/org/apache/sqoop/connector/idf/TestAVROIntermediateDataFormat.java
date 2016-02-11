@@ -35,12 +35,14 @@ import org.apache.sqoop.schema.type.Array;
 import org.apache.sqoop.schema.type.Binary;
 import org.apache.sqoop.schema.type.Bit;
 import org.apache.sqoop.schema.type.Column;
+import org.apache.sqoop.schema.type.Decimal;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.joda.time.LocalDateTime;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,7 +82,7 @@ public class TestAVROIntermediateDataFormat {
     enumCol = new org.apache.sqoop.schema.type.Enum("seven").setOptions(options);
     sqoopSchema
         .addColumn(new FixedPoint("one", 8L, true))
-        .addColumn(new FixedPoint("two", 2L, true))
+        .addColumn(new Decimal("two", 4, 2))
         .addColumn(new Text("three"))
         .addColumn(new Text("four"))
         .addColumn(new Binary("five"))
@@ -105,7 +107,7 @@ public class TestAVROIntermediateDataFormat {
   @Test
   public void testInputAsCSVTextInAndDataOut() {
 
-    String csvText = "10,34,'54','random data',"
+    String csvText = "10,34.56,'54','random data',"
         + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
         + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
         + csvDate + ",13.44," + csvSet;
@@ -116,7 +118,7 @@ public class TestAVROIntermediateDataFormat {
 
   @Test
   public void testInputAsCSVTextInAndObjectArrayOut() {
-    String csvText = "10,34,'54','random data',"
+    String csvText = "10,34.56,'54','random data',"
         + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
         + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
         + csvDate + ",13.44," + csvSet;
@@ -129,7 +131,7 @@ public class TestAVROIntermediateDataFormat {
   private void assertObjectArray() {
     Object[] out = dataFormat.getObjectData();
     assertEquals(10L, out[0]);
-    assertEquals(34, out[1]);
+    assertEquals(new BigDecimal("34.56"), out[1]);
     assertEquals("54", out[2]);
     assertEquals("random data", out[3]);
     assertEquals(-112, ((byte[]) out[4])[0]);
@@ -173,7 +175,7 @@ public class TestAVROIntermediateDataFormat {
 
   @Test
   public void testInputAsCSVTextInCSVTextOut() {
-    String csvText = "10,34,'54','random data',"
+    String csvText = "10,34.56,'54','random data',"
         + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
         + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
         + csvDate + ",13.44," + csvSet;
@@ -184,7 +186,7 @@ public class TestAVROIntermediateDataFormat {
   private GenericRecord createAvroGenericRecord() {
     GenericRecord avroObject = new GenericData.Record(avroSchema);
     avroObject.put("one", 10L);
-    avroObject.put("two", 34);
+    avroObject.put("two", "34.56");
     avroObject.put("three", new Utf8("54"));
     avroObject.put("four", new Utf8("random data"));
     // store byte array in byte buffer
@@ -235,7 +237,7 @@ public class TestAVROIntermediateDataFormat {
   @Test
   public void testInputAsDataInAndCSVOut() {
 
-    String csvExpected = "10,34,'54','random data',"
+    String csvExpected = "10,34.56,'54','random data',"
         + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
         + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
         + csvDate + ",13.44," + csvSet;
@@ -260,7 +262,7 @@ public class TestAVROIntermediateDataFormat {
   private Object[] createObjectArray() {
     Object[] out = new Object[15];
     out[0] = 10L;
-    out[1] = 34;
+    out[1] = new BigDecimal("34.56");
     out[2] = "54";
     out[3] = "random data";
     out[4] = new byte[] { (byte) -112, (byte) 54 };
@@ -322,7 +324,7 @@ public class TestAVROIntermediateDataFormat {
   public void testInputAsObjectArrayInAndCSVOut() {
     Object[] out = createObjectArray();
     dataFormat.setObjectData(out);
-    String csvText = "10,34,'54','random data',"
+    String csvText = "10,34.56,'54','random data',"
         + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'" + String.valueOf(0x0A)
         + "','ENUM'," + csvArray + "," + map + ",true," + csvDateTime + "," + csvTime + ","
         + csvDate + ",13.44," + csvSet;
@@ -339,7 +341,7 @@ public class TestAVROIntermediateDataFormat {
   // **************test cases for empty and null schema*******************
   @Test(expectedExceptions = SqoopException.class)
   public void testEmptySchema() {
-    String testData = "10,34,'54','random data',"
+    String testData = "10,34.56,'54','random data',"
         + getByteFieldString(new byte[] { (byte) -112, (byte) 54 }) + ",'\\n'";
     // no coumns
     Schema schema = new Schema("Test");
