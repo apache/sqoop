@@ -45,7 +45,7 @@ public class LinkRestTest extends RestTest {
         assertResponseCode(200);
         assertContains("first-link");
       }}),
-    new TestDescription("Get all links for connector", "v1/link/all?cname=generic-jdbc-connector", "GET", null, new Validator() {
+    new TestDescription("Get all links for connector", "v1/link/all?cname=hdfs-connector", "GET", null, new Validator() {
       @Override
       void validate() throws Exception {
         assertResponseCode(200);

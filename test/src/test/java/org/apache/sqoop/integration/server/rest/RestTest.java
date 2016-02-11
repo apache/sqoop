@@ -118,15 +118,10 @@ public abstract class RestTest extends SqoopTestCase {
    * Various objects that can be pre-created by child test cases
    */
   public void createFirstLink() {
-    // Link: first-link
-    MLink genericJDBCLink = getClient().createLink("generic-jdbc-connector");
-    genericJDBCLink.setName("first-link");
-    MConfigList configs = genericJDBCLink.getConnectorLinkConfig();
-    configs.getStringInput("linkConfig.jdbcDriver").setValue("org.apache.derby.jdbc.ClientDriver");
-    configs.getStringInput("linkConfig.connectionString").setValue("jdbc:derby:memory:invalid-rest-calls-test;create=true");
-    configs.getStringInput("linkConfig.username").setValue("sqoop");
-    configs.getStringInput("linkConfig.password").setValue("is-awesome");
-    getClient().saveLink(genericJDBCLink);
+    MLink hdfsLinkFrom = getClient().createLink("hdfs-connector");
+    fillHdfsLink(hdfsLinkFrom);
+    hdfsLinkFrom.setName("first-link");
+    saveLink(hdfsLinkFrom);
   }
 
   @AfterMethod
