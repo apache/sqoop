@@ -60,6 +60,11 @@ public class ClassWriter {
   // The following are keywords and cannot be used for class, method, or field
   // names.
   public static final HashSet<String> JAVA_RESERVED_WORDS;
+  
+  private static final String SQOOP_STRING = "_SQOOP_";
+	private static final String HYPHEN = "-";
+	private static final String UNDER_SCORE = "_";
+	private static final String REG_EX_FOR_DOT = "\\.+";
 
   static {
     JAVA_RESERVED_WORDS = new HashSet<String>();
@@ -1872,6 +1877,12 @@ public class ClassWriter {
       throw new IllegalArgumentException("Attempted to generate class with "
           + "no columns!");
     }
+    
+    /* String For Protocol Version Constant Name. */
+		String sqoopVersion = SqoopVersion.VERSION.replaceAll(REG_EX_FOR_DOT, UNDER_SCORE);
+		sqoopVersion = sqoopVersion.replaceAll(HYPHEN, UNDER_SCORE);
+		sqoopVersion = SQOOP_STRING + sqoopVersion;
+		
     StringBuilder sb = new StringBuilder();
     sb.append("// ORM class for table '" + tableName + "'\n");
     sb.append("// WARNING: This class is AUTO-GENERATED. "
@@ -1925,10 +1936,10 @@ public class ClassWriter {
     String className = tableNameInfo.getShortClassForTable(tableName);
     sb.append("public class " + className + " extends SqoopRecord "
         + " implements DBWritable, Writable {\n");
-    sb.append("  private final int PROTOCOL_VERSION = "
+    sb.append("  private final int PROTOCOL_VERSION" + sqoopVersion + " = " 
         + CLASS_WRITER_VERSION + ";\n");
-    sb.append(
-        "  public int getClassFormatVersion() { return PROTOCOL_VERSION; }\n");
+		sb.append(
+		    "  public int getClassFormatVersion() { return PROTOCOL_VERSION" + sqoopVersion + "; }\n");
     sb.append("  protected ResultSet __cur_result_set;\n");
     generateFields(columnTypes, colNames, className, sb);
     generateEquals(columnTypes, colNames, className, sb);
