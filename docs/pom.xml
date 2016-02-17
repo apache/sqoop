@@ -32,6 +32,12 @@ limitations under the License.
   <name>Sqoop Documentation</name>
 
   <dependencies>
+    <!-- To get all libraries and all connector on classpath, they will be used for doc generation -->
+    <dependency>
+      <groupId>org.apache.sqoop</groupId>
+      <artifactId>sqoop-server</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -47,34 +53,66 @@ limitations under the License.
       </activation>
       <build>
         <plugins>
+          <!-- Preprocess documentation - generate dynamic pages and such -->
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-site-plugin</artifactId>
-
-            <!-- Configure generating documentation alongside with package -->
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <mainClass>org.apache.sqoop.docs.generator.DocPreprocessor</mainClass>
+              <arguments>
+                <argument>${project.basedir}/src/site/sphinx/</argument>
+                <argument>${project.build.directory}/docs-preprocessor/</argument>
+              </arguments>
+            </configuration>
             <executions>
               <execution>
-                <id>packaging-documentation</id>
+                <id>generate-docs-package</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>site</goal>
+                  <goal>java</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>generate-docs-site</id>
+                <phase>site</phase>
+                <goals>
+                  <goal>java</goal>
                 </goals>
               </execution>
             </executions>
-
           </plugin>
-        </plugins>
-      </build>
-      <reporting>
-        <plugins>
+
+          <!-- Generate documentation using sphinx and reStructuredText -->
           <plugin>
             <groupId>org.tomdz.maven</groupId>
             <artifactId>sphinx-maven-plugin</artifactId>
             <version>1.0.3</version>
             <configuration>
+              <!-- Configuration options available at http://tomdz.github.io/sphinx-maven/configuration.html -->
               <warningsAsErrors>true</warningsAsErrors>
+              <sourceDirectory>${project.build.directory}/docs-preprocessor/</sourceDirectory>
             </configuration>
+            <executions>
+              <execution>
+                <id>sphinx-package</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>sphinx-site</id>
+                <phase>site</phase>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
+        </plugins>
+      </build>
+      <reporting>
+        <plugins>
           <!-- Turning off standard reports as they collide with sphinx -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
