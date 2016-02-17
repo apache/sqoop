@@ -65,6 +65,26 @@ public class LinkRestTest extends RestTest {
         assertServerException("Entity requested doesn't exist", "SERVER_0006");
         assertContains("Invalid connector: i-dont-exists");
       }}),
+
+    // Post
+    new TestDescription("Empty data", "v1/link", "POST", "", new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(500);
+        assertServerException("Invalid JSON", "SERIALIZATION_002");
+      }}),
+    new TestDescription("Corrupted JSON", "v1/link", "POST", "{\"blah\" : {}", new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(500);
+        assertServerException("Invalid JSON", "SERIALIZATION_002");
+      }}),
+    new TestDescription("Empty JSON", "v1/link", "POST", "{}", new Validator() {
+      @Override
+      void validate() throws Exception {
+        assertResponseCode(500);
+        assertServerException("Required key field is missing", "SERIALIZATION_003");
+      }}),
   };
 
   @DataProvider(name="link-rest-test", parallel=false)
