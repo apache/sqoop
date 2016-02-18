@@ -28,6 +28,8 @@ import org.apache.sqoop.utils.UrlSafeUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Locale;
 
 public class RequestContext {
@@ -73,6 +75,14 @@ public class RequestContext {
     } catch(IllegalArgumentException ex) {
       throw new SqoopException(ServerError.SERVER_0002,
               "Unsupported HTTP method:" + request.getMethod(), ex);
+    }
+  }
+
+  public BufferedReader getReader() {
+    try {
+      return request.getReader();
+    } catch (IOException e) {
+      throw new SqoopException(ServerError.SERVER_0003, "Expected data stream", e);
     }
   }
 

@@ -231,13 +231,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
     AuditLoggerManager manager = AuditLoggerManager.getInstance();
 
     RoleBean bean = new RoleBean();
-
-    try {
-      JSONObject json = JSONUtils.parse(ctx.getRequest().getReader());
-      bean.restore(json);
-    } catch (IOException e) {
-      throw new SqoopException(ServerError.SERVER_0003, "Can't read request content", e);
-    }
+    bean.restore(JSONUtils.parse(ctx.getReader()));
 
     // Get role object
     List<MRole> roles = bean.getRoles();
@@ -261,13 +255,9 @@ public class AuthorizationRequestHandler implements RequestHandler {
     RoleBean rolesBean = new RoleBean();
     PrincipalBean principalsBean = new PrincipalBean();
 
-    try {
-      JSONObject json = JSONUtils.parse(ctx.getRequest().getReader());
+      JSONObject json = JSONUtils.parse(ctx.getReader());
       rolesBean.restore(json);
       principalsBean.restore(json);
-    } catch (IOException e) {
-      throw new SqoopException(ServerError.SERVER_0003, "Can't read request content", e);
-    }
 
     // Get role object
     List<MRole> roles = rolesBean.getRoles();
@@ -293,16 +283,12 @@ public class AuthorizationRequestHandler implements RequestHandler {
     PrincipalBean principalsBean = new PrincipalBean();
     PrivilegesBean privilegesBean = new PrivilegesBean();
 
+    JSONObject json = JSONUtils.parse(ctx.getReader());
+    principalsBean.restore(json);
     try {
-      JSONObject json = JSONUtils.parse(ctx.getRequest().getReader());
-      principalsBean.restore(json);
-      try {
-        privilegesBean.restore(json);
-      } catch (Exception e) {//Privilege is null, revoke all privileges from principal
-        privilegesBean = null;
-      }
-    } catch (IOException e) {
-      throw new SqoopException(ServerError.SERVER_0003, "Can't read request content", e);
+      privilegesBean.restore(json);
+    } catch (Exception e) {//Privilege is null, revoke all privileges from principal
+      privilegesBean = null;
     }
 
     // Get principal object
