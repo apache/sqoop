@@ -66,6 +66,7 @@ public class RealSqoopCluster extends SqoopMiniCluster {
 
   @Override
   public String getConfigurationPath() {
-    return "/etc/hadoop/conf/";
+    return System.getProperty(
+        "sqoop.hadoop.config.path", "/etc/hadoop/conf");
   }
 }

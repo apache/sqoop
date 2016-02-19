@@ -18,6 +18,7 @@
 package org.apache.sqoop.test.infrastructure.providers;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.test.hadoop.HadoopMiniClusterRunner;
 import org.apache.sqoop.test.hadoop.HadoopRunner;
@@ -61,7 +62,9 @@ public class HadoopInfrastructureProvider extends InfrastructureProvider {
   @Override
   public void setHadoopConfiguration(Configuration conf) {
     try {
-      instance.setConfiguration(instance.prepareConfiguration(conf));
+      Configuration newConf = instance.prepareConfiguration(conf);
+      instance.setConfiguration(newConf);
+      UserGroupInformation.setConfiguration(newConf);
     } catch (Exception e) {
       LOG.error("Could not set configuration.", e);
     }
