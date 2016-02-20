@@ -231,6 +231,7 @@ public class SqoopOptions implements Cloneable {
   private boolean areInputDelimsManuallySet;
 
   private Configuration conf;
+  private String toolName;
 
   public static final int DEFAULT_NUM_MAPPERS = 4;
 
@@ -2595,4 +2596,12 @@ public class SqoopOptions implements Cloneable {
   public void setCustomToolOptions(Map<String, String> customToolOptions) {
     this.customToolOptions = customToolOptions;
   }
+
+    public String getToolName() {
+        return this.toolName;
+    }
+
+    public void setToolName(String toolName) {
+        this.toolName = toolName;
+    }
 }

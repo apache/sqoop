@@ -253,6 +253,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
    */
   protected boolean init(SqoopOptions sqoopOpts) {
     // Get the connection to the database.
+      // Set the tool name in sqoop options
+      sqoopOpts.setToolName(getToolName());
     try {
       JobData data = new JobData(sqoopOpts, this);
       this.manager = new ConnFactory(sqoopOpts.getConf()).getManager(data);
