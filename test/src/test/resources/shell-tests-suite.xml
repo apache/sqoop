@@ -22,6 +22,7 @@ limitations under the License.
 
     <listeners>
         <listener class-name="org.apache.sqoop.test.testng.SqoopTestListener" />
+        <listener class-name="org.apache.sqoop.test.testng.ReconfigureLogListener" />
     </listeners>
 
     <test name="ShellTests">

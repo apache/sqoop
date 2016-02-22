@@ -209,6 +209,7 @@ limitations under the License.
           </excludes>
           <systemPropertyVariables>
             <sqoop.integration.tmpdir>${project.build.directory}</sqoop.integration.tmpdir>
+            <sqoop.integration.log>${project.build.directory}/surefire-reports</sqoop.integration.log>
           </systemPropertyVariables>
         </configuration>
         <executions>
