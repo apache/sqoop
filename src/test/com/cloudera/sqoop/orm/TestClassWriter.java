@@ -373,6 +373,8 @@ public class TestClassWriter extends TestCase {
         "9isLegalInSql"));
     assertEquals("____", ClassWriter.toJavaIdentifier("___"));
     assertEquals("__class", ClassWriter.toJavaIdentifier("_class"));
+    //Checking Java identifier for Constant PROTOCOL_VERSION
+    assertEquals("_PROTOCOL_VERSION", ClassWriter.toJavaIdentifier("PROTOCOL_VERSION"));
   }
 
   @Test
@@ -386,6 +388,38 @@ public class TestClassWriter extends TestCase {
       st.executeUpdate("CREATE TABLE " + tableName
           + " (class INT, \"9field\" INT)");
       st.executeUpdate("INSERT INTO " + tableName + " VALUES(42, 41)");
+      connection.commit();
+    } finally {
+      st.close();
+      connection.close();
+    }
+
+    String [] argv = {
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+      "--package-name",
+      OVERRIDE_PACKAGE_NAME,
+    };
+
+    runGenerationTest(argv, OVERRIDE_PACKAGE_NAME + "."
+        + HsqldbTestServer.getTableName());
+  }
+
+  // Test For checking Codegneration perfroming successfully
+  // in case of Table with Column name as PROTOCOL_VERSION
+  @Test
+  public void testColumnNameAsProtocolVersion() throws SQLException {
+    // Recreate the table with column name as PROTOCOL_VERSION.
+    String tableName = HsqldbTestServer.getTableName();
+    Connection connection = testServer.getConnection();
+    Statement st = connection.createStatement();
+    try {
+      st.executeUpdate("DROP TABLE " + tableName + " IF EXISTS");
+      st.executeUpdate("CREATE TABLE " + tableName
+          + " (PROTOCOL_VERSION INT)");
+      st.executeUpdate("INSERT INTO " + tableName + " VALUES(42)");
       connection.commit();
     } finally {
       st.close();
