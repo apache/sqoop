@@ -18,6 +18,7 @@
 package org.apache.sqoop.test.utils;
 
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.Random;
@@ -44,7 +45,7 @@ public class SqoopUtils {
     object.setName(prefix + rand.nextLong());
   }
 
-  //Retrieve the FQDN of the current host
+  // Retrieve the FQDN of the current host
   public static String getLocalHostName() {
     String fqdn;
     try {
@@ -53,5 +54,27 @@ public class SqoopUtils {
       fqdn = "localhost";
     }
     return fqdn;
+  }
+
+  // Retrieve the IP address of the current host
+  public static String getLocalIpAddress() {
+    String address;
+    try {
+      address = InetAddress.getLocalHost().getHostAddress();
+    } catch (UnknownHostException e1) {
+      address = "127.0.0.1";
+    }
+    return address;
+  }
+
+
+  @SuppressWarnings("rawtypes")
+  public static String getClasspathDir(Class klass) throws Exception {
+    String file = klass.getName();
+    file = file.replace('.', '/') + ".class";
+    URL url = Thread.currentThread().getContextClassLoader().getResource(file);
+    String baseDir = url.toURI().getPath();
+    baseDir = baseDir.substring(0, baseDir.length() - file.length() - 1);
+    return baseDir;
   }
 }

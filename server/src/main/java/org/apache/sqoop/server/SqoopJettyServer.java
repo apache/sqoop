@@ -19,12 +19,21 @@
 package org.apache.sqoop.server;
 
 import org.apache.log4j.Logger;
+import org.apache.sqoop.common.MapContext;
+import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.core.SqoopServer;
 import org.apache.sqoop.filter.SqoopAuthenticationFilter;
+import org.apache.sqoop.security.SecurityConstants;
+import org.apache.sqoop.server.common.ServerError;
 import org.apache.sqoop.server.v1.*;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.server.ServerConnector;
 
@@ -58,7 +67,45 @@ public class SqoopJettyServer {
     webServer = new Server(threadPool);
 
     // Connector configs
-    ServerConnector connector = new ServerConnector(webServer);
+    ServerConnector connector;
+
+    MapContext configurationContext = SqoopConfiguration.getInstance().getContext();
+
+    if (configurationContext.getBoolean(SecurityConstants.TLS_ENABLED, false)) {
+      String keyStorePath = configurationContext.getString(SecurityConstants.KEYSTORE_LOCATION);
+      if (keyStorePath == null) {
+        throw new SqoopException(ServerError.SERVER_0007);
+      }
+
+      SslContextFactory sslContextFactory = new SslContextFactory();
+      sslContextFactory.setKeyStorePath(keyStorePath);
+
+      String protocol = configurationContext.getString(SecurityConstants.TLS_PROTOCOL);
+      if (protocol != null && protocol.length() > 0) {
+        sslContextFactory.setProtocol(protocol.trim());
+      }
+
+      String keyStorePassword = configurationContext.getString(SecurityConstants.KEYSTORE_PASSWORD);
+      if (keyStorePassword != null && keyStorePassword.length() > 0) {
+        sslContextFactory.setKeyStorePassword(keyStorePassword);
+      }
+
+      String keyManagerPassword = configurationContext.getString(SecurityConstants.KEYMANAGER_PASSWORD);
+      if (keyManagerPassword != null && keyManagerPassword.length() > 0) {
+        sslContextFactory.setKeyManagerPassword(keyManagerPassword);
+      }
+
+      HttpConfiguration https = new HttpConfiguration();
+      https.addCustomizer(new SecureRequestCustomizer());
+
+      connector = new ServerConnector(webServer,
+        new SslConnectionFactory(sslContextFactory, "http/1.1"),
+        new HttpConnectionFactory(https));
+    } else {
+      connector = new ServerConnector(webServer);
+    }
+
+
     connector.setPort(sqoopJettyContext.getPort());
     webServer.addConnector(connector);
     webServer.setHandler(createServletContextHandler());

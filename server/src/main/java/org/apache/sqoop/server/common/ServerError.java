@@ -38,6 +38,9 @@ public enum ServerError implements ErrorCode {
 
   /** Entity requested doesn't exist*/
   SERVER_0006("Entity requested doesn't exist"),
+
+  /** TLS enabled but keystore location not set*/
+  SERVER_0007("TLS enabled but keystore location not set"),
   ;
 
   private final String message;
