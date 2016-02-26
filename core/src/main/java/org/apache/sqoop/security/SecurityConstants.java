@@ -37,13 +37,6 @@ public final class SecurityConstants {
     PREFIX_SECURITY_CONFIG + "authentication.";
 
   /**
-   * All tls related configuration is prefixed with this:
-   * <tt>org.apache.sqoop.security.tls.</tt>
-   */
-  public static final String PREFIX_TLS_CONFIG =
-    PREFIX_SECURITY_CONFIG + "tls.";
-
-  /**
    * The config specifies the sqoop authentication type (SIMPLE, KERBEROS).
    * The default type is SIMPLE
    * <tt>org.apache.sqoop.security.authentication.type</tt>.
@@ -163,42 +156,6 @@ public final class SecurityConstants {
    */
   public static final String SERVER_NAME =
           PREFIX_AUTHORIZATION_CONFIG + "server_name";
-
-  /**
-   * The config specifies the whether the http server should use TLS.
-   * <tt>org.apache.sqoop.security.tls.enabled</tt>.
-   */
-  public static final String TLS_ENABLED =
-          PREFIX_TLS_CONFIG + "enabled";
-
-  /**
-   * The config specifies the tls protocol version
-   * <tt>org.apache.sqoop.security.tls.protocol</tt>.
-   */
-  public static final String TLS_PROTOCOL =
-    PREFIX_TLS_CONFIG + "protocol";
-
-  /**
-   * The config specifies the location of the JKS formatted keystore
-   * <tt>org.apache.sqoop.security.tls.keystore</tt>.
-   */
-  public static final String KEYSTORE_LOCATION =
-          PREFIX_TLS_CONFIG + "keystore";
-
-  /**
-   * The config specifies the password of the JKS formatted keystore
-   * <tt>org.apache.sqoop.security.tls.keystorepassword</tt>.
-   */
-  public static final String KEYSTORE_PASSWORD =
-          PREFIX_TLS_CONFIG + "keystore_password";
-
-  /**
-   * The config specifies the password for the private key in the JKS formatted
-   * keystore
-   * <tt>org.apache.sqoop.security.tls.keymanagerpassword</tt>.
-   */
-  public static final String KEYMANAGER_PASSWORD =
-    PREFIX_TLS_CONFIG + "keymanager_password";
 
   /**
    * The config specifies the token kind in delegation token.

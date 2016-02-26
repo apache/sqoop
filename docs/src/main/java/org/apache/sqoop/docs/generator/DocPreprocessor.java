@@ -20,7 +20,6 @@ package org.apache.sqoop.docs.generator;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.docs.generator.plugins.AbstractPlugin;
 import org.apache.sqoop.docs.generator.plugins.CopySourceToDestination;
-import org.apache.sqoop.docs.generator.plugins.GenerateConnectorPages;
 import org.apache.sqoop.utils.ClassUtils;
 
 import java.util.LinkedList;
@@ -37,7 +36,6 @@ public class DocPreprocessor {
   static {
     plugins = new LinkedList<>();
     plugins.add(CopySourceToDestination.class);
-    plugins.add(GenerateConnectorPages.class);
   }
 
   public static void main(String []args) {

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.integration.serverproperties;
+package org.apache.sqoop.integration.connectorloading;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.core.ConfigurationConstants;

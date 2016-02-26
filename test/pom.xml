@@ -274,17 +274,17 @@ limitations under the License.
             </configuration>
           </execution>
           <execution>
-            <id>server-properties-test</id>
+            <id>connector-loading-test</id>
             <goals>
               <goal>test</goal>
             </goals>
             <phase>integration-test</phase>
             <configuration>
               <suiteXmlFiles>
-                <suiteXmlFile>src/test/resources/server-properties-tests-suite.xml</suiteXmlFile>
+                <suiteXmlFile>src/test/resources/connector-loading-tests-suite.xml</suiteXmlFile>
               </suiteXmlFiles>
               <properties>
-                <suitename>server-properties-tests</suitename>
+                <suitename>connector-loading-tests</suitename>
               </properties>
             </configuration>
           </execution>

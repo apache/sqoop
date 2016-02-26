@@ -25,13 +25,13 @@ import org.apache.sqoop.model.MPrivilege;
 import org.apache.sqoop.model.MResource;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
+import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.apache.sqoop.validation.Status;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.sqoop.shell.ShellEnvironment.client;
-import static org.apache.sqoop.shell.ShellEnvironment.displayTable;
 import static org.apache.sqoop.shell.ShellEnvironment.resourceString;
 
 @SuppressWarnings("serial")
@@ -108,6 +108,6 @@ public class ShowPrivilegeFunction extends SqoopFunction {
       withGrant.add(Boolean.toString(privilege.isWith_grant_option()));
     }
 
-    displayTable(header, actions, resourceNames, resourceTypes, withGrant);
+    TableDisplayer.display(header, actions, resourceNames, resourceTypes, withGrant);
   }
 }

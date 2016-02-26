@@ -27,6 +27,7 @@ import org.apache.sqoop.client.ClientError;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
@@ -82,7 +83,7 @@ public class ShowConnectorFunction extends SqoopFunction {
       supportedDirections.add(connector.getSupportedDirections().toString());
     }
 
-    displayTable(header, uniqueNames, versions, classes, supportedDirections);
+    TableDisplayer.display(header, uniqueNames, versions, classes, supportedDirections);
   }
 
   private void showConnectors() {

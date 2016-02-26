@@ -18,16 +18,16 @@ limitations under the License.
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="ServerPropertiesTests" verbose="2" parallel="false">
+<suite name="ConnectorLoadingTests" verbose="2" parallel="false">
 
     <listeners>
         <listener class-name="org.apache.sqoop.test.testng.SqoopTestListener" />
         <listener class-name="org.apache.sqoop.test.testng.ReconfigureLogListener" />
     </listeners>
 
-    <test name="ServerPropertiesTests">
+    <test name="ConnectorLoadingTests">
         <packages>
-            <package name="org.apache.sqoop.integration.serverproperties"/>
+            <package name="org.apache.sqoop.integration.connectorloading"/>
         </packages>
     </test>
 

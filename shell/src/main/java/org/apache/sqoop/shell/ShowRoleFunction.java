@@ -24,13 +24,13 @@ import org.apache.sqoop.model.MPrincipal;
 import org.apache.sqoop.model.MRole;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.core.ShellError;
+import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.apache.sqoop.validation.Status;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.apache.sqoop.shell.ShellEnvironment.client;
-import static org.apache.sqoop.shell.ShellEnvironment.displayTable;
 import static org.apache.sqoop.shell.ShellEnvironment.resourceString;
 
 @SuppressWarnings("serial")
@@ -83,6 +83,6 @@ public class ShowRoleFunction extends SqoopFunction {
       names.add(role.getName());
     }
 
-    displayTable(header, names);
+    TableDisplayer.display(header, names);
   }
 }

@@ -22,31 +22,12 @@ import org.apache.commons.lang.StringUtils;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.apache.sqoop.shell.ShellEnvironment.*;
+
 /**
  * Display table based data
  */
 public class TableDisplayer {
-
-  /**
-   * Interface that this displayer will use to write out formatted text.
-   */
-  public interface TableDisplayerWriter {
-    /**
-     * Print out addition formatted text to the output
-     *
-     * @param text
-     */
-    void append(String text);
-  }
-
-  public TableDisplayer(TableDisplayerWriter writer) {
-    this.writer = writer;
-  }
-
-  /**
-   * Writer instance that we should use to write something out
-   */
-  private TableDisplayerWriter writer;
 
   /**
    * Display given columns in nice table structure to given IO object.
@@ -54,11 +35,10 @@ public class TableDisplayer {
    * @param headers List of headers
    * @param columns Array of columns
    */
-  public void display(List<String> headers, List<String> ...columns) {
+  public static void display(List<String> headers, List<String> ...columns) {
     assert headers != null;
     assert columns != null;
     assert headers.size() == columns.length;
-    assert writer != null;
 
     // Count of columns
     int columnCount = headers.size();
@@ -105,7 +85,7 @@ public class TableDisplayer {
    *
    * @param widths List of widths of each column
    */
-  private void drawLine(List<Integer> widths) {
+  private static void drawLine(List<Integer> widths) {
     int last = widths.size() - 1;
     print("+-");
     for(int i = 0; i < widths.size(); i++) {
@@ -122,7 +102,7 @@ public class TableDisplayer {
    * @param column All column values
    * @return Maximal
    */
-  private int getMaximalWidth(String header, List<String> column) {
+  private static int getMaximalWidth(String header, List<String> column) {
     assert header != null;
     assert column != null;
 
@@ -143,7 +123,7 @@ public class TableDisplayer {
    * @param columns Array with all column values
    * @return
    */
-  private int getMaximalRows(List<String>... columns) {
+  private static int getMaximalRows(List<String>... columns) {
     int max = 0;
 
     for(List<String> column : columns) {
@@ -155,12 +135,7 @@ public class TableDisplayer {
     return max;
   }
 
-  private void print(String text) {
-    writer.append(text);
+  private TableDisplayer() {
+    // Instantiation is prohibited
   }
-
-  private void println() {
-    writer.append("\n");
-  }
-
 }

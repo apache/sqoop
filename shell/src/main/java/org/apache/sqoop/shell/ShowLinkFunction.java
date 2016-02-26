@@ -19,13 +19,19 @@ package org.apache.sqoop.shell;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.apache.sqoop.validation.Status;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
 import static org.apache.sqoop.shell.utils.ConfigDisplayer.*;
@@ -80,7 +86,7 @@ public class ShowLinkFunction extends SqoopFunction {
       availabilities.add(String.valueOf(link.getEnabled()));
     }
 
-    displayTable(header, names, connectorNames, availabilities);
+    TableDisplayer.display(header, names, connectorNames, availabilities);
   }
 
   private void showLinks() {
