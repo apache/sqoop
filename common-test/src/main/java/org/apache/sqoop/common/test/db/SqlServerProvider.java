@@ -90,4 +90,9 @@ public class SqlServerProvider extends DatabaseProvider {
   public String escape(String entity) {
     return "[" + entity + "]";
   }
+
+  @Override
+  public String getDateTimeType() {
+    return "datetime";
+  }
 }

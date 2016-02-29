@@ -116,4 +116,9 @@ public class MySQLProvider extends DatabaseProvider {
   public String escapeValue(String entity) {
     return "\'" + entity + "\'";
   }
+
+  @Override
+  public String getDateTimeType() {
+    return "datetime";
+  }
 }

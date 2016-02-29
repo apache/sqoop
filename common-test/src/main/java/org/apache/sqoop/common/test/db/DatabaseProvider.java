@@ -513,4 +513,15 @@ abstract public class DatabaseProvider {
    */
   public void dropDatabase(String databaseName) {
   }
+
+  /**
+   * Different databases handle datetimes/timestamps in different ways.
+   *
+   * This is the type we should use when creating schemas.
+   *
+   * @return A string representing a SQL datatype
+   */
+  public String getDateTimeType() {
+    return "timestamp";
+  }
 }

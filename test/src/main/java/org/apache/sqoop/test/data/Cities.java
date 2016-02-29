@@ -38,7 +38,7 @@ public class Cities extends DataSet {
       "id",
       "id", "int",
       "country", "varchar(50)",
-      "some_date", "timestamp",
+      "some_date", provider.getDateTimeType(),
       "city", "varchar(50)"
     );
 

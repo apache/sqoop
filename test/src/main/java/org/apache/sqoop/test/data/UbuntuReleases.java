@@ -41,7 +41,7 @@ public class UbuntuReleases extends DataSet {
       "id", "int",
       "code_name", "varchar(64)",
       "version", "numeric(4,2)",
-      "release_date", "timestamp"
+      "release_date", provider.getDateTimeType()
     );
 
     return this;
