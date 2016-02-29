@@ -105,6 +105,11 @@ public final class ConfigurationConstants {
    */
   public static final String PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL = "sqoop.avro.logical_types.decimal.enable";
 
+  /**
+   * The Configuration property identifying data publisher class.
+   */
+  public static final String DATA_PUBLISH_CLASS = "sqoop.job.data.publish.class";
+
   private ConfigurationConstants() {
     // Disable Explicit Object Creation
   }
