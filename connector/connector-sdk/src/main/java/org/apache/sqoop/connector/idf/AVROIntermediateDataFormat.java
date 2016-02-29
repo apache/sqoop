@@ -36,6 +36,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.common.SqoopAvroUtils;
 import org.apache.sqoop.error.code.IntermediateDataFormatError;
 import org.apache.sqoop.schema.type.Column;
 import org.apache.sqoop.utils.ClassUtils;
@@ -166,11 +167,12 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
             columns[i].getName() + " does not support null values");
       }
+      String name = SqoopAvroUtils.createAvroName(columns[i].getName());
       if (csvStringArray[i].equals(DEFAULT_NULL_VALUE)) {
-        avroObject.put(columns[i].getName(), null);
+        avroObject.put(name, null);
         continue;
       }
-      avroObject.put(columns[i].getName(), toAVRO(csvStringArray[i], columns[i]));
+      avroObject.put(name, toAVRO(csvStringArray[i], columns[i]));
     }
     return avroObject;
   }
@@ -250,56 +252,59 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
             columns[i].getName() + " does not support null values");
       }
+
+      String name = SqoopAvroUtils.createAvroName(columns[i].getName());
+
       if (objectArray[i] == null) {
-        avroObject.put(columns[i].getName(), null);
+        avroObject.put(name, null);
         continue;
       }
 
       switch (columns[i].getType()) {
       case ARRAY:
       case SET:
-        avroObject.put(columns[i].getName(), toList((Object[]) objectArray[i]));
+        avroObject.put(name, toList((Object[]) objectArray[i]));
         break;
       case ENUM:
         GenericData.EnumSymbol enumValue = new GenericData.EnumSymbol(createEnumSchema(columns[i]),
             (String) objectArray[i]);
-        avroObject.put(columns[i].getName(), enumValue);
+        avroObject.put(name, enumValue);
         break;
       case TEXT:
-        avroObject.put(columns[i].getName(), new Utf8((String) objectArray[i]));
+        avroObject.put(name, new Utf8((String) objectArray[i]));
         break;
       case BINARY:
       case UNKNOWN:
-        avroObject.put(columns[i].getName(), ByteBuffer.wrap((byte[]) objectArray[i]));
+        avroObject.put(name, ByteBuffer.wrap((byte[]) objectArray[i]));
         break;
       case MAP:
       case FIXED_POINT:
       case FLOATING_POINT:
-        avroObject.put(columns[i].getName(), objectArray[i]);
+        avroObject.put(name, objectArray[i]);
         break;
       case DECIMAL:
         // TODO: store as FIXED in SQOOP-16161
-        avroObject.put(columns[i].getName(), ((BigDecimal) objectArray[i]).toPlainString());
+        avroObject.put(name, ((BigDecimal) objectArray[i]).toPlainString());
         break;
       case DATE_TIME:
         if (objectArray[i] instanceof org.joda.time.DateTime) {
-          avroObject.put(columns[i].getName(), ((org.joda.time.DateTime) objectArray[i]).toDate()
+          avroObject.put(name, ((org.joda.time.DateTime) objectArray[i]).toDate()
               .getTime());
         } else if (objectArray[i] instanceof org.joda.time.LocalDateTime) {
-          avroObject.put(columns[i].getName(), ((org.joda.time.LocalDateTime) objectArray[i])
+          avroObject.put(name, ((org.joda.time.LocalDateTime) objectArray[i])
               .toDate().getTime());
         }
         break;
       case TIME:
-        avroObject.put(columns[i].getName(), ((org.joda.time.LocalTime) objectArray[i])
+        avroObject.put(name, ((org.joda.time.LocalTime) objectArray[i])
             .toDateTimeToday().getMillis());
         break;
       case DATE:
-        avroObject.put(columns[i].getName(), ((org.joda.time.LocalDate) objectArray[i]).toDate()
+        avroObject.put(name, ((org.joda.time.LocalDate) objectArray[i]).toDate()
             .getTime());
         break;
       case BIT:
-        avroObject.put(columns[i].getName(), Boolean.valueOf(objectArray[i].toString()));
+        avroObject.put(name, Boolean.valueOf(objectArray[i].toString()));
         break;
       default:
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0001,
@@ -317,7 +322,7 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     StringBuilder csvString = new StringBuilder();
     for (int i = 0; i < columns.length; i++) {
 
-      Object obj = record.get(columns[i].getName());
+      Object obj = record.get(SqoopAvroUtils.createAvroName(columns[i].getName()));
       if (obj == null && !columns[i].isNullable()) {
         throw new SqoopException(IntermediateDataFormatError.INTERMEDIATE_DATA_FORMAT_0005,
             columns[i].getName() + " does not support null values");
@@ -396,8 +401,8 @@ public class AVROIntermediateDataFormat extends IntermediateDataFormat<GenericRe
     Object[] object = new Object[columns.length];
 
     for (int i = 0; i < columns.length; i++) {
-      Object obj = record.get(columns[i].getName());
-      Integer nameIndex = schema.getColumnNameIndex(columns[i].getName());
+      Object obj = record.get(SqoopAvroUtils.createAvroName(columns[i].getName()));
+      Integer nameIndex = schema.getColumnNameIndex(SqoopAvroUtils.createAvroName(columns[i].getName()));
       Column column = columns[nameIndex];
       // null is a possible value
       if (obj == null && !column.isNullable()) {

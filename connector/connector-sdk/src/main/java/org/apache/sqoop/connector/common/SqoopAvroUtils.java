@@ -18,6 +18,7 @@
 package org.apache.sqoop.connector.common;
 
 import org.apache.avro.Schema;
+import org.apache.log4j.Logger;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.common.SqoopException;
@@ -36,6 +37,8 @@ import java.util.Set;
 @InterfaceStability.Unstable
 public class SqoopAvroUtils {
 
+  private static final Logger LOG = Logger.getLogger(SqoopAvroUtils.class);
+
   public static final String COLUMN_TYPE = "columnType";
   public static final String SQOOP_SCHEMA_NAMESPACE = "org.apache.sqoop";
 
@@ -44,19 +47,29 @@ public class SqoopAvroUtils {
    */
   public static Schema createAvroSchema(org.apache.sqoop.schema.Schema sqoopSchema) {
     // avro schema names cannot start with quotes, lets just remove them
-    String name = sqoopSchema.getName().replace("\"", "");
+    String name = createAvroName(sqoopSchema.getName());
     String doc = sqoopSchema.getNote();
     String namespace = SQOOP_SCHEMA_NAMESPACE;
     Schema schema = Schema.createRecord(name, doc, namespace, false);
 
     List<Schema.Field> fields = new ArrayList<Schema.Field>();
     for (Column column : sqoopSchema.getColumnsArray()) {
-      Schema.Field field = new Schema.Field(column.getName(), createAvroFieldSchema(column), null, null);
+      Schema.Field field = new Schema.Field(createAvroName(column.getName()), createAvroFieldSchema(column), null, null);
       field.addProp(COLUMN_TYPE, column.getType().toString());
       fields.add(field);
     }
     schema.setFields(fields);
     return schema;
+  }
+
+  // From the avro docs:
+  // The name portion of a fullname, record field names, and enum symbols must:
+  // start with [A-Za-z_]
+  // subsequently contain only [A-Za-z0-9_]
+  public static String createAvroName(String name) {
+    String avroName = name.replaceFirst("^[0-9]", "").replaceAll("[^a-zA-Z0-9_]", "");
+    LOG.debug("Replacing name: " + name + " with Avro name: " + avroName);
+    return avroName;
   }
 
   public static Schema createAvroFieldSchema(Column column) {
@@ -123,7 +136,7 @@ public class SqoopAvroUtils {
     assert column instanceof org.apache.sqoop.schema.type.Enum;
     Set<String> options = ((org.apache.sqoop.schema.type.Enum) column).getOptions();
     List<String> listOptions = new ArrayList<String>(options);
-    return Schema.createEnum(column.getName(), null, SQOOP_SCHEMA_NAMESPACE, listOptions);
+    return Schema.createEnum(createAvroName(column.getName()), null, SQOOP_SCHEMA_NAMESPACE, listOptions);
   }
 
   public static byte[] getBytesFromByteBuffer(Object obj) {

@@ -39,6 +39,7 @@ import org.apache.sqoop.schema.type.Decimal;
 import org.apache.sqoop.schema.type.FixedPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.joda.time.LocalDateTime;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -545,4 +546,10 @@ public class TestAVROIntermediateDataFormat {
     dataFormat.getData();
   }
 
+  @Test
+  public void testSchemaWithBadCharacters() {
+    Schema schema = new Schema("9`\" blah`^&*(^&*(%$^&").addColumn(new Text("one").setNullable(false));
+    AVROIntermediateDataFormat dataFormat = new AVROIntermediateDataFormat(schema);
+    Assert.assertEquals(dataFormat.getAvroSchema().getName(), "blah");
+  }
 }
