@@ -49,6 +49,8 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.JobTool;
 
+import javax.management.Query;
+
 /**
  * Test the incremental import functionality.
  *
@@ -543,12 +545,16 @@ public class TestIncrementalImport extends TestCase {
     if (commonArgs) {
       CommonArgs.addHadoopFlags(args);
     }
+
+    String [] directoryNames = directoryName.split("/");
+    String className = directoryNames[directoryNames.length -1];
+
     args.add("--connect");
     args.add(SOURCE_DB_URL);
     args.add("--query");
     args.add(query);
     args.add("--class-name");
-    args.add(directoryName);
+    args.add(className);
     args.add("--target-dir");
     args.add(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR
       + System.getProperty("file.separator") + directoryName);
@@ -773,6 +779,21 @@ public class TestIncrementalImport extends TestCase {
     runImport(options, args);
 
     assertDirOfNumbers(TABLE_NAME, 0);
+  }
+
+  public void testEmptyLastModifiedWithNonExistingParentDirectory() throws Exception {
+    final String TABLE_NAME = "emptyLastModifiedNoParent";
+    final String QUERY = "SELECT id, last_modified FROM \"" + TABLE_NAME + "\" WHERE $CONDITIONS";
+    final String DIRECTORY = "non-existing/parents/" + TABLE_NAME;
+    createTimestampTable(TABLE_NAME, 0, null);
+    List<String> args = getArgListForQuery(QUERY, DIRECTORY, true, false, false);
+
+    Configuration conf = newConf();
+    SqoopOptions options = new SqoopOptions();
+    options.setConf(conf);
+    runImport(options, args);
+
+    assertDirOfNumbers(DIRECTORY, 0);
   }
 
   public void testFullLastModifiedImport() throws Exception {
