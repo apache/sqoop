@@ -46,7 +46,7 @@ public class HadoopRealClusterRunner extends HadoopRunner {
   public Configuration prepareConfiguration(Configuration config)
       throws Exception {
     String configPath = System.getProperty(
-        "sqoop.hadoop.config.path", "/etc/hadoop/conf");
+        "sqoop.hadoop.localconfig.path", "/etc/hadoop/conf");
     LOG.debug("Config path is: " + configPath);
 
     File dir = new File(configPath);

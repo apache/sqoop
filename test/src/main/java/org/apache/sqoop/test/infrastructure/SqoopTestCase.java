@@ -46,6 +46,7 @@ import org.apache.sqoop.test.infrastructure.providers.InfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
 import org.apache.sqoop.test.kdc.KdcRunner;
+import org.apache.sqoop.test.kdc.NoKdcRunner;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.apache.sqoop.test.utils.SqoopUtils;
 import org.apache.sqoop.utils.UrlSafeUtils;
@@ -182,10 +183,13 @@ public class SqoopTestCase implements ITest {
       KdcInfrastructureProvider kdcProviderObject = startInfrastructureProvider(KdcInfrastructureProvider.class, conf, null);
       kdc = kdcProviderObject.getInstance();
       providers.remove(KdcInfrastructureProvider.class);
-      conf = kdc.prepareHadoopConfiguration(conf);
+      if (kdc instanceof NoKdcRunner) {
+        conf = setNonKerberosConfiguration(conf);
+      } else {
+        conf = kdc.prepareHadoopConfiguration(conf);
+      }
     } else {
-      conf.set("dfs.block.access.token.enable", "false");
-      conf.set("hadoop.security.authentication", "simple");
+      conf = setNonKerberosConfiguration(conf);
     }
 
     // Start hadoop secondly.
@@ -203,6 +207,13 @@ public class SqoopTestCase implements ITest {
     for (Class<? extends InfrastructureProvider> provider : providers) {
       startInfrastructureProvider(provider, conf, kdc);
     }
+  }
+
+  private static Configuration setNonKerberosConfiguration(Configuration conf) {
+    conf.set("dfs.block.access.token.enable", "false");
+    conf.set("hadoop.security.authentication", "simple");
+
+    return conf;
   }
 
   /**
