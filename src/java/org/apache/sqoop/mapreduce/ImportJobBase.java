@@ -18,11 +18,16 @@
 
 package org.apache.sqoop.mapreduce;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.config.ConfigurationHelper;
+import com.cloudera.sqoop.io.CodecMap;
+import com.cloudera.sqoop.manager.ImportJobContext;
+import com.cloudera.sqoop.mapreduce.JobBase;
+import com.cloudera.sqoop.orm.TableClassName;
+import com.cloudera.sqoop.util.ImportException;
 import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.mapred.AvroJob;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -37,16 +42,16 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.sqoop.SqoopJobDataPublisher;
+import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.apache.sqoop.util.PerfCounters;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.io.CodecMap;
-import com.cloudera.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.mapreduce.JobBase;
-import com.cloudera.sqoop.orm.TableClassName;
-import com.cloudera.sqoop.util.ImportException;
-import org.apache.sqoop.validation.*;
+import org.apache.sqoop.validation.ValidationContext;
+import org.apache.sqoop.validation.ValidationException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * Base class for running an import MapReduce job.
@@ -55,7 +60,8 @@ import org.apache.sqoop.validation.*;
 public class ImportJobBase extends JobBase {
 
   private ImportJobContext context;
-
+  private long startTime;
+  private long endTime;
   public static final Log LOG = LogFactory.getLog(
       ImportJobBase.class.getName());
 
@@ -82,6 +88,7 @@ public class ImportJobBase extends JobBase {
       final ImportJobContext context) {
     super(opts, mapperClass, inputFormatClass, outputFormatClass);
     this.context = context;
+    this.startTime = new Date().getTime();
   }
 
   /**
@@ -272,6 +279,28 @@ public class ImportJobBase extends JobBase {
 
       if (options.isValidationEnabled()) {
         validateImport(tableName, conf, job);
+      }
+      this.endTime = new Date().getTime();
+
+      String publishClassName = conf.get(ConfigurationConstants.DATA_PUBLISH_CLASS);
+      if (!StringUtils.isEmpty(publishClassName)) {
+        try {
+          Class publishClass =  Class.forName(publishClassName);
+          Object obj = publishClass.newInstance();
+          if (obj instanceof SqoopJobDataPublisher) {
+            SqoopJobDataPublisher publisher = (SqoopJobDataPublisher) obj;
+            if (options.doHiveImport() || options.getHCatTableName() != null) {
+              // We need to publish the details
+              SqoopJobDataPublisher.Data data =
+                      new SqoopJobDataPublisher.Data(options, tableName, startTime, endTime);
+              publisher.publish(data);
+            }
+          } else {
+            LOG.warn("Publisher class not an instance of SqoopJobDataPublisher. Ignoring...");
+          }
+        } catch (Exception ex) {
+          LOG.warn("Unable to publish data to publisher " + ex.getMessage(), ex);
+        }
       }
     } catch (InterruptedException ie) {
       throw new IOException(ie);

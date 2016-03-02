@@ -121,6 +121,8 @@ public class ClassWriter {
     // not strictly reserved words, but collides with
     // our imports
     JAVA_RESERVED_WORDS.add("Text");
+    //Fix For Issue SQOOP-2839
+    JAVA_RESERVED_WORDS.add("PROTOCOL_VERSION");
   }
 
   public static final String PROPERTY_CODEGEN_METHODS_MAXCOLS =

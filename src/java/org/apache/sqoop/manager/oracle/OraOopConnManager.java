@@ -151,12 +151,12 @@ public class OraOopConnManager extends GenericJdbcManager {
         String selectedColumn = selectedColumns[idx];
         // If the user did not escape this column name, then we should
         // uppercase it...
-        if (!isEscaped(selectedColumn)) {
+        if (!OracleUtils.isEscaped(selectedColumn)) {
           selectedColumns[idx] = selectedColumn.toUpperCase();
         } else {
           // If the user escaped this column name, then we should
           // retain its case...
-          selectedColumns[idx] = unescapeOracleColumnName(selectedColumn);
+          selectedColumns[idx] = OracleUtils.unescapeIdentifier(selectedColumn);
         }
       }
 
@@ -221,7 +221,7 @@ public class OraOopConnManager extends GenericJdbcManager {
       if (idx > 0) {
         sb.append(",");
       }
-      sb.append(escapeOracleColumnName(colNames.get(idx))); // <- See notes at
+      sb.append(escapeColName(colNames.get(idx))); // <- See notes at
                                                             // top about escaped
                                                             // column names
     }
@@ -513,7 +513,7 @@ public class OraOopConnManager extends GenericJdbcManager {
 
           // Unescape the column names being returned...
           int colType = columnTypes.get(columnNameInTable);
-          String key = unescapeOracleColumnName(columnNameInTable); // <- See
+          String key = OracleUtils.unescapeIdentifier(columnNameInTable); // <- See
                                                                     // notes at
                                                                     // top about
                                                                     // escaped
@@ -527,35 +527,21 @@ public class OraOopConnManager extends GenericJdbcManager {
     return this.columnTypesInOracleTable;
   }
 
-  private boolean isEscaped(String name) {
-
-    return name.startsWith("\"") && name.endsWith("\"");
-  }
-
-  private String escapeOracleColumnName(String columnName) {
-    // See notes at top about escaped column names
-    if (isEscaped(columnName)) {
-      return columnName;
-    } else {
-      return "\"" + columnName + "\"";
-    }
-  }
-
   @Override
   public String escapeColName(String colName) {
-
-    return escapeOracleColumnName(colName); // <- See notes at top about escaped
+    return OracleUtils.escapeIdentifier(colName); // <- See notes at top about escaped
                                          // column names
   }
 
-  private String unescapeOracleColumnName(String columnName) {
-
-    if (isEscaped(columnName)) {
-      return columnName.substring(1, columnName.length() - 1);
-    } else {
-      return columnName;
+    @Override
+    public String escapeTableName(String tableName) {
+        return OracleUtils.escapeIdentifier(tableName);
     }
-  }
+
+   @Override
+   public boolean escapeTableNameOnExport() {
+        return true;
+    }
 
   private void logImportTableDetails(ImportJobContext context) {
 

@@ -430,6 +430,7 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   protected void lastModifiedMerge(SqoopOptions options, ImportJobContext context) throws IOException {
     FileSystem fs = FileSystem.get(options.getConf());
     if (context.getDestination() != null && fs.exists(context.getDestination())) {
+      LOG.info("Final destination exists, will run merge job.");
       Path userDestDir = getOutputPath(options, context.getTableName(), false);
       if (fs.exists(userDestDir)) {
         String tableClassName = null;
@@ -461,7 +462,16 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
         unloadJars();
       } else {
-        fs.rename(context.getDestination(), userDestDir);
+        // Create parent directory(ies), otherwise fs.rename would fail
+        if(!fs.exists(userDestDir.getParent())) {
+          fs.mkdirs(userDestDir.getParent());
+        }
+
+        // And finally move the data
+        LOG.info("Moving data from temporary directory " + context.getDestination() + " to final destination " + userDestDir);
+        if(!fs.rename(context.getDestination(), userDestDir)) {
+          throw new RuntimeException("Couldn't move data from temporary directory " + context.getDestination() + " to final destination " + userDestDir);
+        }
       }
     }
   }

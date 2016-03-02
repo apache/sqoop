@@ -680,7 +680,7 @@ public final class OraOopOracleQueries {
       if (idx > 0) {
         columnList.append(",");
       }
-      columnList.append("\"").append(result.get(idx).getName()).append("\"");
+      columnList.append(OracleUtils.escapeIdentifier(result.get(idx).getName()));
     }
     sql =
         String.format("SELECT %s FROM %s WHERE 0=1", columnList.toString(),
@@ -1244,12 +1244,12 @@ public final class OraOopOracleQueries {
       if (targetColumnsClause.length() > 0) {
         targetColumnsClause.append(",");
       }
-      targetColumnsClause.append(String.format("a.\"%s\"", columnName));
+      targetColumnsClause.append(String.format("a.%s", OracleUtils.escapeIdentifier(columnName)));
 
       if (sourceColumnsClause.length() > 0) {
         sourceColumnsClause.append(",");
       }
-      sourceColumnsClause.append(String.format("b.\"%s\"", columnName));
+      sourceColumnsClause.append(String.format("b.%s", OracleUtils.escapeIdentifier(columnName)));
     }
 
     String sourceClause = sourceColumnsClause.toString();
@@ -1313,7 +1313,7 @@ public final class OraOopOracleQueries {
       if (idx > 0) {
         columnClause.append(",");
       }
-      columnClause.append("a.\"" + columnNames.get(idx) + "\"");
+      columnClause.append(String.format("a.%s", OracleUtils.escapeIdentifier(columnNames.get(idx))));
     }
 
     StringBuilder rowEqualityClause = new StringBuilder();
@@ -1443,7 +1443,7 @@ public final class OraOopOracleQueries {
       if (idx > 0) {
         columnClause.append(",");
       }
-      columnClause.append(columnNames.get(idx));
+        columnClause.append(columnNames.get(idx));
     }
 
     String columnsClause = columnClause.toString();

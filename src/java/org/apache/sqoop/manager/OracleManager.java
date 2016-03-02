@@ -43,6 +43,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.manager.oracle.OracleUtils;
 import org.apache.sqoop.util.LoggingUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -916,6 +917,21 @@ public class OracleManager
     }
   }
 
+    @Override
+    public String escapeColName(String colName) {
+        return OracleUtils.escapeIdentifier(colName);
+    }
+
+    @Override
+    public String escapeTableName(String tableName) {
+        return OracleUtils.escapeIdentifier(tableName);
+    }
+
+    @Override
+    public boolean escapeTableNameOnExport() {
+        return true;
+    }
+
   @Override
   public String[] getColumnNames(String tableName) {
     Connection conn = null;
@@ -947,7 +963,7 @@ public class OracleManager
       rset = pStmt.executeQuery();
 
       while (rset.next()) {
-        columns.add(rset.getString(1));
+          columns.add(rset.getString(1));
       }
       conn.commit();
     } catch (SQLException e) {

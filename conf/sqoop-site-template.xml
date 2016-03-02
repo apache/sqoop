@@ -167,4 +167,24 @@ under the License.
   </property>
   -->
 
+  <!--
+    Configuration required to integrate Sqoop with Apache Atlas.
+  -->
+  <!--
+  <property>
+    <name>atlas.rest.address</name>
+    <value>http://localhost:21000/</value>
+  </property>
+  <property>
+    <name>atlas.cluster.name</name>
+    <value>primary</value>
+  </property>
+  <property>
+    <name>sqoop.job.data.publish.class</name>
+    <value>org.apache.atlas.sqoop.hook.SqoopHook</value>
+    <description>Atlas (or any other publisher) should implement this hook.
+    </description>
+  </property>
+  -->
+
 </configuration>

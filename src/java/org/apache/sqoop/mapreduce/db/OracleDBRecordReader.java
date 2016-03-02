@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.sqoop.manager.oracle.OracleUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -66,7 +67,7 @@ extends DBRecordReader<T>  {
       query.append("SELECT ");
 
       for (int i = 0; i < fieldNames.length; i++) {
-        query.append(fieldNames[i]);
+        query.append(OracleUtils.escapeIdentifier(fieldNames[i]));
         if (i != fieldNames.length -1) {
           query.append(", ");
         }
