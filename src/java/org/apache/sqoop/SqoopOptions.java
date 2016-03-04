@@ -173,6 +173,8 @@ public class SqoopOptions implements Cloneable {
   private String hCatDatabaseName;
   @StoredAsProperty("hcatalog.create.table")
   private boolean hCatCreateTable;
+  @StoredAsProperty("hcatalog.drop.and.create.table")
+  private boolean hCatDropAndCreateTable;
   @StoredAsProperty("hcatalog.storage.stanza")
   private String hCatStorageStanza;
   private String hCatHome; // not serialized to metastore.
@@ -1475,6 +1477,14 @@ public class SqoopOptions implements Cloneable {
 
   public void setCreateHCatalogTable(boolean create) {
     this.hCatCreateTable = create;
+  }
+
+  public boolean doDropAndCreateHCatalogTable() {
+    return hCatDropAndCreateTable;
+  }
+
+  public void setDropAndCreateHCatalogTable(boolean dropAndCreate) {
+    this.hCatDropAndCreateTable = dropAndCreate;
   }
 
   public void setHCatStorageStanza(String stanza) {

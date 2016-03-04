@@ -66,6 +66,7 @@ import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.util.Executor;
 import org.apache.sqoop.util.LoggingAsyncSink;
 import org.apache.sqoop.util.SubprocessSecurityManager;
@@ -337,7 +338,11 @@ public final class SqoopHCatUtilities {
     if (options.doCreateHCatalogTable()) {
       LOG.info("Creating HCatalog table " + hCatQualifiedTableName
         + " for import");
-      createHCatTable();
+      createHCatTable(false);
+    } else if (options.doDropAndCreateHCatalogTable()) {
+      LOG.info("Dropping and Creating HCatalog table "
+        + hCatQualifiedTableName + " for import");
+      createHCatTable(true);
     }
     // For serializing the schema to conf
     HCatInputFormat hif = HCatInputFormat.setInput(hCatJob, hCatDatabaseName,
@@ -555,8 +560,13 @@ public final class SqoopHCatUtilities {
     return sb;
   }
 
-  private void createHCatTable() throws IOException {
+  private void createHCatTable(boolean dropIfExists) throws IOException {
     StringBuilder sb = new StringBuilder();
+    if (dropIfExists) {
+      sb.append("drop table ").
+              append(escHCatObj(hCatDatabaseName)).append('.').
+              append(escHCatObj(hCatTableName)).append(";\n");
+    }
     sb.append("create table ").
       append(escHCatObj(hCatDatabaseName)).append('.');
     sb.append(escHCatObj(hCatTableName)).append(" (\n\t");

@@ -854,6 +854,44 @@ public class HCatalogImportTest extends ImportJobTestCase {
         + " create-hcatalog-table with pre-existing table test", e);
     }
   }
+
+  public void testDropAndCreateWithPreExistingTable() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY), };
+    List<String> addlArgsArray = new ArrayList<String>();
+    addlArgsArray.add("--drop-and-create-hcatalog-table");
+    setExtraArgs(addlArgsArray);
+    // Precreate table
+    utils.createHCatTable(CreateMode.CREATE, TOTAL_RECORDS, table, cols);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+      null, true, false);
+  }
+
+  public void testDropAndCreateWithoutPreExistingTable() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
+    };
+    List<String> addlArgsArray = new ArrayList<String>();
+    addlArgsArray.add("--drop-and-create-hcatalog-table");
+    setExtraArgs(addlArgsArray);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+      null, true, false);
+  }
+
   public void testTableWithNonIdentColChars() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();

@@ -211,6 +211,41 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseImportArgs(args);
   }
 
+  public void testHCatImportWithDropAndCreateTable() throws Exception {
+    String[] args = {
+            "--connect",
+            "jdbc:db:url",
+            "--table",
+            "dbtable",
+            "--hcatalog-table",
+            "table",
+            "--drop-and-create-hcatalog-table",
+    };
+    SqoopOptions opts = parseImportArgs(args);
+    importTool.validateOptions(opts);
+  }
+
+  public void testHCatImportWithCreateTableAndDropAndCreateTable()
+    throws Exception {
+    String[] args = {
+            "--connect",
+            "jdbc:db:url",
+            "--table",
+            "dbtable",
+            "--hcatalog-table",
+            "table",
+            "--create-hcatalog-table",
+            "--drop-and-create-hcatalog-table",
+    };
+    SqoopOptions opts = parseImportArgs(args);
+    try {
+      importTool.validateOptions(opts);
+      fail("Expected InvalidOptionsException");
+    } catch (SqoopOptions.InvalidOptionsException ioe) {
+      // expected.
+    }
+  }
+
   public void testHCatImportWithStorageStanza() throws Exception {
     String[] args = {
       "--hcatalog-table",

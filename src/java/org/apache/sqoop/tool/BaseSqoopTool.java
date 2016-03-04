@@ -122,6 +122,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String HCATALOG_DATABASE_ARG = "hcatalog-database";
   public static final String CREATE_HCATALOG_TABLE_ARG =
     "create-hcatalog-table";
+  public static final String DROP_AND_CREATE_HCATALOG_TABLE =
+    "drop-and-create-hcatalog-table";
   public static final String HCATALOG_STORAGE_STANZA_ARG =
     "hcatalog-storage-stanza";
   public static final String HCATALOG_HOME_ARG = "hcatalog-home";
@@ -604,6 +606,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     hCatOptions.addOption(OptionBuilder
       .withDescription("Create HCatalog before import")
       .withLongOpt(CREATE_HCATALOG_TABLE_ARG)
+      .create());
+    hCatOptions.addOption(OptionBuilder
+      .withDescription("Drop and Create HCatalog before import")
+      .withLongOpt(DROP_AND_CREATE_HCATALOG_TABLE)
       .create());
     hCatOptions.addOption(OptionBuilder
       .hasArg()
@@ -1140,6 +1146,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setCreateHCatalogTable(true);
     }
 
+    if (in.hasOption(DROP_AND_CREATE_HCATALOG_TABLE)) {
+      out.setDropAndCreateHCatalogTable(true);
+    }
+
     if (in.hasOption(HCATALOG_HOME_ARG)) {
       out.setHCatHome(in.getOptionValue(HCATALOG_HOME_ARG));
     }
@@ -1620,6 +1630,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
             + " --hive-partition-value options should be provided or both of "
             + "these options should be omitted");
       }
+    }
+    if (options.doCreateHCatalogTable() &&
+            options.doDropAndCreateHCatalogTable()) {
+      throw new InvalidOptionsException("Options --create-hcatalog-table" +
+              " and --drop-and-create-hcatalog-table are mutually exclusive." +
+              " Use any one of them");
     }
   }
 

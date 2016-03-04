@@ -79,6 +79,11 @@ to exist. The table name will be the same as the database table name
 translated to lower case. Further described in +Automatic Table Creation+
 below.
 
++--drop-and-create-hcatalog-table+::
+
+Same as +--create-hcatalog-table+, but does a +drop if exists+ before creating
+the table.
+
 +--hcatalog-storage-stanza+::
 
 This option specifies the storage stanza to be appended to the table.
