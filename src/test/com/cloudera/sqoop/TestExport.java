@@ -1,4 +1,5 @@
 /**
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -279,10 +280,10 @@ public class TestExport extends ExportJobTestCase {
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
     sb.append(getTableName());
-    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
+    sb.append(" (\"id\" INT NOT NULL PRIMARY KEY, \"msg\" VARCHAR(64)");
     int colNum = 0;
     for (ColumnGenerator gen : extraColumns) {
-      sb.append(", " + forIdx(colNum++) + " " + gen.getType());
+      sb.append(", \"" + forIdx(colNum++) + "\" " + gen.getType());
     }
     sb.append(")");
 
@@ -325,10 +326,10 @@ public class TestExport extends ExportJobTestCase {
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
     sb.append(stageTableName);
-    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
+    sb.append(" (\"id\" INT NOT NULL PRIMARY KEY, \"msg\" VARCHAR(64)");
     int colNum = 0;
     for (ColumnGenerator gen : extraColumns) {
-      sb.append(", " + forIdx(colNum++) + " " + gen.getType());
+      sb.append(", \"" + forIdx(colNum++) + "\" " + gen.getType());
     }
     sb.append(")");
 
@@ -362,7 +363,7 @@ public class TestExport extends ExportJobTestCase {
     LOG.info("Verifying column " + colName + " has value " + expectedVal);
 
     PreparedStatement statement = conn.prepareStatement(
-        "SELECT " + colName + " FROM " + getTableName() + " WHERE id = " + id,
+        "SELECT \"" + colName + "\" FROM " + getTableName() + " WHERE \"id\" = " + id,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     String actualVal = null;
     try {

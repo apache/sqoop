@@ -91,7 +91,7 @@ public class JdbcCallExportJob extends JdbcExportJob {
       DBOutputFormat.setOutput(
         job,
         mgr.escapeTableName(procedureName),
-        colNames);
+        mgr.escapeColNames(colNames));
 
       job.setOutputFormatClass(getOutputFormatClass());
       job.getConfiguration().set(SQOOP_EXPORT_TABLE_CLASS_KEY, tableClassName);

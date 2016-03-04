@@ -129,9 +129,9 @@ public class NetezzaExternalTableExportJob extends ExportJobBase {
       }
 
       if (mgr.escapeTableNameOnExport()) {
-        DBOutputFormat.setOutput(job, mgr.escapeTableName(tableName), colNames);
+        DBOutputFormat.setOutput(job, mgr.escapeTableName(tableName), mgr.escapeColNames(colNames));
       } else {
-        DBOutputFormat.setOutput(job, tableName, colNames);
+        DBOutputFormat.setOutput(job, tableName, mgr.escapeColNames(colNames));
       }
 
       job.setOutputFormatClass(getOutputFormatClass());

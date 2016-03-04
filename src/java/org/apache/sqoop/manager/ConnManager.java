@@ -604,6 +604,21 @@ public abstract class ConnManager {
   }
 
   /**
+   * Variant of escapeColName() method that will escape whole column name array.
+   *
+   * @param colNames Column names as provided by the user, etc.
+   * @return
+   */
+  public String [] escapeColNames(String ...colNames) {
+    String [] escaped = new String[colNames.length];
+    int i = 0;
+    for(String colName : colNames) {
+      escaped[i++] = escapeColName(colName);
+    }
+    return escaped;
+  }
+
+  /**
    * When using a table name in a generated SQL query, how (if at all)
    * should we escape that column name? e.g., a table named "table"
    * may need to be quoted with backtiks: "`table`".
