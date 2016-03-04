@@ -41,6 +41,9 @@ public enum ServerError implements ErrorCode {
 
   /** TLS enabled but keystore location not set*/
   SERVER_0007("TLS enabled but keystore location not set"),
+
+  /** Execution of password generator failed*/
+  SERVER_0008("Execution of password generator failed"),
   ;
 
   private final String message;

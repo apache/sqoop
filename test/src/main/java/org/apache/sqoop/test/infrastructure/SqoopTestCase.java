@@ -115,7 +115,7 @@ public class SqoopTestCase implements ITest {
 
   private SqoopClient client;
 
-  private DelegationTokenAuthenticatedURL.Token authToken = new DelegationTokenAuthenticatedURL.Token();
+  protected DelegationTokenAuthenticatedURL.Token authToken = new DelegationTokenAuthenticatedURL.Token();
 
   protected FileSystem hdfsClient;
 

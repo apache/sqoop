@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.server;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
@@ -26,18 +27,28 @@ import org.apache.sqoop.core.SqoopServer;
 import org.apache.sqoop.filter.SqoopAuthenticationFilter;
 import org.apache.sqoop.security.SecurityConstants;
 import org.apache.sqoop.server.common.ServerError;
-import org.apache.sqoop.server.v1.*;
+import org.apache.sqoop.server.v1.AuthorizationServlet;
+import org.apache.sqoop.server.v1.ConfigurableServlet;
+import org.apache.sqoop.server.v1.ConnectorServlet;
+import org.apache.sqoop.server.v1.DriverServlet;
+import org.apache.sqoop.server.v1.JobServlet;
+import org.apache.sqoop.server.v1.LinkServlet;
+import org.apache.sqoop.server.v1.SubmissionsServlet;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
-import org.eclipse.jetty.server.ServerConnector;
 
 import javax.servlet.DispatcherType;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -86,13 +97,37 @@ public class SqoopJettyServer {
       }
 
       String keyStorePassword = configurationContext.getString(SecurityConstants.KEYSTORE_PASSWORD);
-      if (keyStorePassword != null && keyStorePassword.length() > 0) {
+      String keyStorePasswordGenerator = configurationContext.getString(SecurityConstants.KEYSTORE_PASSWORD_GENERATOR);
+      if (StringUtils.isNotBlank(keyStorePassword)) {
+        if (StringUtils.isNotBlank(keyStorePasswordGenerator)) {
+          LOG.warn(SecurityConstants.KEYSTORE_PASSWORD + " and " + SecurityConstants.KEYSTORE_PASSWORD_GENERATOR
+            + "are both set, using " + SecurityConstants.KEYSTORE_PASSWORD);
+        }
         sslContextFactory.setKeyStorePassword(keyStorePassword);
+      } else if (StringUtils.isNotBlank(keyStorePasswordGenerator)) {
+        try {
+          String passwordFromGenerator = readPasswordFromGenerator(keyStorePasswordGenerator);
+          sslContextFactory.setKeyStorePassword(passwordFromGenerator);
+        } catch (IOException exception) {
+          throw new SqoopException(ServerError.SERVER_0008, "failed to execute generator: " + SecurityConstants.KEYSTORE_PASSWORD_GENERATOR, exception);
+        }
       }
 
       String keyManagerPassword = configurationContext.getString(SecurityConstants.KEYMANAGER_PASSWORD);
-      if (keyManagerPassword != null && keyManagerPassword.length() > 0) {
+      String keyManagerPasswordGenerator = configurationContext.getString(SecurityConstants.KEYMANAGER_PASSWORD_GENERATOR);
+      if (StringUtils.isNotBlank(keyManagerPassword)) {
         sslContextFactory.setKeyManagerPassword(keyManagerPassword);
+        if (StringUtils.isNotBlank(keyManagerPasswordGenerator)) {
+          LOG.warn(SecurityConstants.KEYMANAGER_PASSWORD + " and " + SecurityConstants.KEYMANAGER_PASSWORD_GENERATOR
+            + "are both set, using " + SecurityConstants.KEYMANAGER_PASSWORD);
+        }
+      } else if (StringUtils.isNotBlank(keyManagerPasswordGenerator)) {
+        try {
+          String passwordFromGenerator = readPasswordFromGenerator(keyManagerPasswordGenerator);
+          sslContextFactory.setKeyManagerPassword(passwordFromGenerator);
+        } catch (IOException exception) {
+          throw new SqoopException(ServerError.SERVER_0008, "failed to execute generator: " + SecurityConstants.KEYMANAGER_PASSWORD_GENERATOR, exception);
+        }
       }
 
       HttpConfiguration https = new HttpConfiguration();
@@ -109,6 +144,21 @@ public class SqoopJettyServer {
     connector.setPort(sqoopJettyContext.getPort());
     webServer.addConnector(connector);
     webServer.setHandler(createServletContextHandler());
+  }
+
+  private String readPasswordFromGenerator(String generatorCommand) throws IOException {
+    ProcessBuilder processBuilder = new ProcessBuilder("/bin/sh", "-c", generatorCommand);
+    Process process = processBuilder.start();
+    String output;
+    try (
+      InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream(), Charset.forName("UTF-8"));
+      BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    ) {
+      output =  bufferedReader.readLine();
+    } catch(IOException exception) {
+      throw exception;
+    }
+    return output;
   }
 
   public synchronized void startServer() {
@@ -162,7 +212,7 @@ public class SqoopJettyServer {
     return context;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args){
     SqoopJettyServer sqoopJettyServer = new SqoopJettyServer();
     sqoopJettyServer.startServer();
     sqoopJettyServer.joinServerThread();

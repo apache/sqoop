@@ -187,10 +187,18 @@ public final class SecurityConstants {
 
   /**
    * The config specifies the password of the JKS formatted keystore
-   * <tt>org.apache.sqoop.security.tls.keystorepassword</tt>.
+   * <tt>org.apache.sqoop.security.tls.keystore_password</tt>.
    */
   public static final String KEYSTORE_PASSWORD =
           PREFIX_TLS_CONFIG + "keystore_password";
+
+  /**
+   * The config specifies a script that outputs the password of the JKS formatted keystore
+   * to standard out
+   * <tt>org.apache.sqoop.security.tls.keystore_password_generator</tt>.
+   */
+  public static final String KEYSTORE_PASSWORD_GENERATOR =
+    PREFIX_TLS_CONFIG + "keystore_password_generator";
 
   /**
    * The config specifies the password for the private key in the JKS formatted
@@ -199,6 +207,14 @@ public final class SecurityConstants {
    */
   public static final String KEYMANAGER_PASSWORD =
     PREFIX_TLS_CONFIG + "keymanager_password";
+
+  /**
+   * The config specifies a script that outputs the password for the
+   * private key in the JKS formatted keystore to standard out
+   * <tt>org.apache.sqoop.security.tls.keymanager_password_generator</tt>.
+   */
+  public static final String KEYMANAGER_PASSWORD_GENERATOR =
+    PREFIX_TLS_CONFIG + "keymanager_password_generator";
 
   /**
    * The config specifies the token kind in delegation token.
