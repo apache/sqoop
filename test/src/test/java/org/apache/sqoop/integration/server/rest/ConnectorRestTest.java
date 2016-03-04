@@ -45,7 +45,7 @@ public class ConnectorRestTest extends RestTest {
     new TestDescription("Invalid post request", "v1/connector", "POST", "Random data", new Validator() {
       @Override
       void validate() throws Exception {
-        assertResponseCode(500);
+        assertResponseCode(405);
         assertServerException("Unsupported HTTP method", "SERVER_0002");
       }}),
   };

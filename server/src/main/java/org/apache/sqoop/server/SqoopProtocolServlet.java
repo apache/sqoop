@@ -140,7 +140,14 @@ public class SqoopProtocolServlet extends HttpServlet {
 
       ThrowableBean throwableBean = new ThrowableBean(ex);
 
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      // We're using SERVER_002 code to denote 405/Method not allowed so propagating as such
+      if (ec == ServerError.SERVER_0002) {
+        response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+      } else {
+        // Default error code is 500 internal server error
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      }
+
       response.getWriter().write(throwableBean.extract(true).toJSONString());
     } else {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

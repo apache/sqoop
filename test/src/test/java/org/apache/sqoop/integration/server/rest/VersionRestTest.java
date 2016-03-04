@@ -34,7 +34,7 @@ public class VersionRestTest extends RestTest {
     new TestDescription("Invalid post request", "version", "POST", "Random text", new Validator() {
       @Override
       void validate() throws Exception {
-        assertResponseCode(500);
+        assertResponseCode(405);
         assertServerException("Unsupported HTTP method", "SERVER_0002");
       }}),
   };

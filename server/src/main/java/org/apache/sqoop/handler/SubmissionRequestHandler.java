@@ -44,12 +44,6 @@ public class SubmissionRequestHandler implements RequestHandler {
 
   @Override
   public JsonBean handleEvent(RequestContext ctx) {
-
-    // submission only support GET requests
-    if (ctx.getMethod() != Method.GET) {
-      throw new SqoopException(ServerError.SERVER_0002, "Unsupported HTTP method for connector:"
-          + ctx.getMethod());
-    }
     // submissions per job are ordered by update time
     // hence the latest submission is on the top
     if (ctx.getParameterValue(JOB_NAME_QUERY_PARAM) != null) {
