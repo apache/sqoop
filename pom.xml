@@ -929,6 +929,14 @@ limitations under the License.
       </roles>
     </developer>
     <developer>
+      <id>afine</id>
+      <name>Abraham Fine</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
       <id>ahmed</id>
       <name>Ahmed Radwan</name>
       <organization>Apple</organization>
