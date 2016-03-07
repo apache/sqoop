@@ -21,12 +21,14 @@ import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -56,6 +58,18 @@ public final class ShellEnvironment {
   private static boolean verbose = false;
   private static boolean interactive = false;
   private static long pollTimeout = DEFAULT_POLL_TIMEOUT;
+
+  private static TableDisplayer tableDisplayer = new TableDisplayer(new TableDisplayer.TableDisplayerWriter() {
+    @Override
+    public void append(String text) {
+      print(text);
+    }
+
+    @Override
+    public void newLineAndFlush() {
+      println();
+    }
+  }, TableDisplayer.DEFAULT_STYLE);
 
   static ResourceBundle resource = ResourceBundle.getBundle(Constants.RESOURCE_NAME, Locale.getDefault());
   static SqoopClient client = new SqoopClient(getServerUrl());
@@ -224,6 +238,10 @@ public final class ShellEnvironment {
 
   public static void print(String format, Object... args) {
     io.out.printf(format, args);
+  }
+
+  public static void displayTable(List<String> headers, List<String> ...columns) {
+    tableDisplayer.display(headers, columns);
   }
 
   // for tests only

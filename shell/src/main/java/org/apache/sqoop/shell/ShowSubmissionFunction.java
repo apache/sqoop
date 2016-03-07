@@ -25,7 +25,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.shell.core.Constants;
 import org.apache.sqoop.shell.utils.SubmissionDisplayer;
-import org.apache.sqoop.shell.utils.TableDisplayer;
 import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
@@ -91,7 +90,7 @@ public class ShowSubmissionFunction extends SqoopFunction {
       dates.add(submission.getLastUpdateDate().toString());
     }
 
-    TableDisplayer.display(header, jnames, eids, status, dates);
+    displayTable(header, jnames, eids, status, dates);
   }
 
   private void showSubmissions(String jArg) {
