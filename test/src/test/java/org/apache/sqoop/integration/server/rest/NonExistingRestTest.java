@@ -53,7 +53,7 @@ public class NonExistingRestTest extends RestTest {
     // Content changing requests for read-only resources
     new TestDescription("Put to version", "version", "PUT", "{}", notAllowedValidator),
     new TestDescription("POST to connector", "v1/connector", "POST", "{}", notAllowedValidator),
-    new TestDescription("DELETE to submission", "v1/submission", "DELETE", "{}", notAllowedValidator),
+    new TestDescription("DELETE to submission", "v1/submission", "DELETE", null, notAllowedValidator),
   };
 
   @DataProvider(name="non-existing-rest-test")
