@@ -20,9 +20,11 @@ package org.apache.sqoop.handler;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.Direction;
@@ -257,48 +259,35 @@ public class JobRequestHandler implements RequestHandler {
   }
 
   private JsonBean getJobs(RequestContext ctx) {
-    String connectorIdentifier = ctx.getLastURLElement();
-    JobBean jobBean;
+    String jobName = ctx.getLastURLElement();
+    List<MJob> jobs;
     Locale locale = ctx.getAcceptLanguageHeader();
     Repository repository = RepositoryManager.getInstance().getRepository();
-    // jobs by connector
-    if (ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM) != null) {
-      connectorIdentifier = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
-      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "jobsByConnector", connectorIdentifier);
-      List<MJob> jobList = repository.findJobsForConnector(connectorIdentifier);
 
-      // Authorization check
-      jobList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.JOB, jobList);
+    AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(), "get", "job", jobName);
 
-      jobBean = createJobBean(jobList, locale);
-    } else
-    // all jobs in the system
-    if (ctx.getPath().contains(JOBS_PATH)
-        || (ctx.getPath().contains(JOB_PATH) && connectorIdentifier.equals("all"))) {
-      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "jobs", "all");
-      List<MJob> jobList = repository.findJobs();
+    if(jobName.equals("all")) { // Return all links (by perhaps only for given connector)
+      String connectorName = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
 
-      // Authorization check
-      jobList = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.JOB, jobList);
-
-      jobBean = createJobBean(jobList, locale);
+      if(StringUtils.isEmpty(connectorName)) {
+        jobs = repository.findJobs();
+      } else {
+        if(repository.findConnector(connectorName) == null) {
+          throw new SqoopException(ServerError.SERVER_0006, "Invalid connector: " + connectorName);
+        }
+        jobs = repository.findJobsForConnector(connectorName);
+      }
+    } else { // Return one specific job with name or id stored in identifier
+      MJob job = HandlerUtils.getJobFromIdentifier(jobName);
+      jobs = new LinkedList<>();
+      jobs.add(job);
     }
-    // job by Id
-    else {
-      AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "job", connectorIdentifier);
 
-      MJob job = HandlerUtils.getJobFromIdentifier(connectorIdentifier);
-      String jobName = job.getName();
+    // Authorization check
+    jobs = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.JOB, jobs);
 
-      // Authorization check
-      AuthorizationEngine.readJob(ctx.getUserName(), jobName);
-
-      jobBean = createJobBean(Arrays.asList(job), locale);
-    }
-    return jobBean;
+    // And return resulting links
+    return createJobBean(jobs, locale);
   }
 
   private JobBean createJobBean(List<MJob> jobs, Locale locale) {

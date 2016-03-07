@@ -20,7 +20,9 @@ package org.apache.sqoop.integration.server.rest;
 import org.apache.log4j.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.model.MConfigList;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
@@ -122,6 +124,14 @@ public abstract class RestTest extends SqoopTestCase {
     fillHdfsLink(hdfsLinkFrom);
     hdfsLinkFrom.setName("first-link");
     saveLink(hdfsLinkFrom);
+  }
+  public void createFirstJob() {
+    createFirstLink();
+    MJob job = getClient().createJob("first-link", "first-link");
+    job.setName("first-job");
+    fillHdfsFromConfig(job);
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+    saveJob(job);
   }
 
   @AfterMethod
