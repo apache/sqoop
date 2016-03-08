@@ -34,6 +34,7 @@ import org.apache.sqoop.server.v1.DriverServlet;
 import org.apache.sqoop.server.v1.JobServlet;
 import org.apache.sqoop.server.v1.LinkServlet;
 import org.apache.sqoop.server.v1.SubmissionsServlet;
+import org.apache.sqoop.utils.ProcessUtils;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -45,10 +46,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 
 import javax.servlet.DispatcherType;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -106,7 +104,7 @@ public class SqoopJettyServer {
         sslContextFactory.setKeyStorePassword(keyStorePassword);
       } else if (StringUtils.isNotBlank(keyStorePasswordGenerator)) {
         try {
-          String passwordFromGenerator = readPasswordFromGenerator(keyStorePasswordGenerator);
+          String passwordFromGenerator = ProcessUtils.readOutputFromGenerator(keyStorePasswordGenerator);
           sslContextFactory.setKeyStorePassword(passwordFromGenerator);
         } catch (IOException exception) {
           throw new SqoopException(ServerError.SERVER_0008, "failed to execute generator: " + SecurityConstants.KEYSTORE_PASSWORD_GENERATOR, exception);
@@ -123,7 +121,7 @@ public class SqoopJettyServer {
         }
       } else if (StringUtils.isNotBlank(keyManagerPasswordGenerator)) {
         try {
-          String passwordFromGenerator = readPasswordFromGenerator(keyManagerPasswordGenerator);
+          String passwordFromGenerator = ProcessUtils.readOutputFromGenerator(keyManagerPasswordGenerator);
           sslContextFactory.setKeyManagerPassword(passwordFromGenerator);
         } catch (IOException exception) {
           throw new SqoopException(ServerError.SERVER_0008, "failed to execute generator: " + SecurityConstants.KEYMANAGER_PASSWORD_GENERATOR, exception);
@@ -144,21 +142,6 @@ public class SqoopJettyServer {
     connector.setPort(sqoopJettyContext.getPort());
     webServer.addConnector(connector);
     webServer.setHandler(createServletContextHandler());
-  }
-
-  private String readPasswordFromGenerator(String generatorCommand) throws IOException {
-    ProcessBuilder processBuilder = new ProcessBuilder("/bin/sh", "-c", generatorCommand);
-    Process process = processBuilder.start();
-    String output;
-    try (
-      InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream(), Charset.forName("UTF-8"));
-      BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-    ) {
-      output =  bufferedReader.readLine();
-    } catch(IOException exception) {
-      throw exception;
-    }
-    return output;
   }
 
   public synchronized void startServer() {
@@ -212,7 +195,7 @@ public class SqoopJettyServer {
     return context;
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) {
     SqoopJettyServer sqoopJettyServer = new SqoopJettyServer();
     sqoopJettyServer.startServer();
     sqoopJettyServer.joinServerThread();

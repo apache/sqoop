@@ -50,10 +50,12 @@ public final class ShellEnvironment {
   private static String DEFAULT_SERVER_HOST = getEnv(Constants.ENV_HOST, "localhost");
   private static String DEFAULT_SERVER_PORT = getEnv(Constants.ENV_PORT, "12000");
   private static String DEFAULT_SERVER_WEBAPP = getEnv(Constants.ENV_WEBAPP, "sqoop");
+  private static String DEFAULT_PROTOCOL = getEnv(Constants.ENV_PROTOCOL, "http");
 
   private static String serverHost = DEFAULT_SERVER_HOST;
   private static String serverPort = DEFAULT_SERVER_PORT;
   private static String serverWebapp = DEFAULT_SERVER_WEBAPP;
+  private static String protocol = DEFAULT_PROTOCOL;
 
   private static boolean verbose = false;
   private static boolean interactive = false;
@@ -120,6 +122,11 @@ public final class ShellEnvironment {
     client.setServerUrl(getServerUrl());
   }
 
+  public static void setServerTls() {
+    protocol = "https";
+    client.setServerUrl(getServerUrl());
+  }
+
   public static String getServerWebapp() {
     return serverWebapp;
   }
@@ -157,7 +164,7 @@ public final class ShellEnvironment {
   }
 
   public static String getServerUrl() {
-    return "http://" + serverHost + ":" + serverPort + "/" + serverWebapp + "/";
+    return protocol + "://" + serverHost + ":" + serverPort + "/" + serverWebapp + "/";
   }
 
   public static ResourceBundle getResourceBundle() {

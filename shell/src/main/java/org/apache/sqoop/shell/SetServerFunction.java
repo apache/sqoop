@@ -46,6 +46,10 @@ public class SetServerFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_URL_DESCRIPTION))
         .withLongOpt(Constants.OPT_URL)
         .create(Constants.OPT_URL_CHAR));
+    this.addOption(OptionBuilder.withArgName(Constants.OPT_TLS)
+        .withDescription(resourceString(Constants.RES_TLS_DESCRIPTION))
+        .withLongOpt(Constants.OPT_TLS)
+        .create());
   }
 
   @Override
@@ -62,21 +66,25 @@ public class SetServerFunction extends SqoopFunction {
     if (line.hasOption(Constants.OPT_URL)) {
       setServerUrl(line.getOptionValue(Constants.OPT_URL));
 
-      // ignore --host, --port and --webapp option
+      // ignore --host, --tls, --port and --webapp option
       if (line.hasOption(Constants.OPT_HOST)
+       || line.hasOption(Constants.OPT_TLS)
        || line.hasOption(Constants.OPT_PORT)
        || line.hasOption(Constants.OPT_WEBAPP)) {
         printlnResource(Constants.RES_SET_SERVER_IGNORED);
       }
     } else {
       if (line.hasOption(Constants.OPT_HOST)) {
-          setServerHost(line.getOptionValue(Constants.OPT_HOST));
+        setServerHost(line.getOptionValue(Constants.OPT_HOST));
       }
       if (line.hasOption(Constants.OPT_PORT)) {
         setServerPort(line.getOptionValue(Constants.OPT_PORT));
       }
       if (line.hasOption(Constants.OPT_WEBAPP)) {
         setServerWebapp(line.getOptionValue(Constants.OPT_WEBAPP));
+      }
+      if (line.hasOption(Constants.OPT_TLS)) {
+        setServerTls();
       }
     }
 

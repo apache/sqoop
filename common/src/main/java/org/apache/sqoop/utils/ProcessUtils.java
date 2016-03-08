@@ -15,23 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.shell;
+package org.apache.sqoop.utils;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.sqoop.shell.core.Constants;
-import org.codehaus.groovy.tools.shell.Groovysh;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
-public class SetCommand extends SqoopCommand {
-
-  public SetCommand(Groovysh shell) {
-    super(shell,
-      Constants.CMD_SET,
-      Constants.CMD_SET_SC,
-      ImmutableMap.of(
-        Constants.FN_SERVER, SetServerFunction.class,
-        Constants.FN_OPTION, SetOptionFunction.class,
-        Constants.FN_TRUSTSTORE, SetTruststoreFunction.class
-      )
-    );
+public class ProcessUtils {
+  public static String readOutputFromGenerator(String generatorCommand) throws IOException {
+    ProcessBuilder processBuilder = new ProcessBuilder("/bin/sh", "-c", generatorCommand);
+    Process process = processBuilder.start();
+    String output;
+    try (
+      InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream(), Charset.forName("UTF-8"));
+      BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    ) {
+      output =  bufferedReader.readLine();
+    } catch(IOException exception) {
+      throw exception;
+    }
+    return output;
   }
 }

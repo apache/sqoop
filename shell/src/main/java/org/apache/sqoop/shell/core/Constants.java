@@ -31,6 +31,7 @@ public class Constants {
   public static final String ENV_HOST = "SQOOP2_HOST";
   public static final String ENV_PORT = "SQOOP2_PORT";
   public static final String ENV_WEBAPP = "SQOOP2_WEBAPP";
+  public static final String ENV_PROTOCOL = "SQOOP2_PROTOCOL";
 
   // Options
 
@@ -42,6 +43,7 @@ public class Constants {
   public static final String OPT_VALUE = "value";
   public static final String OPT_VERBOSE = "verbose";
   public static final String OPT_HOST = "host";
+  public static final String OPT_TLS = "tls";
   public static final String OPT_PORT = "port";
   public static final String OPT_WEBAPP = "webapp";
   public static final String OPT_URL = "url";
@@ -59,6 +61,9 @@ public class Constants {
   public static final String OPT_PRINCIPAL_TYPE = "principal-type";
   public static final String OPT_WITH_GRANT = "with-grant";
   public static final String OPT_WITH_JOB = "job";
+  public static final String OPT_TRUSTSTORE = "truststore";
+  public static final String OPT_TRUSTSTORE_PASSWORD = "truststore-password";
+  public static final String OPT_TRUSTSTORE_PASSWORD_GENERATOR = "truststore-password-generator";
 
   public static final char OPT_FROM_CHAR = 'f';
   public static final char OPT_TO_CHAR = 't';
@@ -80,6 +85,7 @@ public class Constants {
   public static final char OPT_ACTION_CHAR = 'a';
   public static final char OPT_WITH_GRANT_CHAR = 'g';
   public static final char OPT_WITH_JOB_CHAR = 'j';
+  public static final char OPT_TRUSTSTORE_CHAR2 = 'j';
 
   // Resource keys for various commands, command options,
   // functions and descriptions
@@ -130,6 +136,7 @@ public class Constants {
   public static final String FN_SUBMISSION = "submission";
   public static final String FN_SERVER = "server";
   public static final String FN_OPTION = "option";
+  public static final String FN_TRUSTSTORE = "truststore";
   public static final String FN_CONNECTOR = "connector";
   public static final String FN_VERSION = "version";
   public static final String FN_DRIVER_CONFIG = "driver";
@@ -248,12 +255,24 @@ public class Constants {
       "set.webapp_description";
   public static final String RES_URL_DESCRIPTION =
       "set.url_description";
+  public static final String RES_TLS_DESCRIPTION =
+      "set.tls_description";
   public static final String RES_SET_SERVER_USAGE =
       "set.server_usage";
   public static final String RES_SET_SERVER_SUCCESSFUL =
       "set.server_successful";
   public static final String RES_SET_SERVER_IGNORED =
       "set.server_ignored";
+  public static final String RES_SET_TRUSTSTORE_SUCCESSFUL =
+    "set.truststore_successful";
+  public static final String RES_SET_TRUSTSTORE_FAILED=
+    "set.truststore_failed";
+  public static final String RES_TRUSTSTORE_DESCRIPTION =
+    "set.truststore_description";
+  public static final String RES_TRUSTSTORE_PASSWORD_DESCRIPTION =
+    "set.truststore_password_description";
+  public static final String RES_TRUSTSTORE_PASSWORD_GENERATOR_DESCRIPTION =
+    "set.truststore_password_generator_description";
 
   public static final String RES_SHOW_PROMPT_DISPLAY_ALL_LINKS =
       "show.prompt_display_all_links";
