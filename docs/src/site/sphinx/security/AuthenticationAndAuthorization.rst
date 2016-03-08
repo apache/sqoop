@@ -14,9 +14,9 @@
    limitations under the License.
 
 
-=========================
-Security Guide On Sqoop 2
-=========================
+================================
+Authentication and Authorization
+================================
 
 Most Hadoop components, such as HDFS, Yarn, Hive, etc., have security frameworks, which support Simple, Kerberos and LDAP authentication. currently Sqoop 2 provides 2 types of authentication: simple and kerberos. The authentication module is pluggable, so more authentication types can be added. Additionally, a new role based access control is introduced in Sqoop 1.99.6. We recommend to use this capability in multi tenant environments, so that malicious users can’t easily abuse your created link and job objects.
 
