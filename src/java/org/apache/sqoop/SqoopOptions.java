@@ -55,6 +55,8 @@ import com.cloudera.sqoop.util.StoredAsProperty;
  */
 public class SqoopOptions implements Cloneable {
 
+  private static final String OLD_SQOOP_TEST_IMPORT_ROOT_DIR = "sqoop.test.import.rootDir";
+
   public static final Log LOG = LogFactory.getLog(SqoopOptions.class.getName());
 
   /**
@@ -105,6 +107,8 @@ public class SqoopOptions implements Cloneable {
   // are stored as constants in BaseSqoopTool.
 
   @StoredAsProperty("verbose") private boolean verbose;
+
+  @StoredAsProperty("temporary.dirRoot") private String tempRootDir;
 
   @StoredAsProperty("mapreduce.job.name") private String mapreduceJobName;
 
@@ -1007,6 +1011,10 @@ public class SqoopOptions implements Cloneable {
 
     // We do not want to be verbose too much if not explicitly needed
     this.verbose = false;
+    //This name of the system property is intentionally OLD_SQOOP_TEST_IMPORT_ROOT_DIR
+    //to support backward compatibility. Do not exchange it with
+    //org.apache.sqoop.tool.BaseSqoopTool#TEMP_ROOTDIR_ARG
+    this.tempRootDir = System.getProperty(OLD_SQOOP_TEST_IMPORT_ROOT_DIR, "_sqoop");
     this.isValidationEnabled = false; // validation is disabled by default
     this.validatorClass = RowCountValidator.class;
     this.validationThresholdClass = AbsoluteValidationThreshold.class;
@@ -1108,6 +1116,14 @@ public class SqoopOptions implements Cloneable {
 
   public void setVerbose(boolean beVerbose) {
     this.verbose = beVerbose;
+  }
+
+  public String getTempRootDir() {
+    return tempRootDir;
+  }
+
+  public void setTempRootDir(String tempRootDir) {
+    this.tempRootDir = tempRootDir;
   }
 
   /**

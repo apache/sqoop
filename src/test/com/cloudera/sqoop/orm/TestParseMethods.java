@@ -30,6 +30,7 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.sqoop.tool.BaseSqoopTool;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
@@ -84,6 +85,15 @@ public class TestParseMethods extends ImportJobTestCase {
     args.add("1");
 
     return args.toArray(new String[0]);
+  }
+
+  public void testTemporaryRootDirParse() throws Exception {
+    String customRoot = "customroot";
+    String[] args = new String[] {"--"+BaseSqoopTool.TEMP_ROOTDIR_ARG, customRoot};
+
+    SqoopOptions opts = new ImportTool().parseArguments(args, null, null, true);
+
+    assertEquals(customRoot, opts.getTempRootDir());
   }
 
   public void runParseTest(String fieldTerminator, String lineTerminator,

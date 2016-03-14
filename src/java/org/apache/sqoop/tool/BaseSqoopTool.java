@@ -162,6 +162,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String SQL_QUERY_SHORT_ARG = "e";
   public static final String VERBOSE_ARG = "verbose";
   public static final String HELP_ARG = "help";
+  public static final String TEMP_ROOTDIR_ARG = "temporary-rootdir";
   public static final String UPDATE_KEY_ARG = "update-key";
   public static final String UPDATE_MODE_ARG = "update-mode";
   public static final String CALL_ARG = "call";
@@ -466,6 +467,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     commonOpts.addOption(OptionBuilder
         .withDescription("Print usage instructions")
         .withLongOpt(HELP_ARG)
+        .create());
+    commonOpts.addOption(OptionBuilder
+        .withDescription("Defines the temporary root directory for the import")
+        .withLongOpt(TEMP_ROOTDIR_ARG)
+        .hasArg()
+        .withArgName("rootdir")
         .create());
     // relax isolation requirements
     commonOpts.addOption(OptionBuilder
@@ -937,6 +944,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       configureOptions(toolOpts);
       printHelp(toolOpts);
       throw new InvalidOptionsException("");
+    }
+
+    if (in.hasOption(TEMP_ROOTDIR_ARG)) {
+      out.setTempRootDir(in.getOptionValue(TEMP_ROOTDIR_ARG));
     }
 
     if (in.hasOption(CONNECT_STRING_ARG)) {

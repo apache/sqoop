@@ -39,9 +39,6 @@ public class AppendUtils {
 
   public static final Log LOG = LogFactory.getLog(AppendUtils.class.getName());
 
-  private static final String TEMP_IMPORT_ROOT =
-          System.getProperty("sqoop.test.import.rootDir", "_sqoop");
-
   private static final int PARTITION_DIGITS = 5;
   private static final String FILEPART_SEPARATOR = "-";
   private static final String FILEEXT_SEPARATOR = ".";
@@ -273,9 +270,9 @@ public class AppendUtils {
    *             Can be arbitrary string, for example table name or query checksum.
    * @return a path pointing to the temporary directory
    */
-  public static Path getTempAppendDir(String salt) {
+  public static Path getTempAppendDir(String salt, SqoopOptions options) {
     String uuid = UUID.randomUUID().toString().replace("-", "");
-    String tempDir = TEMP_IMPORT_ROOT + Path.SEPARATOR + uuid + "_" + salt;
+    String tempDir = options.getTempRootDir() + Path.SEPARATOR + uuid + "_" + salt;
     return new Path(tempDir);
   }
 

@@ -390,6 +390,42 @@ public class TestSqoopOptions extends TestCase {
             connParams, in.getConnectionParams());
   }
 
+  public void testDefaultTempRootDir() {
+    SqoopOptions opts = new SqoopOptions();
+
+    assertEquals("_sqoop", opts.getTempRootDir());
+  }
+
+  public void testDefaultLoadedTempRootDir() {
+    SqoopOptions out = new SqoopOptions();
+    Properties props = out.writeProperties();
+    SqoopOptions opts = new SqoopOptions();
+    opts.loadProperties(props);
+
+    assertEquals("_sqoop", opts.getTempRootDir());
+  }
+
+  public void testLoadedTempRootDir() {
+    SqoopOptions out = new SqoopOptions();
+    final String tempRootDir = "customRoot";
+    out.setTempRootDir(tempRootDir);
+    Properties props = out.writeProperties();
+    SqoopOptions opts = new SqoopOptions();
+    opts.loadProperties(props);
+
+    assertEquals(tempRootDir, opts.getTempRootDir());
+  }
+
+  public void testNulledTempRootDir() {
+    SqoopOptions out = new SqoopOptions();
+    out.setTempRootDir(null);
+    Properties props = out.writeProperties();
+    SqoopOptions opts = new SqoopOptions();
+    opts.loadProperties(props);
+
+    assertEquals("_sqoop", opts.getTempRootDir());
+  }
+
   // test that hadoop-home is accepted as an option
   public void testHadoopHome() throws Exception {
     String [] args = {
