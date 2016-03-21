@@ -73,8 +73,13 @@ public class ParquetTest extends SqoopTestCase {
     fillHdfsLink(hdfsConnection);
     saveLink(hdfsConnection);
 
+    hdfsClient.mkdirs(new Path(HdfsUtils.joinPathFragments
+      (getMapreduceDirectory(), "TO")));
+
     // Job creation
     MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
+
+
 
 
     // Set rdbms "FROM" config
@@ -82,6 +87,9 @@ public class ParquetTest extends SqoopTestCase {
 
     // Fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.PARQUET_FILE);
+
+    job.getToJobConfig().getStringInput("toJobConfig.outputDirectory")
+      .setValue(HdfsUtils.joinPathFragments(getMapreduceDirectory(), "TO"));
 
     saveJob(job);
     executeJob(job);
@@ -97,7 +105,7 @@ public class ParquetTest extends SqoopTestCase {
 
     List<String> notFound = new LinkedList<>();
 
-    Path[] files = HdfsUtils.getOutputMapreduceFiles(hdfsClient, getMapreduceDirectory());
+    Path[] files = HdfsUtils.getOutputMapreduceFiles(hdfsClient, HdfsUtils.joinPathFragments(getMapreduceDirectory(), "TO"));
     for (Path file : files) {
       ParquetReader<GenericRecord> avroParquetReader = AvroParquetReader.builder(file).build();
       GenericRecord record;
