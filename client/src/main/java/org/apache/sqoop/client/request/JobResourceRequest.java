@@ -51,7 +51,7 @@ public class JobResourceRequest extends ResourceRequest {
   public JobBean readByConnector(String serverUrl, String cArg) {
     JobBean bean = new JobBean();
     if (cArg != null) {
-      String response = super.get(serverUrl + RESOURCE + "?cname=" + UrlSafeUtils.urlEncode(cArg));
+      String response = super.get(serverUrl + RESOURCE + "all?cname=" + UrlSafeUtils.urlEncode(cArg));
       JSONObject jsonObject = JSONUtils.parse(response);
       bean.restore(jsonObject);
     }
