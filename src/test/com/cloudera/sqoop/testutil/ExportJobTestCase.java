@@ -301,8 +301,31 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
       statement.close();
     }
 
-    assertEquals("Invalid msg field for min value", getMsgPrefix() + maxVal,
-        maxMsg);
+    assertEquals("Invalid msg field for min value", getMsgPrefix() + maxVal, maxMsg);
+  }
+
+  // Verify Export Method For checking update's : Issue [SQOOP-2846]
+  protected void verifyExport(String expectedValue) throws IOException, SQLException {
+    Connection conn = getConnection();
+    LOG.info("Verifying export: " + getTableName());
+    // Check that we got back the correct number of records.
+    PreparedStatement statement = conn.prepareStatement("SELECT MSG FROM " + getTableName(),
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    String actualValue = null;
+    ResultSet rs = null;
+    try {
+      rs = statement.executeQuery();
+      try {
+        rs.next();
+        actualValue = rs.getString(1);
+      } finally {
+        rs.close();
+      }
+    } finally {
+      statement.close();
+    }
+
+    assertEquals("Got back unexpected row count", expectedValue, actualValue);
   }
 
   /**

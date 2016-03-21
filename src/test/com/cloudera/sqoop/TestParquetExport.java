@@ -32,6 +32,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,10 +144,11 @@ public class TestParquetExport extends ExportJobTestCase {
     fields.add(buildField("id", Schema.Type.INT));
     fields.add(buildField("msg", Schema.Type.STRING));
     int colNum = 0;
-    for (ColumnGenerator gen : extraCols) {
-      if (gen.getColumnParquetSchema() != null) {
-        fields.add(buildParquetField(forIdx(colNum++),
-            gen.getColumnParquetSchema()));
+    if (null != extraCols) {
+      for (ColumnGenerator gen : extraCols) {
+        if (gen.getColumnParquetSchema() != null) {
+          fields.add(buildParquetField(forIdx(colNum++), gen.getColumnParquetSchema()));
+        }
       }
     }
     Schema schema = Schema.createRecord("myschema", null, null, false);
@@ -157,9 +159,11 @@ public class TestParquetExport extends ExportJobTestCase {
   private void addExtraColumns(GenericRecord record, int rowNum,
       ColumnGenerator[] extraCols) {
     int colNum = 0;
-    for (ColumnGenerator gen : extraCols) {
-      if (gen.getColumnParquetSchema() != null) {
-        record.put(forIdx(colNum++), gen.getExportValue(rowNum));
+    if (null != extraCols) {
+      for (ColumnGenerator gen : extraCols) {
+        if (gen.getColumnParquetSchema() != null) {
+          record.put(forIdx(colNum++), gen.getExportValue(rowNum));
+        }
       }
     }
   }
@@ -226,6 +230,38 @@ public class TestParquetExport extends ExportJobTestCase {
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     try {
       statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
+  }
+
+  /**
+   * Create the table definition to export and also inserting one records for
+   * identifying the updates. Issue [SQOOP-2846]
+   */
+  private void createTableWithInsert() throws SQLException {
+    Connection conn = getConnection();
+    PreparedStatement statement = conn.prepareStatement(getDropTableStatement(getTableName()),
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("CREATE TABLE ");
+    sb.append(getTableName());
+    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
+    sb.append(")");
+    statement = conn.prepareStatement(sb.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      Statement statement2 = conn.createStatement();
+      String insertCmd = "INSERT INTO " + getTableName() + " (ID,MSG) VALUES(" + 0 + ",'testMsg');";
+      statement2.execute(insertCmd);
       conn.commit();
     } finally {
       statement.close();
@@ -369,6 +405,30 @@ public class TestParquetExport extends ExportJobTestCase {
     verifyExport(TOTAL_RECORDS);
   }
 
+  public void testParquetWithUpdateKey() throws IOException, SQLException {
+    String[] argv = { "--update-key", "ID" };
+    final int TOTAL_RECORDS = 1;
+    createParquetFile(0, TOTAL_RECORDS, null);
+    createTableWithInsert();
+    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
+    verifyExport(getMsgPrefix() + "0");
+  }
+
+  // Test Case for Issue [SQOOP-2846]
+  public void testParquetWithUpsert() throws IOException, SQLException {
+    String[] argv = { "--update-key", "ID", "--update-mode", "allowinsert" };
+    final int TOTAL_RECORDS = 2;
+    // ColumnGenerator gen = colGenerator("100",
+    // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
+    createParquetFile(0, TOTAL_RECORDS, null);
+    createTableWithInsert();
+    try {
+      runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
+    } catch (Exception e) {
+      // expected
+      assertTrue(true);
+    }
+  }
   public void testMissingParquetFields()  throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1;

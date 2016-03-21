@@ -21,14 +21,23 @@ package org.apache.sqoop.mapreduce;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.MapWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.sqoop.mapreduce.ExportJobBase.FileType;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
+import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
+
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.ExportJobBase;
@@ -40,6 +49,8 @@ import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
  */
 public class JdbcUpdateExportJob extends ExportJobBase {
 
+  // Fix For Issue [SQOOP-2846]
+  private FileType fileType;
   public static final Log LOG = LogFactory.getLog(
       JdbcUpdateExportJob.class.getName());
 
@@ -64,11 +75,21 @@ public class JdbcUpdateExportJob extends ExportJobBase {
     super(ctxt, mapperClass, inputFormatClass, outputFormatClass);
   }
 
+  // Fix For Issue [SQOOP-2846]
   @Override
   protected Class<? extends Mapper> getMapperClass() {
-    if (inputIsSequenceFiles()) {
+    if (isHCatJob) {
+      return SqoopHCatUtilities.getExportMapperClass();
+    }
+    switch (fileType) {
+    case SEQUENCE_FILE:
       return SequenceFileExportMapper.class;
-    } else {
+    case AVRO_DATA_FILE:
+      return AvroExportMapper.class;
+    case PARQUET_FILE:
+      return ParquetExportMapper.class;
+    case UNKNOWN:
+    default:
       return TextExportMapper.class;
     }
   }
@@ -143,5 +164,69 @@ public class JdbcUpdateExportJob extends ExportJobBase {
       throw new IOException("Could not load OutputFormat", cnfe);
     }
   }
-}
 
+  // Fix For Issue [SQOOP-2846]
+  @Override
+  protected void configureInputFormat(Job job, String tableName, String tableClassName,
+      String splitByCol)
+          throws ClassNotFoundException, IOException
+  {
+
+    fileType = getInputFileType();
+
+    super.configureInputFormat(job, tableName, tableClassName, splitByCol);
+
+    if (isHCatJob) {
+      SqoopHCatUtilities.configureExportInputFormat(options, job, context.getConnManager(),
+          tableName,
+          job.getConfiguration());
+      return;
+    } else if (fileType == FileType.AVRO_DATA_FILE) {
+      LOG.debug("Configuring for Avro export");
+      configureGenericRecordExportInputFormat(job, tableName);
+    } else if (fileType == FileType.PARQUET_FILE) {
+      LOG.debug("Configuring for Parquet export");
+      configureGenericRecordExportInputFormat(job, tableName);
+      FileSystem fs = FileSystem.get(job.getConfiguration());
+      String uri = "dataset:" + fs.makeQualified(getInputPath());
+      DatasetKeyInputFormat.configure(job).readFrom(uri);
+    }
+  }
+
+  // Fix For Issue [SQOOP-2846]
+  private void configureGenericRecordExportInputFormat(Job job, String tableName)
+      throws IOException
+  {
+    ConnManager connManager = context.getConnManager();
+    Map<String, Integer> columnTypeInts;
+    if (options.getCall() == null) {
+      columnTypeInts = connManager.getColumnTypes(tableName, options.getSqlQuery());
+    } else {
+      columnTypeInts = connManager.getColumnTypesForProcedure(options.getCall());
+    }
+    MapWritable columnTypes = new MapWritable();
+    for (Map.Entry<String, Integer> e : columnTypeInts.entrySet()) {
+      Text columnName = new Text(e.getKey());
+      Text columnText = new Text(connManager.toJavaType(tableName, e.getKey(), e.getValue()));
+      columnTypes.put(columnName, columnText);
+    }
+    DefaultStringifier.store(job.getConfiguration(), columnTypes,
+        AvroExportMapper.AVRO_COLUMN_TYPES_MAP);
+  }
+
+  // Fix For Issue [SQOOP-2846]
+  @Override
+  protected Class<? extends InputFormat> getInputFormatClass() throws ClassNotFoundException {
+    if (isHCatJob) {
+      return SqoopHCatUtilities.getInputFormatClass();
+    }
+    switch (fileType) {
+    case AVRO_DATA_FILE:
+      return AvroInputFormat.class;
+    case PARQUET_FILE:
+      return DatasetKeyInputFormat.class;
+    default:
+      return super.getInputFormatClass();
+    }
+  }
+}
