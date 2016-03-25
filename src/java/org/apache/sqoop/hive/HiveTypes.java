@@ -52,6 +52,7 @@ public final class HiveTypes {
           case Types.TIME:
           case Types.TIMESTAMP:
           case Types.CLOB:
+          case Types.NCLOB:
               return "STRING";
           case Types.NUMERIC:
           case Types.DECIMAL:
