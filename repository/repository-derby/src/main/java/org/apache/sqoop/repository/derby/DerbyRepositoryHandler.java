@@ -319,6 +319,14 @@ public class DerbyRepositoryHandler extends CommonRepositoryHandler {
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_COLUMN_SQB_NAME, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_ALTER_COLUMN_SQB_NAME_NOT_NULL, conn);
       runQuery(QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ALTER_COLUMN_SQB_NAME_NOT_NULL, conn);
+
+      runQuery(QUERY_CREATE_TABLE_SQ_MASTER_KEY, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_ENCRYPTED, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_IV, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_HMAC, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_ENCRYPTED, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_IV, conn);
+      runQuery(QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_HMAC, conn);
     }
 
     // last step upgrade the repository version to the latest value in the code

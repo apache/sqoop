@@ -146,6 +146,7 @@ public class MySqlRepositoryHandler extends CommonRepositoryHandler {
       runQuery(MySqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONTEXT_TYPE, conn);
       runQuery(MySqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONTEXT_PROPERTY, conn);
       runQuery(MySqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_CONTEXT, conn);
+      runQuery(MySqlSchemaCreateQuery.QUERY_CREATE_TABLE_SQ_MASTER_KEY, conn);
 
       // Insert FROM and TO directions.
       insertDirections(conn);

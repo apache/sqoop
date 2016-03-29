@@ -44,6 +44,13 @@ public final class SecurityConstants {
     PREFIX_SECURITY_CONFIG + "tls.";
 
   /**
+   * All repository encryption related configuration is prefixed with this:
+   * <tt>org.apache.sqoop.security.repo_encryption.</tt>
+   */
+  public static final String PREFIX_REPO_ENCRYPTION_CONFIG =
+    PREFIX_SECURITY_CONFIG + "repo_encryption.";
+
+  /**
    * The config specifies the sqoop authentication type (SIMPLE, KERBEROS).
    * The default type is SIMPLE
    * <tt>org.apache.sqoop.security.authentication.type</tt>.
@@ -215,6 +222,78 @@ public final class SecurityConstants {
    */
   public static final String KEYMANAGER_PASSWORD_GENERATOR =
     PREFIX_TLS_CONFIG + "keymanager_password_generator";
+
+  /**
+   * The config specifies if repository encryption is enabled
+   * <tt>org.apache.sqoop.security.repo_encryption.enabled</tt>.
+   */
+  public static final String REPO_ENCRYPTION_ENABLED =
+    PREFIX_REPO_ENCRYPTION_CONFIG + "enabled";
+
+  /**
+   * The config specifies the password used to encrypt the repository
+   * <tt>org.apache.sqoop.security.repo_encryption.password</tt>.
+   */
+  public static final String REPO_ENCRYPTION_PASSWORD =
+    PREFIX_REPO_ENCRYPTION_CONFIG + "password";
+
+  /**
+   * The config specifies a command that prints the password used to encrypt
+   * the repository to standard out
+   * <tt>org.apache.sqoop.security.repo_encryption.password_generator</tt>.
+   */
+  public static final String REPO_ENCRYPTION_PASSWORD_GENERATOR=
+    PREFIX_REPO_ENCRYPTION_CONFIG + "password_generator";
+
+  /**
+   * The config specifies the algorithm to be used for hmac generation
+   * <tt>org.apache.sqoop.security.repo_encryption.hmac_algorithm</tt>.
+   */
+  public static final String REPO_ENCRYPTION_HMAC_ALGORITHM=
+    PREFIX_REPO_ENCRYPTION_CONFIG + "hmac_algorithm";
+
+  /**
+   * The config specifies the algorithm to be used for repository encryption
+   * <tt>org.apache.sqoop.security.repo_encryption.cipher_algorithm</tt>.
+   */
+  public static final String REPO_ENCRYPTION_CIPHER_ALGORITHM=
+    PREFIX_REPO_ENCRYPTION_CONFIG + "cipher_algorithm";
+
+  /**
+   * The config specifies the spec to be used for repository encryption
+   * <tt>org.apache.sqoop.security.repo_encryption.cipher_spec</tt>.
+   */
+  public static final String REPO_ENCRYPTION_CIPHER_SPEC=
+    PREFIX_REPO_ENCRYPTION_CONFIG + "cipher_spec";
+
+  /**
+   * The config specifies the size of the key used for repository encryption
+   * <tt>org.apache.sqoop.security.repo_encryption.cipher_key_size</tt>.
+   */
+  public static final String REPO_ENCRYPTION_CIPHER_KEY_SIZE=
+    PREFIX_REPO_ENCRYPTION_CONFIG + "cipher_key_size";
+
+  /**
+   * The config specifies the size of the initialization vector used for repository encryption
+   * <tt>org.apache.sqoop.security.repo_encryption.initialization_vector_size</tt>.
+   */
+  public static final String REPO_ENCRYPTION_INITIALIZATION_VECTOR_SIZE=
+    PREFIX_REPO_ENCRYPTION_CONFIG + "initialization_vector_size";
+
+  /**
+   * The config specifies the pbkdf2 algorithm to be used for master key generation
+   * <tt>org.apache.sqoop.security.repo_encryption.pbkdf2_algorithm</tt>.
+   */
+  public static final String REPO_ENCRYPTION_PBKDF2_ALGORITHM=
+    PREFIX_REPO_ENCRYPTION_CONFIG + "pbkdf2_algorithm";
+
+  /**
+   * The config specifies the number of rounds of the pbkdf2 algorithm
+   * to be used for master key generation
+   * <tt>org.apache.sqoop.security.repo_encryption.pbkdf2_algorithm</tt>.
+   */
+  public static final String REPO_ENCRYPTION_PBKDF2_ROUNDS=
+    PREFIX_REPO_ENCRYPTION_CONFIG + "pbkdf2_rounds";
 
   /**
    * The config specifies the token kind in delegation token.

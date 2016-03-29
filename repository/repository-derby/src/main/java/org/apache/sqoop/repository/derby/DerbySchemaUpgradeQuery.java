@@ -662,6 +662,41 @@ public final class DerbySchemaUpgradeQuery {
         + " ALTER COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
         + " NOT NULL";
 
+  // DDL: Create table SQ_MASTER_KEY
+  public static final String QUERY_CREATE_TABLE_SQ_MASTER_KEY =
+    "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_MASTER_KEY_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_ID) + " BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_SECRET) + " VARCHAR(342), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_HMAC) + " VARCHAR(171), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_SALT) + " VARCHAR(171), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_IV) + " VARCHAR(171)"
+      + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_ENCRYPTED =
+      "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+        + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_ENCRYPTED) + " BOOLEAN DEFAULT FALSE";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_IV =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_IV) + " VARCHAR(171)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_HMAC =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_HMAC) + " VARCHAR(171)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_ENCRYPTED =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_ENCRYPTED) + " BOOLEAN DEFAULT FALSE";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_IV =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_IV) + " VARCHAR(171)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_HMAC =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_HMAC) + " VARCHAR(171)";
+
+
   private DerbySchemaUpgradeQuery() {
     // Disable explicit object creation
   }

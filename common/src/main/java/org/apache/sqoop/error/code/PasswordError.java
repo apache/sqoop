@@ -15,26 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.utils;
+package org.apache.sqoop.error.code;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import org.apache.sqoop.common.ErrorCode;
 
-public class ProcessUtils {
-  public static String readOutputFromGenerator(String generatorCommand) throws IOException {
-    ProcessBuilder processBuilder = new ProcessBuilder("/bin/sh", "-c", generatorCommand);
-    Process process = processBuilder.start();
-    String output;
-    try (
-      InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream(), Charset.forName("UTF-8"));
-      BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-    ) {
-      output =  bufferedReader.readLine();
-    } catch(IOException exception) {
-      throw exception;
-    }
-    return output;
+public enum PasswordError implements ErrorCode {
+
+  PASSWORD_0000("Failed to execute password generator"),
+
+  PASSWORD_0001("No password returned from generator"),
+
+  ;
+
+  private final String message;
+
+  private PasswordError(String message) {
+    this.message = message;
   }
+
+  public String getCode() {
+    return name();
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
 }

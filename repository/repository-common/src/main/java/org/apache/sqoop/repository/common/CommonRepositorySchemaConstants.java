@@ -175,9 +175,15 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String COLUMN_SQ_LNKI_LINK = "SQ_LNKI_LINK";
 
+  public static final String COLUMN_SQ_LNKI_ENCRYPTED = "SQ_LNKI_ENCRYPTED";
+
   public static final String COLUMN_SQ_LNKI_INPUT = "SQ_LNKI_INPUT";
 
   public static final String COLUMN_SQ_LNKI_VALUE = "SQ_LNKI_VALUE";
+
+  public static final String COLUMN_SQ_LNKI_IV = "SQ_LNKI_IV";
+
+  public static final String COLUMN_SQ_LNKI_HMAC = "SQ_LNKI_HMAC";
 
   // SQ_JOB_INPUT
 
@@ -187,7 +193,13 @@ public final class CommonRepositorySchemaConstants {
 
   public static final String COLUMN_SQBI_INPUT = "SQBI_INPUT";
 
+  public static final String COLUMN_SQBI_ENCRYPTED = "SQBI_ENCRYPTED";
+
   public static final String COLUMN_SQBI_VALUE = "SQBI_VALUE";
+
+  public static final String COLUMN_SQBI_IV = "SQBI_IV";
+
+  public static final String COLUMN_SQBI_HMAC = "SQBI_HMAC";
 
   // SQ_SUBMISSION
 
@@ -272,6 +284,20 @@ public final class CommonRepositorySchemaConstants {
   public static final String COLUMN_SQCO_PROPERTY = "SQCO_PROPERTY";
 
   public static final String COLUMN_SQCO_VALUE = "SQCO_VALUE";
+
+  // SQ_MASTER_KEY
+
+  public static final String TABLE_SQ_MASTER_KEY_NAME = "SQ_MASTER_KEY";
+
+  public static final String COLUMN_SQMK_ID = "SQMK_ID";
+
+  public static final String COLUMN_SQMK_SECRET = "SQMK_SECRET";
+
+  public static final String COLUMN_SQMK_HMAC = "SQMK_HMAC";
+
+  public static final String COLUMN_SQMK_SALT = "SQMK_SALT";
+
+  public static final String COLUMN_SQMK_IV = "SQMK_IV";
 
   // Constraints
 

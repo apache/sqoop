@@ -34,7 +34,7 @@ import org.apache.sqoop.server.v1.DriverServlet;
 import org.apache.sqoop.server.v1.JobServlet;
 import org.apache.sqoop.server.v1.LinkServlet;
 import org.apache.sqoop.server.v1.SubmissionsServlet;
-import org.apache.sqoop.utils.ProcessUtils;
+import org.apache.sqoop.utils.PasswordUtils;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -46,7 +46,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 
 import javax.servlet.DispatcherType;
-import java.io.IOException;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -94,39 +93,18 @@ public class SqoopJettyServer {
         sslContextFactory.setProtocol(protocol.trim());
       }
 
-      String keyStorePassword = configurationContext.getString(SecurityConstants.KEYSTORE_PASSWORD);
-      String keyStorePasswordGenerator = configurationContext.getString(SecurityConstants.KEYSTORE_PASSWORD_GENERATOR);
-      if (StringUtils.isNotBlank(keyStorePassword)) {
-        if (StringUtils.isNotBlank(keyStorePasswordGenerator)) {
-          LOG.warn(SecurityConstants.KEYSTORE_PASSWORD + " and " + SecurityConstants.KEYSTORE_PASSWORD_GENERATOR
-            + "are both set, using " + SecurityConstants.KEYSTORE_PASSWORD);
-        }
+      String keyStorePassword = PasswordUtils.readPassword(configurationContext, SecurityConstants.KEYSTORE_PASSWORD,
+        SecurityConstants.KEYSTORE_PASSWORD_GENERATOR);
+      if (StringUtils.isNotEmpty(keyStorePassword)) {
         sslContextFactory.setKeyStorePassword(keyStorePassword);
-      } else if (StringUtils.isNotBlank(keyStorePasswordGenerator)) {
-        try {
-          String passwordFromGenerator = ProcessUtils.readOutputFromGenerator(keyStorePasswordGenerator);
-          sslContextFactory.setKeyStorePassword(passwordFromGenerator);
-        } catch (IOException exception) {
-          throw new SqoopException(ServerError.SERVER_0008, "failed to execute generator: " + SecurityConstants.KEYSTORE_PASSWORD_GENERATOR, exception);
-        }
       }
 
-      String keyManagerPassword = configurationContext.getString(SecurityConstants.KEYMANAGER_PASSWORD);
-      String keyManagerPasswordGenerator = configurationContext.getString(SecurityConstants.KEYMANAGER_PASSWORD_GENERATOR);
-      if (StringUtils.isNotBlank(keyManagerPassword)) {
+      String keyManagerPassword = PasswordUtils.readPassword(configurationContext, SecurityConstants.KEYMANAGER_PASSWORD,
+        SecurityConstants.KEYMANAGER_PASSWORD_GENERATOR);
+      if (StringUtils.isNotEmpty(keyManagerPassword)) {
         sslContextFactory.setKeyManagerPassword(keyManagerPassword);
-        if (StringUtils.isNotBlank(keyManagerPasswordGenerator)) {
-          LOG.warn(SecurityConstants.KEYMANAGER_PASSWORD + " and " + SecurityConstants.KEYMANAGER_PASSWORD_GENERATOR
-            + "are both set, using " + SecurityConstants.KEYMANAGER_PASSWORD);
-        }
-      } else if (StringUtils.isNotBlank(keyManagerPasswordGenerator)) {
-        try {
-          String passwordFromGenerator = ProcessUtils.readOutputFromGenerator(keyManagerPasswordGenerator);
-          sslContextFactory.setKeyManagerPassword(passwordFromGenerator);
-        } catch (IOException exception) {
-          throw new SqoopException(ServerError.SERVER_0008, "failed to execute generator: " + SecurityConstants.KEYMANAGER_PASSWORD_GENERATOR, exception);
-        }
       }
+
 
       HttpConfiguration https = new HttpConfiguration();
       https.addCustomizer(new SecureRequestCustomizer());

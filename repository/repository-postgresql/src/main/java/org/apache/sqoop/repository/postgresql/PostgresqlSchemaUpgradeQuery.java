@@ -17,15 +17,30 @@
  */
 package org.apache.sqoop.repository.postgresql;
 
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQBI_ENCRYPTED;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQBI_HMAC;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQBI_IV;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQB_ID;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQC_NAME;
+
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQMK_HMAC;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQMK_ID;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQMK_IV;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQMK_SALT;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQMK_SECRET;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_ENCRYPTED;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_HMAC;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_IV;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQ_LNK_ID;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQ_LNK_NAME;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQB_NAME;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.SCHEMA_SQOOP;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.TABLE_SQ_CONFIGURABLE_NAME;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.TABLE_SQ_JOB_INPUT_NAME;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.TABLE_SQ_JOB_NAME;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.TABLE_SQ_LINK_INPUT_NAME;
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.TABLE_SQ_LINK_NAME;
+import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.TABLE_SQ_MASTER_KEY_NAME;
 
 import org.apache.sqoop.repository.common.CommonRepoUtils;
 
@@ -58,4 +73,37 @@ public class PostgresqlSchemaUpgradeQuery {
       "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
       + " ALTER COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
       + " SET NOT NULL";
+
+  public static final String QUERY_CREATE_TABLE_SQ_MASTER_KEY =
+    "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_MASTER_KEY_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_ID) + " BIGSERIAL PRIMARY KEY NOT NULL, "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_SECRET) + " VARCHAR(342), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_HMAC) + " VARCHAR(171), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_SALT) + " VARCHAR(171), "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_IV) + " VARCHAR(171)"
+      + ")";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_ENCRYPTED =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_ENCRYPTED) + " BOOLEAN DEFAULT FALSE";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_IV =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_IV) + " VARCHAR(171)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_HMAC =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_HMAC) + " VARCHAR(171)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_ENCRYPTED =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_ENCRYPTED) + " BOOLEAN DEFAULT FALSE";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_IV =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_IV) + " VARCHAR(171)";
+
+  public static final String QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_HMAC =
+    "ALTER TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
+      + " ADD COLUMN " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_HMAC) + " VARCHAR(171)";
 }

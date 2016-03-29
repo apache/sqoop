@@ -20,7 +20,7 @@ package org.apache.sqoop.shell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.shell.core.Constants;
-import org.apache.sqoop.utils.ProcessUtils;
+import org.apache.sqoop.utils.PasswordUtils;
 import org.apache.sqoop.validation.Status;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -70,7 +70,7 @@ public class SetTruststoreFunction extends SqoopFunction {
           truststorePassword = line.getOptionValue(Constants.OPT_TRUSTSTORE_PASSWORD).toCharArray();
         } else if (line.hasOption(Constants.OPT_TRUSTSTORE_PASSWORD_GENERATOR)) {
           String generator = line.getOptionValue(Constants.OPT_TRUSTSTORE_PASSWORD_GENERATOR);
-          truststorePassword = ProcessUtils.readOutputFromGenerator(generator).toCharArray();
+          truststorePassword = PasswordUtils.readOutputFromGenerator(generator).toCharArray();
         }
 
         KeyStore keyStore = KeyStore.getInstance("JKS");

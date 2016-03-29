@@ -161,6 +161,9 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_EDITABLE) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + ", "
+          + "cast(null as varchar(100)),"
+          + "false,"
+          + "cast(null as varchar(100)),"
           + "cast(null as varchar(100))"
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = ?"
@@ -223,7 +226,10 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + ","
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_EDITABLE) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE)
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_ENCRYPTED) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_IV) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_HMAC)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
           + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID)
@@ -246,7 +252,10 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_EDITABLE) + ", "
           + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE)
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_ENCRYPTED) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_IV) + ", "
+          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_HMAC)
           + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
           + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
           + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID)
@@ -271,11 +280,14 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   // DML: Insert new link inputs
   private static final String STMT_INSERT_LINK_INPUT =
-      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " ("
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE)
-          + ") VALUES (?, ?, ?)";
+    "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_LINK) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_ENCRYPTED) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_IV) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_HMAC)
+      + ") VALUES (?, ?, ?, ?, ?, ?)";
 
   // DML: Update link
   private static final String STMT_UPDATE_LINK =
@@ -385,13 +397,17 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + CommonRepoUtils.escapeColumnName(COLUMN_SQB_UPDATE_DATE)
           + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
+
   // DML: Insert new job inputs
   private static final String STMT_INSERT_JOB_INPUT =
-      "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME) + " ("
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + ", "
-          + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE)
-          + ") VALUES (?, ?, ?)";
+    "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_JOB) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_ENCRYPTED) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_IV) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_HMAC)
+      + ") VALUES (?, ?, ?, ?, ?, ?)";
 
   private static final String STMT_UPDATE_JOB =
       "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_NAME) + " SET "
@@ -741,6 +757,22 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
           + " IN (SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
           + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = ?)";
 
+  private static final String STMT_SELECT_SQ_MASTER_KEY =
+    "SELECT " + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_SECRET) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_HMAC) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_SALT) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_IV)
+      + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_MASTER_KEY_NAME);
+
+  private static final String STMT_INSERT_SQ_MASTER_KEY =
+    "INSERT INTO " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_MASTER_KEY_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_SECRET) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_HMAC) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_SALT) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQMK_IV)
+      + ") VALUES (?, ?, ?, ?)";
+
+
   public String getStmtSelectSqdIdBySqdName() {
     return STMT_SELECT_SQD_ID_BY_SQD_NAME;
   }
@@ -1041,5 +1073,13 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   public String getStmtInsertIntoInputRelation() {
     return STMT_INSERT_INTO_INPUT_RELATION;
+  }
+
+  public String getStmtSelectSqMasterKey() {
+     return STMT_SELECT_SQ_MASTER_KEY;
+  }
+
+  public String getStmtInsertSqMasterKey() {
+    return STMT_INSERT_SQ_MASTER_KEY;
   }
 }

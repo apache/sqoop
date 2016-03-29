@@ -24,7 +24,7 @@ import org.apache.sqoop.repository.common.CommonRepositorySchemaConstants;
 
 public class MySqlSchemaCreateQuery {
 
-  public static final String QUERY_CREATE_DATABASE_SQOOP = "CREATE DATABASE " + CommonRepoUtils.escapeDatabaseName(SCHEMA_SQOOP);
+  public static final String QUERY_CREATE_DATABASE_SQOOP = "CREATE DATABASE IF NOT EXISTS" + CommonRepoUtils.escapeDatabaseName(SCHEMA_SQOOP);
 
   public static final String QUERY_CREATE_TABLE_SQ_SYSTEM =
       "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_SYSTEM_NAME) + " ("
@@ -177,6 +177,9 @@ public class MySqlSchemaCreateQuery {
           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_LINK) + " BIGINT, "
           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_INPUT) + " BIGINT, "
           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_VALUE) + " VARCHAR(1000), "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_ENCRYPTED) + " BOOLEAN DEFAULT FALSE, "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_IV) + " VARCHAR(171), "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_HMAC) + " VARCHAR(171),"
           + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_LINK) + ", "
             + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_INPUT) + "), "
           + "CONSTRAINT " + CommonRepoUtils.escapeConstraintName(CommonRepositorySchemaConstants.CONSTRAINT_SQ_LNKI_SQ_LNK_NAME)
@@ -194,6 +197,9 @@ public class MySqlSchemaCreateQuery {
           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQBI_JOB) + " BIGINT, "
           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQBI_INPUT) + " BIGINT, "
           + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQBI_VALUE) + " VARCHAR(1000), "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQBI_ENCRYPTED) + " BOOLEAN DEFAULT FALSE, "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQBI_IV) + " VARCHAR(171), "
+          + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQBI_HMAC) + " VARCHAR(171),"
           + "PRIMARY KEY (" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQBI_JOB) + ", "
             + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQBI_INPUT) + "), "
           + "CONSTRAINT " + CommonRepoUtils.escapeConstraintName(CommonRepositorySchemaConstants.CONSTRAINT_SQBI_SQB_NAME)
@@ -290,6 +296,16 @@ public class MySqlSchemaCreateQuery {
            + "REFERENCES " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_CONTEXT_PROPERTY)
            + "(" + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQCP_ID) + ") "
        + ")";
+
+  // DDL: Create table SQ_MASTER_KEY
+  public static final String QUERY_CREATE_TABLE_SQ_MASTER_KEY =
+    "CREATE TABLE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, CommonRepositorySchemaConstants.TABLE_SQ_MASTER_KEY_NAME) + " ("
+      + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQMK_ID) + " BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+      + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQMK_SECRET) + " VARCHAR(342), "
+      + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQMK_HMAC) + " VARCHAR(171), "
+      + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQMK_SALT) + " VARCHAR(171), "
+      + CommonRepoUtils.escapeColumnName(CommonRepositorySchemaConstants.COLUMN_SQMK_IV) + " VARCHAR(171)"
+      + ")";
 
   private MySqlSchemaCreateQuery() {
     // Disable explicit object creation

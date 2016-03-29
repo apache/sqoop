@@ -67,7 +67,43 @@ public enum SecurityError implements ErrorCode {
   AUTH_0014("Authorization exception"),
 
   /** Don't support to grant/remoke privileges for default user. */
-  AUTH_0015("Cannot grant/revoke privileges for default user");
+  AUTH_0015("Cannot grant/revoke privileges for default user"),
+
+  /** The HMAC calculation yielded a result different than what was stored in the database */
+  ENCRYPTION_0001("HMAC validation failed for Master Key"),
+
+  /** The Master Key is found in the database and the creation of one is disabled */
+  ENCRYPTION_0002("No Master Key found"),
+
+  /** Calculation of the Master Key from the provided password failed */
+  ENCRYPTION_0003("Failed to generate Master Key from password"),
+
+  /** Could not encrypt the provided plaintext */
+  ENCRYPTION_0004("Failed to perform encryption"),
+
+  /** HMAC calculation failed */
+  ENCRYPTION_0005("Failed to calculate HMAC"),
+
+  /** Could not decrypt the provided ciphertext */
+  ENCRYPTION_0006("Failed to perform decryption"),
+
+  /** Could not execute the generator script to create a password */
+  ENCRYPTION_0007("Failed to execute password generator"),
+
+  /** No password or password generator found in the configuration file */
+  ENCRYPTION_0008("No password or password generator set"),
+
+  /** One of the necessary configuration entries for encryption is missing */
+  ENCRYPTION_0009("Invalid configuration"),
+
+  /** HMAC validation failed for input, it may have been tampered with */
+  ENCRYPTION_0010("HMAC validation failed for input"),
+
+  /** The HMAC algorithm specified in configuration could not be found */
+  ENCRYPTION_0011("HMAC algorithm not found"),
+
+  ;
+
 
   private final String message;
 

@@ -42,6 +42,7 @@ import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.model.InputEditable;
@@ -65,11 +66,14 @@ import org.apache.sqoop.model.MLinkConfig;
 import org.apache.sqoop.model.MListInput;
 import org.apache.sqoop.model.MLongInput;
 import org.apache.sqoop.model.MMapInput;
+import org.apache.sqoop.model.MMasterKey;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.repository.JdbcRepositoryHandler;
+import org.apache.sqoop.repository.MasterKeyManager;
+import org.apache.sqoop.security.SecurityConstants;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
@@ -1147,6 +1151,56 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MMasterKey getMasterKey(Connection conn) {
+    try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtSelectSqMasterKey())) {
+      stmt.setMaxRows(1);
+
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (!rs.next()) {
+          return null;
+        }
+
+        String aesKey = rs.getString(1);
+        String hmac = rs.getString(2);
+        String salt = rs.getString(3);
+        String iv = rs.getString(4);
+
+        return new MMasterKey(aesKey, hmac, salt, iv);
+      }
+    } catch (SQLException ex) {
+      logException(ex);
+      throw new SqoopException(CommonRepositoryError.COMMON_0059, ex);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void createMasterKey(MMasterKey mMasterKey, Connection conn) {
+    int result;
+    try (PreparedStatement preparedStatement = conn.prepareStatement(crudQueries.getStmtInsertSqMasterKey(),
+      Statement.RETURN_GENERATED_KEYS)) {
+      preparedStatement.setString(1, mMasterKey.getEncryptedSecret());
+      preparedStatement.setString(2, mMasterKey.getHmac());
+      preparedStatement.setString(3, mMasterKey.getSalt());
+      preparedStatement.setString(4, mMasterKey.getIv());
+
+      result = preparedStatement.executeUpdate();
+      if (result != 1) {
+        throw new SqoopException(CommonRepositoryError.COMMON_0009,
+          Integer.toString(result));
+      }
+    } catch (SQLException ex) {
+      logException(ex, mMasterKey);
+      throw new SqoopException(CommonRepositoryError.COMMON_0031, ex);
+    }
+  }
+
   private void insertConnectorDirection(Long connectorId, Direction direction, Connection conn)
       throws SQLException {
     try (PreparedStatement stmt = conn.prepareStatement(crudQueries.getStmtInsertSqConnectorDirections())) {
@@ -2071,8 +2125,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             // get the overrides value from the SQ_INPUT_RELATION table
             String overrides = getOverrides(inputId, conn);
             String inputEnumValues = rsetInput.getString(9);
-            String value = rsetInput.getString(10);
-
+            String value = readInputValue(rsetInput.getString(10), rsetInput.getBoolean(11), rsetInput.getString(12), rsetInput.getString(13));
             MInputType mit = MInputType.valueOf(inputType);
             MInput input = null;
             switch (mit) {
@@ -2184,7 +2237,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         while (inputResults.next()) {
           long inputId = inputResults.getLong(1);
           String inputName = inputResults.getString(2);
-          String value = inputResults.getString(10);
+          String value = readInputValue(inputResults.getString(10), inputResults.getBoolean(11), inputResults.getString(12), inputResults.getString(13));
           if (mConfig.getName().equals(configName) && mConfig.getInputNames().contains(inputName)) {
             MInput mInput = mConfig.getInput(inputName);
             mInput.setPersistenceId(inputId);
@@ -2196,6 +2249,24 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           }
         }
       }
+    }
+  }
+
+
+  /**
+   * Reads the value of an input, while handling the possibility that the input is encrypted
+   *
+   * @param possiblyEncryptedValue Cleartext or base64 encoded ciphertext representing the input
+   * @param encrypted Is the input encrypted
+   * @param iv Encryption initialization vector
+   * @param hmac HMAC for tamper resistance
+   * @return The input value
+   */
+  private String readInputValue(String possiblyEncryptedValue, boolean encrypted, String iv, String hmac) throws SqoopException {
+    if (encrypted) {
+      return MasterKeyManager.getInstance().decryptWithMasterKey(possiblyEncryptedValue, iv, hmac);
+    } else {
+      return possiblyEncryptedValue;
     }
   }
 
@@ -2247,7 +2318,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             // get the overrides value from the SQ_INPUT_RELATION table
             String overrides = getOverrides(inputId, conn);
             String inputEnumValues = rsetInput.getString(9);
-            String value = rsetInput.getString(10);
+            String value = readInputValue(rsetInput.getString(10), rsetInput.getBoolean(11), rsetInput.getString(12), rsetInput.getString(13));
 
             MInputType mit = MInputType.valueOf(inputType);
 
@@ -2401,24 +2472,40 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
       throws SQLException {
     int result;
 
-    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+    boolean encryptionEnabled = SqoopConfiguration.getInstance().getContext().getBoolean(SecurityConstants.REPO_ENCRYPTION_ENABLED, false);
+    MasterKeyManager masterKeyManager = MasterKeyManager.getInstance();
       for (MConfig config : configs) {
         for (MInput<?> input : config.getInputs()) {
           // Skip empty values as we're not interested in storing those in db
           if (input.isEmpty()) {
             continue;
           }
-          stmt.setLong(1, id);
-          stmt.setLong(2, input.getPersistenceId());
-          stmt.setString(3, input.getUrlSafeValueString());
 
-          result = stmt.executeUpdate();
+          try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setLong(1, id);
+            stmt.setLong(2, input.getPersistenceId());
+            if (input.isSensitive() && encryptionEnabled) {
+              String iv = MasterKeyManager.getInstance().generateRandomIv();
+              String hmac = null;
+              String encryptedInput = masterKeyManager.encryptWithMasterKey(input.getUrlSafeValueString(), iv);
+              stmt.setString(3, encryptedInput);
+              hmac = masterKeyManager.generateHmacWithMasterHmacKey(encryptedInput);
+              stmt.setBoolean(4, true);
+              stmt.setString(5, iv);
+              stmt.setString(6, hmac);
+            } else {
+              stmt.setString(3, input.getUrlSafeValueString());
+              stmt.setBoolean(4, false);
+              stmt.setNull(5, Types.VARCHAR);
+              stmt.setNull(6, Types.VARCHAR);
+            }
+            result = stmt.executeUpdate();
+          }
           if (result != 1) {
             throw new SqoopException(CommonRepositoryError.COMMON_0017, Integer.toString(result));
           }
         }
       }
-    }
   }
 
   /**

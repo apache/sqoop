@@ -25,6 +25,7 @@ import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MMasterKey;
 import org.apache.sqoop.model.MSubmission;
 
 /**
@@ -464,5 +465,21 @@ public abstract class JdbcRepositoryHandler {
    * @return Most recent submission
    */
   public abstract MSubmission findLastSubmissionForJob(String jobName, Connection conn);
+
+  /**
+   * Read the master key from the database
+   *
+   * @param conn Connection to the repository
+   * @return MMasterKey representing the Master Key
+   */
+  public abstract MMasterKey getMasterKey(Connection conn);
+
+  /**
+   * Create the master key in the database
+   *
+   * @param mMasterKey MMasterKey representing the Master Key
+   * @param conn Connection to the repository
+   */
+  public abstract void createMasterKey(MMasterKey mMasterKey, Connection conn);
 
 }

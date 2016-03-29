@@ -36,6 +36,7 @@ public class MysqlRepositoryInsertUpdateDeleteSelectQuery extends
     CommonRepositoryInsertUpdateDeleteSelectQuery {
 
   // DML: Get inputs for a given config
+  // MySQL requires that we cast to null to char instead of varchar
   private static final String STMT_SELECT_INPUT = "SELECT "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + ", "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQI_NAME) + ", "
@@ -46,6 +47,9 @@ public class MysqlRepositoryInsertUpdateDeleteSelectQuery extends
       + CommonRepoUtils.escapeColumnName(COLUMN_SQI_STRLENGTH) + ", "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQI_EDITABLE) + ", "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ENUMVALS) + ", "
+      + "cast(null as char(100)),"
+      + "false,"
+      + "cast(null as char(100)),"
       + "cast(null as char(100))" + " FROM "
       + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
       + " WHERE " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG)

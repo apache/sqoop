@@ -22,6 +22,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.core.ConfigurationConstants;
 import org.apache.sqoop.common.test.repository.RepositoryProviderFactory;
+import org.apache.sqoop.security.SecurityConstants;
 import org.apache.sqoop.test.kdc.KdcRunner;
 
 import java.io.File;
@@ -230,6 +231,16 @@ public abstract class SqoopMiniCluster {
     properties.put("org.apache.sqoop.authentication.proxyuser." + user + ".hosts", "*");
     properties.put("org.apache.sqoop.authentication.proxyuser." + "hadoop" + ".groups", "*");
     properties.put("org.apache.sqoop.authentication.proxyuser." + "hadoop" + ".hosts", "*");
+
+    properties.put("org.apache.sqoop.security.repo_encryption.enabled", String.valueOf(true));
+    properties.put("org.apache.sqoop.security.repo_encryption.password_generator", "echo youwillnevergetthis");
+    properties.put("org.apache.sqoop.security.repo_encryption.hmac_algorithm", "HmacSHA256");
+    properties.put("org.apache.sqoop.security.repo_encryption.cipher_algorithm", "AES");
+    properties.put("org.apache.sqoop.security.repo_encryption.cipher_key_size", "16");
+    properties.put("org.apache.sqoop.security.repo_encryption.initialization_vector_size", "16");
+    properties.put("org.apache.sqoop.security.repo_encryption.cipher_spec", "AES/CBC/PKCS5Padding");
+    properties.put("org.apache.sqoop.security.repo_encryption.pbkdf2_algorithm", "PBKDF2WithHmacSHA1");
+    properties.put("org.apache.sqoop.security.repo_encryption.pbkdf2_rounds", "4000");
 
     return properties;
   }

@@ -22,6 +22,7 @@ import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.JobManager;
+import org.apache.sqoop.repository.MasterKeyManager;
 import org.apache.sqoop.repository.RepositoryManager;
 import org.apache.sqoop.security.AuthenticationManager;
 import org.apache.sqoop.security.AuthorizationManager;
@@ -39,6 +40,7 @@ public class SqoopServer {
     JobManager.getInstance().destroy();
     Driver.getInstance().destroy();
     ConnectorManager.getInstance().destroy();
+    MasterKeyManager.getInstance().destroy();
     RepositoryManager.getInstance().destroy();
     AuditLoggerManager.getInstance().destroy();
     AuthorizationManager.getInstance().destroy();
@@ -56,6 +58,7 @@ public class SqoopServer {
       AuthorizationManager.getInstance().initialize();
       AuditLoggerManager.getInstance().initialize();
       RepositoryManager.getInstance().initialize();
+      MasterKeyManager.getInstance().initialize();
       ConnectorManager.getInstance().initialize();
       Driver.getInstance().initialize();
       JobManager.getInstance().initialize();

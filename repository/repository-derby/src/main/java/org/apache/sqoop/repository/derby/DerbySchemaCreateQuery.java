@@ -181,6 +181,10 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  * <p>
  * <strong>SQ_LINK_INPUT</strong>: N:M relationship link and input
  *
+ * SQ_LNKI_IV and SQ_LNKI_HMAC length determined by a generous assumption of the maximum length
+ * of the base64 encoded values. Calculated by ceil((4/3)(1024/8)). Where
+ * 1024 is the maximum possible key size in bits for the IV and the digest.
+ *
  * <pre>
  *    +----------------------------+
  *    | SQ_LINK_INPUT              |
@@ -188,12 +192,19 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_LNKI_LINK: BIGINT PK    | FK SQ_LINK(SQ_LNK_ID)
  *    | SQ_LNKI_INPUT: BIGINT PK   | FK SQ_INPUT(SQI_ID)
  *    | SQ_LNKI_VALUE: LONG VARCHAR|
+ *    | SQ_LNKI_ENCRYPTED: BOOLEAN |
+ *    | SQ_LNKI_IV: VARCHAR(171)    |
+ *    | SQ_LNKI_HMAC: VARCHAR(171) |
  *    +----------------------------+
  * </pre>
  *
  * </p>
  * <p>
  * <strong>SQ_JOB_INPUT</strong>: N:M relationship job and input
+ *
+ * SQ_LNKI_IV and SQ_LNKI_HMAC length determined by a generous assumption of the maximum length
+ * of the base64 encoded values. Calculated by ceil((4/3)(1024/8)). Where
+ * 1024 is the maximum possible key size in bits for the IV and the digest.
  *
  * <pre>
  *    +----------------------------+
@@ -202,6 +213,9 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQBI_JOB: BIGINT PK        | FK SQ_JOB(SQB_ID)
  *    | SQBI_INPUT: BIGINT PK      | FK SQ_INPUT(SQI_ID)
  *    | SQBI_VALUE: LONG VARCHAR   |
+ *    | SQBI_ENCRYPTED: BOOLEAN    |
+ *    | SQBI_IV: VARCHAR(24)       |
+ *    | SQBI_HMAC: VARCHAR(171)    |
  *    +----------------------------+
  * </pre>
  *
@@ -308,6 +322,34 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQCO_PROPERTY: BIGINT      | FK SQ_CONTEXT_PROPERTY(SQCP_ID)
  *    | SQCO_VALUE: VARCHAR(500)   |
  *    +----------------------------+
+ * </pre>
+ * </p>
+ * <p>
+ * <strong>SQ_MASTER_KEY</strong>: Master Key for sensitive value encryption
+ *
+ * SQMK_SECRET length determined by a generous assumption of the maximum length
+ * of the base64 encoded secret. Calculated by ceil((4/3)(1024/8+1024/8)). Where
+ * 1024 is the maximum possible key size in bits for encryption and HMAC.
+ *
+ * SQMK_HMAC length is determined in a similar way to SQ_MASTER_KEY: ceil((4/3)(1024/8))
+ * where 1024 is the maximum possible size of the digest in bits.
+ *
+ * SQMK_SALT length is determined in a similar way to SQ_MASTER_KEY: ceil((4/3)(1024/8))
+ * where 1024 is the maximum possible size of the salt in bits.
+ *
+ * SQMK_IV length is determined in a similar way to SQ_MASTER_KEY: ceil((4/3)(128))
+ * where 128 is the maximum possible size of the salt in bytes.
+ *
+ * <pre>
+ *    +---------------------------+
+ *    | SQ_MASTER_KEY             |
+ *    +---------------------------+
+ *    | SQMK_ID: BIGINT PK        |
+ *    | SQMK_SECRET: VARCHAR(342) |
+ *    | SQMK_HMAC: VARCHAR(171)   |
+ *    | SQMK_SALT: VARCHAR(171)   |
+ *    | SQMK_IV: VARCHAR(171)     |
+ *    +---------------------------+
  * </pre>
  * </p>
  */

@@ -42,6 +42,7 @@ import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
 import org.apache.sqoop.model.MLinkConfig;
+import org.apache.sqoop.model.MMasterKey;
 import org.apache.sqoop.model.MPersistableEntity;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.MToConfig;
@@ -328,6 +329,21 @@ public abstract class Repository {
    * @return Most recent submission
    */
   public abstract MSubmission findLastSubmissionForJob(String jobName);
+
+  /**
+   * Get the encrypted master key from the repository
+   *
+   * @return The encrypted master key, null if no master key exists
+   */
+  public abstract MMasterKey getMasterKey();
+
+
+  /**
+   * Create the encrypted master key in the repository
+   *
+   * @param mMasterKey The encrypted master key
+   */
+  public abstract void createMasterKey(MMasterKey mMasterKey);
 
 
   /*********************Configurable Upgrade APIs ******************************/

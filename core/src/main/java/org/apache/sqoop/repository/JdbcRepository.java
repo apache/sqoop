@@ -27,6 +27,7 @@ import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MMasterKey;
 import org.apache.sqoop.model.MSubmission;
 
 public class JdbcRepository extends Repository {
@@ -653,6 +654,36 @@ public class JdbcRepository extends Repository {
           throw new SqoopException(RepositoryError.JDBCREPO_0020, "Invalid name: " + jobName);
         }
         return handler.findLastSubmissionForJob(jobName, conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MMasterKey getMasterKey() {
+    return (MMasterKey) doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) throws Exception {
+        return handler.getMasterKey(conn);
+      }
+    });
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void createMasterKey(final MMasterKey mMasterKey) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        if(mMasterKey.hasPersistenceId()) {
+          throw new SqoopException(RepositoryError.JDBCREPO_0023);
+        }
+        handler.createMasterKey(mMasterKey, conn);
+        return null;
       }
     });
   }

@@ -216,6 +216,8 @@ public enum CommonRepositoryError implements ErrorCode {
   COMMON_0057("Unable to load specific connector"),
 
   COMMON_0058("Resource doesn't exist"),
+
+  COMMON_0059("Unable to retrieve master key"),
   ;
 
   private final String message;

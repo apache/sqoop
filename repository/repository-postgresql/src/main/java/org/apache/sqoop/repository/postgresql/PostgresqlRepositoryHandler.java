@@ -145,6 +145,13 @@ public class PostgresqlRepositoryHandler extends CommonRepositoryHandler {
       runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_JOB_UPDATE_COLUMN_SQB_NAME, conn);
       runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_JOB_ALTER_COLUMN_SQB_NAME_NOT_NULL, conn);
       runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_CONFIGURABLE_ALTER_COLUMN_SQB_NAME_NOT_NULL, conn);
+      runQuery(PostgresqlSchemaUpgradeQuery.QUERY_CREATE_TABLE_SQ_MASTER_KEY, conn);
+      runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_ENCRYPTED, conn);
+      runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_IV, conn);
+      runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_JOB_INPUT_WITH_HMAC, conn);
+      runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_ENCRYPTED, conn);
+      runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_IV, conn);
+      runQuery(PostgresqlSchemaUpgradeQuery.QUERY_UPGRADE_TABLE_SQ_LINK_INPUT_WITH_HMAC, conn);
     }
 
     try (PreparedStatement stmtDel = conn.prepareStatement(PostgresqlSchemaQuery.STMT_DELETE_SYSTEM);

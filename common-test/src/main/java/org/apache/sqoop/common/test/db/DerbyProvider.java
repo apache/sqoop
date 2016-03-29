@@ -43,6 +43,10 @@ public class DerbyProvider extends DatabaseProvider {
 
   public static final String DRIVER = "org.apache.derby.jdbc.ClientDriver";
 
+  private static String DERBY_USERNAME = "sqoop2";
+
+  private static String DERBY_PASSWORD = "encryptme";
+
   // Used port for this instance
   int port;
 
@@ -62,7 +66,7 @@ public class DerbyProvider extends DatabaseProvider {
       port = NetworkUtils.findAvailablePort();
       LOG.info("Will bind to port " + port);
 
-      server = new NetworkServerControl(InetAddress.getByName("localhost"), port);
+      server = new NetworkServerControl(InetAddress.getByName("localhost"), port, DERBY_USERNAME, DERBY_PASSWORD);
       server.start(new LoggerWriter(LOG, Level.INFO));
 
       // Start won't thrown an exception in case that it fails to start, one
@@ -160,12 +164,12 @@ public class DerbyProvider extends DatabaseProvider {
 
   @Override
   public String getConnectionUsername() {
-    return null;
+    return DERBY_USERNAME;
   }
 
   @Override
   public String getConnectionPassword() {
-    return null;
+    return DERBY_PASSWORD;
   }
 
   @Override
