@@ -114,7 +114,7 @@ public final class AvroUtil {
    * Format candidate to avro specifics
    */
   public static String toAvroIdentifier(String candidate) {
-    String formattedCandidate = candidate.replaceAll("\\W+", "");
+    String formattedCandidate = candidate.replaceAll("\\W+", "_");
     if (formattedCandidate.substring(0,1).matches("[a-zA-Z_]")) {
       return formattedCandidate;
     } else {

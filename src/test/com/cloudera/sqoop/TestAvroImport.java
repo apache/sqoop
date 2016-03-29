@@ -85,20 +85,24 @@ public class TestAvroImport extends ImportJobTestCase {
   }
 
   public void testAvroImport() throws IOException {
+    this.setCurTableName("Avro_Import_Test");
     avroImportTestHelper(null, null);
   }
 
   public void testDeflateCompressedAvroImport() throws IOException {
+    this.setCurTableName("Deflate_Compressed_Avro_Import_Test_1");
     avroImportTestHelper(new String[] {"--compression-codec",
       "org.apache.hadoop.io.compress.DefaultCodec", }, "deflate");
   }
 
   public void testDefaultCompressedAvroImport() throws IOException {
+    this.setCurTableName("Deflate_Compressed_Avro_Import_Test_2");
     avroImportTestHelper(new String[] {"--compress", }, "deflate");
   }
 
   public void testUnsupportedCodec() throws IOException {
     try {
+      this.setCurTableName("Deflate_Compressed_Avro_Import_Test_3");
       avroImportTestHelper(new String[] {"--compression-codec", "foobar", },
         null);
       fail("Expected IOException");
@@ -212,6 +216,7 @@ public class TestAvroImport extends ImportJobTestCase {
     String [] names = { "avro\uC3A11" };
     String [] types = { "INT" };
     String [] vals = { "1987" };
+    this.setCurTableName("Non_Std_Character_Test");
     createTableWithColTypesAndNames(names, types, vals);
 
     runImport(getOutputArgv(true, null));
@@ -223,10 +228,10 @@ public class TestAvroImport extends ImportJobTestCase {
     List<Field> fields = schema.getFields();
     assertEquals(types.length, fields.size());
 
-    checkField(fields.get(0), "AVRO1", Type.INT);
+    checkField(fields.get(0), "AVRO_1", Type.INT);
 
     GenericRecord record1 = reader.next();
-    assertEquals("AVRO1", 1987, record1.get("AVRO1"));
+    assertEquals("AVRO_1", 1987, record1.get("AVRO_1"));
   }
 
   public void testNonIdentCharactersInColumnName() throws IOException {
@@ -248,6 +253,33 @@ public class TestAvroImport extends ImportJobTestCase {
 
     GenericRecord record1 = reader.next();
     assertEquals("TEST_A_V_R_O", 2015, record1.get("TEST_A_V_R_O"));
+  }
+
+  /*
+   * Test Case For checking multiple columns having non standard characters in multiple columns
+   */
+  public void testNonstandardCharactersInMultipleColumns() throws IOException {
+    String[] names = { "id$1", "id1$" };
+    String[] types = { "INT", "INT" };
+    String[] vals = { "1987", "1988" };
+    this.setCurTableName("Non_Std_Character_Test_For_Multiple_Columns");
+    createTableWithColTypesAndNames(names, types, vals);
+
+    runImport(getOutputArgv(true, null));
+
+    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+    DataFileReader<GenericRecord> reader = read(outputFile);
+    Schema schema = reader.getSchema();
+    assertEquals(Schema.Type.RECORD, schema.getType());
+    List<Field> fields = schema.getFields();
+    assertEquals(types.length, fields.size());
+
+    checkField(fields.get(0), "ID_1", Type.INT);
+
+    GenericRecord record1 = reader.next();
+    assertEquals("ID_1", 1987, record1.get("ID_1"));
+    checkField(fields.get(1), "ID1_", Type.INT);
+    assertEquals("ID1_", 1988, record1.get("ID1_"));
   }
 
   protected void checkField(Field field, String name, Type type) {
