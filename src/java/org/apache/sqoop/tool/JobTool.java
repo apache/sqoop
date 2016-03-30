@@ -28,6 +28,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -50,6 +51,7 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(
       JobTool.class.getName());
+  private static final String DASH_STR  = "--";
 
   private enum JobOp {
     JobCreate,
@@ -210,7 +212,35 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     SqoopOptions clonedOpts = (SqoopOptions) childOpts.clone();
     clonedOpts.setParent(childOpts);
 
-    return childTool.run(clonedOpts);
+    String [] childArgv = childOpts.getExtraArgs();
+    if (childArgv == null || childArgv.length == 0) {
+        childArgv = new String[0];
+    }
+
+    int dashPos = getDashPosition(extraArguments);
+    if (dashPos < extraArguments.length) {
+        String[] extraArgs = Arrays.copyOfRange(extraArguments, dashPos + 1,
+                extraArguments.length);
+        if (childArgv == null || childArgv.length == 0) {
+            childArgv = extraArgs;
+        } else {
+            // Find the second dash pos
+            int dashPos2 = getDashPosition(extraArgs);
+            if (dashPos2 >= extraArgs.length) {
+                // if second dash is not present add it
+                extraArgs = ArrayUtils.addAll(extraArgs, DASH_STR);
+            }
+            childArgv = ArrayUtils.addAll(extraArgs, childArgv);
+        }
+    }
+
+    int confRet = configureChildTool(clonedOpts, childTool, childArgv);
+    if (0 != confRet) {
+        // Error.
+        return confRet;
+    }
+
+      return childTool.run(clonedOpts);
   }
 
   private int showJob(SqoopOptions opts) throws IOException {
