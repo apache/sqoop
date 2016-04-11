@@ -111,15 +111,44 @@ public final class AvroUtil {
   }
 
   /**
+   * Helper function for toAvroIdentifier.
+   */
+  private static boolean isWordCharacter(char c) {
+      return (c >= 'a' && c <= 'z') ||
+             (c >= 'A' && c <= 'Z') ||
+             (c >= '0' && c <= '9') ||
+             (c == '_');
+  }
+
+  /**
    * Format candidate to avro specifics
    */
   public static String toAvroIdentifier(String candidate) {
-    String formattedCandidate = candidate.replaceAll("\\W+", "_");
-    if (formattedCandidate.substring(0,1).matches("[a-zA-Z_]")) {
+      String formattedCandidate;
+      int n = candidate.length();
+      char[] data = new char[n];
+
+      int stringIndex = 0;
+      for (int i = 0; i < n; ++i) {
+          if (!isWordCharacter(candidate.charAt(i))) {
+              ++i;
+              while (i < n && !isWordCharacter(candidate.charAt(i)))
+                  ++i;
+              if (i == n)
+                  break;
+          }
+          data[stringIndex++] = candidate.charAt(i);
+      }
+      char initial = data[0];
+      if ((initial >= 'a' && initial <= 'z') || 
+          (initial) >= 'A' && initial <= 'Z' || 
+          (initial == '_') ) {
+          formattedCandidate = new String(data).trim();
+      } else {
+          formattedCandidate = new String("AVRO_" + new String(data).trim());
+      }
+
       return formattedCandidate;
-    } else {
-      return "AVRO_" + formattedCandidate;
-    }
   }
 
   /**
