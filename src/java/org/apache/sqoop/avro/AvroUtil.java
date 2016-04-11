@@ -111,44 +111,21 @@ public final class AvroUtil {
   }
 
   /**
-   * Helper function for toAvroIdentifier.
-   */
-  private static boolean isWordCharacter(char c) {
-      return (c >= 'a' && c <= 'z') ||
-             (c >= 'A' && c <= 'Z') ||
-             (c >= '0' && c <= '9') ||
-             (c == '_');
-  }
-
-  /**
    * Format candidate to avro specifics
    */
   public static String toAvroIdentifier(String candidate) {
-      String formattedCandidate;
-      int n = candidate.length();
-      char[] data = new char[n];
+        char[] data = candidate.toCharArray();
+        int stringIndex = 0;
 
-      int stringIndex = 0;
-      for (int i = 0; i < n; ++i) {
-          if (!isWordCharacter(candidate.charAt(i))) {
-              ++i;
-              while (i < n && !isWordCharacter(candidate.charAt(i)))
-                  ++i;
-              if (i == n)
-                  break;
-          }
-          data[stringIndex++] = candidate.charAt(i);
-      }
-      char initial = data[0];
-      if ((initial >= 'a' && initial <= 'z') || 
-          (initial) >= 'A' && initial <= 'Z' || 
-          (initial == '_') ) {
-          formattedCandidate = new String(data).trim();
-      } else {
-          formattedCandidate = new String("AVRO_" + new String(data).trim());
-      }
+        for(char c:data)
+            if(Character.isLetterOrDigit(c) || c == '_')
+                data[stringIndex++] = c;
 
-      return formattedCandidate;
+        char initial = data[0];
+        if(Character.isLetter(initial) || initial == '_')
+            return new String(data, 0, stringIndex);
+        else
+            return "AVRO_".concat(new String(data, 0, stringIndex));
   }
 
   /**
