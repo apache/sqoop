@@ -33,7 +33,6 @@ import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.driver.DriverUpgrader;
 import org.apache.sqoop.json.DriverBean;
 import org.apache.sqoop.model.ConfigUtils;
-import org.apache.sqoop.model.MConfig;
 import org.apache.sqoop.model.MConfigList;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.model.MDriver;
@@ -332,19 +331,40 @@ public abstract class Repository {
 
   /**
    * Get the encrypted master key from the repository
+   * There should only be one unless the repository encryption tool is in use
    *
    * @return The encrypted master key, null if no master key exists
    */
-  public abstract MMasterKey getMasterKey();
+  public abstract MMasterKey getMasterKey(RepositoryTransaction tx);
 
 
   /**
    * Create the encrypted master key in the repository
    *
-   * @param mMasterKey The encrypted master key
+   * @param mMasterKey The encrypted master key. Its persistenceId will be populated
    */
-  public abstract void createMasterKey(MMasterKey mMasterKey);
+  public abstract void createMasterKey(MMasterKey mMasterKey, RepositoryTransaction tx);
 
+  /**
+   * Delete the master key record for the given id
+   *
+   * @param masterKeyId id of the master key to delete
+   * @param tx Transaction to perform the change within
+   */
+  public abstract void deleteMasterKey(long masterKeyId, RepositoryTransaction tx);
+
+  /**
+   * Change MasterKeyManager for inputs
+   *
+   * @param fromMasterKeyManager The master key manager that currently represents
+   *                             the encryption strategy for the inputs.
+   *                             null if the inputs are not currently encrypted
+   * @param toMasterKeyManager The master key manager that will represent the
+   *                           encryption strategy for the inputs.
+   *                           null if we would like to decrypt the inputs
+   * @param tx Transaction to perform the change within
+   */
+  public abstract void changeMasterKeyManager(MasterKeyManager fromMasterKeyManager, MasterKeyManager toMasterKeyManager, RepositoryTransaction tx);
 
   /*********************Configurable Upgrade APIs ******************************/
 

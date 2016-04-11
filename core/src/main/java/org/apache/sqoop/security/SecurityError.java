@@ -102,6 +102,12 @@ public enum SecurityError implements ErrorCode {
   /** The HMAC algorithm specified in configuration could not be found */
   ENCRYPTION_0011("HMAC algorithm not found"),
 
+  /** An error occured when running the repository encryption tool */
+  ENCRYPTION_0012("Failed to run repository encryption tool"),
+
+  /** An error occured when running the repository encryption tool */
+  ENCRYPTION_0013("Repository is encrypted, need configuration to decrypt"),
+
   ;
 
 

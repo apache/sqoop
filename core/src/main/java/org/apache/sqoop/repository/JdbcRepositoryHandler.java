@@ -477,9 +477,28 @@ public abstract class JdbcRepositoryHandler {
   /**
    * Create the master key in the database
    *
-   * @param mMasterKey MMasterKey representing the Master Key
+   * @param mMasterKey MMasterKey representing the Master Key, this method populates
+   *                   its persistence id
    * @param conn Connection to the repository
    */
   public abstract void createMasterKey(MMasterKey mMasterKey, Connection conn);
+
+  /**
+   * Delete the master key from the database
+   *
+   * @param conn Connection to the repository
+   */
+  public abstract void deleteMasterKey(long masterKeyId, Connection conn);
+
+  /**
+   * Change MasterKeyManager for inputs
+   *
+   * @param fromMasterKeyManager The master key manager that currently represents
+   *                             the encryption strategy for the inputs
+   * @param toMasterKeyManager The master key manager that will represent the
+   *                           encryption strategy for the inputs
+   * @param conn Connection to the repository
+   */
+  public abstract void changeMasterKeyManager(MasterKeyManager fromMasterKeyManager, MasterKeyManager toMasterKeyManager, Connection conn);
 
 }

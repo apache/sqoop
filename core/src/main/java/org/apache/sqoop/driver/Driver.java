@@ -114,10 +114,6 @@ public class Driver implements Reconfigurable {
   }
 
   private Driver() {
-    List<MConfig> driverConfig = ConfigUtils.toConfigs(getDriverJobConfigurationClass());
-    List<MValidator> mValidators = ConfigUtils.getMValidatorsFromConfigurationClass(getDriverJobConfigurationClass());
-    mDriver = new MDriver(new MDriverConfig(driverConfig, mValidators), DriverBean.CURRENT_DRIVER_VERSION);
-
     // Build upgrader
     driverUpgrader = new DriverUpgrader();
   }
@@ -130,15 +126,20 @@ public class Driver implements Reconfigurable {
   public synchronized void initialize(boolean autoUpgrade) {
     LOG.trace("Begin Driver initialization");
 
+    List<MConfig> driverConfig = ConfigUtils.toConfigs(getDriverJobConfigurationClass());
+    List<MValidator> mValidators = ConfigUtils.getMValidatorsFromConfigurationClass(getDriverJobConfigurationClass());
+
     // Register driver in repository
-    mDriver = RepositoryManager.getInstance().getRepository().registerDriver(mDriver, autoUpgrade);
+    mDriver = RepositoryManager.getInstance().getRepository().registerDriver(
+      new MDriver(new MDriverConfig(driverConfig, mValidators),
+      DriverBean.CURRENT_DRIVER_VERSION), autoUpgrade);
 
     SqoopConfiguration.getInstance().getProvider().registerListener(new CoreConfigurationListener(this));
 
     LOG.info("Driver initialized: OK");
   }
 
-  public  synchronized void destroy() {
+  public synchronized void destroy() {
     LOG.trace("Begin Driver destroy");
   }
 

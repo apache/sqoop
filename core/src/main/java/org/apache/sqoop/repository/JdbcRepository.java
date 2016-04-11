@@ -662,20 +662,20 @@ public class JdbcRepository extends Repository {
    * {@inheritDoc}
    */
   @Override
-  public MMasterKey getMasterKey() {
+  public MMasterKey getMasterKey(RepositoryTransaction txn) {
     return (MMasterKey) doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) throws Exception {
         return handler.getMasterKey(conn);
       }
-    });
+    }, (JdbcRepositoryTransaction) txn);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void createMasterKey(final MMasterKey mMasterKey) {
+  public void createMasterKey(final MMasterKey mMasterKey, RepositoryTransaction txn) {
     doWithConnection(new DoWithConnection() {
       @Override
       public Object doIt(Connection conn) {
@@ -685,7 +685,35 @@ public class JdbcRepository extends Repository {
         handler.createMasterKey(mMasterKey, conn);
         return null;
       }
-    });
+    }, (JdbcRepositoryTransaction) txn);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void deleteMasterKey(final long masterKeyId, RepositoryTransaction txn) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        handler.deleteMasterKey(masterKeyId, conn);
+        return null;
+      }
+    }, (JdbcRepositoryTransaction) txn);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void changeMasterKeyManager(final MasterKeyManager fromMasterKeyManager, final MasterKeyManager toMasterKeyManager, RepositoryTransaction txn) {
+    doWithConnection(new DoWithConnection() {
+      @Override
+      public Object doIt(Connection conn) {
+        handler.changeMasterKeyManager(fromMasterKeyManager, toMasterKeyManager, conn);
+        return null;
+      }
+    }, (JdbcRepositoryTransaction) txn);
   }
 
   @Override

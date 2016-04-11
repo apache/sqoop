@@ -19,6 +19,7 @@ package org.apache.sqoop.integration.tools;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.common.VersionInfo;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
@@ -28,16 +29,18 @@ import org.apache.sqoop.model.*;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.test.infrastructure.Infrastructure;
 import org.apache.sqoop.test.infrastructure.SqoopTestCase;
+import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProvider;
+import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.minicluster.JettySqoopMiniCluster;
 import org.apache.sqoop.test.utils.HdfsUtils;
 import org.apache.sqoop.tools.tool.JSONConstants;
 import org.apache.sqoop.tools.tool.RepositoryDumpTool;
 import org.apache.sqoop.tools.tool.RepositoryLoadTool;
 import org.apache.sqoop.utils.UrlSafeUtils;
 import org.json.simple.JSONObject;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.*;
 import java.util.List;
@@ -46,14 +49,24 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 @Test(groups = "no-real-cluster")
-@Infrastructure(dependencies = {KdcInfrastructureProvider.class, SqoopInfrastructureProvider.class})
+@Infrastructure(dependencies = {HadoopInfrastructureProvider.class})
 public class RepositoryDumpLoadToolTest extends SqoopTestCase {
 
+  private JettySqoopMiniCluster jettySqoopMiniCluster;
+  private SqoopClient client;
   private String jsonFilePath;
 
   // do the load test and insert data to repo first, then do the dump test.
-  @Test(dependsOnMethods = { "testLoad" })
+  @Test
   public void testDump() throws Exception {
+    // load data into repository
+    RepositoryLoadTool rlt = new RepositoryLoadTool();
+    rlt.setInTest(true);
+    rlt.runToolWithConfiguration(new String[]{"-i", jsonFilePath});
+    verifyLinks(client.getLinks());
+    verifyJobs(client.getJobs());
+    verifySubmissions(client.getSubmissions());
+
     // dump the repository
     RepositoryDumpTool rdt = new RepositoryDumpTool();
     rdt.setInTest(true);
@@ -87,16 +100,6 @@ public class RepositoryDumpLoadToolTest extends SqoopTestCase {
     }
   }
 
-  @Test
-  public void testLoad() throws Exception {
-    RepositoryLoadTool rlt = new RepositoryLoadTool();
-    rlt.setInTest(true);
-    rlt.runToolWithConfiguration(new String[]{"-i", jsonFilePath});
-    verifyLinks(getClient().getLinks());
-    verifyJobs(getClient().getJobs());
-    verifySubmissions(getClient().getSubmissions());
-  }
-
   private void verifyLinks(List<MLink> links) {
     for (MLink link : links) {
       String linkName = link.getName();
@@ -126,8 +129,15 @@ public class RepositoryDumpLoadToolTest extends SqoopTestCase {
     assertEquals(submission.getStatus(), SubmissionStatus.SUCCEEDED);
   }
 
-  // generate the json file without the license
   @BeforeMethod
+  private void startCluster() throws Exception {
+    jettySqoopMiniCluster = new JettySqoopMiniCluster(HdfsUtils.joinPathFragments(super.getTemporaryPath(), this.getClass().getName()), getHadoopConf());
+    jettySqoopMiniCluster.start();
+    client = new SqoopClient(jettySqoopMiniCluster.getServerUrl());
+  }
+
+  // generate the json file without the license
+  @BeforeMethod(dependsOnMethods = { "startCluster" })
   public void prepareJsonFile() throws Exception {
     String testFilePath = getClass().getResource("/repoLoadToolTest.json").getPath();
     jsonFilePath = HdfsUtils.joinPathFragments(getTemporaryPath(), "repoLoadTest.json");
@@ -140,12 +150,17 @@ public class RepositoryDumpLoadToolTest extends SqoopTestCase {
           // for hdfs connector, DirectoryExistsValidator is responsible for validation
           // replace the link config dir by the local path.
           if  (line.indexOf("linkConfReplacement") > 0) {
-            line = line.replaceAll("linkConfReplacement", UrlSafeUtils.urlEncode(getSqoopMiniClusterTemporaryPath() + "/config/"));
+            line = line.replaceAll("linkConfReplacement", UrlSafeUtils.urlEncode(jettySqoopMiniCluster.getTemporaryPath() + "/config/"));
           }
           writer.write(line);
         }
       }
       writer.flush();
     }
+  }
+
+  @AfterMethod
+  private void stopCluster() throws Exception {
+    jettySqoopMiniCluster.stop();
   }
 }

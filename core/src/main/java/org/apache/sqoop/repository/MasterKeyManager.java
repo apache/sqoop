@@ -53,6 +53,9 @@ public class MasterKeyManager {
   private int pbkdf2Rounds;
   private int ivLength;
 
+  private RepositoryTransaction repositoryTransaction;
+  private MMasterKey mMasterKey;
+
   private SecretKey masterEncryptionKey;
   private SecretKey masterHmacKey;
 
@@ -64,7 +67,7 @@ public class MasterKeyManager {
     instance = new MasterKeyManager();
   }
 
-  private MasterKeyManager() {
+  public MasterKeyManager() {
   }
 
   public static MasterKeyManager getInstance() {
@@ -79,133 +82,177 @@ public class MasterKeyManager {
     initialize(true);
   }
 
-  public synchronized void initialize(boolean createMasterKey) throws SqoopException {
-    // This is used for the generation of random initialization vectors and salts
-    random = new SecureRandom();
+  public void initialize(boolean createMasterKey) throws SqoopException {
+    initialize(createMasterKey, false, null);
+  }
 
+  public void initialize(boolean createMasterKey, boolean createKeyEvenIfKeyExists, RepositoryTransaction repositoryTransactionArg) throws SqoopException {
     MapContext configurationContext = SqoopConfiguration.getInstance().getContext();
     if (configurationContext.getBoolean(SecurityConstants.REPO_ENCRYPTION_ENABLED, false)) {
 
       // Grab configuration from the sqoop properties file. All of this configuration is required
       // and an exception will be thrown if any of it is missing
-      hmacAlgorithm = populateStringConfiguration(configurationContext, SecurityConstants.REPO_ENCRYPTION_HMAC_ALGORITHM);
-      cipherAlgorithm = populateStringConfiguration(configurationContext, SecurityConstants.REPO_ENCRYPTION_CIPHER_ALGORITHM);
-      cipherSpec = populateStringConfiguration(configurationContext, SecurityConstants.REPO_ENCRYPTION_CIPHER_SPEC);
-      cipherKeySize = populateIntConfiguration(configurationContext, SecurityConstants.REPO_ENCRYPTION_CIPHER_KEY_SIZE);
-      ivLength = populateIntConfiguration(configurationContext, SecurityConstants.REPO_ENCRYPTION_INITIALIZATION_VECTOR_SIZE);
-      pbkdf2Algorithm = populateStringConfiguration(configurationContext, SecurityConstants.REPO_ENCRYPTION_PBKDF2_ALGORITHM);
-      pbkdf2Rounds = populateIntConfiguration(configurationContext, SecurityConstants.REPO_ENCRYPTION_PBKDF2_ROUNDS);
+      String hmacAlgorithm = populateStringConfiguration(configurationContext,
+        SecurityConstants.REPO_ENCRYPTION_HMAC_ALGORITHM);
+      String cipherAlgorithm = populateStringConfiguration(configurationContext,
+        SecurityConstants.REPO_ENCRYPTION_CIPHER_ALGORITHM);
+      String cipherSpec = populateStringConfiguration(configurationContext,
+        SecurityConstants.REPO_ENCRYPTION_CIPHER_SPEC);
+      int cipherKeySize = populateIntConfiguration(configurationContext,
+        SecurityConstants.REPO_ENCRYPTION_CIPHER_KEY_SIZE);
+      int ivLength = populateIntConfiguration(configurationContext,
+        SecurityConstants.REPO_ENCRYPTION_INITIALIZATION_VECTOR_SIZE);
+      String pbkdf2Algorithm = populateStringConfiguration(configurationContext,
+        SecurityConstants.REPO_ENCRYPTION_PBKDF2_ALGORITHM);
+      int pbkdf2Rounds = populateIntConfiguration(configurationContext,
+        SecurityConstants.REPO_ENCRYPTION_PBKDF2_ROUNDS);
 
-      // The size of the hmac key can be derived from the provided HMAC algorithm
-      try {
-        hmacKeySizeBytes = Mac.getInstance(hmacAlgorithm).getMacLength();
-      } catch (NoSuchAlgorithmException e) {
-        throw new SqoopException(SecurityError.ENCRYPTION_0011, e);
-      }
-
-      Repository repository = RepositoryManager.getInstance().getRepository();
-      String password = PasswordUtils.readPassword(configurationContext, SecurityConstants.REPO_ENCRYPTION_PASSWORD,
+      String password = PasswordUtils.readPassword(configurationContext,
+        SecurityConstants.REPO_ENCRYPTION_PASSWORD,
         SecurityConstants.REPO_ENCRYPTION_PASSWORD_GENERATOR);
-      if (StringUtils.isEmpty(password)) {
-        throw new SqoopException(SecurityError.ENCRYPTION_0008);
-      }
 
-      MMasterKey existingEncryptedMasterKey = repository.getMasterKey();
-      String salt;
-
-      if (existingEncryptedMasterKey == null) {
-        // Since the master key does not exist, we can generate a random salt that we will use
-        // for encryption of the Master Key
-        // We will use a salt that is the same size as the encryption key
-        salt = Base64.encodeBase64String(generateRandomByteArray(hmacKeySizeBytes));
-      } else {
-        // Since the master key already exists, we will read the salt from the repository
-        salt = existingEncryptedMasterKey.getSalt();
-      }
-
-      // Derive two keys (that we will be used to encrypt and verify the master key)
-      // from the configuration provided password and the salt we just read/created.
-      byte[] keyBytes = getKeysFromPassword(password, salt);
-      SecretKey passwordEncryptionKey = new SecretKeySpec(keyBytes, 0,
-        cipherKeySize, cipherAlgorithm);
-      SecretKey passwordHmacKey = new SecretKeySpec(keyBytes,
-        cipherKeySize, hmacKeySizeBytes, hmacAlgorithm);
-
-      byte[] masterEncryptionKeyBytes;
-      byte[] masterHmacKeyBytes;
-      if (existingEncryptedMasterKey == null) {
-        if (createMasterKey) {
-          // A master key does not exist so we must create one. We will simply
-          // use two random byte arrays for the encryption and hmac components.
-          // The sizes of these keys is determined by the values provided to
-          // configuration.
-          masterEncryptionKeyBytes = generateRandomByteArray(cipherKeySize);
-          masterHmacKeyBytes = generateRandomByteArray(hmacKeySizeBytes);
-
-          // The initialization vector for the encryption of the master key is
-          // randomly generated.
-          String iv = Base64.encodeBase64String(generateRandomByteArray(ivLength));
-
-          // We append our two keys together and encrypt the resulting byte array.
-          // This is the secret that all of the encryption in the repository depends upon
-          byte[] secret = ArrayUtils.addAll(masterEncryptionKeyBytes, masterHmacKeyBytes);
-          String encryptedSecret = encryptToString(passwordEncryptionKey, secret, iv);
-
-          // We store our new master key in the repository in its encrypted form
-          // along with an HMAC to verify the key when we read it, the salt needed to
-          // generate keys to decrypt it, and the initialization vector used
-          repository.createMasterKey(new MMasterKey(encryptedSecret, generateHmac(passwordHmacKey,
-            encryptedSecret), salt, iv));
-        } else {
-          // If a master key does not exist and we are trying to initialize the
-          // manager without allowing it to create a master key, we should fail
-          throw new SqoopException(SecurityError.ENCRYPTION_0002);
-        }
-      } else {
-        // A master key exists so we need to read it from the repository and
-        // decrypt it.
-        String iv = existingEncryptedMasterKey.getIv();
-        String encryptedSecret = existingEncryptedMasterKey.getEncryptedSecret();
-
-        // Before we go about decrypting the master key we should verify the hmac
-        // to ensure that it has not been tampered with
-        String hmac = existingEncryptedMasterKey.getHmac();
-        if (!validHmac(passwordHmacKey, encryptedSecret, hmac)) {
-          throw new SqoopException(SecurityError.ENCRYPTION_0001);
-        }
-
-        // The master key has not been tampered with, lets decrypt it using the key
-        // derived from the password and the initialization vector from the repository
-        byte[] decryptedKey = decryptToBytes(passwordEncryptionKey, encryptedSecret, iv);
-
-        // Since the master key is stored as the concatenation of an encryption
-        // key and an hmac key, we need to split it according to the sizes derived
-        // from the configuration
-        masterEncryptionKeyBytes = new byte[cipherKeySize];
-        masterHmacKeyBytes = new byte[hmacKeySizeBytes];
-        System.arraycopy(decryptedKey, 0, masterEncryptionKeyBytes, 0,
-          cipherKeySize);
-        System.arraycopy(decryptedKey, cipherKeySize,
-          masterHmacKeyBytes, 0, hmacKeySizeBytes);
-      }
-
-      // Place the master encryption and master hmac key in SecretKey objects
-      // so we can use them to encrypt and decrypt data
-      masterEncryptionKey = new SecretKeySpec(masterEncryptionKeyBytes, 0, cipherKeySize, cipherAlgorithm);
-      masterHmacKey = new SecretKeySpec(masterHmacKeyBytes, 0, hmacKeySizeBytes, hmacAlgorithm);
+      initialize(createMasterKey, hmacAlgorithm, cipherAlgorithm, cipherSpec, cipherKeySize,
+        ivLength, pbkdf2Algorithm, pbkdf2Rounds, password, createKeyEvenIfKeyExists, repositoryTransactionArg);
     }
+  }
+
+
+  public synchronized void initialize(boolean createMasterKey, String hmacAlgorithmArg,
+                                      String cipherAlgorithmArg, String cipherSpecArg,
+                                      int cipherKeySizeArg, int ivLengthArg,
+                                      String pbkdf2AlgorithmArg, int pbkdf2RoundsArg,
+                                      String password, boolean createKeyEvenIfKeyExists, RepositoryTransaction repositoryTransactionArg) throws SqoopException {
+    hmacAlgorithm = hmacAlgorithmArg;
+    cipherAlgorithm = cipherAlgorithmArg;
+    cipherSpec = cipherSpecArg;
+    cipherKeySize = cipherKeySizeArg;
+    ivLength = ivLengthArg;
+    pbkdf2Algorithm = pbkdf2AlgorithmArg;
+    pbkdf2Rounds = pbkdf2RoundsArg;
+
+    repositoryTransaction = repositoryTransactionArg;
+
+    // This is used for the generation of random initialization vectors and salts
+    random = new SecureRandom();
+    // The size of the hmac key can be derived from the provided HMAC algorithm
+    try {
+      hmacKeySizeBytes = Mac.getInstance(hmacAlgorithm).getMacLength();
+    } catch (NoSuchAlgorithmException e) {
+      throw new SqoopException(SecurityError.ENCRYPTION_0011, e);
+    }
+
+    Repository repository = RepositoryManager.getInstance().getRepository();
+    if (StringUtils.isEmpty(password)) {
+      throw new SqoopException(SecurityError.ENCRYPTION_0008);
+    }
+
+    MMasterKey existingEncryptedMasterKey = repository.getMasterKey(repositoryTransaction);
+    String salt;
+
+    if (existingEncryptedMasterKey == null || createKeyEvenIfKeyExists) {
+      // Since the master key does not exist, we can generate a random salt that we will use
+      // for encryption of the Master Key
+      // We will use a salt that is the same size as the encryption key
+      salt = Base64.encodeBase64String(generateRandomByteArray(hmacKeySizeBytes));
+    } else {
+      // Since the master key already exists, we will read the salt from the repository
+      salt = existingEncryptedMasterKey.getSalt();
+    }
+
+    // Derive two keys (that we will be used to encrypt and verify the master key)
+    // from the configuration provided password and the salt we just read/created.
+    byte[] keyBytes = getKeysFromPassword(password, salt);
+    SecretKey passwordEncryptionKey = new SecretKeySpec(keyBytes, 0,
+      cipherKeySize, cipherAlgorithm);
+    SecretKey passwordHmacKey = new SecretKeySpec(keyBytes,
+      cipherKeySize, hmacKeySizeBytes, hmacAlgorithm);
+
+    byte[] masterEncryptionKeyBytes;
+    byte[] masterHmacKeyBytes;
+    if (existingEncryptedMasterKey == null || createKeyEvenIfKeyExists) {
+      if (createMasterKey) {
+        // A master key does not exist so we must create one. We will simply
+        // use two random byte arrays for the encryption and hmac components.
+        // The sizes of these keys is determined by the values provided to
+        // configuration.
+        masterEncryptionKeyBytes = generateRandomByteArray(cipherKeySize);
+        masterHmacKeyBytes = generateRandomByteArray(hmacKeySizeBytes);
+
+        // The initialization vector for the encryption of the master key is
+        // randomly generated.
+        String iv = Base64.encodeBase64String(generateRandomByteArray(ivLength));
+
+        // We append our two keys together and encrypt the resulting byte array.
+        // This is the secret that all of the encryption in the repository depends upon
+        byte[] secret = ArrayUtils.addAll(masterEncryptionKeyBytes, masterHmacKeyBytes);
+        String encryptedSecret = encryptToString(passwordEncryptionKey, secret, iv);
+
+        // We store our new master key in the repository in its encrypted form
+        // along with an HMAC to verify the key when we read it, the salt needed to
+        // generate keys to decrypt it, and the initialization vector used
+        mMasterKey = new MMasterKey(encryptedSecret, generateHmac(passwordHmacKey, encryptedSecret), salt, iv);
+        repository.createMasterKey(mMasterKey, repositoryTransaction);
+      } else {
+        // If a master key does not exist and we are trying to initialize the
+        // manager without allowing it to create a master key, we should fail
+        throw new SqoopException(SecurityError.ENCRYPTION_0002);
+      }
+    } else {
+      // A master key exists so we need to read it from the repository and
+      // decrypt it.
+      mMasterKey = existingEncryptedMasterKey;
+      String iv = existingEncryptedMasterKey.getIv();
+      String encryptedSecret = existingEncryptedMasterKey.getEncryptedSecret();
+
+      // Before we go about decrypting the master key we should verify the hmac
+      // to ensure that it has not been tampered with
+      String hmac = existingEncryptedMasterKey.getHmac();
+      if (!validHmac(passwordHmacKey, encryptedSecret, hmac)) {
+        throw new SqoopException(SecurityError.ENCRYPTION_0001);
+      }
+
+      // The master key has not been tampered with, lets decrypt it using the key
+      // derived from the password and the initialization vector from the repository
+      byte[] decryptedKey = decryptToBytes(passwordEncryptionKey, encryptedSecret, iv);
+
+      // Since the master key is stored as the concatenation of an encryption
+      // key and an hmac key, we need to split it according to the sizes derived
+      // from the configuration
+      masterEncryptionKeyBytes = new byte[cipherKeySize];
+      masterHmacKeyBytes = new byte[hmacKeySizeBytes];
+      System.arraycopy(decryptedKey, 0, masterEncryptionKeyBytes, 0,
+        cipherKeySize);
+      System.arraycopy(decryptedKey, cipherKeySize,
+        masterHmacKeyBytes, 0, hmacKeySizeBytes);
+    }
+
+    // Place the master encryption and master hmac key in SecretKey objects
+    // so we can use them to encrypt and decrypt data
+    masterEncryptionKey = new SecretKeySpec(masterEncryptionKeyBytes, 0, cipherKeySize, cipherAlgorithm);
+    masterHmacKey = new SecretKeySpec(masterHmacKeyBytes, 0, hmacKeySizeBytes, hmacAlgorithm);
   }
 
   public synchronized void destroy() {
     hmacAlgorithm = null;
+    hmacKeySizeBytes = 0;
     cipherAlgorithm = null;
+    cipherKeySize = 0;
     cipherSpec = null;
     pbkdf2Algorithm = null;
+    pbkdf2Rounds = 0;
+    ivLength = 0;
+
+    repositoryTransaction = null;
+    mMasterKey = null;
 
     masterEncryptionKey = null;
     masterHmacKey = null;
 
     random = null;
+  }
+
+  public void deleteMasterKeyFromRepository() {
+    RepositoryManager.getInstance().getRepository().deleteMasterKey(mMasterKey.getPersistenceId(), repositoryTransaction);
   }
 
   /**

@@ -1164,12 +1164,15 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           return null;
         }
 
-        String aesKey = rs.getString(1);
-        String hmac = rs.getString(2);
-        String salt = rs.getString(3);
-        String iv = rs.getString(4);
+        String aesKey = rs.getString(2);
+        String hmac = rs.getString(3);
+        String salt = rs.getString(4);
+        String iv = rs.getString(5);
 
-        return new MMasterKey(aesKey, hmac, salt, iv);
+        MMasterKey mMasterKey = new MMasterKey(aesKey, hmac, salt, iv);
+        mMasterKey.setPersistenceId(rs.getLong(1));
+
+        return mMasterKey;
       }
     } catch (SQLException ex) {
       logException(ex);
@@ -1183,8 +1186,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
   @Override
   public void createMasterKey(MMasterKey mMasterKey, Connection conn) {
     int result;
-    try (PreparedStatement preparedStatement = conn.prepareStatement(crudQueries.getStmtInsertSqMasterKey(),
-      Statement.RETURN_GENERATED_KEYS)) {
+    try (PreparedStatement preparedStatement = conn.prepareStatement(crudQueries.getStmtInsertSqMasterKey(), Statement.RETURN_GENERATED_KEYS)) {
       preparedStatement.setString(1, mMasterKey.getEncryptedSecret());
       preparedStatement.setString(2, mMasterKey.getHmac());
       preparedStatement.setString(3, mMasterKey.getSalt());
@@ -1195,9 +1197,57 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         throw new SqoopException(CommonRepositoryError.COMMON_0009,
           Integer.toString(result));
       }
+
+      long masterKeyId = -1;
+      try(ResultSet primaryKeyResultSet = preparedStatement.getGeneratedKeys()) {
+        if (primaryKeyResultSet.next()) {
+          masterKeyId = primaryKeyResultSet.getLong(1);
+        }
+      }
+
+      if (masterKeyId < 0) {
+        throw new SqoopException(CommonRepositoryError.COMMON_0062);
+      }
+
+      mMasterKey.setPersistenceId(masterKeyId);
+
     } catch (SQLException ex) {
       logException(ex, mMasterKey);
       throw new SqoopException(CommonRepositoryError.COMMON_0031, ex);
+    }
+  }
+
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void deleteMasterKey(long masterKeyId, Connection conn) {
+    try (PreparedStatement deleteMasterKeyPreparedStatement = conn.prepareStatement(crudQueries.getDeleteSqMasterKey())) {
+      deleteMasterKeyPreparedStatement.setLong(1, masterKeyId);
+      deleteMasterKeyPreparedStatement.executeUpdate();
+    } catch (SQLException ex) {
+      logException(ex);
+      throw new SqoopException(CommonRepositoryError.COMMON_0061, ex);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void changeMasterKeyManager(MasterKeyManager fromMasterKeyManager, MasterKeyManager toMasterKeyManager, Connection conn) {
+    try (
+      PreparedStatement fetchLinkInputs = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());
+      PreparedStatement updateLinkInput = conn.prepareStatement(crudQueries.getUpdateLinkInput());
+      PreparedStatement fetchJobInputs = conn.prepareStatement(crudQueries.getStmtFetchJobInput());
+      PreparedStatement updateJobInput = conn.prepareStatement(crudQueries.getUpdateJobInput())
+    ) {
+      transitionInputs(fromMasterKeyManager, toMasterKeyManager, fetchLinkInputs, updateLinkInput);
+      transitionInputs(fromMasterKeyManager, toMasterKeyManager, fetchJobInputs, updateJobInput);
+    } catch (SQLException exception) {
+      logException(exception);
+      throw new SqoopException(CommonRepositoryError.COMMON_0060, exception);
     }
   }
 
@@ -1646,7 +1696,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     try (ResultSet rsConnection = stmt.executeQuery();
          PreparedStatement connectorConfigFetchStatement = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
-         PreparedStatement connectorConfigInputStatement = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());) {
+         PreparedStatement connectorConfigInputStatement = conn.prepareStatement(crudQueries.getStmtFetchLinkInputByJob());) {
       while(rsConnection.next()) {
         long id = rsConnection.getLong(1);
         String name = rsConnection.getString(2);
@@ -1691,7 +1741,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
     try (ResultSet rsConnection = stmt.executeQuery();
          PreparedStatement configStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfiguration());
-         PreparedStatement inputStmt = conn.prepareStatement(crudQueries.getStmtFetchLinkInput());
+         PreparedStatement inputStmt = conn.prepareStatement(crudQueries.getStmtFetchLinkInputByJob());
     ) {
       while(rsConnection.next()) {
         long id = rsConnection.getLong(1);
@@ -1734,7 +1784,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
          PreparedStatement fromConfigFetchStmt  = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
          PreparedStatement toConfigFetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
          PreparedStatement driverConfigfetchStmt = conn.prepareStatement(crudQueries.getStmtSelectConfigForConfigurable());
-         PreparedStatement jobInputFetchStmt = conn.prepareStatement(crudQueries.getStmtFetchJobInput());) {
+         PreparedStatement jobInputFetchStmt = conn.prepareStatement(crudQueries.getStmtFetchJobInputByJob());) {
 
       // Note: Job does not hold a explicit reference to the driver since every
       // job has the same driver
@@ -1813,9 +1863,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
            (crudQueries.getStmtSelectConfigForConfigurable());
          PreparedStatement configStmt = conn.prepareStatement(crudQueries
            .getStmtSelectConfigForConfiguration());
-         PreparedStatement jobInputFetchStmt = conn.prepareStatement(crudQueries.getStmtFetchJobInput());
+         PreparedStatement jobInputFetchStmt = conn.prepareStatement(crudQueries.getStmtFetchJobInputByJob());
          PreparedStatement inputStmt = conn.prepareStatement(crudQueries
-           .getStmtFetchLinkInput())
+           .getStmtFetchLinkInputByJob())
     ) {
 
       // Note: Job does not hold a explicit reference to the driver since every
@@ -2125,7 +2175,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             // get the overrides value from the SQ_INPUT_RELATION table
             String overrides = getOverrides(inputId, conn);
             String inputEnumValues = rsetInput.getString(9);
-            String value = readInputValue(rsetInput.getString(10), rsetInput.getBoolean(11), rsetInput.getString(12), rsetInput.getString(13));
+            String value = readInputValue(MasterKeyManager.getInstance(), rsetInput.getString(10), rsetInput.getBoolean(11), rsetInput.getString(12), rsetInput.getString(13));
             MInputType mit = MInputType.valueOf(inputType);
             MInput input = null;
             switch (mit) {
@@ -2222,6 +2272,58 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     }
   }
 
+  private void transitionInputs(MasterKeyManager fromMasterKeyManager, MasterKeyManager toMasterKeyManager,
+                                PreparedStatement selectInputsStatement, PreparedStatement updateInputsStatement) throws SQLException {
+    try (ResultSet inputs = selectInputsStatement.executeQuery()) {
+      while (inputs.next()) {
+        long inputId = inputs.getLong(1);
+        boolean encrypted = inputs.getBoolean(11);
+        boolean sensitive = inputs.getBoolean(6);
+
+        if (encrypted) {
+          assert(fromMasterKeyManager != null);
+          // We need to decrypt the input first
+          String encryptedValue = inputs.getString(10);
+          String iv = inputs.getString(12);
+          String hmac = inputs.getString(13);
+
+          String plainTextValue = readInputValue(fromMasterKeyManager, encryptedValue, encrypted, iv, hmac);
+
+          if (toMasterKeyManager != null && sensitive) {
+            // We need to encrypt the input
+            String newIv = toMasterKeyManager.generateRandomIv();
+            String encryptedInput = toMasterKeyManager.encryptWithMasterKey(plainTextValue, newIv);
+
+            updateInputsStatement.setString(1, encryptedInput);
+            updateInputsStatement.setBoolean(2, true);
+            updateInputsStatement.setString(3, newIv);
+            updateInputsStatement.setString(4, toMasterKeyManager.generateHmacWithMasterHmacKey(encryptedInput));
+            updateInputsStatement.setLong(5, inputId);
+          } else {
+            // Store the plaintext
+            updateInputsStatement.setString(1, plainTextValue);
+            updateInputsStatement.setBoolean(2, false);
+            updateInputsStatement.setNull(3, Types.VARCHAR);
+            updateInputsStatement.setNull(4, Types.VARCHAR);
+            updateInputsStatement.setLong(5, inputId);
+          }
+          updateInputsStatement.executeUpdate();
+        } else if (toMasterKeyManager != null && sensitive) {
+          // We need to encrypt the input
+          String plainTextValue = inputs.getString(10);
+          String newIv = toMasterKeyManager.generateRandomIv();
+          String encryptedInput = toMasterKeyManager.encryptWithMasterKey(plainTextValue, newIv);
+
+          updateInputsStatement.setString(1, encryptedInput);
+          updateInputsStatement.setBoolean(2, true);
+          updateInputsStatement.setString(3, newIv);
+          updateInputsStatement.setString(4, toMasterKeyManager.generateHmacWithMasterHmacKey(encryptedInput));
+          updateInputsStatement.setLong(5, inputId);
+          updateInputsStatement.executeUpdate();
+        }
+      }
+    }
+  }
 
   private void loadInputsForConfigs(MConfigList mConfigList, PreparedStatement configStmt, PreparedStatement inputStmt) throws SQLException {
     for (MConfig mConfig : mConfigList.getConfigs()) {
@@ -2237,7 +2339,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
         while (inputResults.next()) {
           long inputId = inputResults.getLong(1);
           String inputName = inputResults.getString(2);
-          String value = readInputValue(inputResults.getString(10), inputResults.getBoolean(11), inputResults.getString(12), inputResults.getString(13));
+          String value = readInputValue(MasterKeyManager.getInstance(), inputResults.getString(10), inputResults.getBoolean(11), inputResults.getString(12), inputResults.getString(13));
           if (mConfig.getName().equals(configName) && mConfig.getInputNames().contains(inputName)) {
             MInput mInput = mConfig.getInput(inputName);
             mInput.setPersistenceId(inputId);
@@ -2262,9 +2364,9 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
    * @param hmac HMAC for tamper resistance
    * @return The input value
    */
-  private String readInputValue(String possiblyEncryptedValue, boolean encrypted, String iv, String hmac) throws SqoopException {
+  private String readInputValue(MasterKeyManager masterKeyManager, String possiblyEncryptedValue, boolean encrypted, String iv, String hmac) throws SqoopException {
     if (encrypted) {
-      return MasterKeyManager.getInstance().decryptWithMasterKey(possiblyEncryptedValue, iv, hmac);
+      return masterKeyManager.decryptWithMasterKey(possiblyEncryptedValue, iv, hmac);
     } else {
       return possiblyEncryptedValue;
     }
@@ -2318,7 +2420,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             // get the overrides value from the SQ_INPUT_RELATION table
             String overrides = getOverrides(inputId, conn);
             String inputEnumValues = rsetInput.getString(9);
-            String value = readInputValue(rsetInput.getString(10), rsetInput.getBoolean(11), rsetInput.getString(12), rsetInput.getString(13));
+            String value = readInputValue(MasterKeyManager.getInstance(), rsetInput.getString(10), rsetInput.getBoolean(11), rsetInput.getString(12), rsetInput.getString(13));
 
             MInputType mit = MInputType.valueOf(inputType);
 

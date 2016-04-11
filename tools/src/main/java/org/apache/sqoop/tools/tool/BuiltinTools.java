@@ -38,6 +38,7 @@ public class BuiltinTools {
     tools.put("verify", VerifyTool.class);
     tools.put("repositorydump", RepositoryDumpTool.class);
     tools.put("repositoryload", RepositoryLoadTool.class);
+    tools.put("repositoryencryption", RepositoryEncryptionTool.class);
   }
 
   /**

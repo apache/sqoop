@@ -218,6 +218,13 @@ public enum CommonRepositoryError implements ErrorCode {
   COMMON_0058("Resource doesn't exist"),
 
   COMMON_0059("Unable to retrieve master key"),
+
+  COMMON_0060("Failed to change the master key for inputs"),
+
+  COMMON_0061("Unable to delete Master Key"),
+
+  COMMON_0062("Invalid primary key after registering entity"),
+
   ;
 
   private final String message;

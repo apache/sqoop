@@ -193,7 +193,7 @@ import static org.apache.sqoop.repository.derby.DerbySchemaConstants.*;
  *    | SQ_LNKI_INPUT: BIGINT PK   | FK SQ_INPUT(SQI_ID)
  *    | SQ_LNKI_VALUE: LONG VARCHAR|
  *    | SQ_LNKI_ENCRYPTED: BOOLEAN |
- *    | SQ_LNKI_IV: VARCHAR(171)    |
+ *    | SQ_LNKI_IV: VARCHAR(171)   |
  *    | SQ_LNKI_HMAC: VARCHAR(171) |
  *    +----------------------------+
  * </pre>

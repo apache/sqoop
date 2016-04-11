@@ -81,7 +81,7 @@ public class TestMasterKeyManager {
 
 
     jdbcRepoMock = mock(JdbcRepository.class);
-    when(jdbcRepoMock.getMasterKey()).thenReturn(null);
+    when(jdbcRepoMock.getMasterKey(null)).thenReturn(null);
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
 
     masterKeyManager = MasterKeyManager.getInstance();
@@ -106,8 +106,7 @@ public class TestMasterKeyManager {
 
     ArgumentCaptor<MMasterKey> mMasterKeyArgumentCaptor = ArgumentCaptor
       .forClass(MMasterKey.class);
-    verify(jdbcRepoMock, times(1)).createMasterKey(mMasterKeyArgumentCaptor
-      .capture());
+    verify(jdbcRepoMock, times(1)).createMasterKey(mMasterKeyArgumentCaptor.capture(), any(RepositoryTransaction.class));
 
     // Encrypt something with that master key
     String secret = "imasecret";
@@ -120,12 +119,12 @@ public class TestMasterKeyManager {
     // Create a new MasterKeyManager instance with existing master key
     // coming from the "db"
     jdbcRepoMock = mock(JdbcRepository.class);
-    when(jdbcRepoMock.getMasterKey()).thenReturn(mMasterKeyArgumentCaptor
+    when(jdbcRepoMock.getMasterKey(null)).thenReturn(mMasterKeyArgumentCaptor
       .getValue());
     when(repositoryManagerMock.getRepository()).thenReturn(jdbcRepoMock);
 
     masterKeyManager.initialize();
-    verify(jdbcRepoMock, times(1)).getMasterKey();
+    verify(jdbcRepoMock, times(1)).getMasterKey(null);
 
     // Try to decrypt
     assertEquals(masterKeyManager.decryptWithMasterKey(encrypted, iv, masterKeyManager.generateHmacWithMasterHmacKey(encrypted)), secret);
@@ -135,7 +134,7 @@ public class TestMasterKeyManager {
   public void testInitializeWithKeyCreationWithoutExistingKey() {
     masterKeyManager.initialize();
 
-    verify(jdbcRepoMock, times(1)).createMasterKey(any(MMasterKey.class));
+    verify(jdbcRepoMock, times(1)).createMasterKey(any(MMasterKey.class), any(RepositoryTransaction.class));
   }
 
   @Test(
@@ -144,7 +143,7 @@ public class TestMasterKeyManager {
   )
   public void testMasterKeyWithInvalidHmac() {
     jdbcRepoMock = mock(JdbcRepository.class);
-    when(jdbcRepoMock.getMasterKey()).thenReturn(new MMasterKey(
+    when(jdbcRepoMock.getMasterKey(null)).thenReturn(new MMasterKey(
       Base64.encodeBase64String(generateRandomByteArray(CIPHER_KEY_SIZE_BYTES)),
       Base64.encodeBase64String(generateRandomByteArray(HMAC_KEY_SIZE_BYTES)),
       Base64.encodeBase64String(generateRandomByteArray(CIPHER_KEY_SIZE_BYTES)),
