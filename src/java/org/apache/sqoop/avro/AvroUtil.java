@@ -114,18 +114,21 @@ public final class AvroUtil {
    * Format candidate to avro specifics
    */
   public static String toAvroIdentifier(String candidate) {
-        char[] data = candidate.toCharArray();
-        int stringIndex = 0;
+    char[] data = candidate.toCharArray();
+    int stringIndex = 0;
 
-        for(char c:data)
-            if(Character.isLetterOrDigit(c) || c == '_')
-                data[stringIndex++] = c;
+    for (char c:data) {
+      if (Character.isLetterOrDigit(c) || c == '_') {
+        data[stringIndex++] = c;
+      }
+    }
 
-        char initial = data[0];
-        if(Character.isLetter(initial) || initial == '_')
-            return new String(data, 0, stringIndex);
-        else
-            return "AVRO_".concat(new String(data, 0, stringIndex));
+    char initial = data[0];
+    if (Character.isLetter(initial) || initial == '_') {
+      return new String(data, 0, stringIndex);
+    } else {
+      return "AVRO_".concat(new String(data, 0, stringIndex));
+    }
   }
 
   /**
