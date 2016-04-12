@@ -125,3 +125,128 @@ Or an exception. Further details why the upgrade process has failed will be avai
 
 .. note:: If the repository dump was created without passwords (default), the connections will not contain a password and the jobs will fail to execute. In that case you'll need to manually update the connections and set the password.
 .. note:: RepositoryLoad tool will always generate new connections, jobs and submissions from the file. Even when an identical objects already exists in repository.
+
+.. _repositoryencryption-tool:
+
+RepositoryEncryption
+====================
+
+Please see :ref:`repositoryencryption` for more details on repository encryption.
+
+Sometimes we may want to change the password that is used to encrypt our data, generate a new key for our existing password,
+encrypt an existing unencrypted repository, or decrypt an existing encrypting repository. Sqoop 2 provides the
+Repository Encryption Tool to allow us to do this.
+
+Before using the tool it is important to shut down the Sqoop 2 server.
+
+All changes that the tool makes occur in a single transaction with the repository, which will prevent leaving the
+repository in a bad state.
+
+The Repository Encryption Tool is very simple, it uses the exact same configuration specified above (with the exception
+of ``useConf``). Configuration prefixed with a "-F" represents the existing repository state, configuration prefixed with
+a "-T" represents the desired repository state. If one of these configuration sets is left out that means unencrypted.
+
+Changing the Password
+---------------------
+
+In order to change the password, we need to specify the current configuration with the existing password and the desired
+configuration with the new password. It looks like this:
+
+::
+
+    sqoop.sh tool repositoryencryption \
+        -Forg.apache.sqoop.security.repo_encryption.password=old_password \
+        -Forg.apache.sqoop.security.repo_encryption.hmac_algorithm=HmacSHA256 \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_algorithm=AES \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_key_size=16 \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_spec=AES/CBC/PKCS5Padding \
+        -Forg.apache.sqoop.security.repo_encryption.initialization_vector_size=16 \
+        -Forg.apache.sqoop.security.repo_encryption.pbkdf2_algorithm=PBKDF2WithHmacSHA1 \
+        -Forg.apache.sqoop.security.repo_encryption.pbkdf2_rounds=4000 \
+        -Torg.apache.sqoop.security.repo_encryption.password=new_password \
+        -Torg.apache.sqoop.security.repo_encryption.hmac_algorithm=HmacSHA256 \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_algorithm=AES \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_key_size=16 \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_spec=AES/CBC/PKCS5Padding \
+        -Torg.apache.sqoop.security.repo_encryption.initialization_vector_size=16 \
+        -Torg.apache.sqoop.security.repo_encryption.pbkdf2_algorithm=PBKDF2WithHmacSHA1 \
+        -Torg.apache.sqoop.security.repo_encryption.pbkdf2_rounds=4000
+
+Generate a New Key for the Existing Password
+--------------------------------------------
+
+Just like with the previous scenario you could copy the same configuration twice like this:
+
+::
+
+    sqoop.sh tool repositoryencryption \
+        -Forg.apache.sqoop.security.repo_encryption.password=password \
+        -Forg.apache.sqoop.security.repo_encryption.hmac_algorithm=HmacSHA256 \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_algorithm=AES \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_key_size=16 \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_spec=AES/CBC/PKCS5Padding \
+        -Forg.apache.sqoop.security.repo_encryption.initialization_vector_size=16 \
+        -Forg.apache.sqoop.security.repo_encryption.pbkdf2_algorithm=PBKDF2WithHmacSHA1 \
+        -Forg.apache.sqoop.security.repo_encryption.pbkdf2_rounds=4000 \
+        -Torg.apache.sqoop.security.repo_encryption.password=password \
+        -Torg.apache.sqoop.security.repo_encryption.hmac_algorithm=HmacSHA256 \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_algorithm=AES \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_key_size=16 \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_spec=AES/CBC/PKCS5Padding \
+        -Torg.apache.sqoop.security.repo_encryption.initialization_vector_size=16 \
+        -Torg.apache.sqoop.security.repo_encryption.pbkdf2_algorithm=PBKDF2WithHmacSHA1 \
+        -Torg.apache.sqoop.security.repo_encryption.pbkdf2_rounds=4000
+
+But we do have a shortcut to make this easier:
+
+::
+
+    sqoop.sh tool repositoryencryption -FuseConf -TuseConf
+
+The ``useConf`` option will read whatever configuration is already in the configured sqoop properties file and apply it
+for the specified direction.
+
+Encrypting an Existing Unencrypted Repository
+---------------------------------------------
+
+::
+
+    sqoop.sh tool repositoryencryption \
+        -Torg.apache.sqoop.security.repo_encryption.password=password \
+        -Torg.apache.sqoop.security.repo_encryption.hmac_algorithm=HmacSHA256 \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_algorithm=AES \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_key_size=16 \
+        -Torg.apache.sqoop.security.repo_encryption.cipher_spec=AES/CBC/PKCS5Padding \
+        -Torg.apache.sqoop.security.repo_encryption.initialization_vector_size=16 \
+        -Torg.apache.sqoop.security.repo_encryption.pbkdf2_algorithm=PBKDF2WithHmacSHA1 \
+        -Torg.apache.sqoop.security.repo_encryption.pbkdf2_rounds=4000
+
+If the configuration for the encrypted repository has already been written to the sqoop properties file, one can simply
+execute:
+
+::
+
+    sqoop.sh tool repositoryencryption -TuseConf
+
+
+Decrypting an Existing Encrypted Repository
+-------------------------------------------
+
+::
+
+    sqoop.sh tool repositoryencryption \
+        -Forg.apache.sqoop.security.repo_encryption.password=password \
+        -Forg.apache.sqoop.security.repo_encryption.hmac_algorithm=HmacSHA256 \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_algorithm=AES \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_key_size=16 \
+        -Forg.apache.sqoop.security.repo_encryption.cipher_spec=AES/CBC/PKCS5Padding \
+        -Forg.apache.sqoop.security.repo_encryption.initialization_vector_size=16 \
+        -Forg.apache.sqoop.security.repo_encryption.pbkdf2_algorithm=PBKDF2WithHmacSHA1 \
+        -Forg.apache.sqoop.security.repo_encryption.pbkdf2_rounds=4000
+
+If the configuration for the encrypted repository has not yet been removed from the sqoop properties file, one can simply
+execute:
+
+::
+
+    sqoop.sh tool repositoryencryption -FuseConf
