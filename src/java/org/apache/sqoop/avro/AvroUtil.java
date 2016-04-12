@@ -115,11 +115,16 @@ public final class AvroUtil {
    */
   public static String toAvroIdentifier(String candidate) {
     char[] data = candidate.toCharArray();
+    boolean skip = false;
     int stringIndex = 0;
 
     for (char c:data) {
       if (Character.isLetterOrDigit(c) || c == '_') {
         data[stringIndex++] = c;
+        skip = false;
+      } else if(!skip) {
+        data[stringIndex++] = '_';
+        skip = true;
       }
     }
 
