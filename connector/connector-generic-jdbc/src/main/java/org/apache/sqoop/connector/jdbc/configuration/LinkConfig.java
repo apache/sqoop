@@ -40,7 +40,7 @@ public class LinkConfig {
   @Input(size = 128, validators = {@Validator(NotEmpty.class), @Validator(ClassAvailable.class)} )
   public String jdbcDriver;
 
-  @Input(size = 128, validators = {@Validator(value = StartsWith.class, strArg = "jdbc:")} )
+  @Input(size = 2000, validators = {@Validator(value = StartsWith.class, strArg = "jdbc:")} )
   public String connectionString;
 
   @Input(size = 40)
