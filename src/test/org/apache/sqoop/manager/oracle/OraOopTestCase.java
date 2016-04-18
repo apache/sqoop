@@ -141,7 +141,7 @@ public abstract class OraOopTestCase {
   }
 
   protected int countTable(String inputTableName, List<String> partitionList) {
-    String tableName = inputTableName;
+    String tableName = org.apache.sqoop.manager.oracle.OracleUtils.escapeIdentifier(inputTableName);
     if (tableName.startsWith("\"\"") && tableName.endsWith("\"\"")) {
       // Table names may be double quoted to work around Sqoop issue
       tableName = tableName.substring(1, tableName.length() - 1);

@@ -36,7 +36,23 @@ public class ImportTest extends OraOopTestCase {
     createTable("table_tst_product.xml");
 
     try {
-      int retCode = runImport("tst_product", getSqoopConf(), false);
+      int retCode = runImport("TST_PRODUCT", getSqoopConf(), false);
+      Assert.assertEquals("Return code should be 0", 0, retCode);
+
+    } finally {
+      cleanupFolders();
+      closeTestEnvConnection();
+    }
+  }
+
+
+  @Test
+  public void testProductWithWhiteSpaceImport() throws Exception {
+    setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product");
+    createTable("table_tst_product_with_white_space.xml");
+
+    try {
+      int retCode = runImport("TST_Pr OdUCT", getSqoopConf(), false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -51,7 +67,7 @@ public class ImportTest extends OraOopTestCase {
     createTable("table_tst_product_part.xml");
 
     try {
-      int retCode = runImport("tst_product_part", getSqoopConf(), false);
+      int retCode = runImport("TST_PRODUCT_PART", getSqoopConf(), false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -70,7 +86,7 @@ public class ImportTest extends OraOopTestCase {
         OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
 
     try {
-      int retCode = runImport("tst_product_part", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -91,7 +107,7 @@ public class ImportTest extends OraOopTestCase {
         "tst_product_part_1,tst_product_part_2,\"tst_product_pa#rt_6\"");
 
     try {
-      int retCode = runImport("tst_product_part", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -115,7 +131,7 @@ public class ImportTest extends OraOopTestCase {
            +"tst_product_part_3,\"tst_product_pa#rt_6\"");
 
     try {
-      int retCode = runImport("tst_product_part", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -130,7 +146,7 @@ public class ImportTest extends OraOopTestCase {
     createTable("table_tst_product_subpart.xml");
 
     try {
-      int retCode = runImport("tst_product_subpart", getSqoopConf(), false);
+      int retCode = runImport("TST_PRODUCT_SUBPART", getSqoopConf(), false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -149,7 +165,7 @@ public class ImportTest extends OraOopTestCase {
         OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
 
     try {
-      int retCode = runImport("tst_product_subpart", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -172,7 +188,7 @@ public class ImportTest extends OraOopTestCase {
            +"TST_PRODUCT_PART_3,TST_PRODUCT_PART_4");
 
     try {
-      int retCode = runImport("tst_product_subpart", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -193,7 +209,7 @@ public class ImportTest extends OraOopTestCase {
         "TST_PRODUCT_PART_1,TST_PRODUCT_PART_2,TST_PRODUCT_PART_3");
 
     try {
-      int retCode = runImport("tst_product_subpart", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -214,7 +230,7 @@ public class ImportTest extends OraOopTestCase {
     sqoopConf.setBoolean(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ, true);
 
     try {
-      int retCode = runImport("tst_product", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -248,7 +264,7 @@ public class ImportTest extends OraOopTestCase {
         OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
 
     try {
-      int retCode = runImport("tst_product_part_iot", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_PART_IOT", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {

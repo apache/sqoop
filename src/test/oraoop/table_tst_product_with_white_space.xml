@@ -17,7 +17,7 @@
   limitations under the License.
 -->
 <table>
-  <name>TST_PRODUCT_SUBPART</name>
+  <name>TST_Pr OdUCT</name>
   <columns>
     <column>
       <name>product_id</name>
@@ -65,7 +65,7 @@
       <dataExpression>DBMS_RANDOM.string ('U', 30)</dataExpression>
     </column>
     <column>
-      <name>create_time</name>
+      <name>crea te_time</name>
       <dataType>TIMESTAMP</dataType>
       <dataExpression>TO_TIMESTAMP (TO_CHAR (SYSDATE + DBMS_RANDOM.VALUE (-730, 0),'YYYYMMDDHH24MISS') || '.' || TRUNC (TO_CHAR (DBMS_RANDOM.VALUE * 999999999)), 'YYYYMMDDHH24MISSXFF')</dataExpression>
     </column>
@@ -87,19 +87,4 @@
     <uniqueKeyColumn>supplier_code</uniqueKeyColumn>
     <uniqueKeyColumn>product_code</uniqueKeyColumn>
   </uniqueKeyColumns>
-  <partitionClause>
-    PARTITION BY RANGE("sell_from_date")
-    SUBPARTITION BY HASH("supplier_code")
-    SUBPARTITIONS 2
-    (
-      PARTITION tst_product_part_1 values less than (to_date(''' || to_char(add_months(sysdate,-9),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
-      PARTITION tst_product_part_2 values less than (to_date(''' || to_char(add_months(sysdate,-6),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
-      PARTITION tst_product_part_3 values less than (to_date(''' || to_char(add_months(sysdate,-3),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
-      PARTITION tst_product_part_4 values less than (to_date(''' || to_char(sysdate,'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
-      PARTITION tst_product_part_5 values less than (to_date(''' || to_char(add_months(sysdate,3),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
-      PARTITION tst_product_part_6 values less than (to_date(''' || to_char(add_months(sysdate,6),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
-      PARTITION tst_product_part_7 values less than (to_date(''' || to_char(add_months(sysdate,9),'DD/MM/YYYY') || ''',''DD/MM/YYYY'')),
-      PARTITION tst_product_part_max values less than (MAXVALUE)
-    )
-  </partitionClause>
 </table>

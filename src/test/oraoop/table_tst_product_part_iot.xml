@@ -89,7 +89,7 @@
   </uniqueKeyColumns>
   <indexOrganizedTable>true</indexOrganizedTable>
   <partitionClause>
-    PARTITION BY HASH(product_id)
+    PARTITION BY HASH("product_id")
     PARTITIONS 4
   </partitionClause>
 </table>

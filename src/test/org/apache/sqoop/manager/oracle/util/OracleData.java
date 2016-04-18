@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.sqoop.manager.oracle.OraOopTestCase;
+import org.apache.sqoop.manager.oracle.OracleUtils;
 
 /**
  * Class to load an Oracle table with data based on configuration file.
@@ -51,7 +52,7 @@ public final class OracleData {
     StringBuilder result = new StringBuilder();
     String delim = "";
     for (OracleDataDefinition column : tableDefinition.getColumnList()) {
-      result.append(delim).append(column.getColumnName()).append(" ").append(
+      result.append(delim).append(OracleUtils.escapeIdentifier(column.getColumnName())).append(" ").append(
           column.getDataType());
       delim = ",\n";
     }
@@ -62,7 +63,7 @@ public final class OracleData {
       getDataExpression(List<OracleDataDefinition> columnList) {
     StringBuilder result = new StringBuilder();
     for (OracleDataDefinition column : columnList) {
-      result.append("l_ret_rec.").append(column.getColumnName()).append(" := ")
+      result.append("l_ret_rec.").append(OracleUtils.escapeIdentifier(column.getColumnName())).append(" := ")
           .append(column.getDataExpression()).append(";\n");
     }
     return result.toString();
@@ -126,7 +127,7 @@ public final class OracleData {
       StringBuilder keyColumnList = new StringBuilder();
       String delim = "";
       for (String column : columns) {
-        keyColumnList.append(delim).append(column);
+        keyColumnList.append(delim).append(OracleUtils.escapeIdentifier(column));
         delim = ",";
       }
       result = keyColumnList.toString();
