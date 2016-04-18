@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.cli.SqoopGnuParser;
 import org.apache.sqoop.common.MapContext;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.repository.MasterKeyManager;
 import org.apache.sqoop.repository.Repository;
@@ -57,6 +58,7 @@ public class RepositoryEncryptionTool extends ConfiguredTool {
     CommandLineParser parser = new SqoopGnuParser();
     SqoopConfiguration.getInstance().initialize();
     RepositoryManager.getInstance().initialize();
+    ConnectorManager.getInstance().initialize();
     Repository repository = RepositoryManager.getInstance().getRepository();
 
     CommandLine line;

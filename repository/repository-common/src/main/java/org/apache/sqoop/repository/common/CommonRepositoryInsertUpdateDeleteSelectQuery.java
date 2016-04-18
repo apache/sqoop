@@ -251,10 +251,17 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
       + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_VALUE) + ", "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_ENCRYPTED) + ", "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_IV) + ", "
-      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_HMAC)
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_HMAC) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_TYPE) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME)
       + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
       + " RIGHT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME)
-      + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT);
+      + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_LNKI_INPUT)
+      + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
+      + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID)
+      + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
+      + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID);
 
   private static final String UPDATE_LINK_INPUT =
     "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_LINK_INPUT_NAME) + " SET "
@@ -305,11 +312,22 @@ public class CommonRepositoryInsertUpdateDeleteSelectQuery {
       + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_VALUE) + ", "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_ENCRYPTED) + ", "
       + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_IV) + ", "
-      + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_HMAC)
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_HMAC) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_NAME) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_TYPE) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQC_NAME) + ", "
+      + CommonRepoUtils.escapeColumnName(COLUMN_SQD_NAME)
       + " FROM " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_INPUT_NAME)
       + " RIGHT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME)
       + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQBI_INPUT) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_ID)
-      + " ORDER BY " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_INDEX);
+      + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_NAME)
+      + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQI_CONFIG) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID)
+      + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIGURABLE_NAME)
+      + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_CONFIGURABLE) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQC_ID)
+      + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_CONFIG_DIRECTIONS_NAME)
+      + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_ID) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_CONFIG)
+      + " LEFT OUTER JOIN " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_DIRECTION_NAME)
+      + " ON " + CommonRepoUtils.escapeColumnName(COLUMN_SQ_CFG_DIR_DIRECTION) + " = " + CommonRepoUtils.escapeColumnName(COLUMN_SQD_ID);
 
   private static final String UPDATE_JOB_INPUT =
     "UPDATE " + CommonRepoUtils.getTableName(SCHEMA_SQOOP, TABLE_SQ_JOB_INPUT_NAME) + " SET "

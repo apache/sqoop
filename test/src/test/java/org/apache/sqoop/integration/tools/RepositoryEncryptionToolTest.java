@@ -20,9 +20,14 @@ package org.apache.sqoop.integration.tools;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.common.MapContext;
+import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.hdfs.configuration.ToFormat;
 import org.apache.sqoop.core.PropertiesConfigurationProvider;
 import org.apache.sqoop.core.SqoopConfiguration;
+import org.apache.sqoop.model.MInput;
+import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MLink;
+import org.apache.sqoop.model.MMapInput;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.repository.MasterKeyManager;
 import org.apache.sqoop.repository.RepositoryManager;
@@ -45,6 +50,7 @@ import org.testng.annotations.Test;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.sqoop.repository.common.CommonRepositorySchemaConstants.COLUMN_SQ_LNKI_ENCRYPTED;
@@ -82,6 +88,9 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
   private String pbkdf2Algorithm;
   private int pbkdf2Rounds;
   private int ivLength;
+
+  private MStringInput sensitiveInput;
+  private MMapInput sensitiveKeyPatternInput;
 
   public static class SqoopMiniCluster extends JettySqoopMiniCluster {
 
@@ -143,6 +152,10 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
 
       return properties;
     }
+
+    public boolean isRepositoryEncryptionEnabled() {
+      return repositoryEncryptionEnabled;
+    }
   }
 
   @BeforeMethod
@@ -163,21 +176,12 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
 
   @Test
   public void testNotEncryptedToEncrypted() throws Exception {
-    // Start nonencrypted sqoop instance
     sqoopMiniCluster = new SqoopMiniCluster(temporaryPath, getHadoopConf());
     sqoopMiniCluster.start();
 
     verifyMasterKeyDoesNotExist();
 
-    // Create a link and a job with a secure input
-    SqoopClient client = new SqoopClient(sqoopMiniCluster.getServerUrl());
-    MLink link = client.createLink("generic-jdbc-connector");
-    link.setName("zelda");
-    fillRdbmsLinkConfig(link);
-    client.saveLink(link);
-
-    MStringInput sensitiveInput = link.getConnectorLinkConfig().getStringInput("linkConfig.password");
-    verifyPlaintextInput(sensitiveInput.getPersistenceId(), sensitiveInput.getValue());
+    createInputsAndJob();
 
     // Stop sqoop instance
     sqoopMiniCluster.stop();
@@ -197,20 +201,13 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
 
     cleanUpAfterTool();
 
-    // Verify that the data is encrypted
-    StringBuffer cipherText = new StringBuffer();
-    StringBuffer iv = new StringBuffer();
-    StringBuffer hmac = new StringBuffer();
-    readEncryptedInput(sensitiveInput.getPersistenceId(), cipherText, iv, hmac);
-
     // Read the encrypted data by using the MasterKeyManager the server initializes
     sqoopMiniCluster = new SqoopMiniCluster(temporaryPath, getHadoopConf(), passwordGenerator,
       hmacAlgorithm, cipherAlgorithm, cipherKeySize, cipherSpec, pbkdf2Algorithm, pbkdf2Rounds, ivLength);
     sqoopMiniCluster.start();
 
-    String decrypted = MasterKeyManager.getInstance().decryptWithMasterKey(cipherText.toString(), iv.toString(), hmac.toString());
-
-    Assert.assertEquals(sensitiveInput.getValue(), decrypted);
+    verifyEncryptedInput(sensitiveInput);
+    verifyEncryptedInput(sensitiveKeyPatternInput);
   }
 
   @Test
@@ -219,21 +216,11 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
       hmacAlgorithm, cipherAlgorithm, cipherKeySize, cipherSpec, pbkdf2Algorithm, pbkdf2Rounds, ivLength);
     sqoopMiniCluster.start();
 
-    SqoopClient client = new SqoopClient(sqoopMiniCluster.getServerUrl());
-    MLink link = client.createLink("generic-jdbc-connector");
-    link.setName("zelda");
-    fillRdbmsLinkConfig(link);
-    client.saveLink(link);
-    MStringInput sensitiveInput = link.getConnectorLinkConfig().getStringInput("linkConfig.password");
+    createInputsAndJob();
 
-    StringBuffer cipherText = new StringBuffer();
-    StringBuffer iv = new StringBuffer();
-    StringBuffer hmac = new StringBuffer();
-    readEncryptedInput(sensitiveInput.getPersistenceId(), cipherText, iv, hmac);
+    verifyEncryptedInput(sensitiveInput);
+    verifyEncryptedInput(sensitiveKeyPatternInput);
 
-    String decrypted = MasterKeyManager.getInstance().decryptWithMasterKey(cipherText.toString(), iv.toString(), hmac.toString());
-
-    // Stop sqoop instance
     sqoopMiniCluster.stop();
 
     // Run tool
@@ -254,7 +241,8 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
     sqoopMiniCluster = new SqoopMiniCluster(temporaryPath, getHadoopConf());
     sqoopMiniCluster.start();
 
-    verifyPlaintextInput(sensitiveInput.getPersistenceId(), decrypted);
+    verifyPlaintextInput(sensitiveInput);
+    verifyPlaintextInput(sensitiveKeyPatternInput);
 
     verifyMasterKeyDoesNotExist();
   }
@@ -265,24 +253,13 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
       hmacAlgorithm, cipherAlgorithm, cipherKeySize, cipherSpec, pbkdf2Algorithm, pbkdf2Rounds, ivLength);
     sqoopMiniCluster.start();
 
-    SqoopClient client = new SqoopClient(sqoopMiniCluster.getServerUrl());
-    MLink link = client.createLink("generic-jdbc-connector");
-    link.setName("zelda");
-    fillRdbmsLinkConfig(link);
-    client.saveLink(link);
-    MStringInput sensitiveInput = link.getConnectorLinkConfig().getStringInput("linkConfig.password");
+    createInputsAndJob();
 
-    StringBuffer cipherTextFrom = new StringBuffer();
-    StringBuffer ivFrom = new StringBuffer();
-    StringBuffer hmacFrom = new StringBuffer();
-    readEncryptedInput(sensitiveInput.getPersistenceId(), cipherTextFrom, ivFrom, hmacFrom);
+    String fromSensitiveCiphertext = verifyEncryptedInput(sensitiveInput);
+    String fromSensitiveKeyPatternCiphertext = verifyEncryptedInput(sensitiveKeyPatternInput);
 
-    String decryptedFirst = MasterKeyManager.getInstance().decryptWithMasterKey(cipherTextFrom.toString(), ivFrom.toString(), hmacFrom.toString());
-
-    // Stop sqoop instance
     sqoopMiniCluster.stop();
 
-    // Run tool
     RepositoryEncryptionTool repositoryEncryptionTool = new RepositoryEncryptionTool();
     repositoryEncryptionTool.runToolWithConfiguration(new String[] {
       "-F" + SecurityConstants.REPO_ENCRYPTION_PASSWORD_GENERATOR + "=" + passwordGenerator,
@@ -306,22 +283,15 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
 
     cleanUpAfterTool();
 
-    StringBuffer cipherTextTo = new StringBuffer();
-    StringBuffer ivTo = new StringBuffer();
-    StringBuffer hmacTo = new StringBuffer();
-
-    Assert.assertNotEquals(cipherTextFrom, cipherTextTo);
-
-    readEncryptedInput(sensitiveInput.getPersistenceId(), cipherTextTo, ivTo, hmacTo);
-
-    // Read the encrypted data by using the MasterKeyManager the server initializes
     sqoopMiniCluster = new SqoopMiniCluster(temporaryPath, getHadoopConf(), passwordGenerator,
       hmacAlgorithm, cipherAlgorithm, cipherKeySize, cipherSpec, pbkdf2Algorithm, pbkdf2Rounds, ivLength);
     sqoopMiniCluster.start();
 
-    String decryptedSecond = MasterKeyManager.getInstance().decryptWithMasterKey(cipherTextTo.toString(), ivTo.toString(), hmacTo.toString());
+    String toSesitiveCipherText = verifyEncryptedInput(sensitiveInput);
+    String toSensitiveKeyPatternCiphertext = verifyEncryptedInput(sensitiveKeyPatternInput);
 
-    Assert.assertEquals(decryptedFirst, decryptedSecond);
+    Assert.assertNotEquals(fromSensitiveCiphertext, toSesitiveCipherText);
+    Assert.assertNotEquals(fromSensitiveKeyPatternCiphertext, toSensitiveKeyPatternCiphertext);
   }
 
   @Test
@@ -330,24 +300,14 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
       hmacAlgorithm, cipherAlgorithm, cipherKeySize, cipherSpec, pbkdf2Algorithm, pbkdf2Rounds, ivLength);
     sqoopMiniCluster.start();
 
-    SqoopClient client = new SqoopClient(sqoopMiniCluster.getServerUrl());
-    MLink link = client.createLink("generic-jdbc-connector");
-    link.setName("zelda");
-    fillRdbmsLinkConfig(link);
-    client.saveLink(link);
-    MStringInput sensitiveInput = link.getConnectorLinkConfig().getStringInput("linkConfig.password");
+    createInputsAndJob();
 
-    StringBuffer cipherTextFrom = new StringBuffer();
-    StringBuffer ivFrom = new StringBuffer();
-    StringBuffer hmacFrom = new StringBuffer();
-    readEncryptedInput(sensitiveInput.getPersistenceId(), cipherTextFrom, ivFrom, hmacFrom);
-
-    String decryptedFirst = MasterKeyManager.getInstance().decryptWithMasterKey(cipherTextFrom.toString(), ivFrom.toString(), hmacFrom.toString());
+    String fromSensitiveCiphertext = verifyEncryptedInput(sensitiveInput);
+    String fromSensitiveKeyPatternCiphertext = verifyEncryptedInput(sensitiveKeyPatternInput);
 
     // Read the configuration context that we will need for the tool
     MapContext configurationMapContext = SqoopConfiguration.getInstance().getContext();
 
-    // Stop sqoop instance
     sqoopMiniCluster.stop();
 
     // Set the configuration
@@ -356,8 +316,6 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
     when(configurationMock.getContext()).thenReturn(configurationMapContext);
     when(configurationMock.getProvider()).thenReturn(new PropertiesConfigurationProvider());
     SqoopConfiguration.setInstance(configurationMock);
-
-    // Run tool
     RepositoryEncryptionTool repositoryEncryptionTool = new RepositoryEncryptionTool();
     repositoryEncryptionTool.runToolWithConfiguration(new String[] {
       "-FuseConf",
@@ -366,27 +324,59 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
 
     cleanUpAfterTool();
 
-    StringBuffer cipherTextTo = new StringBuffer();
-    StringBuffer ivTo = new StringBuffer();
-    StringBuffer hmacTo = new StringBuffer();
-
-    Assert.assertNotEquals(cipherTextFrom, cipherTextTo);
-
-    readEncryptedInput(sensitiveInput.getPersistenceId(), cipherTextTo, ivTo, hmacTo);
-
-    // Read the encrypted data by using the MasterKeyManager the server initializes
     sqoopMiniCluster = new SqoopMiniCluster(temporaryPath, getHadoopConf(), passwordGenerator,
       hmacAlgorithm, cipherAlgorithm, cipherKeySize, cipherSpec, pbkdf2Algorithm, pbkdf2Rounds, ivLength);
     sqoopMiniCluster.start();
 
-    String decryptedSecond = MasterKeyManager.getInstance().decryptWithMasterKey(cipherTextTo.toString(), ivTo.toString(), hmacTo.toString());
+    String toSesitiveCipherText = verifyEncryptedInput(sensitiveInput);
+    String toSensitiveKeyPatternCiphertext = verifyEncryptedInput(sensitiveKeyPatternInput);
 
-    Assert.assertEquals(decryptedFirst, decryptedSecond);
+    Assert.assertNotEquals(fromSensitiveCiphertext, toSesitiveCipherText);
+    Assert.assertNotEquals(fromSensitiveKeyPatternCiphertext, toSensitiveKeyPatternCiphertext);
 
     SqoopConfiguration.setInstance(oldSqoopConfiguration);
   }
 
+  private void createInputsAndJob() throws Exception {
+    SqoopClient client = new SqoopClient(sqoopMiniCluster.getServerUrl());
+    MLink jdbcLink = client.createLink("generic-jdbc-connector");
+    jdbcLink.setName("jdbcLink");
+    fillRdbmsLinkConfig(jdbcLink);
+    client.saveLink(jdbcLink);
+
+    MLink hdfsLink = client.createLink("hdfs-connector");
+    hdfsLink.setName("hdfsLink");
+    hdfsLink.getConnectorLinkConfig().getStringInput("linkConfig.confDir").setValue((sqoopMiniCluster.getConfigurationPath()));
+    Map<String, String> hdfsConfigOverrides = new HashMap<>();
+
+    // This will be considered sensitive
+    hdfsConfigOverrides.put("password", "secret");
+    hdfsLink.getConnectorLinkConfig().getMapInput("linkConfig.configOverrides").setValue(hdfsConfigOverrides);
+
+    client.saveLink(hdfsLink);
+
+    sensitiveInput = jdbcLink.getConnectorLinkConfig().getStringInput("linkConfig.password");
+
+    sensitiveKeyPatternInput = hdfsLink.getConnectorLinkConfig().getMapInput("linkConfig.configOverrides");
+
+    if (sqoopMiniCluster.isRepositoryEncryptionEnabled()) {
+      verifyEncryptedInput(sensitiveInput);
+      verifyEncryptedInput(sensitiveKeyPatternInput);
+    } else {
+      verifyPlaintextInput(sensitiveInput);
+      verifyPlaintextInput(sensitiveKeyPatternInput);
+    }
+
+    MJob job = client.createJob(jdbcLink.getName(), hdfsLink.getName());
+    job.setName("job");
+    job.getDriverConfig().getIntegerInput("throttlingConfig.numExtractors").setValue(1);
+    fillRdbmsFromConfig(job, "id");
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+    client.saveJob(job);
+  }
+
   private void cleanUpAfterTool() {
+    ConnectorManager.getInstance().destroy();
     RepositoryManager.getInstance().destroy();
     MasterKeyManager.getInstance().destroy();
     SqoopConfiguration.getInstance().destroy();
@@ -400,12 +390,24 @@ public class RepositoryEncryptionToolTest extends SqoopTestCase {
     }
   }
 
-  private void verifyPlaintextInput(long persistenceId, String expectedValue) throws Exception {
+  private String verifyEncryptedInput(MInput<?> input) throws Exception {
+    StringBuffer cipherText = new StringBuffer();
+    StringBuffer iv = new StringBuffer();
+    StringBuffer hmac = new StringBuffer();
+    readEncryptedInput(input.getPersistenceId(), cipherText, iv, hmac);
+
+    String sensitiveDecrypted = MasterKeyManager.getInstance().decryptWithMasterKey(cipherText.toString(), iv.toString(), hmac.toString());
+    Assert.assertEquals(input.getUrlSafeValueString(), sensitiveDecrypted);
+
+    return cipherText.toString();
+  }
+
+  private void verifyPlaintextInput(MInput<?> input) throws Exception {
     try (PreparedStatement inputSelection = DriverManager.getConnection(JDBC_URL).prepareStatement(INPUT_VALUE_QUERY)) {
-      inputSelection.setLong(1, persistenceId);
+      inputSelection.setLong(1, input.getPersistenceId());
       try (ResultSet resultSet = inputSelection.executeQuery()) {
         while (resultSet.next()) {
-          Assert.assertEquals(expectedValue, resultSet.getString(2));
+          Assert.assertEquals(input.getUrlSafeValueString(), resultSet.getString(2));
           Assert.assertFalse(resultSet.getBoolean(3));
           Assert.assertNull(resultSet.getString(4));
           Assert.assertNull(resultSet.getString(5));

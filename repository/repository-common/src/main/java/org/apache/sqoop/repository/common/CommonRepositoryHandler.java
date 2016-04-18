@@ -42,9 +42,11 @@ import org.apache.sqoop.common.MutableMapContext;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.SupportedDirections;
 import org.apache.sqoop.connector.ConnectorManager;
+import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.driver.Driver;
 import org.apache.sqoop.error.code.CommonRepositoryError;
+import org.apache.sqoop.model.ConfigUtils;
 import org.apache.sqoop.model.InputEditable;
 import org.apache.sqoop.model.MBooleanInput;
 import org.apache.sqoop.model.MConfig;
@@ -70,9 +72,11 @@ import org.apache.sqoop.model.MMasterKey;
 import org.apache.sqoop.model.MStringInput;
 import org.apache.sqoop.model.MSubmission;
 import org.apache.sqoop.model.MToConfig;
+import org.apache.sqoop.model.ModelError;
 import org.apache.sqoop.model.SubmissionError;
 import org.apache.sqoop.repository.JdbcRepositoryHandler;
 import org.apache.sqoop.repository.MasterKeyManager;
+import org.apache.sqoop.repository.RepositoryError;
 import org.apache.sqoop.security.SecurityConstants;
 import org.apache.sqoop.submission.SubmissionStatus;
 import org.apache.sqoop.submission.counter.Counter;
@@ -2277,8 +2281,37 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
     try (ResultSet inputs = selectInputsStatement.executeQuery()) {
       while (inputs.next()) {
         long inputId = inputs.getLong(1);
+        String inputName = inputs.getString(2);
+
         boolean encrypted = inputs.getBoolean(11);
-        boolean sensitive = inputs.getBoolean(6);
+        String configType = inputs.getString(15);
+        String connectorName = inputs.getString(16);
+
+        SqoopConnector connector = ConnectorManager.getInstance().getSqoopConnector(connectorName);
+        Class configurationClass;
+        if (MConfigType.LINK.name().equals(configType)) {
+          configurationClass = connector.getLinkConfigurationClass();
+        } else {
+          String direction = inputs.getString(17);
+          if (direction == null) {
+            configurationClass = Driver.getInstance().getDriverJobConfigurationClass();
+          } else {
+            configurationClass = connector.getJobConfigurationClass(Direction.valueOf(direction));
+          }
+        }
+
+        List<MConfig> mConfigList = ConfigUtils.toConfigs(configurationClass);
+        MInput mInput = null;
+        for (MConfig mConfig : mConfigList) {
+          if (mConfig.getInputNames().contains(inputName)) {
+            mInput = mConfig.getInput(inputName);
+            break;
+          }
+        }
+
+        if (mInput == null) {
+          throw new SqoopException(RepositoryError.REPO_0002);
+        }
 
         if (encrypted) {
           assert(fromMasterKeyManager != null);
@@ -2289,7 +2322,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
 
           String plainTextValue = readInputValue(fromMasterKeyManager, encryptedValue, encrypted, iv, hmac);
 
-          if (toMasterKeyManager != null && sensitive) {
+          if (toMasterKeyManager != null && shoudEncryptInput(mInput)) {
             // We need to encrypt the input
             String newIv = toMasterKeyManager.generateRandomIv();
             String encryptedInput = toMasterKeyManager.encryptWithMasterKey(plainTextValue, newIv);
@@ -2308,7 +2341,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
             updateInputsStatement.setLong(5, inputId);
           }
           updateInputsStatement.executeUpdate();
-        } else if (toMasterKeyManager != null && sensitive) {
+        } else if (toMasterKeyManager != null && shoudEncryptInput(mInput)) {
           // We need to encrypt the input
           String plainTextValue = inputs.getString(10);
           String newIv = toMasterKeyManager.generateRandomIv();
@@ -2586,7 +2619,7 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setLong(1, id);
             stmt.setLong(2, input.getPersistenceId());
-            if (input.isSensitive() && encryptionEnabled) {
+            if (shoudEncryptInput(input) && encryptionEnabled) {
               String iv = MasterKeyManager.getInstance().generateRandomIv();
               String hmac = null;
               String encryptedInput = masterKeyManager.encryptWithMasterKey(input.getUrlSafeValueString(), iv);
@@ -2608,6 +2641,11 @@ public abstract class CommonRepositoryHandler extends JdbcRepositoryHandler {
           }
         }
       }
+  }
+
+  private boolean shoudEncryptInput(MInput input) {
+    boolean hasSensitiveKeyPattern = (input instanceof MMapInput) && StringUtils.isNotEmpty(((MMapInput) input).getSensitiveKeyPattern());
+    return input.isSensitive() || hasSensitiveKeyPattern;
   }
 
   /**

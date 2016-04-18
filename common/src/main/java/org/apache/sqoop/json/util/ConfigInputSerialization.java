@@ -115,12 +115,16 @@ public final class ConfigInputSerialization {
           StringUtils.join(((MEnumInput)mInput).getValues(), ","));
       }
 
+      // Map specific serialization
+      if(mInput.getType() == MInputType.MAP) {
+        input.put(ConfigInputConstants.CONFIG_INPUT_SENSITIVE_KEY_PATTERN, ((MMapInput)mInput).getSensitiveKeyPattern());
+      }
+
       // Serialize value if is there
       // Skip if sensitive
       if (!mInput.isEmpty() && !(skipSensitive && mInput.isSensitive())) {
         if (mInput.getType() == MInputType.MAP) {
           MMapInput mMapInput = (MMapInput)mInput;
-          input.put(ConfigInputConstants.CONFIG_INPUT_SENSITIVE_KEY_PATTERN, mMapInput.getSensitiveKeyPattern());
           if (skipSensitive) {
             input.put(ConfigInputConstants.CONFIG_INPUT_VALUE, mMapInput.getNonsenstiveValue());
           } else {
