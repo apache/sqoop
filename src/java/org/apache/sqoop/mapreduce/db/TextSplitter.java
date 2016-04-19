@@ -38,6 +38,8 @@ import org.apache.sqoop.validation.ValidationException;
  */
 public class TextSplitter extends BigDecimalSplitter {
 
+  public static final String ALLOW_TEXT_SPLITTER_PROPERTY = "org.apache.sqoop.splitter.allow_text_splitter";
+
   private static final Log LOG = LogFactory.getLog(TextSplitter.class);
 
   private boolean useNCharStrings = false;
@@ -61,6 +63,10 @@ public class TextSplitter extends BigDecimalSplitter {
    */
   public List<InputSplit> split(Configuration conf, ResultSet results,
       String colName) throws SQLException, ValidationException {
+    if (!conf.getBoolean(ALLOW_TEXT_SPLITTER_PROPERTY, false)) {
+      throw new ValidationException("Generating splits for a textual index column " + "allowed only in case of \"-D"
+          + ALLOW_TEXT_SPLITTER_PROPERTY + "=true\" property " + "passed as a parameter");
+    }
 
     LOG.warn("Generating splits for a textual index column.");
     LOG.warn("If your database sorts in a case-insensitive order, "
