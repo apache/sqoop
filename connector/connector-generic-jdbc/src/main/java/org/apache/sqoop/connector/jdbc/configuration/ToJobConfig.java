@@ -45,15 +45,12 @@ public class ToJobConfig {
 
   @Input
   public Boolean shouldClearStageTable;
-
+  
   public static class ConfigValidator extends AbstractValidator<ToJobConfig> {
     @Override
     public void validate(ToJobConfig config) {
       if (config.tableName == null && config.sql == null) {
         addMessage(Status.ERROR, "Either table name or SQL must be specified");
-      }
-      if (config.tableName != null && config.sql != null) {
-        addMessage(Status.ERROR, "Both table name and SQL cannot be specified");
       }
       if (config.tableName == null && config.stageTableName != null) {
         addMessage(Status.ERROR,
