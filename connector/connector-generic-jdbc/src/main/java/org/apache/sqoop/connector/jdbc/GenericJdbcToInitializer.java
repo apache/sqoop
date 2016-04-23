@@ -122,13 +122,24 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
     String tableSql = toJobConfig.toJobConfig.sql;
     String tableColumns = toJobConfig.toJobConfig.columns;
 
-    if (tableName != null && tableSql != null) {
-      // when both fromTable name and fromTable sql are specified:
-      throw new SqoopException(
-          GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0007);
+    if (tableSql != null) {
+        // when toTable sql is specified:
 
-    } else if (tableName != null) {
-      // when fromTable name is specified:
+        if (tableSql.indexOf(
+            GenericJdbcConnectorConstants.SQL_PARAMETER_MARKER) == -1) {
+          // make sure parameter marker is in the specified sql
+          throw new SqoopException(
+              GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0013);
+        }
+
+        if (tableColumns == null) {
+          dataSql = tableSql;
+        } else {
+          throw new SqoopException(
+              GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0014);
+        }
+      }else if (tableName != null) {
+      // when toTable name is specified:
       if(stageEnabled) {
         LOG.info("Stage has been enabled.");
         LOG.info("Use stageTable: " + stageTableName +
@@ -179,23 +190,7 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
         builder.append(")");
         dataSql = builder.toString();
       }
-    } else if (tableSql != null) {
-      // when fromTable sql is specified:
-
-      if (tableSql.indexOf(
-          GenericJdbcConnectorConstants.SQL_PARAMETER_MARKER) == -1) {
-        // make sure parameter marker is in the specified sql
-        throw new SqoopException(
-            GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0013);
-      }
-
-      if (tableColumns == null) {
-        dataSql = tableSql;
-      } else {
-        throw new SqoopException(
-            GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0014);
-      }
-    } else {
+    }  else {
       // when neither are specified:
       throw new SqoopException(
           GenericJdbcConnectorError.GENERIC_JDBC_CONNECTOR_0008);

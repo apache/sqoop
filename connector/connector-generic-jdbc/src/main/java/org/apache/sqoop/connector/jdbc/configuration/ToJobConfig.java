@@ -52,9 +52,6 @@ public class ToJobConfig {
       if (config.tableName == null && config.sql == null) {
         addMessage(Status.ERROR, "Either table name or SQL must be specified");
       }
-      if (config.tableName != null && config.sql != null) {
-        addMessage(Status.ERROR, "Both table name and SQL cannot be specified");
-      }
       if (config.tableName == null && config.stageTableName != null) {
         addMessage(Status.ERROR,
             "Stage table name cannot be specified without specifying table name");
