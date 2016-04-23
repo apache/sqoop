@@ -124,7 +124,6 @@ public class GenericJdbcToInitializer extends Initializer<LinkConfiguration, ToJ
 
     if (tableSql != null) {
         // when toTable sql is specified:
-
         if (tableSql.indexOf(
             GenericJdbcConnectorConstants.SQL_PARAMETER_MARKER) == -1) {
           // make sure parameter marker is in the specified sql

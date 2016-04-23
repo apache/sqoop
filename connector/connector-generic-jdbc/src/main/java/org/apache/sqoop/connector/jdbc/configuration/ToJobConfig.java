@@ -45,7 +45,7 @@ public class ToJobConfig {
 
   @Input
   public Boolean shouldClearStageTable;
-
+  
   public static class ConfigValidator extends AbstractValidator<ToJobConfig> {
     @Override
     public void validate(ToJobConfig config) {
