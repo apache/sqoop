@@ -40,21 +40,21 @@ public class ExportTest extends OraOopTestCase {
     TEST_CASE.createTable("table_tst_product.xml");
 
     int retCode =
-        TEST_CASE.runImport("tst_product", TEST_CASE.getSqoopConf(), false);
+ TEST_CASE.runImport("TST_PRODUCT", TEST_CASE.getSqoopConf(), false);
     Assert.assertEquals("Return code should be 0", 0, retCode);
   }
 
   @Test
   public void testProductExport() throws Exception {
     int retCode =
-        TEST_CASE.runExportFromTemplateTable("tst_product", "tst_product_exp");
+        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP");
     Assert.assertEquals("Return code should be 0", 0, retCode);
   }
 
   @Test
   public void testProductExportMixedCaseTableName() throws Exception {
     int retCode =
-        TEST_CASE.runExportFromTemplateTable("tst_product",
+        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT",
             "\"\"T5+_Pr#duct_Exp\"\"");
     Assert.assertEquals("Return code should be 0", 0, retCode);
   }

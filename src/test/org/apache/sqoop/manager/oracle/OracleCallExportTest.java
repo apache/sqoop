@@ -90,23 +90,23 @@ public class OracleCallExportTest extends ExportJobTestCase {
   private void createObjects() {
 
     String createTableSql = "CREATE TABLE " + tableName + " ( "
-      + "id  INT NOT NULL PRIMARY KEY, "
-      + "msg VARCHAR(24) NOT NULL, "
-      + "d DATE, "
-      + "f FLOAT, "
-      + "vc VARCHAR(32))";
+      + "\"id\"  INT NOT NULL PRIMARY KEY, "
+      + "\"msg\" VARCHAR(24) NOT NULL, "
+      + "\"d\" DATE, "
+      + "\"f\" FLOAT, "
+      + "\"vc\" VARCHAR(32))";
 
     String createProcSql = "CREATE PROCEDURE " + procName + " ( "
-      + "id IN INT,"
-      + "msg IN VARCHAR,"
-      + "d IN DATE,"
-      + "f IN FLOAT) IS BEGIN "
+      + "\"id\" IN INT,"
+      + "\"msg\" IN VARCHAR,"
+      + "\"d\" IN DATE,"
+      + "\"f\" IN FLOAT) IS BEGIN "
       + "INSERT INTO " + tableName + " "
-      + "VALUES(id,"
-      + "msg,"
-      + "d,"
-      + "f,"
-      + "msg || '_2'); END;";
+      + "VALUES(\"id\","
+      + "\"msg\","
+      + "\"d\","
+      + "\"f\","
+      + "\"msg\" || '_2'); END;";
 
     try {
       dropTableIfExists(tableName);

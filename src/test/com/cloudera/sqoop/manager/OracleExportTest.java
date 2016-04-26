@@ -271,10 +271,10 @@ public class OracleExportTest extends TestExport {
     createTable();
     // first time will be insert.
     runExport(getArgv(true, 10, 10, newStrArray(null,
-        "--update-key", "ID", "--update-mode", "allowinsert")));
+        "--update-key", "id", "--update-mode", "allowinsert")));
     // second time will be update.
     runExport(getArgv(true, 10, 10, newStrArray(null,
-        "--update-key", "ID", "--update-mode", "allowinsert")));
+        "--update-key", "id", "--update-mode", "allowinsert")));
     verifyExport(TOTAL_RECORDS);
   }
 }

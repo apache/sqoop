@@ -39,7 +39,7 @@ public class TimestampDataTest extends OraOopTestCase {
     sqoopConf.setBoolean(OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING, false);
 
     try {
-      int retCode = runImport("tst_product", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT", sqoopConf, false);
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
