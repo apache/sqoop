@@ -54,11 +54,13 @@ import static org.apache.sqoop.shell.ShellEnvironment.*;
  */
 public final class ConfigFiller {
 
+  public final static short MAXIMUM_NAME_LENGTH = 250;
+
   /**
    * Internal input that will be reused for loading names for link and
    * job objects.
    */
-  private static MStringInput nameInput = new MStringInput("object-name", false, InputEditable.ANY, StringUtils.EMPTY, (short)25, Collections.EMPTY_LIST);
+  private static MStringInput nameInput = new MStringInput("object-name", false, InputEditable.ANY, StringUtils.EMPTY, MAXIMUM_NAME_LENGTH, Collections.EMPTY_LIST);
 
   /**
    * Fill job object based on CLI options.
