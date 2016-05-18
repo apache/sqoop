@@ -280,7 +280,7 @@ public class TestExport extends ExportJobTestCase {
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
     sb.append(getTableName());
-    sb.append(" (\"id\" INT NOT NULL PRIMARY KEY, \"msg\" VARCHAR(64)");
+    sb.append(" (\"ID\" INT NOT NULL PRIMARY KEY, \"MSG\" VARCHAR(64)");
     int colNum = 0;
     for (ColumnGenerator gen : extraColumns) {
       sb.append(", \"" + forIdx(colNum++) + "\" " + gen.getType());
@@ -326,7 +326,7 @@ public class TestExport extends ExportJobTestCase {
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
     sb.append(stageTableName);
-    sb.append(" (\"id\" INT NOT NULL PRIMARY KEY, \"msg\" VARCHAR(64)");
+    sb.append(" (\"ID\" INT NOT NULL PRIMARY KEY, \"MSG\" VARCHAR(64)");
     int colNum = 0;
     for (ColumnGenerator gen : extraColumns) {
       sb.append(", \"" + forIdx(colNum++) + "\" " + gen.getType());
@@ -363,7 +363,7 @@ public class TestExport extends ExportJobTestCase {
     LOG.info("Verifying column " + colName + " has value " + expectedVal);
 
     PreparedStatement statement = conn.prepareStatement(
-        "SELECT \"" + colName + "\" FROM " + getTableName() + " WHERE \"id\" = " + id,
+        "SELECT \"" + colName + "\" FROM " + getTableName() + " WHERE \"ID\" = " + id,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     String actualVal = null;
     try {
@@ -796,7 +796,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
   public void testColumnsExport() throws IOException, SQLException {
-    testColumnsExport("id,msg," + forIdx(0) + "," + forIdx(2));
+    testColumnsExport("ID,MSG," + forIdx(0) + "," + forIdx(2));
   }
 
   /**

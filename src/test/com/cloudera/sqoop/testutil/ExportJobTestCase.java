@@ -173,7 +173,7 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
   /** @return the minimum 'id' value in the table */
   protected int getMinRowId(Connection conn) throws SQLException {
     PreparedStatement statement = conn.prepareStatement(
-        "SELECT MIN(\"id\") FROM " + getTableName(),
+        "SELECT MIN(\"ID\") FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     int minVal = 0;
     try {
@@ -194,7 +194,7 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
   /** @return the maximum 'id' value in the table */
   protected int getMaxRowId(Connection conn) throws SQLException {
     PreparedStatement statement = conn.prepareStatement(
-        "SELECT MAX(\"id\") FROM " + getTableName(),
+        "SELECT MAX(\"ID\") FROM " + getTableName(),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     int maxVal = 0;
     try {
@@ -266,8 +266,8 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
     assertEquals("Maximum row had invalid id", expectedNumRecords - 1, maxVal);
 
     // Check that the string values associated with these points match up.
-    statement = conn.prepareStatement("SELECT \"msg\" FROM " + getTableName()
-        + " WHERE \"id\" = " + minVal,
+    statement = conn.prepareStatement("SELECT \"MSG\" FROM " + getTableName()
+        + " WHERE \"ID\" = " + minVal,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     String minMsg = "";
     try {
@@ -285,8 +285,8 @@ public abstract class ExportJobTestCase extends BaseSqoopTestCase {
     assertEquals("Invalid msg field for min value", getMsgPrefix() + minVal,
         minMsg);
 
-    statement = conn.prepareStatement("SELECT \"msg\" FROM " + getTableName()
-        + " WHERE \"id\" = " + maxVal,
+    statement = conn.prepareStatement("SELECT \"MSG\" FROM " + getTableName()
+        + " WHERE \"ID\" = " + maxVal,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     String maxMsg = "";
     try {
