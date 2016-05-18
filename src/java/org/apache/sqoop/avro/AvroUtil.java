@@ -114,11 +114,25 @@ public final class AvroUtil {
    * Format candidate to avro specifics
    */
   public static String toAvroIdentifier(String candidate) {
-    String formattedCandidate = candidate.replaceAll("\\W+", "_");
-    if (formattedCandidate.substring(0,1).matches("[a-zA-Z_]")) {
-      return formattedCandidate;
+    char[] data = candidate.toCharArray();
+    boolean skip = false;
+    int stringIndex = 0;
+
+    for (char c:data) {
+      if (Character.isLetterOrDigit(c) || c == '_') {
+        data[stringIndex++] = c;
+        skip = false;
+      } else if(!skip) {
+        data[stringIndex++] = '_';
+        skip = true;
+      }
+    }
+
+    char initial = data[0];
+    if (Character.isLetter(initial) || initial == '_') {
+      return new String(data, 0, stringIndex);
     } else {
-      return "AVRO_" + formattedCandidate;
+      return "AVRO_".concat(new String(data, 0, stringIndex));
     }
   }
 

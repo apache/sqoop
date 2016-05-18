@@ -1064,57 +1064,49 @@ public class ClassWriter {
    * @param colNames - ordered list of column names for table.
    * @param sb - StringBuilder to append code to
    */
-  private void generateSetField(Map<String, Integer> columnTypes,
-      String [] colNames, String [] rawColNames, StringBuilder sb) {
-
-    int numberOfMethods =
-            this.getNumberOfMethods(colNames, maxColumnsPerMethod);
-
-    sb.append("  public void setField(String __fieldName, Object __fieldVal) "
-        + "{\n");
-    if (numberOfMethods > 1) {
-      boolean first = true;
-      for (int i = 0; i < numberOfMethods; ++i) {
-        if (!first) {
-          sb.append("    else");
-        }
-        sb.append("    if (this.setField" + i
-                + "(__fieldName, __fieldVal)) {\n");
-        sb.append("      return;\n");
-        sb.append("    }\n");
-        first = false;
-      }
-    } else {
-      boolean first = true;
-      for (int i = 0; i < colNames.length; i++) {
-        int sqlType = columnTypes.get(colNames[i]);
-        String javaType = toJavaType(colNames[i], sqlType);
-        if (null == javaType) {
-          continue;
-        } else {
-          if (!first) {
-            sb.append("    else");
-          }
-
-          sb.append("    if (\"" + serializeRawColName(rawColNames[i]) + "\".equals(__fieldName)) {\n");
-          sb.append("      this." + colNames[i] + " = (" + javaType
-              + ") __fieldVal;\n");
-          sb.append("    }\n");
-          first = false;
-        }
-      }
-    }
-    sb.append("    else {\n");
-    sb.append("      throw new RuntimeException(");
-    sb.append("\"No such field: \" + __fieldName);\n");
-    sb.append("    }\n");
-    sb.append("  }\n");
-
-    for (int i = 0; i < numberOfMethods; ++i) {
-      myGenerateSetField(columnTypes, colNames, rawColNames, sb, i, maxColumnsPerMethod);
-    }
+  private void generateSetField(Map<String, Integer> columnTypes, String[] colNames, String[] rawColNames,
+      StringBuilder sb) {
+    String sep = System.getProperty("line.separator");
+    sb.append("  public void setField(String __fieldName, Object __fieldVal) " + "{" + sep);
+    sb.append("    if (!setters.containsKey(__fieldName)) {" + sep);
+    sb.append("      throw new RuntimeException(\"No such field:\"+__fieldName);" + sep);
+    sb.append("    }" + sep);
+    sb.append("    setters.get(__fieldName).setField(__fieldVal);" + sep);
+    sb.append("  }\n" + sep);
   }
 
+  private void generateConstructorAndInitMethods(Map<String, Integer> colTypes, String[] colNames, String[] rawColNames,
+      String typeName, StringBuilder sb) {
+    String sep = System.getProperty("line.separator");
+    int numberOfMethods = getNumberOfMethods(colNames, maxColumnsPerMethod);
+    for (int methodNumber = 0; methodNumber < numberOfMethods; ++methodNumber) {
+      sb.append("  private void init" + methodNumber + "() {" + sep);
+      for (int i = methodNumber * maxColumnsPerMethod; i < topBoundary(colNames, methodNumber,
+          maxColumnsPerMethod); ++i) {
+        String colName = colNames[i];
+        String rawColName = rawColNames[i];
+        int sqlType = colTypes.get(colName);
+        String javaType = toJavaType(colName, sqlType);
+        if (null == javaType) {
+          LOG.error("Cannot resolve SQL type " + sqlType);
+          continue;
+        } else {
+          sb.append("    setters.put(\"" + serializeRawColName(rawColName) + "\", new FieldSetterCommand() {" + sep);
+          sb.append("      @Override" + sep);
+          sb.append("      public void setField(Object value) {" + sep);
+          sb.append("        " + colName + " = (" + javaType + ")value;" + sep);
+          sb.append("      }" + sep);
+          sb.append("    });" + sep);
+        }
+      }
+      sb.append("  }" + sep);
+    }
+    sb.append("  public " + typeName + "() {" + sep);
+    for (int i = 0; i < numberOfMethods; ++i) {
+      sb.append("    init" + i + "();" + sep);
+    }
+    sb.append("  }" + sep);
+  }
   /**
    * Raw column name is a column name as it was created on database and we need to serialize it between
    * double quotes into java class that will be further complied with javac. Various databases supports
@@ -1184,7 +1176,7 @@ public class ClassWriter {
 
     sb.append("  public Map<String, Object> getFieldMap() {\n");
     sb.append("    Map<String, Object> __sqoop$field_map = "
-        + "new TreeMap<String, Object>();\n");
+        + "new HashMap<String, Object>();\n");
     if (numberOfMethods > 1) {
       for (int i = 0; i < numberOfMethods; ++i) {
         sb.append("    this.getFieldMap" + i + "(__sqoop$field_map);\n");
@@ -1934,7 +1926,7 @@ public class ClassWriter {
     sb.append("import java.util.Iterator;\n");
     sb.append("import java.util.List;\n");
     sb.append("import java.util.Map;\n");
-    sb.append("import java.util.TreeMap;\n");
+    sb.append("import java.util.HashMap;\n");
     sb.append("\n");
 
     String className = tableNameInfo.getShortClassForTable(tableName);
@@ -1944,7 +1936,12 @@ public class ClassWriter {
         + CLASS_WRITER_VERSION + ";\n");
     sb.append(
         "  public int getClassFormatVersion() { return PROTOCOL_VERSION; }\n");
+    sb.append("  public static interface FieldSetterCommand {");
+    sb.append("    void setField(Object value);");
+    sb.append("  }");
     sb.append("  protected ResultSet __cur_result_set;\n");
+    sb.append("  private Map<String, FieldSetterCommand> setters = new HashMap<String, FieldSetterCommand>();\n");
+    generateConstructorAndInitMethods(columnTypes, colNames, rawColNames, className, sb);
     generateFields(columnTypes, colNames, className, sb);
     generateEquals(columnTypes, colNames, className, sb);
     generateDbRead(columnTypes, colNames, sb);
