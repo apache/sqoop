@@ -27,7 +27,12 @@ Initialization
 
 Before continuing further, make sure that the Sqoop server is running.
 
-Then find out the details of the Sqoop server: ``host``, ``port`` and ``webapp``, and keep them in mind. Note that the sqoop server is running on Jetty. To exercise a REST API for Sqoop, you could assemble and send a HTTP request to an url corresponding to that API. Generally, the url contains the ``host`` on which the sqoop server is running, the ``port`` at which the sqoop server is listening to and ``webapp``, the context path at which the Sqoop server is registered in the Jetty engine.
+The Sqoop 2 server exposes its REST API via Jetty. By default the server is accessible over HTTP but it can be configured to use HTTPS, please see: :ref:`apitlsssl` for more information. The endpoints are registered under the ``/sqoop`` path and the port is configurable (the default is 12000). For example, if the host running the Sqoop 2 server is ``example.com`` and we are using the default port, we can reach the version endpoint by sending a GET request to:
+
+ ::
+
+    http://example.com:12000/sqoop/v1/version
+
 
 Certain requests might need to contain some additional query parameters and post data. These parameters could be given via
 the HTTP headers, request body or both. All the content in the HTTP body is in ``JSON`` format.
