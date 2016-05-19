@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.util.Random;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -57,6 +58,9 @@ public class TestClassWriter extends TestCase {
 
   public static final Log LOG =
       LogFactory.getLog(TestClassWriter.class.getName());
+  private static final String WIDE_TABLE_NAME = "WIDETABLE";
+  private static final int WIDE_TABLE_COLUMN_COUNT = 800;
+  private static final int WIDE_TABLE_ROW_COUNT = 20_000;
 
   // instance variables populated during setUp, used during tests
   private HsqldbTestServer testServer;
@@ -122,12 +126,16 @@ public class TestClassWriter extends TestCase {
   static final String JAR_GEN_DIR = ImportJobTestCase.TEMP_BASE_DIR
       + "sqoop/test/jargen";
 
+  private File runGenerationTest(String[] argv, String classNameToCheck) {
+    return runGenerationTest(argv, classNameToCheck, HsqldbTestServer.getTableName());
+  }
+
   /**
    * Run a test to verify that we can generate code and it emits the output
    * files where we expect them.
    * @return
    */
-  private File runGenerationTest(String [] argv, String classNameToCheck) {
+  private File runGenerationTest(String[] argv, String classNameToCheck, String tableName) {
     File codeGenDirFile = new File(CODE_GEN_DIR);
     File classGenDirFile = new File(JAR_GEN_DIR);
 
@@ -140,7 +148,7 @@ public class TestClassWriter extends TestCase {
 
     CompilationManager compileMgr = new CompilationManager(options);
     ClassWriter writer = new ClassWriter(options, manager,
-        HsqldbTestServer.getTableName(), compileMgr);
+        tableName, compileMgr);
 
     try {
       writer.generate();
@@ -674,5 +682,56 @@ public class TestClassWriter extends TestCase {
       CODE_GEN_DIR,
     };
     runFailedGenerationTest(argv, HsqldbTestServer.getTableName());
+  }
+
+  @Test(timeout = 10000)
+  public void testWideTableClassGeneration() throws Exception {
+    createWideTable();
+    options = new SqoopOptions(HsqldbTestServer.getDbUrl(), WIDE_TABLE_NAME);
+
+    // Set the option strings in an "argv" to redirect our srcdir and bindir.
+    String [] argv = {
+      "--bindir",
+      JAR_GEN_DIR,
+      "--outdir",
+      CODE_GEN_DIR,
+    };
+
+    File ormJarFile = runGenerationTest(argv, WIDE_TABLE_NAME, WIDE_TABLE_NAME);
+
+    ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(ormJarFile.getCanonicalPath(),
+        WIDE_TABLE_NAME);
+    Class tableClass = Class.forName(WIDE_TABLE_NAME, true,
+        Thread.currentThread().getContextClassLoader());
+
+    Object instance = tableClass.newInstance();
+    Method setterMethod = tableClass.getMethod("setField", String.class, Object.class);
+    Random random = new Random(0);
+    for (int j = 0; j < WIDE_TABLE_ROW_COUNT; ++j) {
+      for (int i = 0; i < WIDE_TABLE_COLUMN_COUNT; ++i) {
+        setterMethod.invoke(instance, "INTFIELD" + i, random.nextInt());
+      }
+    }
+
+    if (null != prevClassLoader) {
+      ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+    }
+  }
+
+  private void createWideTable() throws Exception {
+    try (Connection conn = testServer.getConnection(); Statement stmt = conn.createStatement();) {
+      stmt.executeUpdate("DROP TABLE \"" + WIDE_TABLE_NAME + "\" IF EXISTS");
+      StringBuilder sb = new StringBuilder("CREATE TABLE \"" + WIDE_TABLE_NAME + "\" (");
+      for (int i = 0; i < WIDE_TABLE_COLUMN_COUNT; ++i) {
+        sb.append("intField" + i + " INT");
+        if (i < WIDE_TABLE_COLUMN_COUNT - 1) {
+          sb.append(",");
+        } else {
+          sb.append(")");
+        }
+      }
+      stmt.executeUpdate(sb.toString());
+      conn.commit();
+    }
   }
 }
