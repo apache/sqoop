@@ -296,15 +296,11 @@ public class CompilationManager {
         // we only record the subdir parts in the zip entry.
         String fullPath = entry.getAbsolutePath();
         String chompedPath = fullPath.substring(baseDirName.length());
-        int indexOfDollarSign = chompedPath.indexOf("$");
-        String innerTypesChompedPath = chompedPath
-            .substring(0, indexOfDollarSign == -1 ? chompedPath.length() : indexOfDollarSign);
 
         boolean include = chompedPath.endsWith(".class")
-            && (sources.contains(
+            && sources.contains(
             chompedPath.substring(0, chompedPath.length() - ".class".length())
-                    + ".java")
-                || sources.contains(innerTypesChompedPath + ".java"));
+            + ".java");
 
         if (include) {
           // include this file.
