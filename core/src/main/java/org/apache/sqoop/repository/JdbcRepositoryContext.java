@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.common.MapContext;
+import org.apache.sqoop.utils.PasswordUtils;
 
 
 public final class JdbcRepositoryContext {
@@ -63,8 +64,9 @@ public final class JdbcRepositoryContext {
     String jdbcUserName = context.getString(
         RepoConfigurationConstants.SYSCFG_REPO_JDBC_USER);
 
-    String jdbcPassword = context.getString(
-        RepoConfigurationConstants.SYSCFG_REPO_JDBC_PASSWORD);
+    String jdbcPassword = PasswordUtils.readPassword(context,
+        RepoConfigurationConstants.SYSCFG_REPO_JDBC_PASSWORD,
+        RepoConfigurationConstants.SYSCFG_REPO_JDBC_PASSWORD_GENERATOR);
 
     connectionProperties = new Properties();
 

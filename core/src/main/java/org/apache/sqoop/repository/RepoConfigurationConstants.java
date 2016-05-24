@@ -85,6 +85,14 @@ public final class RepoConfigurationConstants {
       + "jdbc.password";
 
   /**
+   * The config specifies a command that prints the password used to build
+   * the JDBC connection:
+   * <tt>org.apache.sqoop.repository.jdbc.password_generator</tt>
+   */
+  public static final String SYSCFG_REPO_JDBC_PASSWORD_GENERATOR = PREFIX_REPO_CONFIG
+      + "jdbc.password_generator";
+
+  /**
    * JDBC Transaction Isolation, specified by:
    * <tt>org.apache.sqoop.repository.jdbc.transaction.isolation</tt>. The valid
    * values include: <tt>READ_UNCOMMITTED</tt>, <tt>READ_COMMITTED</tt>,
