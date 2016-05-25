@@ -293,6 +293,20 @@ public class HsqldbJobStorage extends JobStorage {
       for (Map.Entry<Object, Object> entry : configProps.entrySet()) {
         conf.set(entry.getKey().toString(), entry.getValue().toString());
       }
+      
+      // Now add/override all the properties which are overridden with -D 
+      Configuration changedConf = getConf();
+      Configuration baseConf = new Configuration();
+
+      for (Map.Entry<String, String> entry : changedConf) {
+        String key = entry.getKey();
+        String rawVal = changedConf.getRaw(key);
+        String baseVal = baseConf.getRaw(key);
+        if (baseVal != null && rawVal.equals(baseVal)) {
+          continue; 
+        }
+        conf.set(entry.getKey().toString(), entry.getValue().toString());
+      }
 
       SqoopOptions opts = new SqoopOptions();
       opts.setConf(conf);
