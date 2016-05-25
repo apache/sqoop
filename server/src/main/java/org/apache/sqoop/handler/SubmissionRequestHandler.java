@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.json.JsonBean;
 import org.apache.sqoop.json.SubmissionBean;
 import org.apache.sqoop.model.MJob;
@@ -54,7 +55,7 @@ public class SubmissionRequestHandler implements RequestHandler {
     } else {
       // all submissions in the system
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "submissions", "all");
+          ctx.getRequest().getRemoteAddr(), "get", "submissions", SqoopProtocolConstants.ALL);
       return getSubmissions(ctx);
     }
   }

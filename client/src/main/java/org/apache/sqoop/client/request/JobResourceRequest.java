@@ -18,6 +18,7 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
+import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.JobBean;
 import org.apache.sqoop.json.SubmissionBean;
@@ -61,7 +62,7 @@ public class JobResourceRequest extends ResourceRequest {
   public JobBean read(String serverUrl, String jobArg) {
     String response;
     if (jobArg == null) {
-      response = super.get(serverUrl + RESOURCE + "all");
+      response = super.get(serverUrl + RESOURCE + SqoopProtocolConstants.ALL);
     } else {
       response = super.get(serverUrl + RESOURCE + UrlSafeUtils.urlPathEncode(jobArg));
     }

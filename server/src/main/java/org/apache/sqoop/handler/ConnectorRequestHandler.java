@@ -26,6 +26,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
+import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.JsonBean;
@@ -53,11 +54,11 @@ public class ConnectorRequestHandler implements RequestHandler {
 
     LOG.info("ConnectorRequestHandler handles cname: " + cIdentifier);
 
-    if (cIdentifier.equals("all")) {
+    if (cIdentifier.equals(SqoopProtocolConstants.ALL)) {
       connectors = ConnectorManager.getInstance().getConnectorConfigurables();
       configParamBundles = ConnectorManager.getInstance().getResourceBundles(locale);
       AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(),
-          ctx.getRequest().getRemoteAddr(), "get", "connectors", "all");
+          ctx.getRequest().getRemoteAddr(), "get", "connectors", SqoopProtocolConstants.ALL);
 
       // Authorization check
       connectors = AuthorizationEngine.filterResource(ctx.getUserName(), MResource.TYPE.CONNECTOR, connectors);

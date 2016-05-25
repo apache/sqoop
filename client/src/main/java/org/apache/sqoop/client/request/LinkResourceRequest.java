@@ -18,6 +18,7 @@
 package org.apache.sqoop.client.request;
 
 import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticatedURL;
+import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.json.JSONUtils;
 import org.apache.sqoop.json.LinkBean;
 import org.apache.sqoop.json.ValidationResultBean;
@@ -47,7 +48,7 @@ public class LinkResourceRequest extends ResourceRequest {
   public LinkBean read(String serverUrl, String linkArg) {
     String response;
     if (linkArg == null) {
-      response = super.get(serverUrl + LINK_RESOURCE + "all");
+      response = super.get(serverUrl + LINK_RESOURCE + SqoopProtocolConstants.ALL);
     } else {
       response = super.get(serverUrl + LINK_RESOURCE + UrlSafeUtils.urlPathEncode(linkArg));
     }

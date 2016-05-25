@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.json.JSONUtils;
@@ -189,7 +190,7 @@ public class LinkRequestHandler implements RequestHandler {
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(), "get", "link", linkName);
 
-    if(linkName.equals("all")) { // Return all links (by perhaps only for given connector)
+    if(linkName.equals(SqoopProtocolConstants.ALL)) { // Return all links (by perhaps only for given connector)
       String connectorName = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
 
       if(StringUtils.isEmpty(connectorName)) {

@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.connector.ConnectorManager;
 import org.apache.sqoop.connector.spi.SqoopConnector;
 import org.apache.sqoop.driver.Driver;
@@ -266,7 +267,7 @@ public class JobRequestHandler implements RequestHandler {
 
     AuditLoggerManager.getInstance().logAuditEvent(ctx.getUserName(), ctx.getRequest().getRemoteAddr(), "get", "job", jobName);
 
-    if(jobName.equals("all")) { // Return all links (by perhaps only for given connector)
+    if(jobName.equals(SqoopProtocolConstants.ALL)) { // Return all links (by perhaps only for given connector)
       String connectorName = ctx.getParameterValue(CONNECTOR_NAME_QUERY_PARAM);
 
       if(StringUtils.isEmpty(connectorName)) {

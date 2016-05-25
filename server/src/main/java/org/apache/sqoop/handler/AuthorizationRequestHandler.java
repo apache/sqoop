@@ -20,6 +20,7 @@ package org.apache.sqoop.handler;
 import org.apache.log4j.Logger;
 import org.apache.sqoop.audit.AuditLoggerManager;
 import org.apache.sqoop.common.SqoopException;
+import org.apache.sqoop.common.SqoopProtocolConstants;
 import org.apache.sqoop.core.SqoopConfiguration;
 import org.apache.sqoop.error.code.CommonRepositoryError;
 import org.apache.sqoop.repository.Repository;
@@ -149,7 +150,7 @@ public class AuthorizationRequestHandler implements RequestHandler {
     } else {
       // get all roles in the system
       manager.logAuditEvent(ctx.getUserName(),
-              ctx.getRequest().getRemoteAddr(), "get", "roles", "all");
+              ctx.getRequest().getRemoteAddr(), "get", "roles", SqoopProtocolConstants.ALL);
       return new RoleBean(handler.getAllRoles());
     }
   }

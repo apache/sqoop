@@ -38,6 +38,8 @@ public final class SqoopProtocolConstants {
   public static final String JSON_CONTENT_TYPE =
       "application/json; charset=\"" + charset + "\"";
 
+  public static final String ALL = "all";
+
   private SqoopProtocolConstants() {
     // Disable explicit object creation
   }
