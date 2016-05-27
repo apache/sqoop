@@ -30,9 +30,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.apache.sqoop.client.SqoopClient;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.VersionBean;
 import org.apache.sqoop.model.MConfig;
@@ -185,6 +187,55 @@ public class TestShowCommand {
     assertTrue(status != null && status == Status.OK);
     str = new String(out.toByteArray());
     assertTrue(str.contains("Connector with Name: test_connector"));
+  }
+
+  @Test
+  public void testShowConnectorsByDirection() {
+    Collection<MConnector> connectorsFrom = new ArrayList<MConnector>();
+    connectorsFrom.add(new MConnector("from_connector", "", "",
+        new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+        new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+        null));
+    when(client.getConnectorsByDirection(Direction.FROM)).thenReturn(connectorsFrom);
+
+    Collection<MConnector> connectorsTo = new ArrayList<MConnector>();
+    connectorsTo.add(new MConnector("to_connector", "", "",
+        new MLinkConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+        null,
+        new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>())));
+    when(client.getConnectorsByDirection(Direction.TO)).thenReturn(connectorsTo);
+
+    // show connector -direction from
+    out.reset();
+    Status status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-direction", "from"));
+    assertTrue(status != null && status == Status.OK);
+    String str = new String(out.toByteArray());
+    assertTrue(str.contains("Connector with Name: from_connector"));
+
+    // show connector -direction to
+    out.reset();
+    status = (Status) showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-direction", "to"));
+    assertTrue(status != null && status == Status.OK);
+    str = new String(out.toByteArray());
+    assertTrue(str.contains("Connector with Name: to_connector"));
+
+    // show connector -direction
+    try {
+      out.reset();
+      showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-direction"));
+      fail("Show connector should fail as option direction is missing!");
+    } catch (SqoopException e) {
+      assertEquals(e.getErrorCode(), ShellError.SHELL_0003);
+    }
+
+    // show connector -direction misc
+    try {
+      out.reset();
+      showCmd.execute(Arrays.asList(Constants.FN_CONNECTOR, "-direction", "misc"));
+      fail("Show connector should fail as option direction is invalid!");
+    } catch (SqoopException e) {
+      assertEquals(e.getErrorCode(), ShellError.SHELL_0003);
+    }
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })

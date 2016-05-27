@@ -23,12 +23,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.ArrayList;
 
 import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.security.token.Token;
 import org.apache.sqoop.classification.InterfaceAudience;
 import org.apache.sqoop.classification.InterfaceStability;
 import org.apache.sqoop.client.request.SqoopResourceRequests;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.*;
 import org.apache.sqoop.model.*;
@@ -199,6 +201,28 @@ public class SqoopClient {
     connectorConfigBundles = bean.getResourceBundles();
 
     return connectors.values();
+  }
+
+  /**
+   * Get list of all connectors in one direction.
+   *
+   * @param direction the required directions of the connectors to be listed.
+   * @return Collection of connector models.
+   */
+  public Collection<MConnector> getConnectorsByDirection(Direction direction) {
+    if (!isAllConnectors) {
+      getConnectors();
+    }
+
+    Collection<MConnector> filteredConnectors = new ArrayList<>();
+
+    for (MConnector connector : connectors.values()) {
+      if (connector.getSupportedDirections().isDirectionSupported(direction)) {
+        filteredConnectors.add(connector);
+      }
+    }
+
+    return filteredConnectors;
   }
 
   /**

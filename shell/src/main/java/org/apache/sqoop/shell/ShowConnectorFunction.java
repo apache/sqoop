@@ -24,9 +24,11 @@ import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.sqoop.client.ClientError;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.model.MConnector;
 import org.apache.sqoop.shell.core.Constants;
+import org.apache.sqoop.shell.core.ShellError;
 import org.apache.sqoop.validation.Status;
 
 import static org.apache.sqoop.shell.ShellEnvironment.*;
@@ -46,6 +48,10 @@ public class ShowConnectorFunction extends SqoopFunction {
         .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_CONNECTOR_NAME))
         .withLongOpt(Constants.OPT_NAME)
         .create(Constants.OPT_NAME_CHAR));
+    this.addOption(OptionBuilder.hasArg().withArgName(Constants.OPT_DIRECTION)
+        .withDescription(resourceString(Constants.RES_SHOW_PROMPT_DISPLAY_CONNECTOR_DIRECTION))
+        .withLongOpt(Constants.OPT_DIRECTION)
+        .create(Constants.OPT_DIRECTION_CHAR));
   }
 
   @Override
@@ -54,6 +60,8 @@ public class ShowConnectorFunction extends SqoopFunction {
       showConnectors();
     } else if (line.hasOption(Constants.OPT_NAME)) {
       showConnector(line);
+    } else if (line.hasOption(Constants.OPT_DIRECTION)) {
+      showConnectorsByDirection(line);
     } else {
       showSummary();
     }
@@ -87,6 +95,30 @@ public class ShowConnectorFunction extends SqoopFunction {
 
   private void showConnectors() {
     Collection<MConnector> connectors = client.getConnectors();
+
+    printlnResource(Constants.RES_SHOW_PROMPT_CONNECTORS_TO_SHOW, connectors.size());
+
+    for (MConnector connector : connectors) {
+      displayConnector(connector);
+    }
+  }
+
+  private void showConnectorsByDirection(CommandLine line) {
+    // Check if the command argument is a connector direction
+    String directionString = line.getOptionValue(Constants.OPT_DIRECTION);
+    Direction direction;
+    switch (directionString) {
+      case Constants.OPT_FROM:
+        direction = Direction.FROM;
+        break;
+      case Constants.OPT_TO:
+        direction = Direction.TO;
+        break;
+      default:
+        throw new SqoopException(ShellError.SHELL_0003, directionString);
+    }
+
+    Collection<MConnector> connectors = client.getConnectorsByDirection(direction);
 
     printlnResource(Constants.RES_SHOW_PROMPT_CONNECTORS_TO_SHOW, connectors.size());
 

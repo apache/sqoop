@@ -35,6 +35,7 @@ public class Constants {
 
   // Options
 
+  public static final String OPT_DIRECTION = "direction";
   public static final String OPT_FROM = "from";
   public static final String OPT_TO = "to";
   public static final String OPT_ALL = "all";
@@ -65,6 +66,7 @@ public class Constants {
   public static final String OPT_TRUSTSTORE_PASSWORD = "truststore-password";
   public static final String OPT_TRUSTSTORE_PASSWORD_GENERATOR = "truststore-password-generator";
 
+  public static final char OPT_DIRECTION_CHAR = 'd';
   public static final char OPT_FROM_CHAR = 'f';
   public static final char OPT_TO_CHAR = 't';
   public static final char OPT_ALL_CHAR = 'a';
@@ -293,6 +295,8 @@ public class Constants {
       "show.prompt_display_all_connectors";
   public static final String RES_SHOW_PROMPT_DISPLAY_CONNECTOR_NAME =
       "show.prompt_display_connector_name";
+  public static final String RES_SHOW_PROMPT_DISPLAY_CONNECTOR_DIRECTION =
+      "show.prompt_display_connectors_by_direction";
   public static final String RES_SHOW_PROMPT_CONNECTORS_TO_SHOW =
       "show.prompt_connectors_to_show";
   public static final String RES_SHOW_PROMPT_CONNECTOR_INFO =

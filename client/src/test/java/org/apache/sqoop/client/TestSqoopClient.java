@@ -19,6 +19,7 @@ package org.apache.sqoop.client;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.sqoop.client.request.SqoopResourceRequests;
+import org.apache.sqoop.common.Direction;
 import org.apache.sqoop.common.SqoopException;
 import org.apache.sqoop.json.ConnectorBean;
 import org.apache.sqoop.json.DriverBean;
@@ -184,6 +186,38 @@ public class TestSqoopClient {
     verify(resourceRequests, times(1)).readConnector("A1");
     verify(resourceRequests, times(0)).readConnector("A2");
     verifyNoMoreInteractions(resourceRequests);
+  }
+
+  @Test
+  public void testGetConnectorsByDirection() {
+    Collection<MConnector> filteredConnectors;
+
+    MConnector connectorFrom = new MConnector("from_connector", "", "",
+        new MLinkConfig(null, null),
+        new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+        null);
+
+    MConnector connectorTo = new MConnector("to_connector", "", "",
+        new MLinkConfig(null, null),
+        null,
+        new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
+
+    MConnector connectorBothWays = new MConnector("both_ways_connector", "", "",
+        new MLinkConfig(null, null),
+        new MFromConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()),
+        new MToConfig(new ArrayList<MConfig>(), new ArrayList<MValidator>()));
+
+    when(resourceRequests.readConnector(null)).thenReturn(connectorBean(connectorFrom, connectorTo, connectorBothWays));
+
+    filteredConnectors = client.getConnectorsByDirection(Direction.FROM);
+    assertTrue(filteredConnectors.contains(connectorFrom));
+    assertTrue(!filteredConnectors.contains(connectorTo));
+    assertTrue(filteredConnectors.contains(connectorBothWays));
+
+    filteredConnectors = client.getConnectorsByDirection(Direction.TO);
+    assertTrue(!filteredConnectors.contains(connectorFrom));
+    assertTrue(filteredConnectors.contains(connectorTo));
+    assertTrue(filteredConnectors.contains(connectorBothWays));
   }
 
   /**
