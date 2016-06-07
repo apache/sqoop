@@ -28,7 +28,6 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.util.MainframeFTPClientUtils;
 
@@ -52,9 +51,20 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     Configuration conf = getConfiguration();
     ftp = MainframeFTPClientUtils.getFTPConnection(conf);
     if (ftp != null) {
-      String dsName
-          = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
-      ftp.changeWorkingDirectory("'" + dsName + "'");
+		String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
+		String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
+		MainframeDatasetPath p = null;
+		try {
+			p = new MainframeDatasetPath(dsName,conf);
+		} catch (Exception e) {
+			LOG.error(e.getMessage());
+			LOG.error("MainframeDatasetPath helper class incorrectly initialised");
+			e.printStackTrace();
+		}
+		if (dsType != null && p != null) {
+			dsName = p.getMainframeDatasetFolder();
+		}
+		ftp.changeWorkingDirectory("'" + dsName + "'");
     }
   }
 

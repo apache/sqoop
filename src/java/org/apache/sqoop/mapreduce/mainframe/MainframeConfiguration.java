@@ -22,4 +22,15 @@ public class MainframeConfiguration
   public static final String MAINFRAME_INPUT_DATASET_NAME
       = "mapreduce.mainframe.input.dataset.name";
 
+  public static final String MAINFRAME_INPUT_DATASET_TYPE
+      = "mapreduce.mainframe.input.dataset.type";
+  public static final String MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL
+		= "s";
+  public static final String MAINFRAME_INPUT_DATASET_TYPE_GDG
+	= "g";
+  public static final String MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED
+	= "p";
+  public static final String MAINFRAME_INPUT_DATASET_TAPE = "mainframe.input.dataset.tape";
+
+  public static final String MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME = "org.apache.sqoop.mapreduce.mainframe.MainframeFTPFileEntryParser";
 }

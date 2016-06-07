@@ -23,3 +23,9 @@
 
 --dataset (partitioned dataset name)::
   Specify a partitioned dataset name
+
+--datasettype (data set type)::
+  Specify a dataset type. "s" for sequential, "p" for partitioned dataset (default), "g" for generational data group
+  
+--tape (dataset on tape)::
+  Specify whether a dataset is on tape or not (true|false)

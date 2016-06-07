@@ -24,7 +24,9 @@ import java.lang.reflect.Method;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.cli.RelatedOptions;
+import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +77,7 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     assertTrue(rOptions.hasOption(MainframeImportTool.MAPREDUCE_JOB_NAME));
     assertTrue(rOptions.hasOption(MainframeImportTool.COMPRESS_ARG));
     assertTrue(rOptions.hasOption(MainframeImportTool.COMPRESSION_CODEC_ARG));
+    assertTrue(rOptions.hasOption(MainframeImportTool.DS_TYPE_ARG));
   }
 
   @Test
@@ -100,5 +103,79 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
     assertEquals(sqoopOption.getConnManagerClassName(), "dummy_ClassName");
     assertNull(sqoopOption.getTableName());
+  }
+  
+  @Test
+  public void testDataSetTypeOptionIsSet() throws ParseException, InvalidOptionsException {
+	  String[] args = new String[] { "--datasettype", MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG };
+	  ToolOptions toolOptions = new ToolOptions();
+	  SqoopOptions sqoopOption = new SqoopOptions();
+	  mfImportTool.configureOptions(toolOptions);
+	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+	  assertEquals(sqoopOption.getMainframeInputDatasetType(), MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG);
+  }
+  
+  @Test
+  public void testDefaultDataSetTypeOptionIsSet() throws ParseException, InvalidOptionsException {
+	  String[] args = new String[] {};
+	  ToolOptions toolOptions = new ToolOptions();
+	  SqoopOptions sqoopOption = new SqoopOptions();
+	  mfImportTool.configureOptions(toolOptions);
+	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+	  assertEquals(sqoopOption.getMainframeInputDatasetType(), MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED);
+  }
+  
+  @Test
+  public void testInvalidDataSetTypeOptionThrowsException() {
+	  // validateImportOptions gets called from Sqoop.run() function
+	  String[] args = new String[] { "--dataset", "mydataset","--datasettype", "fjfdksjjf" };
+	  ToolOptions toolOptions = new ToolOptions();
+	  SqoopOptions sqoopOption = new SqoopOptions();
+	  mfImportTool.configureOptions(toolOptions);
+	  try {
+		  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+		  mfImportTool.validateImportOptions(sqoopOption);
+		  String dsType = sqoopOption.getMainframeInputDatasetType();
+		  System.out.println("dsType: "+dsType);
+	  } catch (InvalidOptionsException e) {
+		  String errorMessage = "--datasettype specified is invalid.";
+		  e.printStackTrace();
+		  assert(e.getMessage().contains(errorMessage));
+	  } catch (ParseException e) {
+		e.printStackTrace();
+		assertFalse(e != null);
+	}
+  }
+
+  @Test
+  public void testTapeOptionIsSet() throws ParseException, InvalidOptionsException {
+	  String[] args = new String[] { "--tape", "true" };
+	  ToolOptions toolOptions = new ToolOptions();
+	  SqoopOptions sqoopOption = new SqoopOptions();
+	  mfImportTool.configureOptions(toolOptions);
+	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
+	  assert(isTape != null && isTape.toString().equals("true"));
+  }
+  @Test
+  public void testTapeOptionDefaultIsSet() throws ParseException, InvalidOptionsException {
+	  String[] args = new String[] { "--datasettype", MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG };
+	  ToolOptions toolOptions = new ToolOptions();
+	  SqoopOptions sqoopOption = new SqoopOptions();
+	  mfImportTool.configureOptions(toolOptions);
+	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
+	  assert(isTape != null && isTape.toString().equals("false"));
+  }
+  @Test
+  public void testTapeOptionInvalidReturnsFalse() throws ParseException, InvalidOptionsException {
+	  String[] args = new String[] { "--dataset", "mydatasetname", "--tape", "invalidvalue" };
+	  ToolOptions toolOptions = new ToolOptions();
+	  SqoopOptions sqoopOption = new SqoopOptions();
+	  mfImportTool.configureOptions(toolOptions);
+	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+	  mfImportTool.validateImportOptions(sqoopOption);
+	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
+	  assert(isTape != null && isTape.toString().equals("false"));
   }
 }

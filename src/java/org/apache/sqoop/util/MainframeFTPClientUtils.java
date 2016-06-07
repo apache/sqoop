@@ -29,16 +29,16 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPListParseEngine;
 import org.apache.commons.net.ftp.FTPReply;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
-
 import org.apache.sqoop.mapreduce.JobBase;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
+import org.apache.sqoop.mapreduce.mainframe.MainframeDatasetPath;
 
 /**
  * Utility methods used when accessing a mainframe server through FTP client.
@@ -52,20 +52,78 @@ public final class MainframeFTPClientUtils {
   private MainframeFTPClientUtils() {
   }
 
-  public static List<String> listSequentialDatasets(
-      String pdsName, Configuration conf) throws IOException {
+  public static List<String> listSequentialDatasets(String pdsName, Configuration conf) throws IOException {
     List<String> datasets = new ArrayList<String>();
+    String dsName = pdsName;
+    String fileName = "";
+    MainframeDatasetPath p = null;
+    try {
+    	p = new MainframeDatasetPath(dsName,conf);
+    } catch (Exception e) {
+    	LOG.error(e.getMessage());
+    	LOG.error("MainframeDatasetPath helper class incorrectly initialised");
+    	e.printStackTrace();
+    }
+    String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
+    boolean isTape = Boolean.parseBoolean(conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE));
+    boolean isSequentialDs = false;
+    boolean isGDG = false;
+    if (dsType != null && p != null) {
+    	isSequentialDs = p.getMainframeDatasetType().toString().equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL);
+        isGDG = p.getMainframeDatasetType().toString().equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG);
+    	pdsName = p.getMainframeDatasetFolder();
+    	fileName = p.getMainframeDatasetFileName();
+    }
     FTPClient ftp = null;
     try {
       ftp = getFTPConnection(conf);
       if (ftp != null) {
         ftp.changeWorkingDirectory("'" + pdsName + "'");
-        FTPFile[] ftpFiles = ftp.listFiles();
-        for (FTPFile f : ftpFiles) {
-          if (f.getType() == FTPFile.FILE_TYPE) {
-            datasets.add(f.getName());
-          }
+        FTPFile[] ftpFiles = null;
+        if (isTape) {
+        	FTPListParseEngine parser = ftp.initiateListParsing(MainframeConfiguration.MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME, "");
+        	List<FTPFile> listing = new ArrayList<FTPFile>();
+        	while(parser.hasNext()) {
+        		FTPFile[] files = parser.getNext(25);
+        		for (FTPFile file : files) {
+        			if (file != null) {
+        				listing.add(file);
+        				LOG.info(String.format("Name: %s Type: %s", file.getName(), file.getType()));
+        			}
+        			// skip nulls returned from parser
+        		}
+        		ftpFiles = new FTPFile[listing.size()];
+        		for (int i = 0;i < listing.size(); i++) {
+        			ftpFiles[i] = listing.get(i);
+        		}
+        		LOG.info("Files returned from mainframe parser:-");
+        		for (FTPFile f : ftpFiles) {
+        			LOG.info(String.format("Name: %s, Type: %s",f.getName(),f.getType()));
+        		}
+        	}
         }
+		else { ftpFiles = ftp.listFiles(); }
+		if (!isGDG) {
+			for (FTPFile f : ftpFiles) {
+				LOG.info(String.format("Name: %s Type: %s",f.getName(), f.getType()));
+				if (f.getType() == FTPFile.FILE_TYPE) {
+					// only add datasets if default behaviour of partitioned data sets
+					// or if it is a sequential data set, only add if the file name matches exactly
+					if (!isSequentialDs || isSequentialDs && f.getName().equals(fileName) && !fileName.equals("")) {
+						datasets.add(f.getName());
+					}
+				}
+			}
+		} else {
+			LOG.info("GDG branch. File list:-");
+			for (FTPFile f : ftpFiles) {
+				LOG.info(String.format("Name: %s Type: %s",f.getName(), f.getType()));
+			}
+			if (ftpFiles.length > 0 && ftpFiles[ftpFiles.length-1].getType() == FTPFile.FILE_TYPE) {
+				// for GDG - add the last file in the collection
+				datasets.add(ftpFiles[ftpFiles.length-1].getName());
+			}
+		}
       }
     } catch(IOException ioe) {
       throw new IOException ("Could not list datasets from " + pdsName + ":"
@@ -144,6 +202,7 @@ public final class MainframeFTPClientUtils {
       ftp.setFileType(FTP.ASCII_FILE_TYPE);
       // Use passive mode as default.
       ftp.enterLocalPassiveMode();
+      LOG.info("System type detected: " + ftp.getSystemType());
     } catch(IOException ioe) {
       if (ftp != null && ftp.isConnected()) {
         try {

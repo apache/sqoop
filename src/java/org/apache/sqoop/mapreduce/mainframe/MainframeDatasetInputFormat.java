@@ -60,9 +60,13 @@ public class MainframeDatasetInputFormat<T extends SqoopRecord>
     String dsName
         = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
     LOG.info("Datasets to transfer from: " + dsName);
+    String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
+    LOG.info("Dataset type: " + dsType);
+    String dsTape = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE);
+    LOG.info("Dataset on tape?: " + dsTape);
     List<String> datasets = retrieveDatasets(dsName, conf);
     if (datasets.isEmpty()) {
-      throw new IOException ("No sequential datasets retrieved from " + dsName);
+      throw new IOException ("No datasets retrieved from " + dsName);
     } else {
       int count = datasets.size();
       int chunks = Math.min(count, ConfigurationHelper.getJobNumMaps(job));

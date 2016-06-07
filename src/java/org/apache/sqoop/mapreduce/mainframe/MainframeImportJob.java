@@ -59,6 +59,12 @@ public class MainframeImportJob extends DataDrivenImportJob {
     job.getConfiguration().set(
         MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,
         options.getMainframeInputDatasetName());
+    job.getConfiguration().set(
+            MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,
+            options.getMainframeInputDatasetType());
+    job.getConfiguration().set(
+            MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE,
+            options.getMainframeInputDatasetTape().toString());
   }
 
   @Override

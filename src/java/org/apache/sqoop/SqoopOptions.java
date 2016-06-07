@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.accumulo.AccumuloConstants;
+import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.SqoopJsonUtil;
@@ -281,6 +282,14 @@ public class SqoopOptions implements Cloneable {
   // Dataset name for mainframe import tool
   @StoredAsProperty("mainframe.input.dataset.name")
   private String mainframeInputDatasetName;
+
+  // Dataset type for mainframe import tool
+  @StoredAsProperty("mainframe.input.dataset.type")
+  private String mainframeInputDatasetType;
+
+  // Indicates if the data set is on tape to use different FTP parser
+  @StoredAsProperty("mainframe.input.dataset.tape")
+  private String mainframeInputDatasetTape;
 
   // Accumulo home directory
   private String accumuloHome; // not serialized to metastore.
@@ -1023,6 +1032,9 @@ public class SqoopOptions implements Cloneable {
     // Relaxed isolation will not enabled by default which is the behavior
     // of sqoop until now.
     this.relaxedIsolation = false;
+    
+    // set default mainframe data set type to partitioned data set
+    this.mainframeInputDatasetType = MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED;
   }
 
   /**
@@ -2276,6 +2288,11 @@ public class SqoopOptions implements Cloneable {
   public void setMainframeInputDatasetName(String name) {
     mainframeInputDatasetName = name;
     tableName = name;
+    // may need to set this in the conf variable otherwise it gets lost.
+  }
+
+  public void setMainframeInputDatasetType(String name) {
+    mainframeInputDatasetType = name;
   }
 
   /**
@@ -2283,6 +2300,24 @@ public class SqoopOptions implements Cloneable {
    */
   public String getMainframeInputDatasetName() {
     return mainframeInputDatasetName;
+  }
+
+  /*
+   * Return the mainframe dataset type
+   */
+  public String getMainframeInputDatasetType() {
+    return mainframeInputDatasetType;
+  }
+
+  // return whether the dataset is on tape
+  public Boolean getMainframeInputDatasetTape() {
+	  if (mainframeInputDatasetTape == null) { return false; }
+	  return Boolean.parseBoolean(mainframeInputDatasetTape);
+  }
+
+  // sets whether the dataset is on tape
+  public void setMainframeInputDatasetTape(String txtIsFromTape) {
+	  mainframeInputDatasetTape = Boolean.valueOf(Boolean.parseBoolean(txtIsFromTape)).toString();
   }
 
   public static String getAccumuloHomeDefault() {

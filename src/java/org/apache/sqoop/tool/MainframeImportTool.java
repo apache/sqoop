@@ -23,6 +23,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
@@ -36,6 +37,8 @@ public class MainframeImportTool extends ImportTool {
   private static final Log LOG
       = LogFactory.getLog(MainframeImportTool.class.getName());
   public static final String DS_ARG = "dataset";
+  public static final String DS_TYPE_ARG = "datasettype";
+  public static final String DS_TAPE_ARG = "tape";
 
   public MainframeImportTool() {
     super("import-mainframe", false);
@@ -59,6 +62,14 @@ public class MainframeImportTool extends ImportTool {
         .hasArg().withDescription("HDFS plain file destination")
         .withLongOpt(TARGET_DIR_ARG)
         .create());
+    importOpts.addOption(OptionBuilder.withArgName("Dataset type")
+            .hasArg().withDescription("Dataset type (p=partitioned data set|s=sequential data set|g=GDG)")
+            .withLongOpt(DS_TYPE_ARG)
+            .create());
+    importOpts.addOption(OptionBuilder.withArgName("Dataset is on tape")
+    		.hasArg().withDescription("Dataset is on tape (true|false)")
+    		.withLongOpt(DS_TAPE_ARG)
+    		.create());
 
     addValidationOpts(importOpts);
 
@@ -142,6 +153,20 @@ public class MainframeImportTool extends ImportTool {
     if (in.hasOption(DS_ARG)) {
       out.setMainframeInputDatasetName(in.getOptionValue(DS_ARG));
     }
+
+    if (in.hasOption(DS_TYPE_ARG)) {
+      out.setMainframeInputDatasetType(in.getOptionValue(DS_TYPE_ARG));
+    } else {
+    	// set default data set type to partitioned
+    	out.setMainframeInputDatasetType(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED);
+    }
+
+    if (in.hasOption(DS_TAPE_ARG)) {
+    	out.setMainframeInputDatasetTape(in.getOptionValue(DS_TAPE_ARG));
+    } else {
+    	// set default tape value to false
+    	out.setMainframeInputDatasetTape("false");
+    }
   }
 
   @Override
@@ -151,6 +176,19 @@ public class MainframeImportTool extends ImportTool {
       throw new InvalidOptionsException(
           "--" + DS_ARG + " is required for mainframe import. " + HELP_STR);
     }
+    String dsType = options.getMainframeInputDatasetType();
+    LOG.info("Dataset type: "+dsType);
+    if (!dsType.equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED)
+    		&& !dsType.equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL)
+    		&& !dsType.equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG)) {
+      throw new InvalidOptionsException(
+    		  "--" + DS_TYPE_ARG + " specified is invalid. " + HELP_STR);
+    }
+    Boolean dsTape = options.getMainframeInputDatasetTape();
+	if (dsTape == null && dsTape != true && dsTape != false) {
+		throw new InvalidOptionsException(
+				"--" + DS_TAPE_ARG + " specified is invalid. " + HELP_STR);
+	}
     super.validateImportOptions(options);
   }
 }
