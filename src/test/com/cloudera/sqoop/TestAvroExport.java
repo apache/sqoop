@@ -240,11 +240,11 @@ public class TestAvroExport extends ExportJobTestCase {
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
     sb.append(getTableName());
-    sb.append(" (\"id\" INT NOT NULL PRIMARY KEY, \"msg\" VARCHAR(64)");
+    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
     int colNum = 0;
     for (ColumnGenerator gen : extraColumns) {
       if (gen.getColumnType() != null) {
-        sb.append(", \"" + forIdx(colNum++) + "\" " + gen.getColumnType());
+        sb.append(", " + forIdx(colNum++)  + " " + gen.getColumnType());
       }
     }
     sb.append(")");
@@ -301,7 +301,7 @@ public class TestAvroExport extends ExportJobTestCase {
     LOG.info("Verifying column " + colName + " has value " + expectedVal);
 
     PreparedStatement statement = conn.prepareStatement(
-        "SELECT \"" + colName + "\" FROM " + getTableName() + " WHERE \"id\" = " + id,
+        "SELECT " + colName + " FROM " + getTableName() + " WHERE ID = " + id,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     Object actualVal = null;
     try {
@@ -511,7 +511,7 @@ public class TestAvroExport extends ExportJobTestCase {
     };
     createAvroFile(0, TOTAL_RECORDS, gens);
     createTable(gens);
-    runExport(getArgv(true, 10, 10, newStrArray(null, "-m", "" + 1, "--columns", "id,msg,col1,col2")));
+    runExport(getArgv(true, 10, 10, newStrArray(null, "-m", "" + 1, "--columns", "ID,MSG,COL1,COL2")));
     verifyExport(TOTAL_RECORDS);
     assertColValForRowId(0, "col0", null);
     assertColValForRowId(0, "col1", 111);

@@ -249,7 +249,7 @@ public class TestExport extends ExportJobTestCase {
    *  @return the name of the column
    */
   protected String forIdx(int idx) {
-    return "col" + idx;
+    return "COL" + idx;
   }
 
   /**

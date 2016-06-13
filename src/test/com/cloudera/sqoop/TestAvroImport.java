@@ -228,10 +228,10 @@ public class TestAvroImport extends ImportJobTestCase {
     List<Field> fields = schema.getFields();
     assertEquals(types.length, fields.size());
 
-    checkField(fields.get(0), "AVRO_1", Type.INT);
+    checkField(fields.get(0), "AVRO\uC3A11", Type.INT);
 
     GenericRecord record1 = reader.next();
-    assertEquals("AVRO_1", 1987, record1.get("AVRO_1"));
+    assertEquals("AVRO\uC3A11", 1987, record1.get("AVRO\uC3A11"));
   }
 
   public void testNonIdentCharactersInColumnName() throws IOException {

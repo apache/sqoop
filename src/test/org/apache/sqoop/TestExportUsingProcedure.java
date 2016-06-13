@@ -235,11 +235,10 @@ public class TestExportUsingProcedure extends TestExport {
 
     StringBuilder sql = new StringBuilder("insert into ");
     sql.append(instanceForProcedure.getTableName());
-    sql.append("(\"id\", \"msg\"");
+    sql.append("(id, msg");
     for (int i = 0; i < instanceForProcedure.names.length; ++i) {
-      sql.append(", \"");
+      sql.append(",");
       sql.append(instanceForProcedure.names[i]);
-      sql.append("\"");
     }
     sql.append(") values (");
     for (int i = 0; i < instanceForProcedure.names.length + 2; ++i) {
