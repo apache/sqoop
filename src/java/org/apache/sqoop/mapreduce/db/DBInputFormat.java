@@ -158,8 +158,11 @@ extends InputFormat<LongWritable, T> implements Configurable  {
   @Override
   /** {@inheritDoc} */
   public void setConf(Configuration conf) {
+    setDbConf(new DBConfiguration(conf));
+  }
 
-    dbConf = new DBConfiguration(conf);
+  public void setDbConf(DBConfiguration dbConf) {
+    this.dbConf = dbConf;
 
     try {
       getConnection();
@@ -389,7 +392,9 @@ extends InputFormat<LongWritable, T> implements Configurable  {
         this.connection.close();
         this.connection = null;
       }
-    } catch (SQLException sqlE) { /* ignore exception on close. */ }
+    } catch (SQLException sqlE) {
+      LOG.error("Cannot close JDBC connection.", sqlE);
+    }
   }
 
 }

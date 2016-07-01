@@ -136,8 +136,16 @@ public class OraOopDataDrivenDBInputFormat<T extends SqoopRecord> extends
         }
 
       }
+      connection.commit();
     } catch (SQLException ex) {
+      try {
+        connection.rollback();
+      } catch (SQLException e) {
+        LOG.error("Cannot rollback transaction.", e);
+      }
       throw new IOException(ex);
+    } finally {
+      closeConnection();
     }
 
     return splits;
@@ -199,12 +207,10 @@ public class OraOopDataDrivenDBInputFormat<T extends SqoopRecord> extends
       // the current
       // value of the URL_PROPERTY...
 
-      return new OraOopDBRecordReader<T>(split, inputClass, conf, dbConf
-          .getConnection(), dbConf, dbConf.getInputConditions(), dbConf
+      return new OraOopDBRecordReader<T>(split, inputClass, conf,
+          getConnection(), dbConf, dbConf.getInputConditions(), dbConf
           .getInputFieldNames(), dbConf.getInputTableName());
     } catch (SQLException ex) {
-      throw new IOException(ex);
-    } catch (ClassNotFoundException ex) {
       throw new IOException(ex);
     }
   }
