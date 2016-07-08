@@ -759,3 +759,31 @@ For metrics-core-<version>.jar:
 For scala-library-<version>.jar:
 
   BSD license
+
+For bsh-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For javax.servlet-api-<version>.jar:
+
+  CDDL v1.0 and GPL v2 with classpath exception
+
+For jetty-io-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For jetty-security-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For jetty-server-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For jetty-servlet-<version>.jar:
+
+  The Apache License, Version 2.0
+
+For jetty-http-<version>.jar:
+
+  The Apache License, Version 2.0
