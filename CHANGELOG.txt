@@ -1,3 +1,887 @@
+Release 1.99.7
+
+  SUB-TASK
+
+    SQOOP-926: Sqoop2: Devguide: Connector developer guide
+
+    SQOOP-1116: Sqoop2: Devguide: Upgrade connectors from sqoop1 to sqoop2
+
+    SQOOP-1256: Sqoop2: Tool: Load repository dump into a different repository
+
+    SQOOP-1758: Sqoop2: HDFS connector documentation
+
+    SQOOP-1766: Sqoop2: Add Kite Connector Usage into User Manual
+
+    SQOOP-1803: Sqoop2: Update and save configuration upon job success
+
+    SQOOP-1853: Sqoop2: Kafka connector supporting FROM direction
+
+    SQOOP-1951: Sqoop2: Load Kafka at beginning of suite
+
+    SQOOP-1952: Sqoop2: Load miniclusters at beginning of integration tests
+
+    SQOOP-1953: Sqoop2: Tomcat at beginning of Suite
+
+    SQOOP-1954: Sqoop2: Load derby at beginning of integration tests
+
+    SQOOP-2126: Sqoop2: Implement FTP TO Connector Support
+
+    SQOOP-2217: Sqoop2: Implement SFTP To Connector Support
+
+    SQOOP-2244: Sqoop2: Generic JDBC: Automatically escape table and column names from configuration objects
+
+    SQOOP-2287: Sqoop2: Create TO direction documentation
+
+    SQOOP-2306: Sqoop2: Use LinkConfiguration in Executor rather then LinkConfig
+
+    SQOOP-2364: Sqoop2: Provide test infrastructure base class for server tests
+
+    SQOOP-2365: Sqoop2: Create annotation and base class
+
+    SQOOP-2366: Sqoop2: Create infrastructure providers for hadoop, tomcat, and database providers
+
+    SQOOP-2378: Sqoop2: Revoke all privileges command
+
+    SQOOP-2379: Sqoop2: Check whether resource exists before run privilege check
+
+    SQOOP-2426: Sqoop2: Precommit: Provide maven profile that will run all tests for precomit hook at once
+
+    SQOOP-2427: Sqoop2: Precommit: Use the precommit maven profile to run tests
+
+    SQOOP-2428: Sqoop2: Precommit: Print actions in order they've been executed
+
+    SQOOP-2429: Sqoop2: Precommit: Add parameter --run-integration-tests
+
+    SQOOP-2430: Sqoop2: Precommit: Add test coverage reports
+
+    SQOOP-2434: Sqoop2: Partition support for Kafka connector (FROM direction)
+
+    SQOOP-2435: Sqoop2: Incremental/offset support for Kafka connector (FROM direction)
+
+    SQOOP-2441: Sqoop2: Generic JDBC: Drop support for specifying custom query when exporting data
+
+    SQOOP-2442: Sqoop2: Generic JDBC: Drop tests for specifying schema name and custom SQL at the same time
+
+    SQOOP-2443: Sqoop2: Generic JDBC: Properly detect compound primary keys in GenericJdbcExecutor
+
+    SQOOP-2445: Sqoop2: Generic JDBC: Prevent use of tableColumns and sql at the same time
+
+    SQOOP-2447: Sqoop2: Precommit: Improve cobertura test coverage reporting
+
+    SQOOP-2449: Sqoop2: Findbugs: Fix smaller-ish warnings in common module
+
+    SQOOP-2450: Sqoop2: Precommit: Introduce findbugs checks
+
+    SQOOP-2451: Sqoop2: Findbugs: Add explicit charset to client ResourceRequest class
+
+    SQOOP-2452: Sqoop2: Findbugs: Convert anonymous class in ResourceRequest to static inner class
+
+    SQOOP-2458: Sqoop2: Precommit: Stop copying test results directly inside the pre-commit hook
+
+    SQOOP-2459: Sqoop2: Precommit: Do not wipe out working directory on finish
+
+    SQOOP-2460: Sqoop2: Refactor repository-common to use methods
+
+    SQOOP-2461: Sqoop2: Add MySQL support for the metadata repository
+
+    SQOOP-2469: Sqoop2: Custom HTTP requests test base class
+
+    SQOOP-2473: "Modify" is misspelled in pre-commit hook
+
+    SQOOP-2479: Sqoop2: Pass configuration objects to Intermediate Data Format
+
+    SQOOP-2483: Sqoop2: Findbugs: Fix singleton class problem in AuthenticationManager and AuthorizationManager
+
+    SQOOP-2484: Sqoop2: Findbugs: Fix resource leak problem in SqoopConfiguration and ConnectorManagerUtils
+
+    SQOOP-2485: Sqoop2: Findbugs: Fix smaller-ish warnings in core module
+
+    SQOOP-2486: Sqoop2: Findbugs: bug fix for MapContext
+
+    SQOOP-2491: Sqoop2: Common external JAR handling in configuration
+
+    SQOOP-2499: Sqoop2: Findbugs: Fix the problem of URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD for ExampleValue
+
+    SQOOP-2500: Sqoop2: Findbugs: Fix the resource leak problem in ProviderAsserts and DatabaseProvider
+
+    SQOOP-2501: Sqoop2: Findbugs: Fix smaller-ish warnings in common-test module
+
+    SQOOP-2506: Sqoop2: Generic JDBC: Remove duplicate code to create schema from result set metadata
+
+    SQOOP-2507: Sqoop2: Do not use default Tomcat handlers for unsupported HTTP methods
+
+    SQOOP-2508: Sqoop2: Findbugs: Fix warnings in connector-sdk module
+
+    SQOOP-2509: Sqoop2: Findbugs: Fix resource leak problem in GenericJdbcExecutor and related classes
+
+    SQOOP-2511: Sqoop2: Findbugs: Fix warnings in connector-generic-jdbc module
+
+    SQOOP-2512: Sqoop2: Findbugs: Fix warnings in connector-ftp, connector-sftp and connector-hdfs module
+
+    SQOOP-2514: Sqoop2: Findbugs: Fix security problems in ConfigUtils
+
+    SQOOP-2515: Sqoop2: Findbugs: Fix warning in common module
+
+    SQOOP-2516: Sqoop2: Findbugs: Fix warning in execution module
+
+    SQOOP-2517: Sqoop2: Findbugs: Fix resource leak problem in CommonRepositoryHandler
+
+    SQOOP-2518: Sqoop2: Findbugs: Fix warning in repository-derby module
+
+    SQOOP-2519: Sqoop2: Findbugs: Fix warning in repository-postgresql module
+
+    SQOOP-2521: Sqoop2: Findbugs: Fix warning in repository-mysql module
+
+    SQOOP-2522: Sqoop2: Findbugs: Fix warning in security module
+
+    SQOOP-2523: Sqoop2: Findbugs: Fix warning in server module
+
+    SQOOP-2526: Sqoop2: findbugs: Fix warning in shell module
+
+    SQOOP-2527: Sqoop2: findbugs: Fix warning in submission module
+
+    SQOOP-2528: Sqoop2: findbugs: Fix warning in test module
+
+    SQOOP-2529: Sqoop2: findbugs: Fix warning in tools module
+
+    SQOOP-2530: Sqoop2: Add utility methods to get object name from object id
+
+    SQOOP-2532: Sqoop2: Findbugs: Fix SIC_INNER_SHOULD_BE_STATIC_ANON problem in ConfigValidationRunner
+
+    SQOOP-2533: Sqoop2: Findbugs: Fix warning for ConfigurableServlet
+
+    SQOOP-2537: Sqoop2: Use object name instead of object id for the name filed in MResource
+
+    SQOOP-2539: Sqoop2: Enforce resource name not null when creating table
+
+    SQOOP-2541: Sqoop2: Provide test infrastructure base class for upgrade tests
+
+    SQOOP-2542: Sqoop2: Provide test infrastructure base class for connector tests
+
+    SQOOP-2544: Sqoop2: Drop connectors servlet
+
+    SQOOP-2545: Sqoop2: RESTiliency: Provide tests for non-existing end points
+
+    SQOOP-2546: Sqoop2: RESTiliency: Unify behavior on getting details on non-existing connector
+
+    SQOOP-2547: Sqoop2: RESTiliency: Provide REST tests for v1/connector servlet
+
+    SQOOP-2548: Sqoop2: RESTiliency: Enforce strict connector names
+
+    SQOOP-2550: Sqoop2: Findbugs: Add filter for the warning SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE and SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING
+
+    SQOOP-2553: Sqoop2: Jetty: Update testcases using Jetty instead of Tomcat
+
+    SQOOP-2555: Sqoop2: Findbugs: Add filter for the unnecessary warning
+
+    SQOOP-2557: Sqoop2: Findbugs: move findbug dependency to the root pom.xml
+
+    SQOOP-2558: Sqoop2: Jetty: Updaet sqoop-server, package with jar, remove war
+
+    SQOOP-2560: Sqoop2: Jetty: Create new class for Jetty server
+
+    SQOOP-2563: Sqoop2: Jetty: Update script for Jetty server
+
+    SQOOP-2565: Sqoop2: Jetty: Update package for sqoop
+
+    SQOOP-2573: Sqoop2: Use object name instead of object id for job, link and connector in Sqoop 2 server
+
+    SQOOP-2577: Sqoop2: Support loading classes using custom classloader in ClassUtils
+
+    SQOOP-2578: Sqoop2: Port the ApplicationClassLoader in Hadoop into Sqoop
+
+    SQOOP-2580: Sqoop2: Jetty: Update the initialization for Sqoop server
+
+    SQOOP-2581: Sqoop2: Drop the jobId parameter in JobManager
+
+    SQOOP-2583: Sqoop2: Encode object name in the http request
+
+    SQOOP-2621: Sqoop2: Provide classpath isolation for Connectors
+
+    SQOOP-2622: Sqoop2: Add documentation about connector classpath isolation
+
+    SQOOP-2623: Sqoop2: Add documentation about connector classpath isolation
+
+    SQOOP-2626: Sqoop2: Provide test for CreateCommand
+
+    SQOOP-2630: Sqoop2: Provide tests for all SqoopCommand
+
+    SQOOP-2631: Sqoop2: Add tests for shell commands in interactive mode
+
+    SQOOP-2632: Sqoop2: add partition class to FROM
+
+    SQOOP-2633: Sqoop2: Allow to specify extra system classes for ConnectorClassLoader
+
+    SQOOP-2634: Sqoop2: Provide classpath isolation for connectors and its dependencies
+
+    SQOOP-2635: Sqoop2: Improve ConnectorClassLoader to support loading classes from the dependencies inside the connector jar
+
+    SQOOP-2636: Sqoop2: Provide connector classpath isolation during running MR job
+
+    SQOOP-2637: Sqoop2: Provide connector classpath isolation during running MR job
+
+    SQOOP-2638: Sqoop2: Add integration tests for connector classpath isolation
+
+    SQOOP-2648: Sqoop2: Add tests for ConfigFiller
+
+    SQOOP-2653: Sqoop2: Separate each connector documentation to it's own page
+
+    SQOOP-2660: Sqoop2: Generic JDBC: Convert input Columns from String to List
+
+    SQOOP-2662: Sqoop2: Remove unnecessary dependencies of sqoop server module
+
+    SQOOP-2668: Sqoop2: Doc: Build documentation only in binary profile
+
+    SQOOP-2669: Sqoop2: Drop Links and Jobs servlet
+
+    SQOOP-2670: Sqoop2: RESTiliency: Allow getting links by connector only for all
+
+    SQOOP-2671: Sqoop2: Add client call to get all links by a connector
+
+    SQOOP-2673: Sqoop2: Remove the notion of LinksBeans and JobsBeans
+
+    SQOOP-2675: Sqoop2: Remove the id from public interface for Job
+
+    SQOOP-2677: Sqoop2: RESTiliency: Refactore the one line try-catch statement in InvalidRESTTest
+
+    SQOOP-2678: Sqoop2: Remove the id from public interface for Link
+
+    SQOOP-2680: Sqoop2: Remove the id from public interface for connection
+
+    SQOOP-2682: Sqoop2: Add test cases for the object name with special char
+
+    SQOOP-2683: Sqoop2: Doc: Update "Installing dependencies" section in Installation guide
+
+    SQOOP-2685: Sqoop2: Doc: Document need for sqoop2 user to be allowed to impersonate other users
+
+    SQOOP-2688: Sqoop2: Provide utility method to safely retrieve value from JSONObject
+
+    SQOOP-2689: Sqoop2: RESTiliency: InvalidRESTCallsTest is using wrong order when serializing data to request
+
+    SQOOP-2690: Sqoop2: Use connector name in MLink.
+
+    SQOOP-2691: Sqoop2: Use maven shade plugin to package connector dependencies with the connector jar itself
+
+    SQOOP-2692: Sqoop2: Use link name in shell
+
+    SQOOP-2694: Sqoop2: Doc: Register structure in sphinx for our docs
+
+    SQOOP-2695: Sqoop2: Doc: Clean up git warnings for doc files
+
+    SQOOP-2696: Sqoop2: Doc: Select final theme for the docs
+
+    SQOOP-2697: Sqoop2: Docs: Clean up conf.py file
+
+    SQOOP-2698: Sqoop2: RESTiliency: Split the InvalidRESTCallsTest into independent test cases
+
+    SQOOP-2701: Sqoop2: Command "show job" doesn't work after removing support for ids:
+
+    SQOOP-2703: Sqoop2: Use connector name in MJob
+
+    SQOOP-2705: Sqoop2: Add kerberos support for SqoopMiniCluster
+
+    SQOOP-2708: Sqoop2: Docs: Update Installation.rst
+
+    SQOOP-2713: Sqoop2: Use link name in MJob
+
+    SQOOP-2716: Sqoop2: Doc: Create special chapter about all the ways how to load jars
+
+    SQOOP-2717: Sqoop2: Use connector name in shell
+
+    SQOOP-2734: Sqoop2: Use job name in shell
+
+    SQOOP-2735: Sqoop2: Use job name in MSubmission
+
+    SQOOP-2736: Sqoop2: Document change command line shell interface
+
+    SQOOP-2739: Sqoop2: Use resource name instead of resource id in authorization engine
+
+    SQOOP-2740: Sqoop2: Use name instead of id for ValidationResultBean
+
+    SQOOP-2741: Sqoop2: Use name instead of id for ValidationResultBean
+
+    SQOOP-2742: Sqoop2: Clear useless method after remove id from public interface
+
+    SQOOP-2743: Sqoop2: Update RepositoryLoadTool and RepositoryDumpTool
+
+    SQOOP-2744: Sqoop2: Enable kerberos for HadoopMiniCluster
+
+    SQOOP-2752: Sqoop2: Add impersonation support for kite hdfs
+
+    SQOOP-2754: Sqoop2: Fix bug in integration test for Mysql and Postgresql
+
+    SQOOP-2755: Sqoop2:Docs: Add section for examples and describe S3 import
+
+    SQOOP-2756: Sqoop2: Add impersonation support for kite hive
+
+    SQOOP-2757: Sqoop2: Add module connector-sdk-hadoop to hold hadoop specific SDK classes used by the connectors
+
+    SQOOP-2761: Sqoop2: Provide test infrastructure base class for tool tests
+
+    SQOOP-2762: Sqoop2: Provide test infrastructure base class for connector loading tests
+
+    SQOOP-2768: Sqoop2: Remove the notion of LinksBeans
+
+    SQOOP-2769: Sqoop2: Remove the notion of JobsBeans
+
+    SQOOP-2770: Sqoop2: Remove the notion of ConnectorsBeans
+
+    SQOOP-2771: Sqoop2: Remove the notion of SubmissionBean
+
+    SQOOP-2772: Sqoop2: Remove the notion of PrincipalsBean
+
+    SQOOP-2774: Sqoop2: Remove the notion of RolesBean
+
+    SQOOP-2776: Sqoop2: Add web interface for thread dump
+
+    SQOOP-2778: Sqoop2: LinkRestTest failed
+
+    SQOOP-2782: Sqoop2: improvement SqoopInfrastructureProvider to support restart with different SqoopMiniCluster
+
+    SQOOP-2796: Sqoop2: Add base version of the tool
+
+    SQOOP-2799: Sqoop2: Add custom branch detection to upload-patch.py
+
+    SQOOP-2804: Sqoop2: Document use of the script in contribution guide
+
+    SQOOP-2805: Sqoop2: Detect if both fixVersion and affectedVersions are empty and report it
+
+    SQOOP-2813: Sqoop2: Enable kerberos for real Hadoop cluster in the integration test
+
+    SQOOP-2818: Sqoop2: Doc: Update broken links
+
+    SQOOP-2822: Sqoop2: RESTiliency: Provide tests for Link POST action
+
+    SQOOP-2823: Sqoop2: RESTiliency: Remove repetitive try-catch block for accessing POST and PUT request
+
+    SQOOP-2826: Sqoop2: Doc: Auto-generate connector pages
+
+    SQOOP-2827: Sqoop2: Doc: Provide doc preprocessor facilities
+
+    SQOOP-2836: Sqoop2: Patch upload tool should detect if the JIRA number is correct
+
+    SQOOP-2843: Sqoop2: Enable SSL/TLS for API calls
+
+    SQOOP-2844: Sqoop2: TrustStore support for shell
+
+    SQOOP-2845: Sqoop2: Derive keystore password from a script passed to configuration
+
+    SQOOP-2848: Sqoop2: RESTiliency: Simplify JobRequestHandler.getJobs similarly as was done for getLinks
+
+    SQOOP-2855: Sqoop2: Enrich Generic JDBC Connector resource file
+
+    SQOOP-2856: Sqoop2: Enrich HDFS Connector resource file
+
+    SQOOP-2867: Sqoop2: ResTiliency: Define one single constant for all
+
+    SQOOP-2870: Sqoop2: RESTiliency: Add tests for DriverHandler
+
+    SQOOP-2871: Sqoop2: Enrich FTP Connector resource file
+
+    SQOOP-2872: Sqoop2: Enrich Kafka Connector resource file
+
+    SQOOP-2876: Sqoop2: Document TLS support
+
+    SQOOP-2877: Sqoop2: Enrich Kite Connector resource file
+
+    SQOOP-2881: Sqoop2: EnrichOraOop Connector resource file
+
+    SQOOP-2882: Sqoop2: Enrich SFTP Connector resource file
+
+    SQOOP-2883: Sqoop2: Update model classes to represent new constant for connector resource bundles
+
+    SQOOP-2889: Read and write from encrypted repository
+
+    SQOOP-2890: Provide tooling to encrypt non-encrypted repository and rotate keys
+
+    SQOOP-2891: Repository encryption documentation
+
+    SQOOP-2900: Support encrypting map inputs with sensitive fields
+
+    SQOOP-2954: Sanitize issues
+
+    SQOOP-2955: Cut 1.99.7 branch
+
+    SQOOP-2956: Update change log with 1.99.7 release
+
+    SQOOP-2957: Update POM with new version
+
+    SQOOP-2958: Create release candidate
+
+    SQOOP-2959: Run vote on RC candidates
+
+    SQOOP-2963: Update license file
+
+    SQOOP-2965: Create release candidate for RC-1
+
+    SQOOP-2966: Run vote on RC candidates for RC-1
+
+  BUG
+
+    SQOOP-691: Improve the way the data is written out into the FS
+
+    SQOOP-910: Sqoop2: Move to embedded jetty from tomcat
+
+    SQOOP-1253: Sqoop2: Implement various maintenance tools
+
+    SQOOP-1442: Sqoop2: Validations: Serialize validations over the wire for client transfer
+
+    SQOOP-1531: Sqoop2: Support getting connectors by Direction
+
+    SQOOP-1690: Implement doAs for Sqoop2
+
+    SQOOP-1732: Sqoop2: Add version to connector upgrade API
+
+    SQOOP-1824: Sqoop2: Create a common RDBMS table structure doc
+
+    SQOOP-1924: Improvement features for Kerberos support on Sqoop 2
+
+    SQOOP-2048: SQOOP2: Improvement of Role Based Access Control
+
+    SQOOP-2121: Sqoop2: Show job should show connection information
+
+    SQOOP-2133: Sqoop2: Hdfs Intermediate Data Format
+
+    SQOOP-2151: Sqoop2: Sqoop mapreduce job gets into deadlock when loader throws an exception
+
+    SQOOP-2196: Sqoop2: Add Runner factory for Kafka
+
+    SQOOP-2197: Add concrete DatabaseType to MySQL provider
+
+    SQOOP-2262: Sqoop2: Create LoggerStream
+
+    SQOOP-2269: Sqoop2: Parquet integration tests
+
+    SQOOP-2280: Sqoop2: Handle fixed point columns
+
+    SQOOP-2285: Sqoop2: Change POM version back to 2.0.0-SNAPSHOT
+
+    SQOOP-2299: Sqoop2: Store context classes in repository
+
+    SQOOP-2300: Sqoop2: DerbySchemaCreateQuery have copy&paste error with SQ_CONFIG_DIRECTIONS comment
+
+    SQOOP-2303: EmptyTypeList when returned from DatabaseProvider class results in NPE in TestNG
+
+    SQOOP-2305: Sqoop2: ConfigUtils is not properly serializing Enum values
+
+    SQOOP-2318: Use hadoop configuration defaults for MapReduceSubmissionEngine
+
+    SQOOP-2319: Sqoop2: Sqoop2-shell should take in JAVA_OPTS
+
+    SQOOP-2320: Sqoop2: AllTypesTest should be in slow category
+
+    SQOOP-2321: Sqoop2: Clean up FromRDBMSToHDFS test
+
+    SQOOP-2322: Sqoop2: Kafka topic should vary on a per method basis
+
+    SQOOP-2323: Sqoop2: Add validation for connector supported directions
+
+    SQOOP-2342: Sqoop2: Provide an external application classloader
+
+    SQOOP-2347: Sqoop2: Typo in code snippet in sqoop documentation
+
+    SQOOP-2350: Sqoop2: log4j properties file should be configurable
+
+    SQOOP-2351: Sqoop2: Connector cache should be cleared when role is deleted
+
+    SQOOP-2352:  Sqoop2: Generic JDBC Connector support for fetch size
+
+    SQOOP-2356: Sqoop2: Derby upgrade should automatically rename jobs that have conflicting names
+
+    SQOOP-2359: Sqoop2: Zookeeper dependency should be documented
+
+    SQOOP-2360: Sqoop2: Upgrade should consider both directions for a single connector
+
+    SQOOP-2369: Sqoop2: Use random port for AJP end point in TomcatSqoopMiniCluster
+
+    SQOOP-2374: Sqoop2: Kite connector documention note on dataset URIs
+
+    SQOOP-2380: Sqoop2: Wrong argument for show link client command
+
+    SQOOP-2382: Sqoop2: Arithmetic exception in partitioner when allow null is true
+
+    SQOOP-2384: SQOOP2: Remove source code from binary distribution
+
+    SQOOP-2386: Sqoop2: refactor code in HandlerUtils
+
+    SQOOP-2388: SQOOP2: Remove duplicate code in ConfigUtils.fromConfigs()
+
+    SQOOP-2390: Sqoop2: FindJob will throw exception when job doesn't exist
+
+    SQOOP-2391: Sqoop2: MySQL JDBC Driver is packaged with binary distribution
+
+    SQOOP-2395: Sqoop2: Signature of method getConnectorIdFromIdentifier in HandlerUtils is inconsistent with other methods
+
+    SQOOP-2396: Sqoop2: Race condition in purge/update threads on Server shutdown
+
+    SQOOP-2397: Sqoop2: Propagate CSVWriter in Kite connector to execution engine
+
+    SQOOP-2409: Sqoop2: Bump up Tomcat version to 6.0.37 in integration test
+
+    SQOOP-2410: Sqoop2: Integration test report have incorrect suffix
+
+    SQOOP-2414: Sqoop2: Change JUnit Assert class to TestNG Assert class
+
+    SQOOP-2419: Sqoop2: Use object name instead of id if possible
+
+    SQOOP-2422: Sqoop2: Test TestJSONIntermediateDataFormat is failing on JDK8
+
+    SQOOP-2424: Sqoop2: Provide custom TestNG listener in integration tests
+
+    SQOOP-2425: Sqoop2: Improve our pre-commit hook
+
+    SQOOP-2431: Sqoop2: Precommit: Refactore the file handling
+
+    SQOOP-2432: Sqoop2: Update maven-site-plugin for in root pom.xml
+
+    SQOOP-2433: Sqoop2: Add way to invoke findbugs checks from maven
+
+    SQOOP-2436: Sqoop2: PreCommit script crashes when testing a patch that was already committed
+
+    SQOOP-2439: Sqoop2: NullPointerException when calling job status notification URL
+
+    SQOOP-2444: Sqoop2: Integration tests are using the same working directory
+
+    SQOOP-2446: Sqoop2: Fix incorrect notification URL for execution engine
+
+    SQOOP-2448: Sqoop2: Resolve findbugs warnings
+
+    SQOOP-2454: Drop JDK6 support
+
+    SQOOP-2462: Sqoop2: Provide List type for configuration objects
+
+    SQOOP-2463: Sqoop2: Add support for schema-less to schema-less transfer for CSV IDF
+
+    SQOOP-2464: Initializer object is not reused when calling getSchema
+
+    SQOOP-2472: Sqoop2: Upgrade to newer version of cobertura maven plugin
+
+    SQOOP-2474: Fix the problem in the integration test case Derby1_99_4UpgradeTest
+
+    SQOOP-2476: Sqoop2: Fix failing precommit hook
+
+    SQOOP-2477: Sqoop2: Add protection for HTTP error 404 to precommit hook
+
+    SQOOP-2478: Sqoop2: Downgrade cobertura plugin to version 2.6
+
+    SQOOP-2480: Sqoop2: Provide ability to add entire Map instance to our MutableMapContext
+
+    SQOOP-2481: Sqoop2: Precommit: Drop call to clean while running unit tests
+
+    SQOOP-2482: Sqoop2: Precommit: Cobertura method is using wrong variable name
+
+    SQOOP-2487: Sqoop2: ConnectorTestCase have wrong order of arguments in assertEquals
+
+    SQOOP-2488: Sqoop2: Precommit hook is using incorrect string insertion
+
+    SQOOP-2489: Sqoop2: Hive with Parquet in Kite Connector
+
+    SQOOP-2492: Sqoop2: getNestedProperties() in MapContext puts key instead of value
+
+    SQOOP-2494: Sqoop2: Improve resiliency for malformed connectors
+
+    SQOOP-2495: Sqoop2: Provide simple test that can validate if connector is reasonably formed
+
+    SQOOP-2496: Sqoop2: Provide a way to inject external connectors
+
+    SQOOP-2497: Sqoop2: Do not require constructors initializing all properties in configuration objects
+
+    SQOOP-2498: Sqoop2: Precommit: Fix formatting typo
+
+    SQOOP-2505: Sqoop2: Add ability to specify custom configuration properties for HDFS connector
+
+    SQOOP-2513: Sqoop2: Deadlock occurs between getJobStatus and JobManager.UpdateThread#updateSubmission
+
+    SQOOP-2520: Sqoop2: Update documentation that JDK7+ is required now
+
+    SQOOP-2524: Sqoop2: Add S3 support to HDFS Connector
+
+    SQOOP-2525: Sqoop2: Add support for incremental From in HDFS Connector
+
+    SQOOP-2538: Sqoop2: Use the table name variable instead of the table name string
+
+    SQOOP-2540: Sqoop2: Add RepositoryProvider for MySQL
+
+    SQOOP-2543: Sqoop2: Create sqoop mini cluster factory and provider
+
+    SQOOP-2549: Sqoop2: Allow connector developers to mask certain keys in Maps when sending them back to clients
+
+    SQOOP-2551: Sqoop2: Explicit encode data sent in SqoopClient with charset
+
+    SQOOP-2554: Sqoop2: Enforce the element column in FromJobConfig of JDBC connector is a comma separated list
+
+    SQOOP-2556: Sqoop2: Declare default constructor private for singleton classes
+
+    SQOOP-2559: Sqoop2: Provide DateTime type for configuration objects
+
+    SQOOP-2562: Sqoop2: Should decode the key and value in MMapInput#restoreFromUrlSafeValueString
+
+    SQOOP-2572: MODEL_004:Usage of unsupported data type when using DateTime type
+
+    SQOOP-2579: Sqoop2: Refactore RepositoryManager to not load structure from repository when loading jobs and links
+
+    SQOOP-2584: Sqoop2: Fix test failure in InvalidRESTCallsTest
+
+    SQOOP-2586: Sqoop2: Oracle DATE type error
+
+    SQOOP-2588: Sqoop2: CommonRepositoryHandler#inUseLink only check if link is used in the from side of a job
+
+    SQOOP-2589: Sqoop2: Tool: Introduce integration tests for the tools
+
+    SQOOP-2590: Sqoop2: Equals operator abuse in MInputs
+
+    SQOOP-2591: Sqoop2: Is there a better way to represent sensitive values in JSON responses from he server?
+
+    SQOOP-2592: Sqoop2: Unit tests for serialization of sensitive inputs
+
+    SQOOP-2593: Sqoop2: repository-mysql tests should not run when integration tests are run
+
+    SQOOP-2598: Sqoop2: Main sqoop.log is missing log outputs from classes other then org.apache.sqoop
+
+    SQOOP-2599: Sqoop2: Classutils behaves badly when the classpath changes.
+
+    SQOOP-2602: Sqoop2: Static initialization of ClassUtils defaultClassloader is fragile
+
+    SQOOP-2603: Sqoop2: Packaging script should make executables to be executable by default for everyone
+
+    SQOOP-2604: Sqoop2: Add "run" mode to sqoop2-server script
+
+    SQOOP-2605: Sqoop2: Allow to override location of configuration directory
+
+    SQOOP-2606: Sqoop2: Do not reconfigure log4j if there are no log4j properties inside sqoop.properties file
+
+    SQOOP-2608: Sqoop2: MNamedElement should inherit from MValidatedElement
+
+    SQOOP-2611: Sqoop2: Update sqoop.properties for Sqoop extra classpath
+
+    SQOOP-2619: Sqoop2: Provide ability to run integration tests against real Sqoop 2 server
+
+    SQOOP-2624: Sqoop2: Provide tests for shell module
+
+    SQOOP-2629: Sqoop2: Add ability to "blacklist" connectors
+
+    SQOOP-2640: Not possible to enter "last value" when creating incremental job
+
+    SQOOP-2641: SQOOP2: Fix test case failure for repository-postgresql
+
+    SQOOP-2645: Sqoop2: Ensure that classpath loading integration tests are run by default
+
+    SQOOP-2652: Sqoop2: Add test case for S3 incremental import to HDFS
+
+    SQOOP-2654: Sqoop2: Fix the problem in integration test with MySql repository
+
+    SQOOP-2655: Sqoop2: Code clean in server module
+
+    SQOOP-2656: Sqoop2: NPE will happen in connector-loading-tests when do the slow integration test
+
+    SQOOP-2659: Sqoop2: Do not stop services that haven't been started in our integration test suite
+
+    SQOOP-2667: Sqoop2: Improve documentation
+
+    SQOOP-2672: Sqoop2: Remove double dependency on mockito in shell module
+
+    SQOOP-2679: Sqoop2: Remove junit import from TestMapContext
+
+    SQOOP-2681: Sqoop2: Connectors failing to register
+
+    SQOOP-2684: Sqoop2: Upgrade groovy to 2.4.0
+
+    SQOOP-2693: Sqoop2: Command line should let user retry Name it's invalid
+
+    SQOOP-2699: Sqoop2: Oraoop: Improve Oracle parameters
+
+    SQOOP-2700: Sqoop2: Tests in shell module are in infinite loop
+
+    SQOOP-2704: Sqoop2: Provide kerberos support for integration tests
+
+    SQOOP-2709: Sqoop2: HDFS: Impersonation on secured cluster doesn't work
+
+    SQOOP-2710: Sqoop2: Move user from context classes to parent TransferableContext
+
+    SQOOP-2715: Sqoop2: The test case ShowJobInOrderTest always failed
+
+    SQOOP-2718: Sqoop2: Remove extra entry from IncrementalType enum
+
+    SQOOP-2719: Sqoop2: Ensure the GenericJDBCConnector integration tests work against MySQL, PostgreSQL, and Oracle
+
+    SQOOP-2720: Sqoop2: Allow the integration tests to be run against a real cluster
+
+    SQOOP-2725: Sqoop2: Integration Tests: Prefer using Timestamp types and PreparedStatements for inserting rows into test databases
+
+    SQOOP-2726: Sqoop2: Integration Tests: Do not use ansi_quotes mode for MySQL
+
+    SQOOP-2727: Sqoop2: Use PreparedStatements for constructing GenericJDBCPartitions
+
+    SQOOP-2728: Sqoop2: Avoid casting after calling getObject on ResultSet
+
+    SQOOP-2729: Sqoop2: Integration Tests: In ShortStories.java we have a varchar(10000) column, which is too long for oracle
+
+    SQOOP-2730: Sqoop2: Integration: Oracle does not support a boolean type, so do not use them in tests
+
+    SQOOP-2731: Sqoop2: DisabledObjectsTest creates table that is too long for oracle
+
+    SQOOP-2732: Sqoop2: Integration Tests: For Oracle compatibility use decimal instead of numeric sql type
+
+    SQOOP-2733: Sqoop2: Integration Tests: Clean up mapreduce directory for IncrementalReadTest
+
+    SQOOP-2760: Sqoop2: Fix update command with name for link and job
+
+    SQOOP-2763: Sqoop2: Sqoop shell is accepting non existing arguments
+
+    SQOOP-2764: Sqoop2: Sqoop shell history is no longer working
+
+    SQOOP-2765: Sqoop2: Client is not exposing the real exception when retrieving exception from server
+
+    SQOOP-2766: Sqoop2: Create debugging web interface for Sqoop 2
+
+    SQOOP-2773: Sqoop2: Ensure that the connector-sdk-hadoop jar is shipped to mappers
+
+    SQOOP-2775: Sqoop2: mark repositorydumploadtooltest to not run on a real cluster
+
+    SQOOP-2781: Sqoop2: Connector isolated class loader should be used when running validations
+
+    SQOOP-2785: Sqoop2: Update developer list in pom.xml file
+
+    SQOOP-2798: Sqoop2: Add cmd tool to automate patch upload process
+
+    SQOOP-2800: Not able to trnasfer unicode data to Teradata
+
+    SQOOP-2802: Sqoop2: Logging level should be debug for integration tests
+
+    SQOOP-2811: Sqoop2: Extracting sequence files may result in duplicates
+
+    SQOOP-2816: Sqoop2: Shell integration tests should pass when running against a real cluster
+
+    SQOOP-2817: Sqoop2: NullValueTest fails when running against MySQL database
+
+    SQOOP-2819: Use connector name instead of id in Repository.findJobsForConnector methods
+
+    SQOOP-2828: Sqoop2: AvroIntermediateDataFormat should read Decimals as BigDecimals instead of Strings
+
+    SQOOP-2829: Sqoop2: LinkRestTest should pass when run against a real cluster
+
+    SQOOP-2831: Sqoop2: Precommit: Do not run multiple execution for integration tests
+
+    SQOOP-2832: Sqoop2: Precommit: Create log files for individual tests
+
+    SQOOP-2833: Sqoop2: Integration Tests: Allow setting which "time type" should be used based on the DatabaseProvider
+
+    SQOOP-2834: Sqoop2: Integration: Limit debug log to only classes that we're interested in
+
+    SQOOP-2849: Sqoop2: Job failure when writing parquet in hdfs with data coming from mysql
+
+    SQOOP-2857: Sqoop2: toParquetTest fails frequently on the pre-commit hook
+
+    SQOOP-2860: Sqoop2: Should be able to run integration tests on a real cluster without kerberos
+
+    SQOOP-2865: Sqoop2: Increase test timeout from one hour
+
+    SQOOP-2866: Sqoop2: Add Abe Fine to committer list in our pom file
+
+    SQOOP-2868: Sqoop2: Introduce link and job validations
+
+    SQOOP-2875: Sqoop2: Integration tests should on include a request body with a delete request
+
+    SQOOP-2888: Test case ShowCommandTest is failing after SQOOP-2848
+
+    SQOOP-2908: Sqoop2: Increase maximal length for jdbc connection strings
+
+    SQOOP-2914: Sqoop2: Support using password generators for repository passwords
+
+    SQOOP-2918: Sqoop2: Increase maximum length of input names
+
+    SQOOP-2923: Sqoop2: Reword documentation to make it clear that the api endpoints fall under /sqoop
+
+  IMPROVEMENT
+
+    SQOOP-736: Move loaders from execution engine to core module
+
+    SQOOP-2329: Sqoop2: Provide integration test infrastructure base class
+
+    SQOOP-2330: Sqoop2: 1.99.2 repository upgrade test
+
+    SQOOP-2341: Sqoop2: Test repository infrastructure
+
+    SQOOP-2375: Sqoop2: Add authorization component in SecurityGuide
+
+    SQOOP-2383: SQOOP2: Add do user support in authorization engine
+
+    SQOOP-2398: Sqoop2: Show all job with order
+
+    SQOOP-2405: Sqoop2: Remove active wait in test cases after executeJob() call
+
+    SQOOP-2490: Sqoop2: Add extra jars to job
+
+    SQOOP-2595: Add Oracle connector to Sqoop 2
+
+    SQOOP-2610: Sqoop2: Tomcat related code should be cleanup
+
+    SQOOP-2614: Sqoop2: Update the document for using Jetty as server
+
+    SQOOP-2618: Sqoop2: Mask S3 sensitive properties in HDFS configuration
+
+    SQOOP-2625: Sqoop2: Fix test case failure for repository-mysql
+
+    SQOOP-2661: Improved sqoop extraction of Oracle 11 timestamp data type exception problem
+
+    SQOOP-2674: Sqoop2: Remove the id from public interfaces for conection/job/link
+
+    SQOOP-2758: Sqoop2: Add integration test for shell
+
+    SQOOP-2786: Sqoop2: If AUTHENTICATION_KERBEROS_KEYTAB is not found in the properties throw a meaningful exception
+
+    SQOOP-2797: Sqoop2: Add new schema object for the Blob
+
+    SQOOP-2807: Sqoop2: Add admin user list to configuration file
+
+    SQOOP-2814: Sqoop2: Create system wide rc file for the shell
+
+    SQOOP-2820: Sqoop2: Encryption over the REST interface
+
+    SQOOP-2838: Sqoop2: Add new schema object for the Clob
+
+    SQOOP-2852: Sqoop2: Revert and re-commit SQOOP-2843: Sqoop2: Enable SSL/TLS for API calls
+
+    SQOOP-2853: Sqoop2: Refactor TableDisplayer to be used in document generation
+
+    SQOOP-2854: Sqoop2: Enrich connector resource files
+
+  NEW FEATURE
+
+    SQOOP-923: Sqoop2: Create developer guide
+
+    SQOOP-1529: Kite Connector Support
+
+    SQOOP-1756: Sqoop2: Specific connector documentation
+
+    SQOOP-2574: Sqoop2: Provide classpath isolation for Connectors
+
+    SQOOP-2615: Sqoop2: We should have a validator to test if an Integer input is within a range
+
+    SQOOP-2788: Sqoop2: Parquet support for HdfsConnector
+
+    SQOOP-2887: Sqoop2: Encrypt sensitive information in the repository
+
+    SQOOP-2932: Sqoop2: Avro support for HdfsConnector
+
+  TASK
+
+    SQOOP-499: Sqoop2: Implement kerberos support for client shell
+
+    SQOOP-641: Add unit tests to Sqoop 2
+
+    SQOOP-668: Formalize network protocol that is in use
+
+    SQOOP-2393: Sqoop2: Add Qian Xu to developers list
+
+    SQOOP-2394: Add Richard Zhou to the developers list
+
+  TEST
+
+    SQOOP-2790: Remove the duplicate test cases in shell module
+
+    SQOOP-2808: Sqoop2: Integration tests should test rows with null values
+
 Release 1.99.6
 
   SUB-TASK
