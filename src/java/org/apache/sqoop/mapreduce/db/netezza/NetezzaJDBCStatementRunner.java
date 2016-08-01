@@ -18,12 +18,15 @@
 
 package org.apache.sqoop.mapreduce.db.netezza;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.io.NamedFifo;
 
 /**
  * A simple class for JDBC External table statement execution for Netezza. Even
@@ -39,6 +42,8 @@ public class NetezzaJDBCStatementRunner extends Thread {
   private Exception exception;
   private PreparedStatement ps;
   private Thread parent;
+
+  private NamedFifo nf;
 
   public boolean hasExceptions() {
     return exception != null;
@@ -59,11 +64,12 @@ public class NetezzaJDBCStatementRunner extends Thread {
   }
 
   public NetezzaJDBCStatementRunner(Thread parent, Connection con,
-      String sqlStatement) throws SQLException {
+      String sqlStatement, NamedFifo nf) throws SQLException {
     this.parent = parent;
     this.con = con;
     this.ps = con.prepareStatement(sqlStatement);
     this.exception = null;
+    this.nf = nf;
   }
 
   public void run() {
@@ -87,9 +93,25 @@ public class NetezzaJDBCStatementRunner extends Thread {
         }
       }
       con = null;
-    }
-    if (interruptParent) {
-      this.parent.interrupt();
+      if (interruptParent) {
+        // write something into the fifo, otherwise reader might never resume
+        FileWriter fileWriter = null;
+        try {
+          fileWriter = new FileWriter(nf.getFile());
+          fileWriter.write("\\n\\r");
+        } catch (IOException ioe) {
+          LOG.debug("error writing into fifo", ioe);
+        } finally {
+          if (fileWriter != null) {
+            try {
+              fileWriter.close();
+            } catch (IOException ioe) {
+              LOG.debug("could not close fifo writer propertly", ioe);
+            }
+          }
+        }
+        this.parent.interrupt();
+      }
     }
   }
 }

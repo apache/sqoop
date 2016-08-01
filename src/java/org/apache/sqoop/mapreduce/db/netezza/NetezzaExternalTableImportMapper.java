@@ -21,19 +21,14 @@ package org.apache.sqoop.mapreduce.db.netezza;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.sqoop.config.ConfigurationHelper;
@@ -41,7 +36,6 @@ import org.apache.sqoop.io.NamedFifo;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
-import org.apache.sqoop.util.FileUploader;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.util.TaskId;
 
@@ -165,7 +159,7 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     try {
       con = dbc.getConnection();
       extTableThread = new NetezzaJDBCStatementRunner(Thread.currentThread(),
-        con, sqlStmt);
+        con, sqlStmt, nf);
     } catch (SQLException sqle) {
       cleanup = true;
       throw new IOException(sqle);
@@ -186,6 +180,9 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
 
     final String encoding = conf
         .get(DirectNetezzaManager.NETEZZA_TABLE_ENCODING_OPT);
+
+    // Caution : FileInputStream instanciation is blocking until somebody writes
+    // into the fifo
     recordReader = new BufferedReader(new InputStreamReader(
       new FileInputStream(nf.getFile()), (null == encoding ? "UTF-8" : encoding)));
   }
@@ -205,8 +202,8 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     counter = new PerfCounters();
     counter.startClock();
     Text outputRecord = new Text();
-    if (extTableThread.isAlive()) {
-      try {
+    try {
+      if (extTableThread.isAlive()) {
         String inputRecord = recordReader.readLine();
         while (inputRecord != null) {
           if (Thread.interrupted()) {
@@ -222,15 +219,14 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
           counter.addBytes(1 + inputRecord.length());
           inputRecord = recordReader.readLine();
         }
-      } finally {
-        recordReader.close();
-        extTableThread.join();
-        counter.stopClock();
-        LOG.info("Transferred " + counter.toString());
-        if (extTableThread.hasExceptions()) {
-          extTableThread.printException();
-          throw new IOException(extTableThread.getException());
-        }
+      }
+    } finally {
+      recordReader.close();
+      extTableThread.join();
+      counter.stopClock();
+      if (extTableThread.hasExceptions()) {
+        extTableThread.printException();
+        throw new IOException(extTableThread.getException());
       }
     }
   }
