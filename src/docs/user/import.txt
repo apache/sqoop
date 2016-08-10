@@ -82,6 +82,7 @@ Argument                          Description
                                   +--split-by <col>+ option.
 +\--table <table-name>+           Table to read
 +\--target-dir <dir>+             HDFS destination dir
++\--temporary-rootdir <dir>+      HDFS directory for temporary files created during import (overrides default "_sqoop")
 +\--warehouse-dir <dir>+          HDFS parent for table destination
 +\--where <where clause>+         WHERE clause to use during import
 +-z,\--compress+                  Enable compression

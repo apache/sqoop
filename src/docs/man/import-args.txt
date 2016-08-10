@@ -49,6 +49,11 @@ include::import-common-args.txt[]
 --table (table-name)::
   The table to import
 
+--temporary-rootdir (path)::
+  Set location of temporary directory for files created during import (overrides default path "_sqoop")
+  This option only applies to the "import" command with "--append" or "--incremental lastmodified"
+  This option has the same affect as using -Dsqoop.test.import.rootDir=<path>
+
 --where (clause)::
   Import only the rows for which _clause_ is true.
   e.g.: `--where "user_id > 400 AND hidden == 0"`
