@@ -19,6 +19,7 @@
 package org.apache.sqoop.util;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,18 +45,18 @@ public class SqoopJsonUtil {
   }
 
   public static Map<String, String> getMapforJsonString(String mapJsonStr) {
-    if ("".equals(mapJsonStr) || null == mapJsonStr) {
-      throw new IllegalArgumentException("Passed Null for map " + mapJsonStr);
-    }
-
     LOG.debug("Passed mapJsonStr ::" + mapJsonStr + " to parse");
-    Map<String, String> partPathMap = new HashMap<String, String>();
-    ObjectMapper mapper = new ObjectMapper();
+    final Map<String, String> result;
     try {
-      partPathMap = mapper.readValue(mapJsonStr,
+      if (isEmptyJSON(mapJsonStr)) {
+        result = Collections.emptyMap();
+      } else {
+        ObjectMapper mapper = new ObjectMapper();
+        result = mapper.readValue(mapJsonStr,
         new TypeReference<HashMap<String, String>>() {
         });
-      return partPathMap;
+      }
+      return result;
     } catch (JsonParseException e) {
       LOG.error("JsonParseException:: Illegal json to parse into map :"
         + mapJsonStr + e.getMessage());

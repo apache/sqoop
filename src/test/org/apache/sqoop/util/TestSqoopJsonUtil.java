@@ -1,6 +1,7 @@
 package org.apache.sqoop.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,14 +51,22 @@ public class TestSqoopJsonUtil {
     assertEquals(paramMap, resultMap);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testGetMapforJsonStringNullString() {
     Map<String, String> resultMap = SqoopJsonUtil.getMapforJsonString(null);
+    assertTrue(resultMap.isEmpty());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testGetMapforJsonStringEmptyString() {
     Map<String, String> resultMap = SqoopJsonUtil.getMapforJsonString("");
+    assertTrue(resultMap.isEmpty());
+  }
+
+  @Test
+  public void testGetMapforJsonStringEmptyMapString() {
+    Map<String, String> resultMap = SqoopJsonUtil.getMapforJsonString("{}");
+    assertTrue(resultMap.isEmpty());
   }
 
   @Test
