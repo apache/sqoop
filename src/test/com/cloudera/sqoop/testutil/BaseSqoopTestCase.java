@@ -18,6 +18,24 @@
 
 package com.cloudera.sqoop.testutil;
 
+import com.cloudera.sqoop.ConnFactory;
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.metastore.JobData;
+import com.cloudera.sqoop.tool.ImportTool;
+import com.google.common.collect.ObjectArrays;
+import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.StringUtils;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.sqoop.SqoopJobDataPublisher;
+import org.junit.After;
+import org.junit.Before;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -26,29 +44,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.util.StringUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.junit.After;
-import org.junit.Before;
-
-import com.cloudera.sqoop.ConnFactory;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.tool.ImportTool;
-import com.google.common.collect.ObjectArrays;
-
-import junit.framework.TestCase;
-
 /**
  * Class that implements common methods required for tests.
  */
 public abstract class BaseSqoopTestCase extends TestCase {
+
+  public static class DummyDataPublisher extends SqoopJobDataPublisher {
+    public static String hiveTable;
+    public static String storeTable;
+    public static String storeType;
+    public static String operation;
+
+    @Override
+    public void publish(Data data) {
+      hiveTable = data.getHiveTable();
+      storeTable = data.getStoreTable();
+      storeType = data.getStoreType();
+      operation = data.getOperation();
+    }
+  }
 
   public static final Log LOG = LogFactory.getLog(
       BaseSqoopTestCase.class.getName());

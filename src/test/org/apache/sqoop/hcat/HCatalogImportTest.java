@@ -44,6 +44,7 @@ import org.apache.hadoop.hive.common.type.HiveVarchar;
 import org.apache.hive.hcatalog.data.HCatRecord;
 import org.apache.hive.hcatalog.data.schema.HCatFieldSchema;
 import org.apache.hive.hcatalog.data.schema.HCatSchema;
+import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.hcat.HCatalogTestUtils.ColumnGenerator;
 import org.apache.sqoop.hcat.HCatalogTestUtils.CreateMode;
 import org.apache.sqoop.hcat.HCatalogTestUtils.KeyType;
@@ -917,5 +918,50 @@ public class HCatalogImportTest extends ImportJobTestCase {
     setExtraArgs(addlArgsArray);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
       null, true, false);
+  }
+
+  public void testPublishQueryImportData() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols =  new ColumnGenerator[] {
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
+    };
+    List<String> cfgParams = new ArrayList<String>();
+    cfgParams.add("-D");
+    cfgParams.add(ConfigurationConstants.DATA_PUBLISH_CLASS + "=" + DummyDataPublisher.class.getName());
+    setConfigParams(cfgParams);
+    runHCatQueryImport(new ArrayList<String>(), TOTAL_RECORDS, table, cols, null);
+    assert (DummyDataPublisher.storeType.equals("hsqldb"));
+    assert (DummyDataPublisher.operation.equals("import"));
+    assert (DummyDataPublisher.storeTable.equals(getTableName()));
+  }
+
+  public void testPublishTableImportData() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols =  new ColumnGenerator[] {
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+        "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+        new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
+    };
+    List<String> cfgParams = new ArrayList<String>();
+    cfgParams.add("-D");
+    cfgParams.add(ConfigurationConstants.DATA_PUBLISH_CLASS + "=" + DummyDataPublisher.class.getName());
+    setConfigParams(cfgParams);
+    List<String> addlArgsArray = new ArrayList<String>();
+    addlArgsArray.add("--create-hcatalog-table");
+    setExtraArgs(addlArgsArray);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true, false);
+    assert (DummyDataPublisher.storeType.equals("hsqldb"));
+    assert (DummyDataPublisher.operation.equals("import"));
+    assert (DummyDataPublisher.storeTable.equals(getTableName()));
   }
 }

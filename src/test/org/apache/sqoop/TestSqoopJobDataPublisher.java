@@ -19,7 +19,6 @@
 package org.apache.sqoop;
 
 import com.cloudera.sqoop.hive.HiveImport;
-import com.cloudera.sqoop.hive.TestHiveImport;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportTool;
@@ -36,22 +35,7 @@ import java.util.ArrayList;
 
 public class TestSqoopJobDataPublisher extends ImportJobTestCase {
 
-    public static class DummyDataPublisher extends SqoopJobDataPublisher {
-        private static String hiveTable;
-        private static String storeTable;
-        private static String storeType;
-
-        @Override
-        public void publish(SqoopJobDataPublisher.Data data) {
-            hiveTable = data.getHiveTable();
-            storeTable = data.getStoreTable();
-            storeType = data.getStoreType();
-            assert (data.getOperation().equals("import"));
-        }
-    }
-
-    public static final Log LOG = LogFactory.getLog(
-            TestHiveImport.class.getName());
+    public static final Log LOG = LogFactory.getLog(TestSqoopJobDataPublisher.class.getName());
 
     public void setUp() {
         super.setUp();
@@ -106,6 +90,7 @@ public class TestSqoopJobDataPublisher extends ImportJobTestCase {
 
         return args.toArray(new String[0]);
     }
+
     private void runImportTest(String tableName, String [] types,
                                String [] values, String verificationScript, String [] args,
                                SqoopTool tool) throws IOException {
@@ -137,6 +122,7 @@ public class TestSqoopJobDataPublisher extends ImportJobTestCase {
 
         return opts;
     }
+
     protected void setNumCols(int numCols) {
         String [] cols = new String[numCols];
         for (int i = 0; i < numCols; i++) {
@@ -159,7 +145,7 @@ public class TestSqoopJobDataPublisher extends ImportJobTestCase {
         assert (DummyDataPublisher.hiveTable.equals("NORMAL_HIVE_IMPORT"));
         assert (DummyDataPublisher.storeTable.equals("NORMAL_HIVE_IMPORT"));
         assert (DummyDataPublisher.storeType.equals("hsqldb"));
-
+        assert (DummyDataPublisher.operation.equals("import"));
     }
 
 }

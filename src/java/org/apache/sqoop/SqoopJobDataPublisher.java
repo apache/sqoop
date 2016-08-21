@@ -19,9 +19,10 @@
 package org.apache.sqoop;
 
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.sqoop.mapreduce.ExportJobBase;
+import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
-import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -94,39 +95,57 @@ public class SqoopJobDataPublisher {
             this.url = url;
             this.user = user;
             this.storeType = storeType;
-            this.storeTable = storeTable;
+            this.storeTable = (storeTable == null) ? hiveTable : storeTable;
             this.storeQuery = storeQuery;
-            this.hiveDB = hiveDB;
-            if (this.hiveDB == null) {
-                this.hiveDB =   SqoopHCatUtilities.DEFHCATDB;
-            }
+            this.hiveDB = (hiveDB == null) ? SqoopHCatUtilities.DEFHCATDB : hiveDB;
             this.hiveTable = hiveTable;
             this.commandLineOpts = commandLineOpts;
             this.startTime = startTime;
             this.endTime = endTime;
         }
 
-        public Data(String operation, String url, String user, String storeType, String storeTable,
-                              String storeQuery, String hiveDB, String hiveTable, Properties commandLineOpts,
-                              long startTime, long endTime) {
+        public Data(String operation, String url, String user, String storeType,
+                    String storeTable, String storeQuery, String hiveDB, String hiveTable,
+                    Properties commandLineOpts, long startTime, long endTime) throws Exception{
             init(operation, url, user, storeType, storeTable, storeQuery,
                     hiveDB, hiveTable, commandLineOpts, startTime, endTime);
         }
 
-        public Data(SqoopOptions options, String tableName, long startTime, long endTime) throws IOException {
-            String hiveTableName = options.doHiveImport() ?
-                    options.getHiveTableName() : options.getHCatTableName();
-            String hiveDatabase = options.doHiveImport() ?
-                    options.getHiveDatabaseName() : options.getHCatDatabaseName();
+        public Data(String operation, SqoopOptions options, String tableName,
+                    long startTime, long endTime) throws Exception {
+            String hiveTableName = null;
+            String hiveDatabase = null;
+            if (ExportJobBase.OPERATION.equals(operation)) {
+                // export job data
+                hiveTableName = options.getHCatTableName();
+                hiveDatabase = options.getHCatDatabaseName();
+            } else if (ImportJobBase.OPERATION.equals(operation)){
+                // import job data
+                hiveTableName = options.doHiveImport() ?
+                        options.getHiveTableName() : options.getHCatTableName();
+                hiveDatabase = options.doHiveImport() ?
+                        options.getHiveDatabaseName() : options.getHCatDatabaseName();
+            } else {
+                throw new Exception("Data published for unsupported Operation "
+                        + operation + " in SqoopJobDataPublisher");
+            }
+
             String dataStoreType = JDBC_STORE;
             String[] storeTypeFields = options.getConnectString().split(":");
             if (storeTypeFields.length > 2) {
                 dataStoreType = storeTypeFields[1];
             }
 
-            init("import", options.getConnectString(), UserGroupInformation.getCurrentUser().getShortUserName(),
+            init(operation, options.getConnectString(), UserGroupInformation.getCurrentUser().getShortUserName(),
                     dataStoreType, tableName, options.getSqlQuery(), hiveDatabase, hiveTableName,
                     options.writeProperties(), startTime, endTime);
+        }
+
+        public String toString() {
+            return  "Operation=" + operation + ", Url=" + url + ", User=" + user + ", StoreType=" + storeType
+                    + ", StoreTable=" + storeTable + ", StoreQuery=" + storeQuery + ", HiveDB=" + hiveDB
+                    + ", HiveTable=" + hiveTable + ", StartTime=" + startTime + ", EndTime=" + endTime
+                    + ", CmdLineArgs=" + commandLineOpts;
         }
     }
 

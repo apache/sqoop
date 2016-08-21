@@ -18,10 +18,14 @@
 
 package org.apache.sqoop.mapreduce;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.SQLException;
-
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.config.ConfigurationHelper;
+import com.cloudera.sqoop.lib.SqoopRecord;
+import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.manager.ExportJobContext;
+import com.cloudera.sqoop.mapreduce.JobBase;
+import com.cloudera.sqoop.orm.TableClassName;
+import com.cloudera.sqoop.util.ExportException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -39,18 +43,13 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.PerfCounters;
+import org.apache.sqoop.validation.ValidationContext;
+import org.apache.sqoop.validation.ValidationException;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.orm.TableClassName;
-import com.cloudera.sqoop.mapreduce.JobBase;
-import com.cloudera.sqoop.util.ExportException;
-
-import org.apache.sqoop.validation.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * Base class for running an export MapReduce job.
@@ -94,6 +93,10 @@ public class ExportJobBase extends JobBase {
   private static final String HADOOP_MAP_TASK_MAX_ATTEMTPS =
     "mapred.map.max.attempts";
 
+  /** Start and endtime captured for export job. */
+  private long startTime;
+  public static final String OPERATION = "export";
+
   protected ExportJobContext context;
 
 
@@ -107,6 +110,7 @@ public class ExportJobBase extends JobBase {
       final Class<? extends OutputFormat> outputFormatClass) {
     super(ctxt.getOptions(), mapperClass, inputFormatClass, outputFormatClass);
     this.context = ctxt;
+    this.startTime = new Date().getTime();
   }
 
   /**
@@ -439,12 +443,20 @@ public class ExportJobBase extends JobBase {
       setJob(job);
       boolean success = runJob(job);
       if (!success) {
+        LOG.error("Export job failed!");
         throw new ExportException("Export job failed!");
       }
 
       if (options.isValidationEnabled()) {
         validateExport(tableName, conf, job);
       }
+
+      if (isHCatJob) {
+        // Publish export job data for hcat export operation
+        LOG.info("Publishing HCatalog export job data to Listeners");
+        PublishJobData.publishJobData(conf, options, OPERATION, tableName, startTime);
+      }
+
     } catch (InterruptedException ie) {
       throw new IOException(ie);
     } catch (ClassNotFoundException cnfe) {

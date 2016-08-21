@@ -38,6 +38,7 @@ import org.apache.hadoop.hive.common.type.HiveChar;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.common.type.HiveVarchar;
 import org.apache.hive.hcatalog.data.schema.HCatFieldSchema;
+import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.hcat.HCatalogTestUtils.ColumnGenerator;
 import org.apache.sqoop.hcat.HCatalogTestUtils.CreateMode;
 import org.apache.sqoop.hcat.HCatalogTestUtils.KeyType;
@@ -440,5 +441,25 @@ public class HCatalogExportTest extends ExportJobTestCase {
     addlArgsArray.add("1");
     utils.setStorageInfo(HCatalogTestUtils.STORED_AS_TEXT);
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
+  }
+
+  public void testPublishExportJobData() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    "1", "1", KeyType.STATIC_KEY),
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    "2", "2", KeyType.DYNAMIC_KEY), };
+
+    List<String> addlArgsArray = new ArrayList<String>();
+    addlArgsArray.add("-D");
+    addlArgsArray.add(ConfigurationConstants.DATA_PUBLISH_CLASS + "=" + DummyDataPublisher.class.getName());
+    runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
+    assert (DummyDataPublisher.storeTable.equals(getTableName()));
+    assert (DummyDataPublisher.storeType.equals("hsqldb"));
+    assert (DummyDataPublisher.operation.equals("export"));
   }
 }

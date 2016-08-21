@@ -27,7 +27,6 @@ import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.ImportException;
 import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.mapred.AvroJob;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -42,8 +41,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.sqoop.SqoopJobDataPublisher;
-import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.validation.ValidationContext;
@@ -61,7 +58,7 @@ public class ImportJobBase extends JobBase {
 
   private ImportJobContext context;
   private long startTime;
-  private long endTime;
+  public static final String OPERATION = "import";
   public static final Log LOG = LogFactory.getLog(
       ImportJobBase.class.getName());
 
@@ -280,28 +277,13 @@ public class ImportJobBase extends JobBase {
       if (options.isValidationEnabled()) {
         validateImport(tableName, conf, job);
       }
-      this.endTime = new Date().getTime();
 
-      String publishClassName = conf.get(ConfigurationConstants.DATA_PUBLISH_CLASS);
-      if (!StringUtils.isEmpty(publishClassName)) {
-        try {
-          Class publishClass =  Class.forName(publishClassName);
-          Object obj = publishClass.newInstance();
-          if (obj instanceof SqoopJobDataPublisher) {
-            SqoopJobDataPublisher publisher = (SqoopJobDataPublisher) obj;
-            if (options.doHiveImport() || options.getHCatTableName() != null) {
-              // We need to publish the details
-              SqoopJobDataPublisher.Data data =
-                      new SqoopJobDataPublisher.Data(options, tableName, startTime, endTime);
-              publisher.publish(data);
-            }
-          } else {
-            LOG.warn("Publisher class not an instance of SqoopJobDataPublisher. Ignoring...");
-          }
-        } catch (Exception ex) {
-          LOG.warn("Unable to publish data to publisher " + ex.getMessage(), ex);
-        }
+      if (options.doHiveImport() || isHCatJob) {
+        // Publish data for import job, only hive/hcat import jobs are supported now.
+        LOG.info("Publishing Hive/Hcat import job data to Listeners for table " + tableName);
+        PublishJobData.publishJobData(conf, options, OPERATION, tableName, startTime);
       }
+
     } catch (InterruptedException ie) {
       throw new IOException(ie);
     } catch (ClassNotFoundException cnfe) {
