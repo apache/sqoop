@@ -224,6 +224,7 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
       recordReader.close();
       extTableThread.join();
       counter.stopClock();
+      LOG.info("Transferred " + counter.toString());
       if (extTableThread.hasExceptions()) {
         extTableThread.printException();
         throw new IOException(extTableThread.getException());
