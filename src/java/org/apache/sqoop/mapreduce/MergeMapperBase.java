@@ -74,7 +74,17 @@ public class MergeMapperBase<INKEY, INVAL>
     if (null == fieldMap) {
       throw new IOException("No field map in record " + r);
     }
-    Object keyObj = fieldMap.get(keyColName);
+    Object keyObj = null;
+    if (keyColName.contains(",")) {
+        StringBuilder keyFieldsSb = new StringBuilder();
+        for (String str : keyColName.split(",")) {
+            keyFieldsSb.append("+").append(fieldMap.get(str).toString());
+        }
+        keyObj = keyFieldsSb;
+    } else {
+        keyObj = fieldMap.get(keyColName);
+    }
+
     if (null == keyObj) {
       throw new IOException("Cannot join values on null key. "
           + "Did you specify a key column that exists?");
