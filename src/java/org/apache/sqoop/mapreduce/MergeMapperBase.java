@@ -76,9 +76,10 @@ public class MergeMapperBase<INKEY, INVAL>
     }
     Object keyObj = null;
     if (keyColName.contains(",")) {
+        String connectStr = new String(new byte[]{1});
         StringBuilder keyFieldsSb = new StringBuilder();
         for (String str : keyColName.split(",")) {
-            keyFieldsSb.append("+").append(fieldMap.get(str).toString());
+            keyFieldsSb.append(connectStr).append(fieldMap.get(str).toString());
         }
         keyObj = keyFieldsSb;
     } else {
