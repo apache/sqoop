@@ -55,8 +55,8 @@ public class HdfsParquetWriter extends GenericHdfsWriter {
   }
 
   @Override
-  public void write(String csv) throws IOException {
-    avroParquetWriter.write(avroIntermediateDataFormat.toAVRO(csv));
+  public void write(Object[] record, String nullValue) throws IOException {
+    avroParquetWriter.write(avroIntermediateDataFormat.toAVRO(record));
   }
 
   @Override

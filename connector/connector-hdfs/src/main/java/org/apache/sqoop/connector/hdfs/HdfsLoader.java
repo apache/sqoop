@@ -92,24 +92,20 @@ public class HdfsLoader extends Loader<LinkConfiguration, ToJobConfiguration> {
 
           filewriter.initialize(filepath, context.getSchema(), conf, codec);
 
-      if (!HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfig) || (context.getSchema() instanceof ByteArraySchema)) {
-        String record;
-        while ((record = reader.readTextRecord()) != null) {
-          if (context.getSchema() instanceof ByteArraySchema) {
-            filewriter.write(SqoopIDFUtils.toText(record));
+
+          String nullValue;
+          if (!HdfsUtils.hasCustomFormat(linkConfiguration, toJobConfig) || (context.getSchema() instanceof ByteArraySchema)) {
+            nullValue = SqoopIDFUtils.DEFAULT_NULL_VALUE;
           } else {
-            filewriter.write(record);
+            nullValue = toJobConfig.toJobConfig.nullValue;
           }
-          rowsWritten++;
-        }
-      } else {
-        Object[] record;
-        while ((record = reader.readArrayRecord()) != null) {
-          filewriter.write(SqoopIDFUtils.toCSV(record, context.getSchema(), toJobConfig.toJobConfig.nullValue));
-          rowsWritten++;
-        }
-      }
-      filewriter.destroy();
+
+          Object[] record;
+          while ((record = reader.readArrayRecord()) != null) {
+            filewriter.write(record, nullValue);
+            rowsWritten++;
+          }
+          filewriter.destroy();
 
         } catch (IOException e) {
           throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0005, e);

@@ -88,14 +88,16 @@ public class HdfsIncrementalReadTest extends SqoopTestCase {
 
     // And last execution
     createFromFile("input-0003",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
+      "5,'USA','2004-10-27 00:00:00.000','Martha\\'s Vineyard'"
     );
     executeJob(job);
-    assertEquals(provider.rowCount(getTableName()), 4);
+    assertEquals(provider.rowCount(getTableName()), 5);
     assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
     assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
     assertRowInCities(3, "Czech Republic", Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
     assertRowInCities(4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
+    assertRowInCities(5, "USA", Timestamp.valueOf("2004-10-27 00:00:00.000"), "Martha's Vineyard");
   }
 
 }

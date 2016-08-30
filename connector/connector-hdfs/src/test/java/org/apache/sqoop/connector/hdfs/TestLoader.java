@@ -20,6 +20,7 @@ package org.apache.sqoop.connector.hdfs;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +54,7 @@ import org.apache.sqoop.schema.type.FloatingPoint;
 import org.apache.sqoop.schema.type.Text;
 import org.apache.sqoop.utils.ClassUtils;
 import org.testng.Assert;
+import org.testng.ITest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -63,7 +65,7 @@ import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.PARQUET_FIL
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.SEQUENCE_FILE;
 import static org.apache.sqoop.connector.hdfs.configuration.ToFormat.TEXT_FILE;
 
-public class TestLoader extends TestHdfsBase {
+public class TestLoader extends TestHdfsBase implements ITest {
   private static final String INPUT_ROOT = System.getProperty("maven.build.directory", "/tmp") + "/sqoop/warehouse/";
   private static final int NUMBER_OF_ROWS_PER_FILE = 1000;
 
@@ -73,6 +75,8 @@ public class TestLoader extends TestHdfsBase {
   private Loader loader;
   private String user = "test_user";
   private Schema schema;
+
+  private String methodName;
 
   @Factory(dataProvider="test-hdfs-loader")
   public TestLoader(ToFormat outputFormat,
@@ -100,12 +104,19 @@ public class TestLoader extends TestHdfsBase {
     return parameters.toArray(new Object[0][]);
   }
 
-  @BeforeMethod(alwaysRun = true)
-  public void setUp() throws Exception {}
+  @BeforeMethod
+  public void findMethodName(Method method) {
+    methodName = method.getName();
+  }
 
   @AfterMethod(alwaysRun = true)
   public void tearDown() throws IOException {
     FileUtils.delete(outputDirectory);
+  }
+
+  @Override
+  public String getTestName() {
+    return methodName + "[" + outputFormat.name() + ", " + compression + "]";
   }
 
   @Test
@@ -123,7 +134,11 @@ public class TestLoader extends TestHdfsBase {
       @Override
       public Object[] readArrayRecord() {
         assertTestUser(user);
-        return null;
+        if (index++ < NUMBER_OF_ROWS_PER_FILE) {
+          return new Object[] {index, (float)index, String.valueOf(index)};
+        } else {
+          return null;
+        }
       }
 
       @Override

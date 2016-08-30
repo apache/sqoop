@@ -51,6 +51,7 @@ public class Cities extends DataSet {
     provider.insertRow(tableBaseName, 2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
     provider.insertRow(tableBaseName, 3, "Czech Republic", Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
     provider.insertRow(tableBaseName, 4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
+    provider.insertRow(tableBaseName, 5, "USA", Timestamp.valueOf("2004-10-27 00:00:00.000"), "Martha's Vineyard");
 
     return this;
   }

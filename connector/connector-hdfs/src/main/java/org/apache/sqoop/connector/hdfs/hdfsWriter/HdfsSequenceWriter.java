@@ -23,6 +23,8 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.sqoop.connector.common.SqoopIDFUtils;
+import org.apache.sqoop.schema.ByteArraySchema;
 import org.apache.sqoop.schema.Schema;
 
 import java.io.IOException;
@@ -31,9 +33,11 @@ public class HdfsSequenceWriter extends GenericHdfsWriter {
 
   private SequenceFile.Writer filewriter;
   private Text text;
+  private Schema schema;
 
   @SuppressWarnings("deprecation")
   public void initialize(Path filepath, Schema schema, Configuration conf, CompressionCodec codec) throws IOException {
+    this.schema = schema;
     if (codec != null) {
       filewriter = SequenceFile.createWriter(filepath.getFileSystem(conf),
               conf, filepath, Text.class, NullWritable.class,
@@ -47,9 +51,14 @@ public class HdfsSequenceWriter extends GenericHdfsWriter {
   }
 
   @Override
-  public void write(String csv) throws IOException {
-    text.set(csv);
-      filewriter.append(text, NullWritable.get());
+  public void write(Object[] record, String nullValue) throws IOException {
+    if (schema instanceof ByteArraySchema) {
+      text.set(new String(((byte[]) record[0]), SqoopIDFUtils.BYTE_FIELD_CHARSET));
+    } else {
+      text.set(SqoopIDFUtils.toCSV(record, schema, nullValue));
+    }
+
+    filewriter.append(text, NullWritable.get());
   }
 
   public void destroy() throws IOException {

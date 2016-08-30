@@ -52,7 +52,8 @@ public class FromHDFSToRDBMSTest extends SqoopTestCase {
       "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
       "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
       "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
+      "5,'USA','2004-10-27 00:00:00.000','Martha\\'s Vineyard'"
     );
     // RDBMS link
     MLink rdbmsLink = getClient().createLink("generic-jdbc-connector");
@@ -80,10 +81,11 @@ public class FromHDFSToRDBMSTest extends SqoopTestCase {
 
     executeJob(job);
 
-    assertEquals(4L, provider.rowCount(getTableName()));
+    assertEquals(5L, provider.rowCount(getTableName()));
     assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
     assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), "Sunnyvale");
     assertRowInCities(3, "Czech Republic", Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
     assertRowInCities(4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
+    assertRowInCities(5, "USA", Timestamp.valueOf("2004-10-27 00:00:00.000"), "Martha's Vineyard");
   }
 }

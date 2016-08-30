@@ -22,7 +22,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.sqoop.connector.common.SqoopIDFUtils;
 import org.apache.sqoop.connector.hdfs.HdfsConstants;
+import org.apache.sqoop.schema.ByteArraySchema;
 import org.apache.sqoop.schema.Schema;
 
 import java.io.BufferedWriter;
@@ -33,9 +35,11 @@ import java.io.OutputStreamWriter;
 public class HdfsTextWriter extends GenericHdfsWriter {
 
   private BufferedWriter filewriter;
+  private Schema schema;
 
   @Override
   public void initialize(Path filepath, Schema schema, Configuration conf, CompressionCodec codec) throws IOException {
+    this.schema = schema;
     FileSystem fs = filepath.getFileSystem(conf);
 
     DataOutputStream filestream = fs.create(filepath, false);
@@ -50,8 +54,12 @@ public class HdfsTextWriter extends GenericHdfsWriter {
   }
 
   @Override
-  public void write(String csv) throws IOException {
-    filewriter.write(csv + HdfsConstants.DEFAULT_RECORD_DELIMITER);
+  public void write(Object[] record, String nullValue) throws IOException {
+    if (schema instanceof ByteArraySchema) {
+      filewriter.write(new String(((byte[]) record[0]), SqoopIDFUtils.BYTE_FIELD_CHARSET) + HdfsConstants.DEFAULT_RECORD_DELIMITER);
+    } else {
+      filewriter.write(SqoopIDFUtils.toCSV(record, schema, nullValue) + HdfsConstants.DEFAULT_RECORD_DELIMITER);
+    }
 
   }
 

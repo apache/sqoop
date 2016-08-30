@@ -108,7 +108,8 @@ public class S3Test extends SqoopTestCase {
       "1,'USA','2004-10-23','San Francisco'",
       "2,'USA','2004-10-24','Sunnyvale'",
       "3,'Czech Republic','2004-10-25','Brno'",
-      "4,'USA','2004-10-26','Palo Alto'"
+      "4,'USA','2004-10-26','Palo Alto'",
+      "5,'USA','2004-10-27','Martha\\'s Vineyard'"
     );
 
     // This re-creates the table completely
@@ -129,6 +130,7 @@ public class S3Test extends SqoopTestCase {
     assertRowInCities(2, "USA", "2004-10-24", "Sunnyvale");
     assertRowInCities(3, "Czech Republic", "2004-10-25", "Brno");
     assertRowInCities(4, "USA", "2004-10-26", "Palo Alto");
+    assertRowInCities(4, "USA", "2004-10-27", "Martha's Vineyard");
   }
 
   @Test

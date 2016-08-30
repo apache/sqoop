@@ -124,7 +124,8 @@ public class NullValueTest extends SqoopTestCase {
       "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
       "2,'USA','2004-10-24 00:00:00.000'," + nullValue,
       "3," + nullValue + ",'2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
+      "5,'USA','2004-10-27 00:00:00.000','Martha\\'s Vineyard'"
     };
   }
 
@@ -164,7 +165,7 @@ public class NullValueTest extends SqoopTestCase {
             sqoopSchema, conf, null);
 
           for (String line : getCsv()) {
-            parquetWriter.write(line);
+            parquetWriter.write(SqoopIDFUtils.fromCSV(line, sqoopSchema), SqoopIDFUtils.DEFAULT_NULL_VALUE);
           }
 
           parquetWriter.destroy();
@@ -199,11 +200,12 @@ public class NullValueTest extends SqoopTestCase {
 
     executeJob(job);
 
-    Assert.assertEquals(4L, provider.rowCount(getTableName()));
+    Assert.assertEquals(5L, provider.rowCount(getTableName()));
     assertRowInCities(1, "USA", Timestamp.valueOf("2004-10-23 00:00:00.000"), "San Francisco");
     assertRowInCities(2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), (String) null);
     assertRowInCities(3, (String) null, Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
     assertRowInCities(4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
+    assertRowInCities(5, "USA", Timestamp.valueOf("2004-10-27 00:00:00.000"), "Martha's Vineyard");
   }
 
   @Test
@@ -217,6 +219,7 @@ public class NullValueTest extends SqoopTestCase {
     provider.insertRow(getTableName(), 2, "USA", Timestamp.valueOf("2004-10-24 00:00:00.000"), (String) null);
     provider.insertRow(getTableName(), 3, (String) null, Timestamp.valueOf("2004-10-25 00:00:00.000"), "Brno");
     provider.insertRow(getTableName(), 4, "USA", Timestamp.valueOf("2004-10-26 00:00:00.000"), "Palo Alto");
+    provider.insertRow(getTableName(), 5, "USA", Timestamp.valueOf("2004-10-27 00:00:00.000"), "Martha's Vineyard");
 
     MLink rdbmsLinkFrom = getClient().createLink("generic-jdbc-connector");
     fillRdbmsLinkConfig(rdbmsLinkFrom);

@@ -66,7 +66,8 @@ public class AppendModeTest extends SqoopTestCase {
       "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
       "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
       "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
+      "5,'USA','2004-10-27 00:00:00.000','Martha\\'s Vineyard'"
     );
 
     // Second execution
@@ -76,10 +77,12 @@ public class AppendModeTest extends SqoopTestCase {
       "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
       "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
       "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
+      "5,'USA','2004-10-27 00:00:00.000','Martha\\'s Vineyard'",
       "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
       "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
       "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
-      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'"
+      "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
+      "5,'USA','2004-10-27 00:00:00.000','Martha\\'s Vineyard'"
     );
 
     dropTable();

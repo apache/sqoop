@@ -28,7 +28,7 @@ public abstract class GenericHdfsWriter {
 
   public abstract void initialize(Path filepath, Schema schema, Configuration conf, CompressionCodec codec) throws IOException;
 
-  public abstract void write(String csv) throws IOException;
+  public abstract void write(Object[] record, String nullValue) throws IOException;
 
   public abstract void destroy() throws IOException;
 
