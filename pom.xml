@@ -1066,6 +1066,14 @@ limitations under the License.
       </roles>
     </developer>
     <developer>
+      <id>maugli</id>
+      <name>Attila Szabo</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
       <id>mengwei</id>
       <name>Mengwei Ding</name>
       <organization>Google</organization>
