@@ -20,7 +20,7 @@ Sqoop 5 Minutes Demo
 
 This page will walk you through the basic usage of Sqoop. You need to have installed and configured Sqoop server and client in order to follow this guide. Installation procedure is described in :doc:`/admin/Installation`. Please note that exact output shown in this page might differ from yours as Sqoop evolves. All major information should however remain the same.
 
-Sqoop uses unique names or persistent ids to identify connectors, links, jobs and configs. We support querying a entity by its unique name or by its perisent database Id.
+Sqoop uses unique names or persistent ids to identify connectors, links, jobs and configs. We support querying an entity by its unique name or by its perisent database Id.
 
 Starting Client
 ===============
@@ -121,7 +121,7 @@ In the ``show connector -all`` we see that there is a hdfs-connector registered.
 Creating Job Object
 ===================
 
-Connectors implement the ``From`` for reading data from and/or ``To`` for writing data to. Generic JDBC Connector supports both of them List of supported directions for each connector might be seen in the output of ``show connector -all`` command above. In order to create a job we need to specifiy the ``From`` and ``To`` parts of the job uniquely identified by their link Ids. We already have 2 links created in the system, you can verify the same with the following command
+Connectors implement the ``From`` for reading data from and/or ``To`` for writing data to. The Generic JDBC Connector supports both of them. A list of supported directions for each connector might be seen in the output of ``show connector -all`` command above. In order to create a job we need to specifiy the ``From`` and ``To`` parts of the job uniquely identified by their link Ids. We already have 2 links created in the system, you can verify the same with the following command
 
 ::
 
