@@ -1591,6 +1591,13 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         + " option." + HELP_STR);
 
     }
+    
+    if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
+      throw new InvalidOptionsException("HCatalog job is not compatible with "
+        + " ParquetFile format option " + FMT_PARQUETFILE_ARG
+        + " option." + HELP_STR);
+
+    }
 
     if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
       throw new InvalidOptionsException("HCatalog job  is not compatible with "
