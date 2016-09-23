@@ -53,6 +53,9 @@ import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
 import com.cloudera.sqoop.util.AppendUtils;
 import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.manager.SupportedManagers;
+
+import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 
 /**
  * Tool that performs database imports to HDFS.
@@ -1018,90 +1021,103 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
    * @param options the configured SqoopOptions to check
    */
   protected void validateImportOptions(SqoopOptions options)
-      throws InvalidOptionsException {
-    if (!allTables && options.getTableName() == null
-        && options.getSqlQuery() == null) {
-      throw new InvalidOptionsException(
-          "--table or --" + SQL_QUERY_ARG + " is required for import. "
-          + "(Or use sqoop import-all-tables.)"
-          + HELP_STR);
-    } else if (options.getExistingJarName() != null
-        && options.getClassName() == null) {
-      throw new InvalidOptionsException("Jar specified with --jar-file, but no "
-          + "class specified with --class-name." + HELP_STR);
-    } else if (options.getTargetDir() != null
-        && options.getWarehouseDir() != null) {
-      throw new InvalidOptionsException(
-          "--target-dir with --warehouse-dir are incompatible options."
-          + HELP_STR);
-    } else if (options.getTableName() != null
-        && options.getSqlQuery() != null) {
-      throw new InvalidOptionsException(
-          "Cannot specify --" + SQL_QUERY_ARG + " and --table together."
-          + HELP_STR);
-    } else if (options.getSqlQuery() != null
-        && options.getTargetDir() == null
-        && options.getHBaseTable() == null
-        && options.getHCatTableName() == null
-        && options.getAccumuloTable() == null) {
-      throw new InvalidOptionsException(
-          "Must specify destination with --target-dir. "
-          + HELP_STR);
-    } else if (options.getSqlQuery() != null && options.doHiveImport()
-        && options.getHiveTableName() == null) {
-      throw new InvalidOptionsException(
-          "When importing a query to Hive, you must specify --"
-          + HIVE_TABLE_ARG + "." + HELP_STR);
-    } else if (options.getSqlQuery() != null && options.getNumMappers() > 1
-        && options.getSplitByCol() == null) {
-      throw new InvalidOptionsException(
-          "When importing query results in parallel, you must specify --"
-          + SPLIT_BY_ARG + "." + HELP_STR);
-    } else if (options.isDirect()
-            && options.getFileLayout() != SqoopOptions.FileLayout.TextFile
-            && options.getConnectString().contains("jdbc:mysql://")) {
-      throw new InvalidOptionsException(
-            "MySQL direct import currently supports only text output format. "
-             + "Parameters --as-sequencefile --as-avrodatafile and --as-parquetfile are not "
-             + "supported with --direct params in MySQL case.");
-    } else if (options.isDirect()
-            && options.doHiveDropDelims()) {
-      throw new InvalidOptionsException(
-            "Direct import currently do not support dropping hive delimiters,"
-            + " please remove parameter --hive-drop-import-delims.");
-    } else if (allTables && options.isValidationEnabled()) {
-      throw new InvalidOptionsException("Validation is not supported for "
-            + "all tables but single table only.");
-    } else if (options.getSqlQuery() != null && options.isValidationEnabled()) {
-      throw new InvalidOptionsException("Validation is not supported for "
-            + "free from query but single table only.");
-    } else if (options.getWhereClause() != null
-            && options.isValidationEnabled()) {
-      throw new InvalidOptionsException("Validation is not supported for "
-            + "where clause but single table only.");
-    } else if (options.getIncrementalMode()
-        != SqoopOptions.IncrementalMode.None && options.isValidationEnabled()) {
-      throw new InvalidOptionsException("Validation is not supported for "
-        + "incremental imports but single table only.");
-    } else if ((options.getTargetDir() != null
-      || options.getWarehouseDir() != null)
-      && options.getHCatTableName() != null) {
-      throw new InvalidOptionsException("--hcatalog-table cannot be used "
-        + " --warehouse-dir or --target-dir options");
-    } else if (options.isDeleteMode() && options.isAppendMode()) {
-       throw new InvalidOptionsException("--append and --delete-target-dir can"
-         + " not be used together.");
-    } else if (options.isDeleteMode() && options.getIncrementalMode()
-         != SqoopOptions.IncrementalMode.None) {
-       throw new InvalidOptionsException("--delete-target-dir can not be used"
-         + " with incremental imports.");
-    } else if (options.getAutoResetToOneMapper()
-        && (options.getSplitByCol() != null)) {
-        throw new InvalidOptionsException("--autoreset-to-one-mapper and"
-          + " --split-by cannot be used together.");
-    }
-  }
+	      throws InvalidOptionsException {
+	    if (!allTables && options.getTableName() == null
+	        && options.getSqlQuery() == null) {
+	      throw new InvalidOptionsException(
+	          "--table or --" + SQL_QUERY_ARG + " is required for import. "
+	              + "(Or use sqoop import-all-tables.)"
+	              + HELP_STR);
+	    } else if (options.getExistingJarName() != null
+	        && options.getClassName() == null) {
+	      throw new InvalidOptionsException("Jar specified with --jar-file, but no "
+	          + "class specified with --class-name." + HELP_STR);
+	    } else if (options.getTargetDir() != null
+	        && options.getWarehouseDir() != null) {
+	      throw new InvalidOptionsException(
+	          "--target-dir with --warehouse-dir are incompatible options."
+	              + HELP_STR);
+	    } else if (options.getTableName() != null
+	        && options.getSqlQuery() != null) {
+	      throw new InvalidOptionsException(
+	          "Cannot specify --" + SQL_QUERY_ARG + " and --table together."
+	              + HELP_STR);
+	    } else if (options.getSqlQuery() != null
+	        && options.getTargetDir() == null
+	        && options.getHBaseTable() == null
+	        && options.getHCatTableName() == null
+	        && options.getAccumuloTable() == null) {
+	      throw new InvalidOptionsException(
+	          "Must specify destination with --target-dir. "
+	              + HELP_STR);
+	    } else if (options.getSqlQuery() != null && options.doHiveImport()
+	        && options.getHiveTableName() == null) {
+	      throw new InvalidOptionsException(
+	          "When importing a query to Hive, you must specify --"
+	              + HIVE_TABLE_ARG + "." + HELP_STR);
+	    } else if (options.getSqlQuery() != null && options.getNumMappers() > 1
+	        && options.getSplitByCol() == null) {
+	      throw new InvalidOptionsException(
+	          "When importing query results in parallel, you must specify --"
+	              + SPLIT_BY_ARG + "." + HELP_STR);
+	    } else if (options.isDirect()) {
+	      validateDirectImportOptions(options);
+	    } else if (allTables && options.isValidationEnabled()) {
+	      throw new InvalidOptionsException("Validation is not supported for "
+	          + "all tables but single table only.");
+	    } else if (options.getSqlQuery() != null && options.isValidationEnabled()) {
+	      throw new InvalidOptionsException("Validation is not supported for "
+	          + "free from query but single table only.");
+	    } else if (options.getWhereClause() != null
+	        && options.isValidationEnabled()) {
+	      throw new InvalidOptionsException("Validation is not supported for "
+	          + "where clause but single table only.");
+	    } else if (options.getIncrementalMode()
+	        != SqoopOptions.IncrementalMode.None && options.isValidationEnabled()) {
+	      throw new InvalidOptionsException("Validation is not supported for "
+	          + "incremental imports but single table only.");
+	    } else if ((options.getTargetDir() != null
+	        || options.getWarehouseDir() != null)
+	        && options.getHCatTableName() != null) {
+	      throw new InvalidOptionsException("--hcatalog-table cannot be used "
+	          + " --warehouse-dir or --target-dir options");
+	    } else if (options.isDeleteMode() && options.isAppendMode()) {
+	      throw new InvalidOptionsException("--append and --delete-target-dir can"
+	          + " not be used together.");
+	    } else if (options.isDeleteMode() && options.getIncrementalMode()
+	        != SqoopOptions.IncrementalMode.None) {
+	      throw new InvalidOptionsException("--delete-target-dir can not be used"
+	          + " with incremental imports.");
+	    } else if (options.getAutoResetToOneMapper()
+	        && (options.getSplitByCol() != null)) {
+	      throw new InvalidOptionsException("--autoreset-to-one-mapper and"
+	          + " --split-by cannot be used together.");
+	    }
+	  }
 
+	  void validateDirectImportOptions(SqoopOptions options) throws InvalidOptionsException {
+	    validateDirectMysqlOptions(options);
+	    validateDirectDropHiveDelimOption(options);
+	    validateHasDirectConnectorOption(options);
+	  }
+
+	  void validateDirectDropHiveDelimOption(SqoopOptions options) throws InvalidOptionsException {
+	    if (options.doHiveDropDelims()) {
+	      throw new InvalidOptionsException(
+	          "Direct import currently do not support dropping hive delimiters,"
+	              + " please remove parameter --hive-drop-import-delims.");
+	    }
+	  }
+
+	  void validateDirectMysqlOptions(SqoopOptions options) throws InvalidOptionsException {
+	    if (options.getFileLayout() != SqoopOptions.FileLayout.TextFile
+	        && MYSQL.isTheManagerTypeOf(options)) {
+	      throw new InvalidOptionsException(
+	          "MySQL direct import currently supports only text output format. "
+	              + "Parameters --as-sequencefile --as-avrodatafile and --as-parquetfile are not "
+	              + "supported with --direct params in MySQL case.");
+	    }
+	  }
   /**
    * Validate the incremental import options.
    */

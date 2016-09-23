@@ -387,8 +387,14 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     validateCommonOptions(options);
     validateCodeGenOptions(options);
     validateHCatalogOptions(options);
+    vaildateDirectExportOptions(options);
   }
 
+  void vaildateDirectExportOptions(SqoopOptions options) throws InvalidOptionsException {
+    if (options.isDirect()) {
+      validateHasDirectConnectorOption(options);
+    }
+  }
   private void applyNewUpdateOptions(CommandLine in, SqoopOptions out)
       throws InvalidOptionsException {
     if (in.hasOption(UPDATE_MODE_ARG)) {

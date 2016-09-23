@@ -25,6 +25,17 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.manager.ConnManager;
 
+import static org.apache.sqoop.manager.SupportedManagers.CUBRID;
+import static org.apache.sqoop.manager.SupportedManagers.DB2;
+import static org.apache.sqoop.manager.SupportedManagers.HSQLDB;
+import static org.apache.sqoop.manager.SupportedManagers.JTDS_SQLSERVER;
+import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
+import static org.apache.sqoop.manager.SupportedManagers.NETEZZA;
+import static org.apache.sqoop.manager.SupportedManagers.ORACLE;
+import static org.apache.sqoop.manager.SupportedManagers.POSTGRES;
+import static org.apache.sqoop.manager.SupportedManagers.SQLSERVER;
+
+
 /**
  * Contains instantiation code for all ConnManager implementations
  * shipped and enabled by default in Sqoop.
@@ -34,6 +45,7 @@ public class DefaultManagerFactory
 
   public static final Log LOG = LogFactory.getLog(
       DefaultManagerFactory.class.getName());
+  public static final String NET_SOURCEFORGE_JTDS_JDBC_DRIVER = "net.sourceforge.jtds.jdbc.Driver";
 
   public ConnManager accept(JobData data) {
     SqoopOptions options = data.getSqoopOptions();
@@ -48,37 +60,35 @@ public class DefaultManagerFactory
 
     LOG.debug("Trying with scheme: " + scheme);
 
-    if (scheme.equals("jdbc:mysql:")) {
+    if (MYSQL.isTheManagerTypeOf(options)) {
       if (options.isDirect()) {
         return new DirectMySQLManager(options);
       } else {
         return new MySQLManager(options);
       }
-    } else if (scheme.equals("jdbc:postgresql:")) {
+    } else if (POSTGRES.isTheManagerTypeOf(options)) {
       if (options.isDirect()) {
         return new DirectPostgresqlManager(options);
       } else {
         return new PostgresqlManager(options);
       }
-    } else if (scheme.startsWith("jdbc:hsqldb:")) {
+    } else if (HSQLDB.isTheManagerTypeOf(options)) {
       return new HsqldbManager(options);
-    } else if (scheme.startsWith("jdbc:oracle:")) {
+    } else if (ORACLE.isTheManagerTypeOf(options)) {
       return new OracleManager(options);
-    } else if (scheme.startsWith("jdbc:sqlserver:")) {
+    } else if (SQLSERVER.isTheManagerTypeOf(options)) {
       return new SQLServerManager(options);
-    } else if (scheme.startsWith("jdbc:jtds:sqlserver:")) {
-      return new SQLServerManager(
-        "net.sourceforge.jtds.jdbc.Driver",
-        options);
-    } else if (scheme.startsWith("jdbc:db2:")) {
+    } else if (JTDS_SQLSERVER.isTheManagerTypeOf(options)) {
+      return new SQLServerManager(NET_SOURCEFORGE_JTDS_JDBC_DRIVER, options);
+    } else if (DB2.isTheManagerTypeOf(options)) {
       return new Db2Manager(options);
-    } else if (scheme.startsWith("jdbc:netezza:")) {
+    } else if (NETEZZA.isTheManagerTypeOf(options)) {
       if (options.isDirect()) {
         return new DirectNetezzaManager(options);
       } else {
         return new NetezzaManager(options);
       }
-    } else if (scheme.startsWith("jdbc:cubrid:")) {
+    } else if (CUBRID.isTheManagerTypeOf(options)) {
       return new CubridManager(options);
     } else {
       return null;
@@ -86,32 +96,7 @@ public class DefaultManagerFactory
   }
 
   protected String extractScheme(SqoopOptions options) {
-    String connectStr = options.getConnectString();
-
-    // java.net.URL follows RFC-2396 literally, which does not allow a ':'
-    // character in the scheme component (section 3.1). JDBC connect strings,
-    // however, commonly have a multi-scheme addressing system. e.g.,
-    // jdbc:mysql://...; so we cannot parse the scheme component via URL
-    // objects. Instead, attempt to pull out the scheme as best as we can.
-
-    // First, see if this is of the form [scheme://hostname-and-etc..]
-    int schemeStopIdx = connectStr.indexOf("//");
-    if (-1 == schemeStopIdx) {
-      // If no hostname start marker ("//"), then look for the right-most ':'
-      // character.
-      schemeStopIdx = connectStr.lastIndexOf(':');
-      if (-1 == schemeStopIdx) {
-        // Warn that this is nonstandard. But we should be as permissive
-        // as possible here and let the ConnectionManagers themselves throw
-        // out the connect string if it doesn't make sense to them.
-        LOG.warn("Could not determine scheme component of connect string");
-
-        // Use the whole string.
-        schemeStopIdx = connectStr.length();
-      }
-    }
-
-    return connectStr.substring(0, schemeStopIdx);
+  return SupportedManagers.extractScheme(options);
   }
 }
 
