@@ -402,6 +402,27 @@ public class TestHiveImport extends ImportJobTestCase {
         {"test2", 4242, "somestring2"}, {"test", 42, "somestring"}});
   }
 
+  /**
+   * Test hive create and --as-parquetfile options validation.
+   */
+  @Test
+  public void testCreateHiveImportAsParquet() throws ParseException {
+    final String TABLE_NAME = "CREATE_HIVE_IMPORT_AS_PARQUET";
+    setCurTableName(TABLE_NAME);
+    setNumCols(3);
+    String [] extraArgs = {"--as-parquetfile", "--create-hive-table"};
+    ImportTool tool = new ImportTool();
+
+    try {
+      tool.validateOptions(tool.parseArguments(getArgv(false, extraArgs), null,
+          null, true));
+      fail("Expected InvalidOptionsException");
+    } catch (InvalidOptionsException ex) {
+      /* success */
+    }
+  }
+
+
   /** Test that dates are coerced properly to strings. */
   @Test
   public void testDate() throws IOException {

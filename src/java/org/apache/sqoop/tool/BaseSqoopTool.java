@@ -1421,6 +1421,14 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         + "importing into SequenceFile format.");
     }
 
+    // Hive import and create hive table not compatible for ParquetFile format
+    if (options.doHiveImport()
+        && options.doFailIfHiveTableExists()
+        && options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
+      throw new InvalidOptionsException("Hive import and create hive table is not compatible with "
+        + "importing into ParquetFile format.");
+      }
+
     if (options.doHiveImport()
         && options.isAppendMode()
         && !options.getIncrementalMode().equals(IncrementalMode.AppendRows)) {
@@ -1595,6 +1603,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     if (options.getFileLayout() == SqoopOptions.FileLayout.SequenceFile) {
       throw new InvalidOptionsException("HCatalog job  is not compatible with "
         + "SequenceFile format option " + FMT_SEQUENCEFILE_ARG
+        + " option." + HELP_STR);
+    }
+
+    if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
+      throw new InvalidOptionsException("HCatalog job  is not compatible with "
+        + "SequenceFile format option " + FMT_PARQUETFILE_ARG
         + " option." + HELP_STR);
     }
 

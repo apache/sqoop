@@ -164,6 +164,24 @@ public class TestHCatalogBasic extends TestCase {
     }
   }
 
+  public void testHCatExportWithParquetFile() throws Exception {
+    String[] args = {
+      "--connect",
+      "jdbc:db:url",
+      "--table",
+      "dbtable",
+      "--hcatalog-table",
+      "table",
+      "--as-parquetfile",
+    };
+    try {
+      SqoopOptions opts = parseExportArgs(args);
+      exportTool.validateOptions(opts);
+      fail("Expected InvalidOptionsException");
+    } catch (SqoopOptions.InvalidOptionsException ioe) {
+      // expected.
+    }
+  }
 
   public void testHCatImportWithSequenceFile() throws Exception {
     String[] args = {
@@ -174,6 +192,28 @@ public class TestHCatalogBasic extends TestCase {
       "--hcatalog-table",
       "table",
       "--as-sequencefile",
+    };
+    try {
+      SqoopOptions opts = parseImportArgs(args);
+      importTool.validateOptions(opts);
+      fail("Expected InvalidOptionsException");
+    } catch (SqoopOptions.InvalidOptionsException ioe) {
+      // expected.
+    }
+  }
+
+  public void testHCatImportWithParquetFile() throws Exception {
+    String[] args = {
+      "--hcatalog-table",
+      "table",
+      "--create-hcatalog-table",
+      "--connect",
+      "jdbc:db:url",
+      "--table",
+      "dbtable",
+      "--hcatalog-table",
+      "table",
+      "--as-parquetfile",
     };
     try {
       SqoopOptions opts = parseImportArgs(args);
