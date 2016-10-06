@@ -38,7 +38,10 @@ public final class MySQLTestUtils {
       "sqoop.test.mysql.connectstring.host_url",
       "jdbc:mysql://localhost/");
 
-  public static final String MYSQL_DATABASE_NAME = "sqooptestdb";
+  public static final String USER_NAME = System.getProperty("sqoop.test.mysql.username", "sqoop");
+  public static final String USER_PASS = System.getProperty("sqoop.test.mysql.password", "sqoop");
+
+  public static final String MYSQL_DATABASE_NAME = System.getProperty("sqoop.test.mysql.databasename", "sqooptestdb");
   public static final String TABLE_NAME = "EMPLOYEES_MYSQL";
   public static final String CONNECT_STRING = HOST_URL + MYSQL_DATABASE_NAME;
 

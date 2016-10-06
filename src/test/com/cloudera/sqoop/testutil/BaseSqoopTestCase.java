@@ -295,8 +295,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
    */
   protected void dropTableIfExists(String table) throws SQLException {
     Connection conn = getManager().getConnection();
-    PreparedStatement statement = conn.prepareStatement(
-        "DROP TABLE " + manager.escapeTableName(table) + " IF EXISTS",
+    PreparedStatement statement = conn.prepareStatement(dropTableIfExistsCommand(table),
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     try {
       statement.executeUpdate();
@@ -304,6 +303,10 @@ public abstract class BaseSqoopTestCase extends TestCase {
     } finally {
       statement.close();
     }
+  }
+
+  protected String dropTableIfExistsCommand(String table) {
+    return "DROP TABLE " + manager.escapeTableName(table) + " IF EXISTS";
   }
 
   /**
@@ -331,7 +334,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
         conn = getManager().getConnection();
 
         for (int i = 0; i < colTypes.length; i++) {
-          columnDefStr += '"' + colNames[i].toUpperCase() + '"' + " " + colTypes[i];
+          columnDefStr += manager.escapeColName(colNames[i].toUpperCase()) + " " + colTypes[i];
           if (i < colTypes.length - 1) {
             columnDefStr += ", ";
           }
@@ -363,7 +366,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
         String columnListStr = "";
         String valueListStr = "";
         for (int i = 0; i < colTypes.length; i++) {
-          columnListStr += '"' + colNames[i].toUpperCase() + '"';
+          columnListStr += manager.escapeColName(colNames[i].toUpperCase());
           valueListStr += vals[count * colTypes.length + i];
           if (i < colTypes.length - 1) {
             columnListStr += ", ";

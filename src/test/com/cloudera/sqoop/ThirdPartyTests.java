@@ -50,6 +50,7 @@ import com.cloudera.sqoop.manager.PostgresqlImportTest;
 import org.apache.sqoop.manager.cubrid.CubridAuthTest;
 import org.apache.sqoop.manager.cubrid.CubridCompatTest;
 import org.apache.sqoop.manager.mysql.MySqlCallExportTest;
+import org.apache.sqoop.manager.mysql.MySqlColumnEscapeImportTest;
 import org.apache.sqoop.manager.netezza.DirectNetezzaExportManualTest;
 import org.apache.sqoop.manager.netezza.DirectNetezzaHCatExportManualTest;
 import org.apache.sqoop.manager.netezza.DirectNetezzaHCatImportManualTest;
@@ -57,6 +58,7 @@ import org.apache.sqoop.manager.netezza.NetezzaExportManualTest;
 import org.apache.sqoop.manager.netezza.NetezzaImportManualTest;
 import org.apache.sqoop.manager.oracle.OraOopDataDrivenDBInputFormatConnectionCloseTest;
 import org.apache.sqoop.manager.oracle.OracleCallExportTest;
+import org.apache.sqoop.manager.oracle.OracleColumnEscapeImportTest;
 import org.apache.sqoop.manager.oracle.OracleIncrementalImportTest;
 import org.apache.sqoop.manager.oracle.OracleSplitterTest;
 import org.apache.sqoop.manager.sqlserver.SQLServerDatatypeExportDelimitedFileManualTest;
@@ -92,6 +94,7 @@ public final class ThirdPartyTests extends TestCase {
     suite.addTestSuite(JdbcMySQLExportTest.class);
     suite.addTestSuite(MySQLAuthTest.class);
     suite.addTestSuite(MySQLCompatTest.class);
+    suite.addTestSuite(MySqlColumnEscapeImportTest.class);
 
     // Oracle
     suite.addTestSuite(OracleExportTest.class);
@@ -100,6 +103,7 @@ public final class ThirdPartyTests extends TestCase {
     suite.addTestSuite(OracleIncrementalImportTest.class);
     suite.addTestSuite(OracleSplitterTest.class);
     suite.addTestSuite(OraOopDataDrivenDBInputFormatConnectionCloseTest.class);
+    suite.addTestSuite(OracleColumnEscapeImportTest.class);
 
     // SQL Server
     suite.addTestSuite(SQLServerDatatypeExportDelimitedFileManualTest.class);

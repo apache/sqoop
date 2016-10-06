@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
@@ -1118,7 +1119,7 @@ public class ClassWriter {
    * @return
    */
   private String serializeRawColName(String name) {
-    return name.replace("\"", "\\\"");
+    return StringEscapeUtils.escapeJava(name);
   }
 
   /**
