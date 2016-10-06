@@ -197,7 +197,7 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     try {
       con = dbc.getConnection();
       extTableThread = new NetezzaJDBCStatementRunner(Thread.currentThread(),
-        con, sqlStmt);
+        con, sqlStmt, nf);
     } catch (SQLException sqle) {
       cleanup = true;
       throw new IOException(sqle);
