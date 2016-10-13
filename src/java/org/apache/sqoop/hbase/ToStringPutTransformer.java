@@ -18,6 +18,15 @@
 
 package org.apache.sqoop.hbase;
 
+import com.cloudera.sqoop.hbase.PutTransformer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.mapreduce.ImportJobBase;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,13 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.util.StringUtils;
-
-import com.cloudera.sqoop.hbase.PutTransformer;
+import static org.apache.sqoop.hbase.HBasePutProcessor.ADD_ROW_KEY;
+import static org.apache.sqoop.hbase.HBasePutProcessor.ADD_ROW_KEY_DEFAULT;
+import static org.apache.sqoop.hbase.HBasePutProcessor.COL_FAMILY_KEY;
+import static org.apache.sqoop.hbase.HBasePutProcessor.ROW_KEY_COLUMN_KEY;
 
 /**
  * PutTransformer that calls toString on all non-null fields.
@@ -204,4 +210,14 @@ public class ToStringPutTransformer extends PutTransformer {
     return valString;
   }
 
+  @Override
+  public void init(Configuration conf) {
+    setColumnFamily(conf.get(COL_FAMILY_KEY, null));
+    setRowKeyColumn(conf.get(ROW_KEY_COLUMN_KEY, null));
+
+    this.bigDecimalFormatString = conf.getBoolean(ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+              ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+    this.addRowKey = conf.getBoolean(ADD_ROW_KEY, ADD_ROW_KEY_DEFAULT);
+    detectCompositeKey();
+  }
 }

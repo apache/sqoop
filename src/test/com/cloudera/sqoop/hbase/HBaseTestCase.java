@@ -88,7 +88,7 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
     if (includeHadoopFlags) {
       CommonArgs.addHadoopFlags(args);
       args.add("-D");
-      args.add("hbase.zookeeper.property.clientPort=21818");
+      args.add("hbase.zookeeper.property.clientPort=" + zookeeperPort);
     }
 
     if (null != queryStr) {
@@ -120,40 +120,33 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
   private String workDir = createTempDir().getAbsolutePath();
   private MiniZooKeeperCluster zookeeperCluster;
   private MiniHBaseCluster hbaseCluster;
+  private int zookeeperPort;
 
   @Override
   @Before
   public void setUp() {
     try {
+      String zookeeperDir = new File(workDir, "zk").getAbsolutePath();
+      zookeeperCluster = new MiniZooKeeperCluster();
+      zookeeperCluster.startup(new File(zookeeperDir));
+      zookeeperPort = zookeeperCluster.getClientPort();
+
       HBaseTestCase.recordTestBuildDataProperty();
       String hbaseDir = new File(workDir, "hbase").getAbsolutePath();
       String hbaseRoot = "file://" + hbaseDir;
       Configuration hbaseConf = HBaseConfiguration.create();
       hbaseConf.set(HConstants.HBASE_DIR, hbaseRoot);
       //Hbase 0.90 does not have HConstants.ZOOKEEPER_CLIENT_PORT
-      hbaseConf.setInt("hbase.zookeeper.property.clientPort", 21818);
+      hbaseConf.setInt("hbase.zookeeper.property.clientPort", zookeeperPort);
       hbaseConf.set(HConstants.ZOOKEEPER_QUORUM, "0.0.0.0");
       hbaseConf.setInt("hbase.master.info.port", -1);
       hbaseConf.setInt("hbase.zookeeper.property.maxClientCnxns", 500);
-      String zookeeperDir = new File(workDir, "zk").getAbsolutePath();
-      int zookeeperPort = 21818;
-      zookeeperCluster = new MiniZooKeeperCluster();
-      Method m;
-      Class<?> zkParam[] = {Integer.TYPE};
-      try {
-        m = MiniZooKeeperCluster.class.getDeclaredMethod("setDefaultClientPort",
-                zkParam);
-      } catch (NoSuchMethodException e) {
-        m = MiniZooKeeperCluster.class.getDeclaredMethod("setClientPort",
-                zkParam);
-      }
-      m.invoke(zookeeperCluster, new Object[]{new Integer(zookeeperPort)});
-      zookeeperCluster.startup(new File(zookeeperDir));
       hbaseCluster = new MiniHBaseCluster(hbaseConf, 1);
       HMaster master = hbaseCluster.getMaster();
       Object serverName = master.getServerName();
 
       String hostAndPort;
+      Method m;
       if (serverName instanceof String) {
         System.out.println("Server name is string, using HServerAddress.");
         m = HMaster.class.getDeclaredMethod("getMasterAddress",

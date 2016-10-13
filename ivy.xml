@@ -55,6 +55,8 @@ under the License.
       extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
     <conf name="hadoop210" visibility="private"
       extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
+    <conf name="hadoop260" visibility="private"
+      extends="common,runtime,avro,hbase${hbaseprofile},hcatalog${hcatprofile},accumulo" />
 
     <conf name="test" visibility="private" extends="common,runtime"/>
     <conf name="hadoop23test" visibility="private" extends="test,hadoop23" />
@@ -62,6 +64,7 @@ under the License.
     <conf name="hadoop100test" visibility="private" extends="test,hadoop100" />
     <conf name="hadoop200test" visibility="private" extends="test,hadoop200" />
     <conf name="hadoop210test" visibility="private" extends="test,hadoop210" />
+    <conf name="hadoop260test" visibility="private" extends="test,hadoop260" />
 
     <!-- We don't redistribute everything we depend on (e.g., Hadoop itself);
          anything which Hadoop itself also depends on, we do not ship.
@@ -104,6 +107,26 @@ under the License.
       conf="hadoop210->default"/>
     <dependency org="org.aspectj" name="aspectjrt" rev="${aspectj.version}"
       conf="hadoop210->default"/>
+
+    <!-- Dependencies for Hadoop 2.6.0 -->
+    <dependency org="org.apache.hadoop" name="hadoop-common"
+      rev="${hadoop.version}" conf="hadoop260->default">
+      <artifact name="hadoop-common" type="jar" />
+      <artifact name="hadoop-common" type="jar" m:classifier="tests"/>
+    </dependency>
+    <dependency org="org.apache.hadoop" name="hadoop-hdfs"
+      rev="${hadoop.version}" conf="hadoop260->default">
+      <artifact name="hadoop-hdfs" type="jar" />
+      <artifact name="hadoop-hdfs" type="jar" m:classifier="tests"/>
+    </dependency>
+    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-common"
+      rev="${hadoop.version}" conf="hadoop260->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core"
+      rev="${hadoop.version}" conf="hadoop260->default"/>
+    <dependency org="org.aspectj" name="aspectjtools" rev="${aspectj.version}"
+      conf="hadoop260->default"/>
+    <dependency org="org.aspectj" name="aspectjrt" rev="${aspectj.version}"
+      conf="hadoop260->default"/>
 
     <!-- Dependencies for Hadoop 2.0.0 -->
     <dependency org="org.apache.hadoop" name="hadoop-common"

@@ -185,6 +185,20 @@
         <property name="avrohadoopprofile" value="2" />
       </then>
     </elseif>
+
+    <!-- hadoopversion 260 is created for testing purposes only. Do not use it in production! -->
+    <elseif>
+      <equals arg1="${hadoopversion}" arg2="260" />
+      <then>
+        <property name="hadoop.version" value="2.6.0" />
+        <property name="hbase95.version" value="1.2.0" />
+        <property name="zookeeper.version" value="3.4.5" />
+        <property name="hadoop.version.full" value="2.6.0" />
+        <property name="hcatalog.version" value="0.13.0" />
+        <property name="hbasecompatprofile" value="2" />
+        <property name="avrohadoopprofile" value="2" />
+      </then>
+    </elseif>
     <else>
       <fail message="Unrecognized hadoopversion. Can only be 20, 23, 100, 200 or 210." />
     </else>

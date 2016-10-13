@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Put;
 
 /**
@@ -32,6 +34,8 @@ public abstract class PutTransformer {
 
   private String columnFamily;
   private String rowKeyColumn;
+
+  public abstract void init(Configuration conf);
 
   /**
    * @return the default column family to insert into.

@@ -18,11 +18,9 @@
 
 package org.apache.sqoop.hbase;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
+import com.cloudera.sqoop.lib.FieldMapProcessor;
+import com.cloudera.sqoop.lib.FieldMappable;
+import com.cloudera.sqoop.lib.ProcessingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
@@ -31,11 +29,11 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.sqoop.mapreduce.ImportJobBase;
 
-import com.cloudera.sqoop.lib.FieldMappable;
-import com.cloudera.sqoop.lib.FieldMapProcessor;
-import com.cloudera.sqoop.lib.ProcessingException;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * SqoopRecordProcessor that performs an HBase "put" operation
@@ -105,21 +103,7 @@ public class HBasePutProcessor implements Closeable, Configurable,
     if (null == putTransformer) {
       throw new RuntimeException("Could not instantiate PutTransformer.");
     }
-
-    this.putTransformer.setColumnFamily(conf.get(COL_FAMILY_KEY, null));
-    this.putTransformer.setRowKeyColumn(conf.get(ROW_KEY_COLUMN_KEY, null));
-
-    if (this.putTransformer instanceof ToStringPutTransformer) {
-      ToStringPutTransformer stringPutTransformer =
-          (ToStringPutTransformer) this.putTransformer;
-      stringPutTransformer.bigDecimalFormatString =
-          conf.getBoolean(ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
-              ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
-      stringPutTransformer.addRowKey =
-          conf.getBoolean(HBasePutProcessor.ADD_ROW_KEY,
-              HBasePutProcessor.ADD_ROW_KEY_DEFAULT);
-      stringPutTransformer.detectCompositeKey();
-    }
+    putTransformer.init(conf);
 
     this.tableName = conf.get(TABLE_NAME_KEY, null);
     try {

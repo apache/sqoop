@@ -66,8 +66,7 @@ public class HBaseBulkImportMapper
     if (null == putTransformer) {
       throw new RuntimeException("Could not instantiate PutTransformer.");
     }
-    this.putTransformer.setColumnFamily(conf.get(COL_FAMILY_KEY, null));
-    this.putTransformer.setRowKeyColumn(conf.get(ROW_KEY_COLUMN_KEY, null));
+    putTransformer.init(conf);
   }
   @Override
   public void map(LongWritable key, SqoopRecord val, Context context)

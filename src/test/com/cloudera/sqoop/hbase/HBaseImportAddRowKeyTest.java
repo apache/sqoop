@@ -18,68 +18,126 @@
 
 package com.cloudera.sqoop.hbase;
 
-import java.io.IOException;
-
+import junit.framework.JUnit4TestAdapter;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-/**
- *
- */
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.apache.commons.lang.StringUtils.join;
+
+@RunWith(Parameterized.class)
 public class HBaseImportAddRowKeyTest extends HBaseTestCase {
+
+  @Parameterized.Parameters(name = "bulkLoad = {0}")
+  public static Iterable<? extends Object> bulkLoadParameters() {
+    return Arrays.asList(new Boolean[] { false } , new Boolean[] { true } );
+  }
+
+  private String[] columnTypes;
+
+  private String[] columnValues;
+
+  private String hbaseTableName;
+
+  private String hbaseColumnFamily;
+
+  private String hbaseTmpDir;
+
+  private String hbaseBulkLoadDir;
+
+  private boolean bulkLoad;
+
+  public HBaseImportAddRowKeyTest(boolean bulkLoad) {
+    this.bulkLoad = bulkLoad;
+  }
+
+  @Before
+  public void setUp() {
+    super.setUp();
+    columnTypes = new String[] { "INT", "INT" };
+    columnValues = new String[] { "0", "1" };
+    hbaseTableName = "addRowKeyTable";
+    hbaseColumnFamily = "addRowKeyFamily";
+    hbaseTmpDir = TEMP_BASE_DIR + "hbaseTmpDir";
+    hbaseBulkLoadDir = TEMP_BASE_DIR + "hbaseBulkLoadDir";
+    createTableWithColTypes(columnTypes, columnValues);
+  }
 
   @Test
   public void testAddRowKey() throws IOException {
-    String[] types = { "INT", "INT" };
-    String[] vals = { "0", "1" };
-    createTableWithColTypes(types, vals);
-
-    String[] otherArg = getArgv(true, "addRowKeyT", "addRowKeyF", true, null);
-    String[] argv = new String[otherArg.length + 2];
-    argv[0] = "-D";
-    argv[1] = "sqoop.hbase.add.row.key=true";
-    System.arraycopy(otherArg, 0, argv, 2, otherArg.length);
+    String[] argv = getImportArguments(true, hbaseTableName, hbaseColumnFamily);
 
     runImport(argv);
 
     // Row key should have been added
-    verifyHBaseCell("addRowKeyT", "0", "addRowKeyF", getColName(0), "0");
-    verifyHBaseCell("addRowKeyT", "0", "addRowKeyF", getColName(1), "1");
+    verifyHBaseCell(hbaseTableName, columnValues[0], hbaseColumnFamily, getColName(0), columnValues[0]);
+    verifyHBaseCell(hbaseTableName, columnValues[0], hbaseColumnFamily, getColName(1), columnValues[1]);
   }
 
   @Test
   public void testAddRowKeyDefault() throws IOException {
-    String[] types = { "INT", "INT" };
-    String[] vals = { "0", "1" };
-    createTableWithColTypes(types, vals);
-
-    String[] argv = getArgv(true, "addRowKeyDfT", "addRowKeyDfF", true, null);
+    String[] argv = getImportArguments(false, hbaseTableName, hbaseColumnFamily);
 
     runImport(argv);
 
     // Row key should not be added by default
-    verifyHBaseCell("addRowKeyDfT", "0", "addRowKeyDfF", getColName(0), null);
-    verifyHBaseCell("addRowKeyDfT", "0", "addRowKeyDfF", getColName(1), "1");
+    verifyHBaseCell(hbaseTableName, columnValues[0], hbaseColumnFamily, getColName(0), null);
+    verifyHBaseCell(hbaseTableName, columnValues[0], hbaseColumnFamily, getColName(1), columnValues[1]);
   }
 
   @Test
   public void testAddCompositeKey() throws IOException {
-    String[] types = { "INT", "INT" };
-    String[] vals = { "0", "1" };
-    createTableWithColTypes(types, vals);
+    String rowKey = getColName(0)+","+getColName(1);
 
-    String[] otherArg = getArgv(true, "addRowKeyT", "addRowKeyF", true, null);
-    String[] argv = new String[otherArg.length + 4];
-    argv[0]="-D";
-    argv[1]="sqoop.hbase.add.row.key=true";
-    System.arraycopy(otherArg, 0, argv, 2, otherArg.length);
-    argv[argv.length - 2] = "--hbase-row-key";
-    argv[argv.length - 1] = getColName(0)+","+getColName(1);
+    String[] argv = getImportArguments(true, hbaseTableName, hbaseColumnFamily, rowKey);
 
     runImport(argv);
 
     // Row key should have been added
-    verifyHBaseCell("addRowKeyT", "0_1", "addRowKeyF", getColName(0), "0");
-    verifyHBaseCell("addRowKeyT", "0_1", "addRowKeyF", getColName(1), "1");
+    verifyHBaseCell(hbaseTableName, join(columnValues, '_'), hbaseColumnFamily, getColName(0), columnValues[0]);
+    verifyHBaseCell(hbaseTableName, join(columnValues, '_'), hbaseColumnFamily, getColName(1), columnValues[1]);
+  }
+
+  private String[] getImportArguments(boolean addRowKey, String hbaseTableName, String hbaseColumnFamily) {
+    return getImportArguments(addRowKey, hbaseTableName, hbaseColumnFamily, null);
+  }
+
+  private String[] getImportArguments(boolean addRowKey, String hbaseTableName, String hbaseColumnFamily, String rowKey) {
+    List<String> result = new ArrayList<>();
+
+    if (addRowKey) {
+      result.add("-D");
+      result.add("sqoop.hbase.add.row.key=true");
+    }
+    result.add("-D");
+    result.add("hbase.fs.tmp.dir=" + hbaseTmpDir);
+
+    result.addAll(asList(getArgv(true, hbaseTableName, hbaseColumnFamily, true, null)));
+
+    if(bulkLoad) {
+      result.add("--target-dir");
+      result.add(hbaseBulkLoadDir);
+      result.add("--hbase-bulkload");
+    }
+
+    if (!StringUtils.isBlank(rowKey)) {
+      result.add("--hbase-row-key");
+      result.add(rowKey);
+    }
+
+    return result.toArray(new String[result.size()]);
+  }
+
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(HBaseImportAddRowKeyTest.class);
   }
 
 }
