@@ -238,14 +238,15 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V> extends
     void configurePreparedStatement(PreparedStatement statement,
         List<SqoopRecord> userRecords) throws SQLException {
 
-      Map<String, Object> fieldMap;
       try {
-        for (SqoopRecord record : userRecords) {
-          fieldMap = record.getFieldMap();
-
-          configurePreparedStatementColumns(statement, fieldMap);
+        for (SqoopRecord sqoopRecord : userRecords) {
+          int fieldCount = sqoopRecord.write(statement, 0);
+          if (this.tableHasMapperRowNumberColumn) {
+            statement.setLong(fieldCount + 1, this.mapperRowNumber);
+            this.mapperRowNumber++;
+          }
+          statement.addBatch();
         }
-
       } catch (Exception ex) {
         if (ex instanceof SQLException) {
           throw (SQLException) ex;

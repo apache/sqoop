@@ -23,6 +23,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -220,9 +221,25 @@ public final class OracleData {
 
   public static void createTable(Connection conn, String fileName,
       int parallelDegree, int rowsPerSlave) throws Exception {
+    createTable(conn, fileName, parallelDegree, rowsPerSlave, false);
+  }
+
+  public static void createTable(Connection conn, String fileName,
+      int parallelDegree, int rowsPerSlave,
+      boolean dropTableIfExists) throws Exception {
     URL file = classLoader.getResource("oraoop/" + fileName);
     OracleTableDefinition tableDefinition = new OracleTableDefinition(file);
+    if (dropTableIfExists) {
+      dropTableIfExists(conn, tableDefinition.getTableName());
+    }
     createTable(conn, tableDefinition, parallelDegree, rowsPerSlave);
+  }
+
+  private static void dropTableIfExists(Connection conn, String tableName) throws Exception {
+    try (Statement stmt = conn.createStatement()) {
+      stmt.execute("BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName
+          + "'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF; END;");
+    }
   }
 
 }

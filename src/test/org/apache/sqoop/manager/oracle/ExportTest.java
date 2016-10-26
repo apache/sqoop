@@ -47,7 +47,7 @@ public class ExportTest extends OraOopTestCase {
   @Test
   public void testProductExport() throws Exception {
     int retCode =
-        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP");
+        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP", false);
     Assert.assertEquals("Return code should be 0", 0, retCode);
   }
 
@@ -55,7 +55,7 @@ public class ExportTest extends OraOopTestCase {
   public void testProductExportMixedCaseTableName() throws Exception {
     int retCode =
         TEST_CASE.runExportFromTemplateTable("TST_PRODUCT",
-            "\"\"T5+_Pr#duct_Exp\"\"");
+            "\"\"T5+_Pr#duct_Exp\"\"", false);
     Assert.assertEquals("Return code should be 0", 0, retCode);
   }
 

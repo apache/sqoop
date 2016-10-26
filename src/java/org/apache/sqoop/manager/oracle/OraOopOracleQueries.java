@@ -969,7 +969,7 @@ public final class OraOopOracleQueries {
 
     Statement statement = connection.createStatement();
     String sql =
-        String.format("ALTER TABLE %s EXCHANGE SUBPARTITION %s WITH TABLE %s",
+        String.format("ALTER TABLE %s EXCHANGE SUBPARTITION %s WITH TABLE %s WITHOUT VALIDATION",
             table.toString(), subPartitionName, subPartitionTable.toString());
     statement.execute(sql);
     statement.close();

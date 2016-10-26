@@ -896,8 +896,12 @@ public class ClassWriter {
         continue;
       }
 
-      sb.append("    JdbcWritableBridge." + setterMethod + "(" + col + ", "
-          + (i + 1) + " + __off, " + sqlType + ", __dbStmt);\n");
+      if ("writeString".equals(setterMethod) && sqlType == 2002) {
+        sb.append("__dbStmt.setString(" + (i + 1) + ", " + col + ");\n");
+      } else {
+        sb.append("    JdbcWritableBridge." + setterMethod + "(" + col + ", " + (i + 1) + " + __off, " + sqlType
+            + ", __dbStmt);\n");
+      }
     }
 
     if (wrapInMethod) {

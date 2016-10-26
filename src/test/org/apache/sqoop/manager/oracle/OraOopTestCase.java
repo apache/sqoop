@@ -24,12 +24,15 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -37,12 +40,13 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.WriterAppender;
+import org.apache.sqoop.manager.oracle.util.HadoopFiles;
+import org.apache.sqoop.manager.oracle.util.OracleData;
 
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.manager.OracleUtils;
 
-import org.apache.sqoop.manager.oracle.util.HadoopFiles;
-import org.apache.sqoop.manager.oracle.util.OracleData;
+import junit.framework.Assert;
 
 /**
  * Base test case for OraOop to handle common functions.
@@ -95,6 +99,10 @@ public abstract class OraOopTestCase {
     return sqoopGenClassName;
   }
 
+  protected void setSqoopGenClassName(String sqoopGenClassName) {
+    this.sqoopGenClassName = sqoopGenClassName;
+  }
+
   protected Connection getTestEnvConnection() throws SQLException {
     if (this.conn == null) {
       this.conn =
@@ -116,7 +124,7 @@ public abstract class OraOopTestCase {
     this.conn = null;
   }
 
-  protected void createTable(String fileName) {
+  protected void createTable(String fileName, boolean dropTableIfExists) {
     try {
       Connection localConn = getTestEnvConnection();
       int parallelProcesses = OracleData.getParallelProcesses(localConn);
@@ -125,7 +133,7 @@ public abstract class OraOopTestCase {
       try {
         long startTime = System.currentTimeMillis();
         OracleData.createTable(localConn, fileName, parallelProcesses,
-            rowsPerSlave);
+            rowsPerSlave, dropTableIfExists);
         LOG.debug("Created and loaded table in "
             + ((System.currentTimeMillis() - startTime) / 1000) + " seconds.");
       } catch (SQLException e) {
@@ -137,6 +145,19 @@ public abstract class OraOopTestCase {
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  protected void createTable(String fileName) {
+    createTable(fileName, false);
+  }
+
+  protected void createTableFromSQL(String sql, String tableName) throws SQLException {
+    Connection conn = getTestEnvConnection();
+    try (Statement stmt = conn.createStatement()) {
+      stmt.execute("BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName
+          + "'; EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF; END;");
+      stmt.execute(sql);
     }
   }
 
@@ -254,7 +275,17 @@ public abstract class OraOopTestCase {
   }
 
   protected int runExportFromTemplateTable(String templateTableName,
-      String tableName) {
+      String tableName, boolean isPartitoned) {
+    Map<String, String> stringConfigEntries = new HashMap<String, String>();
+    stringConfigEntries.put("oraoop.template.table", templateTableName);
+    Map<String, Boolean> booleanConfigEntries = new HashMap<String, Boolean>();
+    booleanConfigEntries.put("oraoop.partitioned", isPartitoned);
+
+    return runExport(tableName, new ArrayList<String>(), stringConfigEntries, booleanConfigEntries);
+  }
+
+  protected int runExport(String tableName, List<String> additionalArgs, Map<String, String> stringConfigEntries,
+      Map<String, Boolean> booleanConfigEntries) {
     List<String> sqoopArgs = new ArrayList<String>();
 
     sqoopArgs.add("export");
@@ -285,15 +316,22 @@ public abstract class OraOopTestCase {
     sqoopArgs.add("--outdir");
     sqoopArgs.add(this.sqoopGenSrcDirectory);
 
+    sqoopArgs.addAll(additionalArgs);
+
     Configuration sqoopConf = getSqoopConf();
 
-    sqoopConf.set("oraoop.template.table", templateTableName);
     sqoopConf.setBoolean("oraoop.drop.table", true);
     sqoopConf.setBoolean("oraoop.nologging", true);
-    sqoopConf.setBoolean("oraoop.partitioned", false);
 
-    return Sqoop.runTool(sqoopArgs.toArray(new String[sqoopArgs.size()]),
-        sqoopConf);
+    for (Entry<String, String> entry : stringConfigEntries.entrySet()) {
+      sqoopConf.set(entry.getKey(), entry.getValue());
+    }
+
+    for (Entry<String, Boolean> entry : booleanConfigEntries.entrySet()) {
+      sqoopConf.setBoolean(entry.getKey(), entry.getValue());
+    }
+
+    return Sqoop.runTool(sqoopArgs.toArray(new String[sqoopArgs.size()]), sqoopConf);
   }
 
   protected int runCompareTables(Connection connection, String table1,
