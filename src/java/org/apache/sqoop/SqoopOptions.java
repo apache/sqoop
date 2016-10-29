@@ -183,6 +183,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hcatalog.storage.stanza")
   private String hCatStorageStanza;
   private String hCatHome; // not serialized to metastore.
+  @StoredAsProperty("skip.dist.cache")
   private boolean skipDistCache;
   @StoredAsProperty("hcatalog.partition.keys")
     private String hCatalogPartitionKeys;
