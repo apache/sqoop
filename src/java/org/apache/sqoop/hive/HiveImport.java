@@ -115,8 +115,8 @@ public class HiveImport {
    * from where we put it, before running Hive LOAD DATA INPATH.
    */
   private void removeTempLogs(Path tablePath) throws IOException {
-    FileSystem fs = FileSystem.get(configuration);
     Path logsPath = new Path(tablePath, "_logs");
+    FileSystem fs = logsPath.getFileSystem(configuration);
     if (fs.exists(logsPath)) {
       LOG.info("Removing temporary files from import process: " + logsPath);
       if (!fs.delete(logsPath, true)) {
