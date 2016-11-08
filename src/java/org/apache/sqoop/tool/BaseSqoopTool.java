@@ -1689,6 +1689,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           BaseSqoopTool.HBASE_TABLE_ARG);
       throw new InvalidOptionsException(validationMessage);
     }
+
+    if (options.getHBaseTable() != null && options.getFileLayout() != SqoopOptions.FileLayout.TextFile) {
+      String validationMessage = String.format("Can't run HBase import with file layout: %s", options.getFileLayout());
+      throw new InvalidOptionsException(validationMessage);
+    }
   }
 
   /**
