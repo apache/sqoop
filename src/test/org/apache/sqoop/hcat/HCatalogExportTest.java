@@ -102,8 +102,8 @@ public class HCatalogExportTest extends ExportJobTestCase {
     Object expectedMin = generator.getDBValue(minId);
     Object expectedMax = generator.getDBValue(maxId);
 
-    utils.assertSqlColValForRowId(conn, table, minId, colName, expectedMin);
-    utils.assertSqlColValForRowId(conn, table, maxId, colName, expectedMax);
+    utils.assertSqlColValForRowId(conn, table, minId, colName, true, expectedMin);
+    utils.assertSqlColValForRowId(conn, table, maxId, colName, true, expectedMax);
   }
 
   protected void runHCatExport(List<String> addlArgsArray,
@@ -111,7 +111,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     ColumnGenerator[] cols) throws Exception {
     utils.createHCatTable(CreateMode.CREATE_AND_LOAD,
       totalRecords, table, cols);
-    utils.createSqlTable(getConnection(), true, totalRecords, table, cols);
+    utils.createSqlTable(getConnection(), true, totalRecords, table, true, cols);
     Map<String, String> addlArgsMap = utils.getAddlTestArgs();
     addlArgsArray.add("--verbose");
     addlArgsArray.add("-m");
@@ -138,7 +138,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runExport(exportArgs);
     verifyExport(totalRecords);
     for (int i = 0; i < cols.length; i++) {
-      assertColMinAndMax(HCatalogTestUtils.forIdx(i), cols[i]);
+      assertColMinAndMax(cols[i].getName(), cols[i]);
     }
   }
 
@@ -165,6 +165,23 @@ public class HCatalogExportTest extends ExportJobTestCase {
     List<String> addlArgsArray = new ArrayList<String>();
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
+
+  public void testExportWithColumnNameValue() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    String valueColumnThatHadIssuesWithClassWriter = "value";
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+        HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+            "boolean", Types.BOOLEAN, HCatFieldSchema.Type.BOOLEAN, 0, 0,
+            Boolean.TRUE, Boolean.TRUE, KeyType.NOT_A_KEY),
+        HCatalogTestUtils.colGenerator(valueColumnThatHadIssuesWithClassWriter,
+            "int", Types.INTEGER, HCatFieldSchema.Type.INT, 5, 5, 10,
+            10, KeyType.NOT_A_KEY)
+    };
+    List<String> addlArgsArray = new ArrayList<String>();
+    runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
+  }
+
 
   public void testFloatTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
@@ -303,7 +320,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     };
     List<String> addlArgsArray = new ArrayList<String>();
     addlArgsArray.add("--columns");
-    addlArgsArray.add("ID,MSG");
+    addlArgsArray.add("id,msg");
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
 
   }

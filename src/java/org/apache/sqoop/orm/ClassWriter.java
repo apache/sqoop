@@ -1099,7 +1099,7 @@ public class ClassWriter {
           sb.append("    setters.put(\"" + serializeRawColName(rawColName) + "\", new FieldSetterCommand() {" + sep);
           sb.append("      @Override" + sep);
           sb.append("      public void setField(Object value) {" + sep);
-          sb.append("        " + colName + " = (" + javaType + ")value;" + sep);
+          sb.append("        " +typeName+".this." + colName + " = (" + javaType + ")value;" + sep);
           sb.append("      }" + sep);
           sb.append("    });" + sep);
         }
