@@ -33,7 +33,7 @@ public class VersionTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   @Override
   /** {@inheritDoc} */
   public int run(SqoopOptions options) {
-    System.out.print(new org.apache.sqoop.SqoopVersion().toString());
+    //System.out.print(new org.apache.sqoop.SqoopVersion().toString());
     return 0;
   }
 

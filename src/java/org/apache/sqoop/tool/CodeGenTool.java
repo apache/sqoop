@@ -18,16 +18,6 @@
 
 package org.apache.sqoop.tool;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.util.StringUtils;
-
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
@@ -36,6 +26,15 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.orm.ClassWriter;
 import com.cloudera.sqoop.orm.CompilationManager;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.util.StringUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tool that generates code from a database schema.
@@ -92,13 +91,15 @@ public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     LOG.info("Beginning code generation");
 
     if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-      String className = options.getClassName() != null ?
-          options.getClassName() : tableName;
-      if (className.equalsIgnoreCase(tableName)) {
-        className = "codegen_" + className;
-        options.setClassName(className);
-        LOG.info("Will generate java class as " + options.getClassName());
-      }
+      String className = "codegen" + System.currentTimeMillis();
+      options.setClassName(className);
+//      String className = options.getClassName() != null ?
+//          options.getClassName() : options.getTableName();
+//      if (className.equalsIgnoreCase(options.getTableName())) {
+//        className = "codegen_" + className;
+//        options.setClassName(className);
+//        LOG.info("Will generate java class as " + options.getClassName());
+//      }
     }
 
     CompilationManager compileMgr = new CompilationManager(options);
