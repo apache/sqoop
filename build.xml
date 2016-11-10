@@ -871,12 +871,19 @@
     <antcall target="checkfailure" inheritRefs="true" />
   </target>
 
+  <property name="remoteDebug" value="false"/>
+
   <target name="test-core">
     <!-- inner target only intended to be used via antcall.
          Does not define its dependencies. Should be invoked through the
          'test' target. Does not fail the build if tests fail.
     -->
-
+    <!-- use ant test -DremoteDebug=true to enable remote debugging -->
+    <condition property="remoteDebugJvmArgs"
+               value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=2601"
+               else="-ea">
+      <istrue value="${remoteDebug}"/>
+    </condition>
     <delete dir="${test.log.dir}"/>
     <mkdir dir="${test.log.dir}"/>
     <delete dir="${build.test}/data"/>
@@ -899,10 +906,7 @@
       <!-- enable asserts in tests -->
       <jvmarg value="-ea" />
 
-      <!-- uncomment this if you want to attach a debugger -->
-      <!--
-      <jvmarg line="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=2601" />
-      -->
+      <jvmarg value="${remoteDebugJvmArgs}"/>
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>
       <sysproperty key="build.test" value="${build.test}"/>
