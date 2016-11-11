@@ -71,7 +71,7 @@ public class OracleUpsertOutputFormat<K extends SqoopRecord, V>
       // lookup table for update columns
       Set<String> updateKeyLookup = new LinkedHashSet<String>();
       for (String updateKey : updateCols) {
-        updateKeyLookup.add(updateKey);
+        updateKeyLookup.add('"' + updateKey + '"');
       }
 
       StringBuilder sb = new StringBuilder();
@@ -85,7 +85,7 @@ public class OracleUpsertOutputFormat<K extends SqoopRecord, V>
         } else {
           sb.append(" AND ");
         }
-        sb.append(updateCols[i]).append(" = ?");
+        sb.append('"' + updateCols[i] + '"').append(" = ?");
       }
       sb.append(" )");
 
