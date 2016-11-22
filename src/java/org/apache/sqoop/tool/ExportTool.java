@@ -99,15 +99,14 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     try {
       exportTable(options, options.getTableName());
     } catch (IOException ioe) {
-      LOG.error("Encountered IOException running export job: "
-          + ioe.toString());
+      LOG.error("Encountered IOException running export job: ", ioe);
       if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
         throw new RuntimeException(ioe);
       } else {
         return 1;
       }
     } catch (ExportException ee) {
-      LOG.error("Error during export: " + ee.toString());
+      LOG.error("Error during export: ", ee);
       if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
         throw new RuntimeException(ee);
       } else {
