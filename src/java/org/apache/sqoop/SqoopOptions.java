@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -339,6 +340,8 @@ public class SqoopOptions implements Cloneable {
   // Use single mapper for non-primary key tables without
   // explicit split by cols
   @StoredAsProperty("reset.onemapper") private boolean autoResetToOneMapper;
+
+  @StoredAsProperty("sqlconnection.metadata.transaction.isolation.level") private int metadataTransactionIsolationLevel;
 
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved job, these will
@@ -1033,9 +1036,12 @@ public class SqoopOptions implements Cloneable {
     // Relaxed isolation will not enabled by default which is the behavior
     // of sqoop until now.
     this.relaxedIsolation = false;
-    
+
     // set default mainframe data set type to partitioned data set
     this.mainframeInputDatasetType = MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED;
+
+    // set default transaction isolation level to TRANSACTION_READ_UNCOMMITED
+    this.metadataTransactionIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
   }
 
   /**
@@ -2659,11 +2665,19 @@ public class SqoopOptions implements Cloneable {
     this.customToolOptions = customToolOptions;
   }
 
-    public String getToolName() {
-        return this.toolName;
-    }
+  public String getToolName() {
+    return this.toolName;
+  }
 
-    public void setToolName(String toolName) {
-        this.toolName = toolName;
-    }
+  public void setToolName(String toolName) {
+    this.toolName = toolName;
+  }
+
+  public int getMetadataTransactionIsolationLevel() {
+    return this.metadataTransactionIsolationLevel;
+  }
+
+  public void setMetadataTransactionIsolationLevel(int transactionIsolationLevel) {
+    this.metadataTransactionIsolationLevel = transactionIsolationLevel;
+  }
 }

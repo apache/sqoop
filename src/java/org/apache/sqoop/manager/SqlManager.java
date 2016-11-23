@@ -918,7 +918,7 @@ public abstract class SqlManager
    * (queries executed by the ConnManager itself).
    */
   protected int getMetadataIsolationLevel() {
-    return Connection.TRANSACTION_READ_COMMITTED;
+    return options.getMetadataTransactionIsolationLevel();
   }
 
   /**

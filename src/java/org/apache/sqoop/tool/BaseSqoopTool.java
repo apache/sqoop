@@ -58,6 +58,8 @@ import com.cloudera.sqoop.metastore.JobData;
  */
 public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
+  public static final String METADATA_TRANSACTION_ISOLATION_LEVEL = "metadata-transaction-isolation-level";
+
   public static final Log LOG = LogFactory.getLog(
       BaseSqoopTool.class.getName());
 
@@ -477,6 +479,13 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withLongOpt(TEMP_ROOTDIR_ARG)
         .hasArg()
         .withArgName("rootdir")
+        .create());
+    commonOpts.addOption(OptionBuilder
+        .withDescription("Defines the transaction isolation level for metadata queries. "
+            + "For more details check java.sql.Connection javadoc or the JDBC specificaiton")
+        .withLongOpt(METADATA_TRANSACTION_ISOLATION_LEVEL)
+        .hasArg()
+        .withArgName("isolationlevel")
         .create());
     // relax isolation requirements
     commonOpts.addOption(OptionBuilder
@@ -1028,6 +1037,17 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
     if (in.hasOption(RELAXED_ISOLATION)) {
       out.setRelaxedIsolation(true);
+    }
+
+    if (in.hasOption(METADATA_TRANSACTION_ISOLATION_LEVEL)) {
+      String transactionLevel = in.getOptionValue(METADATA_TRANSACTION_ISOLATION_LEVEL);
+      try {
+        out.setMetadataTransactionIsolationLevel(JDBCTransactionLevels.valueOf(transactionLevel).getTransactionIsolationLevelValue());
+      } catch (IllegalArgumentException e) {
+        throw new RuntimeException("Only transaction isolation levels defined by "
+            + "java.sql.Connection class are supported. Check the "
+            + "java.sql.Connection javadocs for more details", e);
+      }
     }
   }
 
