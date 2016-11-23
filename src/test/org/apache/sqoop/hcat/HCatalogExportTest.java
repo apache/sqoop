@@ -32,8 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.cloudera.sqoop.SqoopOptions;
+import junit.framework.JUnit4TestAdapter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.common.type.HiveChar;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.common.type.HiveVarchar;
@@ -46,14 +49,24 @@ import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.junit.Before;
 
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test that we can export HCatalog tables into databases.
  */
+@RunWith(JUnit4.class)
 public class HCatalogExportTest extends ExportJobTestCase {
   private static final Log LOG =
     LogFactory.getLog(HCatalogExportTest.class);
   private HCatalogTestUtils utils = HCatalogTestUtils.instance();
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
+
   @Before
   @Override
   public void setUp() {
@@ -142,6 +155,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     }
   }
 
+  @Test
   public void testIntTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -166,6 +180,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testExportWithColumnNameValue() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -182,7 +197,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
-
+  @Test
   public void testFloatTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -201,6 +216,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testNumberTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -220,6 +236,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testDateTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -248,6 +265,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testDateTypesToBigInt() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     long offset = TimeZone.getDefault().getRawOffset();
@@ -270,6 +288,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testStringTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -293,7 +312,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
-
+  @Test
   public void testBinaryTypes() throws Exception {
     ByteBuffer bb = ByteBuffer.wrap(new byte[] { 0, 1, 2 });
     final int TOTAL_RECORDS = 1 * 10;
@@ -310,6 +329,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testColumnProjection() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -324,6 +344,8 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
 
   }
+
+  @Test
   public void testStaticPartitioning() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -341,6 +363,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testStaticPartitioningWithMultipleKeys() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -361,6 +384,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testDynamicPartitioning() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -374,6 +398,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testStaticAndDynamicPartitioning() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -394,6 +419,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testMultipleStaticKeysAndDynamicPartitioning() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -420,6 +446,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
   /**
    * Test other file formats.
    */
+  @Test
   public void testSequenceFile() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -440,6 +467,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testTextFile() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -460,6 +488,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testPublishExportJobData() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -479,4 +508,63 @@ public class HCatalogExportTest extends ExportJobTestCase {
     assert (DummyDataPublisher.storeType.equals("hsqldb"));
     assert (DummyDataPublisher.operation.equals("export"));
   }
+
+  @Test
+  public void testWeCanTellIfHCatViewOrTable() throws Exception {
+    String tableName = getTableName().toUpperCase();
+    String viewName = "view";
+    SqoopHCatUtilities utils = SqoopHCatUtilities.instance();
+    createHCatTableAndView(tableName, viewName, utils);
+
+    Configuration conf = getConf();
+    conf.set("oraoop.disabled", "true");
+    SqoopOptions opts = getSqoopOptions(conf);
+    opts.setHCatTableName(tableName);
+
+    assertFalse(utils.isHCatView(opts));
+    opts.setHCatTableName(viewName);
+    assertTrue(utils.isHCatView(opts));
+  }
+
+  @Test
+  public void testExportHCatViewThrowsException() throws Exception {
+    String tableName = getTableName().toUpperCase();
+    String viewName = "view";
+    SqoopHCatUtilities utils = SqoopHCatUtilities.instance();
+    createHCatTableAndView(tableName, viewName, utils);
+
+    ArrayList<String> args = new ArrayList<String>();
+    args.add("--table");
+    args.add(getTableName());
+    args.add("--hcatalog-table");
+    args.add(viewName);
+    args.add("--connect");
+    args.add(getConnectString());
+
+    args.toArray(new String[0]);
+
+    SqoopHCatUtilities.instance().setConfigured(false);
+    exception.expect(java.io.IOException.class);
+    runExport(args.toArray(new String[0]));
+  }
+
+  private void createHCatTableAndView(String tableName, String viewName, SqoopHCatUtilities utils) throws Exception {
+    HCatalogTestUtils testUtils = HCatalogTestUtils.instance();
+    ColumnGenerator[] cols = new ColumnGenerator[]{
+        HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+            "boolean", Types.BOOLEAN, HCatFieldSchema.Type.BOOLEAN, 0, 0,
+            Boolean.TRUE, Boolean.TRUE, KeyType.NOT_A_KEY),
+        HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+            "int", Types.INTEGER, HCatFieldSchema.Type.INT, 5, 5, 10,
+            10, KeyType.NOT_A_KEY)
+    };
+    testUtils.createHCatTable(CreateMode.CREATE_AND_LOAD, 10, tableName, cols);
+    String createViewCmd = "drop view " + viewName + "; create view " + viewName + " as select * from " + tableName;
+    utils.launchHCatCli(createViewCmd);
+  }
+
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(HCatalogImportTest.class);
+  }
+
 }

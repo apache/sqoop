@@ -33,6 +33,7 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.password.CredentialProviderHelper;
@@ -1560,6 +1561,9 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       }
       return;
     }
+    if(isSet(options.getHCatTableName()) && SqoopHCatUtilities.isHCatView(options)){
+      throw  new InvalidOptionsException("Reads/Writes from and to Views are not supported by HCatalog");
+    }
 
     if (options.explicitInputDelims()) {
       LOG.warn("Input field/record delimiter options are not "
@@ -1670,6 +1674,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
               " and --drop-and-create-hcatalog-table are mutually exclusive." +
               " Use any one of them");
     }
+  }
+
+  private boolean isSet(String option) {
+    return org.apache.commons.lang.StringUtils.isNotBlank(option);
   }
 
   protected void validateHBaseOptions(SqoopOptions options)

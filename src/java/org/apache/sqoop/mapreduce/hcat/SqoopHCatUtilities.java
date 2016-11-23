@@ -40,6 +40,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
+import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hadoop.hive.shims.HadoopShims;
 import org.apache.hadoop.hive.shims.HadoopShims.HCatHadoopShims;
 import org.apache.hadoop.hive.shims.ShimLoader;
@@ -56,6 +59,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.util.Shell;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hive.hcatalog.common.HCatConstants;
+import org.apache.hive.hcatalog.common.HCatUtil;
 import org.apache.hive.hcatalog.data.DefaultHCatRecord;
 import org.apache.hive.hcatalog.data.schema.HCatFieldSchema;
 import org.apache.hive.hcatalog.data.schema.HCatSchema;
@@ -66,7 +70,6 @@ import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.manager.ConnManager;
-import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.util.Executor;
 import org.apache.sqoop.util.LoggingAsyncSink;
 import org.apache.sqoop.util.SubprocessSecurityManager;
@@ -157,6 +160,43 @@ public final class SqoopHCatUtilities {
     DefaultHCatRecord.class;
 
   private static boolean testMode = false;
+
+  public static boolean isHCatView(final SqoopOptions opts)  {
+
+    String hCatDatabaseName = getHCatDbNameFromOptions(opts);
+
+    String hCatTableName = getHCatTableNameFromOptions(opts);
+
+    Configuration conf = opts.getConf();
+    HiveConf hiveConf;
+    try {
+      if (conf != null) {
+        hiveConf = HCatUtil.getHiveConf(conf);
+      } else {
+        hiveConf = new HiveConf(HCatInputFormat.class);
+      }
+      HiveMetaStoreClient client = HCatUtil.getHiveClient(hiveConf);
+      Table table = HCatUtil.getTable(client, hCatDatabaseName, hCatTableName);
+      return table.isView();
+    }
+    catch(Exception e){
+      LOG.warn("We were not able to determine if "+hCatDatabaseName+ ":"+hCatTableName+ "is view or table.");
+      LOG.info("isHCatView threw an exception:", e);
+      return false;
+    }
+  }
+
+  private static String getHCatTableNameFromOptions(SqoopOptions opts) {
+    String optHCTabName = opts.getHCatTableName();
+    return optHCTabName.toLowerCase();
+  }
+
+  private static String getHCatDbNameFromOptions(SqoopOptions opts) {
+    String hCatDatabaseName = opts.getHCatDatabaseName() != null ? opts
+        .getHCatDatabaseName() : DEFHCATDB;
+    hCatDatabaseName = hCatDatabaseName.toLowerCase();
+    return hCatDatabaseName;
+  }
 
   static class IntArrayWritable extends ArrayWritable {
     public IntArrayWritable() {
@@ -278,12 +318,10 @@ public final class SqoopHCatUtilities {
     dbTableName = dbTable;
     configuration = config;
     hCatJob = job;
-    hCatDatabaseName = options.getHCatDatabaseName() != null ? options
-      .getHCatDatabaseName() : DEFHCATDB;
-    hCatDatabaseName = hCatDatabaseName.toLowerCase();
+    hCatDatabaseName = getHCatDbNameFromOptions(opts);
 
     String optHCTabName = options.getHCatTableName();
-    hCatTableName = optHCTabName.toLowerCase();
+    hCatTableName = getHCatTableNameFromOptions(opts);
 
     if (!hCatTableName.equals(optHCTabName)) {
       LOG.warn("Provided HCatalog table name " + optHCTabName

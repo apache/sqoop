@@ -177,29 +177,33 @@ public final class HCatalogTestUtils {
    * memory list.
    */
   public void createHCatTableUsingSchema(String dbName,
-    String tableName, List<HCatFieldSchema> tableCols,
-    List<HCatFieldSchema> partKeys)
-    throws Exception {
+                                         String tableName, List<HCatFieldSchema> tableCols,
+                                         List<HCatFieldSchema> partKeys)
+      throws Exception {
 
     String databaseName = dbName == null
-      ? SqoopHCatUtilities.DEFHCATDB : dbName;
+        ? SqoopHCatUtilities.DEFHCATDB : dbName;
+    dropHCatTableIfExists(tableName, databaseName);
+    LOG.info("Successfully dropped HCatalog table if it existed previously " + databaseName
+        + '.' + tableName);
+    String createCmd = getHCatCreateTableCmd(databaseName, tableName,
+        tableCols, partKeys);
+    utils.launchHCatCli(createCmd);
+    LOG.info("Created HCatalog table " + dbName + "." + tableName);
+  }
+
+  public void dropHCatTableIfExists(String tableName, String databaseName) {
     LOG.info("Dropping HCatalog table if it exists " + databaseName
-      + '.' + tableName);
+        + '.' + tableName);
     String dropCmd = getHCatDropTableCmd(databaseName, tableName);
 
     try {
       utils.launchHCatCli(dropCmd);
     } catch (Exception e) {
       LOG.debug("Drop hcatalog table exception : " + e);
-      LOG.info("Unable to drop table." + dbName + "."
-        + tableName + ".   Assuming it did not exist");
+      LOG.info("Unable to drop table." + databaseName + "."
+          + tableName + ".   Assuming it did not exist");
     }
-    LOG.info("Creating HCatalog table if it exists " + databaseName
-      + '.' + tableName);
-    String createCmd = getHCatCreateTableCmd(databaseName, tableName,
-      tableCols, partKeys);
-    utils.launchHCatCli(createCmd);
-    LOG.info("Created HCatalog table " + dbName + "." + tableName);
   }
 
   /**
