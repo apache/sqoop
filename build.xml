@@ -1568,4 +1568,9 @@
       testcasesonly="false"/>
   </target>
 
+  <target name="report" depends="ivy-resolve-hadoop">
+    <mkdir dir="build/report"/>
+    <ivy:report todir="build/report"/>
+  </target>
+
 </project>
