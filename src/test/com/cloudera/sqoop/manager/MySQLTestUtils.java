@@ -19,7 +19,7 @@
 package com.cloudera.sqoop.manager;
 
 import com.cloudera.sqoop.SqoopOptions;
-import jodd.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -149,7 +149,7 @@ public final class MySQLTestUtils {
   }
 
   private boolean isSet(String userPass) {
-    return !StringUtil.isBlank(userPass);
+    return !StringUtils.isBlank(userPass);
   }
 
   public void addPasswordIfIsSet(SqoopOptions opts) {
