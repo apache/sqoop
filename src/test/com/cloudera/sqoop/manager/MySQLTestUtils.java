@@ -18,13 +18,16 @@
 
 package com.cloudera.sqoop.manager;
 
+import com.cloudera.sqoop.SqoopOptions;
+import jodd.util.StringUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.ArrayList;
 
 /**
  * Utilities for mysql-based tests.
@@ -34,29 +37,72 @@ public final class MySQLTestUtils {
   public static final Log LOG = LogFactory.getLog(
       MySQLTestUtils.class.getName());
 
-  public static final String HOST_URL = System.getProperty(
-      "sqoop.test.mysql.connectstring.host_url",
-      "jdbc:mysql://localhost/");
+  private String hostUrl;
 
-  public static final String USER_NAME = System.getProperty("sqoop.test.mysql.username", "sqoop");
-  public static final String USER_PASS = System.getProperty("sqoop.test.mysql.password", "sqoop");
+  private String userName;
+  private String userPass;
 
-  public static final String MYSQL_DATABASE_NAME = System.getProperty("sqoop.test.mysql.databasename", "sqooptestdb");
-  public static final String TABLE_NAME = "EMPLOYEES_MYSQL";
-  public static final String CONNECT_STRING = HOST_URL + MYSQL_DATABASE_NAME;
+  private String mysqlDbNAme;
+  private String mySqlConnectString;
 
-  private MySQLTestUtils() { }
+  public MySQLTestUtils() {
+    hostUrl = System.getProperty(
+        "sqoop.test.mysql.connectstring.host_url",
+        "jdbc:mysql://localhost/");
+    userName = System.getProperty("sqoop.test.mysql.username", getCurrentUser());
+    userPass = System.getProperty("sqoop.test.mysql.password");
 
-  /** @return the current username. */
+    mysqlDbNAme = System.getProperty("sqoop.test.mysql.databasename", "sqooptestdb");
+    mySqlConnectString = getHostUrl() + getMysqlDbNAme();
+  }
+
+  public String getHostUrl() {
+    return hostUrl;
+  }
+
+  public String getUserName() {
+    return userName;
+  }
+
+  public String getUserPass() {
+    return userPass;
+  }
+
+  public String getMysqlDbNAme() {
+    return mysqlDbNAme;
+  }
+
+
+  public String getMySqlConnectString() {
+    return mySqlConnectString;
+  }
+
+  public String[] addUserNameAndPasswordToArgs(String[] extraArgs) {
+    int extraLength = isSet(getUserPass()) ? 4 : 2;
+    String[] moreArgs = new String[extraArgs.length + extraLength];
+    int i = 0;
+    for (i = 0; i < extraArgs.length; i++) {
+      moreArgs[i] = extraArgs[i];
+    }
+
+    // Add username argument for mysql.
+    moreArgs[i++] = "--username";
+    moreArgs[i++] = getUserName();
+    if (isSet(userPass)) {
+      moreArgs[i++] = "--password";
+      moreArgs[i++] = getUserPass();
+    }
+    return moreArgs;
+  }
+
   public static String getCurrentUser() {
     // First, check the $USER environment variable.
     String envUser = System.getenv("USER");
     if (null != envUser) {
       return envUser;
     }
-
     // Try `whoami`
-    String [] whoamiArgs = new String[1];
+    String[] whoamiArgs = new String[1];
     whoamiArgs[0] = "whoami";
     Process p = null;
     BufferedReader r = null;
@@ -78,7 +124,6 @@ public final class MySQLTestUtils {
               + ioe.toString());
         }
       }
-
       // wait for whoami to exit.
       while (p != null) {
         try {
@@ -92,6 +137,25 @@ public final class MySQLTestUtils {
           continue; // loop around.
         }
       }
+
     }
   }
+
+  public void addPasswordIfIsSet(ArrayList<String> args) {
+    if (isSet(userPass)) {
+      args.add("--password");
+      args.add(getUserPass());
+    }
+  }
+
+  private boolean isSet(String userPass) {
+    return !StringUtil.isBlank(userPass);
+  }
+
+  public void addPasswordIfIsSet(SqoopOptions opts) {
+    if (isSet(userPass)) {
+      opts.setPassword(getUserPass());
+    }
+  }
+
 }

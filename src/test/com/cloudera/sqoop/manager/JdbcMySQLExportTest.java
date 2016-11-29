@@ -47,6 +47,7 @@ public class JdbcMySQLExportTest extends TestExport {
   // instance variables populated during setUp, used during tests.
   private MySQLManager manager;
   private Connection conn;
+  private MySQLTestUtils mySqlTestUtils = new MySQLTestUtils();
 
   @Override
   protected Connection getConnection() {
@@ -66,7 +67,7 @@ public class JdbcMySQLExportTest extends TestExport {
 
   @Override
   protected String getConnectString() {
-    return MySQLTestUtils.CONNECT_STRING;
+    return mySqlTestUtils.getMySqlConnectString();
   }
 
   @Override
@@ -83,9 +84,10 @@ public class JdbcMySQLExportTest extends TestExport {
   public void setUp() {
     super.setUp();
 
-    SqoopOptions options = new SqoopOptions(MySQLTestUtils.CONNECT_STRING,
+    SqoopOptions options = new SqoopOptions(mySqlTestUtils.getMySqlConnectString(),
         getTableName());
-    options.setUsername(MySQLTestUtils.getCurrentUser());
+    options.setUsername(mySqlTestUtils.getUserName());
+    mySqlTestUtils.addPasswordIfIsSet(options);
     this.manager = new MySQLManager(options);
     try {
       this.conn = manager.getConnection();
@@ -119,26 +121,14 @@ public class JdbcMySQLExportTest extends TestExport {
 
   @Override
   protected String [] getCodeGenArgv(String... extraArgs) {
-
-    String [] moreArgs = new String[extraArgs.length + 2];
-    int i = 0;
-    for (i = 0; i < extraArgs.length; i++) {
-      moreArgs[i] = extraArgs[i];
-    }
-
-    // Add username argument for mysql.
-    moreArgs[i++] = "--username";
-    moreArgs[i++] = MySQLTestUtils.getCurrentUser();
-
-    return super.getCodeGenArgv(moreArgs);
+    return super.getCodeGenArgv(mySqlTestUtils.addUserNameAndPasswordToArgs(extraArgs));
   }
 
   @Override
   protected String [] getArgv(boolean includeHadoopFlags,
       int rowsPerStatement, int statementsPerTx, String... additionalArgv) {
 
-    String [] subArgv = newStrArray(additionalArgv,
-        "--username", MySQLTestUtils.getCurrentUser());
+    String [] subArgv = newStrArray(mySqlTestUtils.addUserNameAndPasswordToArgs(additionalArgv));
     return super.getArgv(includeHadoopFlags, rowsPerStatement,
         statementsPerTx, subArgv);
   }

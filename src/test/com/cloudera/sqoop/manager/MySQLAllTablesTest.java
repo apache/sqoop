@@ -33,6 +33,8 @@ import com.cloudera.sqoop.TestAllTables;
  */
 public class MySQLAllTablesTest extends TestAllTables {
 
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+
   @Override
   protected boolean useHsqldbTestServer() {
     return false;
@@ -40,13 +42,14 @@ public class MySQLAllTablesTest extends TestAllTables {
 
   @Override
   protected String getConnectString() {
-    return MySQLTestUtils.CONNECT_STRING;
+    return mySQLTestUtils.getMySqlConnectString();
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(MySQLTestUtils.getCurrentUser());
+    opts.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(opts);
     return opts;
   }
 

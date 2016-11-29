@@ -49,6 +49,7 @@ public class MySqlCallExportTest extends ExportJobTestCase {
 
   private final String tableName = "MYSQL_CALL_EXPORT_BASE_TABLE";
   private final String procName = "MYSQL_CALL_EXPORT_PROC";
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
   @Override
   public void setUp() {
@@ -150,13 +151,14 @@ public class MySqlCallExportTest extends ExportJobTestCase {
 
   @Override
   protected String getConnectString() {
-    return MySQLTestUtils.CONNECT_STRING;
+    return mySQLTestUtils.getMySqlConnectString();
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(MySQLTestUtils.getCurrentUser());
+    opts.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(opts);
     return opts;
   }
 

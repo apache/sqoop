@@ -38,6 +38,7 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       MySqlColumnEscapeImportTest.class.getName());
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
   @Override
   protected boolean useHsqldbTestServer() {
@@ -46,14 +47,14 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
 
   @Override
   protected String getConnectString() {
-    return MySQLTestUtils.CONNECT_STRING;
+    return mySQLTestUtils.getMySqlConnectString();
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(MySQLTestUtils.USER_NAME);
-    opts.setPassword(MySQLTestUtils.USER_PASS);
+    opts.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(opts);
     return opts;
   }
 
@@ -80,9 +81,8 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
     args.add("--connect");
     args.add(getConnectString());
     args.add("--username");
-    args.add(MySQLTestUtils.USER_NAME);
-    args.add("--password");
-    args.add(MySQLTestUtils.USER_PASS);
+    args.add(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(args);
     args.add("--target-dir");
     args.add(getWarehouseDir());
     args.add("--num-mappers");

@@ -71,6 +71,7 @@ public class DirectMySQLTest extends ImportJobTestCase {
 
   // instance variables populated during setUp, used during tests
   private DirectMySQLManager manager;
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
   @Override
   protected String getTablePrefix() {
@@ -81,12 +82,13 @@ public class DirectMySQLTest extends ImportJobTestCase {
   public void setUp() {
     super.setUp();
 
-    SqoopOptions options = new SqoopOptions(MySQLTestUtils.CONNECT_STRING,
+    SqoopOptions options = new SqoopOptions(mySQLTestUtils.getMySqlConnectString(),
         getTableName());
-    options.setUsername(MySQLTestUtils.getCurrentUser());
+    options.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(options);
 
     LOG.debug("Setting up another DirectMySQLTest: "
-        + MySQLTestUtils.CONNECT_STRING);
+        + mySQLTestUtils.getMySqlConnectString());
 
     manager = new DirectMySQLManager(options);
 
@@ -145,12 +147,13 @@ public class DirectMySQLTest extends ImportJobTestCase {
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
-    args.add(MySQLTestUtils.CONNECT_STRING);
+    args.add(mySQLTestUtils.getMySqlConnectString());
     if (isDirect) {
       args.add("--direct");
     }
     args.add("--username");
-    args.add(MySQLTestUtils.getCurrentUser());
+    args.add(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(args);
     args.add("--where");
     args.add("id > 1");
     args.add("--num-mappers");
@@ -303,9 +306,10 @@ public class DirectMySQLTest extends ImportJobTestCase {
     // Test a JDBC-based import of a table whose name is
     // a reserved sql keyword (and is thus `quoted`)
     final String RESERVED_TABLE_NAME = "TABLE";
-    SqoopOptions options = new SqoopOptions(MySQLTestUtils.CONNECT_STRING,
+    SqoopOptions options = new SqoopOptions(mySQLTestUtils.getMySqlConnectString(),
         RESERVED_TABLE_NAME);
-    options.setUsername(MySQLTestUtils.getCurrentUser());
+    options.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(options);
     ConnManager mgr = new MySQLManager(options);
 
     Connection connection = null;
@@ -355,9 +359,10 @@ public class DirectMySQLTest extends ImportJobTestCase {
     // Test a JDBC-based import of a table with a column whose name is
     // a reserved sql keyword (and is thus `quoted`).
     final String TABLE_NAME = "mysql_escaped_col_table";
-    SqoopOptions options = new SqoopOptions(MySQLTestUtils.CONNECT_STRING,
+    SqoopOptions options = new SqoopOptions(mySQLTestUtils.getMySqlConnectString(),
         TABLE_NAME);
-    options.setUsername(MySQLTestUtils.getCurrentUser());
+    options.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(options);
     ConnManager mgr = new MySQLManager(options);
 
     Connection connection = null;

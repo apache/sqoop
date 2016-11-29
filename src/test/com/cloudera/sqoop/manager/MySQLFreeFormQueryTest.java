@@ -37,6 +37,7 @@ public class MySQLFreeFormQueryTest extends TestFreeFormQueryImport {
 
   public static final Log LOG = LogFactory.getLog(
       MySQLFreeFormQueryTest.class.getName());
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
   @Override
   protected Log getLogger() {
@@ -50,13 +51,14 @@ public class MySQLFreeFormQueryTest extends TestFreeFormQueryImport {
 
   @Override
   protected String getConnectString() {
-    return MySQLTestUtils.CONNECT_STRING;
+    return mySQLTestUtils.getMySqlConnectString();
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(MySQLTestUtils.getCurrentUser());
+    opts.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(opts);
     return opts;
   }
 
