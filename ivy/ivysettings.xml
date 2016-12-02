@@ -48,6 +48,7 @@ under the License.
   <property name="maven2.pattern"
       value="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier])"/>
   <property name="repo.dir" value="${user.home}/.m2/repository"/>
+  <property name="ivy.cache.dir" value="${user.home}/.ivy2/cache"/>
   <property name="maven2.pattern.ext"  value="${maven2.pattern}.[ext]"/>
   <property name="resolvers" value="default" override="false"/>
   <settings defaultResolver="${resolvers}"/>
@@ -69,8 +70,14 @@ under the License.
        <ivy pattern="${repo.dir}/[organisation]/[module]/[revision]/[module]-[revision].pom"/>
     </filesystem>
 
+    <filesystem name="fs2">
+       <artifact pattern="${ivy.cache.dir}/[organisation]/[module]/jars/[module]-[revision](-[classifier]).[ext]"/>
+       <ivy pattern="${ivy.cache.dir}/[organisation]/[module]/ivy-[revision].xml"/>
+    </filesystem>
+
     <chain name="default" dual="true" checkmodified="true"
         changingPattern=".*SNAPSHOT">
+      <resolver ref="fs2"/>
       <resolver ref="fs"/>
       <resolver ref="apache-snapshot"/>
       <resolver ref="datanucleus"/>
@@ -80,6 +87,7 @@ under the License.
     </chain>
 
     <chain name="internal" dual="true">
+      <resolver ref="fs2"/>
       <resolver ref="fs"/>
       <resolver ref="apache-snapshot"/>
       <resolver ref="datanucleus"/>
