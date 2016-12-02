@@ -27,11 +27,28 @@ import org.apache.commons.lang.ArrayUtils;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import org.junit.Before;
+import org.junit.After;
+import org.junit.Test;
+
+import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
 
 /**
  * Test aspects of the SqoopOptions class.
  */
 public class TestSqoopOptions extends TestCase {
+
+  private Properties originalSystemProperties;
+
+  @Before
+  public void setup() {
+   originalSystemProperties = System.getProperties();
+  }
+
+  @After
+  public void tearDown() {
+    System.setProperties(originalSystemProperties);
+  }
 
   // tests for the toChar() parser
   public void testNormalChar() throws Exception {
@@ -426,6 +443,64 @@ public class TestSqoopOptions extends TestCase {
     assertEquals("_sqoop", opts.getTempRootDir());
   }
 
+  @Test
+  public void testDefaultThrowOnErrorWithNotSetSystemProperty() {
+    System.clearProperty(SQOOP_RETHROW_PROPERTY);
+    SqoopOptions opts = new SqoopOptions();
+    assertFalse(opts.isThrowOnError());
+  }
+
+  @Test
+  public void testDefaultThrowOnErrorWithSetSystemProperty() {
+    String testSqoopRethrowProperty = "";
+    System.setProperty(SQOOP_RETHROW_PROPERTY, testSqoopRethrowProperty);
+    SqoopOptions opts = new SqoopOptions();
+
+    assertTrue(opts.isThrowOnError());
+  }
+
+  @Test
+  public void testDefaultLoadedThrowOnErrorWithNotSetSystemProperty() {
+    System.clearProperty(SQOOP_RETHROW_PROPERTY);
+    SqoopOptions out = new SqoopOptions();
+    Properties props = out.writeProperties();
+    SqoopOptions opts = new SqoopOptions();
+    opts.loadProperties(props);
+
+    assertFalse(opts.isThrowOnError());
+  }
+
+  @Test
+  public void testDefaultLoadedThrowOnErrorWithSetSystemProperty() {
+    String testSqoopRethrowProperty = "";
+    System.setProperty(SQOOP_RETHROW_PROPERTY, testSqoopRethrowProperty);
+    SqoopOptions out = new SqoopOptions();
+    Properties props = out.writeProperties();
+    SqoopOptions opts = new SqoopOptions();
+    opts.loadProperties(props);
+
+    assertTrue(opts.isThrowOnError());
+  }
+
+  @Test
+  public void testThrowOnErrorWithNotSetSystemProperty() throws Exception {
+    System.clearProperty(SQOOP_RETHROW_PROPERTY);
+    String[] args = {"--throw-on-error"};
+    SqoopOptions opts = parse(args);
+
+    assertTrue(opts.isThrowOnError());
+  }
+
+  @Test
+  public void testThrowOnErrorWithSetSystemProperty() throws Exception {
+    String testSqoopRethrowProperty = "";
+    System.setProperty(SQOOP_RETHROW_PROPERTY, testSqoopRethrowProperty);
+    String[] args = {"--throw-on-error"};
+    SqoopOptions opts = parse(args);
+
+    assertTrue(opts.isThrowOnError());
+  }
+
   // test that hadoop-home is accepted as an option
   public void testHadoopHome() throws Exception {
     String [] args = {
@@ -556,4 +631,5 @@ public class TestSqoopOptions extends TestCase {
       // Expected
     }
   }
+
 }

@@ -39,7 +39,6 @@ import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.password.CredentialProviderHelper;
 
 import com.cloudera.sqoop.ConnFactory;
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
@@ -171,6 +170,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String CALL_ARG = "call";
   public static final String SKIP_DISTCACHE_ARG = "skip-dist-cache";
   public static final String RELAXED_ISOLATION = "relaxed-isolation";
+  public static final String THROW_ON_ERROR_ARG = "throw-on-error";
 
   // Arguments for validation.
   public static final String VALIDATE_ARG = "validate";
@@ -271,13 +271,27 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     } catch (Exception e) {
       LOG.error("Got error creating database manager: "
           + StringUtils.stringifyException(e));
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(e);
-      }
+      rethrowIfRequired(sqoopOpts, e);
     }
 
     return false;
   }
+
+  protected void rethrowIfRequired(SqoopOptions options, Exception ex) {
+    if (!options.isThrowOnError()) {
+      return;
+    }
+
+    final RuntimeException exceptionToThrow;
+    if (ex instanceof RuntimeException) {
+      exceptionToThrow = (RuntimeException) ex;
+    } else {
+      exceptionToThrow = new RuntimeException(ex);
+    }
+
+    throw exceptionToThrow;
+  }
+
 
   /**
    * Should be called in a 'finally' block at the end of the run() method.
@@ -486,6 +500,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withLongOpt(METADATA_TRANSACTION_ISOLATION_LEVEL)
         .hasArg()
         .withArgName("isolationlevel")
+        .create());
+    commonOpts.addOption(OptionBuilder
+        .withDescription("Rethrow a RuntimeException on error occurred during the job")
+        .withLongOpt(THROW_ON_ERROR_ARG)
         .create());
     // relax isolation requirements
     commonOpts.addOption(OptionBuilder
@@ -961,6 +979,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
     if (in.hasOption(TEMP_ROOTDIR_ARG)) {
       out.setTempRootDir(in.getOptionValue(TEMP_ROOTDIR_ARG));
+    }
+
+    if (in.hasOption(THROW_ON_ERROR_ARG)) {
+      LOG.debug("Throw exception on error during job is enabled.");
+      out.setThrowOnError(true);
     }
 
     if (in.hasOption(CONNECT_STRING_ARG)) {

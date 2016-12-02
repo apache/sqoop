@@ -20,6 +20,7 @@ package org.apache.sqoop;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -31,6 +32,9 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.OptionsFileUtil;
+
+import static com.cloudera.sqoop.SqoopOptions.isSqoopRethrowSystemPropertySet;
+import static org.apache.sqoop.tool.BaseSqoopTool.THROW_ON_ERROR_ARG;
 
 /**
  * Main entry-point for Sqoop
@@ -174,18 +178,30 @@ public class Sqoop extends Configured implements Tool {
    * GenericOptionsParser would remove them.
    */
   public static int runSqoop(Sqoop sqoop, String [] args) {
+    String[] toolArgs = sqoop.stashChildPrgmArgs(args);
     try {
-      String [] toolArgs = sqoop.stashChildPrgmArgs(args);
       return ToolRunner.run(sqoop.getConf(), sqoop, toolArgs);
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());
       e.printStackTrace();
-      if (System.getProperty(SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(e);
-      }
+      rethrowIfRequired(toolArgs, e);
       return 1;
     }
+  }
 
+  public static void rethrowIfRequired(String[] toolArgs, Exception ex) {
+    if (!isSqoopRethrowSystemPropertySet() && !ArrayUtils.contains(toolArgs, THROW_ON_ERROR_ARG)) {
+      return;
+    }
+
+    final RuntimeException exceptionToThrow;
+    if (ex instanceof RuntimeException) {
+      exceptionToThrow = (RuntimeException) ex;
+    } else {
+      exceptionToThrow = new RuntimeException(ex);
+    }
+
+    throw exceptionToThrow;
   }
 
   /**

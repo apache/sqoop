@@ -41,7 +41,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
 
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.RelatedOptions;
@@ -618,25 +617,17 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       importTable(options, options.getTableName(), hiveImport);
     } catch (IllegalArgumentException iea) {
         LOG.error("Imported Failed: " + iea.getMessage());
-        if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-          throw iea;
-        }
-        return 1;
+      rethrowIfRequired(options, iea);
+      return 1;
     } catch (IOException ioe) {
       LOG.error("Encountered IOException running import job: "
           + StringUtils.stringifyException(ioe));
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ioe);
-      } else {
-        return 1;
-      }
+      rethrowIfRequired(options, ioe);
+      return 1;
     } catch (ImportException ie) {
       LOG.error("Error during import: " + ie.toString());
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ie);
-      } else {
-        return 1;
-      }
+      rethrowIfRequired(options, ie);
+      return 1;
     } finally {
       destroy(options);
     }

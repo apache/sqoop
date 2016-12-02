@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
 
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.RelatedOptions;
@@ -140,11 +139,8 @@ public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     } catch (IOException ioe) {
       LOG.error("Encountered IOException running codegen job: "
           + StringUtils.stringifyException(ioe));
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ioe);
-      } else {
-        return 1;
-      }
+      rethrowIfRequired(options, ioe);
+      return 1;
     } finally {
       destroy(options);
     }

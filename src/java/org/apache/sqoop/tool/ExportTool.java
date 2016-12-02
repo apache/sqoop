@@ -26,7 +26,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
@@ -100,18 +99,12 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       exportTable(options, options.getTableName());
     } catch (IOException ioe) {
       LOG.error("Encountered IOException running export job: ", ioe);
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ioe);
-      } else {
-        return 1;
-      }
+      rethrowIfRequired(options, ioe);
+      return 1;
     } catch (ExportException ee) {
       LOG.error("Error during export: ", ee);
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ee);
-      } else {
-        return 1;
-      }
+      rethrowIfRequired(options, ee);
+      return 1;
     } finally {
       destroy(options);
     }
