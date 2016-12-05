@@ -59,6 +59,8 @@ import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
  */
 public class SqoopOptions implements Cloneable {
 
+  public static final String ORACLE_ESCAPING_DISABLED = "sqoop.oracle.escaping.disabled";
+
   private static final String OLD_SQOOP_TEST_IMPORT_ROOT_DIR = "sqoop.test.import.rootDir";
 
   public static final Log LOG = LogFactory.getLog(SqoopOptions.class.getName());
@@ -381,6 +383,9 @@ public class SqoopOptions implements Cloneable {
   private Class validationThresholdClass; // ValidationThreshold implementation
   private Class validationFailureHandlerClass; // FailureHandler implementation
 
+  @StoredAsProperty(ORACLE_ESCAPING_DISABLED)
+  private boolean oracleEscapingDisabled;
+
   public SqoopOptions() {
     initDefaults(null);
   }
@@ -701,6 +706,10 @@ public class SqoopOptions implements Cloneable {
     if (this.verbose) {
       LoggingUtils.setDebugLevel();
     }
+
+    // Ensuring that oracleEscapingDisabled property is propagated to
+    // the level of Hadoop configuration as well
+    this.setOracleEscapingDisabled(this.isOracleEscapingDisabled());
   }
 
   private void loadPasswordProperty(Properties props) {
@@ -1038,6 +1047,8 @@ public class SqoopOptions implements Cloneable {
     //This default value is set intentionally according to SQOOP_RETHROW_PROPERTY system property
     //to support backward compatibility. Do not exchange it.
     this.throwOnError = isSqoopRethrowSystemPropertySet();
+
+    setOracleEscapingDisabled(Boolean.parseBoolean(System.getProperty(ORACLE_ESCAPING_DISABLED, "true")));
 
     this.isValidationEnabled = false; // validation is disabled by default
     this.validatorClass = RowCountValidator.class;
@@ -2708,4 +2719,16 @@ public class SqoopOptions implements Cloneable {
   public void setMetadataTransactionIsolationLevel(int transactionIsolationLevel) {
     this.metadataTransactionIsolationLevel = transactionIsolationLevel;
   }
+
+  public boolean isOracleEscapingDisabled() {
+    return oracleEscapingDisabled;
+  }
+
+  public void setOracleEscapingDisabled(boolean escapingDisabled) {
+    this.oracleEscapingDisabled = escapingDisabled;
+    // important to have custom setter to ensure option is available through
+    // Hadoop configuration on those places where SqoopOptions is not reachable
+    getConf().setBoolean(ORACLE_ESCAPING_DISABLED, escapingDisabled);
+  }
+
 }

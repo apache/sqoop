@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.sqoop.SqoopOptions;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
 
@@ -148,11 +149,14 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V> extends
           // a subpartition of the 'real' export table...
 
           this.oracleTable = createUniqueMapperTable(context);
-          setOracleTableColumns(OraOopOracleQueries.getTableColumns(this
-              .getConnection(), this.oracleTable, OraOopUtilities
-              .omitLobAndLongColumnsDuringImport(conf), OraOopUtilities
-              .recallSqoopJobType(conf), true // <- onlyOraOopSupportedTypes
-              , false) // <- omitOraOopPseudoColumns
+          setOracleTableColumns(OraOopOracleQueries.getTableColumns(
+            this.getConnection(),
+            this.oracleTable,
+            OraOopUtilities.omitLobAndLongColumnsDuringImport(conf),
+            OraOopUtilities.recallSqoopJobType(conf),
+            true, // <- onlyOraOopSupportedTypes
+            false, // <- omitOraOopPseudoColumns
+            OracleUtils.isOracleEscapingDisabled(conf))
           );
 
           this.subPartitionName =

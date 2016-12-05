@@ -122,13 +122,17 @@ public class OraOopConnManager extends GenericJdbcManager {
         Configuration conf = this.options.getConf();
 
         this.columnNamesInOracleTable =
-            OraOopOracleQueries.getTableColumnNames(getConnection(),
-                tableContext, OraOopUtilities
-                    .omitLobAndLongColumnsDuringImport(conf), OraOopUtilities
-                    .recallSqoopJobType(conf), true, // <-
-                                                     // onlyOraOopSupportedTypes
-                true // <- omitOraOopPseudoColumns
-                );
+          OraOopOracleQueries.getTableColumnNames(
+            getConnection(),
+            tableContext,
+            OraOopUtilities
+              .omitLobAndLongColumnsDuringImport(conf),
+            OraOopUtilities
+              .recallSqoopJobType(conf),
+            true, // <- onlyOraOopSupportedTypes
+            true, // <- omitOraOopPseudoColumns
+            options.isOracleEscapingDisabled()
+          );
       } catch (SQLException ex) {
         throw new RuntimeException(ex);
       }
@@ -529,14 +533,14 @@ public class OraOopConnManager extends GenericJdbcManager {
 
   @Override
   public String escapeColName(String colName) {
-    return OracleUtils.escapeIdentifier(colName); // <- See notes at top about escaped
-                                         // column names
+    return OracleUtils.escapeIdentifier(colName, options.isOracleEscapingDisabled()); // <- See notes at top about escaped
+                                                                                // column names
   }
 
-    @Override
-    public String escapeTableName(String tableName) {
-        return OracleUtils.escapeIdentifier(tableName);
-    }
+  @Override
+  public String escapeTableName(String tableName) {
+    return OracleUtils.escapeIdentifier(tableName, options.isOracleEscapingDisabled());
+  }
 
    @Override
    public boolean escapeTableNameOnExport() {

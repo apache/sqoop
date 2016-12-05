@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.OracleUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,8 +67,9 @@ extends DBRecordReader<T>  {
     if (dbConf.getInputQuery() == null) {
       query.append("SELECT ");
 
+      boolean escapingDisabled = OracleUtils.isOracleEscapingDisabled(getConf());
       for (int i = 0; i < fieldNames.length; i++) {
-        query.append(OracleUtils.escapeIdentifier(fieldNames[i]));
+        query.append(OracleUtils.escapeIdentifier(fieldNames[i], escapingDisabled));
         if (i != fieldNames.length -1) {
           query.append(", ");
         }

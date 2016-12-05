@@ -31,6 +31,8 @@ import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBRecordReader;
+
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.OraOopConstants.
            OraOopTableImportWhereClauseLocation;
 import org.apache.sqoop.manager.oracle.OraOopUtilities.OraOopStatsReports;
@@ -198,7 +200,8 @@ class OraOopDBRecordReader<T extends SqoopRecord> extends
               OraOopUtilities.recallSqoopJobType(conf)
               , true // <- onlyOraOopSupportedTypes
               , true // <- omitOraOopPseudoColumns
-              );
+              , OracleUtils.isOracleEscapingDisabled(conf)
+          );
     } catch (SQLException ex) {
       LOG.error(String.format(
           "Unable to obtain the data-types of the columns in table %s.\n"

@@ -917,20 +917,20 @@ public class OracleManager
     }
   }
 
-    @Override
-    public String escapeColName(String colName) {
-        return OracleUtils.escapeIdentifier(colName);
-    }
+  @Override
+  public String escapeColName(String colName) {
+    return OracleUtils.escapeIdentifier(colName, options.isOracleEscapingDisabled());
+  }
 
-    @Override
-    public String escapeTableName(String tableName) {
-        return OracleUtils.escapeIdentifier(tableName);
-    }
+  @Override
+  public String escapeTableName(String tableName) {
+    return OracleUtils.escapeIdentifier(tableName, options.isOracleEscapingDisabled());
+  }
 
-    @Override
-    public boolean escapeTableNameOnExport() {
-        return true;
-    }
+  @Override
+  public boolean escapeTableNameOnExport() {
+    return true;
+  }
 
   @Override
   public String[] getColumnNames(String tableName) {

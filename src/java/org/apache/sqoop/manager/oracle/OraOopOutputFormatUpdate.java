@@ -29,6 +29,8 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
+
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.OraOopOracleQueries.
            CreateExportChangesTableOptions;
 
@@ -161,11 +163,14 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V> extends
       Configuration conf = context.getConfiguration();
 
       this.oracleTable = createUniqueMapperTable(context);
-      setOracleTableColumns(OraOopOracleQueries.getTableColumns(this
-          .getConnection(), this.oracleTable, OraOopUtilities
-          .omitLobAndLongColumnsDuringImport(conf), OraOopUtilities
-          .recallSqoopJobType(conf), true // <- onlyOraOopSupportedTypes
-          , false) // <- omitOraOopPseudoColumns
+      setOracleTableColumns(OraOopOracleQueries.getTableColumns(
+        this.getConnection(),
+        this.oracleTable,
+        OraOopUtilities.omitLobAndLongColumnsDuringImport(conf),
+        OraOopUtilities.recallSqoopJobType(conf),
+        true, // <- onlyOraOopSupportedTypes
+        false, // <- omitOraOopPseudoColumns
+        OracleUtils.isOracleEscapingDisabled(conf))
       );
     }
 
@@ -292,7 +297,7 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V> extends
             OraOopOracleQueries.createExportChangesTable(this.getConnection(),
                 changesTable, temporaryTableStorageClause, this.oracleTable,
                 targetTable, this.updateColumnNames, changesTableOptions,
-                parallelizationEnabled);
+                parallelizationEnabled, OracleUtils.isOracleEscapingDisabled(context.getConfiguration()));
 
         if (changeTableRowCount == 0) {
           LOG.debug(String.format(
@@ -312,7 +317,7 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V> extends
 
             OraOopOracleQueries.insertRowsIntoExportTable(this.getConnection(),
                 targetTable, changesTable, sysDateTime, this.mapperId,
-                parallelizationEnabled);
+              parallelizationEnabled, OracleUtils.isOracleEscapingDisabled(context.getConfiguration()));
             break;
 
           case UpdateSql:
@@ -322,7 +327,7 @@ public class OraOopOutputFormatUpdate<K extends SqoopRecord, V> extends
             OraOopOracleQueries.updateTable(this.getConnection(), targetTable,
                 changesTable, this.updateColumnNames, this
                     .getOracleTableColumns(), sysDateTime, this.mapperId,
-                parallelizationEnabled);
+                parallelizationEnabled, context.getConfiguration().getBoolean(SqoopOptions.ORACLE_ESCAPING_DISABLED,false));
 
             double timeInSec = (System.nanoTime() - start) / Math.pow(10, 9);
             LOG.info(String.format("Time spent performing an update: %f sec.",
