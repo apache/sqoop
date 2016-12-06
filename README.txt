@@ -37,7 +37,7 @@ provided in the +build/sqoop-(version)/+ directory.
 
 You can build just the jar by running +ant jar+.
 
-See the COMPILING.txt document for for information.
+See the COMPILING.txt document for more information.
 
 == This is also an Asciidoc file!
 
