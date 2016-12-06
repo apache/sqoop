@@ -21,6 +21,7 @@ package org.apache.sqoop.manager.oracle;
 import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.OraOopConstants.
            OraOopOracleDataChunkMethod;
 import org.junit.Test;
@@ -48,6 +49,7 @@ public class ImportTest extends OraOopTestCase {
 
   @Test
   public void testProductWithWhiteSpaceImport() throws Exception {
+    System.setProperty(SqoopOptions.ORACLE_ESCAPING_DISABLED, "false");
     setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product");
     createTable("table_tst_product_with_white_space.xml");
 
@@ -56,6 +58,7 @@ public class ImportTest extends OraOopTestCase {
       Assert.assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
+      System.clearProperty(SqoopOptions.ORACLE_ESCAPING_DISABLED);
       cleanupFolders();
       closeTestEnvConnection();
     }
