@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -396,10 +397,12 @@ public class OracleManager
     // Need to use reflection to call the method setSessionTimeZone on the
     // OracleConnection class because oracle specific java libraries are not
     // accessible in this context.
-    Method method;
+    Method methodSession;
+    Method methodDefaultTimezone;
     try {
-      method = conn.getClass().getMethod(
+      methodSession = conn.getClass().getMethod(
               "setSessionTimeZone", new Class [] {String.class});
+      methodDefaultTimezone = conn.getClass().getMethod("setDefaultTimeZone", TimeZone.class);
     } catch (Exception ex) {
       LOG.error("Could not find method setSessionTimeZone in "
         + conn.getClass().getName(), ex);
@@ -412,9 +415,13 @@ public class OracleManager
     // the configuration as 'oracle.sessionTimeZone'.
     String clientTimeZoneStr = options.getConf().get(ORACLE_TIMEZONE_KEY,
         "GMT");
+    TimeZone timeZone = TimeZone.getTimeZone(clientTimeZoneStr);
+    TimeZone.setDefault(timeZone);
     try {
-      method.setAccessible(true);
-      method.invoke(conn, clientTimeZoneStr);
+      methodSession.setAccessible(true);
+      methodSession.invoke(conn, clientTimeZoneStr);
+      methodDefaultTimezone.setAccessible(true);
+      methodDefaultTimezone.invoke(conn, timeZone);
       LOG.info("Time zone has been set to " + clientTimeZoneStr);
     } catch (Exception ex) {
       LOG.warn("Time zone " + clientTimeZoneStr
@@ -426,7 +433,9 @@ public class OracleManager
         //     /server.102/b14225/applocaledata.htm#i637736
         // The "GMT" timezone is guaranteed to exist in the available timezone
         // regions, whereas others (e.g., "UTC") are not.
-        method.invoke(conn, "GMT");
+        methodSession.invoke(conn, "GMT");
+        methodDefaultTimezone.invoke(conn, "GMT");
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
       } catch (Exception ex2) {
         LOG.error("Could not set time zone for oracle connection", ex2);
         // rethrow SQLException
