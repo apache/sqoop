@@ -30,6 +30,9 @@ import org.apache.sqoop.test.infrastructure.providers.DatabaseInfrastructureProv
 import org.apache.sqoop.test.infrastructure.providers.HadoopInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.KdcInfrastructureProvider;
 import org.apache.sqoop.test.infrastructure.providers.SqoopInfrastructureProvider;
+import org.apache.sqoop.test.utils.HdfsUtils;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -39,12 +42,12 @@ import static org.testng.Assert.fail;
 
 @Infrastructure(dependencies = {KdcInfrastructureProvider.class, HadoopInfrastructureProvider.class, SqoopInfrastructureProvider.class, DatabaseInfrastructureProvider.class})
 public class OutputDirectoryTest extends SqoopTestCase {
-  @Test
-  public void testOutputDirectoryIsAFile() throws Exception {
-    createAndLoadTableCities();
 
-    hdfsClient.delete(new Path(getMapreduceDirectory()), true);
-    hdfsClient.createNewFile(new Path(getMapreduceDirectory()));
+  private MJob job;
+
+  @BeforeMethod
+  public void setup() {
+    createAndLoadTableCities();
 
     // RDBMS link
     MLink rdbmsConnection = getClient().createLink("generic-jdbc-connector");
@@ -57,10 +60,22 @@ public class OutputDirectoryTest extends SqoopTestCase {
     saveLink(hdfsConnection);
 
     // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
+    job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
 
     // Set rdbms "FROM" config
     fillRdbmsFromConfig(job, "id");
+  }
+
+  @AfterMethod
+  public void cleanUp() {
+    dropTable();
+  }
+
+  @Test
+  public void testOutputDirectoryIsAFile() throws Exception {
+
+    hdfsClient.delete(new Path(getMapreduceDirectory()), true);
+    hdfsClient.createNewFile(new Path(getMapreduceDirectory()));
 
     // fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
@@ -71,32 +86,13 @@ public class OutputDirectoryTest extends SqoopTestCase {
       HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007.toString(),
       "is a file"
     );
-
-    dropTable();
   }
 
   @Test
-  public void testOutputDirectoryIsNotEmpty() throws Exception {
-    createAndLoadTableCities();
+  public void testOutputDirectoryIsNotEmptyWithoutDeleteOption() throws Exception {
 
     hdfsClient.mkdirs(new Path(getMapreduceDirectory()));
     hdfsClient.createNewFile(new Path(getMapreduceDirectory() + "/x"));
-
-    // RDBMS link
-    MLink rdbmsConnection = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkConfig(rdbmsConnection);
-    saveLink(rdbmsConnection);
-
-    // HDFS link
-    MLink hdfsConnection = getClient().createLink("hdfs-connector");
-    fillHdfsLink(hdfsConnection);
-    saveLink(hdfsConnection);
-
-    // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
-
-    // Set rdbms "FROM" config
-    fillRdbmsFromConfig(job, "id");
 
     // fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
@@ -107,31 +103,41 @@ public class OutputDirectoryTest extends SqoopTestCase {
       HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007.toString(),
       "is not empty"
     );
+  }
 
-    dropTable();
+  @Test
+  public void testOutputDirectoryIsNotEmptyWithDeleteOption() throws Exception {
+
+    hdfsClient.mkdirs(new Path(getMapreduceDirectory()));
+    hdfsClient.createNewFile(new Path(getMapreduceDirectory() + "/x"));
+
+    // fill the hdfs "TO" config
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+    job.getToJobConfig().getStringInput("toJobConfig.outputDirectory")
+        .setValue(getMapreduceDirectory());
+
+    fillHdfsToConfig(job, ToFormat.TEXT_FILE);
+    job.getToJobConfig().getBooleanInput("toJobConfig.deleteOutputDirectory").setValue(true);
+
+
+    saveJob(job);
+
+    executeJob(job);
+
+    // Assert correct output
+    assertTo(
+        "1,'USA','2004-10-23 00:00:00.000','San Francisco'",
+        "2,'USA','2004-10-24 00:00:00.000','Sunnyvale'",
+        "3,'Czech Republic','2004-10-25 00:00:00.000','Brno'",
+        "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
+        "5,'USA','2004-10-27 00:00:00.000','Martha\\'s Vineyard'"
+    );
   }
 
   @Test
   public void testOutputDirectoryIsEmpty() throws Exception {
-    createAndLoadTableCities();
 
     hdfsClient.mkdirs(new Path(getMapreduceDirectory()));
-
-    // RDBMS link
-    MLink rdbmsConnection = getClient().createLink("generic-jdbc-connector");
-    fillRdbmsLinkConfig(rdbmsConnection);
-    saveLink(rdbmsConnection);
-
-    // HDFS link
-    MLink hdfsConnection = getClient().createLink("hdfs-connector");
-    fillHdfsLink(hdfsConnection);
-    saveLink(hdfsConnection);
-
-    // Job creation
-    MJob job = getClient().createJob(rdbmsConnection.getName(), hdfsConnection.getName());
-
-    // Set rdbms "FROM" config
-    fillRdbmsFromConfig(job, "id");
 
     // fill the hdfs "TO" config
     fillHdfsToConfig(job, ToFormat.TEXT_FILE);
@@ -148,12 +154,10 @@ public class OutputDirectoryTest extends SqoopTestCase {
       "4,'USA','2004-10-26 00:00:00.000','Palo Alto'",
       "5,'USA','2004-10-27 00:00:00.000','Martha\\'s Vineyard'"
     );
-
-    dropTable();
   }
 
   public void assertJobSubmissionFailure(MJob job, String ...fragments) throws Exception {
-    // Try to execute the job and verify that the it was not successful
+    // Try to execute the job and verify that it was not successful
     try {
       executeJob(job);
       fail("Expected failure in the job submission.");

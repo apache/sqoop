@@ -43,6 +43,8 @@ public class ToJobConfig {
 
   @Input public Boolean appendMode;
 
+  @Input public Boolean deleteOutputDirectory;
+
   public static class ToJobConfigValidator extends AbstractValidator<ToJobConfig> {
     @Override
     public void validate(ToJobConfig conf) {

@@ -24,6 +24,7 @@ import org.apache.sqoop.connector.hdfs.configuration.LinkConfiguration;
 import org.apache.sqoop.connector.hdfs.configuration.ToJobConfiguration;
 import org.apache.sqoop.job.etl.Initializer;
 import org.apache.sqoop.job.etl.InitializerContext;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -36,19 +37,28 @@ import static org.testng.Assert.assertTrue;
  */
 public class TestToInitializer extends TestHdfsBase {
 
+  private LinkConfiguration linkConfig;
+  private ToJobConfiguration jobConfig;
+  private InitializerContext initializerContext;
+  private Initializer initializer;
+
+  @BeforeMethod
+  public void setup() {
+    linkConfig = new LinkConfiguration();
+    jobConfig = new ToJobConfiguration();
+
+    linkConfig.linkConfig.uri = "file:///";
+
+    initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
+    initializer= new HdfsToInitializer();
+  }
+
   @Test
   public void testWorkDirectoryBeingSet() {
     final String TARGET_DIR = "/target/directory";
 
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-
-    linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = TARGET_DIR;
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
-
-    Initializer initializer = new HdfsToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     assertNotNull(initializerContext.getString(HdfsConstants.WORK_DIRECTORY));
@@ -60,50 +70,69 @@ public class TestToInitializer extends TestHdfsBase {
     File file = File.createTempFile("MastersOfOrion", ".txt");
     file.createNewFile();
 
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-
-    linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = file.getAbsolutePath();
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
-
-    Initializer initializer = new HdfsToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
   }
 
   @Test(expectedExceptions = SqoopException.class)
-  public void testOutputDirectoryIsNotEmpty() throws Exception {
+  public void testOutputDirectoryIsNotEmptyWithoutDeleteOption() throws Exception {
     File dir = Files.createTempDir();
     File file = File.createTempFile("MastersOfOrion", ".txt", dir);
 
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-
-    linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
-
-    Initializer initializer = new HdfsToInitializer();
     initializer.initialize(initializerContext, linkConfig, jobConfig);
+  }
+
+  @Test
+  public void testOutputDirectoryIsNotEmptyWithDeleteOption() throws Exception {
+    File dir = Files.createTempDir();
+    File.createTempFile("MastersOfOrion", ".txt", dir);
+
+    jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
+    jobConfig.toJobConfig.deleteOutputDirectory = true;
+
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+
+    assertNotNull(initializerContext.getString(HdfsConstants.WORK_DIRECTORY));
+    assertTrue(initializerContext.getString(HdfsConstants.WORK_DIRECTORY).startsWith(dir.getAbsolutePath() + "/."));
   }
 
   @Test
   public void testOutputDirectoryIsNotEmptyWithIncremental() throws Exception {
     File dir = Files.createTempDir();
-    File file = File.createTempFile("MastersOfOrion", ".txt", dir);
+    File.createTempFile("MastersOfOrion", ".txt", dir);
 
-    LinkConfiguration linkConfig = new LinkConfiguration();
-    ToJobConfiguration jobConfig = new ToJobConfiguration();
-
-    linkConfig.linkConfig.uri = "file:///";
     jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
     jobConfig.toJobConfig.appendMode = true;
 
-    InitializerContext initializerContext = new InitializerContext(new MutableMapContext(), "test_user");
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
 
-    Initializer initializer = new HdfsToInitializer();
+    assertNotNull(initializerContext.getString(HdfsConstants.WORK_DIRECTORY));
+    assertTrue(initializerContext.getString(HdfsConstants.WORK_DIRECTORY).startsWith(dir.getAbsolutePath()));
+  }
+
+  @Test(expectedExceptions = SqoopException.class)
+  public void testOutputDirectoryIsNotEmptyWithoutIncrementalWithoutDeleteOption() throws Exception {
+    File dir = Files.createTempDir();
+    File.createTempFile("MastersOfOrion", ".txt", dir);
+
+    jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
+    jobConfig.toJobConfig.appendMode = false;
+
+    initializer.initialize(initializerContext, linkConfig, jobConfig);
+  }
+
+  @Test
+  public void testOutputDirectoryIsNotEmptyWithoutIncrementalWithDeleteOption() throws Exception {
+    File dir = Files.createTempDir();
+    File.createTempFile("MastersOfOrion", ".txt", dir);
+
+    jobConfig.toJobConfig.outputDirectory = dir.getAbsolutePath();
+    jobConfig.toJobConfig.appendMode = false;
+    jobConfig.toJobConfig.deleteOutputDirectory = true;
+
     initializer.initialize(initializerContext, linkConfig, jobConfig);
 
     assertNotNull(initializerContext.getString(HdfsConstants.WORK_DIRECTORY));

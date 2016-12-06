@@ -54,6 +54,8 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
     HdfsUtils.configurationToContext(configuration, context.getContext());
 
     final boolean appendMode = Boolean.TRUE.equals(jobConfig.toJobConfig.appendMode);
+    final boolean deleteOutputDirectory = Boolean.TRUE.equals(jobConfig.toJobConfig.deleteOutputDirectory);
+
 
     // Verification that given HDFS directory either don't exists or is empty
     try {
@@ -70,7 +72,11 @@ public class HdfsToInitializer extends Initializer<LinkConfiguration, ToJobConfi
             if (fs.isDirectory(path) && !appendMode) {
               FileStatus[] fileStatuses = fs.listStatus(path);
               if (fileStatuses.length != 0) {
-                throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory is not empty");
+                if (deleteOutputDirectory) {
+                  fs.delete(path, true);
+                } else {
+                  throw new SqoopException(HdfsConnectorError.GENERIC_HDFS_CONNECTOR_0007, "Output directory is not empty");
+                }
               }
             }
           }
