@@ -64,7 +64,8 @@ under the License.
         m2compatible="true" checkmodified="true" changingPattern=".*SNAPSHOT"/>
     <ibiblio name="cloudera-staging" root="${staging.cloudera.com}"
         m2compatible="true" checkmodified="true" changingPattern=".*SNAPSHOT"/>
-
+     <!--Conjars had to be added due to hive's dependency on calcite, which depends on pentaho-aggdesigner-algorithm;5.1.5-jhyde, which is only available in conjars and spring plugins repo -->
+     <ibiblio name="conjars" m2compatible="true" root="http://conjars.org/repo/"/>
     <filesystem name="fs" m2compatible="true">
        <artifact pattern="${repo.dir}/[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"/>
        <ivy pattern="${repo.dir}/[organisation]/[module]/[revision]/[module]-[revision].pom"/>
@@ -84,6 +85,7 @@ under the License.
       <resolver ref="cloudera-releases"/>
       <resolver ref="cloudera-staging"/>
       <resolver ref="maven2"/>
+      <resolver ref="conjars"/>
     </chain>
 
     <chain name="internal" dual="true">
@@ -93,10 +95,12 @@ under the License.
       <resolver ref="datanucleus"/>
       <resolver ref="cloudera-staging"/>
       <resolver ref="maven2"/>
+      <resolver ref="conjars"/>
     </chain>
 
     <chain name="external">
       <resolver ref="maven2"/>
+      <resolver ref="conjars"/>
     </chain>
 
   </resolvers>

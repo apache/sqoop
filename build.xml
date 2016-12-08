@@ -31,183 +31,6 @@
     </classpath>
   </taskdef>
 
-  <!-- Set default Hadoop version if not set -->
-  <if>
-    <isset property="hadoopversion" />
-    <then>
-      <echo message="Use Hadoop ${hadoopversion}" />
-    </then>
-    <else>
-      <echo message="Use Hadoop 2.x by default" />
-      <property name="hadoopversion" value="200" />
-    </else>
-  </if>
-
-  <!--
-    Set default HCatalog profile if not set
-
-    In Hive 0.12, the HCatalog artifcacts moved from org.apache.hcatalog
-    to org.apache.hive.hcatalog.   With the advent of hive 0.14, the older
-    hcatalog interfaces used by Sqoop are being removed.  So, we are upgrading
-    the hcatalog version to 0.13.   This will allow as to support the hcatalog
-    features in terms of datatype parity.
-
-    hcatalog 0.13 will be the default for now.
-
-  -->
-  <if>
-    <isset property="hcatprofile" />
-    <then>
-      <if>
-        <or>
-          <equals arg1="${hcatprofile}" arg2="13" />
-        </or>
-        <then>
-          <echo message="Using HCatalog profile ${hcatprofile}" />
-        </then>
-        <else>
-          <fail message="Invalid value for hcatprofile" />
-        </else>
-      </if>
-    </then>
-    <else>
-      <echo message="Using HCatalog profile 0.13" />
-      <property name="hcatprofile" value="13" />
-    </else>
-  </if>
-
-  <!--
-    Set default Accumulo version
-
-    We use 1.5.0 by default if not specified.
-  -->
-  <if>
-    <isset property="accumulo.version" />
-    <then>
-      <echo message="Use Accumulo version ${accumulo.version}" />
-    </then>
-    <else>
-      <echo message="Using Accumulo profile 1.5.0 by default" />
-      <property name="accumulo.version" value="1.5.0" />
-    </else>
-  </if>
-  <!--
-    Set default HBase profile if not set
-
-    HBase 0.95 has broken one big monolithic archive into smaller pieces, so
-    that the build dependencies are different between HBase 0.94 and 0.95.
-    In addition, HBase since 0.95 is providing artifacts compatible with Hadoop 2.0.
-
-    For HBase 0.95 on Hadoop 2.0.0:
-    ant -Dhadoopversion=200 -Dhbaseprofile=95
-
-    For HBase 0.95 on Hadoop 1.0.0:
-    ant -Dhadoopversion=100 -Dhbaseprofile=95
-
-    For HBase 0.94 on Hadoop 1.0.0:
-    ant -Dhadoopversion=100
-
-    For HBase 0.94 on Hadoop 2.0.0:
-    - upstream HBase did not published Hadoop 2 compatible artifacts
-  -->
-  <if>
-    <isset property="hbaseprofile" />
-    <then>
-      <echo message="Use HBase profile ${hbaseprofile}" />
-    </then>
-    <else>
-      <echo message="Use HBase profile 0.94 by default" />
-      <property name="hbaseprofile" value="94" />
-    </else>
-  </if>
-
-	<!-- Set dependency versions per target Hadoop version -->
-  <if>
-    <equals arg1="${hadoopversion}" arg2="20" />
-    <then>
-      <property name="hadoop.version" value="0.20.2-cdh3u5" />
-      <property name="hbase94.version" value="0.90.6-cdh3u5" />
-      <property name="zookeeper.version" value="3.3.3-cdh3u5" />
-      <property name="hadoop.version.full" value="0.20" />
-      <property name="hcatalog.version" value="0.13.0" />
-      <property name="hbasecompatprofile" value="1" />
-      <property name="avrohadoopprofile" value="1" />
-    </then>
-
-    <elseif>
-      <equals arg1="${hadoopversion}" arg2="23" />
-      <then>
-        <property name="hadoop.version" value="0.23.1" />
-        <property name="hbase94.version" value="0.92.0" />
-        <property name="zookeeper.version" value="3.4.2" />
-        <property name="hadoop.version.full" value="0.23" />
-        <property name="hcatalog.version" value="0.13.0" />
-        <property name="hbasecompatprofile" value="2" />
-        <property name="avrohadoopprofile" value="2" />
-      </then>
-    </elseif>
-
-    <elseif>
-      <equals arg1="${hadoopversion}" arg2="100" />
-      <then>
-        <property name="hadoop.version" value="1.0.4" />
-        <property name="hbase94.version" value="0.92.0" />
-        <property name="zookeeper.version" value="3.4.2" />
-        <property name="hadoop.version.full" value="1.0.0" />
-        <property name="hcatalog.version" value="0.13.0" />
-        <property name="hbasecompatprofile" value="1" />
-        <property name="avrohadoopprofile" value="1" />
-      </then>
-    </elseif>
-
-    <elseif>
-      <equals arg1="${hadoopversion}" arg2="200" />
-      <then>
-        <property name="hadoop.version" value="2.0.4-alpha" />
-        <property name="hbase94.version" value="0.94.2" />
-        <property name="zookeeper.version" value="3.4.2" />
-        <property name="hadoop.version.full" value="2.0.4-alpha" />
-        <property name="hcatalog.version" value="0.13.0" />
-        <property name="hbasecompatprofile" value="2" />
-        <property name="avrohadoopprofile" value="2" />
-      </then>
-    </elseif>
-
-    <elseif>
-      <equals arg1="${hadoopversion}" arg2="210" />
-      <then>
-        <property name="hadoop.version" value="2.1.0-beta" />
-        <property name="hbase94.version" value="0.94.2" />
-        <property name="zookeeper.version" value="3.4.2" />
-        <property name="hadoop.version.full" value="2.1.0-beta" />
-        <property name="hcatalog.version" value="0.13.0" />
-        <property name="hbasecompatprofile" value="2" />
-        <property name="avrohadoopprofile" value="2" />
-      </then>
-    </elseif>
-
-    <!-- hadoopversion 260 is created for testing purposes only. Do not use it in production! -->
-    <elseif>
-      <equals arg1="${hadoopversion}" arg2="260" />
-      <then>
-        <property name="hadoop.version" value="2.6.0" />
-        <property name="hbase95.version" value="1.2.0" />
-        <property name="zookeeper.version" value="3.4.5" />
-        <property name="hadoop.version.full" value="2.6.0" />
-        <property name="hcatalog.version" value="1.2.0" />
-        <property name="hbasecompatprofile" value="2" />
-        <property name="avrohadoopprofile" value="2" />
-      </then>
-    </elseif>
-
-    <else>
-      <fail message="Unrecognized hadoopversion. Can only be 20, 23, 100, 200 or 210." />
-    </else>
-  </if>
-
-  <!-- Set dependency versions that are working with all Hadoop versions-->
-  <property name="hbase95.version" value="0.95.2-hadoop${hbasecompatprofile}-SNAPSHOT" />
-
   <!-- Load system-wide and project-wide default properties set by
        the user, to avoid needing to override with -D. -->
   <property file="${user.home}/build.properties" />
@@ -218,6 +41,10 @@
   <property name="name" value="sqoop" />
   <property name="Name" value="Sqoop" />
   <property name="version" value="1.4.7-SNAPSHOT" />
+
+  <!-- Ivy library properties -->
+  <property name="ivy.dir" location="${basedir}/ivy" />
+  <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
 
   <!-- The last version released. -->
   <property name="oldversion" value="1.4.6" />
@@ -277,7 +104,7 @@
   <property name="relnotes.filename"
       location="${build.relnotes.dir}/sqoop-${version}.releasenotes.html" />
 
-  <property name="bin.artifact.name" value="${artifact.name}.bin__hadoop-${hadoop.version.full}" />
+  <property name="bin.artifact.name" value="${artifact.name}.bin__hadoop-${hadoop.version}" />
   <property name="dist.dir" location="${build.dir}/${bin.artifact.name}" />
   <property name="tar.file" location="${build.dir}/${bin.artifact.name}.tar.gz" />
   <property name="build.docs.timestamp"
@@ -339,11 +166,6 @@
        to contain the path to the driver library dir.
     -->
   <property name="sqoop.thirdparty.lib.dir" value="" />
-
-
-  <!-- Ivy library properties -->
-  <property name="ivy.dir" location="${basedir}/ivy" />
-  <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
 
   <!-- Ivy-based dependency resolution -->
   <property name="ivysettings.xml" location="${ivy.dir}/ivysettings.xml"/>
@@ -1464,28 +1286,28 @@
   <!-- retrieve ivy-managed artifacts from the Hadoop distribution -->
   <target name="ivy-resolve-hadoop" depends="ivy-init"
       unless="hadoop.is.local">
-    <ivy:resolve settingsRef="${name}.ivy.settings" conf="hadoop${hadoopversion}" />
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="common" />
   </target>
   <target name="ivy-retrieve-hadoop" depends="ivy-init,ivy-resolve-hadoop">
     <!-- retrieve hadoop refs normally. -->
     <ivy:retrieve settingsRef="${name}.ivy.settings"
        pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
        sync="true" />
-    <ivy:cachepath pathid="${name}.hadoop.classpath" conf="hadoop${hadoopversion}" />
+    <ivy:cachepath pathid="${name}.hadoop.classpath" conf="common" />
   </target>
 
   <!-- retrieve ivy-managed test artifacts from the Hadoop distribution -->
   <target name="ivy-resolve-hadoop-test" depends="ivy-init"
       unless="hadoop.is.local">
-    <ivy:resolve settingsRef="${name}.ivy.settings" conf="hadoop${hadoopversion}test" />
+    <ivy:resolve settingsRef="${name}.ivy.settings" conf="test" />
   </target>
   <target name="ivy-retrieve-hadoop-test"
       depends="ivy-init,ivy-resolve-hadoop-test">
-        <ivy:retrieve settingsRef="${name}.ivy.settings"
+    <ivy:retrieve settingsRef="${name}.ivy.settings"
           pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}"
           sync="true" />
-        <ivy:cachepath pathid="${name}.hadooptest.classpath"
-          conf="hadoop${hadoopversion}test" />
+    <ivy:cachepath pathid="${name}.hadooptest.classpath"
+          conf="test" />
   </target>
 
   <!-- retrieve ivy-managed artifacts for checkstyle -->
