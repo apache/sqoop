@@ -29,6 +29,7 @@ import org.apache.avro.LogicalType;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -88,7 +89,9 @@ public class AvroSchemaGenerator {
 
     List<Field> fields = new ArrayList<Field>();
     for (String columnName : columnNames) {
-      String cleanedCol = AvroUtil.toAvroIdentifier(ClassWriter.toJavaIdentifier(columnName));
+      // We're unescaping identifiers to get the real Unicode characters
+      // back, and not the escaped versions.
+      String cleanedCol = AvroUtil.toAvroIdentifier(StringEscapeUtils.unescapeJava(ClassWriter.toJavaIdentifier(columnName)));
       List<Integer> columnInfoList = columnInfo.get(columnName);
       int sqlType = columnInfoList.get(0);
       Integer precision = columnInfoList.get(1);

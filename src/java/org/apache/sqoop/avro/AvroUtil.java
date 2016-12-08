@@ -28,6 +28,7 @@ import org.apache.avro.generic.GenericFixed;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.mapred.FsInput;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -106,7 +107,10 @@ public final class AvroUtil {
    * Convert Column name into Avro column name.
    */
   public static String toAvroColumn(String column) {
-    String candidate = ClassWriter.toJavaIdentifier(column);
+    // We're unescaping identifiers to get the real Unicode characters
+    // back, and not the escaped versions.
+    String candidate = StringEscapeUtils.unescapeJava(
+        ClassWriter.toJavaIdentifier(column));
     return toAvroIdentifier(candidate);
   }
 

@@ -284,7 +284,16 @@ public class ClassWriter {
       return "_" + output;
     }
 
-    return output;
+    // Calling StringEscapeUtils#escapeJava is required because we'd like to
+    // support Unicode characters in identifiers even if the locale of the host
+    // system is not supporting UTF-8, or by any reason the locale is different
+    // from that. Good example: if a column name would contain a \uC3A1 char
+    // in it's name, though the locale would not support Unicode characters
+    // then the generated java file would contain unrecognizable characters
+    // for the compiler, and javac would fail with a compile error. If the name
+    // of the column would be Alm\uC3A1a then it would be Alm\uC3A1a after the
+    // escaping, and this every places where it's used/
+    return StringEscapeUtils.escapeJava(output);
   }
 
   private String toJavaType(String columnName, int sqlType) {
