@@ -277,4 +277,18 @@ public class OracleExportTest extends TestExport {
         "--update-key", "ID", "--update-mode", "allowinsert", "--oracle-escaping-disabled", "false")));
     verifyExport(TOTAL_RECORDS);
   }
+
+  /** Make sure mixed update/insert export work correctly. */
+  public void testUpsertTextExportWithEscapingDisabled() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+    createTextFile(0, TOTAL_RECORDS, false);
+    createTable();
+    // first time will be insert.
+    runExport(getArgv(true, 10, 10, newStrArray(null,
+        "--update-key", "ID", "--update-mode", "allowinsert", "--oracle-escaping-disabled", "true")));
+    // second time will be update.
+    runExport(getArgv(true, 10, 10, newStrArray(null,
+        "--update-key", "ID", "--update-mode", "allowinsert", "--oracle-escaping-disabled", "true")));
+    verifyExport(TOTAL_RECORDS);
+  }
 }
