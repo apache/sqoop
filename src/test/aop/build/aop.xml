@@ -18,8 +18,8 @@
   <property name="sqoop-fi.jar" location="${build.dir}/${final.name}-fi.jar"/>
   <property name="compile-inject.output"
     value="${build-fi.dir}/compile-fi.log"/>
-  <property name="aspectversion" value="1.6.11"/>
-  <property name="javac.version" value="1.6"/>
+  <property name="aspectversion" value="${aspectj.version}"/>
+  <property name="javac.version" value="${targetJavaVersion}"/>
   <property file="${basedir}/build.properties"/>
 
   <!--All Fault Injection (FI) related targets are located in this session -->
