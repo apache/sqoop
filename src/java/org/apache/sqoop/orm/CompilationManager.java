@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -169,6 +170,9 @@ public class CompilationManager {
 
     String curClasspath = System.getProperty("java.class.path");
     LOG.debug("Current sqoop classpath = " + curClasspath);
+
+    args.add("-encoding");
+    args.add(StandardCharsets.UTF_8.toString());
 
     args.add("-sourcepath");
     args.add(jarOutDir);
