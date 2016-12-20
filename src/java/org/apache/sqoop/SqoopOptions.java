@@ -1062,7 +1062,7 @@ public class SqoopOptions implements Cloneable {
     // set default mainframe data set type to partitioned data set
     this.mainframeInputDatasetType = MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED;
 
-    // set default transaction isolation level to TRANSACTION_READ_UNCOMMITED
+    // set default metadata transaction isolation level to TRANSACTION_READ_COMMITTED
     this.metadataTransactionIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
   }
 
