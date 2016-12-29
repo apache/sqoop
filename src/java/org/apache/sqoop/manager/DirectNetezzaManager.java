@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -86,6 +87,8 @@ public class DirectNetezzaManager extends NetezzaManager {
   public static final String NETEZZA_TABLE_ENCODING_LONG_ARG =
       "encoding";
 
+  public static final String NETEZZA_SCHEMA_OPT = "netezza.schema";
+  public static final String NETEZZA_TABLE_SCHEMA_LONG_ARG = "schema";
 
   private static final String QUERY_CHECK_DICTIONARY_FOR_TABLE =
       "SELECT 1 FROM _V_TABLE WHERE OWNER= ? "
@@ -293,6 +296,9 @@ public class DirectNetezzaManager extends NetezzaManager {
     netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_TABLE_ENCODING_OPT)
         .hasArg().withDescription("Table encoding")
         .withLongOpt(NETEZZA_TABLE_ENCODING_LONG_ARG).create());
+	netezzaOpts.addOption(OptionBuilder.withArgName(NETEZZA_SCHEMA_OPT)
+		.hasArg().withDescription("Allow Schema")
+		.withLongOpt(NETEZZA_TABLE_SCHEMA_LONG_ARG).create());
     return netezzaOpts;
   }
 
@@ -302,6 +308,8 @@ public class DirectNetezzaManager extends NetezzaManager {
     Configuration conf = opts.getConf();
 
     String[] extraArgs = opts.getExtraArgs();
+	
+    LOG.debug("extraArgs " + Arrays.toString(extraArgs));
 
     RelatedOptions netezzaOpts = getNetezzaExtraOpts();
     CommandLine cmdLine = new GnuParser().parse(netezzaOpts, extraArgs, true);
@@ -319,6 +327,12 @@ public class DirectNetezzaManager extends NetezzaManager {
           .getOptionValue(NETEZZA_TABLE_ENCODING_LONG_ARG);
       conf.set(NETEZZA_TABLE_ENCODING_OPT, encoding);
     }
+    
+	if (cmdLine.hasOption(NETEZZA_TABLE_SCHEMA_LONG_ARG)) {
+		String schemaName = cmdLine.getOptionValue(NETEZZA_TABLE_SCHEMA_LONG_ARG);
+		LOG.info("We will use schema " + schemaName);
+		conf.set(NETEZZA_SCHEMA_OPT, schemaName);
+	}
     
     conf.setBoolean(NETEZZA_CTRL_CHARS_OPT,
       cmdLine.hasOption(NETEZZA_CTRL_CHARS_LONG_ARG));
@@ -353,6 +367,20 @@ public class DirectNetezzaManager extends NetezzaManager {
   public boolean isDirectModeHCatSupported() {
     return true;
   }
+  
+  @Override
+  public String escapeTableName(String tableName) {
+	Configuration conf = options.getConf();
+
+	String schema = conf.get(NETEZZA_SCHEMA_OPT);
+	// Return table name including schema if requested
+	if (schema != null && !schema.isEmpty()) {
+		return escapeIdentifier(schema) + "." + escapeIdentifier(tableName);
+	}
+
+	return escapeIdentifier(tableName);
+   }
+
 
 
   public static String getLocalLogDir(TaskAttemptID attemptId) {
