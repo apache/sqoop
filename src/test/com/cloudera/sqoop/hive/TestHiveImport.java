@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.JUnit4TestAdapter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +35,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -46,6 +48,9 @@ import com.cloudera.sqoop.tool.CreateHiveTableTool;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
 import org.apache.commons.cli.ParseException;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Datasets;
@@ -53,10 +58,14 @@ import org.kitesdk.data.Datasets;
 /**
  * Test HiveImport capability after an import to HDFS.
  */
+@RunWith(JUnit4.class)
 public class TestHiveImport extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       TestHiveImport.class.getName());
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() {
@@ -406,20 +415,16 @@ public class TestHiveImport extends ImportJobTestCase {
    * Test hive create and --as-parquetfile options validation.
    */
   @Test
-  public void testCreateHiveImportAsParquet() throws ParseException {
+  public void testCreateHiveImportAsParquet() throws ParseException, InvalidOptionsException {
     final String TABLE_NAME = "CREATE_HIVE_IMPORT_AS_PARQUET";
     setCurTableName(TABLE_NAME);
     setNumCols(3);
     String [] extraArgs = {"--as-parquetfile", "--create-hive-table"};
     ImportTool tool = new ImportTool();
 
-    try {
-      tool.validateOptions(tool.parseArguments(getArgv(false, extraArgs), null,
-          null, true));
-      fail("Expected InvalidOptionsException");
-    } catch (InvalidOptionsException ex) {
-      /* success */
-    }
+    thrown.expect(InvalidOptionsException.class);
+    tool.validateOptions(tool.parseArguments(getArgv(false, extraArgs), null,
+        null, true));
   }
 
 
@@ -449,7 +454,7 @@ public class TestHiveImport extends ImportJobTestCase {
 
   /** If bin/hive returns an error exit status, we should get an IOException. */
   @Test
-  public void testHiveExitFails() {
+  public void testHiveExitFails() throws IOException {
     // The expected script is different than the one which would be generated
     // by this, so we expect an IOException out.
     final String TABLE_NAME = "FAILING_HIVE_IMPORT";
@@ -457,14 +462,10 @@ public class TestHiveImport extends ImportJobTestCase {
     setNumCols(2);
     String [] types = { "NUMERIC", "CHAR(64)" };
     String [] vals = { "3.14159", "'foo'" };
-    try {
-      runImportTest(TABLE_NAME, types, vals, "failingImport.q",
-          getArgv(false, null), new ImportTool());
-      // If we get here, then the run succeeded -- which is incorrect.
-      fail("FAILING_HIVE_IMPORT test should have thrown IOException");
-    } catch (IOException ioe) {
-      // expected; ok.
-    }
+
+    thrown.expect(IOException.class);
+    runImportTest(TABLE_NAME, types, vals, "failingImport.q",
+        getArgv(false, null), new ImportTool());
   }
 
   /** Test that we can set delimiters how we want them. */
@@ -585,7 +586,7 @@ public class TestHiveImport extends ImportJobTestCase {
    * Test hive drop and replace option validation.
    */
   @Test
-  public void testHiveDropAndReplaceOptionValidation() throws ParseException {
+  public void testHiveDropAndReplaceOptionValidation() throws ParseException, InvalidOptionsException {
     LOG.info("Testing conflicting Hive delimiter drop/replace options");
 
     setNumCols(3);
@@ -593,13 +594,10 @@ public class TestHiveImport extends ImportJobTestCase {
       "--"+BaseSqoopTool.HIVE_DROP_DELIMS_ARG, };
 
     ImportTool tool = new ImportTool();
-    try {
-      tool.validateOptions(tool.parseArguments(getArgv(false, moreArgs), null,
-          null, true));
-      fail("Expected InvalidOptionsException");
-    } catch (InvalidOptionsException ex) {
-      /* success */
-    }
+
+    thrown.expect(InvalidOptionsException.class);
+    tool.validateOptions(tool.parseArguments(getArgv(false, moreArgs), null,
+        null, true));
   }
 
   /**
@@ -627,7 +625,7 @@ public class TestHiveImport extends ImportJobTestCase {
    * IOException.
    * */
   @Test
-  public void testImportWithBadPartitionKey() {
+  public void testImportWithBadPartitionKey() throws IOException {
     final String TABLE_NAME = "FAILING_PARTITION_HIVE_IMPORT";
 
     LOG.info("Doing import of single row into " + TABLE_NAME + " table");
@@ -654,30 +652,23 @@ public class TestHiveImport extends ImportJobTestCase {
     };
 
     // Test hive-import with the 1st args.
-    try {
-      runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
-          getArgv(false, moreArgs1), new ImportTool());
-      fail(TABLE_NAME + " test should have thrown IOException");
-    } catch (IOException ioe) {
-      // expected; ok.
-    }
+    thrown.expect(IOException.class);
+    runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
+        getArgv(false, moreArgs1), new ImportTool());
 
     // Test hive-import with the 2nd args.
-    try {
-      runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
-          getArgv(false, moreArgs2), new ImportTool());
-      fail(TABLE_NAME + " test should have thrown IOException");
-    } catch (IOException ioe) {
-      // expected; ok.
-    }
+    thrown.expect(IOException.class);
+    runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
+        getArgv(false, moreArgs2), new ImportTool());
 
     // Test create-hive-table with the 1st args.
-    try {
-      runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
-          getCreateTableArgv(false, moreArgs1), new CreateHiveTableTool());
-      fail(TABLE_NAME + " test should have thrown IOException");
-    } catch (IOException ioe) {
-      // expected; ok.
-    }
+    thrown.expect(IOException.class);
+    runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
+        getCreateTableArgv(false, moreArgs1), new CreateHiveTableTool());
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestHiveImport.class);
   }
 }

@@ -20,6 +20,7 @@ package org.apache.sqoop.mapreduce.db;
 import java.sql.ResultSet;
 import java.util.List;
 
+import junit.framework.JUnit4TestAdapter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
@@ -29,24 +30,33 @@ import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.testutil.MockResultSet;
 
 import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public class TextSplitterHadoopConfIntegrationTest extends TestCase {
   private static final String TEXT_COL_NAME = "text_col_name";
 
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  @Test
   public void testDefaultValueOfUnsetBooleanParam() throws Exception {
     Configuration conf = Job.getInstance().getConfiguration();
     TextSplitter splitter = new TextSplitter();
     ResultSet rs = new MockResultSet();
-    try {
-      splitter.split(conf, rs, TEXT_COL_NAME);
-      fail();
-    } catch (ValidationException e) {
-      // expected to throw ValidationException with the a message about the
-      // "i-know-what-i-am-doing" prop
-      assertTrue(e.getMessage().contains(TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY));
-    }
+
+    String containedByExpectedExceptionMessage = TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY;
+
+    thrown.expect(ValidationException.class);
+    thrown.expectMessage(containedByExpectedExceptionMessage);
+    splitter.split(conf, rs, TEXT_COL_NAME);
   }
 
+  @Test
   public void testBooleanParamValue() throws Exception {
     Configuration conf = Job.getInstance().getConfiguration();
     conf.set(TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY, "true");
@@ -54,6 +64,11 @@ public class TextSplitterHadoopConfIntegrationTest extends TestCase {
     ResultSet rs = new MockResultSet();
     List<InputSplit> splits = splitter.split(conf, rs, TEXT_COL_NAME);
     assertFalse(splits.isEmpty());
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TextSplitterHadoopConfIntegrationTest.class);
   }
 }
 

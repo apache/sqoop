@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
@@ -34,10 +35,17 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test the LobFile reader/writer implementation.
  */
+@RunWith(JUnit4.class)
 public class TestLobFile extends TestCase {
 
   public static final Log LOG = LogFactory.getLog(
@@ -57,6 +65,10 @@ public class TestLobFile extends TestCase {
   private Configuration conf;
   private FileSystem fs;
 
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  @Before
   public void setUp() throws Exception {
     conf = new Configuration();
     conf.set("fs.default.name", "file:///");
@@ -130,12 +142,8 @@ public class TestLobFile extends TestCase {
 
     reader.close();
 
-    try {
-      reader.next();
-      fail("Expected IOException calling next after close");
-    } catch (IOException ioe) {
-      // expected this.
-    }
+    thrown.expect(IOException.class);
+    reader.next();
 
     // A second close shouldn't hurt anything. This should be a no-op.
     reader.close();
@@ -148,15 +156,18 @@ public class TestLobFile extends TestCase {
     fs.delete(p, false);
   }
 
+  @Test
   public void testEmptyRecord() throws Exception {
     runClobFileTest(new Path(TEMP_BASE_DIR, "empty.lob"), null);
   }
 
+  @Test
   public void testSingleRecord() throws Exception {
     runClobFileTest(new Path(TEMP_BASE_DIR, "single.lob"),
         null, "this is a single record!");
   }
 
+  @Test
   public void testMultiRecords() throws Exception {
     runClobFileTest(new Path(TEMP_BASE_DIR, "multi.lob"),
         CodecMap.NONE,
@@ -165,6 +176,7 @@ public class TestLobFile extends TestCase {
         "yet one more record graces this file.");
   }
 
+  @Test
   public void testMultiIndexSegments() throws Exception {
     // Test that we can use multiple IndexSegments.
     runClobFileTest(new Path(TEMP_BASE_DIR, "multi-index.lob"),
@@ -231,6 +243,7 @@ public class TestLobFile extends TestCase {
     assertFalse(reader.isRecordAvailable());
   }
 
+  @Test
   public void testVeryShortRead() throws Exception {
     // Read only a small fraction of a record, ensure that we can
     // read the next record, even when we've left more than a 16-byte
@@ -250,6 +263,7 @@ public class TestLobFile extends TestCase {
 
   }
 
+  @Test
   public void testIncompleteOverread() throws Exception {
     // Read most of the first record so that we partially consume the
     // next record start mark; make sure we realign properly.
@@ -266,6 +280,7 @@ public class TestLobFile extends TestCase {
         RECORD3);
   }
 
+  @Test
   public void testSeekToRecord() throws Exception {
     // Seek past the first two records and read the third.
 
@@ -342,6 +357,7 @@ public class TestLobFile extends TestCase {
     assertEquals(expectedRecord, finalRecord);
   }
 
+  @Test
   public void testManySeeks() throws Exception {
     // Test that we can do gymnastics with seeking between records.
 
@@ -505,6 +521,7 @@ public class TestLobFile extends TestCase {
     reader.close();
   }
 
+  @Test
   public void testBinaryRecords() throws Exception {
     // Write a BLOB file and read it all back.
 
@@ -523,6 +540,7 @@ public class TestLobFile extends TestCase {
     verifyBlobRecords(p, NUM_RECORDS, RECORD_LEN, RECORD_LEN);
   }
 
+  @Test
   public void testOverLengthBinaryRecord() throws Exception {
     // Write a record with a declared length shorter than the
     // actual length, and read it back.
@@ -556,6 +574,7 @@ public class TestLobFile extends TestCase {
     runClobFileTest(p, codec, records);
   }
 
+  @Test
   public void testCompressedFile() throws Exception {
     // Test all the various compression codecs.
 
@@ -564,15 +583,13 @@ public class TestLobFile extends TestCase {
     runCompressedTest(CodecMap.NONE);
     runCompressedTest(CodecMap.DEFLATE);
 
-    try {
-      // We expect this to throw UnsupportedCodecException
-      // because this class is not included in our package.
-      runCompressedTest(CodecMap.LZO);
-      fail("Expected unsupported codec exception for lzo");
-    } catch (UnsupportedCodecException uce) {
-      // We pass.
-      LOG.info("Got unsupported codec exception for lzo; expected -- good.");
-    }
+    thrown.expect(UnsupportedCodecException.class);
+    runCompressedTest(CodecMap.LZO);
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestLobFile.class);
   }
 }
 

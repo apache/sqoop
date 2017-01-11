@@ -20,6 +20,7 @@ package com.cloudera.sqoop.hive;
 
 import java.util.Map;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
@@ -30,26 +31,33 @@ import org.apache.sqoop.util.SqlTypeMap;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import java.sql.Types;
 
 /**
  * Test Hive DDL statement generation.
  */
+@RunWith(JUnit4.class)
 public class TestTableDefWriter extends TestCase {
 
   public static final Log LOG = LogFactory.getLog(
       TestTableDefWriter.class.getName());
 
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
   // Test getHiveOctalCharCode and expect an IllegalArgumentException.
   private void expectExceptionInCharCode(int charCode) {
-    try {
-      TableDefWriter.getHiveOctalCharCode(charCode);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException iae) {
-      // Expected; ok.
-    }
+    thrown.expect(IllegalArgumentException.class);
+    TableDefWriter.getHiveOctalCharCode(charCode);
   }
 
+  @Test
   public void testHiveOctalCharCode() {
     assertEquals("\\000", TableDefWriter.getHiveOctalCharCode(0));
     assertEquals("\\001", TableDefWriter.getHiveOctalCharCode(1));
@@ -61,6 +69,7 @@ public class TestTableDefWriter extends TestCase {
     expectExceptionInCharCode(254);
   }
 
+  @Test
   public void testDifferentTableNames() throws Exception {
     Configuration conf = new Configuration();
     SqoopOptions options = new SqoopOptions();
@@ -83,6 +92,7 @@ public class TestTableDefWriter extends TestCase {
     assertTrue(loadData.indexOf("/inputTable'") != -1);
   }
 
+  @Test
   public void testDifferentTargetDirs() throws Exception {
     String targetDir = "targetDir";
     String inputTable = "inputTable";
@@ -111,6 +121,7 @@ public class TestTableDefWriter extends TestCase {
     assertTrue(loadData.indexOf("/" + targetDir + "'") != -1);
   }
 
+  @Test
   public void testPartitions() throws Exception {
     String[] args = {
         "--hive-partition-key", "ds",
@@ -137,6 +148,7 @@ public class TestTableDefWriter extends TestCase {
     assertTrue(loadData.endsWith(" PARTITION (ds='20110413')"));
   }
 
+  @Test
   public void testLzoSplitting() throws Exception {
     String[] args = {
         "--compress",
@@ -165,6 +177,7 @@ public class TestTableDefWriter extends TestCase {
         createTable);
   }
 
+  @Test
   public void testUserMapping() throws Exception {
     String[] args = {
         "--map-column-hive", "id=STRING,value=INTEGER",
@@ -191,6 +204,7 @@ public class TestTableDefWriter extends TestCase {
     assertFalse(createTable.contains("`value` STRING"));
   }
 
+  @Test
   public void testUserMappingFailWhenCantBeApplied() throws Exception {
     String[] args = {
         "--map-column-hive", "id=STRING,value=INTEGER",
@@ -205,14 +219,11 @@ public class TestTableDefWriter extends TestCase {
     colTypes.put("id", Types.INTEGER);
     writer.setColumnTypes(colTypes);
 
-    try {
-      String createTable = writer.getCreateTableStmt();
-      fail("Expected failure on non applied mapping.");
-    } catch(IllegalArgumentException iae) {
-      // Expected, ok
-    }
+    thrown.expect(IllegalArgumentException.class);
+    String createTable = writer.getCreateTableStmt();
   }
 
+  @Test
   public void testHiveDatabase() throws Exception {
     String[] args = {
         "--hive-database", "db",
@@ -233,5 +244,10 @@ public class TestTableDefWriter extends TestCase {
     String loadStmt = writer.getLoadDataStmt();
     assertNotNull(loadStmt);
     assertTrue(createTable.contains("`db`.`outputTable`"));
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestTableDefWriter.class);
   }
 }

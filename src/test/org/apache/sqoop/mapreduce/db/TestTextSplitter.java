@@ -23,14 +23,23 @@ import java.util.List;
 
 import com.cloudera.sqoop.mapreduce.db.TextSplitter;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestCase;
-import junit.framework.Test;
 import org.apache.sqoop.validation.ValidationException;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test that the TextSplitter implementation creates a sane set of splits.
  */
+@RunWith(JUnit4.class)
 public class TestTextSplitter extends TestCase {
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   public String formatArray(Object [] ar) {
     StringBuilder sb = new StringBuilder();
@@ -70,30 +79,35 @@ public class TestTextSplitter extends TestCase {
     }
   }
 
+  @Test
   public void testStringConvertEmpty() {
     TextSplitter splitter = new TextSplitter();
     BigDecimal emptyBigDec = splitter.stringToBigDecimal("");
     assertEquals(BigDecimal.ZERO, emptyBigDec);
   }
 
+  @Test
   public void testBigDecConvertEmpty() {
     TextSplitter splitter = new TextSplitter();
     String emptyStr = splitter.bigDecimalToString(BigDecimal.ZERO);
     assertEquals("", emptyStr);
   }
 
+  @Test
   public void testConvertA() {
     TextSplitter splitter = new TextSplitter();
     String out = splitter.bigDecimalToString(splitter.stringToBigDecimal("A"));
     assertEquals("A", out);
   }
 
+  @Test
   public void testConvertZ() {
     TextSplitter splitter = new TextSplitter();
     String out = splitter.bigDecimalToString(splitter.stringToBigDecimal("Z"));
     assertEquals("Z", out);
   }
 
+  @Test
   public void testConvertThreeChars() {
     TextSplitter splitter = new TextSplitter();
     String out = splitter.bigDecimalToString(
@@ -101,6 +115,7 @@ public class TestTextSplitter extends TestCase {
     assertEquals("abc", out);
   }
 
+  @Test
   public void testConvertStr() {
     TextSplitter splitter = new TextSplitter();
     String out = splitter.bigDecimalToString(
@@ -108,6 +123,7 @@ public class TestTextSplitter extends TestCase {
     assertEquals("big str", out);
   }
 
+  @Test
   public void testConvertChomped() {
     TextSplitter splitter = new TextSplitter();
     String out = splitter.bigDecimalToString(
@@ -115,6 +131,7 @@ public class TestTextSplitter extends TestCase {
     assertEquals("AVeryLon", out);
   }
 
+  @Test
   public void testAlphabetSplit() throws SQLException, ValidationException {
     // This should give us 25 splits, one per letter.
     TextSplitter splitter = new TextSplitter();
@@ -125,17 +142,15 @@ public class TestTextSplitter extends TestCase {
     assertArrayEquals(expected, splits.toArray(new String [0]));
   }
 
-    public void testAlphabetSplitWhenMinStringGreaterThanMaxString() throws SQLException {
-        TextSplitter splitter = new TextSplitter();
-        try {
-            splitter.split(4, "Z", "A", "");
-            fail();
-        } catch (ValidationException e) {
-            // expected
-            assertTrue(true);
-        }
-    }
+  @Test
+  public void testAlphabetSplitWhenMinStringGreaterThanMaxString() throws SQLException, ValidationException {
+    TextSplitter splitter = new TextSplitter();
 
+    thrown.expect(ValidationException.class);
+    splitter.split(4, "Z", "A", "");
+  }
+
+  @Test
   public void testCommonPrefix() throws SQLException, ValidationException {
     // Splits between 'Hand' and 'Hardy'
     TextSplitter splitter = new TextSplitter();
@@ -148,12 +163,18 @@ public class TestTextSplitter extends TestCase {
     assertEquals(6, splits.size());
   }
 
+  @Test
   public void testNChar() throws SQLException {
     // Splits between 'Hand' and 'Hardy'
     NTextSplitter splitter = new NTextSplitter();
     assertEquals(true, splitter.isUseNCharStrings());
     TextSplitter splitter2 = new TextSplitter();
     assertEquals(false, splitter2.isUseNCharStrings());
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestTextSplitter.class);
   }
 
 }
