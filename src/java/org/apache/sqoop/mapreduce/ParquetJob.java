@@ -28,6 +28,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.security.token.delegation.DelegationTokenIdentifier;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.Token;
+import org.apache.sqoop.avro.AvroSchemaMismatchException;
 import org.apache.sqoop.hive.HiveConfig;
 import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Dataset;
@@ -48,11 +49,22 @@ public final class ParquetJob {
   public static final Log LOG = LogFactory.getLog(ParquetJob.class.getName());
 
   public static final String HIVE_METASTORE_CLIENT_CLASS = "org.apache.hadoop.hive.metastore.HiveMetaStoreClient";
+
   public static final String HIVE_METASTORE_SASL_ENABLED = "hive.metastore.sasl.enabled";
   // Purposefully choosing the same token alias as the one Oozie chooses.
   // Make sure we don't generate a new delegation token if oozie
   // has already generated one.
   public static final String HIVE_METASTORE_TOKEN_ALIAS = "HCat Token";
+
+  public static final String INCOMPATIBLE_AVRO_SCHEMA_MSG = "Target dataset was created with an incompatible Avro schema. ";
+
+  public static final String HIVE_INCOMPATIBLE_AVRO_SCHEMA_MSG = "You tried to import to an already existing Hive table in " +
+      "Parquet format. Sqoop maps date/timestamp SQL types to int/bigint Hive types during Hive Parquet import" +
+      " but it is possible that date/timestamp types were mapped to strings during table" +
+      " creation. Consider using Sqoop option --map-column-java resolve the mismatch" +
+      " (e.g. --map-column-java date_field1=String,timestamp_field1=String).";
+
+  private static final String HIVE_URI_PREFIX = "dataset:hive";
 
   private ParquetJob() {
   }
@@ -91,7 +103,7 @@ public final class ParquetJob {
     Dataset dataset;
 
     // Add hive delegation token only if we don't already have one.
-    if (uri.startsWith("dataset:hive")) {
+    if (isHiveImport(uri)) {
       Configuration hiveConf = HiveConfig.getHiveConf(conf);
       if (isSecureMetastore(hiveConf)) {
         // Copy hive configs to job config
@@ -111,9 +123,8 @@ public final class ParquetJob {
       dataset = Datasets.load(uri);
       Schema writtenWith = dataset.getDescriptor().getSchema();
       if (!SchemaValidationUtil.canRead(writtenWith, schema)) {
-        throw new IOException(
-            String.format("Expected schema: %s%nActual schema: %s",
-                writtenWith, schema));
+        String exceptionMessage = buildAvroSchemaMismatchMessage(isHiveImport(uri));
+        throw new AvroSchemaMismatchException(exceptionMessage, writtenWith, schema);
       }
     } else {
       dataset = createDataset(schema, getCompressionType(conf), uri);
@@ -131,7 +142,11 @@ public final class ParquetJob {
     }
   }
 
-  private static Dataset createDataset(Schema schema,
+  private static boolean isHiveImport(String importUri) {
+    return importUri.startsWith(HIVE_URI_PREFIX);
+  }
+
+  public static Dataset createDataset(Schema schema,
       CompressionType compressionType, String uri) {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(schema)
@@ -191,4 +206,15 @@ public final class ParquetJob {
       throw new RuntimeException("Couldn't fetch delegation token.", ex);
     }
   }
+
+  private static String buildAvroSchemaMismatchMessage(boolean hiveImport) {
+    String exceptionMessage = INCOMPATIBLE_AVRO_SCHEMA_MSG;
+
+    if (hiveImport) {
+      exceptionMessage += HIVE_INCOMPATIBLE_AVRO_SCHEMA_MSG;
+    }
+
+    return exceptionMessage;
+  }
+
 }

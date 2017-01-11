@@ -20,11 +20,25 @@ package org.apache.sqoop.tool;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 
+import com.cloudera.sqoop.hive.HiveImport;
+import org.apache.avro.Schema;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.avro.AvroSchemaMismatchException;
+import org.apache.sqoop.util.ExpectedLogMessage;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
@@ -41,6 +55,9 @@ public class TestImportTool {
     {"TRANSACTION_SERIALIZABLE",Connection.TRANSACTION_SERIALIZABLE}
   };
 
+  @Rule
+  public ExpectedLogMessage logMessage = new ExpectedLogMessage();
+
   @Theory
   public void esnureTransactionIsolationLevelsAreMappedToTheRightValues(Object[] values)
       throws Exception {
@@ -48,6 +65,32 @@ public class TestImportTool {
     String[] args = { "--" + BaseSqoopTool.METADATA_TRANSACTION_ISOLATION_LEVEL, values[0].toString() };
     SqoopOptions options = importTool.parseArguments(args, null, null, true);
     assertThat(options.getMetadataTransactionIsolationLevel(), is(equalTo(values[1])));
+  }
+
+  @Test
+  public void testImportToolHandlesAvroSchemaMismatchExceptionProperly() throws Exception {
+    final String writtenWithSchemaString = "writtenWithSchema";
+    final String actualSchemaString = "actualSchema";
+    final String errorMessage = "Import failed";
+
+    ImportTool importTool = spy(new ImportTool("import", mock(CodeGenTool.class), false));
+
+    doReturn(true).when(importTool).init(any(com.cloudera.sqoop.SqoopOptions.class));
+
+    Schema writtenWithSchema = mock(Schema.class);
+    when(writtenWithSchema.toString()).thenReturn(writtenWithSchemaString);
+    Schema actualSchema = mock(Schema.class);
+    when(actualSchema.toString()).thenReturn(actualSchemaString);
+
+    AvroSchemaMismatchException expectedException = new AvroSchemaMismatchException(errorMessage, writtenWithSchema, actualSchema);
+    doThrow(expectedException).when(importTool).importTable(any(com.cloudera.sqoop.SqoopOptions.class), anyString(), any(HiveImport.class));
+
+    com.cloudera.sqoop.SqoopOptions sqoopOptions = mock(com.cloudera.sqoop.SqoopOptions.class);
+    when(sqoopOptions.doHiveImport()).thenReturn(true);
+
+    logMessage.expectError(expectedException.getMessage());
+    int result = importTool.run(sqoopOptions);
+    assertEquals(1, result);
   }
 
 }
