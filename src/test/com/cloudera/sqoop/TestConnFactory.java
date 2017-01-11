@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
@@ -33,13 +34,23 @@ import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test the ConnFactory implementation and its ability to delegate to multiple
  * different ManagerFactory implementations using reflection.
  */
+@RunWith(JUnit4.class)
 public class TestConnFactory extends TestCase {
 
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  @Test
   public void testCustomFactory() throws IOException {
     Configuration conf = new Configuration();
     conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY,
@@ -52,20 +63,19 @@ public class TestConnFactory extends TestCase {
     assertTrue("Expected a DummyManager", manager instanceof DummyManager);
   }
 
-  public void testExceptionForNoManager() {
+  @Test
+  public void testExceptionForNoManager() throws IOException {
     Configuration conf = new Configuration();
     conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY, EmptyFactory.class.getName());
 
     ConnFactory factory = new ConnFactory(conf);
-    try {
-      factory.getManager(
-          new JobData(new SqoopOptions(), new ImportTool()));
-      fail("factory.getManager() expected to throw IOException");
-    } catch (IOException ioe) {
-      // Expected this. Test passes.
-    }
+
+    thrown.expect(IOException.class);
+    factory.getManager(
+        new JobData(new SqoopOptions(), new ImportTool()));
   }
 
+  @Test
   public void testMultipleManagers() throws IOException {
     Configuration conf = new Configuration();
     // The AlwaysDummyFactory is second in this list. Nevertheless, since
@@ -184,5 +194,10 @@ public class TestConnFactory extends TestCase {
 
     public void release() {
     }
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestConnFactory.class);
   }
 }

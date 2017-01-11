@@ -37,6 +37,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.JUnit4TestAdapter;
 import org.apache.avro.Conversions;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
@@ -49,11 +50,21 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test that we can export Avro Data Files from HDFS into databases.
  */
+
+@RunWith(JUnit4.class)
 public class TestAvroExport extends ExportJobTestCase {
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   /**
    * @return an argv for the CodeGenTool to use when creating tables to export.
@@ -342,6 +353,7 @@ public class TestAvroExport extends ExportJobTestCase {
     assertColValForRowId(maxId, colName, expectedMax);
   }
 
+  @Test
   public void testSupportedAvroTypes() throws IOException, SQLException {
     GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
 
@@ -383,6 +395,7 @@ public class TestAvroExport extends ExportJobTestCase {
     }
   }
 
+  @Test
   public void testPathPatternInExportDir() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
@@ -403,6 +416,7 @@ public class TestAvroExport extends ExportJobTestCase {
     verifyExport(TOTAL_RECORDS);
   }
 
+  @Test
   public void testNullableField() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1 * 10;
@@ -421,6 +435,7 @@ public class TestAvroExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(1), gen1);
   }
 
+  @Test
   public void testAvroRecordsNotSupported() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1;
@@ -434,15 +449,12 @@ public class TestAvroExport extends ExportJobTestCase {
     ColumnGenerator gen = colGenerator(record, schema, null, "VARCHAR(64)");
     createAvroFile(0, TOTAL_RECORDS,  gen);
     createTable(gen);
-    try {
-      runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
-      fail("Avro records can not be exported.");
-    } catch (Exception e) {
-      // expected
-      assertTrue(true);
-    }
+
+    thrown.expect(Exception.class);
+    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
+  @Test
   public void testMissingDatabaseFields() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1;
@@ -458,6 +470,7 @@ public class TestAvroExport extends ExportJobTestCase {
   }
 
   // Test Case for Issue [SQOOP-2846]
+  @Test
   public void testAvroWithUpsert() throws IOException, SQLException {
     String[] argv = { "--update-key", "ID", "--update-mode", "allowinsert" };
     final int TOTAL_RECORDS = 2;
@@ -465,15 +478,13 @@ public class TestAvroExport extends ExportJobTestCase {
     // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
     createAvroFile(0, TOTAL_RECORDS, null);
     createTableWithInsert();
-    try {
-      runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
-    } catch (Exception e) {
-      // expected
-      assertTrue(true);
-    }
+
+    thrown.expect(Exception.class);
+    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
   // Test Case for Issue [SQOOP-2846]
+  @Test
   public void testAvroWithUpdateKey() throws IOException, SQLException {
     String[] argv = { "--update-key", "ID" };
     final int TOTAL_RECORDS = 1;
@@ -484,6 +495,8 @@ public class TestAvroExport extends ExportJobTestCase {
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
     verifyExport(getMsgPrefix() + "0");
   }
+
+  @Test
   public void testMissingAvroFields()  throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1;
@@ -492,15 +505,12 @@ public class TestAvroExport extends ExportJobTestCase {
     ColumnGenerator gen = colGenerator(null, null, null, "VARCHAR(64)");
     createAvroFile(0, TOTAL_RECORDS, gen);
     createTable(gen);
-    try {
-      runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
-      fail("Missing Avro field.");
-    } catch (Exception e) {
-      // expected
-      assertTrue(true);
-    }
+
+    thrown.expect(Exception.class);
+    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
+  @Test
   public void testSpecifiedColumnsAsAvroFields()  throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
     ColumnGenerator[] gens = new ColumnGenerator[] {
@@ -521,6 +531,11 @@ public class TestAvroExport extends ExportJobTestCase {
     assertColValForRowId(9, "col1", 111);
     assertColValForRowId(9, "col2", 222);
     assertColValForRowId(9, "col3", null);
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestAvroExport.class);
   }
 
 }

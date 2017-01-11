@@ -21,6 +21,7 @@ package com.cloudera.sqoop;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import junit.framework.JUnit4TestAdapter;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,14 +33,23 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test that --target-dir works.
  */
+@RunWith(JUnit4.class)
 public class TestTargetDir extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory
       .getLog(TestTargetDir.class.getName());
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   /**
    * Create the argv to pass to Sqoop.
@@ -70,27 +80,22 @@ public class TestTargetDir extends ImportJobTestCase {
   }
 
   /** test invalid argument exception if several output options. */
+  @Test
   public void testSeveralOutputsIOException() throws IOException {
+    ArrayList args = getOutputArgv(true);
+    args.add("--warehouse-dir");
+    args.add(getWarehouseDir());
+    args.add("--target-dir");
+    args.add(getWarehouseDir());
 
-    try {
-      ArrayList args = getOutputArgv(true);
-      args.add("--warehouse-dir");
-      args.add(getWarehouseDir());
-      args.add("--target-dir");
-      args.add(getWarehouseDir());
+    String[] argv = (String[]) args.toArray(new String[0]);
 
-      String[] argv = (String[]) args.toArray(new String[0]);
-      runImport(argv);
-
-      fail("warehouse-dir & target-dir were set and run "
-          + "without problem reported");
-
-    } catch (IOException e) {
-      // expected
-    }
+    thrown.expect(IOException.class);
+    runImport(argv);
   }
 
   /** test target-dir contains imported files. */
+  @Test
   public void testTargetDir() throws IOException {
 
     try {
@@ -123,29 +128,29 @@ public class TestTargetDir extends ImportJobTestCase {
 
   /** test target-dir breaks if already existing
    * (only allowed in append mode). */
+  @Test
   public void testExistingTargetDir() throws IOException {
+    String targetDir = getWarehouseDir() + "/tempTargetDir";
 
-    try {
-      String targetDir = getWarehouseDir() + "/tempTargetDir";
+    ArrayList args = getOutputArgv(true);
+    args.add("--target-dir");
+    args.add(targetDir);
 
-      ArrayList args = getOutputArgv(true);
-      args.add("--target-dir");
-      args.add(targetDir);
-
-      // delete target-dir if exists and recreate it
-      FileSystem fs = FileSystem.get(getConf());
-      Path outputPath = new Path(targetDir);
-      if (!fs.exists(outputPath)) {
-        fs.mkdirs(outputPath);
-      }
-
-      String[] argv = (String[]) args.toArray(new String[0]);
-      runImport(argv);
-
-      fail("Existing target-dir run without problem report");
-
-    } catch (IOException e) {
-      // expected
+    // delete target-dir if exists and recreate it
+    FileSystem fs = FileSystem.get(getConf());
+    Path outputPath = new Path(targetDir);
+    if (!fs.exists(outputPath)) {
+      fs.mkdirs(outputPath);
     }
+
+    String[] argv = (String[]) args.toArray(new String[0]);
+
+    thrown.expect(IOException.class);
+    runImport(argv);
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestTargetDir.class);
   }
 }

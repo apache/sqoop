@@ -29,6 +29,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Types;
 
+import junit.framework.JUnit4TestAdapter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.GenericJdbcManager;
@@ -39,11 +40,18 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * We'll use H2 as a database as the version of HSQLDB we currently depend on
  * (1.8) doesn't include support for stored procedures.
  */
+@RunWith(JUnit4.class)
 public class TestExportUsingProcedure extends TestExport {
   private static final String PROCEDURE_NAME = "INSERT_PROCEDURE";
   /**
@@ -54,6 +62,17 @@ public class TestExportUsingProcedure extends TestExport {
   private String[] names;
   private String[] types;
   private Connection connection;
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  @Rule
+  public TestName testName = new TestName();
+
+  @Override
+  public String getName() {
+    return testName.getMethodName();
+  }
 
   @Override
   @Before
@@ -193,31 +212,24 @@ public class TestExportUsingProcedure extends TestExport {
   // TEST OVERRIDES
 
   @Override
-  public void testMultiMapTextExportWithStaging() throws IOException,
-      SQLException {
-    try {
-      super.testMultiMapTextExportWithStaging();
-      fail("staging tables not compatible with --call");
-    } catch (IOException e) {
-      // expected
-    }
+  @Test
+  public void testMultiMapTextExportWithStaging() throws IOException, SQLException {
+    thrown.expect(IOException.class);
+    super.testMultiMapTextExportWithStaging();
   }
 
   @Override
-  public void testMultiTransactionWithStaging() throws IOException,
-      SQLException {
-    try {
-      super.testMultiTransactionWithStaging();
-      fail("staging tables not compatible with --call");
-    } catch (IOException e) {
-      // expected
-    }
+  @Test
+  public void testMultiTransactionWithStaging() throws IOException, SQLException {
+    thrown.expect(IOException.class);
+    super.testMultiTransactionWithStaging();
   }
 
   /**
    * H2 renames the stored procedure arguments P1, P2, ..., Pn.
    */
   @Override
+  @Test
   public void testColumnsExport() throws IOException, SQLException {
     super.testColumnsExport("P1,P2,P3,P4");
   }
@@ -324,6 +336,11 @@ public class TestExportUsingProcedure extends TestExport {
         on.setInt(5, int2);
       }
     });
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestExportUsingProcedure.class);
   }
 
 }

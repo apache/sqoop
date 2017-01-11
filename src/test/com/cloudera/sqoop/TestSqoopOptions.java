@@ -21,6 +21,7 @@ package com.cloudera.sqoop;
 import java.util.Properties;
 
 import com.cloudera.sqoop.tool.BaseSqoopTool;
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -31,7 +32,9 @@ import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import org.junit.Before;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -47,6 +50,9 @@ import static org.junit.Assert.assertThat;
 public class TestSqoopOptions extends TestCase {
 
   private Properties originalSystemProperties;
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setup() {
@@ -66,22 +72,14 @@ public class TestSqoopOptions extends TestCase {
 
   @Test
   public void testEmptyString() throws Exception {
-    try {
-      SqoopOptions.toChar("");
-      fail("Expected exception");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expect this.
-    }
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    SqoopOptions.toChar("");
   }
 
   @Test
   public void testNullString() throws Exception {
-    try {
-      SqoopOptions.toChar(null);
-      fail("Expected exception");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expect this.
-    }
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    SqoopOptions.toChar(null);
   }
 
   @Test
@@ -134,22 +132,14 @@ public class TestSqoopOptions extends TestCase {
 
   @Test
   public void testUnknownEscape1() throws Exception {
-    try {
-      SqoopOptions.toChar("\\Q");
-      fail("Expected exception");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expect this.
-    }
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    SqoopOptions.toChar("\\Q");
   }
 
   @Test
   public void testUnknownEscape2() throws Exception {
-    try {
-      SqoopOptions.toChar("\\nn");
-      fail("Expected exception");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expect this.
-    }
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    SqoopOptions.toChar("\\nn");
   }
 
   @Test
@@ -184,22 +174,14 @@ public class TestSqoopOptions extends TestCase {
 
   @Test
   public void testErrOctalChar() throws Exception {
-    try {
-      SqoopOptions.toChar("\\095");
-      fail("Expected exception");
-    } catch (NumberFormatException nfe) {
-      // expected.
-    }
+    thrown.expect(NumberFormatException.class);
+    SqoopOptions.toChar("\\095");
   }
 
   @Test
   public void testErrHexChar() throws Exception {
-    try {
-      SqoopOptions.toChar("\\0x9K5");
-      fail("Expected exception");
-    } catch (NumberFormatException nfe) {
-      // expected.
-    }
+    thrown.expect(NumberFormatException.class);
+    SqoopOptions.toChar("\\0x9K5");
   }
 
   private SqoopOptions parse(String [] argv) throws Exception {
@@ -258,12 +240,8 @@ public class TestSqoopOptions extends TestCase {
       "x",
     };
 
-    try {
-      parse(args);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    parse(args);
   }
 
   @Test
@@ -273,12 +251,8 @@ public class TestSqoopOptions extends TestCase {
       "x",
     };
 
-    try {
-      parse(args);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    parse(args);
   }
 
   @Test
@@ -719,12 +693,9 @@ public class TestSqoopOptions extends TestCase {
       "--append",
       "--delete-target-dir",
     };
-    try {
-      validateImportOptions(extraArgs);
-      fail("Expected InvalidOptionsException");
-    } catch(SqoopOptions.InvalidOptionsException ioe) {
-      // Expected
-    }
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    validateImportOptions(extraArgs);
   }
 
   //test incompatability of --delete-target-dir with incremental import
@@ -734,12 +705,9 @@ public class TestSqoopOptions extends TestCase {
       "--incremental", "append",
       "--delete-target-dir",
     };
-    try {
-      validateImportOptions(extraArgs);
-      fail("Expected InvalidOptionsException");
-    } catch(SqoopOptions.InvalidOptionsException ioe) {
-      // Expected
-    }
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    validateImportOptions(extraArgs);
   }
 
   // test that hbase bulk load import with table name and target dir
@@ -761,12 +729,9 @@ public class TestSqoopOptions extends TestCase {
     String [] extraArgs = {
         longArgument(BaseSqoopTool.HBASE_BULK_LOAD_ENABLED_ARG),
         longArgument(BaseSqoopTool.TARGET_DIR_ARG), "./test"};
-    try {
-      validateImportOptions(extraArgs);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // Expected
-    }
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    validateImportOptions(extraArgs);
   }
 
   private static String longArgument(String argument) {
@@ -796,11 +761,13 @@ public class TestSqoopOptions extends TestCase {
       "--split-by",
       "col0",
     };
-    try {
-      validateImportOptions(extraArgs);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // Expected
-    }
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    validateImportOptions(extraArgs);
+  }
+
+  //workaround: ant kept falling back to JUnit3
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(TestSqoopOptions.class);
   }
 }
