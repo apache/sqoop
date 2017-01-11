@@ -42,6 +42,10 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test that compression options (--compress, --compression-codec) work.
@@ -181,14 +185,17 @@ public class TestCompression extends ImportJobTestCase {
     assertEquals(expectedNum, numLines);
   }
 
+  @Test
   public void testDefaultTextCompression() throws IOException {
     runTextCompressionTest(null, 4);
   }
 
+  @Test
   public void testBzip2TextCompression() throws IOException {
     runTextCompressionTest(new BZip2Codec(), 4);
   }
 
+  @Test
   public void testBzip2SequenceFileCompression() throws Exception {
     runSequenceFileCompressionTest(new BZip2Codec(), 4);
   }

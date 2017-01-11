@@ -33,15 +33,18 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.hive.TestHiveImport;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.SqoopTool;
+import org.junit.Before;
+
+import static org.junit.Assert.fail;
 
 /**
  * Test import to Hive from SQL Server.
  */
 public class SQLServerHiveImportManualTest extends TestHiveImport {
 
+  @Before
   public void setUp() {
     super.setUp();
-
   }
 
   protected boolean useHsqldbTestServer() {

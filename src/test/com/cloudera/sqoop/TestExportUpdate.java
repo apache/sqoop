@@ -27,7 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import junit.framework.JUnit4TestAdapter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,17 +34,19 @@ import org.apache.hadoop.util.StringUtils;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Test that we can update a copy of data in the database,
  * based on newer data in HDFS.
  */
-@RunWith(JUnit4.class)
 public class TestExportUpdate extends ExportJobTestCase {
 
   @Rule
@@ -703,11 +704,6 @@ public class TestExportUpdate extends ExportJobTestCase {
     thrown.expect(IOException.class);
     runExport(getArgv(true, 2, 2, "-m", "1",
         "--update-key", "A", "--columns", "B"));
-  }
-
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestExportUpdate.class);
   }
 
 }

@@ -23,6 +23,7 @@ import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -35,6 +36,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -291,6 +295,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     output.close();
   }
 
+  @Test
   public void testExport() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,2009-04-20,400,sales",
@@ -302,6 +307,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     assertRowCount(2, escapeTableOrSchemaName(TABLE_NAME), connection);
   }
 
+  @Test
   public void testExportUsingProcedure() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
         "2,Bob,2009-04-20,400,sales",
@@ -313,6 +319,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     assertRowCount(2, escapeTableOrSchemaName(TABLE_NAME), connection);
   }
 
+  @Test
   public void testExportStaging() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,2009-04-20,400,sales",
@@ -326,6 +333,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     assertRowCount(2, escapeTableOrSchemaName(TABLE_NAME), connection);
   }
 
+  @Test
   public void testExportDirect() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,2009-04-20,400,sales",
@@ -339,6 +347,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     assertRowCount(2, escapeTableOrSchemaName(TABLE_NAME), connection);
   }
 
+  @Test
   public void testExportCustomSchema() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,2009-04-20,400,sales",
@@ -358,6 +367,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       connection);
   }
 
+  @Test
   public void testExportCustomSchemaStaging() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,2009-04-20,400,sales",
@@ -380,6 +390,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       connection);
   }
 
+  @Test
   public void testExportCustomSchemaStagingClear()
     throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
@@ -404,6 +415,7 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       connection);
   }
 
+  @Test
   public void testExportCustomSchemaDirect() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,2009-04-20,400,sales",

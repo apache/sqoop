@@ -20,9 +20,6 @@ package com.cloudera.sqoop.hive;
 
 import java.util.Map;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -31,19 +28,23 @@ import org.apache.sqoop.util.SqlTypeMap;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import java.sql.Types;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * Test Hive DDL statement generation.
  */
-@RunWith(JUnit4.class)
-public class TestTableDefWriter extends TestCase {
+public class TestTableDefWriter {
 
   public static final Log LOG = LogFactory.getLog(
       TestTableDefWriter.class.getName());
@@ -246,8 +247,4 @@ public class TestTableDefWriter extends TestCase {
     assertTrue(createTable.contains("`db`.`outputTable`"));
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestTableDefWriter.class);
-  }
 }

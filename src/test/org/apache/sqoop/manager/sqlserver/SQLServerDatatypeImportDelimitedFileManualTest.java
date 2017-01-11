@@ -38,6 +38,10 @@ import com.cloudera.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test import delimited file from SQL Server.
@@ -218,6 +222,7 @@ public class SQLServerDatatypeImportDelimitedFileManualTest
   }
 
 
+  @Test
   public void testVarBinary() {
     if (!supportsVarBinary()) {
       return;
@@ -225,6 +230,7 @@ public class SQLServerDatatypeImportDelimitedFileManualTest
     dataTypeTest(DATATYPES.VARBINARY);
   }
 
+  @Test
   public void testTime() {
     if (!supportsTime()) {
       skipped = true;

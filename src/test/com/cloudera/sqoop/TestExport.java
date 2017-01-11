@@ -50,6 +50,11 @@ import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import com.cloudera.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test that we can export data from HDFS into databases.
@@ -454,11 +459,13 @@ public class TestExport extends ExportJobTestCase {
   /**
    * Run an "export" on an empty file.
    */
+  @Test
   public void testEmptyExport() throws IOException, SQLException {
     multiFileTest(1, 0, 1);
   }
 
   /** Export 10 rows, make sure they load in correctly. */
+  @Test
   public void testTextExport() throws IOException, SQLException {
     multiFileTest(1, 10, 1);
   }
@@ -466,6 +473,7 @@ public class TestExport extends ExportJobTestCase {
   /** Make sure we can use CombineFileInputFormat to handle multiple
    * files in a single mapper.
    */
+  @Test
   public void testMultiFilesOneMapper() throws IOException, SQLException {
     multiFileTest(2, 10, 1);
   }
@@ -473,11 +481,13 @@ public class TestExport extends ExportJobTestCase {
   /** Make sure we can use CombineFileInputFormat to handle multiple
    * files and multiple maps.
    */
+  @Test
   public void testMultiFilesMultiMaps() throws IOException, SQLException {
     multiFileTest(2, 10, 2);
   }
 
   /** Export 10 rows from gzipped text files. */
+  @Test
   public void testGzipExport() throws IOException, SQLException {
 
     LOG.info("Beginning gzip export test");
@@ -494,6 +504,7 @@ public class TestExport extends ExportJobTestCase {
   /**
    * Ensure that we use multiple statements in a transaction.
    */
+  @Test
   public void testMultiStatement() throws IOException, SQLException {
     final int TOTAL_RECORDS = 20;
     createTextFile(0, TOTAL_RECORDS, true);
@@ -505,6 +516,7 @@ public class TestExport extends ExportJobTestCase {
   /**
    * Ensure that we use multiple transactions in a single mapper.
    */
+  @Test
   public void testMultiTransaction() throws IOException, SQLException {
     final int TOTAL_RECORDS = 20;
     createTextFile(0, TOTAL_RECORDS, true);
@@ -518,6 +530,7 @@ public class TestExport extends ExportJobTestCase {
    * @throws IOException
    * @throws SQLException
    */
+  @Test
   public void testMultiTransactionWithStaging()
     throws IOException, SQLException {
     final int TOTAL_RECORDS = 20;
@@ -532,6 +545,7 @@ public class TestExport extends ExportJobTestCase {
    * Ensure that when we don't force a commit with a statement cap,
    * it happens anyway.
    */
+  @Test
   public void testUnlimitedTransactionSize() throws IOException, SQLException {
     final int TOTAL_RECORDS = 20;
     createTextFile(0, TOTAL_RECORDS, true);
@@ -541,6 +555,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
   /** Run 2 mappers, make sure all records load in correctly. */
+  @Test
   public void testMultiMapTextExport() throws IOException, SQLException {
 
     final int RECORDS_PER_MAP = 10;
@@ -559,6 +574,7 @@ public class TestExport extends ExportJobTestCase {
    * Run 2 mappers with staging enabled,
    * make sure all records load in correctly.
    */
+  @Test
   public void testMultiMapTextExportWithStaging()
   throws IOException, SQLException {
 
@@ -576,6 +592,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
   /** Export some rows from a SequenceFile, make sure they import correctly. */
+  @Test
   public void testSequenceFileExport() throws Exception {
 
     final int TOTAL_RECORDS = 10;
@@ -640,6 +657,7 @@ public class TestExport extends ExportJobTestCase {
     }
   }
 
+  @Test
   public void testIntCol() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
@@ -668,6 +686,7 @@ public class TestExport extends ExportJobTestCase {
     return "BIGINT";
   }
 
+  @Test
   public void testBigIntCol() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
@@ -737,6 +756,7 @@ public class TestExport extends ExportJobTestCase {
     };
   }
 
+  @Test
   public void testDatesAndTimes() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
@@ -751,6 +771,7 @@ public class TestExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(1), genTime);
   }
 
+  @Test
   public void testNumericTypes() throws IOException, SQLException {
     final int TOTAL_RECORDS = 9;
 
@@ -794,6 +815,7 @@ public class TestExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(1), genNumeric);
   }
 
+  @Test
   public void testColumnsExport() throws IOException, SQLException {
     testColumnsExport("ID,MSG," + forIdx(0) + "," + forIdx(2));
   }

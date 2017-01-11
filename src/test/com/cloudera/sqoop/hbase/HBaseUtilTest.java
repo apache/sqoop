@@ -20,13 +20,15 @@ package com.cloudera.sqoop.hbase;
 
 import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * This tests to verify that HBase is present (default when running test cases)
  * and that when in fake not present mode, the method return false.
  */
-public class HBaseUtilTest extends TestCase {
+public class HBaseUtilTest {
 
   @Test
   public void testHBasePresent() {

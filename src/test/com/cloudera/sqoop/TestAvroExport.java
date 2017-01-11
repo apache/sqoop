@@ -19,6 +19,7 @@
 package com.cloudera.sqoop;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
@@ -37,7 +38,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.JUnit4TestAdapter;
 import org.apache.avro.Conversions;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
@@ -50,17 +50,14 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.Rule;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Test that we can export Avro Data Files from HDFS into databases.
  */
 
-@RunWith(JUnit4.class)
 public class TestAvroExport extends ExportJobTestCase {
 
   @Rule
@@ -531,11 +528,6 @@ public class TestAvroExport extends ExportJobTestCase {
     assertColValForRowId(9, "col1", 111);
     assertColValForRowId(9, "col2", 222);
     assertColValForRowId(9, "col3", null);
-  }
-
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestAvroExport.class);
   }
 
 }

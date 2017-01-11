@@ -35,6 +35,9 @@ import org.apache.hadoop.fs.Path;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test exporting lines that are created via both options of
@@ -101,10 +104,12 @@ public class TestBigDecimalExport extends ExportJobTestCase {
     assertEquals(expected2, actual2);
   }
 
+  @Test
   public void testBigDecimalDefault() throws IOException, SQLException {
     runBigDecimalExport("0.000001,0.0000001");
   }
 
+  @Test
   public void testBigDecimalNoFormat() throws IOException, SQLException {
     runBigDecimalExport("0.000001,1E-7");
   }

@@ -26,6 +26,7 @@ import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,6 +38,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Please see instructions in SQLServerManagerImportManualTest.
@@ -296,6 +300,7 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
     output.close();
   }
 
+  @Test
   public void testExport() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,400,sales",
@@ -307,6 +312,7 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
     assertRowCount(2, escapeObjectName(DBO_TABLE_NAME), conn);
   }
 
+  @Test
   public void testExportCustomSchema() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,400,sales",
@@ -327,6 +333,7 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
     );
   }
 
+  @Test
   public void testExportTableHints() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,400,sales",
@@ -340,6 +347,7 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
     assertRowCount(2, escapeObjectName(DBO_TABLE_NAME), conn);
   }
 
+  @Test
   public void testExportTableHintsMultiple() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,400,sales",
@@ -353,6 +361,7 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
     assertRowCount(2, escapeObjectName(DBO_TABLE_NAME), conn);
   }
 
+  @Test
   public void testSQLServerBinaryType() throws IOException, SQLException {
     createSQLServerBinaryTypeTable(SCHEMA_DBO, DBO_BINARY_TABLE_NAME);
     createTestFile("inputFile", new String[] {
@@ -365,6 +374,7 @@ public class SQLServerManagerExportManualTest extends ExportJobTestCase {
   }
 
   /** Make sure mixed update/insert export work correctly. */
+  @Test
   public void testUpsertTextExport() throws IOException, SQLException {
     createTestFile("inputFile", new String[] {
       "2,Bob,400,sales",

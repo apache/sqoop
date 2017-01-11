@@ -38,12 +38,15 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test that tool plugins work.
  */
-public class TestToolPlugin extends TestCase {
+public class TestToolPlugin {
 
   public static final Log LOG = LogFactory
       .getLog(TestToolPlugin.class.getName());
@@ -102,6 +105,7 @@ public class TestToolPlugin extends TestCase {
     }
   }
 
+  @Test
   public void testPlugin() {
     // Register the plugin with SqoopTool.
     Configuration pluginConf = new Configuration();
@@ -132,6 +136,7 @@ public class TestToolPlugin extends TestCase {
     }
   }
 
+  @Test
   public void testNoOverrideTools() {
     // Test that you can't override an existing tool definition. First
     // registration of a tool name wins.

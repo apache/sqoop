@@ -48,6 +48,10 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.ReparseMapper;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 /**
  * Test that the parse() methods generated in user SqoopRecord implementations
@@ -55,6 +59,7 @@ import com.cloudera.sqoop.util.ClassLoaderStack;
  */
 public class SQLServerParseMethodsManualTest extends ImportJobTestCase {
 
+  @Before
   public void setUp() {
     super.setUp();
     Path p = new Path(getWarehouseDir());
@@ -170,6 +175,7 @@ public class SQLServerParseMethodsManualTest extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testDefaults() throws IOException {
     String[] types = { "INTEGER", "VARCHAR(32)", "INTEGER" };
     String[] vals = { "64", "'foo'", "128" };
@@ -178,6 +184,7 @@ public class SQLServerParseMethodsManualTest extends ImportJobTestCase {
     runParseTest(",", "\\n", "\\\"", "\\", false);
   }
 
+  @Test
   public void testRequiredEnclose() throws IOException {
     String[] types = { "INTEGER", "VARCHAR(32)", "INTEGER" };
     String[] vals = { "64", "'foo'", "128" };
@@ -186,6 +193,7 @@ public class SQLServerParseMethodsManualTest extends ImportJobTestCase {
     runParseTest(",", "\\n", "\\\"", "\\", true);
   }
 
+  @Test
   public void testStringEscapes() throws IOException {
     String[] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)",
         "VARCHAR(32)", "VARCHAR(32)", };
@@ -196,6 +204,7 @@ public class SQLServerParseMethodsManualTest extends ImportJobTestCase {
     runParseTest(",", "\\n", "\\\'", "\\", false);
   }
 
+  @Test
   public void testNumericTypes() throws IOException {
     String[] types = { "INTEGER", "REAL", "FLOAT", "DATE", "TIME", "BIT", };
     String[] vals = { "42", "36.0", "127.1", "'2009-07-02'", "'11:24:00'",

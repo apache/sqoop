@@ -20,24 +20,20 @@ package org.apache.sqoop.mapreduce.db;
 import java.sql.ResultSet;
 import java.util.List;
 
-import junit.framework.JUnit4TestAdapter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.sqoop.validation.ValidationException;
 
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.testutil.MockResultSet;
 
-import junit.framework.TestCase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
-public class TextSplitterHadoopConfIntegrationTest extends TestCase {
+import static org.junit.Assert.assertFalse;
+
+public class TextSplitterHadoopConfIntegrationTest {
   private static final String TEXT_COL_NAME = "text_col_name";
 
   @Rule
@@ -66,9 +62,5 @@ public class TextSplitterHadoopConfIntegrationTest extends TestCase {
     assertFalse(splits.isEmpty());
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TextSplitterHadoopConfIntegrationTest.class);
-  }
 }
 

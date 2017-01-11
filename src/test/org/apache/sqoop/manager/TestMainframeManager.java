@@ -44,6 +44,11 @@ import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.util.ImportException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 /**
  * Test methods of the generic SqlManager implementation.
  */

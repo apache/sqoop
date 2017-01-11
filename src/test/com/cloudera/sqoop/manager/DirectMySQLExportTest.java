@@ -38,6 +38,11 @@ import org.junit.Before;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
 import com.cloudera.sqoop.mapreduce.MySQLExportMapper;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test the DirectMySQLManager implementation's exportJob() functionality.
@@ -136,6 +141,7 @@ public class DirectMySQLExportTest extends TestExport {
   /**
    * Test a single mapper that runs several transactions serially.
    */
+  @Test
   public void testMultiTxExport() throws IOException, SQLException {
     multiFileTest(1, 20, 1,
         "-D", MySQLExportMapper.MYSQL_CHECKPOINT_BYTES_KEY + "=10");
@@ -144,6 +150,7 @@ public class DirectMySQLExportTest extends TestExport {
   /**
    * Test an authenticated export using mysqlimport.
    */
+  @Test
   public void testAuthExport() throws IOException, SQLException {
     SqoopOptions options = new SqoopOptions(MySQLAuthTest.AUTH_CONNECT_STRING,
         getTableName());
@@ -213,6 +220,7 @@ public class DirectMySQLExportTest extends TestExport {
   /**
    * Test an authenticated export using mysqlimport.
    */
+  @Test
   public void testEscapedByExport() throws IOException, SQLException {
     SqoopOptions options = new SqoopOptions(MySQLAuthTest.AUTH_CONNECT_STRING,
         getTableName());
@@ -295,12 +303,14 @@ public class DirectMySQLExportTest extends TestExport {
   }
 
   @Override
+  @Test
   public void testMultiMapTextExportWithStaging()
     throws IOException, SQLException {
     // disable this test as staging is not supported in direct mode
   }
 
   @Override
+  @Test
   public void testMultiTransactionWithStaging()
     throws IOException, SQLException {
     // disable this test as staging is not supported in direct mode

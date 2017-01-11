@@ -48,6 +48,10 @@ import com.cloudera.sqoop.tool.ImportTool;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.util.ClassLoaderStack;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test aspects of the DataDrivenImportJob class' failure reporting.
@@ -58,6 +62,8 @@ import org.apache.sqoop.util.ClassLoaderStack;
  * SQOOP_RETHROW_PROPERTY = "sqoop.throwOnError".
  */
 public class TestImportJob extends ImportJobTestCase {
+
+  @Test
   public void testFailedImportDueToIOException() throws IOException {
     // Make sure that if a MapReduce job to do the import fails due
     // to an IOException, we tell the user about it.
@@ -129,6 +135,7 @@ public class TestImportJob extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testFailedImportDueToJobFail() throws IOException {
     // Test that if the job returns 'false' it still fails and informs
     // the user.
@@ -162,6 +169,7 @@ public class TestImportJob extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testFailedNoColumns() throws IOException {
     // Make sure that if a MapReduce job to do the import fails due
     // to an IOException, we tell the user about it.
@@ -189,6 +197,7 @@ public class TestImportJob extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testFailedIllegalColumns() throws IOException {
     // Make sure that if a MapReduce job to do the import fails due
     // to an IOException, we tell the user about it.
@@ -219,6 +228,7 @@ public class TestImportJob extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testDuplicateColumns() throws IOException {
     // Make sure that if a MapReduce job to do the import fails due
     // to an IOException, we tell the user about it.
@@ -280,6 +290,7 @@ public class TestImportJob extends ImportJobTestCase {
     return strings.toArray(new String[0]);
   }
 
+  @Test
   public void testDeleteTargetDir() throws Exception {
     // Make sure that if a MapReduce job to do the import fails due
     // to an IOException, we tell the user about it.
@@ -328,6 +339,7 @@ public class TestImportJob extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testManyColumns() throws Exception {
     int numberOfColumns = 7500;
 

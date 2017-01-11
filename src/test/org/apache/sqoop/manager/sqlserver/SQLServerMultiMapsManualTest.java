@@ -48,12 +48,19 @@ import com.cloudera.sqoop.testutil.SeqFileReader;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test that using multiple mapper splits works.
  */
 public class SQLServerMultiMapsManualTest extends ImportJobTestCase {
 
+  @Before
   public void setUp() {
     super.setUp();
     MSSQLTestUtils utils = new MSSQLTestUtils();
@@ -67,6 +74,7 @@ public class SQLServerMultiMapsManualTest extends ImportJobTestCase {
 
   }
 
+  @After
   public void tearDown() {
     super.tearDown();
     MSSQLTestUtils utils = new MSSQLTestUtils();
@@ -229,6 +237,7 @@ public class SQLServerMultiMapsManualTest extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testSplitByFirstCol() throws IOException {
     runMultiMapTest("L_ORDERKEY", 10);
   }

@@ -18,12 +18,18 @@
 
 package com.cloudera.sqoop.lib;
 
-import junit.framework.TestCase;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test the boolean parser.
  */
-public class TestBooleanParser extends TestCase {
+public class TestBooleanParser {
+
+  @Test
   public void testBoolParser() {
     assertTrue(BooleanParser.valueOf("true"));
     assertTrue(BooleanParser.valueOf("TRUE"));

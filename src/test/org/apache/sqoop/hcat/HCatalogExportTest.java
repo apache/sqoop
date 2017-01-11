@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import com.cloudera.sqoop.SqoopOptions;
-import junit.framework.JUnit4TestAdapter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -52,13 +51,13 @@ import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test that we can export HCatalog tables into databases.
  */
-@RunWith(JUnit4.class)
 public class HCatalogExportTest extends ExportJobTestCase {
   private static final Log LOG =
     LogFactory.getLog(HCatalogExportTest.class);
@@ -68,7 +67,6 @@ public class HCatalogExportTest extends ExportJobTestCase {
   public ExpectedException exception = ExpectedException.none();
 
   @Before
-  @Override
   public void setUp() {
     super.setUp();
     try {
@@ -561,10 +559,6 @@ public class HCatalogExportTest extends ExportJobTestCase {
     testUtils.createHCatTable(CreateMode.CREATE_AND_LOAD, 10, tableName, cols);
     String createViewCmd = "drop view " + viewName + "; create view " + viewName + " as select * from " + tableName;
     utils.launchHCatCli(createViewCmd);
-  }
-
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(HCatalogImportTest.class);
   }
 
 }

@@ -22,10 +22,15 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.tool.ImportTool;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for RowCountValidator.
@@ -43,6 +48,7 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
    *
    * @throws Exception
    */
+  @Test
   public void testValidateOptionIsEnabledInCLI() throws Exception {
     String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
     String[] insertVals = {"1", "'Bob'", "'sales'"};
@@ -59,6 +65,7 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testValidationOptionsParsedCorrectly() throws Exception {
     String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
     String[] insertVals = {"1", "'Bob'", "'sales'"};
@@ -96,6 +103,7 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testInvalidValidationOptions() throws Exception {
     String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
     String[] insertVals = {"1", "'Bob'", "'sales'"};
@@ -140,6 +148,7 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
   /**
    * Negative case where the row counts do NOT match.
    */
+  @Test
   public void testValidatorWithDifferentRowCounts() {
     try {
       Validator validator = new RowCountValidator();
@@ -156,6 +165,7 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
   /**
    * Positive case where the row counts match.
    */
+  @Test
   public void testValidatorWithMatchingRowCounts() {
     try {
       Validator validator = new RowCountValidator();
@@ -170,6 +180,7 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
    *
    * @throws Exception
    */
+  @Test
   public void testValidatorForImportTable() throws Exception {
     String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
     String[] insertVals = {"1", "'Bob'", "'sales'"};

@@ -30,12 +30,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.*;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestData.KEY_STRINGS;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Testing import of a sequence file to SQL Server.
@@ -122,6 +126,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     return opts;
   }
 
+  @Before
   public void setUp() {
     try {
       super.setUp();
@@ -151,6 +156,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @After
   public void tearDown() {
     try {
       super.tearDown();
@@ -209,6 +215,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
   verifyType("BIT", getFalseBoolLiteralSqlInput(), getFalseBoolSeqOutput());
   }
 
+  @Test
   public void testBoolean() {
     try {
       super.testBoolean();
@@ -218,6 +225,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testBoolean2() {
     try {
       super.testBoolean2();
@@ -227,6 +235,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testBoolean3() {
     try {
       super.testBoolean3();
@@ -236,6 +245,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testDouble1() {
     try {
       super.testDouble1();
@@ -255,6 +265,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testClob1() {
     try {
       super.testClob1();
@@ -264,6 +275,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testBlob1() {
     try {
     super.testBlob1();
@@ -273,6 +285,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testLongVarChar() {
     try {
       super.testLongVarChar();
@@ -282,6 +295,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testTimestamp1() {
     try {
       super.testTimestamp1();
@@ -291,6 +305,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testTimestamp2() {
     try {
       super.testTimestamp2();
@@ -300,6 +315,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testTimestamp3() {
     try {
       super.testTimestamp3();
@@ -309,6 +325,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     }
   }
 
+  @Test
   public void testVarBinary() {
     if (!supportsVarBinary()) {
       return;
@@ -316,6 +333,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     dataTypeTest(DATATYPES.VARBINARY);
   }
 
+  @Test
   public void testTime() {
     if (!supportsTime()) {
       skipped = true;
@@ -360,23 +378,29 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     dataTypeTest(DATATYPES.DATETIMEOFFSET);
   }
 
+  @Test
   public void testDecimal() {
     dataTypeTest(DATATYPES.DECIMAL);
   }
 
+  @Test
   public void testNumeric() {
     dataTypeTest(DATATYPES.NUMERIC);
   }
 
+  @Test
   public void testNumeric1() {
   }
 
+  @Test
   public void testNumeric2() {
   }
 
+  @Test
   public void testDecimal1() {
   }
 
+  @Test
   public void testDecimal2() {
   }
 
@@ -418,7 +442,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
   }
 
   @Test
-    public void testTinyInt2() {
+  public void testTinyInt2() {
   }
 
   @Test
@@ -436,6 +460,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     dataTypeTest(DATATYPES.DATE);
   }
 
+  @Test
   public void testMoney() {
     dataTypeTest(DATATYPES.MONEY);
   }
@@ -475,10 +500,12 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
     dataTypeTest(DATATYPES.NVARCHAR);
   }
 
+  @Test
   public void testImage() {
     dataTypeTest(DATATYPES.IMAGE);
   }
 
+  @Test
   public void testBinary() {
     dataTypeTest(DATATYPES.BINARY);
   }

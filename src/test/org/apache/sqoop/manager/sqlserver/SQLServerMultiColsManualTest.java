@@ -26,6 +26,7 @@ import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.*;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestMultiCols;
+import org.junit.Test;
 
 /**
  * Test multiple columns SQL Server.
@@ -76,26 +77,32 @@ public class SQLServerMultiColsManualTest extends TestMultiCols {
 
   }
 
+  @Test
   public void testMixed4() {
     // Overridden to bypass test case invalid for MSSQL server
   }
 
+  @Test
   public void testMixed5() {
     // Overridden to bypass test case invalid for MSSQL server
   }
 
+  @Test
   public void testMixed6() {
     // Overridden to bypass test case invalid for MSSQL server
   }
 
+  @Test
   public void testSkipFirstCol() {
     // Overridden to bypass test case invalid for MSSQL server
   }
 
+  @Test
   public void testSkipSecondCol() {
     // Overridden to bypass test case invalid for MSSQL server
   }
 
+  @Test
   public void testSkipThirdCol() {
     // Overridden to bypass test case invalid for MSSQL server
   }

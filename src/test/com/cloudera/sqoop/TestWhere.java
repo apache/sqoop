@@ -35,6 +35,10 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.SeqFileReader;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test that --where works in Sqoop.
@@ -165,11 +169,13 @@ public class TestWhere extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testSingleClauseWhere() throws IOException {
     String whereClause = "INTFIELD2 > 4";
     runWhereTest(whereClause, "1,8\n", 2, 4);
   }
 
+  @Test
   public void testMultiClauseWhere() throws IOException {
     String whereClause = "INTFIELD1 > 4 AND INTFIELD2 < 3";
     runWhereTest(whereClause, "7,2\n", 1, 7);

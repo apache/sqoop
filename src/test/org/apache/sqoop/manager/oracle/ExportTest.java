@@ -18,11 +18,11 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import junit.framework.Assert;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test exporting data into Oracle.
@@ -41,14 +41,14 @@ public class ExportTest extends OraOopTestCase {
 
     int retCode =
  TEST_CASE.runImport("TST_PRODUCT", TEST_CASE.getSqoopConf(), false);
-    Assert.assertEquals("Return code should be 0", 0, retCode);
+    assertEquals("Return code should be 0", 0, retCode);
   }
 
   @Test
   public void testProductExport() throws Exception {
     int retCode =
         TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP", false);
-    Assert.assertEquals("Return code should be 0", 0, retCode);
+    assertEquals("Return code should be 0", 0, retCode);
   }
 
   @Test
@@ -56,7 +56,7 @@ public class ExportTest extends OraOopTestCase {
     int retCode =
         TEST_CASE.runExportFromTemplateTable("TST_PRODUCT",
             "\"\"T5+_Pr#duct_Exp\"\"", false);
-    Assert.assertEquals("Return code should be 0", 0, retCode);
+    assertEquals("Return code should be 0", 0, retCode);
   }
 
   @AfterClass

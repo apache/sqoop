@@ -24,9 +24,6 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 
 import com.cloudera.sqoop.manager.ConnManager;
@@ -34,22 +31,22 @@ import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
-import org.junit.Rule;
 import org.junit.Test;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Rule;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Test the ConnFactory implementation and its ability to delegate to multiple
  * different ManagerFactory implementations using reflection.
  */
-@RunWith(JUnit4.class)
-public class TestConnFactory extends TestCase {
+
+public class TestConnFactory {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
-
   @Test
   public void testCustomFactory() throws IOException {
     Configuration conf = new Configuration();
@@ -64,6 +61,7 @@ public class TestConnFactory extends TestCase {
   }
 
   @Test
+
   public void testExceptionForNoManager() throws IOException {
     Configuration conf = new Configuration();
     conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY, EmptyFactory.class.getName());
@@ -196,8 +194,4 @@ public class TestConnFactory extends TestCase {
     }
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestConnFactory.class);
-  }
 }

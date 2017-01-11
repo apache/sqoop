@@ -17,14 +17,17 @@
  */
 package com.cloudera.sqoop.util;
 
-import junit.framework.TestCase;
 import org.apache.sqoop.util.SubstitutionUtils;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
  */
-public class TestSubstitutionUtils extends TestCase {
+public class TestSubstitutionUtils {
 
+  @Test
   public void testRemoveEscapeCharacters() {
     assertEquals("\\N", SubstitutionUtils.removeEscapeCharacters("\\\\N"));
     assertEquals("\n", SubstitutionUtils.removeEscapeCharacters("\\n"));

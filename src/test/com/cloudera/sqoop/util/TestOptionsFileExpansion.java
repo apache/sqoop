@@ -22,15 +22,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 
 import com.cloudera.sqoop.Sqoop;
+import org.junit.Test;
+
 /**
  * Tests various options file loading scenarios.
  */
-public class TestOptionsFileExpansion extends TestCase {
+public class TestOptionsFileExpansion {
 
   /**
    * Text from options file 1. Each string represents a new line.
@@ -141,17 +141,20 @@ public class TestOptionsFileExpansion extends TestCase {
     "--efgh",
   };
 
+  @Test
   public void testOptionsFiles() throws Exception {
     checkOptionsFile(OPTIONS_FILE_TEXT1, OPTIONS_FILE_TEXT1_OUTPUT);
     checkOptionsFile(OPTIONS_FILE_TEXT2, OPTIONS_FILE_TEXT2_OUTPUT);
     checkOptionsFile(OPTIONS_FILE_TEXT3, OPTIONS_FILE_TEXT3_OUTPUT);
   }
 
+  @Test
   public void testInvalidOptionsFile() {
     checkInvalidOptionsFile(OPTIONS_FILE_TEXT4);
     checkInvalidOptionsFile(OPTIONS_FILE_TEXT5);
   }
 
+  @Test
   public void testMultilineQuotedText() {
     try {
       checkOptionsFile(OPTIONS_FILE_TEXT6, new String[] {});

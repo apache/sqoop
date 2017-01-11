@@ -20,13 +20,16 @@ package org.apache.sqoop.mapreduce.db;
 
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test aspects of DBConfiguration.
  */
-public class TestDBConfiguration extends TestCase {
+public class TestDBConfiguration {
 
+  @Test
   public void testPropertiesToString() {
     Properties connParams = new Properties();
     connParams.setProperty("a", "value-a");

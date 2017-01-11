@@ -29,19 +29,22 @@ import java.io.OutputStreamWriter;
 
 import org.apache.hadoop.util.StringUtils;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Shell;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test the named fifo utility.
  */
-public class TestNamedFifo extends TestCase {
+public class TestNamedFifo {
 
   public static final Log LOG = LogFactory.getLog(
         TestNamedFifo.class.getName());
@@ -60,6 +63,7 @@ public class TestNamedFifo extends TestCase {
   private Configuration conf;
   private FileSystem fs;
 
+  @Before
   public void setUp() throws Exception {
     conf = new Configuration();
     conf.set("fs.default.name", "file:///");
@@ -157,6 +161,7 @@ public class TestNamedFifo extends TestCase {
     }
   }
 
+  @Test
   public void testNamedFifo() throws Exception {
 
     if (Shell.WINDOWS) {

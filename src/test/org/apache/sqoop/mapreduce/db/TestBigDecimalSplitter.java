@@ -20,13 +20,15 @@ package org.apache.sqoop.mapreduce.db;
 
 import java.math.BigDecimal;
 
-import junit.framework.TestCase;
-
 import com.cloudera.sqoop.mapreduce.db.BigDecimalSplitter;
+import org.junit.Test;
 
-public class TestBigDecimalSplitter extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class TestBigDecimalSplitter {
 
   /* Test if the decimal split sizes are generated as expected */
+  @Test
   public void testDecimalTryDivide() {
     BigDecimal numerator = new BigDecimal("2");
     BigDecimal denominator = new BigDecimal("4");
@@ -37,6 +39,7 @@ public class TestBigDecimalSplitter extends TestCase {
   }
 
   /* Test if the integer split sizes are generated as expected */
+  @Test
   public void testIntegerTryDivide() {
 	BigDecimal numerator = new BigDecimal("99");
 	BigDecimal denominator = new BigDecimal("3");
@@ -47,6 +50,7 @@ public class TestBigDecimalSplitter extends TestCase {
   }
 
   /* Test if the recurring decimal split sizes are generated as expected */
+  @Test
   public void testRecurringTryDivide() {
 	BigDecimal numerator = new BigDecimal("1");
 	BigDecimal denominator = new BigDecimal("3");

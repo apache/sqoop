@@ -21,7 +21,6 @@ package com.cloudera.sqoop;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import junit.framework.JUnit4TestAdapter;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,16 +32,19 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
 
 /**
  * Test that --target-dir works.
  */
-@RunWith(JUnit4.class)
 public class TestTargetDir extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory
@@ -149,8 +151,4 @@ public class TestTargetDir extends ImportJobTestCase {
     runImport(argv);
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestTargetDir.class);
-  }
 }

@@ -46,7 +46,7 @@ import org.apache.sqoop.manager.oracle.util.OracleData;
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.manager.OracleUtils;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Base test case for OraOop to handle common functions.
@@ -269,7 +269,7 @@ public abstract class OraOopTestCase {
         rowsImported = Integer.parseInt(matcher.group(2));
       }
     }
-    Assert.assertEquals("Incorrect number of rows imported", rowsInTable,
+    assertEquals("Incorrect number of rows imported", rowsInTable,
         rowsImported);
     return retCode;
   }

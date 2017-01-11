@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.cloudera.sqoop.Sqoop;
-import junit.framework.JUnit4TestAdapter;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
@@ -54,18 +54,21 @@ import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
 import org.apache.commons.cli.ParseException;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
-import org.kitesdk.data.spi.DefaultConfiguration;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test HiveImport capability after an import to HDFS.
  */
-@RunWith(JUnit4.class)
+
 public class TestHiveImport extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
@@ -272,7 +275,6 @@ public class TestHiveImport extends ImportJobTestCase {
         TABLE_NAME);
     assertFalse("Import actually happened!", fs.exists(hiveImportPath));
   }
-
 
   /** Test that strings and ints are handled in the normal fashion. */
   @Test
@@ -710,8 +712,4 @@ public class TestHiveImport extends ImportJobTestCase {
         getCreateTableArgv(false, moreArgs1), new CreateHiveTableTool());
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestHiveImport.class);
-  }
 }

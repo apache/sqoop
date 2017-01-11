@@ -36,6 +36,12 @@ import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 public class TestMainframeImportTool extends BaseSqoopTestCase {
 
   private static final Log LOG = LogFactory.getLog(TestMainframeImportTool.class

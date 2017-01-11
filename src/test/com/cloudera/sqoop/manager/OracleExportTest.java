@@ -30,8 +30,9 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
+import org.junit.Test;
 
-import junit.framework.AssertionFailedError;
+import static org.junit.Assert.fail;
 
 /**
  * Test the OracleManager implementation's exportJob() functionality.
@@ -251,7 +252,7 @@ public class OracleExportTest extends TestExport {
       verifyExport(TOTAL_RECORDS);
       assertColMinAndMax(forIdx(0), genDate);
       assertColMinAndMax(forIdx(1), genTime);
-    } catch (AssertionFailedError afe) {
+    } catch (AssertionError afe) {
       genDate = getNewDateColGenerator();
       genTime = getNewTimeColGenerator();
 
@@ -265,6 +266,7 @@ public class OracleExportTest extends TestExport {
   }
 
   /** Make sure mixed update/insert export work correctly. */
+  @Test
   public void testUpsertTextExport() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
     createTextFile(0, TOTAL_RECORDS, false);
@@ -279,6 +281,7 @@ public class OracleExportTest extends TestExport {
   }
 
   /** Make sure mixed update/insert export work correctly. */
+  @Test
   public void testUpsertTextExportWithEscapingDisabled() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
     createTextFile(0, TOTAL_RECORDS, false);

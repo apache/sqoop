@@ -39,6 +39,11 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import com.cloudera.sqoop.tool.ExportTool;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 /**
  * Test utilities for export to SQL Server.
 */
@@ -111,12 +116,14 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
 
   public abstract void createFile(DATATYPES dt, String data) throws Exception;
 
+  @Test
   public void testVarBinary() {
 
     exportTestMethod(DATATYPES.VARBINARY);
 
   }
 
+  @Test
   public void testTime() {
 
     exportTestMethod(DATATYPES.TIME);
@@ -151,11 +158,13 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
 
   }
 
+  @Test
   public void testDecimal() {
     exportTestMethod(DATATYPES.DECIMAL);
 
   }
 
+  @Test
   public void testNumeric() {
     exportTestMethod(DATATYPES.NUMERIC);
 
@@ -203,6 +212,7 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
 
   }
 
+  @Test
   public void testMoney() {
     exportTestMethod(DATATYPES.MONEY);
 
@@ -250,11 +260,13 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
 
   }
 
+  @Test
   public void testImage() {
     exportTestMethod(DATATYPES.IMAGE);
 
   }
 
+  @Test
   public void testBinary() {
     exportTestMethod(DATATYPES.BINARY);
 
@@ -596,17 +608,6 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
 
   }
 
-  /**
-   * Create the argv to pass to Sqoop.
-   *
-   * @param includeHadoopFlags
-   *            if true, then include -D various.settings=values
-   * @param rowsPerStmt
-   *            number of rows to export in a single INSERT statement.
-   * @param statementsPerTx
-   *            ## of statements to use in a transaction.
-   * @return the argv as an array of strings.
-   */
   protected String[] getArgv(DATATYPES dt) {
     ArrayList<String> args = new ArrayList<String>();
 

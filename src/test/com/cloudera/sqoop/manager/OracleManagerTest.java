@@ -49,6 +49,11 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.util.FileListing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Test the OracleManager implementation.
  *
@@ -473,6 +478,7 @@ public class OracleManagerTest extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testPurgeClosedConnections() throws Exception {
     // Ensure that after an Oracle ConnManager releases any connections
     // back into the cache (or closes them as redundant), it does not
@@ -533,6 +539,7 @@ public class OracleManagerTest extends ImportJobTestCase {
     m2.close(); // Close the manager's active connection again.
   }
 
+  @Test
   public void testSessionUserName() throws Exception {
     SqoopOptions options = new SqoopOptions(OracleUtils.CONNECT_STRING,
       TABLE_NAME);

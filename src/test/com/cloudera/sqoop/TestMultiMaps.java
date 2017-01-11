@@ -37,6 +37,10 @@ import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test that using multiple mapper splits works.
@@ -177,6 +181,7 @@ public class TestMultiMaps extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testSplitByFirstCol() throws IOException {
     runMultiMapTest("INTFIELD1", HsqldbTestServer.getFirstColSum());
   }

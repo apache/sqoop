@@ -18,10 +18,10 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * These tests need to be separate as changing the mapping type for timestamp
@@ -40,7 +40,7 @@ public class TimestampDataTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();

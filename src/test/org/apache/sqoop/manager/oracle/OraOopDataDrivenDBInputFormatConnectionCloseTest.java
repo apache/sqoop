@@ -19,7 +19,6 @@
 package org.apache.sqoop.manager.oracle;
 
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.junit.Before;
@@ -38,7 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class OraOopDataDrivenDBInputFormatConnectionCloseTest extends TestCase {
+public class OraOopDataDrivenDBInputFormatConnectionCloseTest {
 
   private static final OraOopLog LOG = OraOopLogFactory.getLog(
       TestOraOopDataDrivenDBInputFormat.class.getName());

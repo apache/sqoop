@@ -52,6 +52,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 /**
  * Test that the merge tool works.
@@ -79,7 +83,7 @@ public class TestMerge extends BaseSqoopTestCase {
       Arrays.asList(new Integer(1), new Integer(43)),
       Arrays.asList(new Integer(3), new Integer(313)));
 
-  @Override
+  @Before
   public void setUp() {
     super.setUp();
     manager = getManager();
@@ -145,10 +149,12 @@ public class TestMerge extends BaseSqoopTestCase {
     conn.commit();
   }
 
+  @Test
   public void testTextFileMerge() throws Exception {
     runMergeTest(SqoopOptions.FileLayout.TextFile);
   }
 
+  @Test
   public void testAvroFileMerge() throws Exception {
     runMergeTest(SqoopOptions.FileLayout.AvroDataFile);
   }

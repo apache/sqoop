@@ -21,17 +21,13 @@ package com.cloudera.sqoop;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-@RunWith(value = org.junit.runners.JUnit4.class)
 public class TestDirectImport extends ImportJobTestCase {
 
   @Rule
@@ -81,8 +77,5 @@ public class TestDirectImport extends ImportJobTestCase {
     runImport(argv);
 
   }
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestDirectImport.class);
-  }
+
 }

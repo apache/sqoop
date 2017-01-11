@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.mapreduce;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,9 +34,7 @@ import org.junit.Test;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.JobBase;
 
-import junit.framework.TestCase;
-
-public class TestJobBase extends TestCase {
+public class TestJobBase {
 
   SqoopOptions options;
   Configuration conf;

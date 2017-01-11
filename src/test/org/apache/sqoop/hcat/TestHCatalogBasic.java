@@ -18,25 +18,22 @@
 
 package org.apache.sqoop.hcat;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.TestCase;
-
 import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.ExportTool;
 import com.cloudera.sqoop.tool.ImportTool;
-import org.junit.Rule;
+
 import org.junit.Test;
+
+import org.junit.Rule;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Test basic HCatalog related features.
  */
-@RunWith(JUnit4.class)
-public class TestHCatalogBasic extends TestCase {
+public class TestHCatalogBasic {
+
   private static ImportTool importTool;
   private static ExportTool exportTool;
 
@@ -44,7 +41,6 @@ public class TestHCatalogBasic extends TestCase {
   public ExpectedException thrown = ExpectedException.none();
 
   @Before
-  @Override
   public void setUp() {
     importTool = new ImportTool();
     exportTool = new ExportTool();
@@ -400,8 +396,4 @@ public class TestHCatalogBasic extends TestCase {
     importTool.validateOptions(opts);
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestHCatalogBasic.class);
-  }
 }

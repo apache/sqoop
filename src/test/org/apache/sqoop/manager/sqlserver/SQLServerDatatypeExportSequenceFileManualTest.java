@@ -38,6 +38,10 @@ import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 /**
 * Export sequence file to SQL Server test.
 */
@@ -182,17 +186,6 @@ public class SQLServerDatatypeExportSequenceFileManualTest
     return codeGenArgv.toArray(new String[0]);
   }
 
-  /**
-  * Create the argv to pass to Sqoop.
-  *
-  * @param includeHadoopFlags
-  *            if true, then include -D various.settings=values
-  * @param rowsPerStmt
-  *            number of rows to export in a single INSERT statement.
-  * @param statementsPerTx
-  *            ## of statements to use in a transaction.
-  * @return the argv as an array of strings.
-  */
   protected String[] getArgv(DATATYPES dt, String... additionalArgv) {
     ArrayList<String> args = new ArrayList<String>();
 

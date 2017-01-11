@@ -21,8 +21,6 @@ package com.cloudera.sqoop;
 import java.util.Properties;
 
 import com.cloudera.sqoop.tool.BaseSqoopTool;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.sqoop.manager.oracle.OracleUtils;
@@ -41,13 +39,16 @@ import org.junit.runners.JUnit4;
 import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test aspects of the SqoopOptions class.
  */
-@RunWith(JUnit4.class)
-public class TestSqoopOptions extends TestCase {
+public class TestSqoopOptions {
 
   private Properties originalSystemProperties;
 
@@ -766,8 +767,4 @@ public class TestSqoopOptions extends TestCase {
     validateImportOptions(extraArgs);
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestSqoopOptions.class);
-  }
 }

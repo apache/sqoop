@@ -34,6 +34,7 @@ import org.apache.sqoop.manager.NetezzaManager;
 import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
+import org.junit.Test;
 
 /**
  * Test the DirectNetezzaManager implementation's hcatalog import functionality.
@@ -88,6 +89,7 @@ public class DirectNetezzaHCatImportManualTest extends HCatalogImportTest {
     setUpNZ();
   }
 
+    @Test
   public void testIntTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -111,6 +113,7 @@ public class DirectNetezzaHCatImportManualTest extends HCatalogImportTest {
     super.runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null);
   }
 
+  @Test
   public void testStringTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -127,6 +130,7 @@ public class DirectNetezzaHCatImportManualTest extends HCatalogImportTest {
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null);
   }
 
+  @Test
   public void testNumberTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -144,48 +148,63 @@ public class DirectNetezzaHCatImportManualTest extends HCatalogImportTest {
   }
 
   // Disable the following for direct mode tests
+  @Test
   public void testBinaryTypes() throws Exception {
   }
 
+  @Test
   public void testColumnProjection() throws Exception {
   }
 
+  @Test
   public void testColumnProjectionMissingPartKeys() throws Exception {
   }
 
+  @Test
   public void testStaticPartitioning() throws Exception {
   }
 
+  @Test
   public void testDynamicPartitioning() throws Exception {
   }
 
+  @Test
   public void testStaticAndDynamicPartitioning() throws Exception {
   }
 
+  @Test
   public void testSequenceFile() throws Exception {
   }
 
+  @Test
   public void testTextFile() throws Exception {
   }
 
+  @Test
   public void testTableCreation() throws Exception {
   }
 
+  @Test
   public void testTableCreationWithPartition() throws Exception {
   }
 
+  @Test
   public void testTableCreationWithStorageStanza() throws Exception {
   }
 
+  @Test
   public void testHiveDropDelims() throws Exception {
   }
 
+  @Test
   public void testHiveDelimsReplacement() throws Exception {
   }
 
+  @Test
   public void testDynamicKeyInMiddle() throws Exception {
   }
 
+  @Test
   public void testCreateTableWithPreExistingTable() throws Exception {
   }
 }

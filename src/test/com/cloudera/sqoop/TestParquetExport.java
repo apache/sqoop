@@ -20,16 +20,14 @@ package com.cloudera.sqoop;
 
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import com.google.common.collect.Lists;
-import junit.framework.JUnit4TestAdapter;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.Rule;
+
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.kitesdk.data.*;
 
 import java.io.IOException;
@@ -43,11 +41,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * Test that we can export Parquet Data Files from HDFS into databases.
  */
-@RunWith(JUnit4.class)
 public class TestParquetExport extends ExportJobTestCase {
 
   @Rule
@@ -453,9 +452,5 @@ public class TestParquetExport extends ExportJobTestCase {
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestParquetExport.class);
-  }
 
 }

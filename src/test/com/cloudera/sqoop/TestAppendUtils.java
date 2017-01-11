@@ -41,6 +41,12 @@ import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.AppendUtils;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test that --append works.
@@ -245,6 +251,7 @@ public class TestAppendUtils extends ImportJobTestCase {
   }
 
   /** independent to target-dir. */
+  @Test
   public void testAppend() throws IOException {
     ArrayList args = getOutputlessArgv(false, false, HsqldbTestServer.getFieldNames(), getConf());
     args.add("--warehouse-dir");
@@ -255,6 +262,7 @@ public class TestAppendUtils extends ImportJobTestCase {
   }
 
   /** working with target-dir. */
+  @Test
   public void testAppendToTargetDir() throws IOException {
     ArrayList args = getOutputlessArgv(false, false, HsqldbTestServer.getFieldNames(), getConf());
     String targetDir = getWarehouseDir() + "/tempTargetDir";
@@ -272,6 +280,7 @@ public class TestAppendUtils extends ImportJobTestCase {
    *
    * @throws IOException
    */
+  @Test
   public void testAppendWithQuery() throws IOException {
     ArrayList args = getOutputlessArgv(false, true, HsqldbTestServer.getFieldNames(), getConf());
     String targetDir = getWarehouseDir() + "/tempTargetDir";
@@ -285,6 +294,7 @@ public class TestAppendUtils extends ImportJobTestCase {
   /**
    * If the append source does not exist, don't crash.
    */
+  @Test
   public void testAppendSrcDoesNotExist() throws IOException {
     Configuration conf = new Configuration();
     if (!isOnPhysicalCluster()) {

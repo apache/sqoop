@@ -38,6 +38,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.junit.Test;
 
 /**
  * Test free form query import with the MySQL db.
@@ -194,6 +195,7 @@ public class OracleCallExportTest extends ExportJobTestCase {
       statement.close();
     }
   }
+  @Test
   public void testExportUsingProcedure() throws IOException, SQLException {
     String[] lines = {
       "0,textfield0,2002-12-29 08:40:00,3300",

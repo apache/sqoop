@@ -30,6 +30,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
+import org.junit.Test;
 import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
@@ -41,6 +42,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests --as-parquetfile.
@@ -106,10 +114,12 @@ public class TestParquetImport extends ImportJobTestCase {
     return args.toArray(new String[args.size()]);
   }
 
+  @Test
   public void testSnappyCompression() throws IOException {
     runParquetImportTest("snappy");
   }
 
+  @Test
   public void testDeflateCompression() throws IOException {
     runParquetImportTest("deflate");
   }
@@ -158,6 +168,7 @@ public class TestParquetImport extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testOverrideTypeMapping() throws IOException {
     String [] types = { "INT" };
     String [] vals = { "10" };
@@ -183,6 +194,7 @@ public class TestParquetImport extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testFirstUnderscoreInColumnName() throws IOException {
     String [] names = { "_NAME" };
     String [] types = { "INT" };
@@ -208,6 +220,7 @@ public class TestParquetImport extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testNonIdentCharactersInColumnName() throws IOException {
     String [] names = { "test_p-a+r/quet" };
     String [] types = { "INT" };
@@ -233,6 +246,7 @@ public class TestParquetImport extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testNullableParquetImport() throws IOException, SQLException {
     String [] types = { "INT" };
     String [] vals = { null };
@@ -251,6 +265,7 @@ public class TestParquetImport extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testQueryImport() throws IOException, SQLException {
     String [] types = { "INT" };
     String [] vals = { "1" };
@@ -269,6 +284,7 @@ public class TestParquetImport extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testIncrementalParquetImport() throws IOException, SQLException {
     String [] types = { "INT" };
     String [] vals = { "1" };
@@ -290,6 +306,7 @@ public class TestParquetImport extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testOverwriteParquetDatasetFail() throws IOException, SQLException {
     String [] types = { "INT" };
     String [] vals = {};

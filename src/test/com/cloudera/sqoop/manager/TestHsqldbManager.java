@@ -20,8 +20,6 @@ package com.cloudera.sqoop.manager;
 
 import java.sql.SQLException;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -30,11 +28,15 @@ import org.junit.Test;
 
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 /**
  * Test HsqldbManager-specific functionality that overrides SqlManager
  * behavior.
  */
-public class TestHsqldbManager extends TestCase {
+public class TestHsqldbManager {
 
   public static final Log LOG = LogFactory.getLog(
       TestHsqldbManager.class.getName());

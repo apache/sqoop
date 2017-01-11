@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import junit.framework.JUnit4TestAdapter;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -61,13 +61,14 @@ import com.cloudera.sqoop.tool.SqoopTool;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test that we can export HCatalog tables into databases.
  */
-@RunWith(JUnit4.class)
 public class HCatalogImportTest extends ImportJobTestCase {
   private static final Log LOG =
     LogFactory.getLog(HCatalogImportTest.class);
@@ -1070,7 +1071,4 @@ public class HCatalogImportTest extends ImportJobTestCase {
     utils.launchHCatCli(createViewCmd);
   }
 
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(HCatalogImportTest.class);
-  }
 }

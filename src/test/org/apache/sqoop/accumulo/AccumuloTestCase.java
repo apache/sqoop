@@ -52,6 +52,10 @@ import org.junit.Before;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 /**
  * Utility methods that facilitate Accumulo import tests.
  * These test use the MiniAccumuloCluster.  They are

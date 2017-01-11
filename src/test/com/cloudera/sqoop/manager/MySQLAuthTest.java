@@ -40,6 +40,11 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Test authentication and remote access to direct mysqldump-based imports.
  *

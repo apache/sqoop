@@ -24,7 +24,6 @@ import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.google.common.collect.ObjectArrays;
-import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -44,10 +43,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
+import static org.junit.Assert.fail;
+
 /**
  * Class that implements common methods required for tests.
  */
-public abstract class BaseSqoopTestCase extends TestCase {
+public abstract class BaseSqoopTestCase {
 
   public static class DummyDataPublisher extends SqoopJobDataPublisher {
     public static String hiveTable;

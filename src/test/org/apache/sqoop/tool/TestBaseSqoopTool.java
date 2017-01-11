@@ -19,19 +19,15 @@
 package org.apache.sqoop.tool;
 
 import com.cloudera.sqoop.SqoopOptions;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.mockito.Mockito.mock;
 
-@RunWith(JUnit4.class)
 public class TestBaseSqoopTool {
 
   @Rule
@@ -71,10 +67,6 @@ public class TestBaseSqoopTool {
     exception.expect(RuntimeException.class);
     exception.expectCause(sameInstance(expectedCauseException));
     testBaseSqoopTool.rethrowIfRequired(testSqoopOptions, expectedCauseException);
-  }
-
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestBaseSqoopTool.class);
   }
 
 }

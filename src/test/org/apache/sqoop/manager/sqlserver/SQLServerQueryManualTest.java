@@ -42,12 +42,19 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.SeqFileReader;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test that --query works in Sqoop.
  */
 public class SQLServerQueryManualTest extends ImportJobTestCase {
 
+  @Before
   public void setUp() {
     super.setUp();
     MSSQLTestUtils utils = new MSSQLTestUtils();
@@ -61,6 +68,7 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
 
   }
 
+  @After
   public void tearDown() {
     super.tearDown();
     MSSQLTestUtils utils = new MSSQLTestUtils();
@@ -202,6 +210,7 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testSelectStar() throws IOException {
     runQueryTest("SELECT * FROM " + getTableName()
         + " WHERE L_ORDERKEY > 0 AND $CONDITIONS",
@@ -209,6 +218,7 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
             + "nocomments\n", 4, 10, getTablePath().toString());
   }
 
+  @Test
   public void testCompoundWhere() throws IOException {
     runQueryTest("SELECT * FROM " + getTableName()
         + " WHERE L_ORDERKEY > 1 AND L_PARTKEY < 4 AND $CONDITIONS",
@@ -216,6 +226,7 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
             + "nocomments\n", 1, 2, getTablePath().toString());
   }
 
+  @Test
   public void testFailNoConditions() throws IOException {
     String[] argv = getArgv(true, "SELECT * FROM " + getTableName(),
         getTablePath().toString() + "where $CONDITIONS", true);

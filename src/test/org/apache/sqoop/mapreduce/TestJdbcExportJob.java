@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -41,12 +42,11 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
 
-import junit.framework.TestCase;
 
 /**
  * Test methods of the JdbcExportJob implementation.
  */
-public class TestJdbcExportJob extends TestCase {
+public class TestJdbcExportJob {
 
   @Test
   public void testAvroWithNoColumnsSpecified() throws Exception {

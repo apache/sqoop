@@ -30,7 +30,6 @@ import java.util.Random;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,11 +49,17 @@ import com.cloudera.sqoop.util.ClassLoaderStack;
 
 import java.lang.reflect.Field;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Test that the ClassWriter generates Java classes based on the given table,
  * which compile.
  */
-public class TestClassWriter extends TestCase {
+public class TestClassWriter {
 
   public static final Log LOG =
       LogFactory.getLog(TestClassWriter.class.getName());

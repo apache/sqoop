@@ -37,6 +37,9 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.ExportOutputFormat;
 import com.cloudera.sqoop.tool.ExportTool;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 /**
  * Class that implements common methods required for tests which export data
  * from HDFS to databases, to verify correct export.

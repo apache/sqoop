@@ -28,11 +28,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
 
 public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
 
@@ -63,7 +67,7 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
     return "DROP TABLE IF EXISTS " + getManager().escapeTableName(table);
   }
 
-    @Override
+  @After
   public void tearDown() {
       try {
         dropTableIfExists(getTableName());
@@ -93,6 +97,7 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
+  @Test
   public void testEscapeColumnWithDoubleQuote() throws IOException {
     String[] colNames = { "column\"withdoublequote" };
     String[] types = { "VARCHAR(50)"};

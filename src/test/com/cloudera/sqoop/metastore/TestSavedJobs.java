@@ -32,10 +32,14 @@ import com.cloudera.sqoop.manager.HsqldbManager;
 import com.cloudera.sqoop.metastore.hsqldb.AutoHsqldbStorage;
 import com.cloudera.sqoop.tool.VersionTool;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.Connection;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test the metastore and job-handling features.
@@ -44,14 +48,14 @@ import java.sql.Connection;
  * The metastore URL is configured to be in-memory, and drop all
  * state between individual tests.
  */
-public class TestSavedJobs extends TestCase {
+public class TestSavedJobs {
 
   public static final String TEST_AUTOCONNECT_URL =
       "jdbc:hsqldb:mem:sqoopmetastore";
   public static final String TEST_AUTOCONNECT_USER = "SA";
   public static final String TEST_AUTOCONNECT_PASS = "";
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     // Delete db state between tests.
     resetJobSchema();
@@ -95,6 +99,7 @@ public class TestSavedJobs extends TestCase {
     return conf;
   }
 
+  @Test
   public void testAutoConnect() throws IOException {
     // By default, we should be able to auto-connect with an
     // empty connection descriptor. We should see an empty
@@ -112,6 +117,7 @@ public class TestSavedJobs extends TestCase {
     storage.close();
   }
 
+  @Test
   public void testCreateDeleteJob() throws IOException {
     Configuration conf = newConf();
     JobStorageFactory ssf = new JobStorageFactory(conf);
@@ -167,6 +173,7 @@ public class TestSavedJobs extends TestCase {
     storage.close();
   }
 
+  @Test
     public void testCreateJobWithExtraArgs() throws IOException {
         Configuration conf = newConf();
         JobStorageFactory ssf = new JobStorageFactory(conf);
@@ -207,6 +214,7 @@ public class TestSavedJobs extends TestCase {
         storage.close();
     }
 
+  @Test
   public void testMultiConnections() throws IOException {
     // Ensure that a job can be retrieved when the storage is
     // closed and reopened.

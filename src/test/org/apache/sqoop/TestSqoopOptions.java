@@ -20,11 +20,16 @@ package org.apache.sqoop;
 
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TestSqoopOptions extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class TestSqoopOptions {
+
+  @Test
   public void testParseColumnParsing() {
     new SqoopOptions() {
+  @Test
       public void testParseColumnMapping() {
         Properties result = new Properties();
         parseColumnMapping("test=INTEGER,test1=DECIMAL(1%2C1),test2=NUMERIC(1%2C%202)", result);
@@ -35,6 +40,7 @@ public class TestSqoopOptions extends TestCase {
     }.testParseColumnMapping();
   }
 
+  @Test
   public void testColumnNameCaseInsensitive() {
     SqoopOptions opts = new SqoopOptions();
     opts.setColumns(new String[]{ "AAA", "bbb" });

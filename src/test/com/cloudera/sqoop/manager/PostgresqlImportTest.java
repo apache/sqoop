@@ -42,6 +42,10 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.util.FileListing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Test the PostgresqlManager and DirectPostgresqlManager implementations.
  * The former uses the postgres JDBC driver to perform an import;
@@ -334,6 +338,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     doImportAndVerify(false, expectedResults, TABLE_NAME, extraArgs);
   }
 
+  @Test
   public void testDirectIncrementalImport() throws IOException {
     String [] expectedResults = { };
 
@@ -344,6 +349,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
   }
 
+  @Test
   public void testDirectIncrementalImportMerge() throws IOException {
     String [] expectedResults = { };
 

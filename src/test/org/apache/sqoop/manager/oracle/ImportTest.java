@@ -18,13 +18,13 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.OraOopConstants.
            OraOopOracleDataChunkMethod;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test import data from Oracle.
@@ -38,7 +38,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT", getSqoopConf(), false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -55,7 +55,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_Pr OdUCT", getSqoopConf(), false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       System.clearProperty(SqoopOptions.ORACLE_ESCAPING_DISABLED);
@@ -71,7 +71,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_PART", getSqoopConf(), false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -90,7 +90,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -111,7 +111,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -135,7 +135,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -150,7 +150,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_SUBPART", getSqoopConf(), false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -169,7 +169,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -192,7 +192,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -213,7 +213,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -234,7 +234,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -249,7 +249,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("\"\"T5+_Pr#duct\"\"", getSqoopConf(), false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();
@@ -268,7 +268,7 @@ public class ImportTest extends OraOopTestCase {
 
     try {
       int retCode = runImport("TST_PRODUCT_PART_IOT", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();

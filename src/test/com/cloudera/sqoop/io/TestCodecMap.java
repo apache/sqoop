@@ -20,23 +20,24 @@ package com.cloudera.sqoop.io;
 
 import java.io.IOException;
 
-import junit.framework.JUnit4TestAdapter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 
-import junit.framework.TestCase;
-import org.junit.Rule;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Test looking up codecs by name.
  */
-@RunWith(JUnit4.class)
-public class TestCodecMap extends TestCase {
+public class TestCodecMap  {
+
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -85,8 +86,4 @@ public class TestCodecMap extends TestCase {
     CodecMap.getCodec("bogus", new Configuration());
   }
 
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestCodecMap.class);
-  }
 }

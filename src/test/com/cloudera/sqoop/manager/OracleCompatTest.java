@@ -28,6 +28,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 /**
  * Test the basic Oracle connection manager with the various column types.
@@ -194,6 +197,7 @@ public class OracleCompatTest extends ManagerCompatTestCase {
 
   // Disable this test since Oracle isn't ANSI compliant.
   @Override
+  @Test
   public void testEmptyStringCol() {
     this.skipped = true;
     LOG.info(
@@ -201,6 +205,7 @@ public class OracleCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
+  @Test
   public void testTimestamp1() {
     verifyType(getTimestampType(),
         getTimestampInsertStr("'2009-04-24 18:24:00'"),
@@ -208,6 +213,7 @@ public class OracleCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
+  @Test
   public void testTimestamp2() {
     verifyType(getTimestampType(),
         getTimestampInsertStr("'2009-04-24 18:24:00.0002'"),
@@ -215,21 +221,25 @@ public class OracleCompatTest extends ManagerCompatTestCase {
   }
 
   @Override
+  @Test
   public void testDate1() {
     verifyType("DATE", getDateInsertStr("'2009-01-12'"),
         getDateSeqOutput("2009-01-12"));
   }
 
   @Override
+  @Test
   public void testDate2() {
     verifyType("DATE", getDateInsertStr("'2009-04-24'"),
         getDateSeqOutput("2009-04-24"));
   }
 
+  @Test
   public void testRawVal() {
     verifyType("RAW(8)", "'12ABCD'", getVarBinarySeqOutput("12ABCD"), true);
   }
 
+  @Test
   public void testBinaryFloat() {
     verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(25f), "25.0");
     verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(+6.34f), "6.34");
@@ -241,6 +251,7 @@ public class OracleCompatTest extends ManagerCompatTestCase {
     verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(min), "1.17549E-38");
   }
 
+  @Test
   public void testBinaryDouble() {
     verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(0.5d), "0.5");
     verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-1d), "-1.0");

@@ -35,6 +35,10 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.SeqFileReader;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test that --query works in Sqoop.
@@ -161,18 +165,21 @@ public class TestQuery extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testSelectStar() throws IOException {
     runQueryTest("SELECT * FROM " + getTableName()
         + " WHERE INTFIELD2 > 4 AND $CONDITIONS",
         "1,8\n", 2, 4, getTablePath().toString());
   }
 
+  @Test
   public void testCompoundWhere() throws IOException {
     runQueryTest("SELECT * FROM " + getTableName()
         + " WHERE INTFIELD1 > 4 AND INTFIELD2 < 3 AND $CONDITIONS",
         "7,2\n", 1, 7, getTablePath().toString());
   }
 
+  @Test
   public void testFailNoConditions() throws IOException {
     String [] argv = getArgv(true, "SELECT * FROM " + getTableName(),
         getTablePath().toString(), true);

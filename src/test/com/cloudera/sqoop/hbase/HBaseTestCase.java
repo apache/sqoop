@@ -52,6 +52,10 @@ import java.lang.reflect.Method;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 /**
  * Utility methods that facilitate HBase import tests.
  */

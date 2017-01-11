@@ -37,12 +37,20 @@ import org.apache.hadoop.io.compress.GzipCodec;
 
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test that the splittable buffered writer system works.
  */
-public class TestSplittableBufferedWriter extends TestCase {
+public class TestSplittableBufferedWriter {
 
   public static final Log LOG = LogFactory.getLog(
       TestSplittableBufferedWriter.class.getName());
@@ -84,6 +92,7 @@ public class TestSplittableBufferedWriter extends TestCase {
     }
   }
 
+  @Before
   public void setUp() throws IOException {
     ensureEmptyWriteDir();
   }
@@ -130,6 +139,7 @@ public class TestSplittableBufferedWriter extends TestCase {
     assertFalse("File found: " + p + " and we did not expect it", fs.exists(p));
   }
 
+  @Test
   public void testNonSplittingTextFile() throws IOException {
     SplittingOutputStream os  = new SplittingOutputStream(getConf(),
         getWritePath(), "nonsplit-", 0, null);
@@ -177,6 +187,7 @@ public class TestSplittableBufferedWriter extends TestCase {
     }
   }
 
+  @Test
   public void testNonSplittingGzipFile() throws IOException {
     SplittingOutputStream os  = new SplittingOutputStream(getConf(),
         getWritePath(), "nonsplit-", 0, new GzipCodec());
@@ -207,6 +218,7 @@ public class TestSplittableBufferedWriter extends TestCase {
         "nonsplit-00000.gz"))), expectedLines);
   }
 
+  @Test
   public void testSplittingTextFile() throws IOException {
     SplittingOutputStream os  = new SplittingOutputStream(getConf(),
         getWritePath(), "split-", 10, null);
@@ -267,6 +279,7 @@ public class TestSplittableBufferedWriter extends TestCase {
     }
   }
 
+  @Test
   public void testSplittingGzipFile() throws IOException {
     SplittingOutputStream os = new SplittingOutputStream(getConf(),
         getWritePath(), "splitz-", 3, new GzipCodec());

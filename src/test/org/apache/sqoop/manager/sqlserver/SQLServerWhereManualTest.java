@@ -43,6 +43,12 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.SeqFileReader;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test that --where works in Sqoop. Methods essentially copied out of the other
@@ -50,6 +56,7 @@ import com.cloudera.sqoop.util.ClassLoaderStack;
  */
 public class SQLServerWhereManualTest extends ImportJobTestCase {
 
+ @Before
   public void setUp(){
     super.setUp();
     MSSQLTestUtils utils = new MSSQLTestUtils();
@@ -63,6 +70,7 @@ public class SQLServerWhereManualTest extends ImportJobTestCase {
 
   }
 
+  @After
   public void tearDown(){
     super.tearDown();
     MSSQLTestUtils utils = new MSSQLTestUtils();
@@ -205,6 +213,7 @@ public class SQLServerWhereManualTest extends ImportJobTestCase {
   }
  }
 
+  @Test
  public void testSingleClauseWhere() throws IOException {
   String whereClause = "L_ORDERKEY > 0 ";
   runWhereTest(whereClause,
@@ -212,6 +221,7 @@ public class SQLServerWhereManualTest extends ImportJobTestCase {
       + "\n", 4, 10);
  }
 
+  @Test
  public void testMultiClauseWhere() throws IOException {
   String whereClause = "L_ORDERKEY > 1 AND L_PARTKEY < 4";
   runWhereTest(whereClause,

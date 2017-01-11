@@ -22,21 +22,20 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.cloudera.sqoop.mapreduce.db.TextSplitter;
-
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.TestCase;
 import org.apache.sqoop.validation.ValidationException;
-import org.junit.Rule;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import org.junit.Rule;
+
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
 
 /**
  * Test that the TextSplitter implementation creates a sane set of splits.
  */
-@RunWith(JUnit4.class)
-public class TestTextSplitter extends TestCase {
+public class TestTextSplitter {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -170,11 +169,6 @@ public class TestTextSplitter extends TestCase {
     assertEquals(true, splitter.isUseNCharStrings());
     TextSplitter splitter2 = new TextSplitter();
     assertEquals(false, splitter2.isUseNCharStrings());
-  }
-
-  //workaround: ant kept falling back to JUnit3
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(TestTextSplitter.class);
   }
 
 }

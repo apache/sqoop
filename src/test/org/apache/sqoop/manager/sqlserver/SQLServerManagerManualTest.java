@@ -26,7 +26,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -43,10 +42,15 @@ import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 /**
  * Test methods of the generic SqlManager implementation.
  */
-public class SQLServerManagerManualTest extends TestCase {
+public class SQLServerManagerManualTest  {
 
   public static final Log LOG = LogFactory.getLog(
     SQLServerManagerManualTest.class.getName());

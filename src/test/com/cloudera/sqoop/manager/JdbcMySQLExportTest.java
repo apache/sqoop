@@ -31,6 +31,9 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
+import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 /**
  * Test the MySQLManager implementation's exportJob() functionality.
@@ -133,6 +136,7 @@ public class JdbcMySQLExportTest extends TestExport {
         statementsPerTx, subArgv);
   }
 
+  @Test
   public void testIntColInBatchMode() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
@@ -156,6 +160,7 @@ public class JdbcMySQLExportTest extends TestExport {
     assertColMinAndMax(forIdx(0), gen);
   }
 
+  @Test
   public void testUpsert() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
