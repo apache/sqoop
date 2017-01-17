@@ -155,7 +155,8 @@ public class PostgresqlManager
     + "  AND sch.NSPNAME = " + getSchemaSqlFragment()
     + "  AND tab.RELNAME = '" + escapeLiteral(tableName) + "' "
     + "  AND col.ATTNUM >= 1"
-    + "  AND col.ATTISDROPPED = 'f'";
+    + "  AND col.ATTISDROPPED = 'f' "
+    + "ORDER BY col.ATTNUM ASC";
   }
 
   @Override
