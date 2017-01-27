@@ -689,7 +689,7 @@ public class TestClassWriter {
     runFailedGenerationTest(argv, HsqldbTestServer.getTableName());
   }
 
-  @Test(timeout = 10000)
+  @Test(timeout = 25000)
   public void testWideTableClassGeneration() throws Exception {
     createWideTable();
     options = new SqoopOptions(HsqldbTestServer.getDbUrl(), WIDE_TABLE_NAME);
