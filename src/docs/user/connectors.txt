@@ -644,6 +644,14 @@ select_catalog_role role or all of the following object privileges:
 - +select on dba_tab_columns+
 - +select on dba_objects+
 - +select on dba_extents+
+- +select on dba_tab_partitions+
+- +select on dba_tab_subpartitions+
+- +select on dba_indexes+
+- +select on dba_ind_columns+
+- +select on v_$active_instances+
+- +select on v_$session+
+- +select on v_$version+
+- +select on v_$sql+
 - +select on dba_segments+ — Required for Sqoop imports only
 - +select on dba_constraints+ — Required for Sqoop imports only
 - +select on v_$database+ — Required for Sqoop imports only
