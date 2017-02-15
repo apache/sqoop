@@ -24,7 +24,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -147,10 +149,10 @@ public final class OptionsFileUtil {
    * Removes the surrounding quote characters from the given string. The quotes
    * are identified by the quote parameter, the given string by option. The
    * fileName parameter is used for raising exceptions with relevant message.
-   * @param fileName
-   * @param option
-   * @param quote
-   * @return
+   * @param fileName String The name of the file that contains sqoop options
+   * @param option String the actual options in the options file
+   * @param quote char The quote that we need to validate on, either single or double quotes
+   * @return String The validated options string
    * @throws Exception
    */
   private static String removeQuoteCharactersIfNecessary(String fileName,
@@ -167,11 +169,19 @@ public final class OptionsFileUtil {
     }
 
     if (startingQuote || endingQuote) {
-       throw new Exception("Malformed option in options file("
-           + fileName + "): " + option);
+      // Regular expression looks like below:
+      // .*=\s*".*"$ OR .*=\s*'.*'$
+      // it tries to match the following:
+      // .... column_name = "values" OR .... column_name = 'values'
+      // so that the query like:
+      // SELECT * FROM table WHERE column = "values"
+      // is valid even though it ends with double quote but no starting double quote
+      if (!Pattern.matches(".*=\\s*"+quote+".*"+quote+"$", option)) {
+        throw new Exception("Malformed option in options file("
+            + fileName + "): " + option);
+      }
     }
 
     return option;
   }
-
 }
