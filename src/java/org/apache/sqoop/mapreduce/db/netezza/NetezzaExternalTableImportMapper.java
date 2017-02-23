@@ -80,7 +80,7 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     int errorThreshold = conf.getInt(
       DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
     String logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
-    String[] cols = dbc.getOutputFieldNames();
+    String[] cols = dbc.getInputFieldNames();
     String inputConds = dbc.getInputConditions();
     StringBuilder sqlStmt = new StringBuilder(2048);
 
@@ -125,7 +125,7 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
       sqlStmt.append('*');
     } else {
       sqlStmt.append(cols[0]).append(' ');
-      for (int i = 0; i < cols.length; ++i) {
+      for (int i = 1; i < cols.length; ++i) {
         sqlStmt.append(',').append(cols[i]);
       }
     }
