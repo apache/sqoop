@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.manager.oracle;
 
+import static org.apache.sqoop.mapreduce.JobBase.HADOOP_MAP_TASK_MAX_ATTEMTPS;
+
 /**
  * Constants for OraOop.
  */
@@ -470,8 +472,6 @@ public final class OraOopConstants {
     }
 
     public static final String IMPORT_TOOL_NAME = "import";
-    public static final String MAX_MAPREDUCE_ATTEMPTS =
-        "mapred.map.max.attempts";
   }
 
 /**

@@ -91,9 +91,6 @@ public class ExportJobBase extends JobBase {
   public static final String SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS =
     "sqoop.export.mapred.map.max.attempts";
 
-  private static final String HADOOP_MAP_TASK_MAX_ATTEMTPS =
-    "mapred.map.max.attempts";
-
   /** Start and endtime captured for export job. */
   private long startTime;
   public static final String OPERATION = "export";
