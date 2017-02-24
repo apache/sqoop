@@ -126,7 +126,7 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       childTool.appendArgs(extraChildArgv);
       childTool.validateOptions(childOptions);
     } catch (ParseException pe) {
-      LOG.error("Error parsing arguments to the job-specific tool.");
+      LOG.error("Error parsing arguments to the job-specific tool: ", pe);
       LOG.error("See 'sqoop help <tool>' for usage.");
       return 1;
     } catch (SqoopOptions.InvalidOptionsException e) {
