@@ -23,7 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.mapreduce.db.Db2DataDrivenDBInputFormat;
@@ -47,6 +49,11 @@ public class Db2Manager
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS =
       "com.ibm.db2.jcc.DB2Driver";
+
+  private static final String XML_TO_JAVA_DATA_TYPE = "String";
+
+  private Map<String, String> columnTypeNames;
+
 
   public Db2Manager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
@@ -123,4 +130,98 @@ public class Db2Manager
 
     return databases.toArray(new String[databases.size()]);
   }
+
+  /**
+   * Return hive type for SQL type.
+   *
+   * @param tableName
+   *            table name
+   * @param columnName
+   *            column name
+   * @param sqlType
+   *            sql data type
+   * @return hive type
+   */
+  @Override
+  public String toHiveType(String tableName, String columnName, int sqlType) {
+    String hiveType = super.toHiveType(tableName, columnName, sqlType);
+    if (hiveType == null) {
+      hiveType = toDbSpecificHiveType(tableName, columnName);
+    }
+    return hiveType;
+  }
+
+  /**
+   * Resolve a database-specific type to the Hive type that should contain it.
+   *
+   * @param tableName
+   *            table name
+   * @param colName
+   *            column name
+   * @return the name of a Hive type to hold the sql datatype, or null if
+   *         none.
+   */
+  private String toDbSpecificHiveType(String tableName, String colName) {
+    if (columnTypeNames == null) {
+      columnTypeNames = getColumnTypeNames(tableName, options.getCall(),
+                        options.getSqlQuery());
+    }
+    LOG.debug("database-specific Column Types and names returned = ("
+              + StringUtils.join(columnTypeNames.keySet(), ",") + ")=>("
+              + StringUtils.join(columnTypeNames.values(), ",") + ")");
+
+    String colTypeName = columnTypeNames.get(colName);
+
+    if (colTypeName != null) {
+      if (colTypeName.toUpperCase().startsWith("XML")) {
+        return XML_TO_JAVA_DATA_TYPE;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return java type for SQL type.
+   *
+   * @param tableName
+   *            table name
+   * @param columnName
+   *            column name
+   * @param sqlType
+   *            sql type
+   * @return java type
+   */
+  @Override
+  public String toJavaType(String tableName, String columnName, int sqlType) {
+    String javaType = super.toJavaType(tableName, columnName, sqlType);
+    if (javaType == null) {
+      javaType = toDbSpecificJavaType(tableName, columnName);
+    }
+    return javaType;
+  }
+
+  /**
+   * Resolve a database-specific type to the Java type that should contain it.
+   *
+   * @param tableName
+   *            table name
+   * @param colName
+   *            column name
+   * @return the name of a Java type to hold the sql datatype, or null if
+   *         none.
+   */
+  private String toDbSpecificJavaType(String tableName, String colName) {
+    if (columnTypeNames == null) {
+      columnTypeNames = getColumnTypeNames(tableName, options.getCall(),
+			 options.getSqlQuery());
+    }
+    String colTypeName = columnTypeNames.get(colName);
+    if (colTypeName != null) {
+      if (colTypeName.equalsIgnoreCase("XML")) {
+	return XML_TO_JAVA_DATA_TYPE;
+      }
+    }
+    return null;
+  }
+
 }
