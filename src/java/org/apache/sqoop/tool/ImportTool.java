@@ -300,7 +300,6 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       return true;
     }
 
-    FileSystem fs = FileSystem.get(options.getConf());
     SqoopOptions.IncrementalMode incrementalMode = options.getIncrementalMode();
     String nextIncrementalValue = null;
 
@@ -325,11 +324,14 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       }
       break;
     case DateLastModified:
-      if (options.getMergeKeyCol() == null && !options.isAppendMode()
-          && fs.exists(getOutputPath(options, context.getTableName(), false))) {
-        throw new ImportException("--" + MERGE_KEY_ARG + " or " + "--" + APPEND_ARG
-          + " is required when using --" + this.INCREMENT_TYPE_ARG
-          + " lastmodified and the output directory exists.");
+      if (options.getMergeKeyCol() == null && !options.isAppendMode()) {
+        Path outputPath = getOutputPath(options, context.getTableName(), false);
+        FileSystem fs = outputPath.getFileSystem(options.getConf());
+        if (fs.exists(outputPath)) {
+          throw new ImportException("--" + MERGE_KEY_ARG + " or " + "--" + APPEND_ARG
+            + " is required when using --" + this.INCREMENT_TYPE_ARG
+            + " lastmodified and the output directory exists.");
+        }
       }
       checkColumnType = manager.getColumnTypes(options.getTableName(),
         options.getSqlQuery()).get(options.getIncrementalTestColumn());
@@ -436,10 +438,14 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
    * Merge HDFS output directories
    */
   protected void lastModifiedMerge(SqoopOptions options, ImportJobContext context) throws IOException {
-    FileSystem fs = FileSystem.get(options.getConf());
-    if (context.getDestination() != null && fs.exists(context.getDestination())) {
+    if (context.getDestination() == null) {
+      return;
+    }
+
+    Path userDestDir = getOutputPath(options, context.getTableName(), false);
+    FileSystem fs = userDestDir.getFileSystem(options.getConf());
+    if (fs.exists(context.getDestination())) {
       LOG.info("Final destination exists, will run merge job.");
-      Path userDestDir = getOutputPath(options, context.getTableName(), false);
       if (fs.exists(userDestDir)) {
         String tableClassName = null;
         if (!context.getConnManager().isORMFacilitySelfManaged()) {
@@ -541,8 +547,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   private void deleteTargetDir(ImportJobContext context) throws IOException {
 
     SqoopOptions options = context.getOptions();
-    FileSystem fs = FileSystem.get(options.getConf());
     Path destDir = context.getDestination();
+    FileSystem fs = destDir.getFileSystem(options.getConf());
 
     if (fs.exists(destDir)) {
       fs.delete(destDir, true);

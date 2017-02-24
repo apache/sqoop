@@ -28,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * An output stream that writes to an underlying filesystem, opening
@@ -90,7 +91,7 @@ public class SplittingOutputStream extends OutputStream {
     FileSystem fs = destFile.getFileSystem(conf);
     LOG.debug("Opening next output file: " + destFile);
     if (fs.exists(destFile)) {
-      Path canonicalDest = destFile.makeQualified(fs);
+      Path canonicalDest = fs.makeQualified(destFile);
       throw new IOException("Destination file " + canonicalDest
           + " already exists");
     }

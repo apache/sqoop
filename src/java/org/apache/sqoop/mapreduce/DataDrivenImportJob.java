@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -48,6 +49,7 @@ import com.cloudera.sqoop.mapreduce.ImportJobBase;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import com.cloudera.sqoop.orm.AvroSchemaGenerator;
+import org.apache.sqoop.util.FileSystemUtil;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
 
@@ -141,8 +143,8 @@ public class DataDrivenImportJob extends ImportJobBase {
           options.getHiveTableName();
       return String.format("dataset:hive:/%s/%s", hiveDatabase, hiveTable);
     } else {
-      FileSystem fs = FileSystem.get(conf);
-      return "dataset:" + fs.makeQualified(getContext().getDestination());
+      Path destination = getContext().getDestination();
+      return "dataset:" + FileSystemUtil.makeQualified(destination, conf);
     }
   }
 

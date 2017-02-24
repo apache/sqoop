@@ -92,11 +92,10 @@ public class HBaseBulkImportJob extends HBaseImportJob {
   protected void completeImport(Job job) throws IOException, ImportException {
     super.completeImport(job);
 
-    FileSystem fileSystem = FileSystem.get(job.getConfiguration());
-
     // Make the bulk load files source directory accessible to the world
     // so that the hbase user can deal with it
     Path bulkLoadDir = getContext().getDestination();
+    FileSystem fileSystem = bulkLoadDir.getFileSystem(job.getConfiguration());
     setPermission(fileSystem, fileSystem.getFileStatus(bulkLoadDir),
       FsPermission.createImmutable((short) 00777));
 
@@ -120,8 +119,9 @@ public class HBaseBulkImportJob extends HBaseImportJob {
   protected void jobTeardown(Job job) throws IOException, ImportException {
     super.jobTeardown(job);
     // Delete the hfiles directory after we are finished.
-    FileSystem fileSystem = FileSystem.get(job.getConfiguration());
-    fileSystem.delete(getContext().getDestination(), true);
+    Path destination = getContext().getDestination();
+    FileSystem fileSystem = destination.getFileSystem(job.getConfiguration());
+    fileSystem.delete(destination, true);
   }
 
   /**

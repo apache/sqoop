@@ -36,6 +36,7 @@ import org.apache.sqoop.io.CodecMap;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * Creates (Hive-specific) SQL DDL statements to create tables to hold data
@@ -271,8 +272,7 @@ public class TableDefWriter {
     } else {
       tablePath = warehouseDir + inputTableName;
     }
-    FileSystem fs = FileSystem.get(configuration);
-    return new Path(tablePath).makeQualified(fs);
+    return FileSystemUtil.makeQualified(new Path(tablePath), configuration);
   }
 
   /**

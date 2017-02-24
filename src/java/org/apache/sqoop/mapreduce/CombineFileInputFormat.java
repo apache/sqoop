@@ -47,6 +47,7 @@ import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * This file was ported from Hadoop 2.0.2-alpha
@@ -224,11 +225,9 @@ public abstract class CombineFileInputFormat<K, V>
     // times, one time each for each pool in the next loop.
     List<Path> newpaths = new LinkedList<Path>();
     for (int i = 0; i < paths.length; i++) {
-      FileSystem fs = paths[i].getFileSystem(conf);
-
       //the scheme and authority will be kept if the path is
       //a valid path for a non-default file system
-      Path p = fs.makeQualified(paths[i]);
+      Path p = FileSystemUtil.makeQualified(paths[i], conf);
       newpaths.add(p);
     }
     paths = null;

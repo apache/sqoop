@@ -50,6 +50,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * Base class for running an export MapReduce job.
@@ -232,7 +233,7 @@ public class ExportJobBase extends JobBase {
     }
     Path inputPath = new Path(context.getOptions().getExportDir());
     Configuration conf = options.getConf();
-    inputPath = inputPath.makeQualified(FileSystem.get(conf));
+    inputPath = FileSystemUtil.makeQualified(inputPath, conf);
     return inputPath;
   }
 

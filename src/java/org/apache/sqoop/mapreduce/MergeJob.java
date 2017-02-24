@@ -46,6 +46,7 @@ import org.apache.sqoop.util.Jars;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.JobBase;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * Run a MapReduce job that merges two datasets.
@@ -111,9 +112,9 @@ public class MergeJob extends JobBase {
       Path newPath = new Path(options.getMergeNewPath());
 
       Configuration jobConf = job.getConfiguration();
-      FileSystem fs = FileSystem.get(jobConf);
-      oldPath = oldPath.makeQualified(fs);
-      newPath = newPath.makeQualified(fs);
+
+      oldPath = FileSystemUtil.makeQualified(oldPath, jobConf);
+      newPath = FileSystemUtil.makeQualified(newPath, jobConf);
 
       propagateOptionsToJob(job);
 

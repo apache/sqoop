@@ -79,7 +79,7 @@ public class LargeObjectLoader implements Closeable  {
       throws IOException {
     this.conf = conf;
     this.workPath = workPath;
-    this.fs = FileSystem.get(conf);
+    this.fs = workPath.getFileSystem(conf);
     this.curBlobWriter = null;
     this.curClobWriter = null;
   }

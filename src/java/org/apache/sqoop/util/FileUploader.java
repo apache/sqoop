@@ -18,16 +18,11 @@
 
 package org.apache.sqoop.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -40,15 +35,14 @@ public class FileUploader {
   public static void uploadFilesToDFS(String srcBasePath, String src,
     String destBasePath, String dest, Configuration conf) throws IOException {
 
-    FileSystem fs = FileSystem.get(conf);
-    Path targetPath = null;
     Path srcPath = new Path(srcBasePath, src);
 
-    if (destBasePath == null || destBasePath.length() == 0) {
+    if (destBasePath == null || destBasePath.isEmpty()) {
       destBasePath = ".";
     }
 
-    targetPath = new Path(destBasePath, dest);
+    Path targetPath = new Path(destBasePath, dest);
+    FileSystem fs = targetPath.getFileSystem(conf);
 
     if (!fs.exists(targetPath)) {
       fs.mkdirs(targetPath);
