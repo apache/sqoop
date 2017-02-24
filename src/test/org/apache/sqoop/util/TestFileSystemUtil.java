@@ -33,7 +33,7 @@ public class TestFileSystemUtil {
   @Before
   public void setUp() {
     conf = new Configuration();
-    conf.set("fs.my.impl", MyFileSystem.class.getTypeName());
+    conf.set("fs.my.impl", MyFileSystem.class.getName());
   }
 
   @Test
