@@ -33,13 +33,14 @@ import com.cloudera.sqoop.metastore.hsqldb.AutoHsqldbStorage;
 import com.cloudera.sqoop.tool.VersionTool;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.sql.Connection;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Test the metastore and job-handling features.
@@ -54,6 +55,9 @@ public class TestSavedJobs {
       "jdbc:hsqldb:mem:sqoopmetastore";
   public static final String TEST_AUTOCONNECT_USER = "SA";
   public static final String TEST_AUTOCONNECT_PASS = "";
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() throws Exception {
@@ -118,7 +122,7 @@ public class TestSavedJobs {
   }
 
   @Test
-  public void testCreateDeleteJob() throws IOException {
+  public void testCreateSameJob() throws IOException {
     Configuration conf = newConf();
     JobStorageFactory ssf = new JobStorageFactory(conf);
 
@@ -139,29 +143,45 @@ public class TestSavedJobs {
     assertEquals(1, jobs.size());
     assertEquals("versionJob", jobs.get(0));
 
-    // Try to create that same job name again. This should fail.
     try {
+      // Try to create that same job name again. This should fail.
+      thrown.expect(IOException.class);
+      thrown.reportMissingExceptionWithMessage("Expected IOException since job already exists");
       storage.create("versionJob", data);
-      fail("Expected IOException; this job already exists.");
-    } catch (IOException ioe) {
-      // This is expected; continue operation.
+    } finally {
+      jobs = storage.list();
+      assertEquals(1, jobs.size());
+
+      // Restore our job, check that it exists.
+      JobData outData = storage.read("versionJob");
+      assertEquals(new VersionTool().getToolName(),
+          outData.getSqoopTool().getToolName());
+
+      storage.close();
     }
+  }
+
+  @Test
+  public void testDeleteJob() throws IOException {
+    Configuration conf = newConf();
+    JobStorageFactory ssf = new JobStorageFactory(conf);
+
+    Map<String, String> descriptor = new TreeMap<String, String>();
+    JobStorage storage = ssf.getJobStorage(descriptor);
+
+    storage.open(descriptor);
+
+    // Job list should start out empty.
+    List<String> jobs = storage.list();
+    assertEquals(0, jobs.size());
+
+    // Create a job that displays the version.
+    JobData data = new JobData(new SqoopOptions(), new VersionTool());
+    storage.create("versionJob", data);
 
     jobs = storage.list();
     assertEquals(1, jobs.size());
-
-    // Restore our job, check that it exists.
-    JobData outData = storage.read("versionJob");
-    assertEquals(new VersionTool().getToolName(),
-        outData.getSqoopTool().getToolName());
-
-    // Try to restore a job that doesn't exist. Watch it fail.
-    try {
-      storage.read("DoesNotExist");
-      fail("Expected IOException");
-    } catch (IOException ioe) {
-      // This is expected. Continue.
-    }
+    assertEquals("versionJob", jobs.get(0));
 
     // Now delete the job.
     storage.delete("versionJob");
@@ -171,6 +191,26 @@ public class TestSavedJobs {
     assertEquals(0, jobs.size());
 
     storage.close();
+  }
+
+  @Test
+  public void testRestoreNonExistingJob() throws IOException {
+    Configuration conf = newConf();
+    JobStorageFactory ssf = new JobStorageFactory(conf);
+
+    Map<String, String> descriptor = new TreeMap<String, String>();
+    JobStorage storage = ssf.getJobStorage(descriptor);
+
+    storage.open(descriptor);
+
+    try {
+      // Try to restore a job that doesn't exist. Watch it fail.
+      thrown.expect(IOException.class);
+      thrown.reportMissingExceptionWithMessage("Expected IOException since job doesn't exist");
+      storage.read("DoesNotExist");
+    } finally {
+      storage.close();
+    }
   }
 
   @Test

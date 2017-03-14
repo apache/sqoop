@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.Shell;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -46,6 +47,7 @@ import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
 
@@ -71,6 +73,9 @@ public class TestClassWriter {
   private HsqldbTestServer testServer;
   private ConnManager manager;
   private SqoopOptions options;
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() {
@@ -642,31 +647,6 @@ public class TestClassWriter {
     fail("we shouldn't successfully generate code");
   }
 
-  private void runFailedGenerationTest(String [] argv,
-      String classNameToCheck) {
-    File codeGenDirFile = new File(CODE_GEN_DIR);
-    File classGenDirFile = new File(JAR_GEN_DIR);
-
-    try {
-      options = new ImportTool().parseArguments(argv,
-          null, options, true);
-    } catch (Exception e) {
-      LOG.error("Could not parse options: " + e.toString());
-    }
-
-    CompilationManager compileMgr = new CompilationManager(options);
-    ClassWriter writer = new ClassWriter(options, manager,
-        HsqldbTestServer.getTableName(), compileMgr);
-
-    try {
-      writer.generate();
-      compileMgr.compile();
-      fail("ORM class file generation succeeded when it was expected to fail");
-    } catch (Exception ioe) {
-      LOG.error("Got Exception from ORM generation as expected : "
-        + ioe.toString());
-    }
-  }
   /**
    * A dummy manager that declares that it ORM is self managed.
    */
@@ -686,7 +666,22 @@ public class TestClassWriter {
       "--outdir",
       CODE_GEN_DIR,
     };
-    runFailedGenerationTest(argv, HsqldbTestServer.getTableName());
+
+    try {
+      options = new ImportTool().parseArguments(argv,
+          null, options, true);
+    } catch (Exception e) {
+      LOG.error("Could not parse options: " + e.toString());
+    }
+
+    CompilationManager compileMgr = new CompilationManager(options);
+    ClassWriter writer = new ClassWriter(options, manager,
+        HsqldbTestServer.getTableName(), compileMgr);
+
+    writer.generate();
+
+    thrown.expect(Exception.class);
+    compileMgr.compile();
   }
 
   @Test(timeout = 25000)
