@@ -20,7 +20,10 @@ package com.cloudera.sqoop.lib;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.fail;
 
@@ -29,6 +32,9 @@ import static org.junit.Assert.fail;
  * Test that the record parser works in a variety of configurations.
  */
 public class TestRecordParser {
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   private void assertListsEqual(String msg, List<String> expected,
       List<String> actual) {
@@ -300,49 +306,41 @@ public class TestRecordParser {
   public void testRequiredQuotes2() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(
         new DelimiterSet(',', '\n', '\"', '\\', true));
-    try {
-      parser.parseRecord("\"field1\",field2");
-      fail("Expected parse error for required quotes");
-    } catch (RecordParser.ParseError pe) {
-      // ok. expected.
-    }
+
+    thrown.expect(RecordParser.ParseError.class);
+    thrown.reportMissingExceptionWithMessage("Expected parse error for required quotes");
+    parser.parseRecord("\"field1\",field2");
   }
 
   @Test
   public void testRequiredQuotes3() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(
         new DelimiterSet(',', '\n', '\"', '\\', true));
-    try {
-      parser.parseRecord("field1,\"field2\"");
-      fail("Expected parse error for required quotes");
-    } catch (RecordParser.ParseError pe) {
-      // ok. expected.
-    }
+
+    thrown.expect(RecordParser.ParseError.class);
+    thrown.reportMissingExceptionWithMessage("Expected ParseError for required quotes");
+    parser.parseRecord("field1,\"field2\"");
   }
 
   @Test
   public void testRequiredQuotes4() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(
         new DelimiterSet(',', '\n', '\"', '\\', true));
-    try {
-      parser.parseRecord("field1,\"field2\"\n");
-      fail("Expected parse error for required quotes");
-    } catch (RecordParser.ParseError pe) {
-      // ok. expected.
-    }
+
+    thrown.expect(RecordParser.ParseError.class);
+    thrown.reportMissingExceptionWithMessage("Expected ParseError for required quotes");
+    parser.parseRecord("field1,\"field2\"\n");
   }
 
   @Test
-  public void testNull() {
+  public void testNull() throws RecordParser.ParseError {
     RecordParser parser = new RecordParser(
         new DelimiterSet(',', '\n', '\"', '\\', true));
     String input = null;
-    try {
-      parser.parseRecord(input);
-      fail("Expected parse error for null string");
-    } catch (RecordParser.ParseError pe) {
-      // ok. expected.
-    }
+
+    thrown.expect(RecordParser.ParseError.class);
+    thrown.reportMissingExceptionWithMessage("Expected ParseError for null string");
+    parser.parseRecord(input);
   }
 
 

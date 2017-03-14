@@ -49,7 +49,9 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.JobTool;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 
 import static org.junit.Assert.*;
@@ -69,6 +71,9 @@ public class TestIncrementalImport  {
 
   // What database do we read from.
   public static final String SOURCE_DB_URL = "jdbc:hsqldb:mem:incremental";
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() throws Exception {
@@ -949,14 +954,12 @@ public class TestIncrementalImport  {
     List<String> args = getArgListForTable(TABLE_NAME, false, true);
     args.add("--append");
     createJob(TABLE_NAME, args);
-    try {
-      runJob(TABLE_NAME);
-      //the above line should throw an exception otherwise the test has failed
-      fail("Expected incremental import on varchar column to fail.");
-    } catch(RuntimeException e) {
-      //expected
-    }
+
+    thrown.expect(RuntimeException.class);
+    thrown.reportMissingExceptionWithMessage("Expected incremental import on varchar column to fail");
+    runJob(TABLE_NAME);
   }
+
   @Test
   public void testModifyWithTimestamp() throws Exception {
     // Create a table with data in it; import it.
