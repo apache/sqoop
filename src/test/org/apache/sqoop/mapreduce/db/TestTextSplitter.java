@@ -146,6 +146,8 @@ public class TestTextSplitter {
     TextSplitter splitter = new TextSplitter();
 
     thrown.expect(ValidationException.class);
+    thrown.reportMissingExceptionWithMessage("Expected ValidationException during splitting " +
+        "when min string greater than max string");
     splitter.split(4, "Z", "A", "");
   }
 

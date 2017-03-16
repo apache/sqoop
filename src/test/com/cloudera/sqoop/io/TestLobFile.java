@@ -143,6 +143,7 @@ public class TestLobFile {
     reader.close();
 
     thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException calling next after close");
     reader.next();
 
     // A second close shouldn't hurt anything. This should be a no-op.
@@ -590,6 +591,7 @@ public class TestLobFile {
     runCompressedTest(CodecMap.DEFLATE);
 
     thrown.expect(UnsupportedCodecException.class);
+    thrown.reportMissingExceptionWithMessage("Expected UnsupportedCodecException for lzo");
     runCompressedTest(CodecMap.LZO);
   }
 

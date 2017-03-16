@@ -55,6 +55,7 @@ public class TestTableDefWriter {
   // Test getHiveOctalCharCode and expect an IllegalArgumentException.
   private void expectExceptionInCharCode(int charCode) {
     thrown.expect(IllegalArgumentException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IllegalArgumentException with out-of-range Hive delimiter");
     TableDefWriter.getHiveOctalCharCode(charCode);
   }
 
@@ -221,6 +222,7 @@ public class TestTableDefWriter {
     writer.setColumnTypes(colTypes);
 
     thrown.expect(IllegalArgumentException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IllegalArgumentException on non applied Hive type mapping");
     String createTable = writer.getCreateTableStmt();
   }
 

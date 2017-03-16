@@ -110,6 +110,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --target-dir");
     importTool.validateOptions(opts);
   }
 
@@ -128,6 +130,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --warehouse-dir");
     importTool.validateOptions(opts);
   }
 
@@ -145,6 +149,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --hive-import");
     importTool.validateOptions(opts);
   }
 
@@ -163,6 +169,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseExportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog export " +
+        "with --export-dir");
     exportTool.validateOptions(opts);
   }
 
@@ -180,6 +188,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseExportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog export " +
+        "with --as-parquetfile");
     exportTool.validateOptions(opts);
   }
 
@@ -197,6 +207,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --as-sequencefile");
     importTool.validateOptions(opts);
   }
 
@@ -217,6 +229,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --as-parquetfile");
     importTool.validateOptions(opts);
   }
 
@@ -234,6 +248,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --as-avrodatafile");
     importTool.validateOptions(opts);
   }
 
@@ -278,6 +294,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --drop-and-create-hcatalog-table");
     importTool.validateOptions(opts);
   }
 
@@ -331,6 +349,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with only HCatalog keys");
     importTool.validateOptions(opts);
   }
 
@@ -351,6 +371,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with mismatched keys and values");
     importTool.validateOptions(opts);
   }
 
@@ -371,6 +393,8 @@ public class TestHCatalogBasic {
     SqoopOptions opts = parseImportArgs(args);
 
     thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with empty keys and values");
     importTool.validateOptions(opts);
   }
 
