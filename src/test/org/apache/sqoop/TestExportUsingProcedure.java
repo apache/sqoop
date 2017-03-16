@@ -211,6 +211,7 @@ public class TestExportUsingProcedure extends TestExport {
   @Test
   public void testMultiMapTextExportWithStaging() throws IOException, SQLException {
     thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException as staging tables are not compatible with --call");
     super.testMultiMapTextExportWithStaging();
   }
 
@@ -218,6 +219,7 @@ public class TestExportUsingProcedure extends TestExport {
   @Test
   public void testMultiTransactionWithStaging() throws IOException, SQLException {
     thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException as staging tables are not compatible with --call");
     super.testMultiTransactionWithStaging();
   }
 

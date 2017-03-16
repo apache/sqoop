@@ -93,6 +93,7 @@ public class TestTargetDir extends ImportJobTestCase {
     String[] argv = (String[]) args.toArray(new String[0]);
 
     thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException on several output options");
     runImport(argv);
   }
 
@@ -148,6 +149,7 @@ public class TestTargetDir extends ImportJobTestCase {
     String[] argv = (String[]) args.toArray(new String[0]);
 
     thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException on --target-dir if target dir already exists");
     runImport(argv);
   }
 

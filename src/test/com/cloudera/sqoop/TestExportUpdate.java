@@ -702,6 +702,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     populateDatabase(1);
 
     thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException as --columns is not a superset of --update-key");
     runExport(getArgv(true, 2, 2, "-m", "1",
         "--update-key", "A", "--columns", "B"));
   }

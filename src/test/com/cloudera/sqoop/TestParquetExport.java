@@ -396,6 +396,7 @@ public class TestParquetExport extends ExportJobTestCase {
     createTable(gen);
 
     thrown.expect(Exception.class);
+    thrown.reportMissingExceptionWithMessage("Expected Exception as Parquet records are not supported");
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
@@ -435,6 +436,7 @@ public class TestParquetExport extends ExportJobTestCase {
     createTableWithInsert();
 
     thrown.expect(Exception.class);
+    thrown.reportMissingExceptionWithMessage("Expected Exception during Parquet export with --update-mode");
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
@@ -449,6 +451,7 @@ public class TestParquetExport extends ExportJobTestCase {
     createTable(gen);
 
     thrown.expect(Exception.class);
+    thrown.reportMissingExceptionWithMessage("Expected Exception on missing Parquet fields");
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 

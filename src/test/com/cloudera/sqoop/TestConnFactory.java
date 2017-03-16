@@ -69,6 +69,7 @@ public class TestConnFactory {
     ConnFactory factory = new ConnFactory(conf);
 
     thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException because of missing ConnManager ");
     factory.getManager(
         new JobData(new SqoopOptions(), new ImportTool()));
   }
