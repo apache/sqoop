@@ -31,6 +31,7 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -109,9 +110,19 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   static final String SCHEMA_SPECIAL = "special";
   static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
+  protected Connection connection;
+
   @Override
   protected boolean useHsqldbTestServer() {
     return false;
+  }
+
+  public String quoteTableOrSchemaName(String tableName) {
+    return "\"" + tableName + "\"";
+  }
+
+  private String getDropTableStatement(String tableName, String schema) {
+    return "DROP TABLE IF EXISTS " + quoteTableOrSchemaName(schema) + "." + quoteTableOrSchemaName(tableName);
   }
 
   @Before
@@ -128,13 +139,35 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     LOG.debug("setUp complete.");
   }
 
+  @After
+  public void tearDown() {
+    try {
+      Statement stmt = connection.createStatement();
+      stmt.executeUpdate(getDropTableStatement(TABLE_NAME, SCHEMA_PUBLIC));
+      stmt.executeUpdate(getDropTableStatement(NULL_TABLE_NAME, SCHEMA_PUBLIC));
+      stmt.executeUpdate(getDropTableStatement(SPECIAL_TABLE_NAME, SCHEMA_PUBLIC));
+      stmt.executeUpdate(getDropTableStatement(DIFFERENT_TABLE_NAME, SCHEMA_SPECIAL));
+    } catch (SQLException e) {
+      LOG.error("Can't clean up the database:", e);
+    }
+
+    super.tearDown();
+
+    try {
+      connection.close();
+    } catch (SQLException e) {
+      LOG.error("Ignoring exception in tearDown", e);
+    }
+  }
+
+
+
   public void setUpData(String tableName, String schema, boolean nullEntry) {
     SqoopOptions options = new SqoopOptions(CONNECT_STRING, tableName);
     options.setUsername(DATABASE_USER);
     options.setPassword(PASSWORD);
 
     ConnManager manager = null;
-    Connection connection = null;
     Statement st = null;
 
     try {
