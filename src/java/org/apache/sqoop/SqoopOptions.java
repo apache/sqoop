@@ -1350,8 +1350,8 @@ public class SqoopOptions implements Cloneable {
 
       try {
         output.put(
-            URLDecoder.decode(details[0].replace("#", ","), "UTF-8"),
-            URLDecoder.decode(details[1].replace("#", ","), "UTF-8"));
+            URLDecoder.decode(details[0].replaceAll("\\(([0-9]+)#([0-9]+)\\)", "($1,$2)"), "UTF-8"),
+            URLDecoder.decode(details[1].replaceAll("\\(([0-9]+)#([0-9]+)\\)", "($1,$2)"), "UTF-8"));
       } catch (UnsupportedEncodingException e) {
         throw new IllegalArgumentException("Encoding not supported. "
             + "Column mapping should be UTF-8 encoding.");
