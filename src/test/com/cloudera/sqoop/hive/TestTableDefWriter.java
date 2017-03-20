@@ -180,7 +180,7 @@ public class TestTableDefWriter {
   }
 
   @Test
-  public void testUserMapping() throws Exception {
+  public void testUserMappingNoDecimal() throws Exception {
     String[] args = {
         "--map-column-hive", "id=STRING,value=INTEGER",
     };
@@ -204,6 +204,43 @@ public class TestTableDefWriter {
 
     assertFalse(createTable.contains("`id` INTEGER"));
     assertFalse(createTable.contains("`value` STRING"));
+  }
+
+  @Test
+  public void testUserMappingWithDecimal() throws Exception {
+    String[] args = {
+        "--map-column-hive", "id=STRING,value2=DECIMAL(13,5),value1=INTEGER," +
+                             "value3=DECIMAL(4,5),value4=VARCHAR(255)",
+    };
+    Configuration conf = new Configuration();
+    SqoopOptions options =
+        new ImportTool().parseArguments(args, null, null, false);
+    TableDefWriter writer = new TableDefWriter(options,
+        null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
+
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+    colTypes.put("id", Types.INTEGER);
+    colTypes.put("value1", Types.VARCHAR);
+    colTypes.put("value2", Types.DOUBLE);
+    colTypes.put("value3", Types.FLOAT);
+    colTypes.put("value4", Types.CHAR);
+    writer.setColumnTypes(colTypes);
+
+    String createTable = writer.getCreateTableStmt();
+
+    assertNotNull(createTable);
+
+    assertTrue(createTable.contains("`id` STRING"));
+    assertTrue(createTable.contains("`value1` INTEGER"));
+    assertTrue(createTable.contains("`value2` DECIMAL(13,5)"));
+    assertTrue(createTable.contains("`value3` DECIMAL(4,5)"));
+    assertTrue(createTable.contains("`value4` VARCHAR(255)"));
+
+    assertFalse(createTable.contains("`id` INTEGER"));
+    assertFalse(createTable.contains("`value1` STRING"));
+    assertFalse(createTable.contains("`value2` DOUBLE"));
+    assertFalse(createTable.contains("`value3` FLOAT"));
+    assertFalse(createTable.contains("`value4` CHAR"));
   }
 
   @Test

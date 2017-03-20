@@ -499,6 +499,23 @@ public class TestHiveImport extends ImportJobTestCase {
         getArgv(false, null), new ImportTool());
   }
 
+  /** Test that DECIMALS using --map-column-hive option maps can run without issues. */
+  @Test
+  public void testDecimalMapColumnHive() throws IOException {
+    final String TABLE_NAME = "DECIMAL_MAP_HIVE_IMPORT";
+    setCurTableName(TABLE_NAME);
+    setNumCols(2);
+    String [] types = { "NUMERIC", "CHAR(64)" };
+    String [] vals = { "12343.14159", "'foo'" };
+
+    ArrayList<String> args = new ArrayList<String>();
+    args.add("--map-column-hive");
+    args.add(BASE_COL_NAME  + "0=DECIMAL(10,10)");
+
+    runImportTest(TABLE_NAME, types, vals, "decimalMapImport.q",
+        getArgv(false, args.toArray(new String[args.size()])), new ImportTool());
+  }
+
   /** If bin/hive returns an error exit status, we should get an IOException. */
   @Test
   public void testHiveExitFails() throws IOException {

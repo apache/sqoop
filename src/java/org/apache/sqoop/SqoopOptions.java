@@ -1322,11 +1322,14 @@ public class SqoopOptions implements Cloneable {
   public void setPasswordAlias(String alias) {
     this.passwordAlias = alias;
   }
+
   protected void parseColumnMapping(String mapping,
           Properties output) {
     output.clear();
 
-    String[] maps = mapping.split(",");
+    // replace (xx,xx) with (xx#xx), so that we can just split by "," afterwards
+    String[] maps = mapping.replaceAll("\\(([0-9]+),([0-9]+)\\)", "($1#$2)").split(",");
+
     for(String map : maps) {
       String[] details = map.split("=");
       if (details.length != 2) {
@@ -1336,8 +1339,8 @@ public class SqoopOptions implements Cloneable {
 
       try {
         output.put(
-            URLDecoder.decode(details[0], "UTF-8"),
-            URLDecoder.decode(details[1], "UTF-8"));
+            URLDecoder.decode(details[0].replace("#", ","), "UTF-8"),
+            URLDecoder.decode(details[1].replace("#", ","), "UTF-8"));
       } catch (UnsupportedEncodingException e) {
         throw new IllegalArgumentException("Encoding not supported. "
             + "Column mapping should be UTF-8 encoding.");
