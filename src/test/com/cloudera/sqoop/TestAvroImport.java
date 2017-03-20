@@ -48,6 +48,7 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -317,7 +318,49 @@ public class TestAvroImport extends ImportJobTestCase {
 
     GenericRecord record1 = reader.next();
     assertNull(record1.get("DATA_COL0"));
+  }
 
+  @Test
+  public void testSpecialCharactersInColumnMappingWithConvertion() throws IOException, SQLException {
+    // escaping enabled by default
+    String [] extraArgsEscapeColNamesWithMapping = { "--map-column-java",
+        "INTFIELD1=String,DATA_#_COL0=String,DATA#COL1=String,DATA___COL2=String"};
+
+    // disable escaping
+    String [] extraArgsEscapingDisables = {"--escape-mapping-column-names", "false"};
+
+    // escaping enabled but mapping not provided
+    String [] extraArgsEscapingWithoutMapping = {};
+
+    checkRecordWithExtraArgs(extraArgsEscapeColNamesWithMapping, "TABLE1");
+    checkRecordWithExtraArgs(extraArgsEscapingDisables, "TABLE2");
+    checkRecordWithExtraArgs(extraArgsEscapingWithoutMapping, "TABLE3");
+  }
+
+  private void checkRecordWithExtraArgs(String[] extraArgs, String tableName) throws IOException {
+    String date = "2017-01-19";
+    String timeStamp = "2017-01-19 14:47:57.112000";
+
+    String [] names = {"INTFIELD1", "DATA_#_COL0", "DATA#COL1", "DATA___COL2"};
+    String [] types = { "INT", "DATE", "TIMESTAMP", "DECIMAL(2,20)" };
+    String [] vals = {"1", "{ts \'" + date + "\'}", "{ts \'" + timeStamp + "\'}", "2e20"};
+
+    String [] checkNames =  {"INTFIELD1", "DATA___COL0", "DATA_COL1", "DATA___COL2"};
+
+    setCurTableName(tableName);
+
+    createTableWithColTypesAndNames(names, types, vals);
+    runImport(getOutputArgv(true, extraArgs));
+
+    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+    DataFileReader<GenericRecord> reader = read(outputFile);
+    GenericRecord record = reader.next();
+
+    for (String columnName : checkNames) {
+      assertNotNull(record.get(columnName));
+    }
+
+    removeTableDir();
   }
 
   protected DataFileReader<GenericRecord> read(Path filename) throws IOException {

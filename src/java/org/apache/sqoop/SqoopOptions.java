@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.accumulo.AccumuloConstants;
 import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
+import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.SqoopJsonUtil;
@@ -53,6 +54,7 @@ import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
 
 import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
+import static org.apache.sqoop.orm.ClassWriter.toJavaIdentifier;
 
 /**
  * Configurable state used by Sqoop tools.
@@ -78,7 +80,6 @@ public class SqoopOptions implements Cloneable {
   public static final String DEF_HCAT_HOME_OLD = "/usr/lib/hcatalog";
 
   public static final boolean METASTORE_PASSWORD_DEFAULT = false;
-
   /**
    * Thrown when invalid cmdline options are given.
    */
@@ -201,6 +202,9 @@ public class SqoopOptions implements Cloneable {
   // User explicit mapping of types
   private Properties mapColumnJava; // stored as map.colum.java
   private Properties mapColumnHive; // stored as map.column.hive
+  // SQOOP-3123 default enabled
+  private boolean escapeColumnMappingEnabled;
+  private Properties mapReplacedColumnJava; // used to replace special characters in columns
 
   // An ordered list of column names denoting what order columns are
   // serialized to a PreparedStatement from a generated record type.
@@ -874,6 +878,10 @@ public class SqoopOptions implements Cloneable {
         other.mapColumnJava = (Properties) this.mapColumnJava.clone();
       }
 
+      if (null != mapReplacedColumnJava) {
+        other.mapReplacedColumnJava = (Properties) this.mapReplacedColumnJava.clone();
+      }
+
       return other;
     } catch (CloneNotSupportedException cnse) {
       // Shouldn't happen.
@@ -1064,6 +1072,9 @@ public class SqoopOptions implements Cloneable {
 
     // set default metadata transaction isolation level to TRANSACTION_READ_COMMITTED
     this.metadataTransactionIsolationLevel = Connection.TRANSACTION_READ_COMMITTED;
+
+    // set escape column mapping to true
+    this.escapeColumnMappingEnabled = true;
   }
 
   /**
@@ -2734,4 +2745,38 @@ public class SqoopOptions implements Cloneable {
     getConf().setBoolean(ORACLE_ESCAPING_DISABLED, escapingDisabled);
   }
 
+  public void setEscapeMappingColumnNamesEnabled(boolean escapingEnabled) {
+    this.escapeColumnMappingEnabled = escapingEnabled;
+    // important to have custom setter to ensure option is available through
+    // Hadoop configuration on those places where SqoopOptions is not reachable
+    getConf().setBoolean(BaseSqoopTool.ESCAPE_MAPPING_COLUMN_NAMES_ENABLED, escapingEnabled);
+  }
+
+  public boolean getEscapeMappingColumnNamesEnabled() {
+    return escapeColumnMappingEnabled;
+  }
+
+  public Properties getColumnNames() {
+    if (escapeColumnMappingEnabled && null == mapReplacedColumnJava) {
+      return doCleanColumnMapping();
+    }
+    return escapeColumnMappingEnabled ? mapReplacedColumnJava : mapColumnJava;
+  }
+
+  private Properties doCleanColumnMapping() {
+      mapReplacedColumnJava = new Properties();
+
+      if (!mapColumnJava.isEmpty()) {
+        for (Map.Entry<Object, Object> entry : mapColumnJava.entrySet()) {
+          String candidate = toJavaIdentifier((String)entry.getKey());
+          mapReplacedColumnJava.put(candidate, mapColumnJava.getProperty((String)entry.getKey()));
+        }
+        return mapReplacedColumnJava;
+      }
+
+      return mapColumnJava;
+    }
+
+
 }
+

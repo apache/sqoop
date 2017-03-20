@@ -172,6 +172,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String RELAXED_ISOLATION = "relaxed-isolation";
   public static final String THROW_ON_ERROR_ARG = "throw-on-error";
   public static final String ORACLE_ESCAPING_DISABLED = "oracle-escaping-disabled";
+  public static final String ESCAPE_MAPPING_COLUMN_NAMES_ENABLED = "escape-mapping-column-names";
 
   // Arguments for validation.
   public static final String VALIDATE_ARG = "validate";
@@ -787,6 +788,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withDescription("Override mapping for specific columns to java types")
         .withLongOpt(MAP_COLUMN_JAVA)
         .create());
+    codeGenOpts.addOption(OptionBuilder
+        .hasArg()
+        .withDescription("Disable special characters escaping in column names")
+        .withLongOpt(ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)
+        .withArgName("boolean")
+        .create());
 
     if (!multiTable) {
       codeGenOpts.addOption(OptionBuilder.withArgName("name")
@@ -1084,6 +1091,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     if (in.hasOption(ORACLE_ESCAPING_DISABLED)) {
       out.setOracleEscapingDisabled(Boolean.parseBoolean(in.getOptionValue(ORACLE_ESCAPING_DISABLED)));
     }
+
+    if (in.hasOption(ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)) {
+      out.setEscapeMappingColumnNamesEnabled(Boolean.parseBoolean(in.getOptionValue(
+          ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)));
+    }
   }
 
   private void applyCredentialsOptions(CommandLine in, SqoopOptions out)
@@ -1354,6 +1366,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
     if (!multiTable && in.hasOption(CLASS_NAME_ARG)) {
       out.setClassName(in.getOptionValue(CLASS_NAME_ARG));
+    }
+
+    if (in.hasOption(ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)) {
+      out.setEscapeMappingColumnNamesEnabled(Boolean.parseBoolean(in.getOptionValue(
+          ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)));
     }
   }
 

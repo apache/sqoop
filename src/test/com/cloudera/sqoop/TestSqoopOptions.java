@@ -20,21 +20,18 @@ package com.cloudera.sqoop;
 
 import java.util.Properties;
 
-import com.cloudera.sqoop.tool.BaseSqoopTool;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.sqoop.manager.oracle.OracleUtils;
-
-import com.cloudera.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import com.cloudera.sqoop.lib.DelimiterSet;
+import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import com.cloudera.sqoop.tool.BaseSqoopTool;
+import com.cloudera.sqoop.tool.ImportTool;
 
 import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -780,6 +777,21 @@ public class TestSqoopOptions {
     thrown.reportMissingExceptionWithMessage("Expected Exception on incompatibility of " +
         "--autoreset-to-one-mapper and --split-by");
     validateImportOptions(extraArgs);
+  }
+
+  @Test
+  public void testEscapeMapingColumnNames() throws Exception {
+    SqoopOptions opts = new SqoopOptions();
+    // enabled by default
+    assertTrue(opts.getEscapeMappingColumnNamesEnabled());
+
+    String [] args = {
+        "--" + org.apache.sqoop.tool.BaseSqoopTool.ESCAPE_MAPPING_COLUMN_NAMES_ENABLED,
+        "false",
+    };
+
+    opts = parse(args);
+    assertFalse(opts.getEscapeMappingColumnNamesEnabled());
   }
 
 }

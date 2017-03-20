@@ -39,18 +39,18 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.lib.BigDecimalSerializer;
+import com.cloudera.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.BooleanParser;
+import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.FieldFormatter;
 import com.cloudera.sqoop.lib.JdbcWritableBridge;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.lib.LobSerializer;
 import com.cloudera.sqoop.lib.RecordParser;
-import com.cloudera.sqoop.lib.BlobRef;
-import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.SqoopRecord;
+import com.cloudera.sqoop.manager.ConnManager;
 
 /**
  * Creates an ORM class to represent a table from a database.
@@ -289,10 +289,9 @@ public class ClassWriter {
   }
 
   private String toJavaType(String columnName, int sqlType) {
-    Properties mapping = options.getMapColumnJava();
-
-    if (mapping.containsKey(columnName)) {
-      String type = mapping.getProperty(columnName);
+    Properties columnMapping = options.getColumnNames();
+    if (null != columnMapping && columnMapping.containsKey(columnName)) {
+      String type = (String) columnMapping.get(columnName);
       if (LOG.isDebugEnabled()) {
         LOG.info("Overriding type of column " + columnName + " to " + type);
       }
@@ -1705,7 +1704,8 @@ public class ClassWriter {
     }
 
     // Check that all explicitly mapped columns are present in result set
-    Properties mapping = options.getMapColumnJava();
+    Properties mapping = options.getColumnNames();
+
     if (mapping != null && !mapping.isEmpty()) {
       for(Object column : mapping.keySet()) {
         if (!uniqColNames.contains((String)column)) {
