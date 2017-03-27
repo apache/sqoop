@@ -885,4 +885,14 @@ public class TestExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(2), gen2);
     assertColMinAndMax(forIdx(1), genNull);
   }
+
+  protected void testExportToTableWithName(String tableName) throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+    setCurTableName(tableName);
+    createTextFile(0, TOTAL_RECORDS, false);
+    createTable();
+    runExport(getArgv(true, 10, 10));
+    verifyExport(TOTAL_RECORDS);
+  }
+
 }

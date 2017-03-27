@@ -45,6 +45,8 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.FileListing;
 import com.cloudera.sqoop.util.Jars;
 
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
+
 /**
  * Manages the compilation of a bunch of .java files into .class files
  * and eventually a jar.
@@ -60,6 +62,9 @@ public class CompilationManager {
 
   public static final Log LOG = LogFactory.getLog(
       CompilationManager.class.getName());
+  private static final String INNER_CLASS_SEPARATOR = "$";
+  private static final String CLASS_EXTENSION = ".class";
+  private static final String JAVA_EXTENSION = ".java";
 
   private SqoopOptions options;
   private List<String> sources;
@@ -299,32 +304,51 @@ public class CompilationManager {
         // with the base directory where class files were put;
         // we only record the subdir parts in the zip entry.
         String fullPath = entry.getAbsolutePath();
-        String chompedPath = fullPath.substring(baseDirName.length());
-        int indexOfDollarSign = chompedPath.indexOf("$");
-        String innerTypesChompedPath = chompedPath
-            .substring(0, indexOfDollarSign == -1 ? chompedPath.length() : indexOfDollarSign);
+        String classFileName = fullPath.substring(baseDirName.length());
 
-        boolean include = chompedPath.endsWith(".class")
-            && (sources.contains(
-            chompedPath.substring(0, chompedPath.length() - ".class".length())
-                    + ".java")
-                || sources.contains(innerTypesChompedPath + ".java"));
-
-        if (include) {
+        if (includeFileInJar(classFileName)) {
           // include this file.
           if (Shell.WINDOWS) {
             // In Windows OS, elements in jar files still need to have a path
             // separator of '/' rather than the default File.separator which is '\'
-            chompedPath = chompedPath.replace(File.separator, "/");
+            classFileName = classFileName.replace(File.separator, "/");
           }
-          LOG.debug("Got classfile: " + entry.getPath() + " -> " + chompedPath);
-          ZipEntry ze = new ZipEntry(chompedPath);
+          LOG.debug("Got classfile: " + entry.getPath() + " -> " + classFileName);
+          ZipEntry ze = new ZipEntry(classFileName);
           jstream.putNextEntry(ze);
           copyFileToStream(entry, jstream);
           jstream.closeEntry();
         }
       }
     }
+  }
+
+  boolean includeFileInJar(String classFileName) {
+    if (!classFileName.endsWith(CLASS_EXTENSION)) {
+      return false;
+    }
+
+    String className = substringBeforeLast(classFileName, CLASS_EXTENSION);
+    String sourceFileOfClass = className + JAVA_EXTENSION;
+
+    return isInnerClass(sourceFileOfClass) || isOuterClass(sourceFileOfClass);
+  }
+
+  boolean isInnerClass(String sourceFileName) {
+    String potentialOuterClassName = potentialOuterClassNameOf(sourceFileName);
+
+    String sourceFileOfPotentialOuterClass = potentialOuterClassName + JAVA_EXTENSION;
+
+    return isOuterClass(sourceFileOfPotentialOuterClass);
+  }
+
+  boolean isOuterClass(String sourceFileOfClass) {
+    return sources.contains(sourceFileOfClass);
+  }
+
+
+  String potentialOuterClassNameOf(String className) {
+    return substringBeforeLast(className, INNER_CLASS_SEPARATOR);
   }
 
   /**
