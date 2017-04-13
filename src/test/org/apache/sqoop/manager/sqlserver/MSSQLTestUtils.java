@@ -17,9 +17,6 @@
  */
 package org.apache.sqoop.manager.sqlserver;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -27,9 +24,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,9 +41,14 @@ public class MSSQLTestUtils {
           "ms.sqlserver.username", "SQOOPUSER");
   static final String DATABASE_PASSWORD = System.getProperty(
           "ms.sqlserver.password", "PASSWORD");
+  static final String DATABASE_NAME = System.getProperty(
+      "sqoop.test.sqlserver.database",
+      "sqooptest");
   public static final String HOST_URL = System.getProperty(
           "sqoop.test.sqlserver.connectstring.host_url",
           "jdbc:sqlserver://sqlserverhost:1433");
+
+  public static final String CONNECT_STRING = HOST_URL + ";database=" + DATABASE_NAME;
 
   public static final String CREATE_TALBE_LINEITEM
     = "CREATE TABLE TPCH1M_LINEITEM"
@@ -70,7 +69,7 @@ public class MSSQLTestUtils {
     if (conn == null) {
 
       try {
-        Connection con = DriverManager.getConnection(HOST_URL,
+        Connection con = DriverManager.getConnection(CONNECT_STRING,
             DATABASE_USER, DATABASE_PASSWORD);
         conn = con;
         return con;
@@ -156,6 +155,14 @@ public class MSSQLTestUtils {
 
   public static String getDBPassWord() {
     return DATABASE_PASSWORD;
+  }
+
+  public static String getDBDatabaseName() {
+    return DATABASE_NAME;
+  }
+
+  public static String getDBConnectString() {
+    return CONNECT_STRING;
   }
 
   public void dropTableIfExists(String table) throws SQLException {

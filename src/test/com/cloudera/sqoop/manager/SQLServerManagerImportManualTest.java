@@ -75,10 +75,16 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
   static final String HOST_URL = System.getProperty(
           "sqoop.test.sqlserver.connectstring.host_url",
           "jdbc:sqlserver://sqlserverhost:1433");
+  static final String DATABASE_NAME = System.getProperty(
+      "sqoop.test.sqlserver.database",
+      "sqooptest");
+  static final String DATABASE_USER = System.getProperty(
+      "ms.sqlserver.username",
+      "sqoopuser");
+  static final String DATABASE_PASSWORD = System.getProperty(
+      "ms.sqlserver.password",
+      "password");
 
-  static final String DATABASE_NAME = "SQOOPTEST";
-  static final String DATABASE_USER = "SQOOPUSER";
-  static final String DATABASE_PASSWORD = "PASSWORD";
   static final String SCHEMA_DBO = "dbo";
   static final String DBO_TABLE_NAME = "EMPLOYEES_MSSQL";
   static final String SCHEMA_SCH = "sch";
@@ -94,6 +100,7 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
   private SQLServerManager manager;
 
   private Configuration conf = new Configuration();
+  private Connection conn = null;
 
   @Override
   protected Configuration getConf() {
@@ -103,6 +110,11 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
   @Override
   protected boolean useHsqldbTestServer() {
     return false;
+  }
+
+  private String getDropTableStatement(String schema, String tableName) {
+    return "DROP TABLE IF EXISTS " + manager.escapeObjectName(schema)
+        + "." + manager.escapeObjectName(tableName);
   }
 
   @Before
@@ -130,7 +142,6 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
     String fulltableName = manager.escapeObjectName(schema)
       + "." + manager.escapeObjectName(table);
 
-    Connection conn = null;
     Statement stmt = null;
 
     // Create schema if needed
@@ -208,6 +219,14 @@ public class SQLServerManagerImportManualTest extends ImportJobTestCase {
 
   @After
   public void tearDown() {
+    try {
+      Statement stmt = conn.createStatement();
+      stmt.executeUpdate(getDropTableStatement(SCHEMA_DBO, DBO_TABLE_NAME));
+      stmt.executeUpdate(getDropTableStatement(SCHEMA_SCH, SCH_TABLE_NAME));
+    } catch (SQLException e) {
+      LOG.error("Can't clean up the database:", e);
+    }
+
     super.tearDown();
     try {
       manager.close();

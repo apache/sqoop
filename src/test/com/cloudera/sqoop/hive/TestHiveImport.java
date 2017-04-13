@@ -104,7 +104,7 @@ public class TestHiveImport extends ImportJobTestCase {
     setColNames(cols);
   }
 
-  protected String[] getTypesNewLineTest() {
+  protected String[] getTypes() {
     String[] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
     return types;
   }
@@ -295,7 +295,7 @@ public class TestHiveImport extends ImportJobTestCase {
     final String TABLE_NAME = "NORMAL_HIVE_IMPORT_AS_PARQUET";
     setCurTableName(TABLE_NAME);
     setNumCols(3);
-    String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String [] types = getTypes();
     String [] vals = { "'test'", "42", "'somestring'" };
     String [] extraArgs = {"--as-parquetfile"};
 
@@ -382,7 +382,7 @@ public class TestHiveImport extends ImportJobTestCase {
     final String TABLE_NAME = "CREATE_OVERWRITE_HIVE_IMPORT_AS_PARQUET";
     setCurTableName(TABLE_NAME);
     setNumCols(3);
-    String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String [] types = getTypes();
     String [] vals = { "'test'", "42", "'somestring'" };
     String [] extraArgs = {"--as-parquetfile"};
     ImportTool tool = new ImportTool();
@@ -441,7 +441,7 @@ public class TestHiveImport extends ImportJobTestCase {
     final String TABLE_NAME = "APPEND_HIVE_IMPORT_AS_PARQUET";
     setCurTableName(TABLE_NAME);
     setNumCols(3);
-    String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
+    String [] types = getTypes();
     String [] vals = { "'test'", "42", "'somestring'" };
     String [] extraArgs = {"--as-parquetfile"};
     String [] args = getArgv(false, extraArgs);
@@ -560,7 +560,7 @@ public class TestHiveImport extends ImportJobTestCase {
     LOG.info("Doing import of single row into FIELD_WITH_NL_HIVE_IMPORT table");
     setCurTableName(TABLE_NAME);
     setNumCols(3);
-    String[] types = getTypesNewLineTest();
+    String[] types = getTypes();
     String[] vals = { "'test with \n new lines \n'", "42",
         "'oh no " + '\01' + " field delims " + '\01' + "'", };
     String[] moreArgs = { "--"+ BaseSqoopTool.HIVE_DROP_DELIMS_ARG };
@@ -609,7 +609,7 @@ public class TestHiveImport extends ImportJobTestCase {
         + "FIELD_WITH_NL_REPLACEMENT_HIVE_IMPORT table");
     setCurTableName(TABLE_NAME);
     setNumCols(3);
-    String[] types = getTypesNewLineTest();
+    String[] types = getTypes();
     String[] vals = { "'test with\nnew lines\n'", "42",
         "'oh no " + '\01' + " field delims " + '\01' + "'", };
     String[] moreArgs = { "--"+BaseSqoopTool.HIVE_DELIMS_REPLACEMENT_ARG, " "};

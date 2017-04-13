@@ -42,7 +42,24 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Testing import of a sequence file to SQL Server.
+ * Test importing sequence file from SQL Server.
+ *
+ * This uses JDBC to import data from an SQLServer database to HDFS.
+ *
+ * Since this requires an SQLServer installation,
+ * this class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=SQLServerDatatypeImportSequenceFileManualTest.
+ *
+ * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
+ * where Sqoop will be able to access it (since this library cannot be checked
+ * into Apache's tree for licensing reasons).
+ *
+ * To set up your test environment:
+ *   Install SQL Server Express 2012
+ *   Create a database SQOOPTEST
+ *   Create a login SQOOPUSER with password PASSWORD and grant all
+ *   access for SQOOPTEST to SQOOPUSER.
  */
 public class SQLServerDatatypeImportSequenceFileManualTest extends
     ManagerCompatTestCase {
@@ -89,9 +106,7 @@ public class SQLServerDatatypeImportSequenceFileManualTest extends
   }
 
   protected String getConnectString() {
-    return System.getProperty(
-          "sqoop.test.sqlserver.connectstring.host_url",
-          "jdbc:sqlserver://sqlserverhost:1433");
+    return MSSQLTestUtils.getDBConnectString();
   }
 
   /**

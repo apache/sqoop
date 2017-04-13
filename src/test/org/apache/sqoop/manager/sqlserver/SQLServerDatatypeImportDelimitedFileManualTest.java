@@ -30,7 +30,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.*;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
@@ -38,13 +37,31 @@ import com.cloudera.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
- * Test import delimited file from SQL Server.
+ * Test to import delimited file from SQL Server.
+ *
+ * This uses JDBC to import data from an SQLServer database to HDFS.
+ *
+ * Since this requires an SQLServer installation,
+ * this class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=SQLServerDatatypeImportDelimitedFileManualTest.
+ *
+ * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
+ * where Sqoop will be able to access it (since this library cannot be checked
+ * into Apache's tree for licensing reasons).
+ *
+ * To set up your test environment:
+ *   Install SQL Server Express 2012
+ *   Create a database SQOOPTEST
+ *   Create a login SQOOPUSER with password PASSWORD and grant all
+ *   access for SQOOPTEST to SQOOPUSER.
  */
 public class SQLServerDatatypeImportDelimitedFileManualTest
   extends SQLServerDatatypeImportSequenceFileManualTest {
@@ -88,7 +105,7 @@ public class SQLServerDatatypeImportDelimitedFileManualTest
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
-    args.add(getConnectString());
+    args.add(MSSQLTestUtils.getDBConnectString());
 
     args.add("--num-mappers");
     args.add("2");
@@ -190,13 +207,13 @@ public class SQLServerDatatypeImportDelimitedFileManualTest
           } finally {
             IOUtils.closeStream(reader);
           }
-          LOG.info("Read back from sequencefile: " + line);
+          LOG.info("Read back from delimited file: " + line);
           foundRecord = true;
           // Add trailing '\n' to expected value since
           // SqoopRecord.toString()
           // encodes the record delim.
           if (null == expectedVal) {
-            assertEquals("Error validating result from SeqFile",
+            assertEquals("Error validating result from delimited file",
               "null\n", line);
           }
         } catch (EOFException eoe) {
@@ -209,7 +226,7 @@ public class SQLServerDatatypeImportDelimitedFileManualTest
       }
 
       if (!foundRecord) {
-        fail("Couldn't read any records from SequenceFiles");
+        fail("Couldn't read any records from delimited file");
       }
     } catch (IOException ioe) {
       LOG.error(StringUtils.stringifyException(ioe));
@@ -221,15 +238,6 @@ public class SQLServerDatatypeImportDelimitedFileManualTest
     }
   }
 
-
-  @Test
-  public void testVarBinary() {
-    if (!supportsVarBinary()) {
-      return;
-    }
-    dataTypeTest(DATATYPES.VARBINARY);
-  }
-
   @Test
   public void testTime() {
     if (!supportsTime()) {
@@ -238,6 +246,56 @@ public class SQLServerDatatypeImportDelimitedFileManualTest
     }
 
     dataTypeTest(DATATYPES.TIME);
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testVarBinary() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testBit() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testBit2() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testBit3() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testNChar() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testChar() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testVarchar() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testNVarchar() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testBinary() {
+  }
+
+  @Ignore("Ignored as used type is not supported for table splitting.")
+  @Test
+  public void testTimestamp3() {
   }
 
   public String getResportFileName(){

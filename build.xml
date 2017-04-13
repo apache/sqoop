@@ -224,6 +224,9 @@
   <property name="sqoop.test.sqlserver.connectstring.host_url"
             value="jdbc:sqlserver://sqlserverhost:1433"/>
 
+  <property name="sqoop.test.sqlserver.database"
+            value="sqooptest"/>
+
   <property name="java.security.krb5.realm"
             value="OX.AC.UK"/>
 
@@ -849,6 +852,9 @@
 
       <sysproperty key="sqoop.test.sqlserver.connectstring.host_url"
                    value="${sqoop.test.sqlserver.connectstring.host_url}"/>
+
+      <sysproperty key="sqoop.test.sqlserver.database"
+                   value="${sqoop.test.sqlserver.database}"/>
 
       <sysproperty key="sqoop.test.msserver.connector.factory"
                    value="${sqoop.test.msserver.connector.factory}"/>

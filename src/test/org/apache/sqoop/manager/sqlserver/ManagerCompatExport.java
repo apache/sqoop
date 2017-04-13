@@ -40,7 +40,6 @@ import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import com.cloudera.sqoop.tool.ExportTool;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
@@ -117,162 +116,162 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
   public abstract void createFile(DATATYPES dt, String data) throws Exception;
 
   @Test
-  public void testVarBinary() {
+  public void testVarBinary() throws Exception {
 
     exportTestMethod(DATATYPES.VARBINARY);
 
   }
 
   @Test
-  public void testTime() {
+  public void testTime() throws Exception {
 
     exportTestMethod(DATATYPES.TIME);
 
   }
 
   @Test
-  public void testSmalldatetime() {
+  public void testSmalldatetime() throws Exception {
 
     exportTestMethod(DATATYPES.SMALLDATETIME);
 
   }
 
   @Test
-  public void testdatetime2() {
+  public void testdatetime2() throws Exception {
 
     exportTestMethod(DATATYPES.DATETIME2);
 
   }
 
   @Test
-  public void testdatetime() {
+  public void testdatetime() throws Exception {
 
     exportTestMethod(DATATYPES.DATETIME);
 
   }
 
   @Test
-  public void testdatetimeoffset() {
+  public void testdatetimeoffset() throws Exception {
 
     exportTestMethod(DATATYPES.DATETIMEOFFSET);
 
   }
 
   @Test
-  public void testDecimal() {
+  public void testDecimal() throws Exception {
     exportTestMethod(DATATYPES.DECIMAL);
 
   }
 
   @Test
-  public void testNumeric() {
+  public void testNumeric() throws Exception {
     exportTestMethod(DATATYPES.NUMERIC);
 
   }
 
   @Test
-  public void testBigInt() {
+  public void testBigInt() throws Exception {
 
     exportTestMethod(DATATYPES.BIGINT);
   }
 
   @Test
-  public void testInt() {
+  public void testInt() throws Exception {
     exportTestMethod(DATATYPES.INT);
 
   }
 
   @Test
-  public void testSmallInt() {
+  public void testSmallInt() throws Exception {
     exportTestMethod(DATATYPES.SMALLINT);
 
   }
 
   @Test
-  public void testTinyint() {
+  public void testTinyint() throws Exception {
     exportTestMethod(DATATYPES.TINYINT);
 
   }
 
   @Test
-  public void testFloat() {
+  public void testFloat() throws Exception {
     exportTestMethod(DATATYPES.FLOAT);
 
   }
 
   @Test
-  public void testReal() {
+  public void testReal() throws Exception {
     exportTestMethod(DATATYPES.REAL);
 
   }
 
   @Test
-  public void testDate() {
+  public void testDate() throws Exception {
     exportTestMethod(DATATYPES.DATE);
 
   }
 
   @Test
-  public void testMoney() {
+  public void testMoney() throws Exception  {
     exportTestMethod(DATATYPES.MONEY);
 
   }
 
   @Test
-  public void testSmallMoney() {
+  public void testSmallMoney() throws Exception  {
     exportTestMethod(DATATYPES.SMALLMONEY);
 
   }
 
   @Test
-  public void testText() {
+  public void testText() throws Exception  {
     exportTestMethod(DATATYPES.TEXT);
 
   }
 
   @Test
-  public void testVarchar() {
+  public void testVarchar() throws Exception  {
     exportTestMethod(DATATYPES.VARCHAR);
 
   }
 
   @Test
-  public void testChar() {
+  public void testChar() throws Exception  {
     exportTestMethod(DATATYPES.CHAR);
 
   }
 
   @Test
-  public void testNText() {
+  public void testNText() throws Exception  {
     exportTestMethod(DATATYPES.NTEXT);
 
   }
 
   @Test
-  public void testNChar() {
+  public void testNChar() throws Exception  {
     exportTestMethod(DATATYPES.NCHAR);
 
   }
 
   @Test
-  public void testNVarchar() {
+  public void testNVarchar() throws Exception  {
     exportTestMethod(DATATYPES.NVARCHAR);
 
   }
 
   @Test
-  public void testImage() {
+  public void testImage() throws Exception  {
     exportTestMethod(DATATYPES.IMAGE);
 
   }
 
   @Test
-  public void testBinary() {
+  public void testBinary() throws Exception  {
     exportTestMethod(DATATYPES.BINARY);
 
   }
 
-  public void exportTestMethod(DATATYPES dt) {
+  public void exportTestMethod(DATATYPES dt) throws SQLException {
     int exceptionCount = 0;
 
     List testdata = tdfs.getTestdata(dt);
@@ -370,6 +369,8 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
       } catch (Error e) {
         addToReport(current, e);
         exceptionCount++;
+      } finally {
+        dropTableIfExists(getTableName(dt));
       }
     }
     if (exceptionCount > 0) {
@@ -377,7 +378,7 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
       System.out.println("There were failures for :" + dt.toString());
       System.out.println("Failed for " + exceptionCount + "/"
           + testdata.size() + " test data samples\n");
-      System.out.println("Sroll up for detailed errors");
+      System.out.println("Scroll up for detailed errors");
       System.out
           .println("----------------------------------------------------------"
             + "-");
@@ -385,25 +386,6 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
           + " test data sample");
     }
 
-  }
-
-  /*
-
- */
-
-  public String[] extractData(List data, String negPosFlag,
-      KEY_STRINGS readBackType) {
-    List<String> filtered = new ArrayList<String>();
-    for (Iterator<MSSQLTestData> itr = data.iterator(); itr.hasNext();) {
-      MSSQLTestData current = itr.next();
-      if (current.getData(KEY_STRINGS.NEG_POS_FLAG).toString().equals(
-          negPosFlag)) {
-        filtered.add(current.getData(readBackType));
-      }
-    }
-    String[] ret = new String[filtered.size()];
-    filtered.toArray(ret);
-    return ret;
   }
 
   public void verifyExport(DATATYPES dt, String[] data) throws SQLException {
@@ -438,43 +420,6 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
             data.length, cnt);
       } finally {
 
-        rs.close();
-      }
-    } finally {
-      statement.close();
-    }
-
-  }
-
-  public void verifyNegativeExport(DATATYPES dt, String[] data)
-      throws SQLException {
-    LOG.info("Verifying export: " + getTableName());
-    // Check that we got back the correct number of records.
-    Connection conn = getManager().getConnection();
-
-    PreparedStatement statement = conn.prepareStatement("SELECT "
-        + getColName() + " FROM " + getTableName(dt),
-        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    System.out.println("data samples being compared : " + data.length);
-
-    ResultSet rs = null;
-    try {
-      rs = statement.executeQuery();
-      int cnt = 0;
-      try {
-        while (rs.next()) {
-          String tmp = rs.getString(1);
-          String expected = data[cnt++];
-          System.out.println("Readback, expected" + tmp + " :"
-              + expected);
-          if (tmp == null) {
-            assertNull("Must be null", expected);
-          } else {
-            assertNotSame("Data must match", expected, tmp);
-          }
-        }
-
-      } finally {
         rs.close();
       }
     } finally {
@@ -568,10 +513,9 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
     return false;
   }
 
+  @Override
   protected String getConnectString() {
-    return System.getProperty(
-          "sqoop.test.sqlserver.connectstring.host_url",
-          "jdbc:sqlserver://sqlserverhost:1433");
+    return MSSQLTestUtils.getDBConnectString();
   }
 
   /**

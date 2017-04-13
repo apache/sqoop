@@ -23,22 +23,37 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.*;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.hive.TestHiveImport;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.SqoopTool;
+import org.junit.After;
 import org.junit.Before;
 
 import static org.junit.Assert.fail;
 
 /**
  * Test import to Hive from SQL Server.
+ *
+ * This uses JDBC to import data from an SQLServer database to HDFS.
+ *
+ * Since this requires an SQLServer installation,
+ * this class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=SQLServerHiveImportManualTest.
+ *
+ * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
+ * where Sqoop will be able to access it (since this library cannot be checked
+ * into Apache's tree for licensing reasons).
+ *
+ * To set up your test environment:
+ *   Install SQL Server Express 2012
+ *   Create a database SQOOPTEST
+ *   Create a login SQOOPUSER with password PASSWORD and grant all
+ *   access for SQOOPTEST to SQOOPUSER.
  */
 public class SQLServerHiveImportManualTest extends TestHiveImport {
 
@@ -47,18 +62,28 @@ public class SQLServerHiveImportManualTest extends TestHiveImport {
     super.setUp();
   }
 
+  @After
+  public void tearDown() {
+    try {
+      dropTableIfExists(getTableName());
+    } catch (SQLException sqle) {
+      LOG.info("Table clean-up failed: " + sqle);
+    } finally {
+      super.tearDown();
+    }
+  }
+
   protected boolean useHsqldbTestServer() {
     return false;
   }
 
   protected String getConnectString() {
-    return System.getProperty(
-          "sqoop.test.sqlserver.connectstring.host_url",
-          "jdbc:sqlserver://sqlserverhost:1433");
+    return MSSQLTestUtils.getDBConnectString();
   }
 
   //SQL Server pads out
-  protected String[] getTypesNewLineTest() {
+  @Override
+  protected String[] getTypes() {
     String[] types = { "VARCHAR(32)", "INTEGER", "VARCHAR(64)" };
     return types;
   }
@@ -115,7 +140,7 @@ public class SQLServerHiveImportManualTest extends TestHiveImport {
 
   protected String[] getArgv(boolean includeHadoopFlags, String[] moreArgs) {
     ArrayList<String> args = new ArrayList<String>();
-    System.out.println("Ovverdien getArgv is called..");
+    System.out.println("Overridden getArgv is called..");
     if (includeHadoopFlags) {
       CommonArgs.addHadoopFlags(args);
     }

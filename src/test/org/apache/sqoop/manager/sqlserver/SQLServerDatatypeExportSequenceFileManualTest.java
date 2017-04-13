@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.*;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -43,14 +42,31 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
-* Export sequence file to SQL Server test.
-*/
+ * Test to export sequence file to SQL Server.
+ *
+ * This uses JDBC to export data to an SQLServer database from HDFS.
+ *
+ * Since this requires an SQLServer installation,
+ * this class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=SQLServerDatatypeExportSequenceFileManualTest.
+ *
+ * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
+ * where Sqoop will be able to access it (since this library cannot be checked
+ * into Apache's tree for licensing reasons).
+ *
+ * To set up your test environment:
+ *   Install SQL Server Express 2012
+ *   Create a database SQOOPTEST
+ *   Create a login SQOOPUSER with password PASSWORD and grant all
+ *   access for SQOOPTEST to SQOOPUSER.
+ */
 public class SQLServerDatatypeExportSequenceFileManualTest
     extends ManagerCompatExport {
 
   private static Map jars = new HashMap();
 
-   @Override
+  @Override
   public void createFile(DATATYPES dt, String[] data) throws Exception {
     try {
       codeGen(dt);
@@ -142,11 +158,9 @@ public class SQLServerDatatypeExportSequenceFileManualTest
     jars.put(dt, jarFileName);
     return (getArgv(dt, "--class-name", className, "--jar-file",
      jarFileName));
-
-
-
   }
 
+  @Override
   protected String[] getArgv(DATATYPES dt) {
 
     String[] args = super.getArgv(dt);
@@ -177,7 +191,7 @@ public class SQLServerDatatypeExportSequenceFileManualTest
     codeGenArgv.add("--table");
     codeGenArgv.add(getTableName(dt));
     codeGenArgv.add("--connect");
-    codeGenArgv.add(getConnectString());
+    codeGenArgv.add(MSSQLTestUtils.getDBConnectString());
     codeGenArgv.add("--fields-terminated-by");
     codeGenArgv.add("\\t");
     codeGenArgv.add("--lines-terminated-by");
@@ -225,7 +239,7 @@ public class SQLServerDatatypeExportSequenceFileManualTest
     args.add("--export-dir");
     args.add(getTablePath(dt).toString());
     args.add("--connect");
-    args.add(getConnectString());
+    args.add(MSSQLTestUtils.getDBConnectString());
     args.add("--fields-terminated-by");
     args.add("\\t");
     args.add("--lines-terminated-by");
