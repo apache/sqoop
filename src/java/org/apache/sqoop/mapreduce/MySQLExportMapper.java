@@ -260,7 +260,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
       this.importStream = null;
     }
 
-    if (null != this.mysqlImportProcess && this.mysqlImportProcess.isClosed()) {
+    if (null != this.mysqlImportProcess && !this.mysqlImportProcess.isClosed()) {
       // We started mysqlimport; wait for it to finish.
       LOG.info("Waiting for mysqlimport to complete");
       ret = this.mysqlImportProcess.waitFor();
@@ -268,7 +268,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
       this.mysqlImportProcess = null;
     }
 
-    if (null != this.passwordFile && this.passwordFile.exists()) {
+    if (null != this.passwordFile && !this.passwordFile.exists()) {
       if (!this.passwordFile.delete()) {
         LOG.error("Could not remove mysql password file " + passwordFile);
         LOG.error("You should remove this file to protect your credentials.");
