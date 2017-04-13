@@ -253,14 +253,14 @@ public class MySQLExportMapper<KEYIN, VALIN>
 
   private void closeExportHandles() throws IOException, InterruptedException {
     int ret = 0;
-    if (null != this.importStream) {
+    if (null != this.importStream && this.importStream.isClosed()) {
       // Close the stream that writes to mysqlimport's stdin first.
       LOG.debug("Closing import stream");
       this.importStream.close();
       this.importStream = null;
     }
 
-    if (null != this.mysqlImportProcess) {
+    if (null != this.mysqlImportProcess && this.mysqlImportProcess.isClosed()) {
       // We started mysqlimport; wait for it to finish.
       LOG.info("Waiting for mysqlimport to complete");
       ret = this.mysqlImportProcess.waitFor();
