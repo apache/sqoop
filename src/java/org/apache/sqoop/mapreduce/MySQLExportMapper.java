@@ -253,7 +253,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
 
   private void closeExportHandles() throws IOException, InterruptedException {
     int ret = 0;
-    if (null != this.importStream && this.importStream.isClosed()) {
+    if (null != this.importStream && !this.importStream.isClosed()) {
       // Close the stream that writes to mysqlimport's stdin first.
       LOG.debug("Closing import stream");
       this.importStream.close();
@@ -268,7 +268,7 @@ public class MySQLExportMapper<KEYIN, VALIN>
       this.mysqlImportProcess = null;
     }
 
-    if (null != this.passwordFile && !this.passwordFile.exists()) {
+    if (null != this.passwordFile && this.passwordFile.exists()) {
       if (!this.passwordFile.delete()) {
         LOG.error("Could not remove mysql password file " + passwordFile);
         LOG.error("You should remove this file to protect your credentials.");
