@@ -743,7 +743,7 @@
       <sysproperty key="test.build.data" value="${build.test}/data"/>
       <sysproperty key="build.test" value="${build.test}"/>
 
-      <!-- microsoft sqlserver manual test related properties-->
+      <!-- microsoft sqlserver thirdparty test related properties-->
       <sysproperty key="test.data.dir" value="${basedir}/testdata"/>
       <sysproperty key="ms.datatype.test.data.file.export" value="DatatypeTestData-export-lite.txt"/>
       <sysproperty key="ms.datatype.test.data.file.import" value="DatatypeTestData-import-lite.txt"/>

@@ -54,19 +54,21 @@ import static org.junit.Assert.fail;
  * Since this requires an SQLServer installation,
  * this class is named in such a way that Sqoop's default QA process does
  * not run it. You need to run this manually with
- * -Dtestcase=SQLServerWhereManualTest.
+ * -Dtestcase=SQLServerWhereTest or -Dthirdparty=true.
  *
  * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons).
+ * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
  *
  * To set up your test environment:
  *   Install SQL Server Express 2012
  *   Create a database SQOOPTEST
  *   Create a login SQOOPUSER with password PASSWORD and grant all
  *   access for SQOOPTEST to SQOOPUSER.
+ *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
+ *   -Dms.sqlserver.password
  */
-public class SQLServerWhereManualTest extends ImportJobTestCase {
+public class SQLServerWhereTest extends ImportJobTestCase {
 
  @Before
   public void setUp(){

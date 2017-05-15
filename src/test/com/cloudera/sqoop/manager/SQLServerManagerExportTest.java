@@ -43,12 +43,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
- * Please see instructions in SQLServerManagerImportManualTest.
+ * Please see instructions in SQLServerManagerImportTest.
  */
-public class SQLServerManagerExportManualTest extends ExportJobTestCase {
+public class SQLServerManagerExportTest extends ExportJobTestCase {
 
     public static final Log LOG = LogFactory.getLog(
-      SQLServerManagerExportManualTest.class.getName());
+      SQLServerManagerExportTest.class.getName());
 
   static final String HOST_URL = System.getProperty(
           "sqoop.test.sqlserver.connectstring.host_url",

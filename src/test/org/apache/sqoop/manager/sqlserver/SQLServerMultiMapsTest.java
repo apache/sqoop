@@ -24,10 +24,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.mapred.Utils;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
 
@@ -38,6 +43,7 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.SeqFileReader;
 import com.cloudera.sqoop.tool.ImportTool;
+import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.junit.After;
 import org.junit.Before;
@@ -47,26 +53,28 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
- * Test that --query works in SQL Server.
+ * Test multiple mapper splits in SQL Server.
  *
  * This uses JDBC to import data from an SQLServer database to HDFS.
  *
  * Since this requires an SQLServer installation,
  * this class is named in such a way that Sqoop's default QA process does
  * not run it. You need to run this manually with
- * -Dtestcase=SQLServerQueryManualTest.
+ * -Dtestcase=SQLServerMultiMapsTest or -Dthirdparty=true.
  *
  * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons).
+ * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
  *
  * To set up your test environment:
  *   Install SQL Server Express 2012
  *   Create a database SQOOPTEST
  *   Create a login SQOOPUSER with password PASSWORD and grant all
  *   access for SQOOPTEST to SQOOPUSER.
+ *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
+ *   -Dms.sqlserver.password
  */
-public class SQLServerQueryManualTest extends ImportJobTestCase {
+public class SQLServerMultiMapsTest extends ImportJobTestCase {
 
   @Before
   public void setUp() {
@@ -89,7 +97,7 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
     try {
       utils.dropTableIfExists("TPCH1M_LINEITEM");
     } catch (SQLException e) {
-      LOG.error("TearDown fail with SQLException: " + StringUtils.stringifyException(e));
+      LOG.error("TeatDown fail with SQLException: " + StringUtils.stringifyException(e));
       fail("TearDown fail with SQLException: " + e.toString());
     }
   }
@@ -99,8 +107,12 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
    *
    * @return the argv as an array of strings.
    */
-  protected String[] getArgv(boolean includeHadoopFlags, String query,
-      String targetDir, boolean allowParallel) {
+  protected String[] getArgv(boolean includeHadoopFlags, String[] colNames,
+      String splitByCol) {
+    String columnsString = "";
+    for (String col : colNames) {
+      columnsString += col + ",";
+    }
 
     ArrayList<String> args = new ArrayList<String>();
 
@@ -110,10 +122,14 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
     String username = MSSQLTestUtils.getDBUserName();
     String password = MSSQLTestUtils.getDBPassWord();
 
-    args.add("--query");
-    args.add(query);
+    args.add("--table");
+    args.add(getTableName());
+    args.add("--columns");
+    args.add(columnsString);
     args.add("--split-by");
-    args.add("L_ORDERKEY");
+    args.add(splitByCol);
+    args.add("--warehouse-dir");
+    args.add(getWarehouseDir());
     args.add("--connect");
     args.add(getConnectString());
     args.add("--username");
@@ -121,19 +137,29 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
     args.add("--password");
     args.add(password);
     args.add("--as-sequencefile");
-    args.add("--target-dir");
-    args.add(targetDir);
-    args.add("--class-name");
-    args.add(getTableName());
-    if (allowParallel) {
-      args.add("--num-mappers");
-      args.add("2");
-    } else {
-      args.add("--num-mappers");
-      args.add("1");
-    }
+    args.add("--num-mappers");
+    args.add("2");
 
     return args.toArray(new String[0]);
+  }
+
+  // this test just uses the two int table.
+
+  /** @return a list of Path objects for each data file */
+  protected List<Path> getDataFilePaths() throws IOException {
+    List<Path> paths = new ArrayList<Path>();
+    Configuration conf = new Configuration();
+    conf.set("fs.default.name", "file:///");
+    FileSystem fs = FileSystem.get(conf);
+
+    FileStatus[] stats = fs.listStatus(getTablePath(),
+        new Utils.OutputFileUtils.OutputFilesFilter());
+
+    for (FileStatus stat : stats) {
+      paths.add(stat.getPath());
+    }
+
+    return paths;
   }
 
   /**
@@ -149,18 +175,23 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
     return Integer.parseInt(parts[0]);
   }
 
-  public void runQueryTest(String query, String firstValStr,
-      int numExpectedResults, int expectedSum, String targetDir)
+  public void runMultiMapTest(String splitByCol, int expectedSum)
       throws IOException {
 
+    String[] columns = MSSQLTestUtils.getColumns();
     ClassLoader prevClassLoader = null;
     SequenceFile.Reader reader = null;
 
-    String[] argv = getArgv(true, query, targetDir, false);
+    String[] argv = getArgv(true, columns, splitByCol);
     runImport(argv);
     try {
-      SqoopOptions opts = new ImportTool().parseArguments(getArgv(false,
-          query, targetDir, false), null, null, true);
+      ImportTool importTool = new ImportTool();
+      SqoopOptions opts = importTool.parseArguments(getArgv(false,
+          columns, splitByCol), null, null, true);
+      String username = MSSQLTestUtils.getDBUserName();
+      String password = MSSQLTestUtils.getDBPassWord();
+      opts.setUsername(username);
+      opts.setPassword(password);
 
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
@@ -168,47 +199,45 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
       prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
           getTableName());
 
-      reader = SeqFileReader.getSeqFileReader(getDataFilePath()
-          .toString());
-
-      // here we can actually instantiate (k, v) pairs.
+      List<Path> paths = getDataFilePaths();
       Configuration conf = new Configuration();
-      Object key = ReflectionUtils
-          .newInstance(reader.getKeyClass(), conf);
-      Object val = ReflectionUtils.newInstance(reader.getValueClass(),
-          conf);
+      int curSum = 0;
 
-      if (reader.next(key) == null) {
-        fail("Empty SequenceFile during import");
-      }
+      // We expect multiple files. We need to open all the files and sum
+      // up the
+      // first column across all of them.
+      for (Path p : paths) {
+        reader = SeqFileReader.getSeqFileReader(p.toString());
 
-      // make sure that the value we think should be at the top, is.
-      reader.getCurrentValue(val);
-      assertEquals("Invalid ordering within sorted SeqFile", firstValStr,
-          val.toString());
+        // here we can actually instantiate (k, v) pairs.
+        Object key = ReflectionUtils.newInstance(reader.getKeyClass(),
+            conf);
+        Object val = ReflectionUtils.newInstance(
+            reader.getValueClass(), conf);
 
-      // We know that these values are two ints separated by a ','
-      // character.
-      // Since this is all dynamic, though, we don't want to actually link
-      // against the class and use its methods. So we just parse this back
-      // into int fields manually. Sum them up and ensure that we get the
-      // expected total for the first column, to verify that we got all
-      // the
-      // results from the db into the file.
-      int curSum = getFirstInt(val.toString());
-      int totalResults = 1;
+        // We know that these values are two ints separated by a ','
+        // character. Since this is all dynamic, though, we don't want
+        // to
+        // actually link against the class and use its methods. So we
+        // just
+        // parse this back into int fields manually. Sum them up and
+        // ensure
+        // that we get the expected total for the first column, to
+        // verify that
+        // we got all the results from the db into the file.
 
-      // now sum up everything else in the file.
-      while (reader.next(key) != null) {
-        reader.getCurrentValue(val);
-        curSum += getFirstInt(val.toString());
-        totalResults++;
+        // now sum up everything in the file.
+        while (reader.next(key) != null) {
+          reader.getCurrentValue(val);
+          curSum += getFirstInt(val.toString());
+        }
+
+        IOUtils.closeStream(reader);
+        reader = null;
       }
 
       assertEquals("Total sum of first db column mismatch", expectedSum,
           curSum);
-      assertEquals("Incorrect number of results for query",
-          numExpectedResults, totalResults);
     } catch (InvalidOptionsException ioe) {
       LOG.error(StringUtils.stringifyException(ioe));
       fail(ioe.toString());
@@ -225,35 +254,11 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
   }
 
   @Test
-  public void testSelectStar() throws IOException {
-    runQueryTest("SELECT * FROM " + getTableName()
-        + " WHERE L_ORDERKEY > 0 AND $CONDITIONS",
-        "1,2,3,4,5,6.00,7.00,8.00,AB,CD,abcd,efgh,hijk,dothis,likethis,"
-            + "nocomments\n", 4, 10, getTablePath().toString());
-  }
-
-  @Test
-  public void testCompoundWhere() throws IOException {
-    runQueryTest("SELECT * FROM " + getTableName()
-        + " WHERE L_ORDERKEY > 1 AND L_PARTKEY < 4 AND $CONDITIONS",
-        "2,3,4,5,6,7.00,8.00,9.00,AB,CD,abcd,efgh,hijk,dothis,likethis,"
-            + "nocomments\n", 1, 2, getTablePath().toString());
-  }
-
-  @Test
-  public void testFailNoConditions() throws IOException {
-    String[] argv = getArgv(true, "SELECT * FROM " + getTableName(),
-        getTablePath().toString() + "where $CONDITIONS", true);
-    try {
-      runImport(argv);
-      fail("Expected exception running import without $CONDITIONS");
-    } catch (Exception e) {
-      LOG.info("Got exception " + e + " running job (expected; ok)");
-    }
+  public void testSplitByFirstCol() throws IOException {
+    runMultiMapTest("L_ORDERKEY", 10);
   }
 
   protected boolean useHsqldbTestServer() {
-
     return false;
   }
 
@@ -273,7 +278,6 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
     Connection conn = getManager().getConnection();
     String sqlStmt = "IF OBJECT_ID('" + table
         + "') IS NOT NULL  DROP TABLE " + table;
-
     PreparedStatement statement = conn.prepareStatement(sqlStmt,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     try {
@@ -293,6 +297,23 @@ public class SQLServerQueryManualTest extends ImportJobTestCase {
     opts.setPassword(password);
 
     return opt;
+  }
+
+  SqoopOptions getSqoopOptions(String[] args, SqoopTool tool) {
+    SqoopOptions opts = null;
+    try {
+      opts = tool.parseArguments(args, null, null, true);
+      String username = MSSQLTestUtils.getDBUserName();
+      String password = MSSQLTestUtils.getDBPassWord();
+      opts.setUsername(username);
+      opts.setPassword(password);
+
+    } catch (Exception e) {
+      LOG.error(StringUtils.stringifyException(e));
+      fail("Invalid options: " + e.toString());
+    }
+
+    return opts;
   }
 
   protected String getTableName() {
