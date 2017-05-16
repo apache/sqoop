@@ -32,11 +32,13 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 
+import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.hive.HiveImport;
 import org.apache.avro.Schema;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;
 import org.apache.sqoop.util.ExpectedLogMessage;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -91,6 +93,18 @@ public class TestImportTool {
     logMessage.expectError(expectedException.getMessage());
     int result = importTool.run(sqoopOptions);
     assertEquals(1, result);
+  }
+
+  // If --external-table-dir is set and --hive-import is not, check an exception
+  // is thrown
+  @Test (expected = InvalidOptionsException.class)
+  public void testExternalTableNoHiveImportThrowsException() throws InvalidOptionsException {
+    String hdfsTableDir = "/data/movielens/genre";
+    com.cloudera.sqoop.SqoopOptions options = new com.cloudera.sqoop.SqoopOptions("jdbc:postgresql://localhost/movielens", "genres");
+    options.setHiveExternalTableDir(hdfsTableDir);
+    ImportTool tool = new ImportTool("Import Tool", false);
+    tool.validateHiveOptions(options);
+    Assert.fail("testExternalTableNoHiveImportThrowsException unit test failed!");
   }
 
 }

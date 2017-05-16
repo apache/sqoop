@@ -114,6 +114,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           "hive-delims-replacement";
   public static final String HIVE_PARTITION_KEY_ARG = "hive-partition-key";
   public static final String HIVE_PARTITION_VALUE_ARG = "hive-partition-value";
+  public static final String HIVE_EXTERNAL_TABLE_LOCATION_ARG = "external-table-dir";
   public static final String HCATCALOG_PARTITION_KEYS_ARG =
       "hcatalog-partition-keys";
   public static final String HCATALOG_PARTITION_VALUES_ARG =
@@ -582,6 +583,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
             + "to hive")
         .withLongOpt(HIVE_PARTITION_VALUE_ARG)
         .create());
+    hiveOpts.addOption(OptionBuilder.withArgName("hdfs path")
+        .hasArg()
+        .withDescription("Sets where the external table is in HDFS")
+        .withLongOpt(HIVE_EXTERNAL_TABLE_LOCATION_ARG)
+        .create());
+
     hiveOpts.addOption(OptionBuilder
         .hasArg()
         .withDescription("Override mapping for specific column to hive"
@@ -1208,7 +1215,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
    if (in.hasOption(MAP_COLUMN_HIVE)) {
       out.setMapColumnHive(in.getOptionValue(MAP_COLUMN_HIVE));
-    }
+   }
+   if (in.hasOption(HIVE_EXTERNAL_TABLE_LOCATION_ARG)) {
+     out.setHiveExternalTableDir(in.getOptionValue(HIVE_EXTERNAL_TABLE_LOCATION_ARG));
+   }
+
   }
 
   protected void applyHCatalogOptions(CommandLine in, SqoopOptions out) {
@@ -1566,6 +1577,14 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       LOG.info("Please note that --hive-home, --hive-partition-key, ");
       LOG.info("\t hive-partition-value and --map-column-hive options are ");
       LOG.info("\t are also valid for HCatalog imports and exports");
+    }
+    // importing to Hive external tables requires target directory to be set
+    // for external table's location
+    Boolean isNotHiveImportButExternalTableDirIsSet = !options.doHiveImport() && !org.apache.commons.lang.StringUtils.isBlank(options.getHiveExternalTableDir());
+    if (isNotHiveImportButExternalTableDirIsSet) {
+      LOG.warn("Importing to external Hive table requires --hive-import parameter to be set");
+      throw new InvalidOptionsException("Importing to external Hive table requires --hive-import parameter to be set."
+          + HELP_STR);
     }
   }
 

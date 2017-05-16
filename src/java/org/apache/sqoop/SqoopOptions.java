@@ -175,6 +175,7 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hive.overwrite.table") private boolean overwriteHiveTable;
   @StoredAsProperty("hive.fail.table.exists")
   private boolean failIfHiveTableExists;
+  @StoredAsProperty("hive.external.table.dir") private String hiveExternalTableDir;
   @StoredAsProperty("hive.table.name") private String hiveTableName;
   @StoredAsProperty("hive.database.name") private String hiveDatabaseName;
   @StoredAsProperty("hive.drop.delims") private boolean hiveDropDelims;
@@ -1485,6 +1486,14 @@ public class SqoopOptions implements Cloneable {
 
   public void setHiveImport(boolean doImport) {
     this.hiveImport = doImport;
+  }
+
+  public String getHiveExternalTableDir() {
+    return this.hiveExternalTableDir;
+  }
+
+  public void setHiveExternalTableDir(String location) {
+    this.hiveExternalTableDir = location;
   }
 
   /**
