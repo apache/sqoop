@@ -895,4 +895,193 @@ public class TestExport extends ExportJobTestCase {
     verifyExport(TOTAL_RECORDS);
   }
 
+  /**
+   * When we have less columns in the export file than in the export table, without changes in SQOOP-3158
+   * it will fail with errors. After SQOOP-3158, it should succeed without errors
+   *
+   * @throws IOException
+   * @throws SQLException
+   */
+  @Test
+  public void testLessColumnsInFileThanInTable() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    ColumnGenerator genDate = getDateColumnGenerator();
+    ColumnGenerator genTime = getTimeColumnGenerator();
+
+    createTextFile(0, TOTAL_RECORDS, false, genDate);
+    createTable(genDate, genTime);
+    runExport(getArgv(true, 10, 10));
+    verifyExport(TOTAL_RECORDS);
+    assertColMinAndMax(forIdx(0), genDate);
+
+    // test that the Time column is with NULL values
+    class NullColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return null;
+      }
+      public String getVerifyText(int rowNum) {
+        return null;
+      }
+      public String getType() {
+        return "Timestamp";
+      }
+    }
+
+    ColumnGenerator genNull = new NullColumnGenerator();
+    assertColMinAndMax(forIdx(1), genNull);
+  }
+
+  /**
+   * This test case covers the following:
+   *
+   * - two files under export directory
+   * - first file has one missing column
+   * - second file has correct number of columns
+   * - second file has last column with the value defined by parameter --input-null-string
+   * - last column is of STRING data type
+   *
+   * This case will happen when destination table has been modified to add a new column and
+   * user has data for both before and after the table modification, some files has less columns
+   * and some files has new columns
+   *
+   * @throws IOException
+   * @throws SQLException
+   */
+  @Test
+  public void testLessColumnsInFileThanInTableInputNullStringPassed() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    // a column that contains string value of "STRING_NULL",
+    // this should be treated as NULL value during test import
+    // due to --input-null-string is defined using "STRING_NULL"
+    class StringNULLValueColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return "STRING_NULL";
+      }
+      public String getVerifyText(int rowNum) {
+        return "STRING_NULL";
+      }
+      public String getType() {
+          return "VARCHAR(255)";
+        }
+    }
+
+    // a normal string column
+    class  StringColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        int day = rowNum + 1;
+        return "ROW_" + pad(day);
+      }
+      public String getVerifyText(int rowNum) {
+        int day = rowNum + 1;
+        return "ROW_" + pad(day);
+      }
+      public String getType() {
+          return "VARCHAR(255)";
+        }
+    }
+
+    // test that the second column is with NULL values after import
+    class NullColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return null;
+      }
+      public String getVerifyText(int rowNum) {
+        return null;
+      }
+      public String getType() {
+        return "VARCHAR(255)";
+      }
+    }
+
+    ColumnGenerator genString = new StringColumnGenerator();
+    ColumnGenerator genNullString = new StringNULLValueColumnGenerator();
+
+    createTextFile(0, TOTAL_RECORDS, false, genString);
+    createTextFile(1, TOTAL_RECORDS, false, genString, genNullString);
+    createTable(genString, genNullString);
+    runExport(getArgv(true, 10, 10, "--input-null-string", "STRING_NULL"));
+
+    verifyExport(TOTAL_RECORDS * 2);
+    assertColMinAndMax(forIdx(0), genString);
+
+    ColumnGenerator genNull = new NullColumnGenerator();
+    assertColMinAndMax(forIdx(1), genNull);
+  }
+
+  /**
+   * This test case covers the following:
+   *
+   * - two files under export directory
+   * - first file has one missing column
+   * - second file has correct number of columns
+   * - second file has last column with the value defined by parameter --input-null-non-string
+   * - last column is of INTEGER data type
+   *
+   * This case will happen when destination table has been modified to add a new column and
+   * user has data for both before and after the table modification, some files has less columns
+   * and some files has new columns
+   *
+   * @throws IOException
+   * @throws SQLException
+   */
+  @Test
+  public void testLessColumnsInFileThanInTableInputNullIntPassed() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    // a column that contains string value of "INT_NULL",
+    // this should be treated as NULL value during test import
+    // due to --input-null-non-string is defined using "INT_NULL"
+    class IntNULLValueColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return "INT_NULL";
+      }
+      public String getVerifyText(int rowNum) {
+        return "INT_NULL";
+      }
+      public String getType() {
+        return "INT";
+      }
+    }
+
+    // a normal string column
+    class  IntColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        int day = rowNum + 1;
+        return String.valueOf(day);
+      }
+      public String getVerifyText(int rowNum) {
+        int day = rowNum + 1;
+        return String.valueOf(day);
+      }
+      public String getType() {
+        return "INT";
+      }
+    }
+
+    // test that the second column is with NULL values after import
+    class NullColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return null;
+      }
+      public String getVerifyText(int rowNum) {
+        return null;
+      }
+      public String getType() {
+        return "INT";
+      }
+    }
+
+    ColumnGenerator genInt = new IntColumnGenerator();
+    ColumnGenerator genNullInt = new IntNULLValueColumnGenerator();
+
+    createTextFile(0, TOTAL_RECORDS, false, genInt);
+    createTextFile(1, TOTAL_RECORDS, false, genInt, genNullInt);
+    createTable(genInt, genNullInt);
+    runExport(getArgv(true, 10, 10, "--input-null-non-string", "INT_NULL"));
+    verifyExport(TOTAL_RECORDS * 2);
+    assertColMinAndMax(forIdx(0), genInt);
+    assertColMinAndMax(forIdx(1), new NullColumnGenerator());
+  }
 }

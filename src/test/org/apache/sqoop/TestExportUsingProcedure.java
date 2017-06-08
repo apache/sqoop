@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -337,4 +338,48 @@ public class TestExportUsingProcedure extends TestExport {
     });
   }
 
+  /**
+   * This test case is special - we're only inserting into a subset of the
+   * columns in the table.
+   */
+  public static void insertFunctiontestLessColumnsInFileThanInTable(int id, String msg,
+      final Date date1, final Timestamp t2) throws SQLException {
+    insertFunction(id, msg, new SetExtraArgs() {
+      @Override
+      public void set(PreparedStatement on) throws SQLException {
+        on.setDate(3, date1);
+        on.setNull(4, Types.TIMESTAMP);
+      }
+    });
+  }
+
+  /**
+   * This test case is special - we're only inserting into a subset of the
+   * columns in the table.
+   */
+  public static void insertFunctiontestLessColumnsInFileThanInTableInputNullStringPassed(int id, String msg,
+      final String str1) throws SQLException {
+    insertFunction(id, msg, new SetExtraArgs() {
+      @Override
+      public void set(PreparedStatement on) throws SQLException {
+        on.setString(3, str1);
+        on.setNull(4, Types.VARCHAR);
+      }
+    });
+  }
+
+  /**
+   * This test case is special - we're only inserting into a subset of the
+   * columns in the table.
+   */
+  public static void insertFunctiontestLessColumnsInFileThanInTableInputNullIntPassed(int id, String msg,
+      final int int1) throws SQLException {
+    insertFunction(id, msg, new SetExtraArgs() {
+      @Override
+      public void set(PreparedStatement on) throws SQLException {
+        on.setInt(3, int1);
+        on.setNull(4, Types.INTEGER);
+      }
+    });
+  }
 }
