@@ -40,14 +40,14 @@
   <property environment="env"/>
   <property name="name" value="sqoop" />
   <property name="Name" value="Sqoop" />
-  <property name="version" value="1.4.7-SNAPSHOT" />
+  <property name="version" value="1.5.0-SNAPSHOT" />
 
   <!-- Ivy library properties -->
   <property name="ivy.dir" location="${basedir}/ivy" />
   <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
 
   <!-- The last version released. -->
-  <property name="oldversion" value="1.4.6" />
+  <property name="oldversion" value="1.4.7" />
   <!-- The point when we branched for the previous release. -->
   <property name="prev.git.hash"
       value="81624ddf3c8ca5834ab015ebafc8b8649ac36ab7" />
