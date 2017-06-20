@@ -577,7 +577,7 @@ public final class HCatalogTestUtils {
     LOG.info("Verifying column " + colName + " has value " + expectedVal);
     String escapeStr = escapeId? "\"" : "";
     PreparedStatement statement = conn.prepareStatement(
-      "SELECT "+escapeStr + colName + escapeStr+" FROM " + table + " WHERE "+escapeStr+"id"+escapeStr+" = " + id,
+      "SELECT \"" + colName +"\" FROM " + table + " WHERE "+escapeStr+"id"+escapeStr+" = " + id,
       ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     Object actualVal = null;
     try {
