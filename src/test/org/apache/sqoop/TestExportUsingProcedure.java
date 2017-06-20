@@ -343,11 +343,11 @@ public class TestExportUsingProcedure extends TestExport {
    * columns in the table.
    */
   public static void insertFunctiontestLessColumnsInFileThanInTable(int id, String msg,
-      final Date date1, final Timestamp t2) throws SQLException {
+      final int number, final Timestamp t2) throws SQLException {
     insertFunction(id, msg, new SetExtraArgs() {
       @Override
       public void set(PreparedStatement on) throws SQLException {
-        on.setDate(3, date1);
+        on.setInt(3, number);
         on.setNull(4, Types.TIMESTAMP);
       }
     });
