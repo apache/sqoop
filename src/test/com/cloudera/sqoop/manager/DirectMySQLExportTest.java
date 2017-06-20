@@ -38,6 +38,7 @@ import org.junit.Before;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
 import com.cloudera.sqoop.mapreduce.MySQLExportMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -302,18 +303,30 @@ public class DirectMySQLExportTest extends TestExport {
     }
   }
 
+  @Ignore("Ignoring this test as staging is not supported in direct mode.")
   @Override
   @Test
   public void testMultiMapTextExportWithStaging()
     throws IOException, SQLException {
-    // disable this test as staging is not supported in direct mode
   }
 
+  @Ignore("Ignoring this test as staging is not supported in direct mode.")
   @Override
   @Test
   public void testMultiTransactionWithStaging()
     throws IOException, SQLException {
-    // disable this test as staging is not supported in direct mode
+  }
+
+  @Ignore("Ignoring this test as --input-null-non-string is not supported in direct mode.")
+  @Override
+  @Test
+  public void testLessColumnsInFileThanInTableInputNullIntPassed() throws IOException, SQLException {
+  }
+
+  @Ignore("Ignoring this test as --input-null-string is not supported in direct mode.")
+  @Override
+  @Test
+  public void testLessColumnsInFileThanInTableInputNullStringPassed() throws IOException, SQLException {
   }
 
   private void verifyTableColumnContents(Connection connection,

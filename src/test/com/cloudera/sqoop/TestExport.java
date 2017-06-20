@@ -124,6 +124,20 @@ public class TestExport extends ExportJobTestCase {
     String getType();
   }
 
+  protected static class IntColumnGenerator implements ColumnGenerator {
+    public String getExportText(int rowNum) {
+      int day = rowNum + 1;
+      return String.valueOf(day);
+    }
+    public String getVerifyText(int rowNum) {
+      int day = rowNum + 1;
+      return String.valueOf(day);
+    }
+    public String getType() {
+      return "INT";
+    }
+  }
+
   /**
    * Create a data file that gets exported to the db.
    * @param fileNum the number of the file (for multi-file export)
@@ -906,14 +920,14 @@ public class TestExport extends ExportJobTestCase {
   public void testLessColumnsInFileThanInTable() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
-    ColumnGenerator genDate = getDateColumnGenerator();
+    ColumnGenerator genInteger = new IntColumnGenerator();
     ColumnGenerator genTime = getTimeColumnGenerator();
 
-    createTextFile(0, TOTAL_RECORDS, false, genDate);
-    createTable(genDate, genTime);
+    createTextFile(0, TOTAL_RECORDS, false, genInteger);
+    createTable(genInteger, genTime);
     runExport(getArgv(true, 10, 10));
     verifyExport(TOTAL_RECORDS);
-    assertColMinAndMax(forIdx(0), genDate);
+    assertColMinAndMax(forIdx(0), genInteger);
 
     // test that the Time column is with NULL values
     class NullColumnGenerator implements ColumnGenerator {
@@ -1039,21 +1053,6 @@ public class TestExport extends ExportJobTestCase {
       }
       public String getVerifyText(int rowNum) {
         return "INT_NULL";
-      }
-      public String getType() {
-        return "INT";
-      }
-    }
-
-    // a normal string column
-    class  IntColumnGenerator implements ColumnGenerator {
-      public String getExportText(int rowNum) {
-        int day = rowNum + 1;
-        return String.valueOf(day);
-      }
-      public String getVerifyText(int rowNum) {
-        int day = rowNum + 1;
-        return String.valueOf(day);
       }
       public String getType() {
         return "INT";
