@@ -113,8 +113,8 @@ public class HCatalogExportTest extends ExportJobTestCase {
     Object expectedMin = generator.getDBValue(minId);
     Object expectedMax = generator.getDBValue(maxId);
 
-    utils.assertSqlColValForRowId(conn, table, minId, colName, true, expectedMin);
-    utils.assertSqlColValForRowId(conn, table, maxId, colName, true, expectedMax);
+    utils.assertSqlColValForRowId(conn, table, minId, colName, false, expectedMin);
+    utils.assertSqlColValForRowId(conn, table, maxId, colName, false, expectedMax);
   }
 
   protected void runHCatExport(List<String> addlArgsArray,
@@ -122,7 +122,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     ColumnGenerator[] cols) throws Exception {
     utils.createHCatTable(CreateMode.CREATE_AND_LOAD,
       totalRecords, table, cols);
-    utils.createSqlTable(getConnection(), true, totalRecords, table, true, cols);
+    utils.createSqlTable(getConnection(), true, totalRecords, table, false, cols);
     Map<String, String> addlArgsMap = utils.getAddlTestArgs();
     addlArgsArray.add("--verbose");
     addlArgsArray.add("-m");
@@ -338,7 +338,7 @@ public class HCatalogExportTest extends ExportJobTestCase {
     };
     List<String> addlArgsArray = new ArrayList<String>();
     addlArgsArray.add("--columns");
-    addlArgsArray.add("id,msg");
+    addlArgsArray.add("ID,MSG");
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
 
   }
