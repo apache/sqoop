@@ -98,7 +98,7 @@ public class NetezzaJDBCStatementRunner extends Thread {
         FileWriter fileWriter = null;
         try {
           fileWriter = new FileWriter(nf.getFile());
-          fileWriter.write("\\n\\r");
+          fileWriter.write("\n");
         } catch (IOException ioe) {
           LOG.debug("error writing into fifo", ioe);
         } finally {
