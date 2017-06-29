@@ -1120,12 +1120,19 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 	  }
 
 	  void validateDirectMysqlOptions(SqoopOptions options) throws InvalidOptionsException {
-	    if (options.getFileLayout() != SqoopOptions.FileLayout.TextFile
-	        && MYSQL.isTheManagerTypeOf(options)) {
+	    if (!MYSQL.isTheManagerTypeOf(options)) {
+	      return;
+	    }
+	    if (options.getFileLayout() != SqoopOptions.FileLayout.TextFile) {
 	      throw new InvalidOptionsException(
 	          "MySQL direct import currently supports only text output format. "
 	              + "Parameters --as-sequencefile --as-avrodatafile and --as-parquetfile are not "
 	              + "supported with --direct params in MySQL case.");
+	    }
+	    if (options.getNullStringValue() != null || options.getNullNonStringValue() != null) {
+	      throw new InvalidOptionsException(
+	              "The --direct option is not compatible with the --null-string or " +
+	                      "--null-non-string command for MySQL imports");
 	    }
 	  }
   /**

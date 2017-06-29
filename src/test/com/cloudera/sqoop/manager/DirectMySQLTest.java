@@ -192,13 +192,7 @@ public class DirectMySQLTest extends ImportJobTestCase {
     }
 
     String [] argv = getArgv(mysqlOutputDelims, isDirect, tableName, extraArgs);
-    try {
-      runImport(argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    }
+    runImport(argv);
 
     File f = new File(filePath.toString());
     assertTrue("Could not find imported data file: " + f, f.exists());
@@ -356,6 +350,22 @@ public class DirectMySQLTest extends ImportJobTestCase {
       }
     }
 
+  }
+
+  @Test(expected = IOException.class)
+  public void testSqoopNullStringValueFailsValidate() throws Exception {
+    String [] expectedResults =  {};
+    String [] extraArgs =  {"--null-string", "abc"};
+
+    doImport(false, true, getTableName(), expectedResults, extraArgs);
+  }
+
+  @Test(expected = IOException.class)
+  public void testSqoopNullNonStringValueFailsValidate() throws Exception {
+    String [] expectedResults =  {};
+    String [] extraArgs =  {"--null-non-string", "abc"};
+
+    doImport(false, true, getTableName(), expectedResults, extraArgs);
   }
 
   @Test

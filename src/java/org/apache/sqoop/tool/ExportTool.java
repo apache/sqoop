@@ -33,6 +33,7 @@ import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.util.ExportException;
+import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 
 /**
  * Tool that performs HDFS exports to databases.
@@ -385,8 +386,21 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   void vaildateDirectExportOptions(SqoopOptions options) throws InvalidOptionsException {
     if (options.isDirect()) {
       validateHasDirectConnectorOption(options);
+      validateDirectMysqlOptions(options);
     }
   }
+
+  public void validateDirectMysqlOptions(SqoopOptions options) throws InvalidOptionsException {
+    if (!MYSQL.isTheManagerTypeOf(options)) {
+      return;
+    }
+    if (options.getInNullStringValue() != null || options.getInNullNonStringValue() != null) {
+      throw new InvalidOptionsException(
+              "The --direct option is not compatible with the --input-null-string or " +
+                      "--input-null-non-string command for MySQL exports");
+    }
+  }
+
   private void applyNewUpdateOptions(CommandLine in, SqoopOptions out)
       throws InvalidOptionsException {
     if (in.hasOption(UPDATE_MODE_ARG)) {

@@ -66,6 +66,22 @@ public class TestExportToolValidateOptions {
     exportTool.vaildateDirectExportOptions(options);
   }
 
+  @Test(expected = SqoopOptions.InvalidOptionsException.class)
+  public void givenDirectImportInputNullStringThrows() throws SqoopOptions.InvalidOptionsException {
+    SqoopOptions options = stubDirectOptions(SupportedManagers.MYSQL);
+    when(options.getInNullNonStringValue()).thenReturn("abc");
+
+    exportTool.validateDirectMysqlOptions(options);
+  }
+
+  @Test(expected = SqoopOptions.InvalidOptionsException.class)
+  public void givenDirectImportInputNullNonStringThrows() throws SqoopOptions.InvalidOptionsException {
+    SqoopOptions options = stubDirectOptions(SupportedManagers.MYSQL);
+    when(options.getInNullNonStringValue()).thenReturn("abc");
+
+    exportTool.validateDirectMysqlOptions(options);
+  }
+
   private SqoopOptions stubDirectOptions(SupportedManagers supportedManagers) {
     return stubOptions(supportedManagers, true);
   }

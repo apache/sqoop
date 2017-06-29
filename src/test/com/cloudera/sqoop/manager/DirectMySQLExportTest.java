@@ -303,6 +303,24 @@ public class DirectMySQLExportTest extends TestExport {
     }
   }
 
+  @Test(expected = IOException.class)
+  public void testExportInputNullStringFailsValidate() throws IOException {
+    runExport(getArgv(true, 10, 10,
+            "--username", MySQLAuthTest.AUTH_TEST_USER,
+            "--password", MySQLAuthTest.AUTH_TEST_PASS,
+            "--connect", MySQLAuthTest.AUTH_CONNECT_STRING,
+            "--input-null-string", "null"));
+  }
+
+  @Test(expected = IOException.class)
+  public void testExportInputNullNonStringFailsValidate() throws IOException {
+    runExport(getArgv(true, 10, 10,
+            "--username", MySQLAuthTest.AUTH_TEST_USER,
+            "--password", MySQLAuthTest.AUTH_TEST_PASS,
+            "--connect", MySQLAuthTest.AUTH_CONNECT_STRING,
+            "--input-null-non-string", "null"));
+  }
+
   @Ignore("Ignoring this test as staging is not supported in direct mode.")
   @Override
   @Test
