@@ -38,6 +38,7 @@ import org.apache.avro.Schema.Type;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.sqoop.kudu.KuduTypes;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -288,6 +289,30 @@ public abstract class ConnManager {
   public LogicalType toAvroLogicalType(String tableName, String columnName, int sqlType, Integer precision, Integer scale) {
     // ignore table name and column name by default.
     return toAvroLogicalType(sqlType, precision, scale);
+  }
+
+  /**
+   * Resolve a database-specific type to Kudu data type.
+   *
+   * @param sqlType sql type
+   * @return hive type
+   */
+  public org.apache.kudu.Type toKuduType(int sqlType) {
+    return KuduTypes.toKuduType(sqlType);
+  }
+
+  /**
+   * Return Kudu type for SQL type.
+   *
+   * @param tableName  table name
+   * @param columnName column name
+   * @param sqlType    sql type
+   * @return hive type
+   */
+  public org.apache.kudu.Type toKuduType(String tableName, String columnName,
+                                    int sqlType) {
+    // ignore table name and column name by default.
+    return toKuduType(sqlType);
   }
 
   /**
@@ -861,5 +886,14 @@ public abstract class ConnManager {
     return false;
   }
 
+  /**
+   * Determine if Kudu operations from direct mode of the connector is
+   * allowed.  By default direct mode is not compatible with Kudu.
+   *
+   * @return Whether direct mode is allowed.
+   */
+  public boolean isDirectModeKuduSupported() {
+    return false;
+  }
 }
 

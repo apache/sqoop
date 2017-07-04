@@ -30,10 +30,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.accumulo.AccumuloUtil;
 import org.apache.sqoop.hbase.HBaseUtil;
+import org.apache.sqoop.kudu.KuduUtil;
 import org.apache.sqoop.mapreduce.AccumuloImportJob;
 import org.apache.sqoop.mapreduce.HBaseBulkImportJob;
 import org.apache.sqoop.mapreduce.HBaseImportJob;
 import org.apache.sqoop.mapreduce.ImportJobBase;
+import org.apache.sqoop.mapreduce.KuduImportJob;
 import org.apache.sqoop.mapreduce.mainframe.MainframeDatasetInputFormat;
 import org.apache.sqoop.mapreduce.mainframe.MainframeImportJob;
 
@@ -88,6 +90,12 @@ public class MainframeManager extends com.cloudera.sqoop.manager.ConnManager {
             + "classpath, cannot import to Accumulo!");
       }
       importer = new AccumuloImportJob(opts, context);
+    } else if (opts.getKuduTable() != null) {
+      if (!KuduUtil.isKuduJarPresent()) {
+        throw new ImportException("Kudu jars are not present in "
+            + "classpath, cannot import to Kudu!");
+      }
+      importer = new KuduImportJob(opts, context);
     } else {
       // Import to HDFS.
       importer = new MainframeImportJob(opts, context);

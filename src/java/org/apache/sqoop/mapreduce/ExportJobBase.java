@@ -362,6 +362,11 @@ public class ExportJobBase extends JobBase {
       throw new IOException("Direct mode is incompatible with "
             + "HBase. Please remove the parameter --direct");
     }
+    if (options.getKuduTable() != null && options.isDirect()
+        && !cmgr.isDirectModeKuduSupported()) {
+      throw new IOException("Direct mode is incompatible with "
+          + "Kudu. Please remove the parameter --direct");
+    }
     if (stagingTableName != null) { // user has specified the staging table
       if (cmgr.supportsStagingForExport()) {
         LOG.info("Data will be staged in the table: " + stagingTableName);

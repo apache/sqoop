@@ -203,6 +203,7 @@ public class SqoopOptions implements Cloneable {
   // User explicit mapping of types
   private Properties mapColumnJava; // stored as map.colum.java
   private Properties mapColumnHive; // stored as map.column.hive
+  private Properties mapColumnKudu; // stored as map.column.kudu
   // SQOOP-3123 default enabled
   private boolean escapeColumnMappingEnabled;
   private Properties mapReplacedColumnJava; // used to replace special characters in columns
@@ -355,6 +356,34 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("reset.onemapper") private boolean autoResetToOneMapper;
 
   @StoredAsProperty("sqlconnection.metadata.transaction.isolation.level") private int metadataTransactionIsolationLevel;
+
+  //Kudu table to import into
+  @StoredAsProperty("kudu.table")
+  private String kuduTable;
+
+  // if true, create the Kudu table based on the source table
+  @StoredAsProperty("kudu.create.table")
+  private boolean kuduCreateTable;
+
+  //Kudu master URL
+  @StoredAsProperty("kudu.master.url")
+  private String kuduMasterUrl;
+
+  //Kudu key cols
+  @StoredAsProperty("kudu.key.cols")
+  private String kuduKeyCols;
+
+  //Kudu partition cols
+  @StoredAsProperty("kudu.partition.cols")
+  private String kuduPartitionCols;
+
+  //Kudu partitions buckets
+  @StoredAsProperty("kudu.partition.buckets")
+  private String kuduPartitionBuckets;
+
+  //Kudu number of replicas
+  @StoredAsProperty("kudu.replica.count")
+  private String kuduReplicaCount;
 
   // These next two fields are not serialized to the metastore.
   // If this SqoopOptions is created by reading a saved job, these will
@@ -701,6 +730,8 @@ public class SqoopOptions implements Cloneable {
             getPropertiesAsNetstedProperties(props, "map.column.hive");
     this.mapColumnJava =
             getPropertiesAsNetstedProperties(props, "map.column.java");
+    this.mapColumnKudu =
+        getPropertiesAsNetstedProperties(props, "map.column.kudu");
 
     // Delimiters were previously memoized; don't let the tool override
     // them with defaults.
@@ -810,6 +841,8 @@ public class SqoopOptions implements Cloneable {
             "map.column.hive", this.mapColumnHive);
     setPropertiesAsNestedProperties(props,
             "map.column.java", this.mapColumnJava);
+    setPropertiesAsNestedProperties(props,
+        "map.column.kudu", this.mapColumnKudu);
     return props;
   }
 
@@ -881,6 +914,10 @@ public class SqoopOptions implements Cloneable {
 
       if (null != mapReplacedColumnJava) {
         other.mapReplacedColumnJava = (Properties) this.mapReplacedColumnJava.clone();
+      }
+
+      if (null != mapColumnKudu) {
+        other.mapColumnKudu = (Properties) this.mapColumnKudu.clone();
       }
 
       return other;
@@ -1040,6 +1077,7 @@ public class SqoopOptions implements Cloneable {
     // Creating instances for user specific mapping
     this.mapColumnHive = new Properties();
     this.mapColumnJava = new Properties();
+    this.mapColumnKudu = new Properties();
 
     // Set Accumulo batch size defaults, since 0 is not the same
     // as "not set"
@@ -1368,12 +1406,20 @@ public class SqoopOptions implements Cloneable {
     parseColumnMapping(mapColumn, mapColumnJava);
   }
 
+  public void setMapColumnKudu(String mapColumn) {
+    parseColumnMapping(mapColumn, mapColumnKudu);
+  }
+
   public Properties getMapColumnHive() {
     return mapColumnHive;
   }
 
   public Properties getMapColumnJava() {
     return mapColumnJava;
+  }
+
+  public Properties getMapColumnKudu() {
+    return mapColumnKudu;
   }
 
   /**
@@ -2562,6 +2608,105 @@ public class SqoopOptions implements Cloneable {
    */
   public void setAccumuloInstance(String instance) {
     this.accumuloInstance = instance;
+  }
+
+  /**
+   * Set whether we should create missing Kudu tables.
+   */
+  public void setCreateKuduTable(boolean create) {
+    this.kuduCreateTable = create;
+  }
+
+  /**
+   * Returns true if we should create Kudu tables
+   * that are missing.
+   */
+  public boolean getCreateKuduTable() {
+    return this.kuduCreateTable;
+  }
+
+  /**
+   * Gets the target Kudu table name, if any.
+   */
+  public String getKuduTable() {
+    return this.kuduTable;
+  }
+
+  /**
+   * Sets the target Kudu table name for an import.
+   */
+  public void setKuduTable(String table) {
+    this.kuduTable = table;
+  }
+
+  /**
+   * Sets the kudu master url.
+   */
+  public void setKuduURL(String url) {
+    this.kuduMasterUrl = url;
+  }
+
+  /**
+   * Gets the Kudu master url.
+   */
+  public String getKuduURL() {
+    return this.kuduMasterUrl;
+  }
+
+  /**
+   * Gets the target Kudu table key columns.
+   */
+  public String getKuduKeyCols() {
+    return this.kuduKeyCols;
+  }
+
+  /**
+   * Sets the Kudu key cols.
+   */
+  public void setKuduKeyCols(String kuduKeyCols) {
+    this.kuduKeyCols = kuduKeyCols;
+  }
+
+  /**
+   * Gets the target Kudu table partition columns.
+   */
+  public String getKuduPartitionCols() {
+    return this.kuduPartitionCols;
+  }
+
+  /**
+   * Sets the Kudu partition cols.
+   */
+  public void setKuduPartitionCols(String kuduPartitionCols) {
+    this.kuduPartitionCols = kuduPartitionCols;
+  }
+
+  /**
+   * Gets the target Kudu table partition buckets.
+   */
+  public String getKuduPartitionBuckets() {
+    return this.kuduPartitionBuckets;
+  }
+
+  /**
+   * Sets the Kudu partition buckets.
+   */
+  public void setKuduPartitionBuckets(String kuduPartitionBuckets) {
+    this.kuduPartitionBuckets = kuduPartitionBuckets;
+  }
+
+  /**
+   * Gets the target Kudu table replica count.
+   */
+  public String getKuduReplicaCount() {
+    return this.kuduReplicaCount;
+  }
+
+  /**
+   * Sets the Kudu replica count.
+   */
+  public void setKuduReplicaCount(String kuduReplicaCount) {
+    this.kuduReplicaCount = kuduReplicaCount;
   }
 
   /**

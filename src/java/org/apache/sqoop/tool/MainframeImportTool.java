@@ -113,6 +113,7 @@ public class MainframeImportTool extends ImportTool {
     toolOptions.addUniqueOptions(getHCatalogOptions());
     toolOptions.addUniqueOptions(getHCatImportOnlyOptions());
     toolOptions.addUniqueOptions(getAccumuloOptions());
+    toolOptions.addUniqueOptions(getKuduOptions());
 
     // get common codegen opts.
     RelatedOptions codeGenOpts = getCodeGenOpts(false);

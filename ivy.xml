@@ -54,6 +54,9 @@ under the License.
 
     <!-- configuration for running rat -->
     <conf name="releaseaudit" visibility="private" />
+
+    <!-- Configuration for kudu -->
+    <conf name="kudu" visibility="private" />
   </configurations>
 
   <publications>
@@ -218,6 +221,11 @@ under the License.
       <exclude org="org.mortbay.jetty" module="jetty"/>
       <exclude org="org.jboss.netty" module="netty"/>
       <exclude org="org.apache.velocity" module="velocity"/>
+    </dependency>
+
+    <dependency org="org.apache.kudu" name="kudu-client"
+      rev="${kudu.version}" conf="kudu->default;redist->default">
+      <artifact name="kudu-client" type="jar" />
     </dependency>
 
     <exclude org="org.apache.hadoop" module="avro"/>
