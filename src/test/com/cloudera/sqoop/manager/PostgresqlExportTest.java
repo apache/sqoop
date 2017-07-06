@@ -51,13 +51,13 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     "sqoop.test.postgresql.connectstring.host_url",
     "jdbc:postgresql://localhost/");
   static final String DATABASE_USER = System.getProperty(
-    "sqoop.test.postgresql.connectstring.username",
+    "sqoop.test.postgresql.username",
     "sqooptest");
   static final String DATABASE_NAME = System.getProperty(
-    "sqoop.test.postgresql.connectstring.database",
+    "sqoop.test.postgresql.database",
     "sqooptest");
   static final String PASSWORD = System.getProperty(
-    "sqoop.test.postgresql.connectstring.password");
+    "sqoop.test.postgresql.password");
 
   static final String TABLE_NAME = "EMPLOYEES_PG";
   static final String PROCEDURE_NAME = "INSERT_AN_EMPLOYEE";
@@ -286,6 +286,8 @@ public class PostgresqlExportTest extends ExportJobTestCase {
     args.add(CONNECT_STRING);
     args.add("--username");
     args.add(DATABASE_USER);
+    args.add("--password");
+    args.add(PASSWORD);
     args.add("-m");
     args.add("1");
 
