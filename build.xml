@@ -218,6 +218,9 @@
   <property name="sqoop.test.postgresql.username"
             value="sqooptest" />
 
+  <property name="sqoop.test.postgresql.password"
+            value="" />
+
   <property name="sqoop.test.postgresql.pg_bulkload"
             value="pg_bulkload" />
 
@@ -846,6 +849,9 @@
 
       <sysproperty key="sqoop.test.postgresql.username"
                    value="${sqoop.test.postgresql.username}" />
+
+      <sysproperty key="sqoop.test.postgresql.password"
+                   value="${sqoop.test.postgresql.password}" />
 
       <sysproperty key="sqoop.test.postgresql.pg_bulkload"
                    value="${sqoop.test.postgresql.pg_bulkload}" />

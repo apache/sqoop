@@ -29,6 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobConf;
 import com.cloudera.sqoop.TestExport;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.junit.Ignore;
+import org.junit.Test;
 
 
 /**
@@ -64,6 +66,8 @@ public class DirectPostgreSQLExportManualTest extends TestExport {
     System.getProperty("sqoop.test.postgresql.database", "sqooptest");
   static final String USERNAME =
     System.getProperty("sqoop.test.postgresql.username", "sqooptest");
+  static final String PASSWORD = System.getProperty(
+      "sqoop.test.postgresql.password");
   static final String CONNECT_STRING = HOST_URL + DATABASE;
 
   public DirectPostgreSQLExportManualTest() {
@@ -72,7 +76,7 @@ public class DirectPostgreSQLExportManualTest extends TestExport {
                                 "org.postgresql.Driver",
                                 getConnectString(),
                                 getUserName(),
-                                (String) null, (Integer) null);
+                                PASSWORD, (Integer) null);
     dbConf = new DBConfiguration(conf);
   }
 
@@ -138,6 +142,8 @@ public class DirectPostgreSQLExportManualTest extends TestExport {
         new ArrayList<String>(Arrays.asList(additionalArgv));
     args.add("--username");
     args.add(getUserName());
+    args.add("--password");
+    args.add(PASSWORD);
     args.add("--direct");
     return super.getArgv(includeHadoopFlags,
                          rowsPerStatement,
@@ -150,11 +156,34 @@ public class DirectPostgreSQLExportManualTest extends TestExport {
     ArrayList<String> args = new ArrayList<String>(Arrays.asList(extraArgs));
     args.add("--username");
     args.add(getUserName());
+    args.add("--password");
+    args.add(PASSWORD);
     return super.getCodeGenArgv(args.toArray(new String[0]));
   }
 
+  @Ignore("Ignoring this test case as direct export does not support --columns option.")
   @Override
+  @Test
   public void testColumnsExport() throws IOException, SQLException {
-    // Direct export does not support --columns option.
   }
+
+  @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
+  @Override
+  @Test
+  public void testLessColumnsInFileThanInTable() throws IOException, SQLException {
+  }
+
+  @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
+  @Override
+  @Test
+  public void testLessColumnsInFileThanInTableInputNullIntPassed() throws IOException, SQLException {
+  }
+
+  @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
+  @Override
+  @Test
+  public void testLessColumnsInFileThanInTableInputNullStringPassed() throws IOException, SQLException {
+  }
+
+
 }

@@ -35,10 +35,10 @@ public class PostgresqlExternalTableImportTest extends ImportJobTestCase {
   static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",
       "jdbc:postgresql://localhost/");
   static final String DATABASE_USER = System.getProperty(
-      "sqoop.test.postgresql.connectstring.username", "sqooptest");
+      "sqoop.test.postgresql.username", "sqooptest");
   static final String DATABASE_NAME = System.getProperty(
-      "sqoop.test.postgresql.connectstring.database", "sqooptest");
-  static final String PASSWORD = System.getProperty("sqoop.test.postgresql.connectstring.password");
+      "sqoop.test.postgresql.database", "sqooptest");
+  static final String PASSWORD = System.getProperty("sqoop.test.postgresql.password");
 
   static final String TABLE_NAME = "EMPLOYEES_PG";
   static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_PG";
@@ -193,6 +193,8 @@ public class PostgresqlExternalTableImportTest extends ImportJobTestCase {
     args.add(CONNECT_STRING);
     args.add("--username");
     args.add(DATABASE_USER);
+    args.add("--password");
+    args.add(PASSWORD);
     args.add("--where");
     args.add("id > 1");
     args.add("-m");
