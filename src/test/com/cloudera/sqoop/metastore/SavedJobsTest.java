@@ -21,17 +21,17 @@ package com.cloudera.sqoop.metastore;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.manager.MySQLTestUtils;
+import com.cloudera.sqoop.manager.OracleUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.VersionTool;
 import org.apache.sqoop.manager.DefaultManagerFactory;
+import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 import org.apache.sqoop.tool.ImportTool;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
@@ -42,7 +42,9 @@ import java.io.IOException;
 import java.sql.Connection;
 
 import static org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.*;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Test the metastore and job-handling features.
@@ -52,33 +54,51 @@ import static org.junit.Assert.assertEquals;
  * state between individual tests.
  */
 @RunWith(Parameterized.class)
-public class TestSavedJobs {
+public class SavedJobsTest {
+
+  private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+  private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
   @Parameterized.Parameters(name = "metaConnect = {0}, metaUser = {1}, metaPassword = {2}, driverClass = {3}")
   public static Iterable<? extends Object> fileLayoutAndValidationMessageParameters() {
     return Arrays.asList(
             new Object[] {
-                    "jdbc:mysql://mysql.vpc.cloudera.com/sqoop",
-                    "sqoop", "sqoop", "com.mysql.jdbc.Driver"
+                    mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
+                    mySQLTestUtils.getUserPass(), "com.mysql.jdbc.Driver"
             },
             new Object[] {
-                    "jdbc:postgresql://postgresql.vpc.cloudera.com/sqoop",
-                    "sqoop", "sqoop", "org.postgresql.Driver"
+                   OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
+                    OracleUtils.ORACLE_USER_PASS, "oracle.jdbc.OracleDriver"
             },
             new Object[] {
-                    "jdbc:oracle:thin:@//oracle-ee.vpc.cloudera.com/orcl",
-                    "sqoop", "sqoop", "oracle.jdbc.OracleDriver"
+                   msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
+                    msSQLTestUtils.getDBPassWord(), "com.microsoft.sqlserver.jdbc.SQLServerDriver"
             },
             new Object[] {
-                   "jdbc:db2://db2.vpc.cloudera.com:50000/SQOOP",
-                    "DB2INST1", "cloudera", "com.ibm.db2.jcc.DB2Driver"
-            }
-            ,
-            new Object[] {
-                    "jdbc:sqlserver://sqlserver.vpc.cloudera.com:1433;database=sqoop",
-                    "sqoop", "sqoop", "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+                    System.getProperty(
+                            "sqoop.test.postgresql.connectstring.host_url",
+                            "jdbc:postgresql://localhost/"),
+                    System.getProperty(
+                            "sqoop.test.postgresql.connectstring.username",
+                            "sqooptest"),
+                    System.getProperty(
+                            "sqoop.test.postgresql.connectstring.password"),
+                    "org.postgresql.Driver"
             },
-            new Object[] { "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "", "org.hsqldb.jdbcDriver" } );
+            new Object[] {
+                    System.getProperty(
+                            "sqoop.test.db2.connectstring.host_url",
+                            "jdbc:db2://db2host:50000"),
+                    System.getProperty(
+                            "sqoop.test.db2.connectstring.username",
+                            "SQOOP"),
+                    System.getProperty(
+                            "sqoop.test.db2.connectstring.password",
+                            "SQOOP"),
+                    "com.ibm.db2.jcc.DB2Driver"
+            },
+            new Object[] { "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "", "org.hsqldb.jdbcDriver" }
+            );
   }
 
   private String metaConnect;
@@ -94,7 +114,7 @@ public class TestSavedJobs {
 
 
 
-  public TestSavedJobs(String metaConnect, String metaUser, String metaPassword, String driverClass){
+  public SavedJobsTest(String metaConnect, String metaUser, String metaPassword, String driverClass){
     this.metaConnect = metaConnect;
     this.metaUser = metaUser;
     this.metaPassword = metaPassword;
@@ -221,13 +241,9 @@ public class TestSavedJobs {
     storage.create("testJob3", createTestJobData("abcd"));
     storage.create("testJob4", createTestJobData("efgh"));
     storage.create("testJob5", createTestJobData("ijkl"));
-    System.out.print(storage.list());
 
-    List<String> expected = Arrays.asList("testJob3", "testJob4", "testJob5");
-
-    assertEquals(expected, storage.list());
+    assertThat( storage.list(), hasItems( "testJob3", "testJob4", "testJob5" ));
   }
-
 
   @Test
   public void testCreateSameJob() throws IOException {

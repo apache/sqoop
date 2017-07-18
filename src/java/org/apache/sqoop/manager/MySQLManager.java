@@ -54,7 +54,7 @@ public class MySQLManager
   public static final Log LOG = LogFactory.getLog(MySQLManager.class.getName());
 
   // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = "com.mysql.jdbc.Driver";
+  public static final String DRIVER_CLASS = "com.mysql.jdbc.Driver";
 
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;

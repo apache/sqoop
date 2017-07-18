@@ -42,6 +42,7 @@ import com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
+import org.apache.sqoop.manager.*;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**
@@ -52,6 +53,15 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   public static final Log LOG = LogFactory.getLog(
       JobTool.class.getName());
   private static final String DASH_STR  = "--";
+  public static final String MYSQL_SCHEME = "jdbc:mysql:";
+  public static final String POSTGRES_SCHEME = "jdbc:postgresql:";
+  public static final String HSQLDB_SCHEME = "jdbc:hsqldb:";
+  public static final String ORACLE_SCHEME = "jdbc:oracle:";
+  public static final String SQLSERVER_SCHEME = "jdbc:sqlserver:";
+  public static final String DB2_SCHEME = "jdbc:db2:";
+  public static final String JTDS_SQLSERVER_SCHEME = "jdbc:jtds:sqlserver:";
+  public static final String NETEZZA_SCHEME = "jdbc:netezza:";
+  public static final String CUBRID_SCHEME = "jdbc:cubrid:";
 
   private enum JobOp {
     JobCreate,
@@ -59,7 +69,7 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     JobExecute,
     JobList,
     JobShow,
-  };
+  }
 
   private Map<String, String> storageDescriptor;
   private String jobName;
@@ -346,8 +356,12 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     this.storageDescriptor = new TreeMap<String, String>();
 
     if (in.hasOption(STORAGE_METASTORE_ARG)) {
-      this.storageDescriptor.put(HsqldbJobStorage.META_CONNECT_KEY,
-          in.getOptionValue(STORAGE_METASTORE_ARG));
+
+      String metaConnectString = in.getOptionValue(STORAGE_METASTORE_ARG);
+      this.storageDescriptor.put(HsqldbJobStorage.META_CONNECT_KEY, metaConnectString);
+
+      String driverString = chooseDriverType(metaConnectString);
+      this.storageDescriptor.put(HsqldbJobStorage.META_DRIVER_KEY, driverString);
     }
 
     // These are generated via an option group; exactly one
@@ -368,6 +382,28 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       this.jobName = in.getOptionValue(JOB_CMD_SHOW_ARG);
     }
   }
+  public static String chooseDriverType(String metaConnectString) throws InvalidOptionsException {
+    int schemeEndIndex = metaConnectString.indexOf("//");
+    String scheme = metaConnectString.substring(0, schemeEndIndex);
+
+    switch(scheme){
+      case MYSQL_SCHEME:
+        return MySQLManager.DRIVER_CLASS;
+      case POSTGRES_SCHEME:
+        return PostgresqlManager.DRIVER_CLASS;
+      case HSQLDB_SCHEME:
+        return HsqldbManager.DRIVER_CLASS;
+      case ORACLE_SCHEME:
+        return OracleManager.DRIVER_CLASS;
+      case SQLSERVER_SCHEME:
+        return SQLServerManager.DRIVER_CLASS;
+      case DB2_SCHEME:
+        return Db2Manager.DRIVER_CLASS;
+      default:
+        throw new InvalidOptionsException("current meta-connect scheme not compatible with metastore");
+    }
+  }
+
 
   @Override
   /** {@inheritDoc} */

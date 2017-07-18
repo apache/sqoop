@@ -69,7 +69,7 @@ public class SQLServerManager
       "org.apache.sqoop.manager.sqlserver.table.identity";
 
   // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS =
+  public static final String DRIVER_CLASS =
       "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
   // Define SQL Server specific types that are not covered by parent classes

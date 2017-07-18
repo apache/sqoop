@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.cloudera.sqoop.metastore.SavedJobsTest;
 import com.cloudera.sqoop.metastore.hsqldb.AutoHsqldbStorage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +46,6 @@ import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.HsqldbManager;
 import com.cloudera.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.metastore.TestSavedJobs;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
@@ -110,7 +110,7 @@ public class TestIncrementalImport  {
   public static void resetSourceDataSchema() throws SQLException {
     SqoopOptions options = new SqoopOptions();
     options.setConnectString(SOURCE_DB_URL);
-    TestSavedJobs.resetSchema(options);
+    SavedJobsTest.resetSchema(options);
   }
 
   public static Configuration newConf() {
