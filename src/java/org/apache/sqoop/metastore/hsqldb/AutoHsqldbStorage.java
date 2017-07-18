@@ -70,6 +70,7 @@ public class AutoHsqldbStorage
 
   /** HSQLDB default user has an empty password. */
   public static final String DEFAULT_AUTO_PASSWORD = "";
+  public static final String AUTO_HSQLDB_JDBC_DRIVER = "org.hsqldb.jdbcDriver";
 
   @Override
   /** {@inheritDoc} */
@@ -107,6 +108,7 @@ public class AutoHsqldbStorage
     setMetastoreUser(conf.get(AUTO_STORAGE_USER_KEY, DEFAULT_AUTO_USER));
     setMetastorePassword(conf.get(AUTO_STORAGE_PASS_KEY,
         DEFAULT_AUTO_PASSWORD));
+    setDriverClass(AUTO_HSQLDB_JDBC_DRIVER);
     setConnectedDescriptor(descriptor);
 
     init();

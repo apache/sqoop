@@ -63,6 +63,9 @@ public class HsqldbJobStorage extends JobStorage {
    */
   public static final String META_PASSWORD_KEY = "metastore.password";
 
+  /** descriptor key identifying the class name of the jdbc driver
+   */
+  public static final String META_DRIVER_KEY = "metastore.driver.class";
 
   /** Default name for the root metadata table in HSQLDB. */
   private static final String DEFAULT_ROOT_TABLE_NAME = "SQOOP_ROOT";
@@ -118,6 +121,7 @@ public class HsqldbJobStorage extends JobStorage {
   private String metastoreUser;
   private String metastorePassword;
   private Connection connection;
+  private String driverClass;
 
   protected Connection getConnection() {
     return this.connection;
@@ -139,8 +143,9 @@ public class HsqldbJobStorage extends JobStorage {
     this.metastorePassword = pass;
   }
 
-  private static final String DB_DRIVER_CLASS = "org.hsqldb.jdbcDriver";
-
+  protected void setDriverClass(String driverClass) {
+    this.driverClass = driverClass;
+  }
   /**
    * Set the descriptor used to open() this storage.
    */
@@ -156,6 +161,7 @@ public class HsqldbJobStorage extends JobStorage {
     setMetastoreConnectStr(descriptor.get(META_CONNECT_KEY));
     setMetastoreUser(descriptor.get(META_USERNAME_KEY));
     setMetastorePassword(descriptor.get(META_PASSWORD_KEY));
+    setDriverClass(descriptor.get(META_DRIVER_KEY));
     setConnectedDescriptor(descriptor);
 
     init();
@@ -164,9 +170,9 @@ public class HsqldbJobStorage extends JobStorage {
   protected void init() throws IOException {
     try {
       // Load/initialize the JDBC driver.
-      Class.forName(DB_DRIVER_CLASS);
+      Class.forName(driverClass);
     } catch (ClassNotFoundException cnfe) {
-      throw new IOException("Could not load HSQLDB JDBC driver", cnfe);
+      throw new IOException("Could not load JDBC driver", cnfe);
     }
 
     try {
@@ -177,7 +183,7 @@ public class HsqldbJobStorage extends JobStorage {
             metastoreUser, metastorePassword);
       }
 
-      connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+      connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
       connection.setAutoCommit(false);
 
       // Initialize the root schema.
@@ -186,7 +192,11 @@ public class HsqldbJobStorage extends JobStorage {
       }
 
       // Check the schema version.
-      String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, null);
+      String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, -1);
+
+      if(curStorageVerStr == null){
+        curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, null);
+      }
       int actualStorageVer = -1;
       try {
         actualStorageVer = Integer.valueOf(curStorageVerStr);
@@ -520,7 +530,7 @@ public class HsqldbJobStorage extends JobStorage {
     Statement s = connection.createStatement();
     try {
       s.executeUpdate("CREATE TABLE " + rootTableName + " ("
-          + "version INT, "
+          + "version INT NOT NULL, "
           + "propname VARCHAR(128) NOT NULL, "
           + "propval VARCHAR(256), "
           + "CONSTRAINT " + rootTableName + "_unq UNIQUE (version, propname))");
@@ -528,7 +538,7 @@ public class HsqldbJobStorage extends JobStorage {
       s.close();
     }
 
-    setRootProperty(STORAGE_VERSION_KEY, null,
+    setRootProperty(STORAGE_VERSION_KEY, -1,
         Integer.toString(CUR_STORAGE_VERSION));
 
     LOG.debug("Saving root table.");
@@ -599,10 +609,6 @@ public class HsqldbJobStorage extends JobStorage {
       // INSERT the row.
       s = connection.prepareStatement("INSERT INTO " + getRootTableName()
           + " (propval, propname, version) VALUES ( ? , ? , ? )");
-    } else if (version == null) {
-      // UPDATE an existing row with a null version
-      s = connection.prepareStatement("UPDATE " + getRootTableName()
-          + " SET propval = ? WHERE  propname = ? AND version IS NULL");
     } else {
       // UPDATE an existing row with non-null version.
       s = connection.prepareStatement("UPDATE " + getRootTableName()
@@ -612,7 +618,10 @@ public class HsqldbJobStorage extends JobStorage {
     try {
       s.setString(1, val);
       s.setString(2, propertyName);
-      if (null != version) {
+      if (null == version) {
+       /* -1 replaces null as a placeholder for the version row of the root table  */
+       s.setInt(3, -1);
+      } else {
         s.setInt(3, version);
       }
       s.executeUpdate();

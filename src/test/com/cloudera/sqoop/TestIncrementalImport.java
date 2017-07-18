@@ -27,10 +27,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.cloudera.sqoop.metastore.hsqldb.AutoHsqldbStorage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -71,6 +73,8 @@ public class TestIncrementalImport  {
 
   // What database do we read from.
   public static final String SOURCE_DB_URL = "jdbc:hsqldb:mem:incremental";
+  public static final String AUTO_STORAGE_PASS = "";
+  public static final String AUTO_STORAGE_USER = "SA";
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -78,8 +82,29 @@ public class TestIncrementalImport  {
   @Before
   public void setUp() throws Exception {
     // Delete db state between tests.
-    TestSavedJobs.resetJobSchema();
+    SqoopOptions options = new SqoopOptions();
+    options.setConnectString("jdbc:hsqldb:mem:sqoopmetastore");
+    options.setUsername("SA");
+    options.setPassword("");
+
+    resetSchema(options);
     resetSourceDataSchema();
+  }
+
+  public static void resetSchema(SqoopOptions options) throws SQLException {
+    HsqldbManager manager = new HsqldbManager(options);
+    Connection c = manager.getConnection();
+    Statement s = c.createStatement();
+    try {
+      String [] tables = manager.listTables();
+      for (String table : tables) {
+        s.executeUpdate("DROP TABLE " + manager.escapeTableName(table));
+      }
+
+      c.commit();
+    } finally {
+      s.close();
+    }
   }
 
   public static void resetSourceDataSchema() throws SQLException {
@@ -89,7 +114,13 @@ public class TestIncrementalImport  {
   }
 
   public static Configuration newConf() {
-    return TestSavedJobs.newConf();
+    Configuration conf = new Configuration();
+    conf.set(AutoHsqldbStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USER);
+    conf.set(AutoHsqldbStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASS);
+    conf.set(AutoHsqldbStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
+            SOURCE_DB_URL);
+
+    return conf;
   }
 
   /**
