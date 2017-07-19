@@ -30,7 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.VersionTool;
-import org.apache.sqoop.manager.DefaultManagerFactory;
+import org.apache.sqoop.manager.*;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 import org.apache.sqoop.tool.ImportTool;
 import org.junit.*;
@@ -60,19 +60,19 @@ public class SavedJobsTest {
   private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
   @Parameterized.Parameters(name = "metaConnect = {0}, metaUser = {1}, metaPassword = {2}, driverClass = {3}")
-  public static Iterable<? extends Object> fileLayoutAndValidationMessageParameters() {
+  public static Iterable<? extends Object> dbConnectParameters() {
     return Arrays.asList(
             new Object[] {
                     mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
-                    mySQLTestUtils.getUserPass(), "com.mysql.jdbc.Driver"
+                    mySQLTestUtils.getUserPass(), MySQLManager.DRIVER_CLASS
             },
             new Object[] {
                    OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
-                    OracleUtils.ORACLE_USER_PASS, "oracle.jdbc.OracleDriver"
+                    OracleUtils.ORACLE_USER_PASS, OracleManager.DRIVER_CLASS
             },
             new Object[] {
                    msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
-                    msSQLTestUtils.getDBPassWord(), "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+                    msSQLTestUtils.getDBPassWord(), SQLServerManager.DRIVER_CLASS
             },
             new Object[] {
                     System.getProperty(
@@ -83,7 +83,7 @@ public class SavedJobsTest {
                             "sqooptest"),
                     System.getProperty(
                             "sqoop.test.postgresql.connectstring.password"),
-                    "org.postgresql.Driver"
+                    PostgresqlManager.DRIVER_CLASS
             },
             new Object[] {
                     System.getProperty(
@@ -95,9 +95,9 @@ public class SavedJobsTest {
                     System.getProperty(
                             "sqoop.test.db2.connectstring.password",
                             "SQOOP"),
-                    "com.ibm.db2.jcc.DB2Driver"
+                    Db2Manager.DRIVER_CLASS
             },
-            new Object[] { "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "", "org.hsqldb.jdbcDriver" }
+            new Object[] { "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "", HsqldbManager.DRIVER_CLASS }
             );
   }
 
@@ -193,7 +193,7 @@ public class SavedJobsTest {
   }
 
   @Test
-  public void testCanAcceptInvalidKeyFalse() throws Exception {
+  public void canAcceptInvalidKeyFalseTest() throws Exception {
     TreeMap<String,String> t = new TreeMap<>();
     t.put(INVALID_KEY, "abc");
 
@@ -202,7 +202,7 @@ public class SavedJobsTest {
   }
 
   @Test
-  public void testCanAcceptValidKeyTrue() throws Exception {
+  public void canAcceptValidKeyTrueTest() throws Exception {
     TreeMap<String,String> t = new TreeMap<>();
     t.put(META_CONNECT_KEY, "abc");
 
@@ -210,14 +210,14 @@ public class SavedJobsTest {
   }
 
   @Test(expected = IOException.class)
-  public void testReadJobDoesNotExistThrows() throws IOException{
+  public void readJobDoesNotExistThrowsTest() throws IOException{
     String invalidJob = "abcd";
 
     storage.read(invalidJob);
   }
 
   @Test
-  public void testReadJobDoesExistPasses() throws Exception{
+  public void readJobDoesExistPassesTest() throws Exception{
     storage.create("testJob", createTestJobData("abcd"));
 
     assertEquals("Read did not return job data correctly",
@@ -226,7 +226,7 @@ public class SavedJobsTest {
   }
 
   @Test
-  public void testUpdateJob() throws  Exception {
+  public void updateJobTest() throws  Exception {
     storage.create("testJob2", createTestJobData("abcd"));
 
     storage.update("testJob2", createTestJobData("efgh") );
@@ -237,7 +237,7 @@ public class SavedJobsTest {
   }
 
   @Test
-  public void testList() throws IOException {
+  public void listTest() throws IOException {
     storage.create("testJob3", createTestJobData("abcd"));
     storage.create("testJob4", createTestJobData("efgh"));
     storage.create("testJob5", createTestJobData("ijkl"));
@@ -246,7 +246,7 @@ public class SavedJobsTest {
   }
 
   @Test
-  public void testCreateSameJob() throws IOException {
+  public void createSameJobTest() throws IOException {
 
     // Job list should start out empty.
     List<String> jobs = storage.list();
@@ -277,7 +277,7 @@ public class SavedJobsTest {
   }
 
   @Test
-  public void testDeleteJob() throws IOException {
+  public void deleteJobTest() throws IOException {
     // Job list should start out empty.
     List<String> jobs = storage.list();
     assertEquals(0, jobs.size());
@@ -299,7 +299,7 @@ public class SavedJobsTest {
   }
 
   @Test
-  public void testRestoreNonExistingJob() throws IOException {
+  public void restoreNonExistingJobTest() throws IOException {
       // Try to restore a job that doesn't exist. Watch it fail.
       thrown.expect(IOException.class);
       thrown.reportMissingExceptionWithMessage("Expected IOException since job doesn't exist");
@@ -307,7 +307,7 @@ public class SavedJobsTest {
   }
 
   @Test
-    public void testCreateJobWithExtraArgs() throws IOException {
+    public void createJobWithExtraArgsTest() throws IOException {
 
         // Job list should start out empty.
         List<String> jobs = storage.list();
@@ -339,7 +339,7 @@ public class SavedJobsTest {
     }
 
   @Test
-  public void testMultiConnections() throws IOException {
+  public void multiConnectionsTest() throws IOException {
 
     // Job list should start out empty.
     List<String> jobs = storage.list();

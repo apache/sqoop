@@ -21,15 +21,11 @@ package org.apache.sqoop.manager;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.sqoop.tool.JobTool;
-import org.kitesdk.compat.Hadoop;
 
 
 public enum SupportedManagers {
-    MYSQL(JobTool.MYSQL_SCHEME, true), POSTGRES(JobTool.POSTGRES_SCHEME, true), HSQLDB(JobTool.HSQLDB_SCHEME, false),
-    ORACLE(JobTool.ORACLE_SCHEME, true), SQLSERVER(JobTool.SQLSERVER_SCHEME, false),
-    JTDS_SQLSERVER(JobTool.JTDS_SQLSERVER_SCHEME, false), DB2(JobTool.DB2_SCHEME, false),
-    NETEZZA(JobTool.NETEZZA_SCHEME, true), CUBRID(JobTool.CUBRID_SCHEME, false);
+    MYSQL("jdbc:mysql:", true), POSTGRES("jdbc:postgresql:", true), HSQLDB("jdbc:hsqldb:", false), ORACLE("jdbc:oracle:", true), SQLSERVER("jdbc:sqlserver:", false),
+    JTDS_SQLSERVER("jdbc:jtds:sqlserver:", false), DB2("jdbc:db2:", false), NETEZZA("jdbc:netezza:", true), CUBRID("jdbc:cubrid:", false);
 
     private final String schemePrefix;
 

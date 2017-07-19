@@ -216,6 +216,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
   // Arguments for the saved job management system.
   public static final String STORAGE_METASTORE_ARG = "meta-connect";
+  public static final String METASTORE_USER_ARG = "meta-user";
+  public static final String METASTORE_PASS_ARG = "meta-pass";
   public static final String JOB_CMD_CREATE_ARG = "create";
   public static final String JOB_CMD_DELETE_ARG = "delete";
   public static final String JOB_CMD_EXEC_ARG = "exec";
@@ -378,6 +380,18 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .hasArg()
         .withDescription("Specify JDBC connect string for the metastore")
         .withLongOpt(STORAGE_METASTORE_ARG)
+        .create());
+
+    relatedOpts.addOption(OptionBuilder.withArgName("metastore-db-username")
+        .hasArg()
+        .withDescription("Specify the username string for the metastore")
+        .withLongOpt(METASTORE_USER_ARG)
+        .create());
+
+    relatedOpts.addOption(OptionBuilder.withArgName("metastore-db-password")
+        .hasArg()
+        .withDescription("Specify the password string for the metastore")
+        .withLongOpt(METASTORE_PASS_ARG)
         .create());
 
     // Create an option-group surrounding the operations a user

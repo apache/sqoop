@@ -62,6 +62,8 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   public static final String JTDS_SQLSERVER_SCHEME = "jdbc:jtds:sqlserver:";
   public static final String NETEZZA_SCHEME = "jdbc:netezza:";
   public static final String CUBRID_SCHEME = "jdbc:cubrid:";
+  public static final String EMPTY_USERNAME = "";
+  public static final String EMPTY_PASSWORD = "";
 
   private enum JobOp {
     JobCreate,
@@ -69,7 +71,7 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     JobExecute,
     JobList,
     JobShow,
-  }
+  };
 
   private Map<String, String> storageDescriptor;
   private String jobName;
@@ -356,9 +358,14 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     this.storageDescriptor = new TreeMap<String, String>();
 
     if (in.hasOption(STORAGE_METASTORE_ARG)) {
-
       String metaConnectString = in.getOptionValue(STORAGE_METASTORE_ARG);
       this.storageDescriptor.put(HsqldbJobStorage.META_CONNECT_KEY, metaConnectString);
+
+      String metaUserString = in.getOptionValue(METASTORE_USER_ARG, EMPTY_USERNAME);
+      this.storageDescriptor.put(HsqldbJobStorage.META_USERNAME_KEY, metaUserString);
+
+      String metaPassString = in.getOptionValue(METASTORE_PASS_ARG, EMPTY_PASSWORD);
+      this.storageDescriptor.put(HsqldbJobStorage.META_PASSWORD_KEY, metaPassString);
 
       String driverString = chooseDriverType(metaConnectString);
       this.storageDescriptor.put(HsqldbJobStorage.META_DRIVER_KEY, driverString);
@@ -383,27 +390,30 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     }
   }
   public static String chooseDriverType(String metaConnectString) throws InvalidOptionsException {
-    int schemeEndIndex = metaConnectString.indexOf("//");
-    String scheme = metaConnectString.substring(0, schemeEndIndex);
+    String scheme = metaConnectString;
 
-    switch(scheme){
-      case MYSQL_SCHEME:
-        return MySQLManager.DRIVER_CLASS;
-      case POSTGRES_SCHEME:
-        return PostgresqlManager.DRIVER_CLASS;
-      case HSQLDB_SCHEME:
-        return HsqldbManager.DRIVER_CLASS;
-      case ORACLE_SCHEME:
-        return OracleManager.DRIVER_CLASS;
-      case SQLSERVER_SCHEME:
-        return SQLServerManager.DRIVER_CLASS;
-      case DB2_SCHEME:
-        return Db2Manager.DRIVER_CLASS;
-      default:
-        throw new InvalidOptionsException("current meta-connect scheme not compatible with metastore");
+    if (scheme.startsWith(MYSQL_SCHEME)) {
+      return MySQLManager.DRIVER_CLASS;
+    }
+    else if (scheme.startsWith(POSTGRES_SCHEME)) {
+      return PostgresqlManager.DRIVER_CLASS;
+    }
+    else if (scheme.startsWith(HSQLDB_SCHEME)) {
+      return HsqldbManager.DRIVER_CLASS;
+    }
+    else if (scheme.startsWith(ORACLE_SCHEME)) {
+      return OracleManager.DRIVER_CLASS;
+    }
+    else if (scheme.startsWith(DB2_SCHEME)) {
+      return Db2Manager.DRIVER_CLASS;
+    }
+    else if (scheme.startsWith(SQLSERVER_SCHEME)) {
+      return SQLServerManager.DRIVER_CLASS;
+    }
+    else {
+      throw new InvalidOptionsException("current meta-connect scheme not compatible with metastore");
     }
   }
-
 
   @Override
   /** {@inheritDoc} */

@@ -63,8 +63,7 @@ public class HsqldbJobStorage extends JobStorage {
    */
   public static final String META_PASSWORD_KEY = "metastore.password";
 
-  /** descriptor key identifying the class name of the jdbc driver
-   */
+  /** descriptor key identifying the class name of the jdbc driver */
   public static final String META_DRIVER_KEY = "metastore.driver.class";
 
   /** Default name for the root metadata table in HSQLDB. */
@@ -131,6 +130,10 @@ public class HsqldbJobStorage extends JobStorage {
   // schema, this holds the name of the job table.
   private String jobTableName;
 
+  protected String getMetastoreConnectStr() {
+    return metastoreConnectStr;
+  }
+
   protected void setMetastoreConnectStr(String connectStr) {
     this.metastoreConnectStr = connectStr;
   }
@@ -193,7 +196,6 @@ public class HsqldbJobStorage extends JobStorage {
 
       // Check the schema version.
       String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, -1);
-
       if(curStorageVerStr == null){
         curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, null);
       }
