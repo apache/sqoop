@@ -3,9 +3,11 @@ package com.cloudera.sqoop;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.DefaultManagerFactory;
+import org.apache.sqoop.tool.JobTool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +65,8 @@ public class JobToolTest {
         ConnManager cm = dmf.accept(jd);
         Connection conn = cm.getConnection();
 
+        System.setProperty(org.apache.sqoop.SqoopOptions.METASTORE_PASSWORD_KEY, "true");
+
         try {
             Statement statement = conn.createStatement();
             statement.execute("DROP TABLE SQOOP_ROOT");
@@ -100,6 +104,8 @@ public class JobToolTest {
     args.add(metaPass);
     args.add("--");
     args.add("import");
+    args.add("-m");
+    args.add("1");
     args.add("--connect");
     args.add("jdbc:mysql://mysql.vpc.cloudera.com:3306/sqoop");
     args.add("--username");
@@ -108,9 +114,26 @@ public class JobToolTest {
     args.add("sqoop");
     args.add("--table");
     args.add("CarLocations");
+    args.add("--as-textfile");
+    args.add("--delete-target-dir");
 
     return args.toArray(new String[0]);
   }
+
+    protected String[] getExecJob(String metaConnectString, String metaUser, String metaPass) {
+        ArrayList<String> args = new ArrayList<String>();
+        CommonArgs.addHadoopFlags(args);
+        args.add("--exec");
+        args.add("testJob");
+        args.add("--meta-connect");
+        args.add(metaConnectString);
+        args.add("--meta-user");
+        args.add(metaUser);
+        args.add("--meta-pass");
+        args.add(metaPass);
+
+        return args.toArray(new String[0]);
+    }
 
   @Test
   public void testCreateJob() throws IOException {
@@ -120,4 +143,17 @@ public class JobToolTest {
     assertEquals(0, Sqoop.runSqoop(sqoop, args));
   }
 
+  @Test
+  public void testExecJob() throws IOException {
+      Configuration conf = new Configuration();
+      conf.set(org.apache.sqoop.SqoopOptions.METASTORE_PASSWORD_KEY, "true");
+      JobTool jobToolCreate = new JobTool();
+      Sqoop sqoopCreate = new Sqoop(jobToolCreate, conf);
+      String[] argsCreate = getCreateJob(metaConnectString, metaUser, metaPass);
+      Sqoop.runSqoop(sqoopCreate, argsCreate);
+      JobTool jobToolExec = new JobTool();
+      Sqoop sqoopExec = new Sqoop(jobToolExec);
+      String[] argsExec = getExecJob(metaConnectString, metaUser, metaPass);
+      assertEquals( 0, Sqoop.runSqoop(sqoopExec, argsExec));
+  }
 }
