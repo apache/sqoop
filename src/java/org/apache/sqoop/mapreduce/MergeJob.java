@@ -19,19 +19,21 @@
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
-import org.apache.avro.file.SeekableInput;
-import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.DatumReader;
 import org.apache.avro.mapred.FsInput;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RemoteIterator;
+import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -43,6 +45,16 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.sqoop.avro.AvroUtil;
 import org.apache.sqoop.mapreduce.ExportJobBase.FileType;
 import org.apache.sqoop.util.Jars;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.Formats;
+import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
+import parquet.avro.AvroParquetInputFormat;
+import parquet.avro.AvroSchemaConverter;
+import parquet.hadoop.Footer;
+import parquet.hadoop.ParquetFileReader;
+import parquet.schema.MessageType;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.mapreduce.JobBase;
@@ -66,6 +78,8 @@ public class MergeJob extends JobBase {
    * the records we are merging.
    */
   public static final String MERGE_SQOOP_RECORD_KEY = "sqoop.merge.class";
+
+  public static final String PARQUET_AVRO_SCHEMA = "parquetjob.avro.schema";
 
   public MergeJob(final SqoopOptions opts) {
     super(opts, null, null, null);
@@ -130,6 +144,11 @@ public class MergeJob extends JobBase {
 
       FileType fileType = ExportJobBase.getFileType(jobConf, oldPath);
       switch (fileType) {
+        case PARQUET_FILE:
+          Path finalPath = new Path(options.getTargetDir());
+          finalPath = FileSystemUtil.makeQualified(finalPath, jobConf);
+          configueParquetMergeJob(jobConf, job, oldPath, newPath, finalPath);
+          break;
         case AVRO_DATA_FILE:
           configueAvroMergeJob(conf, job, oldPath, newPath);
           break;
@@ -178,6 +197,51 @@ public class MergeJob extends JobBase {
     job.setMapperClass(MergeAvroMapper.class);
     job.setReducerClass(MergeAvroReducer.class);
     AvroJob.setOutputSchema(job.getConfiguration(), oldPathSchema);
+  }
+
+  private void configueParquetMergeJob(Configuration conf, Job job, Path oldPath, Path newPath,
+      Path finalPath) throws IOException {
+    try {
+      FileSystem fileSystem = finalPath.getFileSystem(conf);
+      LOG.info("Trying to merge parquet files");
+      job.setOutputKeyClass(org.apache.avro.generic.GenericRecord.class);
+      job.setMapperClass(MergeParquetMapper.class);
+      job.setReducerClass(MergeParquetReducer.class);
+      job.setOutputValueClass(NullWritable.class);
+
+      List<Footer> footers = new ArrayList<Footer>();
+      FileStatus oldPathfileStatus = fileSystem.getFileStatus(oldPath);
+      FileStatus newPathfileStatus = fileSystem.getFileStatus(oldPath);
+      footers.addAll(ParquetFileReader.readFooters(job.getConfiguration(), oldPathfileStatus, true));
+      footers.addAll(ParquetFileReader.readFooters(job.getConfiguration(), newPathfileStatus, true));
+
+      MessageType schema = footers.get(0).getParquetMetadata().getFileMetaData().getSchema();
+      AvroSchemaConverter avroSchemaConverter = new AvroSchemaConverter();
+      Schema avroSchema = avroSchemaConverter.convert(schema);
+
+      if (!fileSystem.exists(finalPath)) {
+        Dataset dataset = createDataset(avroSchema, "dataset:" + finalPath);
+        DatasetKeyOutputFormat.configure(job).overwrite(dataset);
+      } else {
+        DatasetKeyOutputFormat.configure(job).overwrite(new URI("dataset:" + finalPath));
+      }
+
+      job.setInputFormatClass(AvroParquetInputFormat.class);
+      AvroParquetInputFormat.setAvroReadSchema(job, avroSchema);
+
+      conf.set(PARQUET_AVRO_SCHEMA, avroSchema.toString());
+      Class<DatasetKeyOutputFormat> outClass = DatasetKeyOutputFormat.class;
+
+      job.setOutputFormatClass(outClass);
+    } catch (Exception cnfe) {
+      throw new IOException(cnfe);
+    }
+  }
+
+  public static Dataset createDataset(Schema schema, String uri) {
+    DatasetDescriptor descriptor =
+        new DatasetDescriptor.Builder().schema(schema).format(Formats.PARQUET).build();
+    return Datasets.create(uri, descriptor, GenericRecord.class);
   }
 }
 

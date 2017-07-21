@@ -48,6 +48,7 @@ import com.cloudera.sqoop.mapreduce.MergeJob;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
+import org.apache.sqoop.orm.ClassWriter;
 import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.AppendUtils;
 import com.cloudera.sqoop.util.ClassLoaderStack;
@@ -460,7 +461,12 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         options.setTargetDir(destDir.toString());
 
         // Local job tracker needs jars in the classpath.
-        loadJars(options.getConf(), context.getJarFile(), context.getTableName());
+        if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
+          loadJars(options.getConf(), context.getJarFile(), ClassWriter.toJavaIdentifier("codegen_" +
+            context.getTableName()));
+        } else {
+          loadJars(options.getConf(), context.getJarFile(), context.getTableName());
+        }
 
         MergeJob mergeJob = new MergeJob(options);
         if (mergeJob.runMergeJob()) {
