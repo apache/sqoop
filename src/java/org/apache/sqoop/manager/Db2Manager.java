@@ -19,12 +19,17 @@ package org.apache.sqoop.manager;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,9 +59,37 @@ public class Db2Manager
 
   private Map<String, String> columnTypeNames;
 
+  public static final String SCHEMA = "schema";
+
+  /**
+   *  Query to list all tables visible to the current user. Note that this list
+   *  does not identify the table owners which is required in order to ensure
+   *  that the table can be operated on for import/export purposes.
+   */
+
+  public static final String QUERY_LIST_SCHEMA_TABLES = "SELECT DISTINCT NAME FROM SYSIBM.SYSTABLES WHERE CREATOR =? AND TYPE='T' ";
+
+  /**
+   * Query to get the current user's schema for the DB session.   Used in case of
+   * wallet logins.
+   */
+  public static final String QUERY_GET_USERSCHEMA =
+     "select current schema from sysibm.sysdummy1";
+
+  /**
+   *  DB2 schema that we should use.
+   */
+  private String schema = null;
 
   public Db2Manager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);
+
+    // Try to parse extra arguments
+    try {
+      this.schema = parseExtraScheArgs(opts.getExtraArgs(),getExtraOptions());
+    } catch (ParseException e) {
+      throw new RuntimeException("Can't parse extra arguments", e);
+    }
   }
 
   /**
@@ -107,15 +140,7 @@ public class Db2Manager
         // represents schema name.
         databases.add(rset.getString(1));
       }
-      conn.commit();
     } catch (SQLException sqle) {
-      try {
-        if (conn != null) {
-          conn.rollback();
-        }
-      } catch (SQLException ce) {
-        LoggingUtils.logAll(LOG, "Failed to rollback transaction", ce);
-      }
       LoggingUtils.logAll(LOG, "Failed to list databases", sqle);
       throw new RuntimeException(sqle);
     } finally {
@@ -129,6 +154,105 @@ public class Db2Manager
     }
 
     return databases.toArray(new String[databases.size()]);
+  }
+
+  public static String getUserSchema(Connection conn) {
+    Statement stmt = null;
+    ResultSet rset = null;
+    String currSchema = null;
+    try {
+      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+              ResultSet.CONCUR_READ_ONLY);
+      rset = stmt.executeQuery(QUERY_GET_USERSCHEMA);
+
+      if (rset.next()) {
+        currSchema = rset.getString(1);
+      }
+    } catch (SQLException e) {
+      LoggingUtils.logAll(LOG, "Failed to get user schema", e);
+    } finally {
+      if (rset != null) {
+        try {
+          rset.close();
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close resultset", ex);
+        }
+      }
+      if (stmt != null) {
+        try {
+          stmt.close();
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Failed to close statement", ex);
+        }
+      }
+    }
+    if (currSchema == null) {
+      throw new RuntimeException("Unable to get current user schema");
+    }
+    return currSchema;
+  }
+
+  @Override
+  public String[] listTables() {
+    Connection conn = null;
+    PreparedStatement pStmt = null;
+    ResultSet rset = null;
+    List<String> tables = new ArrayList<String>();
+    String currUserSchema = null;
+
+    try {
+      conn = getConnection();
+      currUserSchema = getUserSchema(conn);
+
+      pStmt = conn.prepareStatement(QUERY_LIST_SCHEMA_TABLES,
+      ResultSet.TYPE_FORWARD_ONLY,
+      ResultSet.CONCUR_READ_ONLY);
+
+      // if user don't provide schema in CLI
+      if (schema == null) {
+        pStmt.setString(1, currUserSchema);
+      } else {  //user provide a schema
+        pStmt.setString(1, schema);
+      }
+
+      rset = pStmt.executeQuery();
+
+      if (schema != null && rset == null) {
+        LOG.debug("schema=" + schema
+                  + ",maybe not exists in current database");
+      }
+      while (rset.next()) {
+        if(schema == null){
+          tables.add(rset.getString(1));
+        }else{
+          tables.add(schema + "." + rset.getString(1));
+        }
+      }
+     } catch (SQLException e) {
+        LoggingUtils.logAll(LOG, "Failed to list tables", e);
+      } finally {
+        if (rset != null) {
+          try {
+            rset.close();
+          } catch (SQLException ex) {
+            LoggingUtils.logAll(LOG, "Failed to close resultset", ex);
+          }
+        }
+        if (pStmt != null) {
+          try {
+            pStmt.close();
+          } catch (SQLException ex) {
+            LoggingUtils.logAll(LOG, "Failed to close statement", ex);
+          }
+        }
+
+        try {
+          close();
+        } catch (SQLException ex) {
+          LoggingUtils.logAll(LOG, "Unable to discard connection", ex);
+        }
+      }
+    return tables.toArray(new String[tables.size()]);
   }
 
   /**
@@ -223,5 +347,19 @@ public class Db2Manager
     }
     return null;
   }
+
+ /**
+  * Create related options for PostgreSQL extra parameters.
+  * @return
+  */
+ @SuppressWarnings("static-access")
+ protected RelatedOptions getExtraOptions() {
+   // Connection args (common)
+   RelatedOptions extraOptions = new RelatedOptions("DB2 extra options:");
+   extraOptions.addOption(OptionBuilder.withArgName("string").hasArg()
+			.withDescription("Optional schema name").withLongOpt(SCHEMA)
+			.create("schema"));
+   return extraOptions;
+ }
 
 }
