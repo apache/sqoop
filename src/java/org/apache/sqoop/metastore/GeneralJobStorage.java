@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.metastore.hsqldb;
+package org.apache.sqoop.metastore;
 
 import java.io.IOException;
 
@@ -42,13 +42,13 @@ import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.tool.SqoopTool;
 
 /**
- * JobStorage implementation that uses an HSQLDB-backed database to
+ * JobStorage implementation that uses a database to
  * hold job information.
  */
-public class HsqldbJobStorage extends JobStorage {
+public class GeneralJobStorage extends JobStorage {
 
   public static final Log LOG = LogFactory.getLog(
-      HsqldbJobStorage.class.getName());
+      GeneralJobStorage.class.getName());
 
   /** descriptor key identifying the connect string for the metastore. */
   public static final String META_CONNECT_KEY = "metastore.connect.string";
@@ -66,23 +66,23 @@ public class HsqldbJobStorage extends JobStorage {
   /** descriptor key identifying the class name of the jdbc driver */
   public static final String META_DRIVER_KEY = "metastore.driver.class";
 
-  /** Default name for the root metadata table in HSQLDB. */
+  /** Default name for the root metadata table. */
   private static final String DEFAULT_ROOT_TABLE_NAME = "SQOOP_ROOT";
 
   /** Configuration key used to override root table name. */
   public static final String ROOT_TABLE_NAME_KEY =
-       "sqoop.hsqldb.root.table.name";
+       "sqoop.root.table.name";
 
   /** root metadata table key used to define the current schema version. */
   private static final String STORAGE_VERSION_KEY =
-      "sqoop.hsqldb.job.storage.version";
+      "sqoop.job.storage.version";
 
   /** The current version number for the schema edition. */
   private static final int CUR_STORAGE_VERSION = 0;
 
   /** root metadata table key used to define the job table name. */
   private static final String SESSION_TABLE_KEY =
-      "sqoop.hsqldb.job.info.table";
+      "sqoop.job.info.table";
 
   /** Default value for SESSION_TABLE_KEY. */
   private static final String DEFAULT_SESSION_TABLE_NAME =
@@ -196,7 +196,7 @@ public class HsqldbJobStorage extends JobStorage {
 
       // Check the schema version.
       String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, -1);
-      if(curStorageVerStr == null){
+      if (curStorageVerStr == null) {
         curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, null);
       }
       int actualStorageVer = -1;

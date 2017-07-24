@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.sql.Connection;
 
-import static org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.*;
+import static org.apache.sqoop.metastore.GeneralJobStorage.*;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;

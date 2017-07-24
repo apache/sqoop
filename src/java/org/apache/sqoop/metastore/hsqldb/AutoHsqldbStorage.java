@@ -23,19 +23,19 @@ import java.io.IOException;
 
 import java.util.Map;
 
-import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.metastore.GeneralJobStorage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.tool.JobTool;
+import org.apache.sqoop.manager.HsqldbManager;
 
 /**
  * JobStorage implementation that auto-configures an HSQLDB
  * local-file-based instance to hold jobs.
  */
 public class AutoHsqldbStorage
-    extends com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage {
+    extends GeneralJobStorage {
 
   public static final Log LOG = LogFactory.getLog(
       AutoHsqldbStorage.class.getName());
@@ -109,12 +109,7 @@ public class AutoHsqldbStorage
     setMetastoreUser(conf.get(AUTO_STORAGE_USER_KEY, DEFAULT_AUTO_USER));
     setMetastorePassword(conf.get(AUTO_STORAGE_PASS_KEY,
         DEFAULT_AUTO_PASSWORD));
-    try {
-      setDriverClass(JobTool.chooseDriverType(getMetastoreConnectStr()));
-    }
-    catch (SqoopOptions.InvalidOptionsException e) {
-      throw new IOException( e.getMessage() );
-    }
+    setDriverClass(HsqldbManager.DRIVER_CLASS);
     setConnectedDescriptor(descriptor);
 
     init();

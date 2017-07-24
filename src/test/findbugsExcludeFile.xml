@@ -47,7 +47,7 @@
     <!-- createRootTable() allows a user-specified table name retrieved
          from properties. This since instance is allowed for now.
     -->
-    <Class name="com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage" />
+    <Class name="com.cloudera.sqoop.metastore.GeneralJobStorage" />
     <Method name="createRootTable" />
     <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
   </Match>

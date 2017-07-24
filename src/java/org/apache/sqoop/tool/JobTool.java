@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import com.cloudera.sqoop.metastore.GeneralJobStorage;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -38,7 +39,6 @@ import org.apache.hadoop.util.ToolRunner;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
@@ -62,8 +62,6 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   public static final String JTDS_SQLSERVER_SCHEME = "jdbc:jtds:sqlserver:";
   public static final String NETEZZA_SCHEME = "jdbc:netezza:";
   public static final String CUBRID_SCHEME = "jdbc:cubrid:";
-  public static final String EMPTY_USERNAME = "";
-  public static final String EMPTY_PASSWORD = "";
 
   private enum JobOp {
     JobCreate,
@@ -359,16 +357,16 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     if (in.hasOption(STORAGE_METASTORE_ARG)) {
       String metaConnectString = in.getOptionValue(STORAGE_METASTORE_ARG);
-      this.storageDescriptor.put(HsqldbJobStorage.META_CONNECT_KEY, metaConnectString);
+      this.storageDescriptor.put(GeneralJobStorage.META_CONNECT_KEY, metaConnectString);
 
-      String metaUserString = in.getOptionValue(METASTORE_USER_ARG, EMPTY_USERNAME);
-      this.storageDescriptor.put(HsqldbJobStorage.META_USERNAME_KEY, metaUserString);
+      String metaUserString = in.getOptionValue(METASTORE_USER_ARG, null);
+      this.storageDescriptor.put(GeneralJobStorage.META_USERNAME_KEY, metaUserString);
 
-      String metaPassString = in.getOptionValue(METASTORE_PASS_ARG, EMPTY_PASSWORD);
-      this.storageDescriptor.put(HsqldbJobStorage.META_PASSWORD_KEY, metaPassString);
+      String metaPassString = in.getOptionValue(METASTORE_PASS_ARG, null);
+      this.storageDescriptor.put(GeneralJobStorage.META_PASSWORD_KEY, metaPassString);
 
       String driverString = chooseDriverType(metaConnectString);
-      this.storageDescriptor.put(HsqldbJobStorage.META_DRIVER_KEY, driverString);
+      this.storageDescriptor.put(GeneralJobStorage.META_DRIVER_KEY, driverString);
     }
 
     // These are generated via an option group; exactly one

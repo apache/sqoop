@@ -381,13 +381,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withDescription("Specify JDBC connect string for the metastore")
         .withLongOpt(STORAGE_METASTORE_ARG)
         .create());
-
     relatedOpts.addOption(OptionBuilder.withArgName("metastore-db-username")
         .hasArg()
         .withDescription("Specify the username string for the metastore")
         .withLongOpt(METASTORE_USER_ARG)
         .create());
-
     relatedOpts.addOption(OptionBuilder.withArgName("metastore-db-password")
         .hasArg()
         .withDescription("Specify the password string for the metastore")

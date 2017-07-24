@@ -15,22 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.metastore.hsqldb;
+package com.cloudera.sqoop.metastore;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class HsqldbJobStorage
-    extends org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage {
+public class GeneralJobStorage
+    extends org.apache.sqoop.metastore.GeneralJobStorage {
 
   public static final String META_CONNECT_KEY =
-      org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.META_CONNECT_KEY;
+      org.apache.sqoop.metastore.GeneralJobStorage.META_CONNECT_KEY;
   public static final String META_USERNAME_KEY =
-      org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.META_USERNAME_KEY;
+      org.apache.sqoop.metastore.GeneralJobStorage.META_USERNAME_KEY;
   public static final String META_PASSWORD_KEY =
-      org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.META_PASSWORD_KEY;
+      org.apache.sqoop.metastore.GeneralJobStorage.META_PASSWORD_KEY;
   public static final String ROOT_TABLE_NAME_KEY =
-      org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.ROOT_TABLE_NAME_KEY;
+      org.apache.sqoop.metastore.GeneralJobStorage.ROOT_TABLE_NAME_KEY;
 
 }
 

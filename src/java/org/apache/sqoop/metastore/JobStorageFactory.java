@@ -42,7 +42,7 @@ public class JobStorageFactory {
 
   /** The default list of available JobStorage implementations. */
   private static final String DEFAULT_AVAILABLE_STORAGES =
-      "com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage,"
+      "com.cloudera.sqoop.metastore.GeneralJobStorage,"
       + "com.cloudera.sqoop.metastore.hsqldb.AutoHsqldbStorage";
 
   public JobStorageFactory(Configuration config) {
