@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import java.util.Map;
 
-import com.cloudera.sqoop.metastore.GeneralJobStorage;
+import com.cloudera.sqoop.metastore.GenericJobStorage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,7 +35,7 @@ import org.apache.sqoop.manager.HsqldbManager;
  * local-file-based instance to hold jobs.
  */
 public class AutoHsqldbStorage
-    extends GeneralJobStorage {
+    extends GenericJobStorage {
 
   public static final Log LOG = LogFactory.getLog(
       AutoHsqldbStorage.class.getName());

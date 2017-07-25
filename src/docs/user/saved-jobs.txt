@@ -131,6 +131,8 @@ Argument                     Description
 -----------------------------------------------------------------------
 +\--meta-connect <jdbc-uri>+ Specifies the JDBC connect string used \
                              to connect to the metastore
++\--meta-username <username>+    Specifies the username for the metastore database
++\--meta-password <password>+    Specifies the password for the metastore database
 -----------------------------------------------------------------------
 
 By default, a private metastore is instantiated in +$HOME/.sqoop+. If
@@ -147,6 +149,16 @@ filesystem other than your home directory.
 
 If you configure +sqoop.metastore.client.enable.autoconnect+ with the
 value +false+, then you must explicitly supply +\--meta-connect+.
+
+While metastore autoconnect and local metastore instances are only supported for Hsqldb,
+job data can be stored in MySql, PostgreSql, DB2, SqlServer, and Oracle with
+the +\--meta-connect+ argument. The +\--meta-username+ and +\--meta-password+ arguments are necessary
+if the database containing the saved jobs requires a username and password.
+
+----
+$ sqoop job --exec myjob --meta-connect jdbc:hsqldb:hsql://localhost:3000/ --meta-username *username* --meta-password *password*
+
+----
 
 .Common options:
 [grid="all"]
@@ -229,7 +241,7 @@ The metastore is available over TCP/IP. The port is controlled by the
 
 Clients should connect to the metastore by specifying
 +sqoop.metastore.client.autoconnect.url+ or +\--meta-connect+ with the
-value +jdbc:hsqldb:hsql://<server-name>:<port>/sqoop+. For example,
+JDBC-URI string. For example,
 +jdbc:hsqldb:hsql://metaserver.example.com:16000/sqoop+.
 
 This metastore may be hosted on a machine within the Hadoop cluster, or

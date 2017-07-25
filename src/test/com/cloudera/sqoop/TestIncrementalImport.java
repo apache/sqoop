@@ -73,8 +73,8 @@ public class TestIncrementalImport  {
 
   // What database do we read from.
   public static final String SOURCE_DB_URL = "jdbc:hsqldb:mem:incremental";
-  public static final String AUTO_STORAGE_PASS = "";
-  public static final String AUTO_STORAGE_USER = "SA";
+  public static final String AUTO_STORAGE_PASSWORD = "";
+  public static final String AUTO_STORAGE_USERNAME = "SA";
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -83,9 +83,9 @@ public class TestIncrementalImport  {
   public void setUp() throws Exception {
     // Delete db state between tests.
     SqoopOptions options = new SqoopOptions();
-    options.setConnectString("jdbc:hsqldb:mem:sqoopmetastore");
-    options.setUsername("SA");
-    options.setPassword("");
+    options.setConnectString(SOURCE_DB_URL);
+    options.setUsername(AUTO_STORAGE_USERNAME);
+    options.setPassword(AUTO_STORAGE_PASSWORD);
 
     resetSchema(options);
     resetSourceDataSchema();
@@ -115,8 +115,8 @@ public class TestIncrementalImport  {
 
   public static Configuration newConf() {
     Configuration conf = new Configuration();
-    conf.set(AutoHsqldbStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USER);
-    conf.set(AutoHsqldbStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASS);
+    conf.set(AutoHsqldbStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
+    conf.set(AutoHsqldbStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
     conf.set(AutoHsqldbStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
             SOURCE_DB_URL);
 

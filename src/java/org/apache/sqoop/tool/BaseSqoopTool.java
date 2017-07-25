@@ -216,8 +216,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
   // Arguments for the saved job management system.
   public static final String STORAGE_METASTORE_ARG = "meta-connect";
-  public static final String METASTORE_USER_ARG = "meta-user";
-  public static final String METASTORE_PASS_ARG = "meta-pass";
+  public static final String METASTORE_USER_ARG = "meta-username";
+  public static final String METASTORE_PASS_ARG = "meta-password";
   public static final String JOB_CMD_CREATE_ARG = "create";
   public static final String JOB_CMD_DELETE_ARG = "delete";
   public static final String JOB_CMD_EXEC_ARG = "exec";

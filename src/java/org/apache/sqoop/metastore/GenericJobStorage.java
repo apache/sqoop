@@ -45,10 +45,10 @@ import com.cloudera.sqoop.tool.SqoopTool;
  * JobStorage implementation that uses a database to
  * hold job information.
  */
-public class GeneralJobStorage extends JobStorage {
+public class GenericJobStorage extends JobStorage {
 
   public static final Log LOG = LogFactory.getLog(
-      GeneralJobStorage.class.getName());
+      GenericJobStorage.class.getName());
 
   /** descriptor key identifying the connect string for the metastore. */
   public static final String META_CONNECT_KEY = "metastore.connect.string";
@@ -197,7 +197,10 @@ public class GeneralJobStorage extends JobStorage {
       // Check the schema version.
       String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, -1);
       if (curStorageVerStr == null) {
+
+        setRootProperty(STORAGE_VERSION_KEY, -1, "0" );
         curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, null);
+
       }
       int actualStorageVer = -1;
       try {

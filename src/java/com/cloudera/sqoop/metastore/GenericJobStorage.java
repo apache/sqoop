@@ -20,17 +20,17 @@ package com.cloudera.sqoop.metastore;
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */
-public class GeneralJobStorage
-    extends org.apache.sqoop.metastore.GeneralJobStorage {
+public class GenericJobStorage
+    extends org.apache.sqoop.metastore.GenericJobStorage {
 
   public static final String META_CONNECT_KEY =
-      org.apache.sqoop.metastore.GeneralJobStorage.META_CONNECT_KEY;
+      org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
   public static final String META_USERNAME_KEY =
-      org.apache.sqoop.metastore.GeneralJobStorage.META_USERNAME_KEY;
+      org.apache.sqoop.metastore.GenericJobStorage.META_USERNAME_KEY;
   public static final String META_PASSWORD_KEY =
-      org.apache.sqoop.metastore.GeneralJobStorage.META_PASSWORD_KEY;
+      org.apache.sqoop.metastore.GenericJobStorage.META_PASSWORD_KEY;
   public static final String ROOT_TABLE_NAME_KEY =
-      org.apache.sqoop.metastore.GeneralJobStorage.ROOT_TABLE_NAME_KEY;
+      org.apache.sqoop.metastore.GenericJobStorage.ROOT_TABLE_NAME_KEY;
 
 }
 

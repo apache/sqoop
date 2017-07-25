@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import com.cloudera.sqoop.metastore.GeneralJobStorage;
+import com.cloudera.sqoop.metastore.GenericJobStorage;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -42,7 +42,12 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
-import org.apache.sqoop.manager.*;
+import org.apache.sqoop.manager.MySQLManager;
+import org.apache.sqoop.manager.OracleManager;
+import org.apache.sqoop.manager.SQLServerManager;
+import org.apache.sqoop.manager.HsqldbManager;
+import org.apache.sqoop.manager.PostgresqlManager;
+import org.apache.sqoop.manager.Db2Manager;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**
@@ -357,16 +362,16 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     if (in.hasOption(STORAGE_METASTORE_ARG)) {
       String metaConnectString = in.getOptionValue(STORAGE_METASTORE_ARG);
-      this.storageDescriptor.put(GeneralJobStorage.META_CONNECT_KEY, metaConnectString);
+      this.storageDescriptor.put(GenericJobStorage.META_CONNECT_KEY, metaConnectString);
 
       String metaUserString = in.getOptionValue(METASTORE_USER_ARG, null);
-      this.storageDescriptor.put(GeneralJobStorage.META_USERNAME_KEY, metaUserString);
+      this.storageDescriptor.put(GenericJobStorage.META_USERNAME_KEY, metaUserString);
 
       String metaPassString = in.getOptionValue(METASTORE_PASS_ARG, null);
-      this.storageDescriptor.put(GeneralJobStorage.META_PASSWORD_KEY, metaPassString);
+      this.storageDescriptor.put(GenericJobStorage.META_PASSWORD_KEY, metaPassString);
 
       String driverString = chooseDriverType(metaConnectString);
-      this.storageDescriptor.put(GeneralJobStorage.META_DRIVER_KEY, driverString);
+      this.storageDescriptor.put(GenericJobStorage.META_DRIVER_KEY, driverString);
     }
 
     // These are generated via an option group; exactly one
