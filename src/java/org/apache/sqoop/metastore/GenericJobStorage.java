@@ -130,10 +130,6 @@ public class GenericJobStorage extends JobStorage {
   // schema, this holds the name of the job table.
   private String jobTableName;
 
-  protected String getMetastoreConnectStr() {
-    return metastoreConnectStr;
-  }
-
   protected void setMetastoreConnectStr(String connectStr) {
     this.metastoreConnectStr = connectStr;
   }
