@@ -80,6 +80,9 @@ public class GenericJobStorage extends JobStorage {
   /** The current version number for the schema edition. */
   private static final int CUR_STORAGE_VERSION = 0;
 
+  /** This value represents an invalid version */
+  private static final int NO_VERSION = -1;
+
   /** root metadata table key used to define the job table name. */
   private static final String SESSION_TABLE_KEY =
       "sqoop.job.info.table";
@@ -191,14 +194,14 @@ public class GenericJobStorage extends JobStorage {
       }
 
       // Check the schema version.
-      String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, -1);
+      String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, NO_VERSION);
       if (curStorageVerStr == null) {
 
-        setRootProperty(STORAGE_VERSION_KEY, -1, "0" );
+        setRootProperty(STORAGE_VERSION_KEY, NO_VERSION, "0" );
         curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, null);
 
       }
-      int actualStorageVer = -1;
+      int actualStorageVer = -2;
       try {
         actualStorageVer = Integer.valueOf(curStorageVerStr);
       } catch (NumberFormatException nfe) {
@@ -539,7 +542,7 @@ public class GenericJobStorage extends JobStorage {
       s.close();
     }
 
-    setRootProperty(STORAGE_VERSION_KEY, -1,
+    setRootProperty(STORAGE_VERSION_KEY, NO_VERSION,
         Integer.toString(CUR_STORAGE_VERSION));
 
     LOG.debug("Saving root table.");
@@ -620,8 +623,7 @@ public class GenericJobStorage extends JobStorage {
       s.setString(1, val);
       s.setString(2, propertyName);
       if (null == version) {
-       /* -1 replaces null as a placeholder for the version row of the root table  */
-       s.setInt(3, -1);
+       s.setInt(3, NO_VERSION);
       } else {
         s.setInt(3, version);
       }
