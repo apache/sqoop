@@ -20,6 +20,7 @@ package com.cloudera.sqoop;
 
 import com.cloudera.sqoop.manager.MySQLTestUtils;
 import com.cloudera.sqoop.manager.OracleUtils;
+import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +30,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.DefaultManagerFactory;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 import org.apache.sqoop.tool.JobTool;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +38,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,13 +46,14 @@ import java.util.Arrays;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class JobToolTest {
+public class JobToolTest extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory
             .getLog(MetaConnectIncrementalImportTest.class.getName());
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
+    ConnManager cm;
 
     @Parameterized.Parameters(name = "metaConnectString = {0}, metaUser = {1}, metaPassword = {2}")
     public static Iterable<? extends Object> dbConnectParameters() {
@@ -92,18 +96,12 @@ public class JobToolTest {
     }
 
     @Before
-    public void setUp() throws Exception {
-        SqoopOptions options = new SqoopOptions();
-        options.setConnectString(metaConnectString);
-        options.setUsername(metaUser);
-        options.setPassword(metaPass);
+    public void setUp() {
+        super.setUp();
 
-        com.cloudera.sqoop.metastore.JobData jd = new com.cloudera.sqoop.metastore.JobData(options, null);
-        DefaultManagerFactory dmf = new DefaultManagerFactory();
-        ConnManager cm = dmf.accept(jd);
-        Connection conn = cm.getConnection();
+        SqoopOptions options = getSqoopOptions();
 
-        System.setProperty(org.apache.sqoop.SqoopOptions.METASTORE_PASSWORD_KEY, "true");
+        Connection conn = getConnection(options);
 
         try {
             Statement statement = conn.createStatement();
@@ -111,10 +109,51 @@ public class JobToolTest {
             statement.execute("DROP TABLE SQOOP_SESSIONS");
             conn.commit();
         } catch (Exception e) {
-            LOG.error(e.getLocalizedMessage());
+            LOG.error("Failed to clear metastore database");
+        }
+        //Methods from BaseSqoopTestClass reference the test Hsqldb database, not the metastore
+        try{
+            dropTableIfExists("CarLocations");
+        } catch (SQLException e) {
+            LOG.error("Failed to drop table CarLocations");
+        }
+        setCurTableName("CarLocations");
+        createTableWithColTypesAndNames(
+                new String [] {"carId", "Locations"},
+                new String [] {"INTEGER", "VARCHAR"},
+                new String [] {"1", "'Lexus'"});
+    }
+
+    private Connection getConnection(SqoopOptions options) {
+        try {
+            com.cloudera.sqoop.metastore.JobData jd = new com.cloudera.sqoop.metastore.JobData(options, null);
+            DefaultManagerFactory dmf = new DefaultManagerFactory();
+            cm = dmf.accept(jd);
+            return cm.getConnection();
+        } catch (SQLException e) {
+            LOG.error("Failed to create a connection to the Metastore");
+            return  null;
+        }
+    }
+
+    private SqoopOptions getSqoopOptions() {
+        SqoopOptions options = new SqoopOptions();
+        options.setConnectString(metaConnectString);
+        options.setUsername(metaUser);
+        options.setPassword(metaPass);
+        return options;
+    }
+
+    @After
+    public void tearDown() {
+        super.tearDown();
+
+        try {
+            cm.close();
+        } catch (SQLException e) {
+            LOG.error("Failed to close ConnManager");
         }
 
-        cm.close();
     }
 
     private String metaConnectString;
@@ -140,19 +179,9 @@ public class JobToolTest {
         args.add("--meta-password");
         args.add(metaPass);
         args.add("--");
-        args.add("import");
-        args.add("-m");
-        args.add("1");
+        args.add("list-tables");
         args.add("--connect");
-        args.add("jdbc:mysql://mysql.vpc.cloudera.com:3306/sqoop");
-        args.add("--username");
-        args.add("sqoop");
-        args.add("--password");
-        args.add("sqoop");
-        args.add("--table");
-        args.add("CarLocations");
-        args.add("--as-textfile");
-        args.add("--delete-target-dir");
+        args.add(getConnectString());
 
         return args.toArray(new String[0]);
     }
@@ -199,11 +228,12 @@ public class JobToolTest {
     @Test
     public void testExecJob() throws IOException {
         Configuration conf = new Configuration();
-        conf.set(org.apache.sqoop.SqoopOptions.METASTORE_PASSWORD_KEY, "true");
+        //creates the job
         JobTool jobToolCreate = new JobTool();
         Sqoop sqoopCreate = new Sqoop(jobToolCreate, conf);
         String[] argsCreate = getCreateJob(metaConnectString, metaUser, metaPass);
         Sqoop.runSqoop(sqoopCreate, argsCreate);
+        //executes the job
         JobTool jobToolExec = new JobTool();
         Sqoop sqoopExec = new Sqoop(jobToolExec);
         String[] argsExec = getExecJob(metaConnectString, metaUser, metaPass);
@@ -213,11 +243,13 @@ public class JobToolTest {
     @Test
     public void testDeleteJob() throws IOException {
         Configuration conf = new Configuration();
-        conf.set(org.apache.sqoop.SqoopOptions.METASTORE_PASSWORD_KEY, "true");
+
+        //Creates the job
         JobTool jobToolCreate = new JobTool();
         Sqoop sqoopCreate = new Sqoop(jobToolCreate, conf);
         String[] argsCreate = getCreateJob(metaConnectString, metaUser, metaPass);
         Sqoop.runSqoop(sqoopCreate, argsCreate);
+       //Deletes the job
         JobTool jobToolDelete = new JobTool();
         Sqoop sqoopExec = new Sqoop(jobToolDelete);
         String[] argsDelete = getDeleteJob(metaConnectString, metaUser, metaPass);

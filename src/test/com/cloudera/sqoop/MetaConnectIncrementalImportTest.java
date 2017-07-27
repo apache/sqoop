@@ -20,6 +20,7 @@ package com.cloudera.sqoop;
 
 import com.cloudera.sqoop.manager.MySQLTestUtils;
 import com.cloudera.sqoop.manager.OracleUtils;
+import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,9 +28,10 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.DefaultManagerFactory;
-import org.apache.sqoop.manager.MySQLManager;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 import org.apache.sqoop.tool.JobTool;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -45,7 +47,7 @@ import static org.junit.Assert.assertEquals;
 
 
 @RunWith(Parameterized.class)
-public class MetaConnectIncrementalImportTest {
+public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory
             .getLog(MetaConnectIncrementalImportTest.class.getName());
@@ -93,13 +95,20 @@ public class MetaConnectIncrementalImportTest {
         );
     }
 
+    @Before
+    public void setUp() {
+        super.setUp();
+    }
+
+    @After
+    public void tearDown() {
+        super.tearDown();
+    }
 
     private String metaConnectString;
     private String metaUser;
     private String metaPass;
 
-    private int tableSize;
-    private Connection connDb;
     private Connection connMeta;
     private ConnManager cm;
 
@@ -127,17 +136,13 @@ public class MetaConnectIncrementalImportTest {
         args.add("-m");
         args.add("1");
         args.add("--connect");
-        args.add("jdbc:mysql://mysql.vpc.cloudera.com:3306/sqoop");
-        args.add("--username");
-        args.add("sqoop");
-        args.add("--password");
-        args.add("sqoop");
+        args.add(getConnectString());
         args.add("--table");
-        args.add("CarLocations");
+        args.add("CARLOCATIONS");
         args.add("--incremental");
         args.add("append");
         args.add("--check-column");
-        args.add("carId");
+        args.add("CARID");
         args.add("--last-value");
         args.add("0");
         args.add("--as-textfile");
@@ -163,19 +168,18 @@ public class MetaConnectIncrementalImportTest {
 
     @Test
     public void testIncrementalJob() throws Exception {
+        //Resets the target table
+        dropTableIfExists("CARLOCATIONS");
+        setCurTableName("CARLOCATIONS");
+        createTableWithColTypesAndNames(
+                new String [] {"CARID", "LOCATIONS"},
+                new String [] {"INTEGER", "VARCHAR"},
+                new String [] {"1", "'Lexus'"});
 
-        dbConnInit();
-
-        Statement databaseStatement = connDb.createStatement();
-        databaseStatement.execute("DELETE FROM CarLocations");
-        databaseStatement.execute("INSERT INTO CarLocations VALUES (1, 'shmexus')");
-        connDb.commit();
-
-        getDbRowCount(databaseStatement);
-
-        metaConnInit();
+        initMetastoreConnection();
 
         try {
+            //Resets the metastore schema
             Statement metastoreStatement = connMeta.createStatement();
             metastoreStatement.execute("DROP TABLE SQOOP_ROOT");
             metastoreStatement.execute("DROP TABLE SQOOP_SESSIONS");
@@ -201,16 +205,16 @@ public class MetaConnectIncrementalImportTest {
 
         //Ensures the saveIncrementalState saved the right row
         Statement getSaveIncrementalState = connMeta.createStatement();
-        ResultSet lastCol = getSaveIncrementalState.executeQuery("SELECT propVal FROM SQOOP_SESSIONS WHERE propname = 'incremental.last.value'");
+        ResultSet lastCol = getSaveIncrementalState.executeQuery(
+                "SELECT propVal FROM SQOOP_SESSIONS WHERE propname = 'incremental.last.value'");
         lastCol.next();
-        assertEquals(tableSize, lastCol.getInt("propVal"));
+        assertEquals(1, lastCol.getInt("propVal"));
 
 
         //Adds rows to the import table
-        Statement insertStatement = connDb.createStatement();
-        insertStatement.execute("INSERT INTO CarLocations VALUES (2, 'lexus')");
-        connDb.commit();
-
+        Statement insertStmt = getConnection().createStatement();
+        insertStmt.executeUpdate("INSERT INTO CARLOCATIONS VALUES (2, 'lexus')");
+        getConnection().commit();
 
         //Execute the import again
         JobTool jobToolExec2 = new JobTool();
@@ -220,36 +224,22 @@ public class MetaConnectIncrementalImportTest {
 
         //Ensures the last incremental value is updated correctly.
         Statement getSaveIncrementalState2 = connMeta.createStatement();
-        ResultSet lastCol2 = getSaveIncrementalState2.executeQuery("SELECT propVal FROM SQOOP_SESSIONS WHERE propName = 'incremental.last.value'");
+        ResultSet lastCol2 = getSaveIncrementalState2.executeQuery(
+                "SELECT propVal FROM SQOOP_SESSIONS WHERE propName = 'incremental.last.value'");
         lastCol2.next();
         assertEquals(2, lastCol2.getInt("propVal"));
 
         cm.close();
-        connDb.close();
     }
 
-    private void getDbRowCount(Statement statement) throws SQLException {
-        ResultSet rs = statement.executeQuery("SELECT count(*) FROM CarLocations");
-        if(rs.next()) {
-            tableSize = rs.getInt("count(*)");
-        }
-    }
 
-    private void dbConnInit() throws SQLException {
+    private void initMetastoreConnection() throws SQLException{
         SqoopOptions options = new SqoopOptions();
-        options.setConnectString("jdbc:mysql://mysql.vpc.cloudera.com/sqoop");
-        options.setUsername("sqoop");
-        options.setPassword("sqoop");
-        MySQLManager mySQLManager = new MySQLManager(options);
-        connDb = mySQLManager.getConnection();
-    }
-
-    private void metaConnInit() throws SQLException{
-        SqoopOptions options2 = new SqoopOptions();
-        options2.setConnectString(metaConnectString);
-        options2.setUsername(metaUser);
-        options2.setPassword(metaPass);
-        com.cloudera.sqoop.metastore.JobData jd = new com.cloudera.sqoop.metastore.JobData(options2, null);
+        options.setConnectString(metaConnectString);
+        options.setUsername(metaUser);
+        options.setPassword(metaPass);
+        com.cloudera.sqoop.metastore.JobData jd =
+                new com.cloudera.sqoop.metastore.JobData(options, new JobTool());
         DefaultManagerFactory dmf = new DefaultManagerFactory();
         cm = dmf.accept(jd);
         connMeta= cm.getConnection();
