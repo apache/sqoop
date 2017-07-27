@@ -682,23 +682,20 @@ public class GenericJobStorage extends JobStorage {
   private void initV0Schema() throws SQLException {
     this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
 
-    if (null != this.jobTableName) {
-        return;
-    }
-
-    if (!tableExists(this.jobTableName)) {
-      LOG.debug("Could not find job table: " + jobTableName);
-      createJobTable();
-      return;
-    }
     /** Checks to see if there is an existing job table under HsqldbJobStorage. **/
     String hsqldbStorageJobTableName = getRootProperty(HSQLDB_TABLE_KEY, 0);
-    if(hsqldbStorageJobTableName != null) {
+    if(hsqldbStorageJobTableName != null && this.jobTableName == null) {
       this.jobTableName = hsqldbStorageJobTableName;
       setRootProperty(SESSION_TABLE_KEY, 0, jobTableName);
       return;
     }
-
+    if (null == this.jobTableName) {
+      createJobTable();
+    }
+    if (!tableExists(this.jobTableName)) {
+      LOG.debug("Could not find job table: " + jobTableName);
+      createJobTable();
+    }
   }
 
   /**
