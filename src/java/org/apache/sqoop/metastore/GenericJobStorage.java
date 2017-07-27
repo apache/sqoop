@@ -116,7 +116,7 @@ public class GenericJobStorage extends JobStorage {
    * to load.
    */
   private static final String SQOOP_TOOL_KEY = "sqoop.tool";
-  public static final String OLD_SESSION_TABLE_KEY = "sqoop.hsqldb.job.info.table";
+  public static final String HSQLDB_TABLE_KEY = "sqoop.hsqldb.job.info.table";
 
 
   private Map<String, String> connectedDescriptor;
@@ -678,7 +678,10 @@ public class GenericJobStorage extends JobStorage {
   private void initV0Schema() throws SQLException {
     this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
 
-    if(getRootProperty(OLD_SESSION_TABLE_KEY, 0) != null) {
+    /** Checks to see if there is an existing job table under HsqldbJobStorage. **/
+    String hsqldbStorageJobTableName = getRootProperty(HSQLDB_TABLE_KEY, 0);
+    if(hsqldbStorageJobTableName != null) {
+      this.jobTableName = hsqldbStorageJobTableName;
       return;
     }
     if (null == this.jobTableName) {
