@@ -87,6 +87,9 @@ public class GenericJobStorage extends JobStorage {
   private static final String SESSION_TABLE_KEY =
       "sqoop.job.info.table";
 
+  /** Key used to hold job table name by outdated HsqldbStorage class */
+  public static final String HSQLDB_TABLE_KEY = "sqoop.hsqldb.job.info.table";
+
   /** Default value for SESSION_TABLE_KEY. */
   private static final String DEFAULT_SESSION_TABLE_NAME =
       "SQOOP_SESSIONS";
@@ -116,7 +119,8 @@ public class GenericJobStorage extends JobStorage {
    * to load.
    */
   private static final String SQOOP_TOOL_KEY = "sqoop.tool";
-  public static final String HSQLDB_TABLE_KEY = "sqoop.hsqldb.job.info.table";
+
+
 
 
   private Map<String, String> connectedDescriptor;
@@ -678,19 +682,23 @@ public class GenericJobStorage extends JobStorage {
   private void initV0Schema() throws SQLException {
     this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
 
+    if (null != this.jobTableName) {
+        return;
+    }
+
+    if (!tableExists(this.jobTableName)) {
+      LOG.debug("Could not find job table: " + jobTableName);
+      createJobTable();
+      return;
+    }
     /** Checks to see if there is an existing job table under HsqldbJobStorage. **/
     String hsqldbStorageJobTableName = getRootProperty(HSQLDB_TABLE_KEY, 0);
     if(hsqldbStorageJobTableName != null) {
       this.jobTableName = hsqldbStorageJobTableName;
+      setRootProperty(SESSION_TABLE_KEY, 0, jobTableName);
       return;
     }
-    if (null == this.jobTableName) {
-      createJobTable();
-    }
-    if (!tableExists(this.jobTableName)) {
-      LOG.debug("Could not find job table: " + jobTableName);
-      createJobTable();
-    }
+
   }
 
   /**
