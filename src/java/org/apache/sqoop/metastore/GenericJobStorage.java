@@ -116,6 +116,7 @@ public class GenericJobStorage extends JobStorage {
    * to load.
    */
   private static final String SQOOP_TOOL_KEY = "sqoop.tool";
+  public static final String OLD_SESSION_TABLE_KEY = "sqoop.hsqldb.job.info.table";
 
 
   private Map<String, String> connectedDescriptor;
@@ -196,10 +197,8 @@ public class GenericJobStorage extends JobStorage {
       // Check the schema version.
       String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, NO_VERSION);
       if (curStorageVerStr == null) {
-
         setRootProperty(STORAGE_VERSION_KEY, NO_VERSION, "0" );
-        curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, null);
-
+        curStorageVerStr = "0";
       }
       int actualStorageVer = -2;
       try {
@@ -678,6 +677,10 @@ public class GenericJobStorage extends JobStorage {
    */
   private void initV0Schema() throws SQLException {
     this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
+
+    if(getRootProperty(OLD_SESSION_TABLE_KEY, 0) != null) {
+      return;
+    }
     if (null == this.jobTableName) {
       createJobTable();
     }
