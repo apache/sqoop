@@ -373,6 +373,10 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       String driverString = chooseDriverType(metaConnectString);
       this.storageDescriptor.put(GenericJobStorage.META_DRIVER_KEY, driverString);
     }
+    else if (in.hasOption(METASTORE_USER_ARG) || in.hasOption(METASTORE_PASS_ARG)) {
+      throw new InvalidOptionsException(
+              "--meta-username and --meta-password cannot be used without --meta-connect");
+    }
 
     // These are generated via an option group; exactly one
     // of this exhaustive list will always be selected.
