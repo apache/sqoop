@@ -46,6 +46,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @RunWith(Parameterized.class)
 public class JobToolTest extends BaseSqoopTestCase {
@@ -170,7 +171,7 @@ public class JobToolTest extends BaseSqoopTestCase {
     }
 
     protected String[] getCreateJob(String metaConnectString, String metaUser, String metaPass) {
-        ArrayList<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         CommonArgs.addHadoopFlags(args);
         args.add("--create");
         args.add("testJob");
@@ -189,7 +190,7 @@ public class JobToolTest extends BaseSqoopTestCase {
     }
 
     protected String[] getExecJob(String metaConnectString, String metaUser, String metaPass) {
-        ArrayList<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         CommonArgs.addHadoopFlags(args);
         args.add("--exec");
         args.add("testJob");
@@ -205,7 +206,7 @@ public class JobToolTest extends BaseSqoopTestCase {
 
 
     protected String[] getDeleteJob(String metaConnectString, String metaUser, String metaPass) {
-        ArrayList<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         CommonArgs.addHadoopFlags(args);
         args.add("--delete");
         args.add("testJob");

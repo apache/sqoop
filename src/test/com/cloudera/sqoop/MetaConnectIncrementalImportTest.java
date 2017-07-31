@@ -45,6 +45,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @RunWith(Parameterized.class)
 public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
@@ -121,7 +122,7 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
 
 
     protected String[] getIncrementalJob(String metaConnectString, String metaUser, String metaPass) {
-        ArrayList<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         CommonArgs.addHadoopFlags(args);
         args.add("--create");
         args.add("testJob");
@@ -152,7 +153,7 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
 
 
     protected String[] getExecJob(String metaConnectString, String metaUser, String metaPass) {
-        ArrayList<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         CommonArgs.addHadoopFlags(args);
         args.add("--exec");
         args.add("testJob");
