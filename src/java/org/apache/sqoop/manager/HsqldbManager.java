@@ -40,7 +40,7 @@ public class HsqldbManager
       HsqldbManager.class.getName());
 
   // driver class to ensure is loaded when making db connection.
-  public static final String DRIVER_CLASS = "org.hsqldb.jdbcDriver";
+  private static final String DRIVER_CLASS = JdbcDrivers.HSQLDB.getDriverClass();
 
   // HsqlDb doesn't have a notion of multiple "databases"; the user's database
   // is always called "PUBLIC".

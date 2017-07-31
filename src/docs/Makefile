@@ -24,7 +24,8 @@ VERSION=Unknown
 
 # Building documentation under CentOS causes xmlto to have issues
 # with validation. Disable this step.
-
+VALIDATION=$(shell ( lsb_release -d | grep CentOS > /dev/null 2>&1 ) \
+       && echo "--skip-validation" )
 
 all: man userguide devguide supportfiles index
 

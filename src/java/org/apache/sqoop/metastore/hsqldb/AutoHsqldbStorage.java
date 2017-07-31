@@ -28,7 +28,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.manager.HsqldbManager;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.tool.JobTool;
 
 /**
  * JobStorage implementation that auto-configures an HSQLDB
@@ -109,7 +110,12 @@ public class AutoHsqldbStorage
     setMetastoreUser(conf.get(AUTO_STORAGE_USER_KEY, DEFAULT_AUTO_USER));
     setMetastorePassword(conf.get(AUTO_STORAGE_PASS_KEY,
         DEFAULT_AUTO_PASSWORD));
-    setDriverClass(HsqldbManager.DRIVER_CLASS);
+    try {
+      String driverClass = JobTool.chooseDriverType(getMetastoreConnectStr());
+      setDriverClass(driverClass);
+    } catch (SqoopOptions.InvalidOptionsException e) {
+      throw new IOException("Invalid auto-connect string");
+    }
     setConnectedDescriptor(descriptor);
 
     init();

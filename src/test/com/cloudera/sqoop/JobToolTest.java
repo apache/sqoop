@@ -18,18 +18,22 @@
 
 package com.cloudera.sqoop;
 
+import static org.junit.Assert.assertEquals;
+
 import com.cloudera.sqoop.manager.MySQLTestUtils;
 import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.DefaultManagerFactory;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
+import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.tool.JobTool;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,8 +46,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class JobToolTest extends BaseSqoopTestCase {
@@ -243,13 +245,12 @@ public class JobToolTest extends BaseSqoopTestCase {
     @Test
     public void testDeleteJob() throws IOException {
         Configuration conf = new Configuration();
-
         //Creates the job
         JobTool jobToolCreate = new JobTool();
         Sqoop sqoopCreate = new Sqoop(jobToolCreate, conf);
         String[] argsCreate = getCreateJob(metaConnectString, metaUser, metaPass);
         Sqoop.runSqoop(sqoopCreate, argsCreate);
-       //Deletes the job
+        //Deletes the job
         JobTool jobToolDelete = new JobTool();
         Sqoop sqoopExec = new Sqoop(jobToolDelete);
         String[] argsDelete = getDeleteJob(metaConnectString, metaUser, metaPass);

@@ -46,7 +46,7 @@ public class NetezzaManager extends GenericJdbcManager {
       .getName());
 
   // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = "org.netezza.Driver";
+  private static final String DRIVER_CLASS = JdbcDrivers.NETEZZA.getDriverClass();
 
   // set to true after we warn the user that we can use direct fastpath.
   protected static boolean directModeWarningPrinted = false;

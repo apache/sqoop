@@ -52,8 +52,8 @@ public class Db2Manager
       Db2Manager.class.getName());
 
   // driver class to ensure is loaded when making db connection.
-  public static final String DRIVER_CLASS =
-      "com.ibm.db2.jcc.DB2Driver";
+  private static final String DRIVER_CLASS =
+     JdbcDrivers.DB2.getDriverClass();
 
   private static final String XML_TO_JAVA_DATA_TYPE = "String";
 

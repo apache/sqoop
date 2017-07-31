@@ -18,33 +18,44 @@
 
 package com.cloudera.sqoop.metastore;
 
-import java.sql.SQLException;
-import java.sql.Statement;
+import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
+import static org.apache.sqoop.metastore.GenericJobStorage.META_DRIVER_KEY;
+import static org.apache.sqoop.metastore.GenericJobStorage.META_PASSWORD_KEY;
+import static org.apache.sqoop.metastore.GenericJobStorage.META_USERNAME_KEY;
 
-import java.util.*;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.MySQLTestUtils;
 import com.cloudera.sqoop.manager.OracleUtils;
-import org.apache.hadoop.conf.Configuration;
-
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.VersionTool;
-import org.apache.sqoop.manager.*;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.manager.DefaultManagerFactory;
+import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 import org.apache.sqoop.tool.ImportTool;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.sql.Connection;
 
-import static org.apache.sqoop.metastore.GenericJobStorage.*;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Test the metastore and job-handling features.
@@ -64,15 +75,15 @@ public class SavedJobsTest {
     return Arrays.asList(
             new Object[] {
                     mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
-                    mySQLTestUtils.getUserPass(), MySQLManager.DRIVER_CLASS
+                    mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass()
             },
             new Object[] {
                    OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
-                    OracleUtils.ORACLE_USER_PASS, OracleManager.DRIVER_CLASS
+                    OracleUtils.ORACLE_USER_PASS, JdbcDrivers.ORACLE.getDriverClass()
             },
             new Object[] {
                    msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
-                    msSQLTestUtils.getDBPassWord(), SQLServerManager.DRIVER_CLASS
+                    msSQLTestUtils.getDBPassWord(), JdbcDrivers.SQLSERVER.getDriverClass()
             },
             new Object[] {
                     System.getProperty(
@@ -83,7 +94,7 @@ public class SavedJobsTest {
                             "sqooptest"),
                     System.getProperty(
                             "sqoop.test.postgresql.connectstring.password"),
-                    PostgresqlManager.DRIVER_CLASS
+                    JdbcDrivers.POSTGRES.getDriverClass()
             },
             new Object[] {
                     System.getProperty(
@@ -95,9 +106,9 @@ public class SavedJobsTest {
                     System.getProperty(
                             "sqoop.test.db2.connectstring.password",
                             "SQOOP"),
-                    Db2Manager.DRIVER_CLASS
+                    JdbcDrivers.DB2.getDriverClass()
             },
-            new Object[] { "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "", HsqldbManager.DRIVER_CLASS }
+            new Object[] { "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "", JdbcDrivers.HSQLDB.getDriverClass()}
             );
   }
 
@@ -112,14 +123,12 @@ public class SavedJobsTest {
 
   public String INVALID_KEY = "INVALID_KEY";
 
-
-
   public SavedJobsTest(String metaConnect, String metaUser, String metaPassword, String driverClass){
     this.metaConnect = metaConnect;
     this.metaUser = metaUser;
     this.metaPassword = metaPassword;
     this.driverClass = driverClass;
-    descriptor = new TreeMap<String, String>();
+    this.descriptor = new TreeMap<>();
   }
 
   @Rule
@@ -194,7 +203,7 @@ public class SavedJobsTest {
 
   @Test
   public void canAcceptInvalidKeyFalseTest() throws Exception {
-    TreeMap<String,String> t = new TreeMap<>();
+    Map<String,String> t = new TreeMap<>();
     t.put(INVALID_KEY, "abc");
 
     assertEquals("canAccept() should not accept invalid key",
@@ -203,7 +212,7 @@ public class SavedJobsTest {
 
   @Test
   public void canAcceptValidKeyTrueTest() throws Exception {
-    TreeMap<String,String> t = new TreeMap<>();
+    Map<String,String> t = new TreeMap<>();
     t.put(META_CONNECT_KEY, "abc");
 
     assertEquals("canAccept should accept valid key", storage.canAccept(t), true);

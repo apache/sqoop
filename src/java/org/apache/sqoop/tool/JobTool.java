@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import com.cloudera.sqoop.metastore.GenericJobStorage;
+import jdk.nashorn.internal.scripts.JD;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -42,12 +43,7 @@ import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
-import org.apache.sqoop.manager.MySQLManager;
-import org.apache.sqoop.manager.OracleManager;
-import org.apache.sqoop.manager.SQLServerManager;
-import org.apache.sqoop.manager.HsqldbManager;
-import org.apache.sqoop.manager.PostgresqlManager;
-import org.apache.sqoop.manager.Db2Manager;
+import org.apache.sqoop.manager.*;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**
@@ -58,15 +54,6 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   public static final Log LOG = LogFactory.getLog(
       JobTool.class.getName());
   private static final String DASH_STR  = "--";
-  public static final String MYSQL_SCHEME = "jdbc:mysql:";
-  public static final String POSTGRES_SCHEME = "jdbc:postgresql:";
-  public static final String HSQLDB_SCHEME = "jdbc:hsqldb:";
-  public static final String ORACLE_SCHEME = "jdbc:oracle:";
-  public static final String SQLSERVER_SCHEME = "jdbc:sqlserver:";
-  public static final String DB2_SCHEME = "jdbc:db2:";
-  public static final String JTDS_SQLSERVER_SCHEME = "jdbc:jtds:sqlserver:";
-  public static final String NETEZZA_SCHEME = "jdbc:netezza:";
-  public static final String CUBRID_SCHEME = "jdbc:cubrid:";
 
   private enum JobOp {
     JobCreate,
@@ -399,23 +386,23 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   public static String chooseDriverType(String metaConnectString) throws InvalidOptionsException {
     String scheme = metaConnectString;
 
-    if (scheme.startsWith(MYSQL_SCHEME)) {
-      return MySQLManager.DRIVER_CLASS;
+    if (scheme.startsWith(JdbcDrivers.MYSQL.getSchemePrefix())) {
+      return JdbcDrivers.MYSQL.getDriverClass();
     }
-    else if (scheme.startsWith(POSTGRES_SCHEME)) {
-      return PostgresqlManager.DRIVER_CLASS;
+    else if (scheme.startsWith(JdbcDrivers.POSTGRES.getSchemePrefix())) {
+      return JdbcDrivers.POSTGRES.getDriverClass();
     }
-    else if (scheme.startsWith(HSQLDB_SCHEME)) {
-      return HsqldbManager.DRIVER_CLASS;
+    else if (scheme.startsWith(JdbcDrivers.HSQLDB.getSchemePrefix())) {
+      return JdbcDrivers.HSQLDB.getDriverClass();
     }
-    else if (scheme.startsWith(ORACLE_SCHEME)) {
-      return OracleManager.DRIVER_CLASS;
+    else if (scheme.startsWith(JdbcDrivers.ORACLE.getSchemePrefix())) {
+      return JdbcDrivers.ORACLE.getDriverClass();
     }
-    else if (scheme.startsWith(DB2_SCHEME)) {
-      return Db2Manager.DRIVER_CLASS;
+    else if (scheme.startsWith(JdbcDrivers.DB2.getSchemePrefix())) {
+      return JdbcDrivers.DB2.getDriverClass();
     }
-    else if (scheme.startsWith(SQLSERVER_SCHEME)) {
-      return SQLServerManager.DRIVER_CLASS;
+    else if (scheme.startsWith(JdbcDrivers.SQLSERVER.getSchemePrefix())) {
+      return JdbcDrivers.SQLSERVER.getDriverClass();
     }
     else {
       throw new InvalidOptionsException("current meta-connect scheme not compatible with metastore");

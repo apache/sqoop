@@ -45,7 +45,7 @@ public class PostgresqlManager
       PostgresqlManager.class.getName());
 
   // driver class to ensure is loaded when making db connection.
-  public static final String DRIVER_CLASS = "org.postgresql.Driver";
+  private static final String DRIVER_CLASS = JdbcDrivers.POSTGRES.getDriverClass();
 
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;

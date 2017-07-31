@@ -44,7 +44,7 @@ public class CubridManager extends
 
   // driver class to ensure is loaded when making db connection.
   private static final String DRIVER_CLASS =
-      "cubrid.jdbc.driver.CUBRIDDriver";
+      JdbcDrivers.CUBRID.getDriverClass();
 
   public CubridManager(final SqoopOptions opts) {
     super(DRIVER_CLASS, opts);

@@ -19,13 +19,17 @@
 package org.apache.sqoop.manager;
 
 import com.cloudera.sqoop.SqoopOptions;
+import jdk.nashorn.internal.scripts.JD;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
 public enum SupportedManagers {
-    MYSQL("jdbc:mysql:", true), POSTGRES("jdbc:postgresql:", true), HSQLDB("jdbc:hsqldb:", false), ORACLE("jdbc:oracle:", true), SQLSERVER("jdbc:sqlserver:", false),
-    JTDS_SQLSERVER("jdbc:jtds:sqlserver:", false), DB2("jdbc:db2:", false), NETEZZA("jdbc:netezza:", true), CUBRID("jdbc:cubrid:", false);
+    MYSQL(JdbcDrivers.MYSQL.getSchemePrefix(), true), POSTGRES(JdbcDrivers.POSTGRES.getSchemePrefix(), true),
+    HSQLDB(JdbcDrivers.HSQLDB.getSchemePrefix(), false), ORACLE(JdbcDrivers.ORACLE.getSchemePrefix(), true),
+    SQLSERVER(JdbcDrivers.SQLSERVER.getSchemePrefix(), false),  CUBRID(JdbcDrivers.CUBRID.getSchemePrefix(), false),
+    JTDS_SQLSERVER(JdbcDrivers.JTDS_SQLSERVER.getSchemePrefix(), false), DB2(JdbcDrivers.DB2.getSchemePrefix(), false),
+    NETEZZA(JdbcDrivers.NETEZZA.getSchemePrefix(), true);
 
     private final String schemePrefix;
 

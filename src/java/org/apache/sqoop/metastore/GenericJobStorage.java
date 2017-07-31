@@ -87,8 +87,13 @@ public class GenericJobStorage extends JobStorage {
   private static final String SESSION_TABLE_KEY =
       "sqoop.job.info.table";
 
-  /** Key used to hold job table name by outdated HsqldbStorage class */
+  /** Outdated key for job table data, kept for backward compatibility */
   public static final String HSQLDB_TABLE_KEY = "sqoop.hsqldb.job.info.table";
+
+  /** Outdated key for schema version, kept for backward compatibility */
+  private static final String HSQLDB_VERSION_KEY =
+          "sqoop.hsqldb.job.storage.version";
+
 
   /** Default value for SESSION_TABLE_KEY. */
   private static final String DEFAULT_SESSION_TABLE_NAME =
@@ -119,10 +124,6 @@ public class GenericJobStorage extends JobStorage {
    * to load.
    */
   private static final String SQOOP_TOOL_KEY = "sqoop.tool";
-
-
-
-
   private Map<String, String> connectedDescriptor;
   private String metastoreConnectStr;
   private String metastoreUser;
@@ -137,6 +138,8 @@ public class GenericJobStorage extends JobStorage {
   // After connection to the database and initialization of the
   // schema, this holds the name of the job table.
   private String jobTableName;
+
+  protected String getMetastoreConnectStr() { return this.metastoreConnectStr; }
 
   protected void setMetastoreConnectStr(String connectStr) {
     this.metastoreConnectStr = connectStr;
@@ -200,11 +203,14 @@ public class GenericJobStorage extends JobStorage {
 
       // Check the schema version.
       String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, NO_VERSION);
+
+      // If schema version is not present under the current key,
+      // sets it correctly. Present for backward compatibility
       if (curStorageVerStr == null) {
-        setRootProperty(STORAGE_VERSION_KEY, NO_VERSION, "0" );
-        curStorageVerStr = "0";
+        setRootProperty(STORAGE_VERSION_KEY, NO_VERSION, Integer.toString(CUR_STORAGE_VERSION));
+        curStorageVerStr = Integer.toString(CUR_STORAGE_VERSION);
       }
-      int actualStorageVer = -2;
+      int actualStorageVer = NO_VERSION;
       try {
         actualStorageVer = Integer.valueOf(curStorageVerStr);
       } catch (NumberFormatException nfe) {
@@ -625,6 +631,7 @@ public class GenericJobStorage extends JobStorage {
     try {
       s.setString(1, val);
       s.setString(2, propertyName);
+      //Replaces null value with -1 constant, for backward compatibility
       if (null == version) {
        s.setInt(3, NO_VERSION);
       } else {
@@ -682,7 +689,8 @@ public class GenericJobStorage extends JobStorage {
   private void initV0Schema() throws SQLException {
     this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
 
-    /** Checks to see if there is an existing job table under HsqldbJobStorage. **/
+    /** Checks to see if there is an existing job table under the old root table schema,
+     * present for backward compatibility. **/
     String hsqldbStorageJobTableName = getRootProperty(HSQLDB_TABLE_KEY, 0);
     if(hsqldbStorageJobTableName != null && this.jobTableName == null) {
       this.jobTableName = hsqldbStorageJobTableName;

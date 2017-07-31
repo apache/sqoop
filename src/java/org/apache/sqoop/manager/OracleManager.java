@@ -119,7 +119,7 @@ public class OracleManager
      "SELECT USER FROM DUAL";
 
   // driver class to ensure is loaded when making db connection.
-  public static final String DRIVER_CLASS = "oracle.jdbc.OracleDriver";
+  private static final String DRIVER_CLASS = JdbcDrivers.ORACLE.getDriverClass();
 
   // Configuration key to use to set the session timezone.
   public static final String ORACLE_TIMEZONE_KEY = "oracle.sessionTimeZone";
