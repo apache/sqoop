@@ -150,8 +150,7 @@ filesystem other than your home directory.
 If you configure +sqoop.metastore.client.enable.autoconnect+ with the
 value +false+, then you must explicitly supply +\--meta-connect+.
 
-While metastore autoconnect and local metastore instances are only supported for Hsqldb,
-job data can be stored in MySql, PostgreSql, DB2, SqlServer, and Oracle with
+Job data can be stored in MySql, PostgreSql, DB2, SqlServer, and Oracle with
 the +\--meta-connect+ argument. The +\--meta-username+ and +\--meta-password+ arguments are necessary
 if the database containing the saved jobs requires a username and password.
 
