@@ -19,7 +19,6 @@
 package org.apache.sqoop.manager;
 
 import com.cloudera.sqoop.SqoopOptions;
-import jdk.nashorn.internal.scripts.JD;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

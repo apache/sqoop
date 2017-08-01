@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package com.cloudera.sqoop.metastore;
 
 import static org.junit.Assert.assertEquals;
 
+import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.MySQLTestUtils;
 import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
@@ -31,6 +32,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.DefaultManagerFactory;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
+import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.tool.JobTool;
 
 import org.junit.After;
@@ -39,8 +41,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -48,15 +50,16 @@ import java.util.Arrays;
 import java.util.List;
 
 @RunWith(Parameterized.class)
-public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
+public class JobToolTest extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory
-            .getLog(MetaConnectIncrementalImportTest.class.getName());
+            .getLog(com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest.class.getName());
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
+    ConnManager cm;
 
-    @Parameterized.Parameters(name = "metaConnectString = {0}, metaUser = {1}, metaPass = {2}")
+    @Parameterized.Parameters(name = "metaConnectString = {0}, metaUser = {1}, metaPassword = {2}")
     public static Iterable<? extends Object> dbConnectParameters() {
         return Arrays.asList(
                 new Object[] {
@@ -99,29 +102,76 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
     @Before
     public void setUp() {
         super.setUp();
+
+        SqoopOptions options = getSqoopOptions();
+
+        Connection conn = getConnection(options);
+
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute("DROP TABLE SQOOP_ROOT");
+            statement.execute("DROP TABLE SQOOP_SESSIONS");
+            conn.commit();
+        } catch (Exception e) {
+            LOG.error("Failed to clear metastore database");
+        }
+        //Methods from BaseSqoopTestClass reference the test Hsqldb database, not the metastore
+        try{
+            dropTableIfExists("CarLocations");
+        } catch (SQLException e) {
+            LOG.error("Failed to drop table CarLocations");
+        }
+        setCurTableName("CarLocations");
+        createTableWithColTypesAndNames(
+                new String [] {"carId", "Locations"},
+                new String [] {"INTEGER", "VARCHAR"},
+                new String [] {"1", "'Lexus'"});
+    }
+
+    private Connection getConnection(SqoopOptions options) {
+        try {
+            com.cloudera.sqoop.metastore.JobData jd = new com.cloudera.sqoop.metastore.JobData(options, null);
+            DefaultManagerFactory dmf = new DefaultManagerFactory();
+            cm = dmf.accept(jd);
+            return cm.getConnection();
+        } catch (SQLException e) {
+            LOG.error("Failed to create a connection to the Metastore");
+            return  null;
+        }
+    }
+
+    private SqoopOptions getSqoopOptions() {
+        SqoopOptions options = new SqoopOptions();
+        options.setConnectString(metaConnectString);
+        options.setUsername(metaUser);
+        options.setPassword(metaPass);
+        return options;
     }
 
     @After
     public void tearDown() {
         super.tearDown();
+
+        try {
+            cm.close();
+        } catch (SQLException e) {
+            LOG.error("Failed to close ConnManager");
+        }
+
     }
 
     private String metaConnectString;
     private String metaUser;
     private String metaPass;
 
-    private Connection connMeta;
-    private ConnManager cm;
 
-
-    public MetaConnectIncrementalImportTest(String metaConnectString, String metaUser, String metaPass) {
+    public JobToolTest(String metaConnectString, String metaUser, String metaPass) {
         this.metaConnectString = metaConnectString;
         this.metaUser = metaUser;
         this.metaPass = metaPass;
     }
 
-
-    protected String[] getIncrementalJob(String metaConnectString, String metaUser, String metaPass) {
+    protected String[] getCreateJob(String metaConnectString, String metaUser, String metaPass) {
         List<String> args = new ArrayList<>();
         CommonArgs.addHadoopFlags(args);
         args.add("--create");
@@ -133,24 +183,12 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
         args.add("--meta-password");
         args.add(metaPass);
         args.add("--");
-        args.add("import");
-        args.add("-m");
-        args.add("1");
+        args.add("list-tables");
         args.add("--connect");
         args.add(getConnectString());
-        args.add("--table");
-        args.add("CARLOCATIONS");
-        args.add("--incremental");
-        args.add("append");
-        args.add("--check-column");
-        args.add("CARID");
-        args.add("--last-value");
-        args.add("0");
-        args.add("--as-textfile");
 
         return args.toArray(new String[0]);
     }
-
 
     protected String[] getExecJob(String metaConnectString, String metaUser, String metaPass) {
         List<String> args = new ArrayList<>();
@@ -167,82 +205,57 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
         return args.toArray(new String[0]);
     }
 
-    @Test
-    public void testIncrementalJob() throws Exception {
-        //Resets the target table
-        dropTableIfExists("CARLOCATIONS");
-        setCurTableName("CARLOCATIONS");
-        createTableWithColTypesAndNames(
-                new String [] {"CARID", "LOCATIONS"},
-                new String [] {"INTEGER", "VARCHAR"},
-                new String [] {"1", "'Lexus'"});
 
-        initMetastoreConnection();
+    protected String[] getDeleteJob(String metaConnectString, String metaUser, String metaPass) {
+        List<String> args = new ArrayList<>();
+        CommonArgs.addHadoopFlags(args);
+        args.add("--delete");
+        args.add("testJob");
+        args.add("--meta-connect");
+        args.add(metaConnectString);
+        args.add("--meta-username");
+        args.add(metaUser);
+        args.add("--meta-password");
+        args.add(metaPass);
 
-        try {
-            //Resets the metastore schema
-            Statement metastoreStatement = connMeta.createStatement();
-            metastoreStatement.execute("DROP TABLE SQOOP_ROOT");
-            metastoreStatement.execute("DROP TABLE SQOOP_SESSIONS");
-            connMeta.commit();
-        }
-        catch (Exception e) {
-            LOG.error( e.getLocalizedMessage() );
-        }
-
-        //creates Job
-        Configuration conf = new Configuration();
-        conf.set(org.apache.sqoop.SqoopOptions.METASTORE_PASSWORD_KEY, "true");
-        JobTool jobToolCreate = new JobTool();
-        org.apache.sqoop.Sqoop sqoopCreate = new org.apache.sqoop.Sqoop(jobToolCreate, conf);
-        String[] argsCreate = getIncrementalJob(metaConnectString, metaUser, metaPass);
-        org.apache.sqoop.Sqoop.runSqoop(sqoopCreate, argsCreate);
-
-        //Executes the import
-        JobTool jobToolExec = new JobTool();
-        org.apache.sqoop.Sqoop sqoopExec = new org.apache.sqoop.Sqoop(jobToolExec);
-        String[] argsExec = getExecJob(metaConnectString, metaUser, metaPass);
-        assertEquals(0, org.apache.sqoop.Sqoop.runSqoop(sqoopExec, argsExec));
-
-        //Ensures the saveIncrementalState saved the right row
-        Statement getSaveIncrementalState = connMeta.createStatement();
-        ResultSet lastCol = getSaveIncrementalState.executeQuery(
-                "SELECT propVal FROM SQOOP_SESSIONS WHERE propname = 'incremental.last.value'");
-        lastCol.next();
-        assertEquals(1, lastCol.getInt("propVal"));
-
-
-        //Adds rows to the import table
-        Statement insertStmt = getConnection().createStatement();
-        insertStmt.executeUpdate("INSERT INTO CARLOCATIONS VALUES (2, 'lexus')");
-        getConnection().commit();
-
-        //Execute the import again
-        JobTool jobToolExec2 = new JobTool();
-        org.apache.sqoop.Sqoop sqoopExec2 = new org.apache.sqoop.Sqoop(jobToolExec2);
-        String[] argsExec2 = getExecJob(metaConnectString, metaUser, metaPass);
-        assertEquals(0, org.apache.sqoop.Sqoop.runSqoop(sqoopExec2, argsExec2));
-
-        //Ensures the last incremental value is updated correctly.
-        Statement getSaveIncrementalState2 = connMeta.createStatement();
-        ResultSet lastCol2 = getSaveIncrementalState2.executeQuery(
-                "SELECT propVal FROM SQOOP_SESSIONS WHERE propName = 'incremental.last.value'");
-        lastCol2.next();
-        assertEquals(2, lastCol2.getInt("propVal"));
-
-        cm.close();
+        return args.toArray(new String[0]);
     }
 
+    @Test
+    public void testCreateJob() throws IOException {
+        org.apache.sqoop.tool.JobTool jobTool = new org.apache.sqoop.tool.JobTool();
+        org.apache.sqoop.Sqoop sqoop = new Sqoop(jobTool);
+        String[] args = getCreateJob(metaConnectString, metaUser, metaPass);
+        assertEquals(0, Sqoop.runSqoop(sqoop, args));
+    }
 
-    private void initMetastoreConnection() throws SQLException{
-        SqoopOptions options = new SqoopOptions();
-        options.setConnectString(metaConnectString);
-        options.setUsername(metaUser);
-        options.setPassword(metaPass);
-        com.cloudera.sqoop.metastore.JobData jd =
-                new com.cloudera.sqoop.metastore.JobData(options, new JobTool());
-        DefaultManagerFactory dmf = new DefaultManagerFactory();
-        cm = dmf.accept(jd);
-        connMeta= cm.getConnection();
+    @Test
+    public void testExecJob() throws IOException {
+        Configuration conf = new Configuration();
+        //creates the job
+        JobTool jobToolCreate = new JobTool();
+        Sqoop sqoopCreate = new Sqoop(jobToolCreate, conf);
+        String[] argsCreate = getCreateJob(metaConnectString, metaUser, metaPass);
+        Sqoop.runSqoop(sqoopCreate, argsCreate);
+        //executes the job
+        JobTool jobToolExec = new JobTool();
+        Sqoop sqoopExec = new Sqoop(jobToolExec);
+        String[] argsExec = getExecJob(metaConnectString, metaUser, metaPass);
+        assertEquals(0, Sqoop.runSqoop(sqoopExec, argsExec));
+    }
+
+    @Test
+    public void testDeleteJob() throws IOException {
+        Configuration conf = new Configuration();
+        //Creates the job
+        JobTool jobToolCreate = new JobTool();
+        Sqoop sqoopCreate = new Sqoop(jobToolCreate, conf);
+        String[] argsCreate = getCreateJob(metaConnectString, metaUser, metaPass);
+        Sqoop.runSqoop(sqoopCreate, argsCreate);
+        //Deletes the job
+        JobTool jobToolDelete = new JobTool();
+        Sqoop sqoopExec = new Sqoop(jobToolDelete);
+        String[] argsDelete = getDeleteJob(metaConnectString, metaUser, metaPass);
+        assertEquals(0, Sqoop.runSqoop(sqoopExec, argsDelete));
     }
 }

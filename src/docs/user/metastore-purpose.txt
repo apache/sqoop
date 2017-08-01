@@ -22,7 +22,7 @@ Multiple users and/or remote users can define and execute saved jobs (created
 with +sqoop job+) defined in this metastore.
 
 Clients must be configured to connect to the metastore in +sqoop-site.xml+ or
-with the +--meta-connect+ argument. Supports MySql, PostgreSql, Oracle, DB2,
+with the +--meta-connect+ argument. Supports MySql, Hsqldb, PostgreSql, Oracle, DB2,
 and SqlServer databses.
 
 

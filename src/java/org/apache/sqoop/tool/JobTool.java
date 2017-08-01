@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import com.cloudera.sqoop.metastore.GenericJobStorage;
-import jdk.nashorn.internal.scripts.JD;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -40,10 +38,11 @@ import org.apache.hadoop.util.ToolRunner;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.ToolOptions;
+import com.cloudera.sqoop.metastore.GenericJobStorage;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
-import org.apache.sqoop.manager.*;
+import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**
@@ -347,24 +346,7 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     this.storageDescriptor = new TreeMap<String, String>();
 
-    if (in.hasOption(STORAGE_METASTORE_ARG)) {
-      String metaConnectString = in.getOptionValue(STORAGE_METASTORE_ARG);
-      this.storageDescriptor.put(GenericJobStorage.META_CONNECT_KEY, metaConnectString);
-
-      String metaUserString = in.getOptionValue(METASTORE_USER_ARG, null);
-      this.storageDescriptor.put(GenericJobStorage.META_USERNAME_KEY, metaUserString);
-
-      String metaPassString = in.getOptionValue(METASTORE_PASS_ARG, null);
-      this.storageDescriptor.put(GenericJobStorage.META_PASSWORD_KEY, metaPassString);
-
-      String driverString = chooseDriverType(metaConnectString);
-      this.storageDescriptor.put(GenericJobStorage.META_DRIVER_KEY, driverString);
-    }
-    else if (in.hasOption(METASTORE_USER_ARG) || in.hasOption(METASTORE_PASS_ARG)) {
-      throw new InvalidOptionsException(
-              "--meta-username and --meta-password cannot be used without --meta-connect");
-    }
-
+    applyMetastoreOptions(in, out);
     // These are generated via an option group; exactly one
     // of this exhaustive list will always be selected.
     if (in.hasOption(JOB_CMD_CREATE_ARG)) {
@@ -383,6 +365,36 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       this.jobName = in.getOptionValue(JOB_CMD_SHOW_ARG);
     }
   }
+
+  private void applyMetastoreOptions(CommandLine in, SqoopOptions out) throws InvalidOptionsException {
+    String metaConnectString;
+    String metaUsernameString;
+    String metaPasswordString;
+    if (in.hasOption(STORAGE_METASTORE_ARG)) {
+      metaConnectString = in.getOptionValue(STORAGE_METASTORE_ARG);
+      this.storageDescriptor.put(GenericJobStorage.META_DRIVER_KEY, chooseDriverType(metaConnectString));
+      this.storageDescriptor.put(GenericJobStorage.META_CONNECT_KEY, metaConnectString);
+    } else {
+      metaConnectString = out.getMetaConnectStr();
+      this.storageDescriptor.put(GenericJobStorage.META_DRIVER_KEY, chooseDriverType(metaConnectString));
+      this.storageDescriptor.put(GenericJobStorage.META_CONNECT_KEY, metaConnectString);
+    }
+    if (in.hasOption(METASTORE_USER_ARG)) {
+      metaUsernameString = in.getOptionValue(METASTORE_USER_ARG);
+      this.storageDescriptor.put(GenericJobStorage.META_USERNAME_KEY, metaUsernameString);
+    } else {
+      metaUsernameString = out.getMetaUsername();
+      this.storageDescriptor.put(GenericJobStorage.META_USERNAME_KEY, metaUsernameString);
+    }
+    if (in.hasOption(METASTORE_PASS_ARG)) {
+      metaPasswordString = in.getOptionValue(METASTORE_PASS_ARG);
+      this.storageDescriptor.put(GenericJobStorage.META_PASSWORD_KEY, metaPasswordString);
+    } else {
+      metaPasswordString = out.getMetaPassword();
+      this.storageDescriptor.put(GenericJobStorage.META_PASSWORD_KEY, metaPasswordString);
+    }
+  }
+
   public static String chooseDriverType(String metaConnectString) throws InvalidOptionsException {
     String scheme = metaConnectString;
 

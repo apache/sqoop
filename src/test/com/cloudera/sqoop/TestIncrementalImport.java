@@ -27,13 +27,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.cloudera.sqoop.metastore.SavedJobsTest;
-import com.cloudera.sqoop.metastore.hsqldb.AutoHsqldbStorage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -50,6 +48,7 @@ import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.JobTool;
+import org.apache.sqoop.metastore.GenericJobStorage;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -81,45 +80,28 @@ public class TestIncrementalImport  {
 
   @Before
   public void setUp() throws Exception {
-    // Delete db state between tests.
-    SqoopOptions options = new SqoopOptions();
-    options.setConnectString(SOURCE_DB_URL);
-    options.setUsername(AUTO_STORAGE_USERNAME);
-    options.setPassword(AUTO_STORAGE_PASSWORD);
-
-    resetSchema(options);
+    // Delete db state between tests
+    System.setProperty(GenericJobStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
+    System.setProperty(GenericJobStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
+    System.setProperty(GenericJobStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
+            SOURCE_DB_URL);
     resetSourceDataSchema();
-  }
-
-  public static void resetSchema(SqoopOptions options) throws SQLException {
-    HsqldbManager manager = new HsqldbManager(options);
-    Connection c = manager.getConnection();
-    Statement s = c.createStatement();
-    try {
-      String [] tables = manager.listTables();
-      for (String table : tables) {
-        s.executeUpdate("DROP TABLE " + manager.escapeTableName(table));
-      }
-
-      c.commit();
-    } finally {
-      s.close();
-    }
   }
 
   public static void resetSourceDataSchema() throws SQLException {
     SqoopOptions options = new SqoopOptions();
     options.setConnectString(SOURCE_DB_URL);
+    options.setUsername(AUTO_STORAGE_USERNAME);
+    options.setPassword(AUTO_STORAGE_PASSWORD);
     SavedJobsTest.resetSchema(options);
   }
 
   public static Configuration newConf() {
     Configuration conf = new Configuration();
-    conf.set(AutoHsqldbStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
-    conf.set(AutoHsqldbStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
-    conf.set(AutoHsqldbStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
+    conf.set(GenericJobStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
+    conf.set(GenericJobStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
+    conf.set(GenericJobStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
             SOURCE_DB_URL);
-
     return conf;
   }
 

@@ -120,6 +120,40 @@ public class GenericJobStorage extends JobStorage {
   private static final String PROPERTY_CLASS_CONFIG = "config";
 
   /**
+   * Configuration key specifying whether this storage agent is active.
+   * Defaults to "on" to allow zero-conf local users.
+   */
+  public static final String AUTO_STORAGE_IS_ACTIVE_KEY =
+          "sqoop.metastore.client.enable.autoconnect";
+
+  /**
+   * Configuration key specifying the connect string used by this
+   * storage agent.
+   */
+  public static final String AUTO_STORAGE_CONNECT_STRING_KEY =
+          "sqoop.metastore.client.autoconnect.url";
+
+  /**
+   * Configuration key specifying the username to bind with.
+   */
+  public static final String AUTO_STORAGE_USER_KEY =
+          "sqoop.metastore.client.autoconnect.username";
+
+
+  /** HSQLDB default user is named 'SA'. */
+  public static final String DEFAULT_AUTO_USER = "SA";
+
+  /**
+   * Configuration key specifying the password to bind with.
+   */
+  public static final String AUTO_STORAGE_PASS_KEY =
+          "sqoop.metastore.client.autoconnect.password";
+
+  /** HSQLDB default user has an empty password. */
+  public static final String DEFAULT_AUTO_PASSWORD = "";
+
+
+  /**
    * Per-job key with propClass 'schema' that specifies the SqoopTool
    * to load.
    */
@@ -265,8 +299,11 @@ public class GenericJobStorage extends JobStorage {
   /** {@inheritDoc} */
   public boolean canAccept(Map<String, String> descriptor) {
     // We return true if the desciptor contains a connect string to find
-    // the database.
-    return descriptor.get(META_CONNECT_KEY) != null;
+    // the database or aut -connect is enabled
+    Configuration conf = this.getConf();
+    boolean metaConnectTrue = descriptor.get(META_CONNECT_KEY) != null;
+    boolean autoConnectEnabled = conf.getBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, true);
+    return metaConnectTrue || autoConnectEnabled;
   }
 
   @Override
