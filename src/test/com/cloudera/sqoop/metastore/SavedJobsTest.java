@@ -201,23 +201,6 @@ public class SavedJobsTest {
     return conf;
   }
 
-  @Test
-  public void canAcceptInvalidKeyFalseTest() throws Exception {
-    Map<String,String> t = new TreeMap<>();
-    t.put(INVALID_KEY, "abc");
-
-    assertEquals("canAccept() should not accept invalid key",
-            storage.canAccept(t), false);
-  }
-
-  @Test
-  public void canAcceptValidKeyTrueTest() throws Exception {
-    Map<String,String> t = new TreeMap<>();
-    t.put(META_CONNECT_KEY, "abc");
-
-    assertEquals("canAccept should accept valid key", storage.canAccept(t), true);
-  }
-
   @Test(expected = IOException.class)
   public void readJobDoesNotExistThrowsTest() throws IOException{
     String invalidJob = "abcd";
