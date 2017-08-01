@@ -152,7 +152,6 @@ public class GenericJobStorage extends JobStorage {
   /** HSQLDB default user has an empty password. */
   public static final String DEFAULT_AUTO_PASSWORD = "";
 
-
   /**
    * Per-job key with propClass 'schema' that specifies the SqoopTool
    * to load.
@@ -172,8 +171,6 @@ public class GenericJobStorage extends JobStorage {
   // After connection to the database and initialization of the
   // schema, this holds the name of the job table.
   private String jobTableName;
-
-  protected String getMetastoreConnectStr() { return this.metastoreConnectStr; }
 
   protected void setMetastoreConnectStr(String connectStr) {
     this.metastoreConnectStr = connectStr;
@@ -299,7 +296,7 @@ public class GenericJobStorage extends JobStorage {
   /** {@inheritDoc} */
   public boolean canAccept(Map<String, String> descriptor) {
     // We return true if the desciptor contains a connect string to find
-    // the database or aut -connect is enabled
+    // the database or auto-connect is enabled
     Configuration conf = this.getConf();
     boolean metaConnectTrue = descriptor.get(META_CONNECT_KEY) != null;
     boolean autoConnectEnabled = conf.getBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, true);
@@ -726,20 +723,24 @@ public class GenericJobStorage extends JobStorage {
   private void initV0Schema() throws SQLException {
     this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
 
-    /** Checks to see if there is an existing job table under the old root table schema,
-     * present for backward compatibility. **/
-    String hsqldbStorageJobTableName = getRootProperty(HSQLDB_TABLE_KEY, 0);
-    if(hsqldbStorageJobTableName != null && this.jobTableName == null) {
-      this.jobTableName = hsqldbStorageJobTableName;
-      setRootProperty(SESSION_TABLE_KEY, 0, jobTableName);
-      return;
-    }
+    /** Checks to see if there is an existing job table under the old root table schema
+     *  and reconfigures under the present schema, present for backward compatibility. **/
+    checkForOldSchema();
+
     if (null == this.jobTableName) {
       createJobTable();
     }
     if (!tableExists(this.jobTableName)) {
       LOG.debug("Could not find job table: " + jobTableName);
       createJobTable();
+    }
+  }
+
+  private void checkForOldSchema() throws SQLException {
+    String hsqldbStorageJobTableName = getRootProperty(HSQLDB_TABLE_KEY, 0);
+    if(hsqldbStorageJobTableName != null && this.jobTableName == null) {
+      this.jobTableName = hsqldbStorageJobTableName;
+      setRootProperty(SESSION_TABLE_KEY, 0, jobTableName);
     }
   }
 

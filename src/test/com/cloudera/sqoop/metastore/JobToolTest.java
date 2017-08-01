@@ -57,7 +57,10 @@ public class JobToolTest extends BaseSqoopTestCase {
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
-    ConnManager cm;
+    private String metaConnectString;
+    private String metaUser;
+    private String metaPass;
+    private ConnManager cm;
 
     @Parameterized.Parameters(name = "metaConnectString = {0}, metaUser = {1}, metaPassword = {2}")
     public static Iterable<? extends Object> dbConnectParameters() {
@@ -159,11 +162,6 @@ public class JobToolTest extends BaseSqoopTestCase {
         }
 
     }
-
-    private String metaConnectString;
-    private String metaUser;
-    private String metaPass;
-
 
     public JobToolTest(String metaConnectString, String metaUser, String metaPass) {
         this.metaConnectString = metaConnectString;
