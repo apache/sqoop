@@ -18,12 +18,21 @@
 
 package org.apache.sqoop.tool;
 
+import static org.apache.sqoop.manager.JdbcDrivers.DB2;
+import static org.apache.sqoop.manager.JdbcDrivers.HSQLDB;
+import static org.apache.sqoop.manager.JdbcDrivers.MYSQL;
+import static org.apache.sqoop.manager.JdbcDrivers.ORACLE;
+import static org.apache.sqoop.manager.JdbcDrivers.POSTGRES;
+import static org.apache.sqoop.manager.JdbcDrivers.SQLSERVER;
+
 import java.io.IOException;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.cli.CommandLine;
@@ -53,6 +62,8 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   public static final Log LOG = LogFactory.getLog(
       JobTool.class.getName());
   private static final String DASH_STR  = "--";
+
+  private static Set<JdbcDrivers> SUPPORTED_DRIVERS = EnumSet.of(HSQLDB, MYSQL, ORACLE, POSTGRES, DB2, SQLSERVER);
 
   private enum JobOp {
     JobCreate,
@@ -395,30 +406,13 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     }
   }
 
-  public static String chooseDriverType(String metaConnectString) throws InvalidOptionsException {
-    String scheme = metaConnectString;
-
-    if (scheme.startsWith(JdbcDrivers.MYSQL.getSchemePrefix())) {
-      return JdbcDrivers.MYSQL.getDriverClass();
+  private String chooseDriverType(String metaConnectString) throws InvalidOptionsException {
+    for (JdbcDrivers driver : SUPPORTED_DRIVERS) {
+      if (metaConnectString.startsWith(driver.getSchemePrefix())) {
+        return driver.getDriverClass();
+      }
     }
-    else if (scheme.startsWith(JdbcDrivers.POSTGRES.getSchemePrefix())) {
-      return JdbcDrivers.POSTGRES.getDriverClass();
-    }
-    else if (scheme.startsWith(JdbcDrivers.HSQLDB.getSchemePrefix())) {
-      return JdbcDrivers.HSQLDB.getDriverClass();
-    }
-    else if (scheme.startsWith(JdbcDrivers.ORACLE.getSchemePrefix())) {
-      return JdbcDrivers.ORACLE.getDriverClass();
-    }
-    else if (scheme.startsWith(JdbcDrivers.DB2.getSchemePrefix())) {
-      return JdbcDrivers.DB2.getDriverClass();
-    }
-    else if (scheme.startsWith(JdbcDrivers.SQLSERVER.getSchemePrefix())) {
-      return JdbcDrivers.SQLSERVER.getDriverClass();
-    }
-    else {
-      throw new InvalidOptionsException("current meta-connect scheme not compatible with metastore");
-    }
+    throw new InvalidOptionsException("current meta-connect scheme not compatible with metastore");
   }
 
   @Override
