@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.manager;
 
+import static org.apache.sqoop.manager.JdbcDrivers.ORACLE;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -117,9 +119,6 @@ public class OracleManager
    */
   public static final String QUERY_GET_SESSIONUSER =
      "SELECT USER FROM DUAL";
-
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = JdbcDrivers.ORACLE.getDriverClass();
 
   // Configuration key to use to set the session timezone.
   public static final String ORACLE_TIMEZONE_KEY = "oracle.sessionTimeZone";
@@ -247,7 +246,7 @@ public class OracleManager
   }
 
   public OracleManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    super(ORACLE.getDriverClass(), opts);
   }
 
   public void close() throws SQLException {

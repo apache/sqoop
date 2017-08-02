@@ -723,9 +723,7 @@ public class GenericJobStorage extends JobStorage {
   private void initV0Schema() throws SQLException {
     this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
 
-    /** Checks to see if there is an existing job table under the old root table schema
-     *  and reconfigures under the present schema, present for backward compatibility. **/
-    checkForOldSchema();
+    checkForOldRootProperties();
 
     if (null == this.jobTableName) {
       createJobTable();
@@ -736,7 +734,9 @@ public class GenericJobStorage extends JobStorage {
     }
   }
 
-  private void checkForOldSchema() throws SQLException {
+  /** Checks to see if there is an existing job table under the old root table schema
+   *  and reconfigures under the present schema, present for backward compatibility. **/
+  private void checkForOldRootProperties() throws SQLException {
     String hsqldbStorageJobTableName = getRootProperty(HSQLDB_TABLE_KEY, 0);
     if(hsqldbStorageJobTableName != null && this.jobTableName == null) {
       this.jobTableName = hsqldbStorageJobTableName;

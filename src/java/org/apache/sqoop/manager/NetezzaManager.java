@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.manager;
 
+import static org.apache.sqoop.manager.JdbcDrivers.NETEZZA;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -45,9 +47,6 @@ public class NetezzaManager extends GenericJdbcManager {
   public static final Log LOG = LogFactory.getLog(NetezzaManager.class
       .getName());
 
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = JdbcDrivers.NETEZZA.getDriverClass();
-
   // set to true after we warn the user that we can use direct fastpath.
   protected static boolean directModeWarningPrinted = false;
 
@@ -62,7 +61,7 @@ public class NetezzaManager extends GenericJdbcManager {
       "partitioned-access";
 
   public NetezzaManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    super(NETEZZA.getDriverClass(), opts);
   }
 
 

@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.manager;
 
+import static org.apache.sqoop.manager.JdbcDrivers.POSTGRES;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -44,9 +46,6 @@ public class PostgresqlManager
   public static final Log LOG = LogFactory.getLog(
       PostgresqlManager.class.getName());
 
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = JdbcDrivers.POSTGRES.getDriverClass();
-
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;
 
@@ -56,7 +55,7 @@ public class PostgresqlManager
   private String schema;
 
   public PostgresqlManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    super(POSTGRES.getDriverClass(), opts);
 
     // Try to parse extra arguments
     try {

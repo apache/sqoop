@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.manager;
 
+import static org.apache.sqoop.manager.JdbcDrivers.SQLSERVER;
+
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
@@ -68,10 +70,6 @@ public class SQLServerManager
   public static final String IDENTITY_INSERT_PROP =
       "org.apache.sqoop.manager.sqlserver.table.identity";
 
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS =
-      JdbcDrivers.SQLSERVER.getDriverClass();
-
   // Define SQL Server specific types that are not covered by parent classes
   private static final int DATETIMEOFFSET = -155;
 
@@ -91,7 +89,7 @@ public class SQLServerManager
   private boolean identityInserts;
 
   public SQLServerManager(final SqoopOptions opts) {
-    this(DRIVER_CLASS, opts);
+    this(SQLSERVER.getDriverClass(), opts);
   }
 
   public SQLServerManager(final String driver, final SqoopOptions opts) {

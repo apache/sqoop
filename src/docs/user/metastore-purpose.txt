@@ -23,6 +23,6 @@ with +sqoop job+) defined in this metastore.
 
 Clients must be configured to connect to the metastore in +sqoop-site.xml+ or
 with the +--meta-connect+ argument. Supports MySql, Hsqldb, PostgreSql, Oracle, DB2,
-and SqlServer databses.
+and SqlServer databases.
 
 

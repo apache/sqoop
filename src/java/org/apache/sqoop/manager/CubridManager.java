@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.manager;
 
+import static org.apache.sqoop.manager.JdbcDrivers.CUBRID;
+
 import java.io.IOException;
 import java.sql.Types;
 import java.util.Map;
@@ -42,12 +44,8 @@ public class CubridManager extends
   public static final Log LOG = LogFactory
       .getLog(CubridManager.class.getName());
 
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS =
-      JdbcDrivers.CUBRID.getDriverClass();
-
   public CubridManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    super(CUBRID.getDriverClass(), opts);
   }
 
   @Override

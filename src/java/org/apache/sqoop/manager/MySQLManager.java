@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.manager;
 
+import static org.apache.sqoop.manager.JdbcDrivers.MYSQL;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -27,8 +29,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -53,16 +53,13 @@ public class MySQLManager
 
   public static final Log LOG = LogFactory.getLog(MySQLManager.class.getName());
 
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = JdbcDrivers.MYSQL.getDriverClass();
-
   // set to true after we warn the user that we can use direct fastpath.
   private static boolean warningPrinted = false;
 
   private static final String EXPORT_OPERATION = "export";
 
   public MySQLManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    super(MYSQL.getDriverClass(), opts);
   }
 
   @Override
