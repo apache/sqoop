@@ -25,7 +25,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.ReflectionUtils;
@@ -128,17 +130,27 @@ public class HBasePutProcessor implements Closeable, Configurable,
   public void accept(FieldMappable record)
       throws IOException, ProcessingException {
     Map<String, Object> fields = record.getFieldMap();
-
-    List<Put> putList = putTransformer.getPutCommand(fields);
-    if (null != putList) {
-      for (Put put : putList) {
-        if (put!=null) {
-          if (put.isEmpty()) {
-            LOG.warn("Could not insert row with no columns "
-                + "for row-key column: " + Bytes.toString(put.getRow()));
-          } else {
-            this.table.put(put);
-          }
+    List<Mutation> mutationList = putTransformer.getMutationCommand(fields);
+    if (null != mutationList) {
+      for (Mutation mutation : mutationList) {
+        if (mutation!=null) {
+            if(mutation instanceof Put) {
+              Put putObject = (Put) mutation;
+              if (putObject.isEmpty()) {
+                LOG.warn("Could not insert row with no columns "
+                      + "for row-key column: " + Bytes.toString(putObject.getRow()));
+                } else {
+                  this.table.put(putObject);
+                }
+              } else if(mutation instanceof Delete) {
+                Delete deleteObject = (Delete) mutation;
+                if (deleteObject.isEmpty()) {
+                  LOG.warn("Could not delete row with no columns "
+                        + "for row-key column: " + Bytes.toString(deleteObject.getRow()));
+                } else {
+                  this.table.delete(deleteObject);
+                }
+            }
         }
       }
     }

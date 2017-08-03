@@ -22,9 +22,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Mutation;
 
 /**
  * Interface that takes a map of jdbc field names to values
@@ -71,7 +70,7 @@ public abstract class PutTransformer {
    * @param fields a map of field names to values to insert.
    * @return A list of Put commands that inserts these into HBase.
    */
-  public abstract List<Put> getPutCommand(Map<String, Object> fields)
+  public abstract List<Mutation> getMutationCommand(Map<String, Object> fields)
       throws IOException;
 
 }
