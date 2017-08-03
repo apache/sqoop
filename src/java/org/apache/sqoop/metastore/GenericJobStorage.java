@@ -94,7 +94,6 @@ public class GenericJobStorage extends JobStorage {
   private static final String HSQLDB_VERSION_KEY =
           "sqoop.hsqldb.job.storage.version";
 
-
   /** Default value for SESSION_TABLE_KEY. */
   private static final String DEFAULT_SESSION_TABLE_NAME =
       "SQOOP_SESSIONS";
