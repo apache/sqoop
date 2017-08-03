@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -79,9 +80,12 @@ public class HBaseBulkImportMapper
     }
     Map<String, Object> fields = val.getFieldMap();
 
-    List<Put> putList = putTransformer.getPutCommand(fields);
-    for(Put put: putList){
-      context.write(new ImmutableBytesWritable(put.getRow()), put);
+    List<Mutation> mutationList = putTransformer.getMutationCommand(fields);
+    for(Mutation mutation: mutationList){
+      if(mutation != null && mutation instanceof Put) {
+        Put putObject = (Put) mutation;
+        context.write(new ImmutableBytesWritable(putObject.getRow()), putObject);
+      }
     }
   }
   @Override

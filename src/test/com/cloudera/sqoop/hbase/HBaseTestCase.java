@@ -18,43 +18,40 @@
 
 package com.cloudera.sqoop.hbase;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.conf.Configuration;
-
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
-import org.apache.hadoop.hbase.master.HMaster;
-import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
-
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.master.HMaster;
 import org.apache.hadoop.hbase.util.Bytes;
-
+import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
 import org.apache.hadoop.util.StringUtils;
-
 import org.junit.After;
 import org.junit.Before;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.UUID;
-import org.apache.commons.io.FileUtils;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Utility methods that facilitate HBase import tests.
@@ -115,7 +112,38 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
     if (hbaseCreate) {
       args.add("--hbase-create-table");
     }
+    return args.toArray(new String[0]);
+  }
 
+  /**
+   * Create the argv to pass to Sqoop as incremental options.
+   * @return the argv as an array of strings.
+   */
+  protected String [] getIncrementalArgv(boolean includeHadoopFlags,
+      String hbaseTable, String hbaseColFam, boolean hbaseCreate,
+      String queryStr, boolean isAppend, boolean appendTimestamp, String checkColumn, String checkValue, String lastModifiedColumn) {
+
+    String[] argsStrArray = getArgv(includeHadoopFlags, hbaseTable, hbaseColFam, hbaseCreate, queryStr);
+    List<String> args = new ArrayList<String>(Arrays.asList(argsStrArray));
+
+    if (isAppend) {
+      args.add("--incremental");
+      args.add("append");
+      if (!appendTimestamp) {
+        args.add("--check-column");
+        args.add(checkColumn);//"ID");
+      } else {
+        args.add("--check-column");
+        args.add(lastModifiedColumn);//LAST_MODIFIED");
+      }
+    } else {
+      args.add("--incremental");
+      args.add("lastmodified");
+      args.add("--check-column");
+      args.add(checkColumn);
+      args.add("--last-value");
+      args.add(checkValue);
+    }
     return args.toArray(new String[0]);
   }
   // Starts a mini hbase cluster in this process.
