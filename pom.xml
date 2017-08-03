@@ -973,6 +973,14 @@ limitations under the License.
       </roles>
     </developer>
     <developer>
+      <id>bogi</id>
+      <name>Boglarka Egyed</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
       <id>cheolsoo</id>
       <name>Cheolsoo Park</name>
       <organization>StreamSets</organization>
