@@ -1197,8 +1197,9 @@ public final class SqoopHCatUtilities {
     }
   }
 
-  public void executeHCatProgramInProcess(String[] argv) throws IOException {
+  void executeHCatProgramInProcess(String[] argv) throws IOException {
     SubprocessSecurityManager subprocessSM = null;
+    final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 
     try {
       Class<?> cliDriverClass = Class.forName(HCAT_CLI_MAIN_CLASS);
@@ -1229,6 +1230,7 @@ public final class SqoopHCatUtilities {
       if (null != subprocessSM) {
         subprocessSM.uninstall();
       }
+      Thread.currentThread().setContextClassLoader(originalClassLoader);
     }
   }
 
