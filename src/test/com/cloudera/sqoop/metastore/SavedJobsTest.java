@@ -90,10 +90,10 @@ public class SavedJobsTest {
                             "sqoop.test.postgresql.connectstring.host_url",
                             "jdbc:postgresql://localhost/"),
                     System.getProperty(
-                            "sqoop.test.postgresql.connectstring.username",
+                            "sqoop.test.postgresql.username",
                             "sqooptest"),
                     System.getProperty(
-                            "sqoop.test.postgresql.connectstring.password"),
+                            "sqoop.test.postgresql.password"),
                     JdbcDrivers.POSTGRES.getDriverClass()
             },
             new Object[] {
