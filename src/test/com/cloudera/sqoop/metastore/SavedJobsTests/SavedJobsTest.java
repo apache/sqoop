@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore;
+package com.cloudera.sqoop.metastore.SavedJobsTests;
 
 import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
 import static org.apache.sqoop.metastore.GenericJobStorage.META_DRIVER_KEY;
@@ -31,6 +31,9 @@ import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.MySQLTestUtils;
 import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.metastore.JobData;
+import com.cloudera.sqoop.metastore.JobStorage;
+import com.cloudera.sqoop.metastore.JobStorageFactory;
 import com.cloudera.sqoop.tool.VersionTool;
 
 import org.apache.hadoop.conf.Configuration;
@@ -59,58 +62,8 @@ import java.util.TreeMap;
 
 /**
  * Test the metastore and job-handling features.
- *
- * These all make use of the auto-connect hsqldb-based metastore.
- * The metastore URL is configured to be in-memory, and drop all
- * state between individual tests.
  */
-@RunWith(Parameterized.class)
-public class SavedJobsTest {
-
-  private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
-  private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
-
-  @Parameterized.Parameters(name = "metaConnect = {0}, metaUser = {1}, metaPassword = {2}, driverClass = {3}")
-  public static Iterable<? extends Object> dbConnectParameters() {
-    return Arrays.asList(
-            new Object[] {
-                    mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
-                    mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass()
-            },
-            new Object[] {
-                   OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
-                    OracleUtils.ORACLE_USER_PASS, JdbcDrivers.ORACLE.getDriverClass()
-            },
-            new Object[] {
-                   msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
-                    msSQLTestUtils.getDBPassWord(), JdbcDrivers.SQLSERVER.getDriverClass()
-            },
-            new Object[] {
-                    System.getProperty(
-                            "sqoop.test.postgresql.connectstring.host_url",
-                            "jdbc:postgresql://localhost/"),
-                    System.getProperty(
-                            "sqoop.test.postgresql.username",
-                            "sqooptest"),
-                    System.getProperty(
-                            "sqoop.test.postgresql.password"),
-                    JdbcDrivers.POSTGRES.getDriverClass()
-            },
-            new Object[] {
-                    System.getProperty(
-                            "sqoop.test.db2.connectstring.host_url",
-                            "jdbc:db2://db2host:50000"),
-                    System.getProperty(
-                            "sqoop.test.db2.connectstring.username",
-                            "SQOOP"),
-                    System.getProperty(
-                            "sqoop.test.db2.connectstring.password",
-                            "SQOOP"),
-                    JdbcDrivers.DB2.getDriverClass()
-            },
-            new Object[] { "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "", JdbcDrivers.HSQLDB.getDriverClass()}
-            );
-  }
+public abstract class SavedJobsTest {
 
   private String metaConnect;
   private String metaUser;
@@ -120,8 +73,6 @@ public class SavedJobsTest {
 
   private Configuration conf;
   private Map<String, String> descriptor;
-
-  public String INVALID_KEY = "INVALID_KEY";
 
   public SavedJobsTest(String metaConnect, String metaUser, String metaPassword, String driverClass){
     this.metaConnect = metaConnect;
@@ -180,8 +131,8 @@ public class SavedJobsTest {
     try {
       String [] tables = manager.listTables();
       for (String table : tables) {
-        if(table.equalsIgnoreCase("SQOOP_ROOT") || table.equalsIgnoreCase("SQOOP_SESSIONS")){
-          s.execute("DROP TABLE " + table);
+        if(table.equals("SQOOP_ROOT") || table.equals("SQOOP_SESSIONS")){
+          s.execute("DROP TABLE " + manager.escapeTableName(table));
         }
       }
 

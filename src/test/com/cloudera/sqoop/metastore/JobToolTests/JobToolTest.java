@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore;
+package com.cloudera.sqoop.metastore.JobToolTests;
 
 import static org.junit.Assert.assertEquals;
 
@@ -49,57 +49,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@RunWith(Parameterized.class)
-public class JobToolTest extends BaseSqoopTestCase {
+public abstract class JobToolTest extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory
             .getLog(com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest.class.getName());
 
-    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
-    private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
     private String metaConnectString;
     private String metaUser;
     private String metaPass;
     private ConnManager cm;
 
-    @Parameterized.Parameters(name = "metaConnectString = {0}, metaUser = {1}, metaPassword = {2}")
-    public static Iterable<? extends Object> dbConnectParameters() {
-        return Arrays.asList(
-                new Object[] {
-                        mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
-                        mySQLTestUtils.getUserPass()
-                },
-                new Object[] {
-                        OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
-                        OracleUtils.ORACLE_USER_PASS
-                },
-                new Object[] {
-                        msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
-                        msSQLTestUtils.getDBPassWord()
-                },
-                new Object[] {
-                        System.getProperty(
-                                "sqoop.test.postgresql.connectstring.host_url",
-                                "jdbc:postgresql://localhost/"),
-                        System.getProperty(
-                                "sqoop.test.postgresql.username",
-                                "sqooptest"),
-                        System.getProperty(
-                                "sqoop.test.postgresql.password"),
-                },
-                new Object[] {
-                        System.getProperty(
-                                "sqoop.test.db2.connectstring.host_url",
-                                "jdbc:db2://db2host:50000"),
-                        System.getProperty(
-                                "sqoop.test.db2.connectstring.username",
-                                "SQOOP"),
-                        System.getProperty(
-                                "sqoop.test.db2.connectstring.password",
-                                "SQOOP"),
-                },
-                new Object[] { "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "" }
-        );
+
+    public JobToolTest(String metaConnectString, String metaUser, String metaPass) {
+        this.metaConnectString = metaConnectString;
+        this.metaUser = metaUser;
+        this.metaPass = metaPass;
     }
 
     @Before
@@ -112,8 +76,8 @@ public class JobToolTest extends BaseSqoopTestCase {
 
         try {
             Statement statement = conn.createStatement();
-            statement.execute("DROP TABLE SQOOP_ROOT");
-            statement.execute("DROP TABLE SQOOP_SESSIONS");
+            statement.execute("DROP TABLE " + cm.escapeTableName("SQOOP_ROOT"));
+            statement.execute("DROP TABLE " + cm.escapeTableName("SQOOP_SESSIONS"));
             conn.commit();
         } catch (Exception e) {
             LOG.error("Failed to clear metastore database");
@@ -161,12 +125,6 @@ public class JobToolTest extends BaseSqoopTestCase {
             LOG.error("Failed to close ConnManager");
         }
 
-    }
-
-    public JobToolTest(String metaConnectString, String metaUser, String metaPass) {
-        this.metaConnectString = metaConnectString;
-        this.metaUser = metaUser;
-        this.metaPass = metaPass;
     }
 
     protected String[] getCreateJob(String metaConnectString, String metaUser, String metaPass) {

@@ -114,13 +114,11 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
     private Connection connMeta;
     private ConnManager cm;
 
-
     public MetaConnectIncrementalImportTest(String metaConnectString, String metaUser, String metaPass) {
         this.metaConnectString = metaConnectString;
         this.metaUser = metaUser;
         this.metaPass = metaPass;
     }
-
 
     protected String[] getIncrementalJob(String metaConnectString, String metaUser, String metaPass) {
         List<String> args = new ArrayList<>();
@@ -183,8 +181,8 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
         try {
             //Resets the metastore schema
             Statement metastoreStatement = connMeta.createStatement();
-            metastoreStatement.execute("DROP TABLE SQOOP_ROOT");
-            metastoreStatement.execute("DROP TABLE SQOOP_SESSIONS");
+            metastoreStatement.execute("DROP TABLE " + cm.escapeTableName("SQOOP_ROOT"));
+            metastoreStatement.execute("DROP TABLE " + cm.escapeTableName("SQOOP_SESSIONS"));
             connMeta.commit();
         }
         catch (Exception e) {
@@ -208,7 +206,7 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
         //Ensures the saveIncrementalState saved the right row
         Statement getSaveIncrementalState = connMeta.createStatement();
         ResultSet lastCol = getSaveIncrementalState.executeQuery(
-                "SELECT propVal FROM SQOOP_SESSIONS WHERE propname = 'incremental.last.value'");
+                "SELECT propVal FROM " + cm.escapeTableName("SQOOP_SESSIONS") + " WHERE propname = 'incremental.last.value'");
         lastCol.next();
         assertEquals(1, lastCol.getInt("propVal"));
 
@@ -227,7 +225,7 @@ public class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
         //Ensures the last incremental value is updated correctly.
         Statement getSaveIncrementalState2 = connMeta.createStatement();
         ResultSet lastCol2 = getSaveIncrementalState2.executeQuery(
-                "SELECT propVal FROM SQOOP_SESSIONS WHERE propName = 'incremental.last.value'");
+                "SELECT propVal FROM " + cm.escapeTableName("SQOOP_SESSIONS") + " WHERE propName = 'incremental.last.value'");
         lastCol2.next();
         assertEquals(2, lastCol2.getInt("propVal"));
 
