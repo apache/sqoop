@@ -16,21 +16,17 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.SavedJobsTests;
+package com.cloudera.sqoop.metastore.savedjobstests;
 
+import com.cloudera.sqoop.manager.MySQLTestUtils;
 import org.apache.sqoop.manager.JdbcDrivers;
 
-public class PostgresSavedJobsTest extends SavedJobsTest {
+public class MySqlSavedJobsTest extends SavedJobsTest {
 
-    public PostgresSavedJobsTest () {
-        super(System.getProperty(
-                "sqoop.test.postgresql.connectstring.host_url",
-                "jdbc:postgresql://localhost/"),
-                System.getProperty(
-                        "sqoop.test.postgresql.username",
-                        "sqooptest"),
-                System.getProperty(
-                        "sqoop.test.postgresql.password"),
-                JdbcDrivers.POSTGRES.getDriverClass());
+    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+
+    public MySqlSavedJobsTest () {
+        super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
+                mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
     }
 }

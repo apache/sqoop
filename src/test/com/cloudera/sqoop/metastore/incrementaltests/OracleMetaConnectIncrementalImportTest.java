@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.JobToolTests;
+package com.cloudera.sqoop.metastore.incrementaltests;
 
 import com.cloudera.sqoop.manager.OracleUtils;
 
-public class OracleJobToolTest extends JobToolTest {
+public class OracleMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
 
-    public OracleJobToolTest () {
+    public OracleMetaConnectIncrementalImportTest () {
         super(OracleUtils.CONNECT_STRING,
                 OracleUtils.ORACLE_USER_NAME,
                 OracleUtils.ORACLE_USER_PASS);

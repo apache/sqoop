@@ -16,17 +16,18 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.SavedJobsTests;
+package com.cloudera.sqoop.metastore.jobtooltests;
 
-import com.cloudera.sqoop.manager.OracleUtils;
-import org.apache.sqoop.manager.JdbcDrivers;
+public class PostgresJobToolTest extends com.cloudera.sqoop.metastore.jobtooltests.JobToolTest {
 
-public class OracleSavedJobsTest extends SavedJobsTest {
-
-    public OracleSavedJobsTest () {
-        super(OracleUtils.CONNECT_STRING,
-                OracleUtils.ORACLE_USER_NAME,
-                OracleUtils.ORACLE_USER_PASS,
-                JdbcDrivers.ORACLE.getDriverClass());
+    public PostgresJobToolTest () {
+        super(System.getProperty(
+                "sqoop.test.postgresql.connectstring.host_url",
+                "jdbc:postgresql://localhost/"),
+                System.getProperty(
+                        "sqoop.test.postgresql.username",
+                        "sqooptest"),
+                System.getProperty(
+                        "sqoop.test.postgresql.password"));
     }
 }

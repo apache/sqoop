@@ -16,22 +16,11 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.SavedJobsTests;
+package com.cloudera.sqoop.metastore.jobtooltests;
 
-import org.apache.sqoop.manager.JdbcDrivers;
+public class HsqldbJobToolTest extends JobToolTest {
 
-public class DB2SavedJobsTest extends SavedJobsTest {
-
-    DB2SavedJobsTest () {
-        super(System.getProperty(
-                "sqoop.test.db2.connectstring.host_url",
-                "jdbc:db2://db2host:50000"),
-                System.getProperty(
-                        "sqoop.test.db2.connectstring.username",
-                        "SQOOP"),
-                System.getProperty(
-                        "sqoop.test.db2.connectstring.password",
-                        "SQOOP"),
-                JdbcDrivers.DB2.getDriverClass());
+    public HsqldbJobToolTest () {
+        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
     }
 }

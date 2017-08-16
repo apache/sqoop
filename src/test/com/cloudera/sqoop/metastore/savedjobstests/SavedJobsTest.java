@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.SavedJobsTests;
+package com.cloudera.sqoop.metastore.savedjobstests;
 
 import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
 import static org.apache.sqoop.metastore.GenericJobStorage.META_DRIVER_KEY;
@@ -28,8 +28,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.MySQLTestUtils;
-import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
@@ -38,16 +36,12 @@ import com.cloudera.sqoop.tool.VersionTool;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.DefaultManagerFactory;
-import org.apache.sqoop.manager.JdbcDrivers;
-import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 import org.apache.sqoop.tool.ImportTool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 
@@ -55,7 +49,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -152,15 +145,8 @@ public abstract class SavedJobsTest {
     return conf;
   }
 
-  @Test(expected = IOException.class)
-  public void readJobDoesNotExistThrowsTest() throws IOException{
-    String invalidJob = "abcd";
-
-    storage.read(invalidJob);
-  }
-
   @Test
-  public void readJobDoesExistPassesTest() throws Exception{
+  public void testReadJobDoesExistPasses() throws Exception{
     storage.create("testJob", createTestJobData("abcd"));
 
     assertEquals("Read did not return job data correctly",
@@ -169,7 +155,7 @@ public abstract class SavedJobsTest {
   }
 
   @Test
-  public void updateJobTest() throws  Exception {
+  public void testUpdateJob() throws  Exception {
     storage.create("testJob2", createTestJobData("abcd"));
 
     storage.update("testJob2", createTestJobData("efgh") );
@@ -180,7 +166,7 @@ public abstract class SavedJobsTest {
   }
 
   @Test
-  public void listTest() throws IOException {
+  public void testList() throws IOException {
     storage.create("testJob3", createTestJobData("abcd"));
     storage.create("testJob4", createTestJobData("efgh"));
     storage.create("testJob5", createTestJobData("ijkl"));
@@ -189,7 +175,7 @@ public abstract class SavedJobsTest {
   }
 
   @Test
-  public void createSameJobTest() throws IOException {
+  public void testCreateSameJob() throws IOException {
 
     // Job list should start out empty.
     List<String> jobs = storage.list();
@@ -220,7 +206,7 @@ public abstract class SavedJobsTest {
   }
 
   @Test
-  public void deleteJobTest() throws IOException {
+  public void testDeleteJob() throws IOException {
     // Job list should start out empty.
     List<String> jobs = storage.list();
     assertEquals(0, jobs.size());
@@ -242,7 +228,7 @@ public abstract class SavedJobsTest {
   }
 
   @Test
-  public void restoreNonExistingJobTest() throws IOException {
+  public void testRestoreNonExistingJob() throws IOException {
       // Try to restore a job that doesn't exist. Watch it fail.
       thrown.expect(IOException.class);
       thrown.reportMissingExceptionWithMessage("Expected IOException since job doesn't exist");
@@ -250,7 +236,7 @@ public abstract class SavedJobsTest {
   }
 
   @Test
-    public void createJobWithExtraArgsTest() throws IOException {
+  public void testCreateJobWithExtraArgs() throws IOException {
 
         // Job list should start out empty.
         List<String> jobs = storage.list();
@@ -282,7 +268,7 @@ public abstract class SavedJobsTest {
     }
 
   @Test
-  public void multiConnectionsTest() throws IOException {
+  public void testMultiConnections() throws IOException {
 
     // Job list should start out empty.
     List<String> jobs = storage.list();

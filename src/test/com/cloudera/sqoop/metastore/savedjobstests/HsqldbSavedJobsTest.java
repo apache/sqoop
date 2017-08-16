@@ -16,18 +16,14 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.JobToolTests;
+package com.cloudera.sqoop.metastore.savedjobstests;
 
-public class PostgresJobToolTest extends com.cloudera.sqoop.metastore.JobToolTests.JobToolTest {
+import org.apache.sqoop.manager.JdbcDrivers;
 
-    public PostgresJobToolTest () {
-        super(System.getProperty(
-                "sqoop.test.postgresql.connectstring.host_url",
-                "jdbc:postgresql://localhost/"),
-                System.getProperty(
-                        "sqoop.test.postgresql.username",
-                        "sqooptest"),
-                System.getProperty(
-                        "sqoop.test.postgresql.password"));
+public class HsqldbSavedJobsTest extends SavedJobsTest {
+
+    public HsqldbSavedJobsTest () {
+        super("jdbc:hsqldb:mem:sqoopmetastore",
+                "SA" , "", JdbcDrivers.HSQLDB.getDriverClass());
     }
 }

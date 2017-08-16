@@ -16,11 +16,17 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.JobToolTests;
+package com.cloudera.sqoop.metastore.incrementaltests;
 
-public class HsqldbJobToolTest extends JobToolTest {
 
-    public HsqldbJobToolTest () {
-        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
+import com.cloudera.sqoop.manager.MySQLTestUtils;
+
+public class MySqlMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+
+    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+
+    public MySqlMetaConnectIncrementalImportTest () {
+        super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
+                mySQLTestUtils.getUserPass());
     }
 }

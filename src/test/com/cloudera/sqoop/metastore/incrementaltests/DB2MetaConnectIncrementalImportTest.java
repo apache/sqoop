@@ -16,17 +16,20 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.SavedJobsTests;
+package com.cloudera.sqoop.metastore.incrementaltests;
 
-import com.cloudera.sqoop.manager.MySQLTestUtils;
-import org.apache.sqoop.manager.JdbcDrivers;
+public class DB2MetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
 
-public class MySqlSavedJobsTest extends SavedJobsTest {
-
-    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
-
-    public MySqlSavedJobsTest () {
-        super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
-                mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
+    public DB2MetaConnectIncrementalImportTest () {
+        super(System.getProperty(
+                "sqoop.test.db2.connectstring.host_url",
+                "jdbc:db2://db2host:50000"),
+                System.getProperty(
+                        "sqoop.test.db2.connectstring.username",
+                        "SQOOP"),
+                System.getProperty(
+                        "sqoop.test.db2.connectstring.password",
+                        "SQOOP"));
     }
 }
+

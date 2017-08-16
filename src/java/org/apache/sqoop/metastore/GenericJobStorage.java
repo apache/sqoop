@@ -262,23 +262,16 @@ public class GenericJobStorage extends JobStorage {
 
   @Override
   public void close() throws IOException {
-    if (null != this.connection) {
       try {
-        LOG.debug("Flushing current transaction");
-        this.connection.commit();
+        if (null != this.connection && !this.connection.isClosed()) {
+          LOG.debug("Closing connection");
+          connManager.close();
+        }
       } catch (SQLException sqlE) {
-        throw new IOException("Exception committing connection", sqlE);
-      }
-
-      try {
-        LOG.debug("Closing connection");
-        this.connection.close();
-      } catch (SQLException sqlE) {
-        throw new IOException("Exception closing connection", sqlE);
+          throw new IOException("Exception closing connection", sqlE);
       } finally {
-        this.connection = null;
+          this.connection = null;
       }
-    }
   }
 
   @Override

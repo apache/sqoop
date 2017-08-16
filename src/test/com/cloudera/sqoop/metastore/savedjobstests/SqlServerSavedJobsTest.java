@@ -16,17 +16,19 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.JobToolTests;
+package com.cloudera.sqoop.metastore.savedjobstests;
 
+import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
-public class SqlServerJobToolTest extends JobToolTest{
+public class SqlServerSavedJobsTest extends SavedJobsTest {
 
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-    public SqlServerJobToolTest () {
+    public SqlServerSavedJobsTest () {
         super(msSQLTestUtils.getDBConnectString(),
                 msSQLTestUtils.getDBUserName(),
-                msSQLTestUtils.getDBPassWord());
+                msSQLTestUtils.getDBPassWord(),
+                JdbcDrivers.SQLSERVER.getDriverClass());
     }
 }
