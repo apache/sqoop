@@ -17,12 +17,27 @@
   limitations under the License.
 ////
 
-The +metastore+ tool configures Sqoop to host a shared metadata repository.
+The +metastore+ tool configures Sqoop to host a shared Hsqldb metadata repository.
 Multiple users and/or remote users can define and execute saved jobs (created
 with +sqoop job+) defined in this metastore.
 
 Clients must be configured to connect to the metastore in +sqoop-site.xml+ or
-with the +--meta-connect+ argument. Supports MySql, Hsqldb, PostgreSql, Oracle, DB2,
-and SqlServer databases.
+with the +--meta-connect+ argument. These commands MySql, Hsqldb, PostgreSql, Oracle, DB2,
+and SqlServer databases as well. All services other than Hsqldb and Postgres require the
+download of the corresponding JDBC driver and connect string structured in the correct format.
+
+Migration of metastore data from one database service to another is not directly supported, but is possible.
+
+.JDBC Connect String Formats:
+[grid="all"]
+`---------------------------`------------------------------------------
+Service                       Connect String Format
+-----------------------------------------------------------------------
+  +MySql+                      jdbc:mysql://<hostname>[<:port>]/<dbname>
+  +Hsqldb+                     jdbc:hsqldb:hsql://<server>[:<port>]
+  +Postgres+                   jdbc:postgresql:[<//host>[:<port>/]]<database>
+  +Oracle+                     jdbc:oracle:thin:@<server>[:<port>]:<database_name>
+  +DB2+                        jdbc:db2://<server>:<port>/<db-name>
+-----------------------------------------------------------------------
 
 
