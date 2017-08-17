@@ -16,17 +16,17 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.savedjobstests;
+package com.cloudera.sqoop.metastore.mysql;
 
 import com.cloudera.sqoop.manager.MySQLTestUtils;
-import org.apache.sqoop.manager.JdbcDrivers;
+import com.cloudera.sqoop.metastore.JobToolTest;
 
-public class MySqlSavedJobsTest extends SavedJobsTest {
+public class MySqlJobToolTest extends JobToolTest {
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-    public MySqlSavedJobsTest () {
+    public MySqlJobToolTest() {
         super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
-                mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
+                mySQLTestUtils.getUserPass());
     }
 }

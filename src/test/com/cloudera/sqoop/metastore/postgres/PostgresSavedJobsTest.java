@@ -16,22 +16,22 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.savedjobstests;
+package com.cloudera.sqoop.metastore.postgres;
 
+import com.cloudera.sqoop.metastore.SavedJobsTest;
 import org.apache.sqoop.manager.JdbcDrivers;
 
-public class DB2SavedJobsTest extends SavedJobsTest {
+public class PostgresSavedJobsTest extends SavedJobsTest {
 
-    DB2SavedJobsTest () {
+    public PostgresSavedJobsTest () {
         super(System.getProperty(
-                "sqoop.test.db2.connectstring.host_url",
-                "jdbc:db2://db2host:50000"),
+                "sqoop.test.postgresql.connectstring.host_url",
+                "jdbc:postgresql://localhost/"),
                 System.getProperty(
-                        "sqoop.test.db2.connectstring.username",
-                        "SQOOP"),
+                        "sqoop.test.postgresql.username",
+                        "sqooptest"),
                 System.getProperty(
-                        "sqoop.test.db2.connectstring.password",
-                        "SQOOP"),
-                JdbcDrivers.DB2.getDriverClass());
+                        "sqoop.test.postgresql.password"),
+                JdbcDrivers.POSTGRES.getDriverClass());
     }
 }

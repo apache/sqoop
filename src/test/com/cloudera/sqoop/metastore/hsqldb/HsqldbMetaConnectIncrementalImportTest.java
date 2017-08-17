@@ -16,17 +16,13 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.savedjobstests;
+package com.cloudera.sqoop.metastore.hsqldb;
 
-import com.cloudera.sqoop.manager.OracleUtils;
-import org.apache.sqoop.manager.JdbcDrivers;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
 
-public class OracleSavedJobsTest extends SavedJobsTest {
+public class HsqldbMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
 
-    public OracleSavedJobsTest () {
-        super(OracleUtils.CONNECT_STRING,
-                OracleUtils.ORACLE_USER_NAME,
-                OracleUtils.ORACLE_USER_PASS,
-                JdbcDrivers.ORACLE.getDriverClass());
+    public HsqldbMetaConnectIncrementalImportTest () {
+        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
     }
 }

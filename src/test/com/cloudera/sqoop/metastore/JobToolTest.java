@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.jobtooltests;
+package com.cloudera.sqoop.metastore;
 
 import static org.junit.Assert.assertEquals;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.incrementaltests.MetaConnectIncrementalImportTest;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 

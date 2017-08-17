@@ -16,13 +16,11 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.incrementaltests;
+package com.cloudera.sqoop.metastore;
 
 import static org.junit.Assert.assertEquals;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.MySQLTestUtils;
-import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 
@@ -31,21 +29,17 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.DefaultManagerFactory;
-import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 import org.apache.sqoop.tool.JobTool;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {

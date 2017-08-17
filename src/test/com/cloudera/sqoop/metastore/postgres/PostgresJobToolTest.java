@@ -16,11 +16,13 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.incrementaltests;
+package com.cloudera.sqoop.metastore.postgres;
 
-public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+import com.cloudera.sqoop.metastore.JobToolTest;
 
-    public PostgresMetaConnectIncrementalImportTest () {
+public class PostgresJobToolTest extends JobToolTest {
+
+    public PostgresJobToolTest () {
         super(System.getProperty(
                 "sqoop.test.postgresql.connectstring.host_url",
                 "jdbc:postgresql://localhost/"),

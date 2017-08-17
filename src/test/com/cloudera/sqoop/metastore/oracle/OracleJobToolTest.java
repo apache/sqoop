@@ -16,17 +16,16 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.jobtooltests;
+package com.cloudera.sqoop.metastore.oracle;
 
-import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
+import com.cloudera.sqoop.manager.OracleUtils;
+import com.cloudera.sqoop.metastore.JobToolTest;
 
-public class SqlServerJobToolTest extends JobToolTest{
+public class OracleJobToolTest extends JobToolTest {
 
-    private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
-
-    public SqlServerJobToolTest () {
-        super(msSQLTestUtils.getDBConnectString(),
-                msSQLTestUtils.getDBUserName(),
-                msSQLTestUtils.getDBPassWord());
+    public OracleJobToolTest () {
+        super(OracleUtils.CONNECT_STRING,
+                OracleUtils.ORACLE_USER_NAME,
+                OracleUtils.ORACLE_USER_PASS);
     }
 }

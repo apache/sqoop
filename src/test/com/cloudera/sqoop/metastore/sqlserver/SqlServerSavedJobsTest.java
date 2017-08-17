@@ -16,11 +16,20 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.incrementaltests;
+package com.cloudera.sqoop.metastore.sqlserver;
 
-public class HsqldbMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+import com.cloudera.sqoop.metastore.SavedJobsTest;
+import org.apache.sqoop.manager.JdbcDrivers;
+import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
-    public HsqldbMetaConnectIncrementalImportTest () {
-        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
+public class SqlServerSavedJobsTest extends SavedJobsTest {
+
+    private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
+
+    public SqlServerSavedJobsTest () {
+        super(msSQLTestUtils.getDBConnectString(),
+                msSQLTestUtils.getDBUserName(),
+                msSQLTestUtils.getDBPassWord(),
+                JdbcDrivers.SQLSERVER.getDriverClass());
     }
 }

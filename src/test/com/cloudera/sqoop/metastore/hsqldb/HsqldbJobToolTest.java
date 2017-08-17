@@ -16,18 +16,13 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.jobtooltests;
+package com.cloudera.sqoop.metastore.hsqldb;
 
-public class PostgresJobToolTest extends com.cloudera.sqoop.metastore.jobtooltests.JobToolTest {
+import com.cloudera.sqoop.metastore.JobToolTest;
 
-    public PostgresJobToolTest () {
-        super(System.getProperty(
-                "sqoop.test.postgresql.connectstring.host_url",
-                "jdbc:postgresql://localhost/"),
-                System.getProperty(
-                        "sqoop.test.postgresql.username",
-                        "sqooptest"),
-                System.getProperty(
-                        "sqoop.test.postgresql.password"));
+public class HsqldbJobToolTest extends JobToolTest {
+
+    public HsqldbJobToolTest () {
+        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
     }
 }

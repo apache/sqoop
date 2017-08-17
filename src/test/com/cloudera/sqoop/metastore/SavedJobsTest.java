@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.savedjobstests;
+package com.cloudera.sqoop.metastore;
 
 import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
 import static org.apache.sqoop.metastore.GenericJobStorage.META_DRIVER_KEY;
@@ -29,9 +29,6 @@ import static org.junit.Assert.assertThat;
 
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.metastore.JobStorage;
-import com.cloudera.sqoop.metastore.JobStorageFactory;
 import com.cloudera.sqoop.tool.VersionTool;
 
 import org.apache.hadoop.conf.Configuration;
@@ -58,6 +55,12 @@ import java.util.TreeMap;
  */
 public abstract class SavedJobsTest {
 
+  public static final String TEST_JOB = "testJob";
+  public static final String TEST_TABLE_NAME = "abcd";
+  public static final String TEST_TABLE_NAME_2 = "efgh";
+  public static final String TEST_JOB_2 = "testJob2";
+  public static final String TEST_JOB_3 = "testJob3";
+  public static final String TEST_TABLE_NAME_3 = "ijkl";
   private String metaConnect;
   private String metaUser;
   private String metaPassword;
@@ -147,31 +150,31 @@ public abstract class SavedJobsTest {
 
   @Test
   public void testReadJobDoesExistPasses() throws Exception{
-    storage.create("testJob", createTestJobData("abcd"));
+    storage.create(TEST_JOB, createTestJobData(TEST_TABLE_NAME));
 
     assertEquals("Read did not return job data correctly",
-            storage.read("testJob").getSqoopOptions().getTableName(),
-            "abcd");
+            storage.read(TEST_JOB).getSqoopOptions().getTableName(),
+            TEST_TABLE_NAME);
   }
 
   @Test
   public void testUpdateJob() throws  Exception {
-    storage.create("testJob2", createTestJobData("abcd"));
+    storage.create(TEST_JOB, createTestJobData(TEST_TABLE_NAME));
 
-    storage.update("testJob2", createTestJobData("efgh") );
+    storage.update(TEST_JOB, createTestJobData(TEST_TABLE_NAME_2) );
 
     assertEquals("Update did not change data correctly",
-            storage.read("testJob2").getSqoopOptions().getTableName(),
-            "efgh");
+            storage.read(TEST_JOB).getSqoopOptions().getTableName(),
+            TEST_TABLE_NAME_2);
   }
 
   @Test
   public void testList() throws IOException {
-    storage.create("testJob3", createTestJobData("abcd"));
-    storage.create("testJob4", createTestJobData("efgh"));
-    storage.create("testJob5", createTestJobData("ijkl"));
+    storage.create(TEST_JOB, createTestJobData(TEST_TABLE_NAME));
+    storage.create(TEST_JOB_2, createTestJobData(TEST_TABLE_NAME_2));
+    storage.create(TEST_JOB_3, createTestJobData(TEST_TABLE_NAME_3));
 
-    assertThat( storage.list(), hasItems( "testJob3", "testJob4", "testJob5" ));
+    assertThat( storage.list(), hasItems( TEST_JOB, TEST_JOB_2, TEST_JOB_3));
   }
 
   @Test
@@ -183,23 +186,23 @@ public abstract class SavedJobsTest {
 
     // Create a job that displays the version.
     JobData data = new JobData(new SqoopOptions(), new VersionTool());
-    storage.create("versionJob", data);
+    storage.create(TEST_JOB, data);
 
     jobs = storage.list();
     assertEquals(1, jobs.size());
-    assertEquals("versionJob", jobs.get(0));
+    assertEquals(TEST_JOB, jobs.get(0));
 
     try {
       // Try to create that same job name again. This should fail.
       thrown.expect(IOException.class);
       thrown.reportMissingExceptionWithMessage("Expected IOException since job already exists");
-      storage.create("versionJob", data);
+      storage.create(TEST_JOB, data);
     } finally {
       jobs = storage.list();
       assertEquals(1, jobs.size());
 
       // Restore our job, check that it exists.
-      JobData outData = storage.read("versionJob");
+      JobData outData = storage.read(TEST_JOB);
       assertEquals(new VersionTool().getToolName(),
           outData.getSqoopTool().getToolName());
     }
@@ -213,14 +216,14 @@ public abstract class SavedJobsTest {
 
     // Create a job that displays the version.
     JobData data = new JobData(new SqoopOptions(), new VersionTool());
-    storage.create("versionJob", data);
+    storage.create(TEST_JOB, data);
 
     jobs = storage.list();
     assertEquals(1, jobs.size());
-    assertEquals("versionJob", jobs.get(0));
+    assertEquals(TEST_JOB, jobs.get(0));
 
     // Now delete the job.
-    storage.delete("versionJob");
+    storage.delete(TEST_JOB);
 
     // After delete, we should have no jobs.
     jobs = storage.list();
@@ -247,14 +250,14 @@ public abstract class SavedJobsTest {
         String[] args = {"-schema", "test"};
         opts.setExtraArgs(args);
         JobData data = new JobData(opts, new VersionTool());
-        storage.create("versionJob", data);
+        storage.create(TEST_JOB, data);
 
         jobs = storage.list();
         assertEquals(1, jobs.size());
-        assertEquals("versionJob", jobs.get(0));
+        assertEquals(TEST_JOB, jobs.get(0));
 
         // Restore our job, check that it exists.
-        JobData outData = storage.read("versionJob");
+        JobData outData = storage.read(TEST_JOB);
         assertEquals(new VersionTool().getToolName(),
                 outData.getSqoopTool().getToolName());
 
@@ -264,7 +267,7 @@ public abstract class SavedJobsTest {
         }
 
         // Now delete the job.
-        storage.delete("versionJob");
+        storage.delete(TEST_JOB);
     }
 
   @Test
@@ -276,11 +279,11 @@ public abstract class SavedJobsTest {
 
     // Create a job that displays the version.
     JobData data = new JobData(new SqoopOptions(), new VersionTool());
-    storage.create("versionJob", data);
+    storage.create(TEST_JOB, data);
 
     jobs = storage.list();
     assertEquals(1, jobs.size());
-    assertEquals("versionJob", jobs.get(0));
+    assertEquals(TEST_JOB, jobs.get(0));
 
     storage.close(); // Close the existing connection
 
@@ -289,10 +292,10 @@ public abstract class SavedJobsTest {
 
     jobs = storage.list();
     assertEquals(1, jobs.size());
-    assertEquals("versionJob", jobs.get(0));
+    assertEquals(TEST_JOB, jobs.get(0));
 
     // Restore our job, check that it exists.
-    JobData outData = storage.read("versionJob");
+    JobData outData = storage.read(TEST_JOB);
     assertEquals(new VersionTool().getToolName(),
         outData.getSqoopTool().getToolName());
   }

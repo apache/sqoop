@@ -16,19 +16,16 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.savedjobstests;
+package com.cloudera.sqoop.metastore.oracle;
 
-import org.apache.sqoop.manager.JdbcDrivers;
-import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
+import com.cloudera.sqoop.manager.OracleUtils;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
 
-public class SqlServerSavedJobsTest extends SavedJobsTest {
+public class OracleMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
 
-    private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
-
-    public SqlServerSavedJobsTest () {
-        super(msSQLTestUtils.getDBConnectString(),
-                msSQLTestUtils.getDBUserName(),
-                msSQLTestUtils.getDBPassWord(),
-                JdbcDrivers.SQLSERVER.getDriverClass());
+    public OracleMetaConnectIncrementalImportTest () {
+        super(OracleUtils.CONNECT_STRING,
+                OracleUtils.ORACLE_USER_NAME,
+                OracleUtils.ORACLE_USER_PASS);
     }
 }

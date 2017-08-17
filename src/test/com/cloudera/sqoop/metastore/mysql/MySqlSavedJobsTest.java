@@ -16,14 +16,18 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.savedjobstests;
+package com.cloudera.sqoop.metastore.mysql;
 
+import com.cloudera.sqoop.manager.MySQLTestUtils;
+import com.cloudera.sqoop.metastore.SavedJobsTest;
 import org.apache.sqoop.manager.JdbcDrivers;
 
-public class HsqldbSavedJobsTest extends SavedJobsTest {
+public class MySqlSavedJobsTest extends SavedJobsTest {
 
-    public HsqldbSavedJobsTest () {
-        super("jdbc:hsqldb:mem:sqoopmetastore",
-                "SA" , "", JdbcDrivers.HSQLDB.getDriverClass());
+    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+
+    public MySqlSavedJobsTest () {
+        super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
+                mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
     }
 }

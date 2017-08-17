@@ -16,15 +16,20 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.incrementaltests;
+package com.cloudera.sqoop.metastore.postgres;
 
-import com.cloudera.sqoop.manager.OracleUtils;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
 
-public class OracleMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
 
-    public OracleMetaConnectIncrementalImportTest () {
-        super(OracleUtils.CONNECT_STRING,
-                OracleUtils.ORACLE_USER_NAME,
-                OracleUtils.ORACLE_USER_PASS);
+    public PostgresMetaConnectIncrementalImportTest () {
+        super(System.getProperty(
+                "sqoop.test.postgresql.connectstring.host_url",
+                "jdbc:postgresql://localhost/"),
+                System.getProperty(
+                        "sqoop.test.postgresql.username",
+                        "sqooptest"),
+                System.getProperty(
+                        "sqoop.test.postgresql.password"));
     }
 }

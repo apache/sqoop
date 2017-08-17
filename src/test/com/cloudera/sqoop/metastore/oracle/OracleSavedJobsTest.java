@@ -16,11 +16,18 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.jobtooltests;
+package com.cloudera.sqoop.metastore.oracle;
 
-public class HsqldbJobToolTest extends JobToolTest {
+import com.cloudera.sqoop.manager.OracleUtils;
+import com.cloudera.sqoop.metastore.SavedJobsTest;
+import org.apache.sqoop.manager.JdbcDrivers;
 
-    public HsqldbJobToolTest () {
-        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
+public class OracleSavedJobsTest extends SavedJobsTest {
+
+    public OracleSavedJobsTest () {
+        super(OracleUtils.CONNECT_STRING,
+                OracleUtils.ORACLE_USER_NAME,
+                OracleUtils.ORACLE_USER_PASS,
+                JdbcDrivers.ORACLE.getDriverClass());
     }
 }

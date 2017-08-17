@@ -16,19 +16,18 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.jobtooltests;
+package com.cloudera.sqoop.metastore.sqlserver;
 
-public class DB2JobToolTest extends JobToolTest {
+import com.cloudera.sqoop.metastore.JobToolTest;
+import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
-    public DB2JobToolTest () {
-        super(System.getProperty(
-                "sqoop.test.db2.connectstring.host_url",
-                "jdbc:db2://db2host:50000"),
-                System.getProperty(
-                        "sqoop.test.db2.connectstring.username",
-                        "SQOOP"),
-                System.getProperty(
-                        "sqoop.test.db2.connectstring.password",
-                        "SQOOP"));
+public class SqlServerJobToolTest extends JobToolTest {
+
+    private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
+
+    public SqlServerJobToolTest () {
+        super(msSQLTestUtils.getDBConnectString(),
+                msSQLTestUtils.getDBUserName(),
+                msSQLTestUtils.getDBPassWord());
     }
 }

@@ -16,15 +16,18 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.jobtooltests;
+package com.cloudera.sqoop.metastore.mysql;
 
-import com.cloudera.sqoop.manager.OracleUtils;
 
-public class OracleJobToolTest extends JobToolTest {
+import com.cloudera.sqoop.manager.MySQLTestUtils;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
 
-    public OracleJobToolTest () {
-        super(OracleUtils.CONNECT_STRING,
-                OracleUtils.ORACLE_USER_NAME,
-                OracleUtils.ORACLE_USER_PASS);
+public class MySqlMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+
+    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+
+    public MySqlMetaConnectIncrementalImportTest () {
+        super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
+                mySQLTestUtils.getUserPass());
     }
 }
