@@ -332,4 +332,8 @@ public class DBRecordReader<T extends DBWritable> extends
   protected Configuration getConf(){
     return conf;
   }
+
+  ResultSet getResultSet() {
+    return results;
+  }
 }
