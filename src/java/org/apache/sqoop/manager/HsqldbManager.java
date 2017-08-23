@@ -18,18 +18,15 @@
 
 package org.apache.sqoop.manager;
 
-import java.io.IOException;
-
 import static org.apache.sqoop.manager.JdbcDrivers.HSQLDB;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
-
 import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
-
 import com.cloudera.sqoop.util.ExportException;
+import java.io.IOException;
 
 /**
  * Manages connections to hsqldb databases.
