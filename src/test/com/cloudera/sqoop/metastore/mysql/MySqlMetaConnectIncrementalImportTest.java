@@ -27,7 +27,7 @@ public class MySqlMetaConnectIncrementalImportTest extends MetaConnectIncrementa
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
     public MySqlMetaConnectIncrementalImportTest () {
-        super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
+        super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
                 mySQLTestUtils.getUserPass());
     }
 }

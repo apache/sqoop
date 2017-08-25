@@ -27,7 +27,7 @@ public class MySqlSavedJobsTest extends SavedJobsTest {
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
     public MySqlSavedJobsTest () {
-        super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
+        super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
                 mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
     }
 }

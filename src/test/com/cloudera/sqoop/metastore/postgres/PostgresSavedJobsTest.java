@@ -23,15 +23,16 @@ import org.apache.sqoop.manager.JdbcDrivers;
 
 public class PostgresSavedJobsTest extends SavedJobsTest {
 
+    private static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",
+        "jdbc:postgresql://localhost/");
+    private static final String DATABASE_USER = System.getProperty(
+        "sqoop.test.postgresql.username", "sqooptest");
+    private static final String DATABASE_NAME = System.getProperty(
+        "sqoop.test.postgresql.database", "sqooptest");
+    private static final String PASSWORD = System.getProperty("sqoop.test.postgresql.password");
+    private static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
+
     public PostgresSavedJobsTest () {
-        super(System.getProperty(
-                "sqoop.test.postgresql.connectstring.host_url",
-                "jdbc:postgresql://localhost/"),
-                System.getProperty(
-                        "sqoop.test.postgresql.username",
-                        "sqooptest"),
-                System.getProperty(
-                        "sqoop.test.postgresql.password"),
-                JdbcDrivers.POSTGRES.getDriverClass());
+        super(CONNECT_STRING, DATABASE_USER, PASSWORD, JdbcDrivers.POSTGRES.getDriverClass());
     }
 }

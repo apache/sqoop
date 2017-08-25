@@ -26,7 +26,7 @@ public class MySqlJobToolTest extends JobToolTest {
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
     public MySqlJobToolTest() {
-        super(mySQLTestUtils.getHostUrl(), mySQLTestUtils.getUserName(),
+        super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
                 mySQLTestUtils.getUserPass());
     }
 }

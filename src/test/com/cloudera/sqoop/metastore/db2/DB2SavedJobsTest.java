@@ -23,16 +23,24 @@ import org.apache.sqoop.manager.JdbcDrivers;
 
 public class DB2SavedJobsTest extends SavedJobsTest {
 
-    DB2SavedJobsTest () {
-        super(System.getProperty(
-                "sqoop.test.db2.connectstring.host_url",
-                "jdbc:db2://db2host:50000"),
-                System.getProperty(
-                        "sqoop.test.db2.connectstring.username",
-                        "SQOOP"),
-                System.getProperty(
-                        "sqoop.test.db2.connectstring.password",
-                        "SQOOP"),
-                JdbcDrivers.DB2.getDriverClass());
+    private static final String HOST_URL = System.getProperty(
+        "sqoop.test.db2.connectstring.host_url",
+        "jdbc:db2://db2host:50000");
+
+    private static final String DATABASE_NAME = System.getProperty(
+        "sqoop.test.db2.connectstring.database",
+        "SQOOP");
+    private static final String DATABASE_USER = System.getProperty(
+        "sqoop.test.db2.connectstring.username",
+        "SQOOP");
+    private static final String DATABASE_PASSWORD = System.getProperty(
+        "sqoop.test.db2.connectstring.password",
+        "SQOOP");
+    private static final String CONNECT_STRING = HOST_URL
+        + "/" + DATABASE_NAME
+        + ":currentSchema=" + DATABASE_USER +";";
+
+    public DB2SavedJobsTest () {
+        super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD, JdbcDrivers.DB2.getDriverClass());
     }
 }

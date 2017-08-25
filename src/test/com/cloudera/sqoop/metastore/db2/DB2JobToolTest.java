@@ -22,15 +22,24 @@ import com.cloudera.sqoop.metastore.JobToolTest;
 
 public class DB2JobToolTest extends JobToolTest {
 
+    private static final String HOST_URL = System.getProperty(
+        "sqoop.test.db2.connectstring.host_url",
+        "jdbc:db2://db2host:50000");
+
+    private static final String DATABASE_NAME = System.getProperty(
+        "sqoop.test.db2.connectstring.database",
+        "SQOOP");
+    private static final String DATABASE_USER = System.getProperty(
+        "sqoop.test.db2.connectstring.username",
+        "SQOOP");
+    private static final String DATABASE_PASSWORD = System.getProperty(
+        "sqoop.test.db2.connectstring.password",
+        "SQOOP");
+    private static final String CONNECT_STRING = HOST_URL
+        + "/" + DATABASE_NAME
+        + ":currentSchema=" + DATABASE_USER +";";
+
     public DB2JobToolTest () {
-        super(System.getProperty(
-                "sqoop.test.db2.connectstring.host_url",
-                "jdbc:db2://db2host:50000"),
-                System.getProperty(
-                        "sqoop.test.db2.connectstring.username",
-                        "SQOOP"),
-                System.getProperty(
-                        "sqoop.test.db2.connectstring.password",
-                        "SQOOP"));
+        super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);
     }
 }
