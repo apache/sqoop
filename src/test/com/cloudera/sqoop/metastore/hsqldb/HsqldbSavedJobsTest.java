@@ -18,12 +18,12 @@
 
 package com.cloudera.sqoop.metastore.hsqldb;
 
-import com.cloudera.sqoop.metastore.SavedJobsTest;
+import com.cloudera.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 
-public class HsqldbSavedJobsTest extends SavedJobsTest {
+public class HsqldbSavedJobsTest extends SavedJobsTestBase {
 
-    public HsqldbSavedJobsTest () {
+    public HsqldbSavedJobsTest() {
         super("jdbc:hsqldb:mem:sqoopmetastore",
                 "SA" , "", JdbcDrivers.HSQLDB.getDriverClass());
     }

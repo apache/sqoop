@@ -18,9 +18,9 @@
 
 package com.cloudera.sqoop.metastore.postgres;
 
-import com.cloudera.sqoop.metastore.JobToolTest;
+import com.cloudera.sqoop.metastore.JobToolTestBase;
 
-public class PostgresJobToolTest extends JobToolTest {
+public class PostgresJobToolTest extends JobToolTestBase {
 
     private static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",
         "jdbc:postgresql://localhost/");
@@ -31,7 +31,7 @@ public class PostgresJobToolTest extends JobToolTest {
     private static final String PASSWORD = System.getProperty("sqoop.test.postgresql.password");
     private static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
-    public PostgresJobToolTest () {
+    public PostgresJobToolTest() {
         super(CONNECT_STRING, DATABASE_USER, PASSWORD);
     }
 }

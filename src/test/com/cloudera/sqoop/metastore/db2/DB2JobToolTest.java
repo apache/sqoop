@@ -18,9 +18,9 @@
 
 package com.cloudera.sqoop.metastore.db2;
 
-import com.cloudera.sqoop.metastore.JobToolTest;
+import com.cloudera.sqoop.metastore.JobToolTestBase;
 
-public class DB2JobToolTest extends JobToolTest {
+public class DB2JobToolTest extends JobToolTestBase {
 
     private static final String HOST_URL = System.getProperty(
         "sqoop.test.db2.connectstring.host_url",
@@ -39,7 +39,7 @@ public class DB2JobToolTest extends JobToolTest {
         + "/" + DATABASE_NAME
         + ":currentSchema=" + DATABASE_USER +";";
 
-    public DB2JobToolTest () {
+    public DB2JobToolTest() {
         super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);
     }
 }

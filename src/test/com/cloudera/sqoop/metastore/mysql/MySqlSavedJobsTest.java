@@ -19,14 +19,14 @@
 package com.cloudera.sqoop.metastore.mysql;
 
 import com.cloudera.sqoop.manager.MySQLTestUtils;
-import com.cloudera.sqoop.metastore.SavedJobsTest;
+import com.cloudera.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 
-public class MySqlSavedJobsTest extends SavedJobsTest {
+public class MySqlSavedJobsTest extends SavedJobsTestBase {
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-    public MySqlSavedJobsTest () {
+    public MySqlSavedJobsTest() {
         super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
                 mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
     }

@@ -20,13 +20,13 @@ package com.cloudera.sqoop.metastore.mysql;
 
 
 import com.cloudera.sqoop.manager.MySQLTestUtils;
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
-public class MySqlMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+public class MySqlMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-    public MySqlMetaConnectIncrementalImportTest () {
+    public MySqlMetaConnectIncrementalImportTest() {
         super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
                 mySQLTestUtils.getUserPass());
     }

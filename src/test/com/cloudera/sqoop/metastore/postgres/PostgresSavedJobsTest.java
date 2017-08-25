@@ -18,10 +18,10 @@
 
 package com.cloudera.sqoop.metastore.postgres;
 
-import com.cloudera.sqoop.metastore.SavedJobsTest;
+import com.cloudera.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 
-public class PostgresSavedJobsTest extends SavedJobsTest {
+public class PostgresSavedJobsTest extends SavedJobsTestBase {
 
     private static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",
         "jdbc:postgresql://localhost/");
@@ -32,7 +32,7 @@ public class PostgresSavedJobsTest extends SavedJobsTest {
     private static final String PASSWORD = System.getProperty("sqoop.test.postgresql.password");
     private static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
-    public PostgresSavedJobsTest () {
+    public PostgresSavedJobsTest() {
         super(CONNECT_STRING, DATABASE_USER, PASSWORD, JdbcDrivers.POSTGRES.getDriverClass());
     }
 }

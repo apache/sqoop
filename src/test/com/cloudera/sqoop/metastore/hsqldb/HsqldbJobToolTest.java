@@ -18,11 +18,11 @@
 
 package com.cloudera.sqoop.metastore.hsqldb;
 
-import com.cloudera.sqoop.metastore.JobToolTest;
+import com.cloudera.sqoop.metastore.JobToolTestBase;
 
-public class HsqldbJobToolTest extends JobToolTest {
+public class HsqldbJobToolTest extends JobToolTestBase {
 
-    public HsqldbJobToolTest () {
+    public HsqldbJobToolTest() {
         super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
     }
 }

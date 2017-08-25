@@ -18,14 +18,14 @@
 
 package com.cloudera.sqoop.metastore.sqlserver;
 
-import com.cloudera.sqoop.metastore.JobToolTest;
+import com.cloudera.sqoop.metastore.JobToolTestBase;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
-public class SqlServerJobToolTest extends JobToolTest {
+public class SqlServerJobToolTest extends JobToolTestBase {
 
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-    public SqlServerJobToolTest () {
+    public SqlServerJobToolTest() {
         super(msSQLTestUtils.getDBConnectString(),
                 msSQLTestUtils.getDBUserName(),
                 msSQLTestUtils.getDBPassWord());

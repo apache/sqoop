@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.cloudera.sqoop.metastore.SavedJobsTest;
+import com.cloudera.sqoop.metastore.SavedJobsTestBase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -93,7 +93,7 @@ public class TestIncrementalImport  {
     options.setConnectString(SOURCE_DB_URL);
     options.setUsername(AUTO_STORAGE_USERNAME);
     options.setPassword(AUTO_STORAGE_PASSWORD);
-    SavedJobsTest.resetSchema(options);
+    SavedJobsTestBase.resetSchema(options);
   }
 
   public static Configuration newConf() {

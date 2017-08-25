@@ -18,14 +18,14 @@
 
 package com.cloudera.sqoop.metastore.sqlserver;
 
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
-public class SqlServerMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+public class SqlServerMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-    public SqlServerMetaConnectIncrementalImportTest () {
+    public SqlServerMetaConnectIncrementalImportTest() {
         super(msSQLTestUtils.getDBConnectString(),
                 msSQLTestUtils.getDBUserName(),
                 msSQLTestUtils.getDBPassWord());

@@ -19,11 +19,11 @@
 package com.cloudera.sqoop.metastore.oracle;
 
 import com.cloudera.sqoop.manager.OracleUtils;
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
-public class OracleMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+public class OracleMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
-    public OracleMetaConnectIncrementalImportTest () {
+    public OracleMetaConnectIncrementalImportTest() {
         super(OracleUtils.CONNECT_STRING,
                 OracleUtils.ORACLE_USER_NAME,
                 OracleUtils.ORACLE_USER_PASS);

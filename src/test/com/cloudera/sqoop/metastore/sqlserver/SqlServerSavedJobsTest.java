@@ -18,15 +18,15 @@
 
 package com.cloudera.sqoop.metastore.sqlserver;
 
-import com.cloudera.sqoop.metastore.SavedJobsTest;
+import com.cloudera.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
-public class SqlServerSavedJobsTest extends SavedJobsTest {
+public class SqlServerSavedJobsTest extends SavedJobsTestBase {
 
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-    public SqlServerSavedJobsTest () {
+    public SqlServerSavedJobsTest() {
         super(msSQLTestUtils.getDBConnectString(),
                 msSQLTestUtils.getDBUserName(),
                 msSQLTestUtils.getDBPassWord(),

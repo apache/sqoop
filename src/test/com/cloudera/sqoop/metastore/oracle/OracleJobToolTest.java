@@ -19,11 +19,11 @@
 package com.cloudera.sqoop.metastore.oracle;
 
 import com.cloudera.sqoop.manager.OracleUtils;
-import com.cloudera.sqoop.metastore.JobToolTest;
+import com.cloudera.sqoop.metastore.JobToolTestBase;
 
-public class OracleJobToolTest extends JobToolTest {
+public class OracleJobToolTest extends JobToolTestBase {
 
-    public OracleJobToolTest () {
+    public OracleJobToolTest() {
         super(OracleUtils.CONNECT_STRING,
                 OracleUtils.ORACLE_USER_NAME,
                 OracleUtils.ORACLE_USER_PASS);

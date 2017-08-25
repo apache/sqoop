@@ -19,12 +19,12 @@
 package com.cloudera.sqoop.metastore.oracle;
 
 import com.cloudera.sqoop.manager.OracleUtils;
-import com.cloudera.sqoop.metastore.SavedJobsTest;
+import com.cloudera.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 
-public class OracleSavedJobsTest extends SavedJobsTest {
+public class OracleSavedJobsTest extends SavedJobsTestBase {
 
-    public OracleSavedJobsTest () {
+    public OracleSavedJobsTest() {
         super(OracleUtils.CONNECT_STRING,
                 OracleUtils.ORACLE_USER_NAME,
                 OracleUtils.ORACLE_USER_PASS,

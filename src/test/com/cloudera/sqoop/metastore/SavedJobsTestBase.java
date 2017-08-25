@@ -53,7 +53,7 @@ import java.util.TreeMap;
 /**
  * Test the metastore and job-handling features.
  */
-public abstract class SavedJobsTest {
+public abstract class SavedJobsTestBase {
 
   public static final String TEST_JOB = "testJob";
   public static final String TEST_TABLE_NAME = "abcd";
@@ -70,7 +70,7 @@ public abstract class SavedJobsTest {
   private Configuration conf;
   private Map<String, String> descriptor;
 
-  public SavedJobsTest(String metaConnect, String metaUser, String metaPassword, String driverClass){
+  public SavedJobsTestBase(String metaConnect, String metaUser, String metaPassword, String driverClass){
     this.metaConnect = metaConnect;
     this.metaUser = metaUser;
     this.metaPassword = metaPassword;

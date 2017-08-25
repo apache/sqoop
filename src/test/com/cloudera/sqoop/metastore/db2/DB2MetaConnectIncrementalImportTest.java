@@ -18,9 +18,9 @@
 
 package com.cloudera.sqoop.metastore.db2;
 
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
-public class DB2MetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+public class DB2MetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
     private static final String HOST_URL = System.getProperty(
         "sqoop.test.db2.connectstring.host_url",
@@ -39,8 +39,7 @@ public class DB2MetaConnectIncrementalImportTest extends MetaConnectIncrementalI
         + "/" + DATABASE_NAME
         + ":currentSchema=" + DATABASE_USER +";";
 
-    public DB2MetaConnectIncrementalImportTest () {
+    public DB2MetaConnectIncrementalImportTest() {
         super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);
     }
 }
-

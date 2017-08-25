@@ -42,10 +42,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class MetaConnectIncrementalImportTest extends BaseSqoopTestCase {
+public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory
-            .getLog(MetaConnectIncrementalImportTest.class.getName());
+            .getLog(MetaConnectIncrementalImportTestBase.class.getName());
 
     private String metaConnectString;
     private String metaUser;
@@ -54,7 +54,7 @@ public abstract class MetaConnectIncrementalImportTest extends BaseSqoopTestCase
     private Connection connMeta;
     private ConnManager cm;
 
-    public MetaConnectIncrementalImportTest(String metaConnectString, String metaUser, String metaPass) {
+    public MetaConnectIncrementalImportTestBase(String metaConnectString, String metaUser, String metaPass) {
         this.metaConnectString = metaConnectString;
         this.metaUser = metaUser;
         this.metaPass = metaPass;

@@ -18,9 +18,9 @@
 
 package com.cloudera.sqoop.metastore.postgres;
 
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
-public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
     private static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",
         "jdbc:postgresql://localhost/");
@@ -31,7 +31,7 @@ public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncreme
     private static final String PASSWORD = System.getProperty("sqoop.test.postgresql.password");
     private static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
-    public PostgresMetaConnectIncrementalImportTest () {
+    public PostgresMetaConnectIncrementalImportTest() {
         super(CONNECT_STRING, DATABASE_USER, PASSWORD);
     }
 }

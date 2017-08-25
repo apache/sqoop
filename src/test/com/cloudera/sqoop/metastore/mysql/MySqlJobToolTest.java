@@ -19,9 +19,9 @@
 package com.cloudera.sqoop.metastore.mysql;
 
 import com.cloudera.sqoop.manager.MySQLTestUtils;
-import com.cloudera.sqoop.metastore.JobToolTest;
+import com.cloudera.sqoop.metastore.JobToolTestBase;
 
-public class MySqlJobToolTest extends JobToolTest {
+public class MySqlJobToolTest extends JobToolTestBase {
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 

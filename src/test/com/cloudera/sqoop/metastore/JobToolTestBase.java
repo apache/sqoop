@@ -21,7 +21,6 @@ package com.cloudera.sqoop.metastore;
 import static org.junit.Assert.assertEquals;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 
@@ -44,10 +43,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class JobToolTest extends BaseSqoopTestCase {
+public abstract class JobToolTestBase extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory
-            .getLog(MetaConnectIncrementalImportTest.class.getName());
+            .getLog(MetaConnectIncrementalImportTestBase.class.getName());
 
     private String metaConnectString;
     private String metaUser;
@@ -55,7 +54,7 @@ public abstract class JobToolTest extends BaseSqoopTestCase {
     private ConnManager cm;
 
 
-    public JobToolTest(String metaConnectString, String metaUser, String metaPass) {
+    public JobToolTestBase(String metaConnectString, String metaUser, String metaPass) {
         this.metaConnectString = metaConnectString;
         this.metaUser = metaUser;
         this.metaPass = metaPass;

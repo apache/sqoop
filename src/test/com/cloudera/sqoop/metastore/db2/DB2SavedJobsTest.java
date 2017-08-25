@@ -18,10 +18,10 @@
 
 package com.cloudera.sqoop.metastore.db2;
 
-import com.cloudera.sqoop.metastore.SavedJobsTest;
+import com.cloudera.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 
-public class DB2SavedJobsTest extends SavedJobsTest {
+public class DB2SavedJobsTest extends SavedJobsTestBase {
 
     private static final String HOST_URL = System.getProperty(
         "sqoop.test.db2.connectstring.host_url",
@@ -40,7 +40,7 @@ public class DB2SavedJobsTest extends SavedJobsTest {
         + "/" + DATABASE_NAME
         + ":currentSchema=" + DATABASE_USER +";";
 
-    public DB2SavedJobsTest () {
+    public DB2SavedJobsTest() {
         super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD, JdbcDrivers.DB2.getDriverClass());
     }
 }

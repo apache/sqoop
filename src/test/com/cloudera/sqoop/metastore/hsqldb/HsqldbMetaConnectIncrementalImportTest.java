@@ -18,11 +18,11 @@
 
 package com.cloudera.sqoop.metastore.hsqldb;
 
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTest;
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
-public class HsqldbMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTest {
+public class HsqldbMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
-    public HsqldbMetaConnectIncrementalImportTest () {
+    public HsqldbMetaConnectIncrementalImportTest() {
         super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
     }
 }

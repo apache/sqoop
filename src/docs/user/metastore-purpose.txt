@@ -33,11 +33,12 @@ Migration of metastore data from one database service to another is not directly
 `---------------------------`------------------------------------------
 Service                       Connect String Format
 -----------------------------------------------------------------------
-  +MySql+                      jdbc:mysql://<hostname>[<:port>]/<dbname>
-  +Hsqldb+                     jdbc:hsqldb:hsql://<server>[:<port>]
-  +Postgres+                   jdbc:postgresql:[<//host>[:<port>/]]<database>
-  +Oracle+                     jdbc:oracle:thin:@<server>[:<port>]:<database_name>
-  +DB2+                        jdbc:db2://<server>:<port>/<db-name>
+  +MySQL+                      jdbc:mysql://<server>:<port>/<dbname>
+  +HSQLDB+                     jdbc:hsqldb:hsql://<server>:<port>/<dbname>
+  +PostgreSQL+                 jdbc:postgresql://<server>:<port>/<dbname>
+  +Oracle+                     jdbc:oracle:thin:@//<server>:<port>/<SID>
+  +DB2+                        jdbc:db2://<server>:<port>/<dbname>
+  +MSSQL+                      jdbc:sqlserver://<server>:<port>;database=<dbname>
 -----------------------------------------------------------------------
 
 
