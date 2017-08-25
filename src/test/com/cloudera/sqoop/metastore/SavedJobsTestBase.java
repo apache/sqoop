@@ -51,7 +51,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Test the metastore and job-handling features.
+ * Test the metastore and job-handling features,
+ * implemented for specific database services in sub-classes.
  */
 public abstract class SavedJobsTestBase {
 

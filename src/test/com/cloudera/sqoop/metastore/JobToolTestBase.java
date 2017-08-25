@@ -43,6 +43,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Base test class for JobTool, implemented for specific database services in sub-classes
+ */
+
 public abstract class JobToolTestBase extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory

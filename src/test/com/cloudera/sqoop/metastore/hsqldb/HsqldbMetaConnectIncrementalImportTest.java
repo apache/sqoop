@@ -20,6 +20,16 @@ package com.cloudera.sqoop.metastore.hsqldb;
 
 import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
+/**
+ * Test that Incremental-Import values are stored correctly in Hsqldb
+ *
+ * This class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=HsqldbMetaConnectIncrementalImportTest or -Dthirdparty=true.
+ *
+ * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
+ */
+
 public class HsqldbMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
     public HsqldbMetaConnectIncrementalImportTest() {

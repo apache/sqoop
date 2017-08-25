@@ -42,6 +42,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Base test class for Incremental Import Metastore data, implemented for specific database services in sub-classes
+ */
+
 public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory

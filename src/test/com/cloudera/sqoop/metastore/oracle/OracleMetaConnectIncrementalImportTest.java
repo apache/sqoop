@@ -21,6 +21,26 @@ package com.cloudera.sqoop.metastore.oracle;
 import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
+/**
+ * Test that Incremental-Import values are stored correctly in Oracle
+ *
+ * This uses JDBC to store and retrieve metastore data from an Oracle server
+ *
+ * Since this requires an Oracle installation,
+ * this class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=OracleMetaConnectIncrementalImportTest or -Dthirdparty=true.
+ *
+ * You need to put Oracle JDBC driver library (ojdbc6.jar) in a location
+ * where Sqoop will be able to access it (since this library cannot be checked
+ * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
+ *
+ *   Once you have a running Oracle database,
+ *   Set server URL, username, and password with system variables
+ *   -Dsqoop.test.oracle.connectstring, -Dsqoop.test.oracle.username
+ *   and -Dsqoop.test.oracle.password respectively
+ */
+
 public class OracleMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
     public OracleMetaConnectIncrementalImportTest() {

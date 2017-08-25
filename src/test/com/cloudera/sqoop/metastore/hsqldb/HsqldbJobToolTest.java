@@ -20,6 +20,16 @@ package com.cloudera.sqoop.metastore.hsqldb;
 
 import com.cloudera.sqoop.metastore.JobToolTestBase;
 
+/**
+ * Test that the Job Tool works in Hsqldb
+ *
+ * This class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=HsqldbJobToolTest or -Dthirdparty=true.
+ *
+ * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
+ */
+
 public class HsqldbJobToolTest extends JobToolTestBase {
 
     public HsqldbJobToolTest() {

@@ -20,6 +20,22 @@ package com.cloudera.sqoop.metastore.postgres;
 
 import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
+/**
+ * Test that Incremental-Import values are stored correctly in PostgreSQL
+ *
+ * This uses JDBC to store and retrieve metastore data from a Postgres server
+ *
+ * Since this requires a Postgres installation,
+ * this class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=PostgresMetaConnectIncrementalImportTest or -Dthirdparty=true.
+ *
+ *   Once you have a running Postgres database,
+ *   Set server URL, database name, username, and password with system variables
+ *   -Dsqoop.test.postgresql.connectstring.host_url, -Dsqoop.test.postgresql.database,
+ *   -Dsqoop.test.postgresql.username and -Dsqoop.test.postgresql.password respectively
+ */
+
 public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
     private static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",
