@@ -175,7 +175,8 @@ public abstract class SavedJobsTestBase {
     storage.create(TEST_JOB_2, createTestJobData(TEST_TABLE_NAME_2));
     storage.create(TEST_JOB_3, createTestJobData(TEST_TABLE_NAME_3));
 
-    assertThat( storage.list(), hasItems( TEST_JOB, TEST_JOB_2, TEST_JOB_3));
+    assertThat("List did not return correct job data",
+            storage.list(), hasItems(TEST_JOB, TEST_JOB_2, TEST_JOB_3));
   }
 
   @Test
@@ -183,15 +184,15 @@ public abstract class SavedJobsTestBase {
 
     // Job list should start out empty.
     List<String> jobs = storage.list();
-    assertEquals(0, jobs.size());
+    assertEquals("Job list should start out empty", 0, jobs.size());
 
     // Create a job that displays the version.
     JobData data = new JobData(new SqoopOptions(), new VersionTool());
     storage.create(TEST_JOB, data);
 
     jobs = storage.list();
-    assertEquals(1, jobs.size());
-    assertEquals(TEST_JOB, jobs.get(0));
+    assertEquals("Test Job not created correctly",1, jobs.size());
+    assertEquals("Test Job data not returned correctly", TEST_JOB, jobs.get(0));
 
     try {
       // Try to create that same job name again. This should fail.
@@ -200,11 +201,11 @@ public abstract class SavedJobsTestBase {
       storage.create(TEST_JOB, data);
     } finally {
       jobs = storage.list();
-      assertEquals(1, jobs.size());
+      assertEquals("Incorrect number of jobs present",1, jobs.size());
 
       // Restore our job, check that it exists.
       JobData outData = storage.read(TEST_JOB);
-      assertEquals(new VersionTool().getToolName(),
+      assertEquals("Test job does not exist", new VersionTool().getToolName(),
           outData.getSqoopTool().getToolName());
     }
   }
@@ -213,22 +214,22 @@ public abstract class SavedJobsTestBase {
   public void testDeleteJob() throws IOException {
     // Job list should start out empty.
     List<String> jobs = storage.list();
-    assertEquals(0, jobs.size());
+    assertEquals("Job List should start out empty", 0, jobs.size());
 
     // Create a job that displays the version.
     JobData data = new JobData(new SqoopOptions(), new VersionTool());
     storage.create(TEST_JOB, data);
 
     jobs = storage.list();
-    assertEquals(1, jobs.size());
-    assertEquals(TEST_JOB, jobs.get(0));
+    assertEquals("Incorrect number of jobs present",1, jobs.size());
+    assertEquals("Test Job created incorrectly", TEST_JOB, jobs.get(0));
 
     // Now delete the job.
     storage.delete(TEST_JOB);
 
     // After delete, we should have no jobs.
     jobs = storage.list();
-    assertEquals(0, jobs.size());
+    assertEquals("Job was not deleted correctly", 0, jobs.size());
   }
 
   @Test
@@ -244,7 +245,7 @@ public abstract class SavedJobsTestBase {
 
         // Job list should start out empty.
         List<String> jobs = storage.list();
-        assertEquals(0, jobs.size());
+        assertEquals("Job list should start out empty", 0, jobs.size());
 
         // Create a job with extra args
         com.cloudera.sqoop.SqoopOptions opts = new SqoopOptions();
@@ -254,12 +255,13 @@ public abstract class SavedJobsTestBase {
         storage.create(TEST_JOB, data);
 
         jobs = storage.list();
-        assertEquals(1, jobs.size());
-        assertEquals(TEST_JOB, jobs.get(0));
+        assertEquals("Incorrect number of jobs", 1, jobs.size());
+        assertEquals("Job not created properly", TEST_JOB, jobs.get(0));
 
         // Restore our job, check that it exists.
         JobData outData = storage.read(TEST_JOB);
-        assertEquals(new VersionTool().getToolName(),
+        assertEquals("Incorrect Tool in Test Job",
+                new VersionTool().getToolName(),
                 outData.getSqoopTool().getToolName());
 
         String[] storedArgs = outData.getSqoopOptions().getExtraArgs();
@@ -276,15 +278,15 @@ public abstract class SavedJobsTestBase {
 
     // Job list should start out empty.
     List<String> jobs = storage.list();
-    assertEquals(0, jobs.size());
+    assertEquals("Job list should start out empty", 0, jobs.size());
 
     // Create a job that displays the version.
     JobData data = new JobData(new SqoopOptions(), new VersionTool());
     storage.create(TEST_JOB, data);
 
     jobs = storage.list();
-    assertEquals(1, jobs.size());
-    assertEquals(TEST_JOB, jobs.get(0));
+    assertEquals("Incorrect number of jobs", 1, jobs.size());
+    assertEquals("Job not created correctly", TEST_JOB, jobs.get(0));
 
     storage.close(); // Close the existing connection
 
@@ -292,13 +294,14 @@ public abstract class SavedJobsTestBase {
     storage.open(descriptor);
 
     jobs = storage.list();
-    assertEquals(1, jobs.size());
-    assertEquals(TEST_JOB, jobs.get(0));
+    assertEquals("Test Job did not persist through re-open", 1, jobs.size());
+    assertEquals("Job data not correct after re-open", TEST_JOB, jobs.get(0));
 
     // Restore our job, check that it exists.
     JobData outData = storage.read(TEST_JOB);
-    assertEquals(new VersionTool().getToolName(),
-        outData.getSqoopTool().getToolName());
+    assertEquals("Incorrect Tool in Test Job",
+            new VersionTool().getToolName(),
+            outData.getSqoopTool().getToolName());
   }
 
   private com.cloudera.sqoop.metastore.JobData createTestJobData(String setTableName) throws IOException {

@@ -157,14 +157,16 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
         ResultSet lastCol = getSaveIncrementalState.executeQuery(
                 "SELECT propVal FROM " + cm.escapeTableName("SQOOP_SESSIONS") + " WHERE propname = 'incremental.last.value'");
         lastCol.next();
-        assertEquals(expected, lastCol.getInt("propVal"));
+        assertEquals("Last row value differs from expected",
+                expected, lastCol.getInt("propVal"));
     }
 
     private void execJob() {
         JobTool jobToolExec = new JobTool();
         org.apache.sqoop.Sqoop sqoopExec = new org.apache.sqoop.Sqoop(jobToolExec);
         String[] argsExec = getExecJob(metaConnectString, metaUser, metaPass);
-        assertEquals(0, org.apache.sqoop.Sqoop.runSqoop(sqoopExec, argsExec));
+        assertEquals("Sqoop Job did not execute properly",
+                0, org.apache.sqoop.Sqoop.runSqoop(sqoopExec, argsExec));
     }
 
     private void createJob() {

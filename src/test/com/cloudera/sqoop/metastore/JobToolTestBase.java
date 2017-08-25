@@ -180,7 +180,7 @@ public abstract class JobToolTestBase extends BaseSqoopTestCase {
         org.apache.sqoop.tool.JobTool jobTool = new org.apache.sqoop.tool.JobTool();
         org.apache.sqoop.Sqoop sqoop = new Sqoop(jobTool);
         String[] args = getCreateJob(metaConnectString, metaUser, metaPass);
-        assertEquals(0, Sqoop.runSqoop(sqoop, args));
+        assertEquals("Error creating Sqoop Job", 0, Sqoop.runSqoop(sqoop, args));
     }
 
     @Test
@@ -195,7 +195,7 @@ public abstract class JobToolTestBase extends BaseSqoopTestCase {
         JobTool jobToolExec = new JobTool();
         Sqoop sqoopExec = new Sqoop(jobToolExec);
         String[] argsExec = getExecJob(metaConnectString, metaUser, metaPass);
-        assertEquals(0, Sqoop.runSqoop(sqoopExec, argsExec));
+        assertEquals("Error executing Sqoop Job", 0, Sqoop.runSqoop(sqoopExec, argsExec));
     }
 
     @Test
@@ -210,6 +210,6 @@ public abstract class JobToolTestBase extends BaseSqoopTestCase {
         JobTool jobToolDelete = new JobTool();
         Sqoop sqoopExec = new Sqoop(jobToolDelete);
         String[] argsDelete = getDeleteJob(metaConnectString, metaUser, metaPass);
-        assertEquals(0, Sqoop.runSqoop(sqoopExec, argsDelete));
+        assertEquals("Error deleting Sqoop Job", 0, Sqoop.runSqoop(sqoopExec, argsDelete));
     }
 }
