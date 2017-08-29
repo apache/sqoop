@@ -55,7 +55,7 @@ public abstract class OraOopTestCase {
 
   private static final OraOopLog LOG = OraOopLogFactory.getLog(
       OraOopTestCase.class.getName());
-
+  private static final boolean ESCAPING_DISABLED_DEFAULT = true;
   private String sqoopGenLibDirectory = System.getProperty("user.dir")
       + "/target/tmp/lib";
   private String sqoopGenSrcDirectory = System.getProperty("user.dir")
@@ -206,6 +206,11 @@ public abstract class OraOopTestCase {
 
   protected int runImport(String tableName, Configuration sqoopConf,
       boolean sequenceFile) {
+    return runImport(tableName, sqoopConf, sequenceFile, ESCAPING_DISABLED_DEFAULT);
+  }
+
+  protected int runImport(String tableName, Configuration sqoopConf,
+      boolean sequenceFile, boolean escapingDisabled) {
     Logger rootLogger = Logger.getRootLogger();
     StringWriter stringWriter = new StringWriter();
     Layout layout = new PatternLayout("%d{yy/MM/dd HH:mm:ss} %p %c{2}: %m%n");
@@ -246,6 +251,9 @@ public abstract class OraOopTestCase {
     sqoopArgs.add("--outdir");
     sqoopArgs.add(this.sqoopGenSrcDirectory);
 
+    sqoopArgs.add("--oracle-escaping-disabled");
+    sqoopArgs.add(Boolean.toString(escapingDisabled));
+
     if (OracleUtils.NUM_MAPPERS != 0) {
       sqoopArgs.add("--num-mappers");
       sqoopArgs.add(Integer.toString(OracleUtils.NUM_MAPPERS));
@@ -276,16 +284,21 @@ public abstract class OraOopTestCase {
 
   protected int runExportFromTemplateTable(String templateTableName,
       String tableName, boolean isPartitoned) {
+    return runExportFromTemplateTable(templateTableName, tableName, isPartitoned, ESCAPING_DISABLED_DEFAULT);
+  }
+
+  protected int runExportFromTemplateTable(String templateTableName,
+      String tableName, boolean isPartitoned, boolean escapingDisabled) {
     Map<String, String> stringConfigEntries = new HashMap<String, String>();
     stringConfigEntries.put("oraoop.template.table", templateTableName);
     Map<String, Boolean> booleanConfigEntries = new HashMap<String, Boolean>();
     booleanConfigEntries.put("oraoop.partitioned", isPartitoned);
 
-    return runExport(tableName, new ArrayList<String>(), stringConfigEntries, booleanConfigEntries);
+    return runExport(tableName, new ArrayList<String>(), stringConfigEntries, booleanConfigEntries, escapingDisabled);
   }
 
   protected int runExport(String tableName, List<String> additionalArgs, Map<String, String> stringConfigEntries,
-      Map<String, Boolean> booleanConfigEntries) {
+      Map<String, Boolean> booleanConfigEntries, boolean escapingDisabled) {
     List<String> sqoopArgs = new ArrayList<String>();
 
     sqoopArgs.add("export");
@@ -315,6 +328,9 @@ public abstract class OraOopTestCase {
 
     sqoopArgs.add("--outdir");
     sqoopArgs.add(this.sqoopGenSrcDirectory);
+
+    sqoopArgs.add("--oracle-escaping-disabled");
+    sqoopArgs.add(Boolean.toString(escapingDisabled));
 
     sqoopArgs.addAll(additionalArgs);
 

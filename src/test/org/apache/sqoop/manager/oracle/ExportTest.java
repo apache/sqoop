@@ -31,6 +31,8 @@ public class ExportTest extends OraOopTestCase {
 
   private static final ExportTest TEST_CASE = new ExportTest();
 
+  private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
+
   @BeforeClass
   public static void setUpHdfsData() throws Exception {
     // Copy the TST_PRODUCT table into HDFS which can be used for the export
@@ -40,14 +42,14 @@ public class ExportTest extends OraOopTestCase {
     TEST_CASE.createTable("table_tst_product.xml");
 
     int retCode =
- TEST_CASE.runImport("TST_PRODUCT", TEST_CASE.getSqoopConf(), false);
+ TEST_CASE.runImport("TST_PRODUCT", TEST_CASE.getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
     assertEquals("Return code should be 0", 0, retCode);
   }
 
   @Test
   public void testProductExport() throws Exception {
     int retCode =
-        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP", false);
+        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP", false, DISABLE_ORACLE_ESCAPING_FLAG);
     assertEquals("Return code should be 0", 0, retCode);
   }
 
@@ -55,7 +57,7 @@ public class ExportTest extends OraOopTestCase {
   public void testProductExportMixedCaseTableName() throws Exception {
     int retCode =
         TEST_CASE.runExportFromTemplateTable("TST_PRODUCT",
-            "\"\"T5+_Pr#duct_Exp\"\"", false);
+            "\"\"T5+_Pr#duct_Exp\"\"", false, DISABLE_ORACLE_ESCAPING_FLAG);
     assertEquals("Return code should be 0", 0, retCode);
   }
 
