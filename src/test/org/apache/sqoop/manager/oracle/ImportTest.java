@@ -19,7 +19,6 @@
 package org.apache.sqoop.manager.oracle;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.OraOopConstants.
            OraOopOracleDataChunkMethod;
 import org.junit.Test;
@@ -31,13 +30,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class ImportTest extends OraOopTestCase {
 
+  private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
+
   @Test
   public void testProductImport() throws Exception {
     setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product");
     createTable("table_tst_product.xml");
 
     try {
-      int retCode = runImport("TST_PRODUCT", getSqoopConf(), false);
+      int retCode = runImport("TST_PRODUCT", getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -49,16 +50,14 @@ public class ImportTest extends OraOopTestCase {
 
   @Test
   public void testProductWithWhiteSpaceImport() throws Exception {
-    System.setProperty(SqoopOptions.ORACLE_ESCAPING_DISABLED, "false");
     setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product");
     createTable("table_tst_product_with_white_space.xml");
 
     try {
-      int retCode = runImport("TST_Pr OdUCT", getSqoopConf(), false);
+      int retCode = runImport("TST_Pr OdUCT", getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
-      System.clearProperty(SqoopOptions.ORACLE_ESCAPING_DISABLED);
       cleanupFolders();
       closeTestEnvConnection();
     }
@@ -70,7 +69,7 @@ public class ImportTest extends OraOopTestCase {
     createTable("table_tst_product_part.xml");
 
     try {
-      int retCode = runImport("TST_PRODUCT_PART", getSqoopConf(), false);
+      int retCode = runImport("TST_PRODUCT_PART", getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -89,7 +88,7 @@ public class ImportTest extends OraOopTestCase {
         OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
 
     try {
-      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -110,7 +109,7 @@ public class ImportTest extends OraOopTestCase {
         "tst_product_part_1,tst_product_part_2,\"tst_product_pa#rt_6\"");
 
     try {
-      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -134,7 +133,7 @@ public class ImportTest extends OraOopTestCase {
            +"tst_product_part_3,\"tst_product_pa#rt_6\"");
 
     try {
-      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_PART", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -149,7 +148,7 @@ public class ImportTest extends OraOopTestCase {
     createTable("table_tst_product_subpart.xml");
 
     try {
-      int retCode = runImport("TST_PRODUCT_SUBPART", getSqoopConf(), false);
+      int retCode = runImport("TST_PRODUCT_SUBPART", getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -168,7 +167,7 @@ public class ImportTest extends OraOopTestCase {
         OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
 
     try {
-      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -191,7 +190,7 @@ public class ImportTest extends OraOopTestCase {
            +"TST_PRODUCT_PART_3,TST_PRODUCT_PART_4");
 
     try {
-      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -212,7 +211,7 @@ public class ImportTest extends OraOopTestCase {
         "TST_PRODUCT_PART_1,TST_PRODUCT_PART_2,TST_PRODUCT_PART_3");
 
     try {
-      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_SUBPART", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -233,7 +232,7 @@ public class ImportTest extends OraOopTestCase {
     sqoopConf.setBoolean(OraOopConstants.ORAOOP_IMPORT_CONSISTENT_READ, true);
 
     try {
-      int retCode = runImport("TST_PRODUCT", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -248,7 +247,7 @@ public class ImportTest extends OraOopTestCase {
     createTable("table_tst_product_special_chars.xml");
 
     try {
-      int retCode = runImport("\"\"T5+_Pr#duct\"\"", getSqoopConf(), false);
+      int retCode = runImport("\"\"T5+_Pr#duct\"\"", getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
@@ -267,7 +266,7 @@ public class ImportTest extends OraOopTestCase {
         OraOopConstants.OraOopOracleDataChunkMethod.PARTITION.toString());
 
     try {
-      int retCode = runImport("TST_PRODUCT_PART_IOT", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT_PART_IOT", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {

@@ -30,6 +30,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class TimestampDataTest extends OraOopTestCase {
 
+  private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
+
   @Test
   public void testProductImportTimezone() throws Exception {
     setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_timezone");
@@ -39,7 +41,7 @@ public class TimestampDataTest extends OraOopTestCase {
     sqoopConf.setBoolean(OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING, false);
 
     try {
-      int retCode = runImport("TST_PRODUCT", sqoopConf, false);
+      int retCode = runImport("TST_PRODUCT", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
       assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
