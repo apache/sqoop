@@ -81,6 +81,8 @@ under the License.
     <dependency org="org.aspectj" name="aspectjrt" rev="${aspectj.version}"
       conf="common->default"/>
 
+    <dependency org="org.apache.hadoop" name="hadoop-minikdc" rev="${hadoop.version}" conf="test->default" />
+
     <!-- Common dependencies for Sqoop -->
     <dependency org="commons-cli" name="commons-cli"
       rev="${commons-cli.version}" conf="common->default"/>
