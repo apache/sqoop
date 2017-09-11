@@ -19,7 +19,6 @@
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
@@ -28,10 +27,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.security.User;
+import org.apache.hadoop.hbase.security.token.TokenUtil;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -160,53 +163,16 @@ public class HBaseImportJob extends DataDrivenImportJob {
       HBaseConfiguration.addHbaseResources(conf);
     }
 
-    HBaseAdmin admin = new HBaseAdmin(conf);
+    Connection hbaseConnection = ConnectionFactory.createConnection(conf);
+    Admin admin = hbaseConnection.getAdmin();
 
     if (!skipDelegationTokens(conf)) {
-      // Add authentication token to the job if we're running on secure cluster.
-      //
-      // We're currently supporting HBase version 0.90 that do not have security
-      // patches which means that it do not have required methods
-      // "isSecurityEnabled" and "obtainAuthTokenForJob".
-      //
-      // We're using reflection API to see if those methods are available and call
-      // them only if they are present.
-      //
-      // After we will remove support for HBase 0.90 we can simplify the code to
-      // following code fragment:
-      /*
       try {
-        if (User.isSecurityEnabled()) {
-          User user = User.getCurrent();
-          user.obtainAuthTokenForJob(conf, job);
+        if (User.isHBaseSecurityEnabled(conf)) {
+          TokenUtil.obtainTokenForJob(hbaseConnection, User.getCurrent(), job);
         }
       } catch(InterruptedException ex) {
         throw new ImportException("Can't get authentication token", ex);
-      }
-      */
-      try {
-        // Get method isSecurityEnabled
-        Method isHBaseSecurityEnabled = User.class.getMethod(
-            "isHBaseSecurityEnabled", Configuration.class);
-
-        // Get method obtainAuthTokenForJob
-        Method obtainAuthTokenForJob = User.class.getMethod(
-            "obtainAuthTokenForJob", Configuration.class, Job.class);
-
-        // Get current user
-        User user = User.getCurrent();
-
-        // Obtain security token if needed
-        if ((Boolean)isHBaseSecurityEnabled.invoke(null, conf)) {
-          obtainAuthTokenForJob.invoke(user, conf, job);
-        }
-      } catch (NoSuchMethodException e) {
-        LOG.info("It seems that we're running on HBase without security"
-            + " additions. Security additions will not be used during this job.");
-      } catch (InvocationTargetException e) {
-        throw new ImportException("Can't get authentication token", e);
-      } catch (IllegalAccessException e) {
-        throw new ImportException("Can't get authentication token", e);
       }
     }
 
@@ -214,11 +180,11 @@ public class HBaseImportJob extends DataDrivenImportJob {
     HTableDescriptor tableDesc = null;
     byte [] familyBytes = Bytes.toBytes(familyName);
     HColumnDescriptor colDesc = new HColumnDescriptor(familyBytes);
-    if (!admin.tableExists(tableName)) {
+    if (!admin.tableExists(TableName.valueOf(tableName))) {
       if (options.getCreateHBaseTable()) {
         // Create the table.
         LOG.info("Creating missing HBase table " + tableName);
-        tableDesc =  new HTableDescriptor(tableName);
+        tableDesc =  new HTableDescriptor(TableName.valueOf(tableName));
         tableDesc.addFamily(colDesc);
         admin.createTable(tableDesc);
       } else {
@@ -228,16 +194,16 @@ public class HBaseImportJob extends DataDrivenImportJob {
       }
     } else {
       // Table exists, so retrieve their current version
-      tableDesc = admin.getTableDescriptor(Bytes.toBytes(tableName));
+	    tableDesc = admin.getTableDescriptor(TableName.valueOf(tableName));
 
       // Check if current version do have specified column family
       if (!tableDesc.hasFamily(familyBytes)) {
         if (options.getCreateHBaseTable()) {
           // Create the column family.
           LOG.info("Creating missing column family " + familyName);
-          admin.disableTable(tableName);
-          admin.addColumn(tableName, colDesc);
-          admin.enableTable(tableName);
+          admin.disableTable(TableName.valueOf(tableName));
+          admin.addColumn(TableName.valueOf(tableName), colDesc);
+          admin.enableTable(TableName.valueOf(tableName));
         } else {
           LOG.warn("Could not find column family " + familyName + " in table "
             + tableName);
@@ -250,10 +216,11 @@ public class HBaseImportJob extends DataDrivenImportJob {
     // Make sure we close the connection to HBA, this is only relevant in
     // unit tests
     admin.close();
+    hbaseConnection.close();
 
     // Make sure HBase libraries are shipped as part of the job.
     TableMapReduceUtil.addDependencyJars(job);
-    TableMapReduceUtil.addDependencyJars(conf, HTable.class);
+    TableMapReduceUtil.addDependencyJars(conf, Table.class);
 
     super.jobSetup(job);
   }

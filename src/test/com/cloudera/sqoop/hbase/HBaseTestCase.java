@@ -39,8 +39,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.security.HBaseKerberosUtils;
@@ -206,9 +209,10 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       String colFamily, String colName, String val) throws IOException {
     Get get = new Get(Bytes.toBytes(rowKey));
     get.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(colName));
-    HTable table = new HTable(new Configuration(
-        hbaseTestUtil.getConfiguration()), Bytes.toBytes(tableName));
-    try {
+    try (
+        Connection hbaseConnection = createHBaseConnection();
+        Table table = getHBaseTable(hbaseConnection, tableName)
+    ) {
       Result r = table.get(get);
       byte [] actualVal = r.getValue(Bytes.toBytes(colFamily),
           Bytes.toBytes(colName));
@@ -218,27 +222,32 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
         assertNotNull("No result, but we expected one", actualVal);
         assertEquals(val, Bytes.toString(actualVal));
       }
-    } finally {
-      table.close();
     }
   }
 
   protected int countHBaseTable(String tableName, String colFamily)
       throws IOException {
     int count = 0;
-    HTable table = new HTable(new Configuration(
-        hbaseTestUtil.getConfiguration()), Bytes.toBytes(tableName));
-    try {
+    try (
+        Connection hbaseConnection = createHBaseConnection();
+        Table table = getHBaseTable(hbaseConnection, tableName)
+    ) {
       ResultScanner scanner = table.getScanner(Bytes.toBytes(colFamily));
       for(Result result = scanner.next();
           result != null;
           result = scanner.next()) {
         count++;
       }
-    } finally {
-      table.close();
     }
     return count;
+  }
+
+  private Connection createHBaseConnection() throws IOException {
+    return ConnectionFactory.createConnection(new Configuration(hbaseTestUtil.getConfiguration()));
+  }
+
+  private Table getHBaseTable(Connection connection, String tableName) throws IOException {
+    return connection.getTable(TableName.valueOf(tableName));
   }
 
   protected boolean isKerberized() {

@@ -25,8 +25,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.BufferedMutator;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -84,10 +87,17 @@ public class HBasePutProcessor implements Closeable, Configurable,
   // into a Put command.
   private PutTransformer putTransformer;
 
-  private String tableName;
-  private HTable table;
+  private Connection hbaseConnection;
+  private BufferedMutator bufferedMutator;
 
   public HBasePutProcessor() {
+  }
+
+  HBasePutProcessor(Configuration conf, PutTransformer putTransformer, Connection hbaseConnection, BufferedMutator bufferedMutator) {
+    this.conf = conf;
+    this.putTransformer = putTransformer;
+    this.hbaseConnection = hbaseConnection;
+    this.bufferedMutator = bufferedMutator;
   }
 
   @Override
@@ -106,15 +116,24 @@ public class HBasePutProcessor implements Closeable, Configurable,
       throw new RuntimeException("Could not instantiate PutTransformer.");
     }
     putTransformer.init(conf);
+    initHBaseMutator();
+  }
 
-    this.tableName = conf.get(TABLE_NAME_KEY, null);
+  private void initHBaseMutator() {
+    String tableName = conf.get(TABLE_NAME_KEY, null);
     try {
-      this.table = new HTable(conf, this.tableName);
-    } catch (IOException ioe) {
-      throw new RuntimeException("Could not access HBase table " + tableName,
-          ioe);
+      hbaseConnection = ConnectionFactory.createConnection(conf);
+      bufferedMutator = hbaseConnection.getBufferedMutator(TableName.valueOf(tableName));
+    } catch (IOException e) {
+      if (hbaseConnection != null) {
+        try {
+          hbaseConnection.close();
+        } catch (IOException connCloseException){
+          LOG.error("Cannot close HBase connection.", connCloseException);
+        }
+      }
+      throw new RuntimeException("Could not create mutator for HBase table " + tableName, e);
     }
-    this.table.setAutoFlush(false);
   }
 
   @Override
@@ -131,29 +150,34 @@ public class HBasePutProcessor implements Closeable, Configurable,
       throws IOException, ProcessingException {
     Map<String, Object> fields = record.getFieldMap();
     List<Mutation> mutationList = putTransformer.getMutationCommand(fields);
-    if (null != mutationList) {
-      for (Mutation mutation : mutationList) {
-        if (mutation!=null) {
-            if(mutation instanceof Put) {
-              Put putObject = (Put) mutation;
-              if (putObject.isEmpty()) {
-                LOG.warn("Could not insert row with no columns "
-                      + "for row-key column: " + Bytes.toString(putObject.getRow()));
-                } else {
-                  this.table.put(putObject);
-                }
-              } else if(mutation instanceof Delete) {
-                Delete deleteObject = (Delete) mutation;
-                if (deleteObject.isEmpty()) {
-                  LOG.warn("Could not delete row with no columns "
-                        + "for row-key column: " + Bytes.toString(deleteObject.getRow()));
-                } else {
-                  this.table.delete(deleteObject);
-                }
-            }
-        }
+    if (mutationList == null) {
+      return;
+    }
+    for (Mutation mutation : mutationList) {
+      if (!canAccept(mutation)) {
+        continue;
+      }
+      if (!mutation.isEmpty()) {
+        bufferedMutator.mutate(mutation);
+      } else {
+        logEmptyMutation(mutation);
       }
     }
+  }
+
+  private void logEmptyMutation(Mutation mutation) {
+    String action = null;
+    if (mutation instanceof Put) {
+      action = "insert";
+    } else if (mutation instanceof Delete) {
+      action = "delete";
+    }
+    LOG.warn("Could not " + action + " row with no columns "
+        + "for row-key column: " + Bytes.toString(mutation.getRow()));
+  }
+
+  private boolean canAccept(Mutation mutation) {
+    return mutation != null && (mutation instanceof Put || mutation instanceof Delete);
   }
 
   @Override
@@ -161,8 +185,19 @@ public class HBasePutProcessor implements Closeable, Configurable,
    * Closes the HBase table and commits all pending operations.
    */
   public void close() throws IOException {
-    this.table.flushCommits();
-    this.table.close();
+    try {
+      bufferedMutator.flush();
+    } finally {
+      try {
+        bufferedMutator.close();
+      } finally {
+        try {
+          hbaseConnection.close();
+        } catch (IOException e) {
+          LOG.error("Cannot close HBase connection.", e);
+        }
+      }
+    }
   }
 
 }
