@@ -42,6 +42,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.common.type.HiveChar;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.common.type.HiveVarchar;
+import org.apache.hadoop.hive.ql.metadata.Hive;
 import org.apache.hive.hcatalog.data.HCatRecord;
 import org.apache.hive.hcatalog.data.schema.HCatFieldSchema;
 import org.apache.hive.hcatalog.data.schema.HCatSchema;
@@ -398,6 +399,36 @@ public class HCatalogImportTest extends ImportJobTestCase {
     List<String> addlArgsArray = new ArrayList<String>();
     setExtraArgs(addlArgsArray);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null);
+  }
+
+  @Test
+  public void testDecimalTypes() throws Exception{
+    final int TOTAL_RECORDS = 1 * 10;
+    String hcatTable = getTableName().toUpperCase();
+    boolean allowRoundig = false;
+    String dbTypeNumeric = "numeric";
+    String dbTypeDecimal = "decimal";
+    int sqlTypeNumeric = Types.NUMERIC;
+    int sqlTypeDecimal = Types.DECIMAL;
+    HCatFieldSchema.Type hcatTypeDecimal = HCatFieldSchema.Type.DECIMAL;
+
+    BigDecimal inputValue1 = new BigDecimal("454018528782.42006329");
+    HiveDecimal expectedValue1 = HiveDecimal.create(new BigDecimal("454018528782.42006"), allowRoundig);
+    BigDecimal inputValue2 = new BigDecimal("87658675864540185.123456789123456789");
+    HiveDecimal expectedValue2 = HiveDecimal.create(new BigDecimal("87658675864540185.12346"), allowRoundig);
+    int precision = 22;
+    int scale = 5;
+
+    ColumnGenerator[] hcatColumns = new ColumnGenerator[] {
+        HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0), dbTypeNumeric, sqlTypeNumeric,
+            hcatTypeDecimal, precision, scale, expectedValue1, inputValue1, KeyType.NOT_A_KEY),
+
+        HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1), dbTypeDecimal, sqlTypeDecimal,
+            hcatTypeDecimal, precision, scale, expectedValue2, inputValue2, KeyType.NOT_A_KEY)
+    };
+    List<String> addlArgsArray = new ArrayList<String>();
+    setExtraArgs(addlArgsArray);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, hcatTable, hcatColumns, null);
   }
 
   @Test

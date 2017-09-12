@@ -149,6 +149,13 @@ public class SqoopHCatImportHelper {
     LOG.debug("Static partition key used : "  + partKeysString);
   }
 
+  /* This construct is only for testing and avoiding static method
+   * usage
+   */
+  SqoopHCatImportHelper() {
+
+  }
+
   public HCatRecord convertToHCatRecord(SqoopRecord sqr) throws IOException,
     InterruptedException {
     try {
@@ -441,11 +448,22 @@ public class SqoopHCatImportHelper {
       HiveChar hChar = new HiveChar(val.toString(), cti.getLength());
       return hChar;
     } else if (hfsType == HCatFieldSchema.Type.DECIMAL) {
-      BigDecimal bd = new BigDecimal(n.doubleValue(),
-        MathContext.DECIMAL128);
-      return HiveDecimal.create(bd);
+      return convertNumberIntoHiveDecimal(n);
     }
     return null;
+  }
+
+  HiveDecimal convertNumberIntoHiveDecimal(Number number) {
+    BigDecimal bigDecimal = null;
+
+    if(number instanceof BigDecimal) {
+      bigDecimal = (BigDecimal) number;
+    } else if(number instanceof Long) {
+      bigDecimal = BigDecimal.valueOf((Long)number);
+    } else if (number instanceof Double) {
+      bigDecimal = BigDecimal.valueOf((Double) number);
+    }
+    return HiveDecimal.create(bigDecimal);
   }
 
   public void cleanup() throws IOException {
