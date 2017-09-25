@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.cloudera.sqoop.metastore.SavedJobsTestBase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -43,11 +44,11 @@ import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.HsqldbManager;
 import com.cloudera.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.metastore.TestSavedJobs;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.JobTool;
+import org.apache.sqoop.metastore.GenericJobStorage;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -71,25 +72,37 @@ public class TestIncrementalImport  {
 
   // What database do we read from.
   public static final String SOURCE_DB_URL = "jdbc:hsqldb:mem:incremental";
+  public static final String AUTO_STORAGE_PASSWORD = "";
+  public static final String AUTO_STORAGE_USERNAME = "SA";
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() throws Exception {
-    // Delete db state between tests.
-    TestSavedJobs.resetJobSchema();
+    // Delete db state between tests
+    System.setProperty(GenericJobStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
+    System.setProperty(GenericJobStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
+    System.setProperty(GenericJobStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
+            SOURCE_DB_URL);
     resetSourceDataSchema();
   }
 
   public static void resetSourceDataSchema() throws SQLException {
     SqoopOptions options = new SqoopOptions();
     options.setConnectString(SOURCE_DB_URL);
-    TestSavedJobs.resetSchema(options);
+    options.setUsername(AUTO_STORAGE_USERNAME);
+    options.setPassword(AUTO_STORAGE_PASSWORD);
+    SavedJobsTestBase.resetSchema(options);
   }
 
   public static Configuration newConf() {
-    return TestSavedJobs.newConf();
+    Configuration conf = new Configuration();
+    conf.set(GenericJobStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
+    conf.set(GenericJobStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
+    conf.set(GenericJobStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
+            SOURCE_DB_URL);
+    return conf;
   }
 
   /**

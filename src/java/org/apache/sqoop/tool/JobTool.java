@@ -18,12 +18,21 @@
 
 package org.apache.sqoop.tool;
 
+import static org.apache.sqoop.manager.JdbcDrivers.DB2;
+import static org.apache.sqoop.manager.JdbcDrivers.HSQLDB;
+import static org.apache.sqoop.manager.JdbcDrivers.MYSQL;
+import static org.apache.sqoop.manager.JdbcDrivers.ORACLE;
+import static org.apache.sqoop.manager.JdbcDrivers.POSTGRES;
+import static org.apache.sqoop.manager.JdbcDrivers.SQLSERVER;
+
 import java.io.IOException;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.cli.CommandLine;
@@ -38,10 +47,11 @@ import org.apache.hadoop.util.ToolRunner;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.metastore.hsqldb.HsqldbJobStorage;
+import com.cloudera.sqoop.metastore.GenericJobStorage;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
+import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**
@@ -52,6 +62,8 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   public static final Log LOG = LogFactory.getLog(
       JobTool.class.getName());
   private static final String DASH_STR  = "--";
+
+  private static Set<JdbcDrivers> SUPPORTED_DRIVERS = EnumSet.of(HSQLDB, MYSQL, ORACLE, POSTGRES, DB2, SQLSERVER);
 
   private enum JobOp {
     JobCreate,
@@ -345,11 +357,7 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     this.storageDescriptor = new TreeMap<String, String>();
 
-    if (in.hasOption(STORAGE_METASTORE_ARG)) {
-      this.storageDescriptor.put(HsqldbJobStorage.META_CONNECT_KEY,
-          in.getOptionValue(STORAGE_METASTORE_ARG));
-    }
-
+    applyMetastoreOptions(in, out);
     // These are generated via an option group; exactly one
     // of this exhaustive list will always be selected.
     if (in.hasOption(JOB_CMD_CREATE_ARG)) {
@@ -367,6 +375,44 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       this.operation = JobOp.JobShow;
       this.jobName = in.getOptionValue(JOB_CMD_SHOW_ARG);
     }
+  }
+
+  private void applyMetastoreOptions(CommandLine in, SqoopOptions out) throws InvalidOptionsException {
+    String metaConnectString;
+    String metaUsernameString;
+    String metaPasswordString;
+    if (in.hasOption(STORAGE_METASTORE_ARG)) {
+      metaConnectString = in.getOptionValue(STORAGE_METASTORE_ARG);
+      this.storageDescriptor.put(GenericJobStorage.META_DRIVER_KEY, chooseDriverType(metaConnectString));
+      this.storageDescriptor.put(GenericJobStorage.META_CONNECT_KEY, metaConnectString);
+    } else {
+      metaConnectString = out.getMetaConnectStr();
+      this.storageDescriptor.put(GenericJobStorage.META_DRIVER_KEY, chooseDriverType(metaConnectString));
+      this.storageDescriptor.put(GenericJobStorage.META_CONNECT_KEY, metaConnectString);
+    }
+    if (in.hasOption(METASTORE_USER_ARG)) {
+      metaUsernameString = in.getOptionValue(METASTORE_USER_ARG);
+      this.storageDescriptor.put(GenericJobStorage.META_USERNAME_KEY, metaUsernameString);
+    } else {
+      metaUsernameString = out.getMetaUsername();
+      this.storageDescriptor.put(GenericJobStorage.META_USERNAME_KEY, metaUsernameString);
+    }
+    if (in.hasOption(METASTORE_PASS_ARG)) {
+      metaPasswordString = in.getOptionValue(METASTORE_PASS_ARG);
+      this.storageDescriptor.put(GenericJobStorage.META_PASSWORD_KEY, metaPasswordString);
+    } else {
+      metaPasswordString = out.getMetaPassword();
+      this.storageDescriptor.put(GenericJobStorage.META_PASSWORD_KEY, metaPasswordString);
+    }
+  }
+
+  private String chooseDriverType(String metaConnectString) throws InvalidOptionsException {
+    for (JdbcDrivers driver : SUPPORTED_DRIVERS) {
+      if (metaConnectString.startsWith(driver.getSchemePrefix())) {
+        return driver.getDriverClass();
+      }
+    }
+    throw new InvalidOptionsException("current meta-connect scheme not compatible with metastore");
   }
 
   @Override

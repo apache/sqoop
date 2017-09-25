@@ -15,22 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.cloudera.sqoop.metastore.hsqldb;
 
+import com.cloudera.sqoop.metastore.JobToolTestBase;
+
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * Test that the Job Tool works in Hsqldb
+ *
+ * This class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=HsqldbJobToolTest or -Dthirdparty=true.
+ *
+ * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
  */
-public class HsqldbJobStorage
-    extends org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage {
 
-  public static final String META_CONNECT_KEY =
-      org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.META_CONNECT_KEY;
-  public static final String META_USERNAME_KEY =
-      org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.META_USERNAME_KEY;
-  public static final String META_PASSWORD_KEY =
-      org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.META_PASSWORD_KEY;
-  public static final String ROOT_TABLE_NAME_KEY =
-      org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.ROOT_TABLE_NAME_KEY;
+public class HsqldbJobToolTest extends JobToolTestBase {
 
+    public HsqldbJobToolTest() {
+        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
+    }
 }
-

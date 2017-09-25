@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sqoop.metastore.hsqldb;
+package org.apache.sqoop.metastore;
 
 import java.io.IOException;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.cloudera.sqoop.manager.ConnManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,15 +39,16 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.manager.DefaultManagerFactory;
 
 /**
- * JobStorage implementation that uses an HSQLDB-backed database to
+ * JobStorage implementation that uses a database to
  * hold job information.
  */
-public class HsqldbJobStorage extends JobStorage {
+public class GenericJobStorage extends JobStorage {
 
   public static final Log LOG = LogFactory.getLog(
-      HsqldbJobStorage.class.getName());
+      GenericJobStorage.class.getName());
 
   /** descriptor key identifying the connect string for the metastore. */
   public static final String META_CONNECT_KEY = "metastore.connect.string";
@@ -63,24 +63,36 @@ public class HsqldbJobStorage extends JobStorage {
    */
   public static final String META_PASSWORD_KEY = "metastore.password";
 
+  /** descriptor key identifying the class name of the jdbc driver */
+  public static final String META_DRIVER_KEY = "metastore.driver.class";
 
-  /** Default name for the root metadata table in HSQLDB. */
+  /** Default name for the root metadata table. */
   private static final String DEFAULT_ROOT_TABLE_NAME = "SQOOP_ROOT";
 
   /** Configuration key used to override root table name. */
   public static final String ROOT_TABLE_NAME_KEY =
-       "sqoop.hsqldb.root.table.name";
+       "sqoop.root.table.name";
 
   /** root metadata table key used to define the current schema version. */
   private static final String STORAGE_VERSION_KEY =
-      "sqoop.hsqldb.job.storage.version";
+      "sqoop.job.storage.version";
 
   /** The current version number for the schema edition. */
   private static final int CUR_STORAGE_VERSION = 0;
 
+  /** This value represents an invalid version */
+  private static final int NO_VERSION = -1;
+
   /** root metadata table key used to define the job table name. */
   private static final String SESSION_TABLE_KEY =
-      "sqoop.hsqldb.job.info.table";
+      "sqoop.job.info.table";
+
+  /** Outdated key for job table data, kept for backward compatibility */
+  public static final String HSQLDB_TABLE_KEY = "sqoop.hsqldb.job.info.table";
+
+  /** Outdated key for schema version, kept for backward compatibility */
+  private static final String HSQLDB_VERSION_KEY =
+          "sqoop.hsqldb.job.storage.version";
 
   /** Default value for SESSION_TABLE_KEY. */
   private static final String DEFAULT_SESSION_TABLE_NAME =
@@ -107,17 +119,50 @@ public class HsqldbJobStorage extends JobStorage {
   private static final String PROPERTY_CLASS_CONFIG = "config";
 
   /**
+   * Configuration key specifying whether this storage agent is active.
+   * Defaults to "on" to allow zero-conf local users.
+   */
+  public static final String AUTO_STORAGE_IS_ACTIVE_KEY =
+          "sqoop.metastore.client.enable.autoconnect";
+
+  /**
+   * Configuration key specifying the connect string used by this
+   * storage agent.
+   */
+  public static final String AUTO_STORAGE_CONNECT_STRING_KEY =
+          "sqoop.metastore.client.autoconnect.url";
+
+  /**
+   * Configuration key specifying the username to bind with.
+   */
+  public static final String AUTO_STORAGE_USER_KEY =
+          "sqoop.metastore.client.autoconnect.username";
+
+
+  /** HSQLDB default user is named 'SA'. */
+  public static final String DEFAULT_AUTO_USER = "SA";
+
+  /**
+   * Configuration key specifying the password to bind with.
+   */
+  public static final String AUTO_STORAGE_PASS_KEY =
+          "sqoop.metastore.client.autoconnect.password";
+
+  /** HSQLDB default user has an empty password. */
+  public static final String DEFAULT_AUTO_PASSWORD = "";
+
+  /**
    * Per-job key with propClass 'schema' that specifies the SqoopTool
    * to load.
    */
   private static final String SQOOP_TOOL_KEY = "sqoop.tool";
-
-
   private Map<String, String> connectedDescriptor;
   private String metastoreConnectStr;
   private String metastoreUser;
   private String metastorePassword;
   private Connection connection;
+  private String driverClass;
+  private ConnManager connManager;
 
   protected Connection getConnection() {
     return this.connection;
@@ -139,8 +184,9 @@ public class HsqldbJobStorage extends JobStorage {
     this.metastorePassword = pass;
   }
 
-  private static final String DB_DRIVER_CLASS = "org.hsqldb.jdbcDriver";
-
+  protected void setDriverClass(String driverClass) {
+    this.driverClass = driverClass;
+  }
   /**
    * Set the descriptor used to open() this storage.
    */
@@ -156,6 +202,7 @@ public class HsqldbJobStorage extends JobStorage {
     setMetastoreConnectStr(descriptor.get(META_CONNECT_KEY));
     setMetastoreUser(descriptor.get(META_USERNAME_KEY));
     setMetastorePassword(descriptor.get(META_PASSWORD_KEY));
+    setDriverClass(descriptor.get(META_DRIVER_KEY));
     setConnectedDescriptor(descriptor);
 
     init();
@@ -163,21 +210,10 @@ public class HsqldbJobStorage extends JobStorage {
 
   protected void init() throws IOException {
     try {
-      // Load/initialize the JDBC driver.
-      Class.forName(DB_DRIVER_CLASS);
-    } catch (ClassNotFoundException cnfe) {
-      throw new IOException("Could not load HSQLDB JDBC driver", cnfe);
-    }
+      connManager = createConnManager();
+      connection = connManager.getConnection();
 
-    try {
-      if (null == metastoreUser) {
-        this.connection = DriverManager.getConnection(metastoreConnectStr);
-      } else {
-        this.connection = DriverManager.getConnection(metastoreConnectStr,
-            metastoreUser, metastorePassword);
-      }
-
-      connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+      connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
       connection.setAutoCommit(false);
 
       // Initialize the root schema.
@@ -186,8 +222,15 @@ public class HsqldbJobStorage extends JobStorage {
       }
 
       // Check the schema version.
-      String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, null);
-      int actualStorageVer = -1;
+      String curStorageVerStr = getRootProperty(STORAGE_VERSION_KEY, NO_VERSION);
+
+      // If schema version is not present under the current key,
+      // sets it correctly. Present for backward compatibility
+      if (curStorageVerStr == null) {
+        setRootProperty(STORAGE_VERSION_KEY, NO_VERSION, Integer.toString(CUR_STORAGE_VERSION));
+        curStorageVerStr = Integer.toString(CUR_STORAGE_VERSION);
+      }
+      int actualStorageVer = NO_VERSION;
       try {
         actualStorageVer = Integer.valueOf(curStorageVerStr);
       } catch (NumberFormatException nfe) {
@@ -219,31 +262,25 @@ public class HsqldbJobStorage extends JobStorage {
 
   @Override
   public void close() throws IOException {
-    if (null != this.connection) {
       try {
-        LOG.debug("Flushing current transaction");
-        this.connection.commit();
+          LOG.debug("Closing connection manager");
+          connManager.close();
       } catch (SQLException sqlE) {
-        throw new IOException("Exception committing connection", sqlE);
-      }
-
-      try {
-        LOG.debug("Closing connection");
-        this.connection.close();
-      } catch (SQLException sqlE) {
-        throw new IOException("Exception closing connection", sqlE);
+          throw new IOException("Exception closing connection manager", sqlE);
       } finally {
-        this.connection = null;
+          this.connection = null;
       }
-    }
   }
 
   @Override
   /** {@inheritDoc} */
   public boolean canAccept(Map<String, String> descriptor) {
     // We return true if the desciptor contains a connect string to find
-    // the database.
-    return descriptor.get(META_CONNECT_KEY) != null;
+    // the database or auto-connect is enabled
+    Configuration conf = this.getConf();
+    boolean metaConnectTrue = descriptor.get(META_CONNECT_KEY) != null;
+    boolean autoConnectEnabled = conf.getBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, true);
+    return metaConnectTrue || autoConnectEnabled;
   }
 
   @Override
@@ -310,7 +347,7 @@ public class HsqldbJobStorage extends JobStorage {
 
   private boolean jobExists(String jobName) throws SQLException {
     PreparedStatement s = connection.prepareStatement(
-        "SELECT COUNT(job_name) FROM " + this.jobTableName
+        "SELECT COUNT(job_name) FROM " + connManager.escapeTableName(this.jobTableName)
         + " WHERE job_name = ? GROUP BY job_name");
     ResultSet rs = null;
     try {
@@ -343,7 +380,7 @@ public class HsqldbJobStorage extends JobStorage {
       } else {
         LOG.debug("Deleting job: " + jobName);
         PreparedStatement s = connection.prepareStatement("DELETE FROM "
-            + this.jobTableName + " WHERE job_name = ?");
+            + connManager.escapeTableName(this.jobTableName) + " WHERE job_name = ?");
         try {
           s.setString(1, jobName);
           s.executeUpdate();
@@ -451,7 +488,7 @@ public class HsqldbJobStorage extends JobStorage {
     ResultSet rs = null;
     try {
       PreparedStatement s = connection.prepareStatement(
-          "SELECT DISTINCT job_name FROM " + this.jobTableName);
+          "SELECT DISTINCT job_name FROM " + connManager.escapeTableName(this.jobTableName));
       try {
         rs = s.executeQuery();
         ArrayList<String> jobs = new ArrayList<String>();
@@ -481,28 +518,20 @@ public class HsqldbJobStorage extends JobStorage {
   // Determine the name to use for the root metadata table.
   private String getRootTableName() {
     Configuration conf = getConf();
-    return conf.get(ROOT_TABLE_NAME_KEY, DEFAULT_ROOT_TABLE_NAME);
+    return conf.get(ROOT_TABLE_NAME_KEY, DEFAULT_ROOT_TABLE_NAME).toUpperCase();
   }
 
-  private boolean tableExists(String table) throws SQLException {
-    LOG.debug("Checking for table: " + table);
-    DatabaseMetaData dbmd = connection.getMetaData();
-    String [] tableTypes = { "TABLE" };
-    ResultSet rs = dbmd.getTables(null, null, null, tableTypes);
-    if (null != rs) {
-      try {
-        while (rs.next()) {
-          if (table.equalsIgnoreCase(rs.getString("TABLE_NAME"))) {
-            LOG.debug("Found table: " + table);
-            return true;
-          }
-        }
-      } finally {
-        rs.close();
+  private String getEscapedRootTableName() {
+    return connManager.escapeTableName(getRootTableName());
+  }
+
+  private boolean tableExists(String tableToCheck) throws SQLException {
+    String[] tables = connManager.listTables();
+    for (String table : tables) {
+      if (table.equals(tableToCheck)) {
+        return true;
       }
     }
-
-    LOG.debug("Could not find table.");
     return false;
   }
 
@@ -519,8 +548,8 @@ public class HsqldbJobStorage extends JobStorage {
     // not a SQL-injection attack vector.
     Statement s = connection.createStatement();
     try {
-      s.executeUpdate("CREATE TABLE " + rootTableName + " ("
-          + "version INT, "
+      s.executeUpdate("CREATE TABLE " + getEscapedRootTableName() + " ("
+          + "version INT NOT NULL, "
           + "propname VARCHAR(128) NOT NULL, "
           + "propval VARCHAR(256), "
           + "CONSTRAINT " + rootTableName + "_unq UNIQUE (version, propname))");
@@ -528,7 +557,7 @@ public class HsqldbJobStorage extends JobStorage {
       s.close();
     }
 
-    setRootProperty(STORAGE_VERSION_KEY, null,
+    setRootProperty(STORAGE_VERSION_KEY, NO_VERSION,
         Integer.toString(CUR_STORAGE_VERSION));
 
     LOG.debug("Saving root table.");
@@ -549,12 +578,12 @@ public class HsqldbJobStorage extends JobStorage {
     try {
       if (null == version) {
         s = connection.prepareStatement(
-          "SELECT propval FROM " + getRootTableName()
+          "SELECT propval FROM " + getEscapedRootTableName()
           + " WHERE version IS NULL AND propname = ?");
         s.setString(1, propertyName);
       } else {
         s = connection.prepareStatement(
-          "SELECT propval FROM " + getRootTableName() + " WHERE version = ? "
+          "SELECT propval FROM " + getEscapedRootTableName() + " WHERE version = ? "
           + " AND propname = ?");
         s.setInt(1, version);
         s.setString(2, propertyName);
@@ -597,22 +626,21 @@ public class HsqldbJobStorage extends JobStorage {
     String curVal = getRootProperty(propertyName, version);
     if (null == curVal) {
       // INSERT the row.
-      s = connection.prepareStatement("INSERT INTO " + getRootTableName()
+      s = connection.prepareStatement("INSERT INTO " + getEscapedRootTableName()
           + " (propval, propname, version) VALUES ( ? , ? , ? )");
-    } else if (version == null) {
-      // UPDATE an existing row with a null version
-      s = connection.prepareStatement("UPDATE " + getRootTableName()
-          + " SET propval = ? WHERE  propname = ? AND version IS NULL");
     } else {
       // UPDATE an existing row with non-null version.
-      s = connection.prepareStatement("UPDATE " + getRootTableName()
+      s = connection.prepareStatement("UPDATE " + getEscapedRootTableName()
           + " SET propval = ? WHERE  propname = ? AND version = ?");
     }
 
     try {
       s.setString(1, val);
       s.setString(2, propertyName);
-      if (null != version) {
+      //Replaces null value with -1 constant, for backward compatibility
+      if (null == version) {
+       s.setInt(3, NO_VERSION);
+      } else {
         s.setInt(3, version);
       }
       s.executeUpdate();
@@ -641,7 +669,7 @@ public class HsqldbJobStorage extends JobStorage {
     LOG.debug("Creating job storage table: " + curTableName);
     Statement s = connection.createStatement();
     try {
-      s.executeUpdate("CREATE TABLE " + curTableName + " ("
+      s.executeUpdate("CREATE TABLE " + connManager.escapeTableName(curTableName) + " ("
           + "job_name VARCHAR(64) NOT NULL, "
           + "propname VARCHAR(128) NOT NULL, "
           + "propval VARCHAR(1024), "
@@ -666,12 +694,25 @@ public class HsqldbJobStorage extends JobStorage {
    */
   private void initV0Schema() throws SQLException {
     this.jobTableName = getRootProperty(SESSION_TABLE_KEY, 0);
+
+    checkForOldRootProperties();
+
     if (null == this.jobTableName) {
       createJobTable();
     }
     if (!tableExists(this.jobTableName)) {
       LOG.debug("Could not find job table: " + jobTableName);
       createJobTable();
+    }
+  }
+
+  /** Checks to see if there is an existing job table under the old root table schema
+   *  and reconfigures under the present schema, present for backward compatibility. **/
+  private void checkForOldRootProperties() throws SQLException {
+    String hsqldbStorageJobTableName = getRootProperty(HSQLDB_TABLE_KEY, 0);
+    if(hsqldbStorageJobTableName != null && this.jobTableName == null) {
+      this.jobTableName = hsqldbStorageJobTableName;
+      setRootProperty(SESSION_TABLE_KEY, 0, jobTableName);
     }
   }
 
@@ -689,12 +730,12 @@ public class HsqldbJobStorage extends JobStorage {
       String curValue = getV0Property(jobName, propClass, propName);
       if (null == curValue) {
         // Property is not yet set.
-        s = connection.prepareStatement("INSERT INTO " + this.jobTableName
+        s = connection.prepareStatement("INSERT INTO " + connManager.escapeTableName(this.jobTableName)
             + " (propval, job_name, propclass, propname) "
             + "VALUES (?, ?, ?, ?)");
       } else {
         // Overwrite existing property.
-        s = connection.prepareStatement("UPDATE " + this.jobTableName
+        s = connection.prepareStatement("UPDATE " + connManager.escapeTableName(this.jobTableName)
             + " SET propval = ? WHERE job_name = ? AND propclass = ? "
             + "AND propname = ?");
       }
@@ -723,7 +764,7 @@ public class HsqldbJobStorage extends JobStorage {
 
     ResultSet rs = null;
     PreparedStatement s = connection.prepareStatement(
-        "SELECT propval FROM " + this.jobTableName
+        "SELECT propval FROM " + connManager.escapeTableName(this.jobTableName)
         + " WHERE job_name = ? AND propclass = ? AND propname = ?");
 
     try {
@@ -764,7 +805,7 @@ public class HsqldbJobStorage extends JobStorage {
 
     ResultSet rs = null;
     PreparedStatement s = connection.prepareStatement(
-        "SELECT propname, propval FROM " + this.jobTableName
+        "SELECT propname, propval FROM " + connManager.escapeTableName(this.jobTableName)
         + " WHERE job_name = ? AND propclass = ?");
     try {
       s.setString(1, jobName);
@@ -801,5 +842,17 @@ public class HsqldbJobStorage extends JobStorage {
       setV0Property(jobName, propClass, key, val);
     }
   }
+
+  private ConnManager createConnManager() {
+    SqoopOptions sqoopOptions = new SqoopOptions();
+    sqoopOptions.setConnectString(metastoreConnectStr);
+    sqoopOptions.setUsername(metastoreUser);
+    sqoopOptions.setPassword(metastorePassword);
+    JobData jd = new JobData();
+    jd.setSqoopOptions(sqoopOptions);
+    DefaultManagerFactory dmf = new DefaultManagerFactory();
+    return dmf.accept(jd);
+  }
+
 }
 

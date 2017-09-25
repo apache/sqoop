@@ -18,24 +18,21 @@
 
 package com.cloudera.sqoop.metastore.hsqldb;
 
+import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
+
 /**
- * @deprecated Moving to use org.apache.sqoop namespace.
+ * Test that Incremental-Import values are stored correctly in Hsqldb
+ *
+ * This class is named in such a way that Sqoop's default QA process does
+ * not run it. You need to run this manually with
+ * -Dtestcase=HsqldbMetaConnectIncrementalImportTest or -Dthirdparty=true.
+ *
+ * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
  */
-public class AutoHsqldbStorage
-    extends org.apache.sqoop.metastore.hsqldb.AutoHsqldbStorage {
 
-  public static final String AUTO_STORAGE_IS_ACTIVE_KEY =
-    org.apache.sqoop.metastore.hsqldb.
-        AutoHsqldbStorage.AUTO_STORAGE_IS_ACTIVE_KEY;
-  public static final String AUTO_STORAGE_CONNECT_STRING_KEY =
-    org.apache.sqoop.metastore.hsqldb.
-        AutoHsqldbStorage.AUTO_STORAGE_CONNECT_STRING_KEY;
-  public static final String AUTO_STORAGE_USER_KEY =
-    org.apache.sqoop.metastore.hsqldb.AutoHsqldbStorage.AUTO_STORAGE_USER_KEY;
-  public static final String AUTO_STORAGE_PASS_KEY =
-    org.apache.sqoop.metastore.hsqldb.AutoHsqldbStorage.AUTO_STORAGE_PASS_KEY;
-  public static final String DEFAULT_AUTO_PASSWORD =
-    org.apache.sqoop.metastore.hsqldb.AutoHsqldbStorage.DEFAULT_AUTO_PASSWORD;
+public class HsqldbMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
+    public HsqldbMetaConnectIncrementalImportTest() {
+        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
+    }
 }
-
