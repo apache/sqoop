@@ -66,9 +66,11 @@ will run all the "basic" checks against an in-memory database, HSQLDB.
 
 Sqoop also has compatibility tests that check its ability to work with
 several third-party databases. To enable these tests, you will need to install
-and configure the databases, and download the JDBC drivers for each one.
+and configure the databases or run them in Docker containers, and download the JDBC drivers for each one.
 
-=== MySQL
+=== Installing the necessary databases
+
+==== MySQL
 
 Install MySQL server and client 5.0. Download MySQL Connector/J 5.0.8 for
 JDBC. Instructions for configuring the MySQL database are in MySQLAuthTest
@@ -83,7 +85,7 @@ sqoop.test.mysql.connectstring.host_url=jdbc:mysql://host.example.com/
 If not specified, the default value used for this property is:
 jdbc:mysql://localhost/
 
-=== Oracle
+==== Oracle
 
 Install Oracle Enterprise Edition 10.2.0+. Instructions for configuring the
 database are in OracleManagerTest. Download the ojdbc6_g jar.
@@ -103,7 +105,7 @@ jdbc:oracle:thin:@//localhost/xe
 Users sqooptest and sqooptest2 should be created prior to running the tests.
 SQL script is available in src/test/oraoop/create_users.sql
 
-=== PostgreSQL
+==== PostgreSQL
 
 Install PostgreSQL 8.3.9. Download the postgresql 8.4 jdbc driver. Instructions
 for configuring the database are in PostgresqlTest.
@@ -117,7 +119,7 @@ sqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://sqoop-dbs.sf.clou
 If not specified, the default value used for this property is:
 jdbc:postgresql://localhost/
 
-=== SQL Server
+==== SQL Server
 
 Install SQL Server Express 2012 and create a database instance and
 download the appropriate JDBC driver. Instructions for configuring the
@@ -135,7 +137,7 @@ jdbc:sqlserver://sqlserverhost:1433
 This can be useful if you have the hostname sqlserverhost mapped to the IP
 address of the SQL Server instance.
 
-=== Cubrid
+==== Cubrid
 
 Install Cubrid 9.2.2.0003 and create a database instance and download the
 appropriate JDBC driver. Instructions for configuring the database are in
@@ -151,7 +153,7 @@ sqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost
 If not specified, the default value used for this property is:
 jdbc:cubrid:localhost
 
-=== DB2
+==== DB2
 
 Install DB2 9.74 Express C and download the appropriate JDBC driver.
 Instructions for configuring the server can be found in
@@ -169,7 +171,7 @@ jdbc:db2://db2host:50000
 This can be useful if you have the hostname db2host mapped to the IP
 address of the DB2 Server instance.
 
-=== Running the Third-party Tests
+==== Running the Third-party Tests
 
 After the third-party databases are installed and configured, run:
 
@@ -187,6 +189,84 @@ ant test -Dmanual=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
 
 Note that +sqoop.thirdparty.lib.dir+ can also be specified in
 +build.properties+.
+
+=== Setting up and executing third-party tests with databases running in Docker containers
+
+The easiest way to run the Sqoop third party test pack is to start all the necessary database servers in Docker containers. This eliminates the need of installing and setting up 6 different RDBMSs on the development machines and provides a clean database environment every time the tests are executed.
+
+==== Installing docker
+
+The first step is to install a recent version (1.13.0+) of Docker and Docker Compose on your development machine. Please refer to the Docker documentation for the installation instructions for your OS environment:
+
+https://docs.docker.com/engine/installation/
+https://docs.docker.com/compose/install/
+
+==== Downloading docker images
+
+MySQL, PostgreSQL, MSSQL, DB2 and Cubrid images are freely available on Docker Hub so they will be pulled automatically by the startup command specified below however the Oracle EE image has to be built manually. Please refer to the README.md file on the below Github project for building instructions:
+
+https://github.com/oracle/docker-images/tree/master/OracleDatabase
+
+Please note that Sqoop third party tests require Oracle Enterprise Edition and the startup command assumes version 12.2.0.1.
+
+==== Starting the Docker containers
+
+A startup script has been added to the Sqoop project to make the Docker container initialization easier:
+
+----
+<sqoop_workspace>/src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh
+----
+
+If it is executed without parameters it starts the following services:
+
+.Third party test DB docker services
+[width="40%",frame="topbot",options="header"]
+|======================
+|Service name    |Database version
+|+mysql+         |MySql 5.7.19
+|+postgresql+    |PostgreSQL 9.6.4
+|+mssql+         |MSSQL 14.0.1000.169 Developer Edition
+|+cubrid+        |Cubrid 10.0
+|+oracle+        |Oracle EE 12.2.0.1
+|+db2+           |DB2 Express Edition 10.5.0.5-3.10.0
+|======================
+
+The script starts up all the services by default but you can override this behavior by specifying the service names in the parameter list. For example if you want to start up mysql and postgresql services only you can execute the script like this:
+
+----
+<sqoop_workspace>/src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh mysql postgresql
+----
+
+After the startup script is executed the containers need some time to initialize the databases. You can follow the status of the containers using the docker ps command. If a service is properly initialized you will see a healthy status in the output of the docker ps command. For example the below output means that Cubrid is started up successfully and it is ready to be used but DB2 is still starting up:
+
+----
+61c4ef871cbb        cubrid/cubrid:10.0                    "/entrypoint.sh"         43 seconds ago      Up 38 seconds (healthy)            0.0.0.0:33000->33000/tcp           sqoop_cubrid_container
+158e5421d134        ibmcom/db2express-c:10.5.0.5-3.10.0   "/home/db2inst1/db..."   43 seconds ago      Up 40 seconds (health: starting)   22/tcp, 0.0.0.0:50000->50000/tcp   sqoop_db2_container
+----
+
+Most of the containers need less than 1 minute to start up but DB2 needs ~5 minutes and Oracle needs ~15 minutes. The Docker images need ~17GB free disk space and Docker requires ~5GB of memory to start all of them at the same time.
+
+==== Stopping the Docker containers
+
+You can stop and remove the Docker containers using the following command:
+
+----
+<sqoop_workspace>/src/scripts/thirdpartytest/stop-thirdpartytest-db-containers.sh
+----
+
+==== Running the third party tests using docker containers
+
+You can execute the third party tests against the DBs running in Docker containers using the following command (replace <path_to_thirdparty_lib_directory> with the path you have the necessary JDBC drivers):
+
+----
+ant clean test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=<path_to_thirdparty_lib_directory> -Dsqoop.test.mysql.connectstring.host_url=jdbc:mysql://127.0.0.1:3306/ -Dsqoop.test.mysql.databasename=sqoop -Dsqoop.test.mysql.password=Sqoop12345 -Dsqoop.test.mysql.username=sqoop -Dsqoop.test.oracle.connectstring=jdbc:oracle:thin:@//localhost:1521/sqoop -Dsqoop.test.oracle.username=SYSTEM -Dsqoop.test.oracle.password=Sqoop12345 -Dsqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://localhost/ -Dsqoop.test.postgresql.database=sqoop -Dsqoop.test.postgresql.username=sqoop -Dsqoop.test.postgresql.password=Sqoop12345 -Dsqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost:33000 -Dsqoop.test.cubrid.connectstring.username=sqoop -Dsqoop.test.cubrid.connectstring.database=sqoop -Dsqoop.test.cubrid.connectstring.password=Sqoop12345 -Dmapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom" -Dtest.timeout=10000000 -Dsqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://localhost:1433 -Dsqoop.test.sqlserver.database=master -Dms.sqlserver.username=sa -Dms.sqlserver.password=Sqoop12345 -Dsqoop.test.db2.connectstring.host_url=jdbc:db2://localhost:50000 -Dsqoop.test.db2.connectstring.database=SQOOP -Dsqoop.test.db2.connectstring.username=DB2INST1 -Dsqoop.test.db2.connectstring.password=Sqoop12345
+----
+
+Please note that even if you do not need to install RDBMSs to run Sqoop third party tests against the Docker containers you still need to install the following tools:
+
+* mysqldump
+* mysqlimport
+* psql
 
 == Code Quality Analysis
 
