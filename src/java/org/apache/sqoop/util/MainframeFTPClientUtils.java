@@ -57,6 +57,12 @@ public final class MainframeFTPClientUtils {
     String dsName = pdsName;
     String fileName = "";
     MainframeDatasetPath p = null;
+    String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
+    if (dsType == null) {
+      // default dataset type to partitioned dataset
+      conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED);
+      dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
+    }
     try {
     	p = new MainframeDatasetPath(dsName,conf);
     } catch (Exception e) {
@@ -64,8 +70,6 @@ public final class MainframeFTPClientUtils {
     	LOG.error("MainframeDatasetPath helper class incorrectly initialised");
     	e.printStackTrace();
     }
-    String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
-    boolean isTape = Boolean.parseBoolean(conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE));
     boolean isSequentialDs = false;
     boolean isGDG = false;
     if (dsType != null && p != null) {
@@ -80,7 +84,8 @@ public final class MainframeFTPClientUtils {
       if (ftp != null) {
         ftp.changeWorkingDirectory("'" + pdsName + "'");
         FTPFile[] ftpFiles = null;
-        if (isTape) {
+        if (!MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED.equals(dsType)) {
+          // excepting partitioned datasets, use the MainframeFTPFileEntryParser, default doesn't match larger datasets
         	FTPListParseEngine parser = ftp.initiateListParsing(MainframeConfiguration.MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME, "");
         	List<FTPFile> listing = new ArrayList<FTPFile>();
         	while(parser.hasNext()) {
@@ -102,7 +107,11 @@ public final class MainframeFTPClientUtils {
         		}
         	}
         }
-		else { ftpFiles = ftp.listFiles(); }
+		else {
+      // partitioned datasets have a different FTP listing structure
+      LOG.info("Dataset is a partitioned dataset, using default FTP list parsing");
+      ftpFiles = ftp.listFiles();
+        }
 		if (!isGDG) {
 			for (FTPFile f : ftpFiles) {
 				LOG.info(String.format("Name: %s Type: %s",f.getName(), f.getType()));
