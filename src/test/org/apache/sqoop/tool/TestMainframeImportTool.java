@@ -40,6 +40,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestMainframeImportTool extends BaseSqoopTestCase {
 
@@ -182,5 +183,71 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 	  mfImportTool.validateImportOptions(sqoopOption);
 	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
 	  assert(isTape != null && isTape.toString().equals("false"));
+  }
+
+  @Test
+  public void testFtpTransferModeAscii() throws ParseException, InvalidOptionsException {
+    String transferModeValue = "ascii";
+    String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
+    ToolOptions toolOptions = new ToolOptions();
+    SqoopOptions sqoopOption = new SqoopOptions();
+    mfImportTool.configureOptions(toolOptions);
+    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+    mfImportTool.validateImportOptions(sqoopOption);
+    String transferMode = sqoopOption.getMainframeFtpTransferMode();
+    assert(transferMode != null && transferMode.toString().equals(transferModeValue));
+  }
+  @Test
+  public void testFtpTransferModeBinary() throws ParseException, InvalidOptionsException {
+    String transferModeValue = "binary";
+    String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
+    ToolOptions toolOptions = new ToolOptions();
+    SqoopOptions sqoopOption = new SqoopOptions();
+    mfImportTool.configureOptions(toolOptions);
+    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+    mfImportTool.validateImportOptions(sqoopOption);
+    String transferMode = sqoopOption.getMainframeFtpTransferMode();
+    assert(transferMode != null && transferMode.toString().equals(transferModeValue));
+  }
+  @Test
+  public void testFtpTransferModeDefaultsToAscii() throws ParseException, InvalidOptionsException {
+    String expectedTransferModeValue = "ascii";
+    String[] args = new String[] { "--dataset", "mydatasetname" };
+    ToolOptions toolOptions = new ToolOptions();
+    SqoopOptions sqoopOption = new SqoopOptions();
+    mfImportTool.configureOptions(toolOptions);
+    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+    mfImportTool.validateImportOptions(sqoopOption);
+    sqoopOption.setMainframeFtpTransferMode(null);
+    String transferMode = sqoopOption.getMainframeFtpTransferMode();
+    assert(transferMode != null && transferMode.toString().equals(expectedTransferModeValue));
+  }
+  @Test
+  public void testFtpTransferModeDefaultsToAsciiIfEmptyString() throws ParseException, InvalidOptionsException {
+    String expectedTransferModeValue = "ascii";
+    String[] args = new String[] { "--dataset", "mydatasetname" };
+    ToolOptions toolOptions = new ToolOptions();
+    SqoopOptions sqoopOption = new SqoopOptions();
+    mfImportTool.configureOptions(toolOptions);
+    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+    mfImportTool.validateImportOptions(sqoopOption);
+    sqoopOption.setMainframeFtpTransferMode(" ");
+    String transferMode = sqoopOption.getMainframeFtpTransferMode();
+    assert(transferMode != null && transferMode.toString().equals(expectedTransferModeValue));
+  }
+  @Test
+  public void testFtpTransferModeInvalid() throws ParseException, InvalidOptionsException {
+    String transferModeValue = "myinvalidvalue";
+    String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
+    ToolOptions toolOptions = new ToolOptions();
+    SqoopOptions sqoopOption = new SqoopOptions();
+    mfImportTool.configureOptions(toolOptions);
+    try {
+      sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+      mfImportTool.validateImportOptions(sqoopOption);
+      fail("shouldn't get here");
+    } catch (InvalidOptionsException e) {
+      assert(e.getMessage().contains("--transfermode") && e.getMessage().contains("invalid"));
+    }
   }
 }

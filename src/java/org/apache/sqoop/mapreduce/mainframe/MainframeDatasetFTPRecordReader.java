@@ -21,6 +21,8 @@ package org.apache.sqoop.mapreduce.mainframe;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +40,7 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     extends MainframeDatasetRecordReader<T> {
   private FTPClient ftp = null;
   private BufferedReader datasetReader = null;
+  private InputStream inputStream = null;
 
   private static final Log LOG = LogFactory.getLog(
       MainframeDatasetFTPRecordReader.class.getName());
@@ -80,6 +83,13 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
 
   protected boolean getNextRecord(T sqoopRecord) throws IOException {
     String line = null;
+    Configuration conf = getConfiguration();
+    String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
+    LOG.info("Detected transfer mode: "+transferMode);
+    if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE))) {
+      LOG.info("Binary transfer branch");
+      return getNextBinaryRecord(sqoopRecord);
+    }
     try {
       do {
         if (datasetReader == null) {
@@ -112,9 +122,69 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     return false;
   }
 
+  private boolean getNextBinaryRecord(T sqoopRecord) throws IOException {
+    // typical estimated max size for mainframe record
+    int BUFFER_SIZE = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER;
+    byte [] buf = new byte[BUFFER_SIZE];
+    int bytesRead = -1;
+    int cumulativeBytesRead = 0;
+    String dsName = null;
+    try {
+      if (inputStream == null) {
+        dsName = getNextDataset();
+        if (dsName == null) {
+          return false;
+        }
+        inputStream =
+          ftp.retrieveFileStream(dsName);
+        if (inputStream == null) {
+          throw new IOException("Failed to retrieve FTP file stream.");
+        }
+      }
+      do {
+        bytesRead = inputStream.read(buf,cumulativeBytesRead,BUFFER_SIZE-cumulativeBytesRead);
+        if (bytesRead == -1) {
+          // EOF
+          inputStream.close();
+          inputStream = null;
+          if (!ftp.completePendingCommand()) {
+            throw new IOException("Failed to complete ftp command. FTP Response: "+ftp.getReplyString());
+          } else {
+            LOG.info("Data transfer completed.");
+          }
+          if (cumulativeBytesRead > 0) {
+            // there were some bytes left in the buffer when EOF reached
+            ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
+            buffer.put(buf,0,cumulativeBytesRead);
+            convertToSqoopRecord(buffer.array(), (SqoopRecord)sqoopRecord);
+            return true;
+          }
+          return false;
+        }
+        cumulativeBytesRead += bytesRead;
+        if (cumulativeBytesRead == BUFFER_SIZE) {
+          ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
+          buffer.put(buf,0,cumulativeBytesRead);
+          convertToSqoopRecord(buffer.array(), (SqoopRecord)sqoopRecord);
+          return true;
+        }
+      } while (bytesRead != -1);
+    } catch (IOException ioe) {
+      throw new IOException("IOException during data transfer: " +
+        ioe.toString());
+    }
+    return false;
+  }
+
   private void convertToSqoopRecord(String line,  SqoopRecord sqoopRecord) {
     String fieldName
         = sqoopRecord.getFieldMap().entrySet().iterator().next().getKey();
     sqoopRecord.setField(fieldName, line);
+  }
+
+  private void convertToSqoopRecord(byte[] buf,  SqoopRecord sqoopRecord) {
+    String fieldName
+      = sqoopRecord.getFieldMap().entrySet().iterator().next().getKey();
+    sqoopRecord.setField(fieldName, buf);
   }
 }

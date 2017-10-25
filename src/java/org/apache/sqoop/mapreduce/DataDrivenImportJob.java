@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -40,6 +41,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
+
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.LargeObjectLoader;
@@ -49,6 +51,8 @@ import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import org.apache.sqoop.orm.AvroSchemaGenerator;
+import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
+import org.apache.sqoop.mapreduce.mainframe.MainframeDatasetBinaryRecord;
 import org.apache.sqoop.util.FileSystemUtil;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
@@ -83,7 +87,13 @@ public class DataDrivenImportJob extends ImportJobBase {
       job.setMapperClass(SqoopHCatUtilities.getImportMapperClass());
       return;
     }
-    if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
+    if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(options.getMainframeFtpTransferMode())) {
+      job.setOutputKeyClass(BytesWritable.class);
+      job.setOutputValueClass(NullWritable.class);
+      Configuration conf = job.getConfiguration();
+      conf.setClass(DBConfiguration.INPUT_CLASS_PROPERTY, MainframeDatasetBinaryRecord.class,
+        DBWritable.class);
+    } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       // For text files, specify these as the output types; for
       // other types, we just use the defaults.
       job.setOutputKeyClass(Text.class);
