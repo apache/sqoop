@@ -72,8 +72,8 @@ public class MainframeImportTool extends ImportTool {
     		.hasArg().withDescription("Dataset is on tape (true|false)")
     		.withLongOpt(DS_TAPE_ARG)
     		.create());
-    importOpts.addOption(OptionBuilder.withArgName("FTP transfer mode")
-      .withDescription("FTP transfer mode (ascii=ASCII|binary=BINARY")
+    importOpts.addOption(OptionBuilder.withArgName("Binary FTP transfer mode")
+      .withDescription("Binary FTP transfer mode")
       .withLongOpt(BINARY_FTP_ARG)
       .create());
     addValidationOpts(importOpts);

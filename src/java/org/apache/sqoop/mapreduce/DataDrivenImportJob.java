@@ -40,6 +40,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
+
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.LargeObjectLoader;
@@ -99,11 +100,12 @@ public class DataDrivenImportJob extends ImportJobBase {
     if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
       job.setOutputKeyClass(BytesWritable.class);
       job.setOutputValueClass(NullWritable.class);
+
       // this is required as code generated class assumes setField method takes String
       // and will fail with ClassCastException when a byte array is passed instead
       // java.lang.ClassCastException: [B cannot be cast to java.lang.String
       Configuration conf = job.getConfiguration();
-      conf.setClass(org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_CLASS_PROPERTY, MainframeDatasetBinaryRecord.class,
+      conf.setClass(DBConfiguration.INPUT_CLASS_PROPERTY, MainframeDatasetBinaryRecord.class,
         DBWritable.class);
     } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       // For text files, specify these as the output types; for
