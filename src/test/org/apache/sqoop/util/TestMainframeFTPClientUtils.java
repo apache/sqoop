@@ -362,4 +362,28 @@ public class TestMainframeFTPClientUtils {
       Assert.fail(ioeString);
     }
   }
+  @Test
+  public void testBinaryTransferMode() throws IOException {
+    String expectedResponse = "200 Representation type is Image";
+    int expectedResponseCode = 200;
+    when(mockFTPClient.login("user", "pssword")).thenReturn(true);
+    when(mockFTPClient.logout()).thenReturn(true);
+    when(mockFTPClient.isConnected()).thenReturn(false);
+    when(mockFTPClient.sendCommand("TYPE I")).thenReturn(expectedResponseCode);
+    when(mockFTPClient.getReplyCode()).thenReturn(expectedResponseCode);
+    when(mockFTPClient.getReplyString()).thenReturn(expectedResponse);
+    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
+    conf.set(DBConfiguration.USERNAME_PROPERTY, "user");
+    conf.set(DBConfiguration.PASSWORD_PROPERTY, "pssword");
+    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,"g");
+    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.d");
+    // set the password in the secure credentials object
+    Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
+    conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY,
+      "pssword".getBytes());
+    conf.set(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
+    MainframeFTPClientUtils.setMockFTPClient(mockFTPClient);
+    FTPClient ftp = MainframeFTPClientUtils.getFTPConnection(conf);
+    assert(ftp.sendCommand("TYPE I") == expectedResponseCode && ftp.getReplyString().equals(expectedResponse));
+  }
 }
