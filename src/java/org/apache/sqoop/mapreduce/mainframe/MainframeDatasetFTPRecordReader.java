@@ -109,7 +109,10 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
   protected boolean getNextRecord(T sqoopRecord) throws IOException {
     String line = null;
     Configuration conf = getConfiguration();
+    String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
+    LOG.info("Detected transfer mode: "+transferMode);
     if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE))) {
+      LOG.info("Binary transfer branch");
       return getNextBinaryRecord(sqoopRecord);
     }
     try {
@@ -173,27 +176,28 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
           } else {
             LOG.info("Data transfer completed.");
           }
-          return writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
+          if (cumulativeBytesRead > 0) {
+            // there were some bytes left in the buffer when EOF reached
+            ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
+            buffer.put(buf,0,cumulativeBytesRead);
+            convertToSqoopRecord(buffer.array(), (SqoopRecord)sqoopRecord);
+            return true;
+          }
+          return false;
         }
         cumulativeBytesRead += bytesRead;
         if (cumulativeBytesRead == BUFFER_SIZE) {
-          return writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
+          ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
+          buffer.put(buf,0,cumulativeBytesRead);
+          convertToSqoopRecord(buffer.array(), (SqoopRecord)sqoopRecord);
+          return true;
         }
       } while (bytesRead != -1);
     } catch (IOException ioe) {
-      throw new IOException("IOException during data transfer: " + ioe);
+      throw new IOException("IOException during data transfer: " +
+        ioe.toString());
     }
     return false;
-  }
-
-  protected Boolean writeBytesToSqoopRecord(byte[] buf, int cumulativeBytesRead, SqoopRecord sqoopRecord) {
-    if (cumulativeBytesRead <= 0) {
-      return false;
-    }
-    ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
-    buffer.put(buf,0,cumulativeBytesRead);
-    convertToSqoopRecord(buffer.array(), sqoopRecord);
-    return true;
   }
 
   private void convertToSqoopRecord(String line,  SqoopRecord sqoopRecord) {
