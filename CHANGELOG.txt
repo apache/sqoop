@@ -111,6 +111,7 @@ Release Notes - Sqoop - Version 1.4.7
     * [SQOOP-3159] - Sqoop (export + --table) with Oracle table_name having '$' fails with error (ORA-00942 or java.lang.NoClassDefFoundError)
     * [SQOOP-3182] - Sqoop1 (import + --incremental + --merge-key + --as-parquetfile) fails with (Can't parse input data: 'PAR1')
     * [SQOOP-3187] - Sqoop import as PARQUET to S3 failed
+    * [SQOOP-3248] - Add missing Apache 2 license information to TestCompilationManager.java PostgresqlExternalTableImportTest.java
 
 ** Improvement
     * [SQOOP-816] - Scoop and support for external Hive tables
