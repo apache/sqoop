@@ -18,6 +18,8 @@
 package com.cloudera.sqoop.mapreduce.db;
 
 
+import org.junit.Test;
+
 /**
  * Test that the TextSplitter implementation creates a sane set of splits.
  * @deprecated use org.apache.sqoop.mapreduce.db.TestTextSplitter instead.
@@ -26,6 +28,7 @@ package com.cloudera.sqoop.mapreduce.db;
 public class TestTextSplitter extends
   org.apache.sqoop.mapreduce.db.TestTextSplitter {
 
+  @Test
   public void testDummy() {
     // Nothing to do
   }

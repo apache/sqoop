@@ -18,12 +18,11 @@
   <property name="sqoop-fi.jar" location="${build.dir}/${final.name}-fi.jar"/>
   <property name="compile-inject.output"
     value="${build-fi.dir}/compile-fi.log"/>
-  <property name="aspectversion" value="1.6.11"/>
-  <property name="javac.version" value="1.6"/>
+  <property name="aspectversion" value="${aspectj.version}"/>
+  <property name="javac.version" value="${targetJavaVersion}"/>
   <property file="${basedir}/build.properties"/>
 
   <!--All Fault Injection (FI) related targets are located in this session -->
-
   <target name="clean-fi">
     <delete dir="${build-fi.dir}"/>
   </target>
@@ -31,14 +30,13 @@
   <!-- Weaving aspects in place
     Later on one can run 'ant jar-fault-inject' to create
     Hadoop jar file with instrumented classes-->
-
   <target name="compile-fault-inject" depends="compile, compile-test">
     <!-- AspectJ task definition -->
     <taskdef
       resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
       <classpath>
         <pathelement
-          location="${build.ivy.lib.dir}/sqoop/hadoop${hadoopversion}test/aspectjtools-${aspectversion}.jar"/>
+          location="${build.ivy.lib.dir}/sqoop/test/aspectjtools-${aspectversion}.jar"/>
       </classpath>
     </taskdef>
     <echo message="Start weaving aspects in place"/>

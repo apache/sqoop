@@ -48,6 +48,7 @@ under the License.
   <property name="maven2.pattern"
       value="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier])"/>
   <property name="repo.dir" value="${user.home}/.m2/repository"/>
+  <property name="ivy.cache.dir" value="${user.home}/.ivy2/cache"/>
   <property name="maven2.pattern.ext"  value="${maven2.pattern}.[ext]"/>
   <property name="resolvers" value="default" override="false"/>
   <settings defaultResolver="${resolvers}"/>
@@ -63,32 +64,43 @@ under the License.
         m2compatible="true" checkmodified="true" changingPattern=".*SNAPSHOT"/>
     <ibiblio name="cloudera-staging" root="${staging.cloudera.com}"
         m2compatible="true" checkmodified="true" changingPattern=".*SNAPSHOT"/>
-
+     <!--Conjars had to be added due to hive's dependency on calcite, which depends on pentaho-aggdesigner-algorithm;5.1.5-jhyde, which is only available in conjars and spring plugins repo -->
+     <ibiblio name="conjars" m2compatible="true" root="http://conjars.org/repo/"/>
     <filesystem name="fs" m2compatible="true">
        <artifact pattern="${repo.dir}/[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"/>
        <ivy pattern="${repo.dir}/[organisation]/[module]/[revision]/[module]-[revision].pom"/>
     </filesystem>
 
+    <filesystem name="fs2">
+       <artifact pattern="${ivy.cache.dir}/[organisation]/[module]/jars/[module]-[revision](-[classifier]).[ext]"/>
+       <ivy pattern="${ivy.cache.dir}/[organisation]/[module]/ivy-[revision].xml"/>
+    </filesystem>
+
     <chain name="default" dual="true" checkmodified="true"
         changingPattern=".*SNAPSHOT">
+      <resolver ref="fs2"/>
       <resolver ref="fs"/>
       <resolver ref="apache-snapshot"/>
       <resolver ref="datanucleus"/>
       <resolver ref="cloudera-releases"/>
       <resolver ref="cloudera-staging"/>
       <resolver ref="maven2"/>
+      <resolver ref="conjars"/>
     </chain>
 
     <chain name="internal" dual="true">
+      <resolver ref="fs2"/>
       <resolver ref="fs"/>
       <resolver ref="apache-snapshot"/>
       <resolver ref="datanucleus"/>
       <resolver ref="cloudera-staging"/>
       <resolver ref="maven2"/>
+      <resolver ref="conjars"/>
     </chain>
 
     <chain name="external">
       <resolver ref="maven2"/>
+      <resolver ref="conjars"/>
     </chain>
 
   </resolvers>

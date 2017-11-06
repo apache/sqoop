@@ -18,16 +18,15 @@
 
 package org.apache.sqoop.manager;
 
-import java.io.IOException;
+import static org.apache.sqoop.manager.JdbcDrivers.HSQLDB;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
-
 import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
-
 import com.cloudera.sqoop.util.ExportException;
+import java.io.IOException;
 
 /**
  * Manages connections to hsqldb databases.
@@ -39,15 +38,12 @@ public class HsqldbManager
   public static final Log LOG = LogFactory.getLog(
       HsqldbManager.class.getName());
 
-  // driver class to ensure is loaded when making db connection.
-  private static final String DRIVER_CLASS = "org.hsqldb.jdbcDriver";
-
   // HsqlDb doesn't have a notion of multiple "databases"; the user's database
   // is always called "PUBLIC".
   private static final String HSQL_SCHEMA_NAME = "PUBLIC";
 
   public HsqldbManager(final SqoopOptions opts) {
-    super(DRIVER_CLASS, opts);
+    super(HSQLDB.getDriverClass(), opts);
   }
 
   /**

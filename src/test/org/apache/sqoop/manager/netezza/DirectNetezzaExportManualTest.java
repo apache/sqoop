@@ -29,6 +29,8 @@ import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
 
+import static org.junit.Assert.fail;
+
 /**
  * Test the DirectNetezzaManager implementation's exportJob() functionality.
  */
@@ -179,6 +181,7 @@ public class DirectNetezzaExportManualTest extends NetezzaExportManualTest {
   }
 
 
+  @Test
   public void testDifferentNullStrings() throws IOException, SQLException {
     ColumnGenerator[] extraCols = new ColumnGenerator[] {
         new NullColumnGenerator(),
@@ -218,23 +221,27 @@ public class DirectNetezzaExportManualTest extends NetezzaExportManualTest {
 
 
   @Override
+  @Test
   public void testMultiMapTextExportWithStaging() throws IOException,
       SQLException {
     // disable this test as staging is not supported in direct mode
   }
 
   @Override
+  @Test
   public void testMultiTransactionWithStaging() throws IOException,
       SQLException {
     // disable this test as staging is not supported in direct mode
   }
 
   @Override
+  @Test
   public void testColumnsExport() throws IOException, SQLException {
     // disable this test as it is not supported in direct mode
   }
 
   @Override
+  @Test
   public void testSequenceFileExport() throws IOException, SQLException {
     // disable this test as it is not supported in direct mode
   }

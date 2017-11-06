@@ -24,12 +24,23 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+
+import org.junit.rules.ExpectedException;
 
 /**
  * Test looking up codecs by name.
  */
-public class TestCodecMap extends TestCase {
+public class TestCodecMap  {
+
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   private void verifyCodec(Class<?> c, String codecName)
       throws UnsupportedCodecException {
@@ -37,11 +48,13 @@ public class TestCodecMap extends TestCase {
     assertEquals(codec.getClass(), c);
   }
 
+  @Test
   public void testGetCodecNames() {
     // gzip is picked up from Hadoop defaults
     assertTrue(CodecMap.getCodecNames().contains("gzip"));
   }
 
+  @Test
   public void testGetCodec() throws IOException {
     verifyCodec(GzipCodec.class, "gzip");
     verifyCodec(GzipCodec.class, "Gzip");
@@ -52,15 +65,15 @@ public class TestCodecMap extends TestCase {
     verifyCodec(GzipCodec.class, "org.apache.hadoop.io.compress.GzipCodec");
   }
 
+  @Test
   public void testGetShortName() throws UnsupportedCodecException {
     verifyShortName("gzip", "org.apache.hadoop.io.compress.GzipCodec");
     verifyShortName("default", "org.apache.hadoop.io.compress.DefaultCodec");
-    try {
-      verifyShortName("NONE", "bogus");
-      fail("Expected IOException");
-    } catch (UnsupportedCodecException e) {
-      // Exception is expected
-    }
+
+    thrown.expect(UnsupportedCodecException.class);
+    thrown.reportMissingExceptionWithMessage("Expected UnsupportedCodecException with invalid codec name during getting " +
+        "short codec name");
+    verifyShortName("NONE", "bogus");
   }
 
   private void verifyShortName(String expected, String codecName)
@@ -69,12 +82,11 @@ public class TestCodecMap extends TestCase {
       CodecMap.getCodecShortNameByName(codecName, new Configuration()));
   }
 
-  public void testUnrecognizedCodec() {
-    try {
-      CodecMap.getCodec("bogus", new Configuration());
-      fail("'bogus' codec should throw exception");
-    } catch (UnsupportedCodecException e) {
-      // expected
-    }
+  @Test
+  public void testUnrecognizedCodec() throws UnsupportedCodecException {
+    thrown.expect(UnsupportedCodecException.class);
+    thrown.reportMissingExceptionWithMessage("Expected UnsupportedCodecException with invalid codec name");
+    CodecMap.getCodec("bogus", new Configuration());
   }
+
 }

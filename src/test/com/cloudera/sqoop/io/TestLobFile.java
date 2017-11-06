@@ -27,21 +27,29 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.CharBuffer;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.Before;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 
 /**
  * Test the LobFile reader/writer implementation.
  */
-public class TestLobFile extends TestCase {
+public class TestLobFile {
 
   public static final Log LOG = LogFactory.getLog(
-        TestLobFile.class.getName());
+      TestLobFile.class.getName());
 
   public static final Path TEMP_BASE_DIR;
 
@@ -57,6 +65,10 @@ public class TestLobFile extends TestCase {
   private Configuration conf;
   private FileSystem fs;
 
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  @Before
   public void setUp() throws Exception {
     conf = new Configuration();
     conf.set("fs.default.name", "file:///");
@@ -65,14 +77,14 @@ public class TestLobFile extends TestCase {
     fs.mkdirs(TEMP_BASE_DIR);
   }
 
-  private long [] writeClobFile(Path p, String codec,
-      String... records) throws Exception {
+  private long[] writeClobFile(Path p, String codec,
+                               String... records) throws Exception {
     if (fs.exists(p)) {
       fs.delete(p, false);
     }
 
     // memorize the offsets of each record we write.
-    long [] offsets = new long[records.length];
+    long[] offsets = new long[records.length];
 
     // Create files with four entries per index segment.
     LobFile.Writer writer = LobFile.create(p, conf, true, codec, 4);
@@ -118,7 +130,7 @@ public class TestLobFile extends TestCase {
 
       LOG.info("Got record of " + bytesRead + " chars");
       assertEquals(expected.length(), bytesRead);
-      char [] charData = buf.array();
+      char[] charData = buf.array();
       String finalRecord = new String(charData);
       assertEquals(expected, finalRecord);
 
@@ -130,33 +142,33 @@ public class TestLobFile extends TestCase {
 
     reader.close();
 
-    try {
-      reader.next();
-      fail("Expected IOException calling next after close");
-    } catch (IOException ioe) {
-      // expected this.
-    }
+    thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException calling next after close");
+    reader.next();
 
     // A second close shouldn't hurt anything. This should be a no-op.
     reader.close();
   }
 
   private void runClobFileTest(Path p, String codec,
-      String... records) throws Exception {
+                               String... records) throws Exception {
     writeClobFile(p, codec, records);
     verifyClobFile(p, records);
     fs.delete(p, false);
   }
 
+  @Test
   public void testEmptyRecord() throws Exception {
     runClobFileTest(new Path(TEMP_BASE_DIR, "empty.lob"), null);
   }
 
+  @Test
   public void testSingleRecord() throws Exception {
     runClobFileTest(new Path(TEMP_BASE_DIR, "single.lob"),
         null, "this is a single record!");
   }
 
+  @Test
   public void testMultiRecords() throws Exception {
     runClobFileTest(new Path(TEMP_BASE_DIR, "multi.lob"),
         CodecMap.NONE,
@@ -165,6 +177,7 @@ public class TestLobFile extends TestCase {
         "yet one more record graces this file.");
   }
 
+  @Test
   public void testMultiIndexSegments() throws Exception {
     // Test that we can use multiple IndexSegments.
     runClobFileTest(new Path(TEMP_BASE_DIR, "multi-index.lob"),
@@ -182,12 +195,13 @@ public class TestLobFile extends TestCase {
    * but then read the second record completely. Verify that we
    * can re-align on a record boundary correctly. This test requires
    * at least 3 records.
-   * @param p the path to the file to create.
+   *
+   * @param p         the path to the file to create.
    * @param firstLine the first line of the first reord
-   * @param records All of the records to write to the file.
+   * @param records   All of the records to write to the file.
    */
   private void runLineAndRecordTest(Path p, String firstLine,
-      String... records) throws Exception {
+                                    String... records) throws Exception {
 
     assertTrue("This test requires 3+ records", records.length > 2);
 
@@ -222,7 +236,7 @@ public class TestLobFile extends TestCase {
     CharBuffer buf = CharBuffer.allocate(records[1].length());
     r.read(buf);
     r.close();
-    char [] chars = buf.array();
+    char[] chars = buf.array();
     String s = new String(chars);
     assertEquals(records[1], s);
 
@@ -231,6 +245,7 @@ public class TestLobFile extends TestCase {
     assertFalse(reader.isRecordAvailable());
   }
 
+  @Test
   public void testVeryShortRead() throws Exception {
     // Read only a small fraction of a record, ensure that we can
     // read the next record, even when we've left more than a 16-byte
@@ -250,6 +265,7 @@ public class TestLobFile extends TestCase {
 
   }
 
+  @Test
   public void testIncompleteOverread() throws Exception {
     // Read most of the first record so that we partially consume the
     // next record start mark; make sure we realign properly.
@@ -266,14 +282,15 @@ public class TestLobFile extends TestCase {
         RECORD3);
   }
 
+  @Test
   public void testSeekToRecord() throws Exception {
     // Seek past the first two records and read the third.
 
     Path p = new Path(TEMP_BASE_DIR, "seek.lob");
-    String [] records = {
-      "this is the first record!",
-      "here comes record number two. It is a bit longer.",
-      "this is the third record. we can read it.",
+    String[] records = {
+        "this is the first record!",
+        "here comes record number two. It is a bit longer.",
+        "this is the third record. we can read it.",
     };
 
     // Write the file and memorize when the third record starts.
@@ -306,7 +323,7 @@ public class TestLobFile extends TestCase {
     CharBuffer buf = CharBuffer.allocate(records[2].length());
     r.read(buf);
     r.close();
-    char [] chars = buf.array();
+    char[] chars = buf.array();
     String s = new String(chars);
     assertEquals(records[2], s);
 
@@ -315,9 +332,11 @@ public class TestLobFile extends TestCase {
   }
 
 
-  /** Verifies that the next record in the LobFile is the expected one. */
+  /**
+   * Verifies that the next record in the LobFile is the expected one.
+   */
   private void verifyNextRecord(LobFile.Reader reader, long expectedId,
-      String expectedRecord) throws Exception {
+                                String expectedRecord) throws Exception {
     assertTrue(reader.next());
     assertTrue(reader.isRecordAvailable());
     assertEquals(expectedId, reader.getRecordId());
@@ -337,30 +356,31 @@ public class TestLobFile extends TestCase {
     LOG.info("Got record of " + bytesRead + " chars");
     assertEquals(expectedRecord.length(), bytesRead);
 
-    char [] charData = buf.array();
+    char[] charData = buf.array();
     String finalRecord = new String(charData);
     assertEquals(expectedRecord, finalRecord);
   }
 
+  @Test
   public void testManySeeks() throws Exception {
     // Test that we can do gymnastics with seeking between records.
 
     Path p = new Path(TEMP_BASE_DIR, "manyseeks.lob");
 
-    String [] records = {
-      "first record",
-      "second record",
-      "the third record",
-      "rec4 is the last in IndexSeg 0",
-      "rec5 is first in IndexSeg 1",
-      "rec6 is yet another record",
-      "rec7 is starting to feel boring",
-      "rec8 is at the end of seg 1",
-      "rec9 is all by itself in seg 2",
+    String[] records = {
+        "first record",
+        "second record",
+        "the third record",
+        "rec4 is the last in IndexSeg 0",
+        "rec5 is first in IndexSeg 1",
+        "rec6 is yet another record",
+        "rec7 is starting to feel boring",
+        "rec8 is at the end of seg 1",
+        "rec9 is all by itself in seg 2",
     };
 
     // Write the records to a file, save their offsets.
-    long [] offsets = writeClobFile(p, null, records);
+    long[] offsets = writeClobFile(p, null, records);
 
     // Sanity check that we can stream the file.
     verifyClobFile(p, records);
@@ -437,16 +457,17 @@ public class TestLobFile extends TestCase {
    * as many bytes as we expect, and that the bytes are what we
    * expect them to be. Assumes that the bytes are such that
    * input[i] == i + offset.
-   * @param reader the LobFile reader to consume data from
+   *
+   * @param reader              the LobFile reader to consume data from
    * @param expectedDeclaredLen the size we expect the LobFile to declare
-   * its record length as.
-   * @param expectedActualLen the true number of bytes we expect to read in
-   * the record.
-   * @param offset the offset amount for each of the elements of the array.
+   *                            its record length as.
+   * @param expectedActualLen   the true number of bytes we expect to read in
+   *                            the record.
+   * @param offset              the offset amount for each of the elements of the array.
    */
   private void verifyBlobRecord(LobFile.Reader reader,
-      long expectedDeclaredLen, long expectedActualLen,
-      int offset) throws Exception {
+                                long expectedDeclaredLen, long expectedActualLen,
+                                int offset) throws Exception {
 
     assertTrue(reader.next());
     assertTrue(reader.isRecordAvailable());
@@ -454,7 +475,7 @@ public class TestLobFile extends TestCase {
 
     InputStream is = reader.readBlobRecord();
 
-    byte [] bytes = new byte[(int) expectedActualLen];
+    byte[] bytes = new byte[(int) expectedActualLen];
     int numRead = is.read(bytes);
     assertEquals(expectedActualLen, numRead);
 
@@ -470,13 +491,14 @@ public class TestLobFile extends TestCase {
    * of the record to disagree with the actual length (the actual length
    * should be &gt;= the declared length).
    * The record written will have values v[i] = i + offset.
-   * @param writer the LobFile writer to put the record into
+   *
+   * @param writer      the LobFile writer to put the record into
    * @param declaredLen the length value written into the file itself
-   * @param actualLen the true number of bytes to write
-   * @param offset an amount to adjust each record's byte values by.
+   * @param actualLen   the true number of bytes to write
+   * @param offset      an amount to adjust each record's byte values by.
    */
   private void writeBlobRecord(LobFile.Writer writer, long declaredLen,
-      long actualLen, int offset) throws Exception {
+                               long actualLen, int offset) throws Exception {
     OutputStream os = writer.writeBlobRecord(declaredLen);
     for (int i = 0; i < actualLen; i++) {
       os.write(i + offset);
@@ -489,13 +511,14 @@ public class TestLobFile extends TestCase {
   /**
    * Verifies a number of records that all have the same declared
    * and actual record lengths.
-   * @param p the path to the LobFile to open
-   * @param numRecords the number of records to expect
+   *
+   * @param p           the path to the LobFile to open
+   * @param numRecords  the number of records to expect
    * @param declaredLen the declared length of each record in the file
-   * @param actualLen the true number of bytes we expect to read per record.
+   * @param actualLen   the true number of bytes we expect to read per record.
    */
   private void verifyBlobRecords(Path p, int numRecords,
-      long declaredLen, long actualLen) throws Exception {
+                                 long declaredLen, long actualLen) throws Exception {
 
     LobFile.Reader reader = LobFile.open(p, conf);
     for (int i = 0; i < numRecords; i++) {
@@ -505,6 +528,7 @@ public class TestLobFile extends TestCase {
     reader.close();
   }
 
+  @Test
   public void testBinaryRecords() throws Exception {
     // Write a BLOB file and read it all back.
 
@@ -523,6 +547,7 @@ public class TestLobFile extends TestCase {
     verifyBlobRecords(p, NUM_RECORDS, RECORD_LEN, RECORD_LEN);
   }
 
+  @Test
   public void testOverLengthBinaryRecord() throws Exception {
     // Write a record with a declared length shorter than the
     // actual length, and read it back.
@@ -547,15 +572,16 @@ public class TestLobFile extends TestCase {
   private void runCompressedTest(String codec) throws Exception {
     LOG.info("Testing with codec: " + codec);
     Path p = new Path(TEMP_BASE_DIR, "compressed-" + codec + ".lob");
-    String [] records = {
-      "this is the first record, It should be compressed a lot!",
-      "record 2 record 2 record 2 record 2 2 2 2 2 2 2 2 2 2 2 2",
-      "and a third and a third yes this is the third",
+    String[] records = {
+        "this is the first record, It should be compressed a lot!",
+        "record 2 record 2 record 2 record 2 2 2 2 2 2 2 2 2 2 2 2",
+        "and a third and a third yes this is the third",
     };
 
     runClobFileTest(p, codec, records);
   }
 
+  @Test
   public void testCompressedFile() throws Exception {
     // Test all the various compression codecs.
 
@@ -564,15 +590,10 @@ public class TestLobFile extends TestCase {
     runCompressedTest(CodecMap.NONE);
     runCompressedTest(CodecMap.DEFLATE);
 
-    try {
-      // We expect this to throw UnsupportedCodecException
-      // because this class is not included in our package.
-      runCompressedTest(CodecMap.LZO);
-      fail("Expected unsupported codec exception for lzo");
-    } catch (UnsupportedCodecException uce) {
-      // We pass.
-      LOG.info("Got unsupported codec exception for lzo; expected -- good.");
-    }
+    thrown.expect(UnsupportedCodecException.class);
+    thrown.reportMissingExceptionWithMessage("Expected UnsupportedCodecException for lzo");
+    runCompressedTest(CodecMap.LZO);
   }
+
 }
 

@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.junit.Test;
 
 /**
  * Test cases that import rows containing multiple columns,
@@ -40,11 +41,8 @@ public class TestMultiCols extends ImportJobTestCase {
    * Do a full import verification test on a table containing one row.
    * @param types the types of the columns to insert
    * @param insertVals the SQL text to use to insert each value
-   * @param validateVals the text to expect when retrieving each value from
-   * the db
    * @param validateLine the text to expect as a toString() of the entire row,
    * as imported by the tool
-   * @param importColumns The list of columns to import
    */
   private void verifyTypes(String [] types , String [] insertVals,
       String validateLine) {
@@ -59,6 +57,7 @@ public class TestMultiCols extends ImportJobTestCase {
     LOG.debug("Verified input line as " + validateLine + " -- ok!");
   }
 
+  @Test
   public void testThreeStrings() {
     String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
     String [] insertVals = { "'foo'", "'bar'", "'baz'" };
@@ -67,6 +66,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testStringsWithNull1() {
     String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
     String [] insertVals = { "'foo'", "null", "'baz'" };
@@ -75,6 +75,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testStringsWithNull2() {
     String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
     String [] insertVals = { "null", "'foo'", "'baz'" };
@@ -83,6 +84,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testStringsWithNull3() {
     String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
     String [] insertVals = { "'foo'", "'baz'", "null"};
@@ -91,6 +93,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testThreeInts() {
     String [] types = { "INTEGER", "INTEGER", "INTEGER" };
     String [] insertVals = { "1", "2", "3" };
@@ -99,6 +102,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testIntsWithNulls() {
     String [] types = { "INTEGER", "INTEGER", "INTEGER" };
     String [] insertVals = { "1", "null", "3" };
@@ -107,6 +111,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testMixed1() {
     String [] types = { "INTEGER", "VARCHAR(32)", "DATE" };
     String [] insertVals = { "1", "'meep'", "'2009-12-31'" };
@@ -115,6 +120,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testMixed2() {
     String [] types = { "INTEGER", "VARCHAR(32)", "DATE" };
     String [] insertVals = { "null", "'meep'", "'2009-12-31'" };
@@ -123,6 +129,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testMixed3() {
     String [] types = { "INTEGER", "VARCHAR(32)", "DATE" };
     String [] insertVals = { "1", "'meep'", "null" };
@@ -131,6 +138,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testMixed4() {
     String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
     String [] insertVals = { "-42", "17", "33333333333333333333333.1714" };
@@ -139,6 +147,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testMixed5() {
     String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
     String [] insertVals = { "null", "17", "33333333333333333333333.0" };
@@ -147,6 +156,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine);
   }
 
+  @Test
   public void testMixed6() {
     String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
     String [] insertVals = { "33333333333333333333333", "17", "-42"};
@@ -160,6 +170,7 @@ public class TestMultiCols extends ImportJobTestCase {
   // we can selectively import only certain columns.
   //////////////////////////////////////////////////////////////////////////
 
+  @Test
   public void testSkipFirstCol() {
     String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
     String [] insertVals = { "33333333333333333333333", "17", "-42"};
@@ -170,6 +181,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine, loadCols);
   }
 
+  @Test
   public void testSkipSecondCol() {
     String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
     String [] insertVals = { "33333333333333333333333", "17", "-42"};
@@ -180,6 +192,7 @@ public class TestMultiCols extends ImportJobTestCase {
     verifyTypes(types, insertVals, validateLine, loadCols);
   }
 
+  @Test
   public void testSkipThirdCol() {
     String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
     String [] insertVals = { "33333333333333333333333", "17", "-42"};
@@ -198,6 +211,7 @@ public class TestMultiCols extends ImportJobTestCase {
    *
    * @throws IOException
    */
+  @Test
   public void testSingleColumnsArg() throws IOException {
     String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
     String [] insertVals = { "'foo'", "'bar'", "'baz'" };
@@ -215,6 +229,7 @@ public class TestMultiCols extends ImportJobTestCase {
    *
    * @throws IOException
    */
+  @Test
   public void testColumnsWithSpaces() throws IOException {
     String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
     String [] insertVals = { "'foo'", "'bar'", "'baz'" };

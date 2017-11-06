@@ -30,6 +30,9 @@ import org.apache.hadoop.fs.Path;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the sqoop.bigdecimal.format.string parameter default behavior and when
@@ -70,11 +73,13 @@ public class TestBigDecimalImport extends ImportJobTestCase {
     return line;
   }
 
+  @Test
   public void testBigDecimalDefault() throws IOException {
     String line = runBigDecimalImport(null);
     assertEquals("0.000001,0.0000001", line);
   }
 
+  @Test
   public void testBigDecimalNoFormat() throws IOException {
     List<String> args = new ArrayList<String>();
     args.add("-Dsqoop.bigdecimal.format.string=false");

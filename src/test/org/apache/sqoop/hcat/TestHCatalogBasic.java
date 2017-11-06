@@ -18,23 +18,29 @@
 
 package org.apache.sqoop.hcat;
 
-import junit.framework.TestCase;
-
 import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.tool.ExportTool;
 import com.cloudera.sqoop.tool.ImportTool;
 
+import org.junit.Test;
+
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
+
 /**
  * Test basic HCatalog related features.
  */
-public class TestHCatalogBasic extends TestCase {
+public class TestHCatalogBasic {
+
   private static ImportTool importTool;
   private static ExportTool exportTool;
 
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
   @Before
-  @Override
   public void setUp() {
     importTool = new ImportTool();
     exportTool = new ExportTool();
@@ -49,6 +55,7 @@ public class TestHCatalogBasic extends TestCase {
     return opts;
   }
 
+  @Test
   public void testHCatalogHomeWithImport() throws Exception {
     String[] args = {
       "--hcatalog-home",
@@ -58,6 +65,7 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseImportArgs(args);
   }
 
+  @Test
   public void testHCatalogHomeWithExport() throws Exception {
     String[] args = {
       "--hcatalog-home",
@@ -67,6 +75,7 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseExportArgs(args);
   }
 
+  @Test
   public void testHCatalogImport() throws Exception {
     String[] args = {
       "--hcatalog-table",
@@ -76,6 +85,7 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseImportArgs(args);
   }
 
+  @Test
   public void testHCatalogExport() throws Exception {
     String[] args = {
       "--hcatalog-table",
@@ -85,6 +95,7 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseExportArgs(args);
   }
 
+  @Test
   public void testHCatImportWithTargetDir() throws Exception {
     String[] args = {
       "--connect",
@@ -96,15 +107,15 @@ public class TestHCatalogBasic extends TestCase {
       "--target-dir",
       "/target/dir",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --target-dir");
+    importTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatImportWithWarehouseDir() throws Exception {
     String[] args = {
       "--connect",
@@ -116,15 +127,15 @@ public class TestHCatalogBasic extends TestCase {
       "--warehouse-dir",
       "/target/dir",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --warehouse-dir");
+    importTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatImportWithHiveImport() throws Exception {
     String[] args = {
       "--connect",
@@ -135,15 +146,15 @@ public class TestHCatalogBasic extends TestCase {
       "table",
       "--hive-import",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --hive-import");
+    importTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatExportWithExportDir() throws Exception {
     String[] args = {
       "--connect",
@@ -155,15 +166,15 @@ public class TestHCatalogBasic extends TestCase {
       "--export-dir",
       "/export/dir",
     };
-    try {
-      SqoopOptions opts = parseExportArgs(args);
-      exportTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseExportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog export " +
+        "with --export-dir");
+    exportTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatExportWithParquetFile() throws Exception {
     String[] args = {
       "--connect",
@@ -174,15 +185,15 @@ public class TestHCatalogBasic extends TestCase {
       "table",
       "--as-parquetfile",
     };
-    try {
-      SqoopOptions opts = parseExportArgs(args);
-      exportTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseExportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog export " +
+        "with --as-parquetfile");
+    exportTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatImportWithSequenceFile() throws Exception {
     String[] args = {
       "--connect",
@@ -193,15 +204,15 @@ public class TestHCatalogBasic extends TestCase {
       "table",
       "--as-sequencefile",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --as-sequencefile");
+    importTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatImportWithParquetFile() throws Exception {
     String[] args = {
       "--hcatalog-table",
@@ -215,15 +226,15 @@ public class TestHCatalogBasic extends TestCase {
       "table",
       "--as-parquetfile",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --as-parquetfile");
+    importTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatImportWithAvroFile() throws Exception {
     String[] args = {
       "--connect",
@@ -234,14 +245,15 @@ public class TestHCatalogBasic extends TestCase {
       "table",
       "--as-avrodatafile",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --as-avrodatafile");
+    importTool.validateOptions(opts);
   }
+
+  @Test
   public void testHCatImportWithCreateTable() throws Exception {
     String[] args = {
       "--hcatalog-table",
@@ -251,6 +263,7 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseImportArgs(args);
   }
 
+  @Test
   public void testHCatImportWithDropAndCreateTable() throws Exception {
     String[] args = {
             "--connect",
@@ -265,6 +278,7 @@ public class TestHCatalogBasic extends TestCase {
     importTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatImportWithCreateTableAndDropAndCreateTable()
     throws Exception {
     String[] args = {
@@ -278,14 +292,14 @@ public class TestHCatalogBasic extends TestCase {
             "--drop-and-create-hcatalog-table",
     };
     SqoopOptions opts = parseImportArgs(args);
-    try {
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with --drop-and-create-hcatalog-table");
+    importTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatImportWithStorageStanza() throws Exception {
     String[] args = {
       "--hcatalog-table",
@@ -296,6 +310,7 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseImportArgs(args);
   }
 
+  @Test
   public void testHCatImportWithDatabase() throws Exception {
     String[] args = {
       "--hcatalog-table",
@@ -306,6 +321,7 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseImportArgs(args);
   }
 
+  @Test
   public void testHCatImportWithPartKeys() throws Exception {
     String[] args = {
       "--hcatalog-table",
@@ -318,6 +334,7 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseImportArgs(args);
   }
 
+  @Test
   public void testHCatImportWithOnlyHCatKeys() throws Exception {
     String[] args = {
       "--connect",
@@ -329,15 +346,15 @@ public class TestHCatalogBasic extends TestCase {
       "--hcatalog-partition-keys",
       "k1,k2",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with only HCatalog keys");
+    importTool.validateOptions(opts);
   }
 
+  @Test
   public void testHCatImportWithMismatchedKeysAndVals() throws Exception {
     String[] args = {
       "--connect",
@@ -351,14 +368,15 @@ public class TestHCatalogBasic extends TestCase {
       "--hcatalog-partition-values",
       "v1",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with mismatched keys and values");
+    importTool.validateOptions(opts);
   }
+
+  @Test
   public void testHCatImportWithEmptyKeysAndVals() throws Exception {
     String[] args = {
       "--connect",
@@ -372,14 +390,15 @@ public class TestHCatalogBasic extends TestCase {
       "--hcatalog-partition-values",
       ",v1",
     };
-    try {
-      SqoopOptions opts = parseImportArgs(args);
-      importTool.validateOptions(opts);
-      fail("Expected InvalidOptionsException");
-    } catch (SqoopOptions.InvalidOptionsException ioe) {
-      // expected.
-    }
+    SqoopOptions opts = parseImportArgs(args);
+
+    thrown.expect(SqoopOptions.InvalidOptionsException.class);
+    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during HCatalog import " +
+        "with empty keys and values");
+    importTool.validateOptions(opts);
   }
+
+  @Test
   public void testHCatImportWithBothHCatAndHivePartOptions() throws Exception {
     String[] args = {
       "--connect",
@@ -400,4 +419,5 @@ public class TestHCatalogBasic extends TestCase {
     SqoopOptions opts = parseImportArgs(args);
     importTool.validateOptions(opts);
   }
+
 }

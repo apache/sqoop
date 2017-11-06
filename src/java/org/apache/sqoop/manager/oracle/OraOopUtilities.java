@@ -714,16 +714,16 @@ public final class OraOopUtilities {
 
     Path uniqueFileName = null;
     try {
-      FileSystem fileSystem = FileSystem.get(conf);
-
       // NOTE: This code is not thread-safe.
       // i.e. A race-condition could still cause this code to 'fail'.
 
       int suffix = 0;
       String fileNameTemplate = fileName + "%s";
+      Path outputDirectory = new Path(getOutputDirectory(conf));
+      FileSystem fileSystem = outputDirectory.getFileSystem(conf);
       while (true) {
         uniqueFileName =
-            new Path(getOutputDirectory(conf), String.format(fileNameTemplate,
+            new Path(outputDirectory, String.format(fileNameTemplate,
                 suffix == 0 ? "" : String.format(" (%d)", suffix)));
         if (!fileSystem.exists(uniqueFileName)) {
           break;

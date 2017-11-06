@@ -21,10 +21,16 @@ package org.apache.sqoop.manager;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.cli.RelatedOptions;
 
 /**
  * Database manager that is connects to a generic JDBC-compliant
@@ -39,6 +45,7 @@ public class GenericJdbcManager
 
   private String jdbcDriverClass;
   private Connection connection;
+  private static final String SCHEMA = "schema";
 
   public GenericJdbcManager(final String driverClass, final SqoopOptions opts) {
     super(opts);
@@ -83,6 +90,32 @@ public class GenericJdbcManager
 
   public String getDriverClass() {
     return jdbcDriverClass;
+  }
+
+  public String parseExtraScheArgs(String[] args,RelatedOptions opts) throws ParseException {
+    // No-op when no extra arguments are present
+    if (args == null || args.length == 0) {
+      return null;
+    }
+
+    // We do not need extended abilities of SqoopParser, so we're using
+    // Gnu parser instead.
+    CommandLineParser parser = new GnuParser();
+    CommandLine cmdLine = parser.parse(opts, args, true);
+
+    //Apply parsed arguments
+    return applyExtraScheArguments(cmdLine);
+  }
+
+  public String applyExtraScheArguments(CommandLine cmdLine) {
+    if (cmdLine.hasOption(SCHEMA)) {
+      String schemaName = cmdLine.getOptionValue(SCHEMA);
+      LOG.info("We will use schema " + schemaName);
+
+      return schemaName;
+    }
+
+    return null;
   }
 }
 

@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.sqoop.SqoopOptions;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
@@ -279,6 +280,7 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V> extends
           .omitLobAndLongColumnsDuringImport(conf), OraOopUtilities
           .recallSqoopJobType(conf), true // <- onlyOraOopSupportedTypes
           , false // <- omitOraOopPseudoColumns
+          , OracleUtils.isOracleEscapingDisabled(conf)
           ));
     }
 
@@ -354,7 +356,8 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V> extends
         if (colCount > 0) {
           sqlNames.append("\n,");
         }
-        sqlNames.append(OracleUtils.escapeIdentifier(columnName));
+        boolean escapingDisabled = OracleUtils.isOracleEscapingDisabled(getConf());
+        sqlNames.append(OracleUtils.escapeIdentifier(columnName, escapingDisabled));
 
         // column values...
         if (colCount > 0) {

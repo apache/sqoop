@@ -1,0 +1,113 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7.19
+    container_name: sqoop_mysql_container
+    environment:
+      COMPOSE_HTTP_TIMEOUT: 200
+      MYSQL_ROOT_PASSWORD: sqoop
+      MYSQL_USER: sqoop
+      MYSQL_PASSWORD: Sqoop12345
+      MYSQL_DATABASE: sqoop
+    ports:
+      - 3306:3306
+    command:
+      mysqld --sql_mode="ANSI_QUOTES"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+  postgresql:
+    image: postgres:9.6.4
+    container_name: sqoop_postgresql_container
+    environment:
+      COMPOSE_HTTP_TIMEOUT: 200
+      POSTGRES_DB: sqoop
+      POSTGRES_USER: sqoop
+      POSTGRES_PASSWORD: Sqoop12345
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+  mssql:
+    image: microsoft/mssql-server-linux:2017-GA
+    container_name: sqoop_mssql_container
+    environment:
+      COMPOSE_HTTP_TIMEOUT: 200
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Sqoop12345
+    ports:
+      - 1433:1433
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Sqoop12345", "-Q" , "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+  cubrid:
+    image: cubrid/cubrid:10.0
+    container_name: sqoop_cubrid_container
+    environment:
+      COMPOSE_HTTP_TIMEOUT: 200
+      CUBRID_DB: sqoop
+      CUBRID_USER: sqoop
+      CUBRID_PASSWORD: Sqoop12345
+    ports:
+      - 33000:33000
+    healthcheck:
+      test: ["CMD", "csql", "sqoop", "-c", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+  oracle:
+    image: oracle/database:12.2.0.1-ee
+    container_name: sqoop_oracle_container
+    environment:
+      COMPOSE_HTTP_TIMEOUT: 200
+      ORACLE_SID: sqoop
+      ORACLE_PWD: Sqoop12345
+    ports:
+      - 1521:1521
+    volumes:
+      - ./oraclescripts:/opt/oracle/scripts
+    healthcheck:
+      test: ["CMD", "/opt/oracle/scripts/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 60
+  db2:
+    image: ibmcom/db2express-c:10.5.0.5-3.10.0
+    container_name: sqoop_db2_container
+    environment:
+      COMPOSE_HTTP_TIMEOUT: 200
+      DB2INST1_PASSWORD: Sqoop12345
+      LICENSE: accept
+    ports:
+      - 50000:50000
+    volumes:
+      - ./db2scripts:/home/db2inst1/db2scripts
+    entrypoint:
+        /home/db2inst1/db2scripts/db2entrypoint.sh
+    healthcheck:
+      test: ["CMD", "/home/db2inst1/sqllib/bin/db2", "CONNECT", "TO", "SQOOP"]
+      interval: 30s
+      timeout: 10s
+      retries: 20

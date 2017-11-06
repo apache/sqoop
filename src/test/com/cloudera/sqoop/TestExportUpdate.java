@@ -35,11 +35,22 @@ import org.apache.hadoop.util.StringUtils;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 /**
  * Test that we can update a copy of data in the database,
  * based on newer data in HDFS.
  */
 public class TestExportUpdate extends ExportJobTestCase {
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Override
   protected String getTablePrefix() {
@@ -405,6 +416,7 @@ public class TestExportUpdate extends ExportJobTestCase {
         "--update-key", updateCol));
   }
 
+  @Test
   public void testBasicUpdate() throws Exception {
     // Test that we can do a single-task single-file update.
     // This updates the entire database.
@@ -424,6 +436,7 @@ public class TestExportUpdate extends ExportJobTestCase {
    * and then modifies a subset of the rows via update.
    * @throws Exception
    */
+  @Test
   public void testMultiKeyUpdate() throws Exception {
     createMultiKeyTable(3);
 
@@ -461,6 +474,7 @@ public class TestExportUpdate extends ExportJobTestCase {
    * and then modifies a subset of the rows via update.
    * @throws Exception
    */
+  @Test
   public void testMultiKeyUpdateMultipleFilesNoUpdate() throws Exception {
     createMultiKeyTable(4);
 
@@ -504,6 +518,7 @@ public class TestExportUpdate extends ExportJobTestCase {
    * and then modifies a subset of the rows via update.
    * @throws Exception
    */
+  @Test
   public void testMultiKeyUpdateMultipleFilesFullUpdate() throws Exception {
     createMultiKeyTable(4);
 
@@ -542,7 +557,7 @@ public class TestExportUpdate extends ExportJobTestCase {
         new int[] { 3, 2 }, 3, 2, "3bar2");
   }
 
-
+  @Test
   public void testEmptyTable() throws Exception {
     // Test that an empty table will "accept" updates that modify
     // no rows; no new data is injected into the database.
@@ -552,6 +567,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     verifyRowCount(0);
   }
 
+  @Test
   public void testEmptyFiles() throws Exception {
     // An empty input file results in no changes to a db table.
     populateDatabase(10);
@@ -564,6 +580,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     verifyRow("A", "9", "9", "foo9", "9");
   }
 
+  @Test
   public void testStringCol() throws Exception {
     // Test that we can do modifications based on the string "B" column.
     populateDatabase(10);
@@ -575,6 +592,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     verifyRow("B", "'foo9'", "18", "foo9", "18");
   }
 
+  @Test
   public void testLastCol() throws Exception {
     // Test that we can do modifications based on the third int column.
     populateDatabase(10);
@@ -586,6 +604,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     verifyRow("C", "9", "18", "foo18", "9");
   }
 
+  @Test
   public void testMultiMaps() throws Exception {
     // Test that we can handle multiple map tasks.
     populateDatabase(20);
@@ -600,6 +619,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     verifyRow("A", "19", "19", "foo38", "38");
   }
 
+  @Test
   public void testSubsetUpdate() throws Exception {
     // Update only a few rows in the middle of the table.
     populateDatabase(10);
@@ -619,6 +639,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     verifyRow("A", "7", "7", "foo14", "14");
   }
 
+  @Test
   public void testSubsetUpdate2() throws Exception {
     // Update only some of the rows in the db. Also include some
     // updates that do not affect actual rows in the table.
@@ -647,6 +668,7 @@ public class TestExportUpdate extends ExportJobTestCase {
    *
    * @throws Exception
    */
+  @Test
   public void testUpdateColumnSubset() throws Exception {
     populateDatabase(4);
     createUpdateFiles(1, 3, 0);
@@ -675,15 +697,14 @@ public class TestExportUpdate extends ExportJobTestCase {
    *
    * @throws Exception
    */
+  @Test
   public void testUpdateColumnNotInColumns() throws Exception {
     populateDatabase(1);
-    try {
-      runExport(getArgv(true, 2, 2, "-m", "1",
+
+    thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException as --columns is not a superset of --update-key");
+    runExport(getArgv(true, 2, 2, "-m", "1",
         "--update-key", "A", "--columns", "B"));
-      fail("Expected IOException");
-    } catch (IOException e) {
-      assertTrue(true);
-    }
   }
 
 }

@@ -263,7 +263,7 @@ public class HiveImport {
    * @throws IOException
    */
   private void cleanUp(Path outputPath) throws IOException {
-    FileSystem fs = FileSystem.get(configuration);
+    FileSystem fs = outputPath.getFileSystem(configuration);
 
     // HIVE is not always removing input directory after LOAD DATA statement
     // (which is our export directory). We're removing export directory in case

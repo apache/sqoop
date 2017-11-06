@@ -93,6 +93,10 @@ public class SqoopOptions
     return org.apache.sqoop.SqoopOptions.getHiveHomeDefault();
   }
 
+  public static boolean isSqoopRethrowSystemPropertySet() {
+    return org.apache.sqoop.SqoopOptions.isSqoopRethrowSystemPropertySet();
+  }
+
   /**
    * {@inheritDoc}.
    * @deprecated

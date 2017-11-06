@@ -34,6 +34,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests importing a database table as an Avro Data File then back to the
@@ -44,6 +47,7 @@ public class TestAvroImportExportRoundtrip extends ImportJobTestCase {
   public static final Log LOG = LogFactory
       .getLog(TestAvroImportExportRoundtrip.class.getName());
 
+  @Test
   public void testRoundtripQuery() throws IOException, SQLException {
     String[] argv = {};
 
@@ -55,6 +59,7 @@ public class TestAvroImportExportRoundtrip extends ImportJobTestCase {
     checkFirstColumnSum();
   }
 
+  @Test
   public void testRoundtrip() throws IOException, SQLException {
     String[] argv = {};
 
@@ -158,13 +163,6 @@ public class TestAvroImportExportRoundtrip extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
-  /**
-   * Create the argv to pass to Sqoop.
-   * @param includeHadoopFlags if true, then include -D various.settings=values
-   * @param rowsPerStmt number of rows to export in a single INSERT statement.
-   * @param statementsPerTx ## of statements to use in a transaction.
-   * @return the argv as an array of strings.
-   */
   protected ArrayList<String> formatAdditionalArgs(String... additionalArgv) {
     ArrayList<String> args = new ArrayList<String>();
 

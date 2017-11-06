@@ -26,23 +26,30 @@ import java.sql.SQLException;
 
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
-import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.cloudera.sqoop.testutil.MockResultSet;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test deserialization of ClobRef and BlobRef fields.
  */
-public class TestLargeObjectLoader extends TestCase {
+public class TestLargeObjectLoader {
 
   protected Configuration conf;
   protected LargeObjectLoader loader;
   protected Path outDir;
 
+  @Before
   public void setUp() throws IOException, InterruptedException {
     conf = new Configuration();
     if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
@@ -59,6 +66,7 @@ public class TestLargeObjectLoader extends TestCase {
     loader = new LargeObjectLoader(conf, outDir);
   }
 
+  @Test
   public void testReadClobRef()
       throws IOException, InterruptedException, SQLException {
     // This should give us an inline CLOB.
@@ -82,6 +90,7 @@ public class TestLargeObjectLoader extends TestCase {
     assertEquals(MockResultSet.CLOB_DATA, str);
   }
 
+  @Test
   public void testReadBlobRef()
       throws IOException, InterruptedException, SQLException {
     // This should give us an inline BLOB.

@@ -18,10 +18,10 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * These tests need to be separate as changing the mapping type for timestamp
@@ -29,6 +29,8 @@ import org.junit.Test;
  * to fork per test class.
  */
 public class TimestampDataTest extends OraOopTestCase {
+
+  private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
 
   @Test
   public void testProductImportTimezone() throws Exception {
@@ -39,8 +41,8 @@ public class TimestampDataTest extends OraOopTestCase {
     sqoopConf.setBoolean(OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING, false);
 
     try {
-      int retCode = runImport("TST_PRODUCT", sqoopConf, false);
-      Assert.assertEquals("Return code should be 0", 0, retCode);
+      int retCode = runImport("TST_PRODUCT", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
+      assertEquals("Return code should be 0", 0, retCode);
 
     } finally {
       cleanupFolders();

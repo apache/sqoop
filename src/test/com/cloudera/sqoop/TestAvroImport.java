@@ -45,6 +45,13 @@ import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests --as-avrodatafile.
@@ -84,22 +91,26 @@ public class TestAvroImport extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
+  @Test
   public void testAvroImport() throws IOException {
     this.setCurTableName("Avro_Import_Test");
     avroImportTestHelper(null, null);
   }
 
+  @Test
   public void testDeflateCompressedAvroImport() throws IOException {
     this.setCurTableName("Deflate_Compressed_Avro_Import_Test_1");
     avroImportTestHelper(new String[] {"--compression-codec",
       "org.apache.hadoop.io.compress.DefaultCodec", }, "deflate");
   }
 
+  @Test
   public void testDefaultCompressedAvroImport() throws IOException {
     this.setCurTableName("Deflate_Compressed_Avro_Import_Test_2");
     avroImportTestHelper(new String[] {"--compress", }, "deflate");
   }
 
+  @Test
   public void testUnsupportedCodec() throws IOException {
     try {
       this.setCurTableName("Deflate_Compressed_Avro_Import_Test_3");
@@ -169,6 +180,7 @@ public class TestAvroImport extends ImportJobTestCase {
     checkSchemaFile(schema);
   }
 
+  @Test
   public void testOverrideTypeMapping() throws IOException {
     String [] types = { "INT" };
     String [] vals = { "10" };
@@ -191,6 +203,7 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals("DATA_COL0", new Utf8("10"), record1.get("DATA_COL0"));
   }
 
+  @Test
   public void testFirstUnderscoreInColumnName() throws IOException {
     String [] names = { "_NAME" };
     String [] types = { "INT" };
@@ -212,6 +225,7 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals("__NAME", 1987, record1.get("__NAME"));
   }
 
+  @Test
   public void testNonstandardCharactersInColumnName() throws IOException {
     String [] names = { "avro\uC3A11" };
     String [] types = { "INT" };
@@ -234,6 +248,7 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals("AVRO\uC3A11", 1987, record1.get("AVRO\uC3A11"));
   }
 
+  @Test
   public void testNonIdentCharactersInColumnName() throws IOException {
     String [] names = { "test_a-v+r/o" };
     String [] types = { "INT" };
@@ -258,6 +273,7 @@ public class TestAvroImport extends ImportJobTestCase {
   /*
    * Test Case For checking multiple columns having non standard characters in multiple columns
    */
+  @Test
   public void testNonstandardCharactersInMultipleColumns() throws IOException {
     String[] names = { "id$1", "id1$" };
     String[] types = { "INT", "INT" };
@@ -289,6 +305,7 @@ public class TestAvroImport extends ImportJobTestCase {
     assertEquals(type, field.schema().getTypes().get(1).getType());
   }
 
+  @Test
   public void testNullableAvroImport() throws IOException, SQLException {
     String [] types = { "INT" };
     String [] vals = { null };
@@ -301,7 +318,49 @@ public class TestAvroImport extends ImportJobTestCase {
 
     GenericRecord record1 = reader.next();
     assertNull(record1.get("DATA_COL0"));
+  }
 
+  @Test
+  public void testSpecialCharactersInColumnMappingWithConvertion() throws IOException, SQLException {
+    // escaping enabled by default
+    String [] extraArgsEscapeColNamesWithMapping = { "--map-column-java",
+        "INTFIELD1=String,DATA_#_COL0=String,DATA#COL1=String,DATA___COL2=String"};
+
+    // disable escaping
+    String [] extraArgsEscapingDisables = {"--escape-mapping-column-names", "false"};
+
+    // escaping enabled but mapping not provided
+    String [] extraArgsEscapingWithoutMapping = {};
+
+    checkRecordWithExtraArgs(extraArgsEscapeColNamesWithMapping, "TABLE1");
+    checkRecordWithExtraArgs(extraArgsEscapingDisables, "TABLE2");
+    checkRecordWithExtraArgs(extraArgsEscapingWithoutMapping, "TABLE3");
+  }
+
+  private void checkRecordWithExtraArgs(String[] extraArgs, String tableName) throws IOException {
+    String date = "2017-01-19";
+    String timeStamp = "2017-01-19 14:47:57.112000";
+
+    String [] names = {"INTFIELD1", "DATA_#_COL0", "DATA#COL1", "DATA___COL2"};
+    String [] types = { "INT", "DATE", "TIMESTAMP", "DECIMAL(2,20)" };
+    String [] vals = {"1", "{ts \'" + date + "\'}", "{ts \'" + timeStamp + "\'}", "2e20"};
+
+    String [] checkNames =  {"INTFIELD1", "DATA___COL0", "DATA_COL1", "DATA___COL2"};
+
+    setCurTableName(tableName);
+
+    createTableWithColTypesAndNames(names, types, vals);
+    runImport(getOutputArgv(true, extraArgs));
+
+    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+    DataFileReader<GenericRecord> reader = read(outputFile);
+    GenericRecord record = reader.next();
+
+    for (String columnName : checkNames) {
+      assertNotNull(record.get(columnName));
+    }
+
+    removeTableDir();
   }
 
   protected DataFileReader<GenericRecord> read(Path filename) throws IOException {

@@ -33,12 +33,12 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.password.CredentialProviderHelper;
 
 import com.cloudera.sqoop.ConnFactory;
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
@@ -56,6 +56,8 @@ import com.cloudera.sqoop.metastore.JobData;
  * and call destroy() at the end in a finally block.
  */
 public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
+
+  public static final String METADATA_TRANSACTION_ISOLATION_LEVEL = "metadata-transaction-isolation-level";
 
   public static final Log LOG = LogFactory.getLog(
       BaseSqoopTool.class.getName());
@@ -112,6 +114,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           "hive-delims-replacement";
   public static final String HIVE_PARTITION_KEY_ARG = "hive-partition-key";
   public static final String HIVE_PARTITION_VALUE_ARG = "hive-partition-value";
+  public static final String HIVE_EXTERNAL_TABLE_LOCATION_ARG = "external-table-dir";
   public static final String HCATCALOG_PARTITION_KEYS_ARG =
       "hcatalog-partition-keys";
   public static final String HCATALOG_PARTITION_VALUES_ARG =
@@ -168,6 +171,9 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String CALL_ARG = "call";
   public static final String SKIP_DISTCACHE_ARG = "skip-dist-cache";
   public static final String RELAXED_ISOLATION = "relaxed-isolation";
+  public static final String THROW_ON_ERROR_ARG = "throw-on-error";
+  public static final String ORACLE_ESCAPING_DISABLED = "oracle-escaping-disabled";
+  public static final String ESCAPE_MAPPING_COLUMN_NAMES_ENABLED = "escape-mapping-column-names";
 
   // Arguments for validation.
   public static final String VALIDATE_ARG = "validate";
@@ -210,6 +216,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
   // Arguments for the saved job management system.
   public static final String STORAGE_METASTORE_ARG = "meta-connect";
+  public static final String METASTORE_USER_ARG = "meta-username";
+  public static final String METASTORE_PASS_ARG = "meta-password";
   public static final String JOB_CMD_CREATE_ARG = "create";
   public static final String JOB_CMD_DELETE_ARG = "delete";
   public static final String JOB_CMD_EXEC_ARG = "exec";
@@ -268,13 +276,27 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     } catch (Exception e) {
       LOG.error("Got error creating database manager: "
           + StringUtils.stringifyException(e));
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(e);
-      }
+      rethrowIfRequired(sqoopOpts, e);
     }
 
     return false;
   }
+
+  protected void rethrowIfRequired(SqoopOptions options, Exception ex) {
+    if (!options.isThrowOnError()) {
+      return;
+    }
+
+    final RuntimeException exceptionToThrow;
+    if (ex instanceof RuntimeException) {
+      exceptionToThrow = (RuntimeException) ex;
+    } else {
+      exceptionToThrow = new RuntimeException(ex);
+    }
+
+    throw exceptionToThrow;
+  }
+
 
   /**
    * Should be called in a 'finally' block at the end of the run() method.
@@ -358,6 +380,16 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .hasArg()
         .withDescription("Specify JDBC connect string for the metastore")
         .withLongOpt(STORAGE_METASTORE_ARG)
+        .create());
+    relatedOpts.addOption(OptionBuilder.withArgName("metastore-db-username")
+        .hasArg()
+        .withDescription("Specify the username string for the metastore")
+        .withLongOpt(METASTORE_USER_ARG)
+        .create());
+    relatedOpts.addOption(OptionBuilder.withArgName("metastore-db-password")
+        .hasArg()
+        .withDescription("Specify the password string for the metastore")
+        .withLongOpt(METASTORE_PASS_ARG)
         .create());
 
     // Create an option-group surrounding the operations a user
@@ -477,10 +509,28 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .hasArg()
         .withArgName("rootdir")
         .create());
+    commonOpts.addOption(OptionBuilder
+        .withDescription("Defines the transaction isolation level for metadata queries. "
+            + "For more details check java.sql.Connection javadoc or the JDBC specificaiton")
+        .withLongOpt(METADATA_TRANSACTION_ISOLATION_LEVEL)
+        .hasArg()
+        .withArgName("isolationlevel")
+        .create());
+    commonOpts.addOption(OptionBuilder
+        .withDescription("Rethrow a RuntimeException on error occurred during the job")
+        .withLongOpt(THROW_ON_ERROR_ARG)
+        .create());
     // relax isolation requirements
     commonOpts.addOption(OptionBuilder
         .withDescription("Use read-uncommitted isolation for imports")
         .withLongOpt(RELAXED_ISOLATION)
+        .create());
+
+    commonOpts.addOption(OptionBuilder
+        .withDescription("Disable the escaping mechanism of the Oracle/OraOop connection managers")
+        .withLongOpt(ORACLE_ESCAPING_DISABLED)
+        .hasArg()
+        .withArgName("boolean")
         .create());
 
     return commonOpts;
@@ -545,6 +595,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
             + "to hive")
         .withLongOpt(HIVE_PARTITION_VALUE_ARG)
         .create());
+    hiveOpts.addOption(OptionBuilder.withArgName("hdfs path")
+        .hasArg()
+        .withDescription("Sets where the external table is in HDFS")
+        .withLongOpt(HIVE_EXTERNAL_TABLE_LOCATION_ARG)
+        .create());
+
     hiveOpts.addOption(OptionBuilder
         .hasArg()
         .withDescription("Override mapping for specific column to hive"
@@ -751,6 +807,12 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
         .withDescription("Override mapping for specific columns to java types")
         .withLongOpt(MAP_COLUMN_JAVA)
         .create());
+    codeGenOpts.addOption(OptionBuilder
+        .hasArg()
+        .withDescription("Disable special characters escaping in column names")
+        .withLongOpt(ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)
+        .withArgName("boolean")
+        .create());
 
     if (!multiTable) {
       codeGenOpts.addOption(OptionBuilder.withArgName("name")
@@ -953,6 +1015,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       out.setTempRootDir(in.getOptionValue(TEMP_ROOTDIR_ARG));
     }
 
+    if (in.hasOption(THROW_ON_ERROR_ARG)) {
+      LOG.debug("Throw exception on error during job is enabled.");
+      out.setThrowOnError(true);
+    }
+
     if (in.hasOption(CONNECT_STRING_ARG)) {
       out.setConnectString(in.getOptionValue(CONNECT_STRING_ARG));
     }
@@ -1027,6 +1094,26 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
     if (in.hasOption(RELAXED_ISOLATION)) {
       out.setRelaxedIsolation(true);
+    }
+
+    if (in.hasOption(METADATA_TRANSACTION_ISOLATION_LEVEL)) {
+      String transactionLevel = in.getOptionValue(METADATA_TRANSACTION_ISOLATION_LEVEL);
+      try {
+        out.setMetadataTransactionIsolationLevel(JDBCTransactionLevels.valueOf(transactionLevel).getTransactionIsolationLevelValue());
+      } catch (IllegalArgumentException e) {
+        throw new RuntimeException("Only transaction isolation levels defined by "
+            + "java.sql.Connection class are supported. Check the "
+            + "java.sql.Connection javadocs for more details", e);
+      }
+    }
+
+    if (in.hasOption(ORACLE_ESCAPING_DISABLED)) {
+      out.setOracleEscapingDisabled(Boolean.parseBoolean(in.getOptionValue(ORACLE_ESCAPING_DISABLED)));
+    }
+
+    if (in.hasOption(ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)) {
+      out.setEscapeMappingColumnNamesEnabled(Boolean.parseBoolean(in.getOptionValue(
+          ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)));
     }
   }
 
@@ -1140,7 +1227,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
    if (in.hasOption(MAP_COLUMN_HIVE)) {
       out.setMapColumnHive(in.getOptionValue(MAP_COLUMN_HIVE));
-    }
+   }
+   if (in.hasOption(HIVE_EXTERNAL_TABLE_LOCATION_ARG)) {
+     out.setHiveExternalTableDir(in.getOptionValue(HIVE_EXTERNAL_TABLE_LOCATION_ARG));
+   }
+
   }
 
   protected void applyHCatalogOptions(CommandLine in, SqoopOptions out) {
@@ -1298,6 +1389,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
 
     if (!multiTable && in.hasOption(CLASS_NAME_ARG)) {
       out.setClassName(in.getOptionValue(CLASS_NAME_ARG));
+    }
+
+    if (in.hasOption(ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)) {
+      out.setEscapeMappingColumnNamesEnabled(Boolean.parseBoolean(in.getOptionValue(
+          ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)));
     }
   }
 
@@ -1494,6 +1590,14 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
       LOG.info("\t hive-partition-value and --map-column-hive options are ");
       LOG.info("\t are also valid for HCatalog imports and exports");
     }
+    // importing to Hive external tables requires target directory to be set
+    // for external table's location
+    Boolean isNotHiveImportButExternalTableDirIsSet = !options.doHiveImport() && !org.apache.commons.lang.StringUtils.isBlank(options.getHiveExternalTableDir());
+    if (isNotHiveImportButExternalTableDirIsSet) {
+      LOG.warn("Importing to external Hive table requires --hive-import parameter to be set");
+      throw new InvalidOptionsException("Importing to external Hive table requires --hive-import parameter to be set."
+          + HELP_STR);
+    }
   }
 
   protected void validateAccumuloOptions(SqoopOptions options)
@@ -1559,6 +1663,9 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           + "without --hatalog-table");
       }
       return;
+    }
+    if(isSet(options.getHCatTableName()) && SqoopHCatUtilities.isHCatView(options)){
+      throw  new InvalidOptionsException("Reads/Writes from and to Views are not supported by HCatalog");
     }
 
     if (options.explicitInputDelims()) {
@@ -1672,6 +1779,10 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
     }
   }
 
+  private boolean isSet(String option) {
+    return org.apache.commons.lang.StringUtils.isNotBlank(option);
+  }
+
   protected void validateHBaseOptions(SqoopOptions options)
       throws InvalidOptionsException {
     if ((options.getHBaseColFamily() != null && options.getHBaseTable() == null)
@@ -1687,6 +1798,11 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
           + "without %s",
           BaseSqoopTool.HBASE_BULK_LOAD_ENABLED_ARG,
           BaseSqoopTool.HBASE_TABLE_ARG);
+      throw new InvalidOptionsException(validationMessage);
+    }
+
+    if (options.getHBaseTable() != null && options.getFileLayout() != SqoopOptions.FileLayout.TextFile) {
+      String validationMessage = String.format("Can't run HBase import with file layout: %s", options.getFileLayout());
       throw new InvalidOptionsException(validationMessage);
     }
   }

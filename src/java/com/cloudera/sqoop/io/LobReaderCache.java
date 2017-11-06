@@ -59,7 +59,7 @@ public final class LobReaderCache extends org.apache.sqoop.io.LobReaderCache {
    */
   public static Path qualify(Path path, Configuration conf)
       throws IOException {
-    return org.apache.sqoop.io.LobReaderCache.qualify(path, conf);
+    return org.apache.sqoop.util.FileSystemUtil.makeQualified(path, conf);
   }
 }
 

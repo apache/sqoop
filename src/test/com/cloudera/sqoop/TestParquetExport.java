@@ -24,6 +24,10 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.junit.Rule;
+
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.kitesdk.data.*;
 
 import java.io.IOException;
@@ -37,11 +41,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * Test that we can export Parquet Data Files from HDFS into databases.
  */
 public class TestParquetExport extends ExportJobTestCase {
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   /**
    * @return an argv for the CodeGenTool to use when creating tables to export.
@@ -318,6 +327,7 @@ public class TestParquetExport extends ExportJobTestCase {
     assertColValForRowId(maxId, colName, expectedMax);
   }
 
+  @Test
   public void testSupportedParquetTypes() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1 * 10;
@@ -351,6 +361,7 @@ public class TestParquetExport extends ExportJobTestCase {
     }
   }
 
+  @Test
   public void testNullableField() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1 * 10;
@@ -369,6 +380,7 @@ public class TestParquetExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(1), gen1);
   }
 
+  @Test
   public void testParquetRecordsNotSupported() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1;
@@ -382,15 +394,13 @@ public class TestParquetExport extends ExportJobTestCase {
     ColumnGenerator gen = colGenerator(record, schema, null, "VARCHAR(64)");
     createParquetFile(0, TOTAL_RECORDS,  gen);
     createTable(gen);
-    try {
-      runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
-      fail("Parquet records can not be exported.");
-    } catch (Exception e) {
-      // expected
-      assertTrue(true);
-    }
+
+    thrown.expect(Exception.class);
+    thrown.reportMissingExceptionWithMessage("Expected Exception as Parquet records are not supported");
+    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
+  @Test
   public void testMissingDatabaseFields() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1;
@@ -405,6 +415,7 @@ public class TestParquetExport extends ExportJobTestCase {
     verifyExport(TOTAL_RECORDS);
   }
 
+  @Test
   public void testParquetWithUpdateKey() throws IOException, SQLException {
     String[] argv = { "--update-key", "ID" };
     final int TOTAL_RECORDS = 1;
@@ -415,6 +426,7 @@ public class TestParquetExport extends ExportJobTestCase {
   }
 
   // Test Case for Issue [SQOOP-2846]
+  @Test
   public void testParquetWithUpsert() throws IOException, SQLException {
     String[] argv = { "--update-key", "ID", "--update-mode", "allowinsert" };
     final int TOTAL_RECORDS = 2;
@@ -422,13 +434,13 @@ public class TestParquetExport extends ExportJobTestCase {
     // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
     createParquetFile(0, TOTAL_RECORDS, null);
     createTableWithInsert();
-    try {
-      runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
-    } catch (Exception e) {
-      // expected
-      assertTrue(true);
-    }
+
+    thrown.expect(Exception.class);
+    thrown.reportMissingExceptionWithMessage("Expected Exception during Parquet export with --update-mode");
+    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
+
+  @Test
   public void testMissingParquetFields()  throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1;
@@ -437,13 +449,11 @@ public class TestParquetExport extends ExportJobTestCase {
     ColumnGenerator gen = colGenerator(null, null, null, "VARCHAR(64)");
     createParquetFile(0, TOTAL_RECORDS, gen);
     createTable(gen);
-    try {
-      runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
-      fail("Missing Parquet field.");
-    } catch (Exception e) {
-      // expected
-      assertTrue(true);
-    }
+
+    thrown.expect(Exception.class);
+    thrown.reportMissingExceptionWithMessage("Expected Exception on missing Parquet fields");
+    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
+
 
 }

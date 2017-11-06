@@ -19,14 +19,18 @@
 package org.apache.sqoop.validation;
 
 import com.cloudera.sqoop.SqoopOptions;
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for AbortOnFailureHandler.
  */
-public class AbortOnFailureHandlerTest extends TestCase {
+public class AbortOnFailureHandlerTest {
 
+  @Test
   public void testAbortOnFailureHandlerIsDefaultOption() {
     assertEquals(AbortOnFailureHandler.class,
       new SqoopOptions(new Configuration()).getValidationFailureHandlerClass());
@@ -35,6 +39,7 @@ public class AbortOnFailureHandlerTest extends TestCase {
   /**
    * Positive case.
    */
+  @Test
   public void testAbortOnFailureHandlerAborting() {
     try {
       Validator validator = new RowCountValidator();
@@ -51,6 +56,7 @@ public class AbortOnFailureHandlerTest extends TestCase {
   /**
    * Negative case.
    */
+  @Test
   public void testAbortOnFailureHandlerNotAborting() {
     try {
       Validator validator = new RowCountValidator();

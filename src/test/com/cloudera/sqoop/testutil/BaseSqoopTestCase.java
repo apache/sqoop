@@ -24,7 +24,6 @@ import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.google.common.collect.ObjectArrays;
-import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -44,10 +43,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
+import static org.junit.Assert.fail;
+
 /**
  * Class that implements common methods required for tests.
  */
-public abstract class BaseSqoopTestCase extends TestCase {
+public abstract class BaseSqoopTestCase {
 
   public static class DummyDataPublisher extends SqoopJobDataPublisher {
     public static String hiveTable;
@@ -148,6 +149,9 @@ public abstract class BaseSqoopTestCase extends TestCase {
     return manager;
   }
 
+  protected void setManager(ConnManager manager) {
+    this.manager = manager;
+  }
 
   /**
    * @return a connection to the database under test.
@@ -309,13 +313,21 @@ public abstract class BaseSqoopTestCase extends TestCase {
     return "DROP TABLE " + manager.escapeTableName(table) + " IF EXISTS";
   }
 
+  protected void createTableWithColTypesAndNames(String[] colNames,
+                                                 String[] colTypes,
+                                                 String[] vals) {
+    createTableWithColTypesAndNames(getTableName(), colNames, colTypes, vals);
+  }
+
   /**
    * Create a table with a set of columns with their names and add a row of values.
+   * @param newTableName The name of the new table
    * @param colNames Column names
    * @param colTypes the types of the columns to make
    * @param vals the SQL text for each value to insert
    */
-  protected void createTableWithColTypesAndNames(String[] colNames,
+  protected void createTableWithColTypesAndNames(String newTableName,
+                                                 String[] colNames,
                                                  String[] colTypes,
                                                  String[] vals) {
     assert colNames != null;
@@ -329,7 +341,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
 
     try {
       try {
-        dropTableIfExists(getTableName());
+        dropTableIfExists(newTableName);
 
         conn = getManager().getConnection();
 
@@ -340,7 +352,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
           }
         }
 
-        createTableStr = "CREATE TABLE " + manager.escapeTableName(getTableName()) + "(" + columnDefStr + ")";
+        createTableStr = "CREATE TABLE " + manager.escapeTableName(newTableName) + "(" + columnDefStr + ")";
         LOG.info("Creating table: " + createTableStr);
         statement = conn.prepareStatement(
             createTableStr,
@@ -374,7 +386,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
           }
         }
         try {
-          String insertValsStr = "INSERT INTO " + manager.escapeTableName(getTableName()) + "(" + columnListStr + ")"
+          String insertValsStr = "INSERT INTO " + manager.escapeTableName(newTableName) + "(" + columnListStr + ")"
               + " VALUES(" + valueListStr + ")";
           LOG.info("Inserting values: " + insertValsStr);
           statement = conn.prepareStatement(
@@ -382,7 +394,7 @@ public abstract class BaseSqoopTestCase extends TestCase {
               ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
           statement.executeUpdate();
         } catch (SQLException sqlException) {
-          fail("Could not create table: "
+          fail("Could not insert into table: "
               + StringUtils.stringifyException(sqlException));
         } finally {
           if (null != statement) {
@@ -408,6 +420,139 @@ public abstract class BaseSqoopTestCase extends TestCase {
         }
       }
       fail("Could not create table: " + StringUtils.stringifyException(se));
+    }
+  }
+
+  /**
+   * insert into a table with a set of columns values for a given row.
+   * @param colTypes the types of the columns to make
+   * @param vals the SQL text for each value to insert
+   */
+  protected void insertIntoTable(String[] colTypes, String[] vals) {
+    assert colNames != null;
+    assert colNames.length == vals.length;
+
+    Connection conn = null;
+    PreparedStatement statement = null;
+
+    String[] colNames = new String[vals.length];
+    for( int i = 0; i < vals.length; i++) {
+      colNames[i] = BASE_COL_NAME + Integer.toString(i);
+    }
+    try {
+        conn = getManager().getConnection();
+        for (int count=0; vals != null && count < vals.length/colTypes.length;
+              ++count ) {
+         String columnListStr = "";
+         String valueListStr = "";
+         for (int i = 0; i < colTypes.length; i++) {
+           columnListStr += manager.escapeColName(colNames[i].toUpperCase());
+           valueListStr += vals[count * colTypes.length + i];
+           if (i < colTypes.length - 1) {
+             columnListStr += ", ";
+             valueListStr += ", ";
+           }
+         }
+         try {
+           String insertValsStr = "INSERT INTO " + manager.escapeTableName(getTableName()) + "(" + columnListStr + ")"
+               + " VALUES(" + valueListStr + ")";
+           LOG.info("Inserting values: " + insertValsStr);
+           statement = conn.prepareStatement(
+               insertValsStr,
+               ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+           statement.executeUpdate();
+         } catch (SQLException sqlException) {
+           fail("Could not insert into table: "
+               + StringUtils.stringifyException(sqlException));
+         } finally {
+           if (null != statement) {
+             try {
+               statement.close();
+             } catch (SQLException se) {
+               // Ignore exception on close.
+             }
+
+             statement = null;
+           }
+         }
+       }
+    conn.commit();
+    this.colNames = colNames;
+    } catch (SQLException se) {
+      if (null != conn) {
+        try {
+          conn.close();
+        } catch (SQLException connSE) {
+          // Ignore exception on close.
+       }
+      }
+      fail("Could not create table: " + StringUtils.stringifyException(se));
+    }
+
+  }
+
+  /**
+   * update a table with a set of columns values for a given row.
+   * @param colTypes the types of the columns to make
+   * @param vals the SQL text for each value to insert
+   */
+  protected void updateTable(String[] colTypes, String[] vals) {
+    assert colNames != null;
+    assert colNames.length == vals.length;
+
+    Connection conn = null;
+    PreparedStatement statement = null;
+
+    String[] colNames = new String[vals.length];
+    for( int i = 0; i < vals.length; i++) {
+      colNames[i] = BASE_COL_NAME + Integer.toString(i);
+    }
+
+    try {
+      conn = getManager().getConnection();
+      for (int count=0; vals != null && count < vals.length/colNames.length;
+           ++count ) {
+        String updateStr = "";
+        for (int i = 1; i < colNames.length; i++) {
+	      updateStr += manager.escapeColName(colNames[i].toUpperCase()) + " = "+vals[count * colNames.length + i];
+          if (i < colNames.length - 1) {
+            updateStr += ", ";
+          }
+        }
+        updateStr += " WHERE "+colNames[0]+"="+vals[0]+"";
+        try {
+          String updateValsStr = "UPDATE " + manager.escapeTableName(getTableName()) + " SET " + updateStr;
+          LOG.info("updating values: " + updateValsStr);
+          statement = conn.prepareStatement(
+                      updateValsStr,
+              ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+          statement.executeUpdate();
+        } catch (SQLException sqlException) {
+          fail("Could not update table: "
+              + StringUtils.stringifyException(sqlException));
+        } finally {
+          if (null != statement) {
+            try {
+              statement.close();
+            } catch (SQLException se) {
+              // Ignore exception on close.
+            }
+            statement = null;
+          }
+        }
+      }
+
+      conn.commit();
+      this.colNames = colNames;
+    } catch (SQLException se) {
+      if (null != conn) {
+        try {
+          conn.close();
+        } catch (SQLException connSE) {
+          // Ignore exception on close.
+        }
+      }
+      fail("Could not update table: " + StringUtils.stringifyException(se));
     }
   }
 

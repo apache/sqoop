@@ -1,5 +1,4 @@
 /**
-/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -51,6 +50,11 @@ import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import com.cloudera.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test that we can export data from HDFS into databases.
@@ -118,6 +122,20 @@ public class TestExport extends ExportJobTestCase {
 
     /** Return the column type to put in the CREATE TABLE statement. */
     String getType();
+  }
+
+  protected static class IntColumnGenerator implements ColumnGenerator {
+    public String getExportText(int rowNum) {
+      int day = rowNum + 1;
+      return String.valueOf(day);
+    }
+    public String getVerifyText(int rowNum) {
+      int day = rowNum + 1;
+      return String.valueOf(day);
+    }
+    public String getType() {
+      return "INT";
+    }
   }
 
   /**
@@ -455,11 +473,13 @@ public class TestExport extends ExportJobTestCase {
   /**
    * Run an "export" on an empty file.
    */
+  @Test
   public void testEmptyExport() throws IOException, SQLException {
     multiFileTest(1, 0, 1);
   }
 
   /** Export 10 rows, make sure they load in correctly. */
+  @Test
   public void testTextExport() throws IOException, SQLException {
     multiFileTest(1, 10, 1);
   }
@@ -467,6 +487,7 @@ public class TestExport extends ExportJobTestCase {
   /** Make sure we can use CombineFileInputFormat to handle multiple
    * files in a single mapper.
    */
+  @Test
   public void testMultiFilesOneMapper() throws IOException, SQLException {
     multiFileTest(2, 10, 1);
   }
@@ -474,11 +495,13 @@ public class TestExport extends ExportJobTestCase {
   /** Make sure we can use CombineFileInputFormat to handle multiple
    * files and multiple maps.
    */
+  @Test
   public void testMultiFilesMultiMaps() throws IOException, SQLException {
     multiFileTest(2, 10, 2);
   }
 
   /** Export 10 rows from gzipped text files. */
+  @Test
   public void testGzipExport() throws IOException, SQLException {
 
     LOG.info("Beginning gzip export test");
@@ -495,6 +518,7 @@ public class TestExport extends ExportJobTestCase {
   /**
    * Ensure that we use multiple statements in a transaction.
    */
+  @Test
   public void testMultiStatement() throws IOException, SQLException {
     final int TOTAL_RECORDS = 20;
     createTextFile(0, TOTAL_RECORDS, true);
@@ -506,6 +530,7 @@ public class TestExport extends ExportJobTestCase {
   /**
    * Ensure that we use multiple transactions in a single mapper.
    */
+  @Test
   public void testMultiTransaction() throws IOException, SQLException {
     final int TOTAL_RECORDS = 20;
     createTextFile(0, TOTAL_RECORDS, true);
@@ -519,6 +544,7 @@ public class TestExport extends ExportJobTestCase {
    * @throws IOException
    * @throws SQLException
    */
+  @Test
   public void testMultiTransactionWithStaging()
     throws IOException, SQLException {
     final int TOTAL_RECORDS = 20;
@@ -533,6 +559,7 @@ public class TestExport extends ExportJobTestCase {
    * Ensure that when we don't force a commit with a statement cap,
    * it happens anyway.
    */
+  @Test
   public void testUnlimitedTransactionSize() throws IOException, SQLException {
     final int TOTAL_RECORDS = 20;
     createTextFile(0, TOTAL_RECORDS, true);
@@ -542,6 +569,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
   /** Run 2 mappers, make sure all records load in correctly. */
+  @Test
   public void testMultiMapTextExport() throws IOException, SQLException {
 
     final int RECORDS_PER_MAP = 10;
@@ -560,6 +588,7 @@ public class TestExport extends ExportJobTestCase {
    * Run 2 mappers with staging enabled,
    * make sure all records load in correctly.
    */
+  @Test
   public void testMultiMapTextExportWithStaging()
   throws IOException, SQLException {
 
@@ -577,6 +606,7 @@ public class TestExport extends ExportJobTestCase {
   }
 
   /** Export some rows from a SequenceFile, make sure they import correctly. */
+  @Test
   public void testSequenceFileExport() throws Exception {
 
     final int TOTAL_RECORDS = 10;
@@ -641,6 +671,7 @@ public class TestExport extends ExportJobTestCase {
     }
   }
 
+  @Test
   public void testIntCol() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
@@ -669,6 +700,7 @@ public class TestExport extends ExportJobTestCase {
     return "BIGINT";
   }
 
+  @Test
   public void testBigIntCol() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
@@ -738,6 +770,7 @@ public class TestExport extends ExportJobTestCase {
     };
   }
 
+  @Test
   public void testDatesAndTimes() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
 
@@ -752,6 +785,7 @@ public class TestExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(1), genTime);
   }
 
+  @Test
   public void testNumericTypes() throws IOException, SQLException {
     final int TOTAL_RECORDS = 9;
 
@@ -795,6 +829,7 @@ public class TestExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(1), genNumeric);
   }
 
+  @Test
   public void testColumnsExport() throws IOException, SQLException {
     testColumnsExport("ID,MSG," + forIdx(0) + "," + forIdx(2));
   }
@@ -863,5 +898,189 @@ public class TestExport extends ExportJobTestCase {
     assertColMinAndMax(forIdx(0), gen0);
     assertColMinAndMax(forIdx(2), gen2);
     assertColMinAndMax(forIdx(1), genNull);
+  }
+
+  protected void testExportToTableWithName(String tableName) throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+    setCurTableName(tableName);
+    createTextFile(0, TOTAL_RECORDS, false);
+    createTable();
+    runExport(getArgv(true, 10, 10));
+    verifyExport(TOTAL_RECORDS);
+  }
+
+  /**
+   * When we have less columns in the export file than in the export table, without changes in SQOOP-3158
+   * it will fail with errors. After SQOOP-3158, it should succeed without errors
+   *
+   * @throws IOException
+   * @throws SQLException
+   */
+  @Test
+  public void testLessColumnsInFileThanInTable() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    ColumnGenerator genInteger = new IntColumnGenerator();
+    ColumnGenerator genTime = getTimeColumnGenerator();
+
+    createTextFile(0, TOTAL_RECORDS, false, genInteger);
+    createTable(genInteger, genTime);
+    runExport(getArgv(true, 10, 10));
+    verifyExport(TOTAL_RECORDS);
+    assertColMinAndMax(forIdx(0), genInteger);
+
+    // test that the Time column is with NULL values
+    class NullColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return null;
+      }
+      public String getVerifyText(int rowNum) {
+        return null;
+      }
+      public String getType() {
+        return "Timestamp";
+      }
+    }
+
+    ColumnGenerator genNull = new NullColumnGenerator();
+    assertColMinAndMax(forIdx(1), genNull);
+  }
+
+  /**
+   * This test case covers the following:
+   *
+   * - two files under export directory
+   * - first file has one missing column
+   * - second file has correct number of columns
+   * - second file has last column with the value defined by parameter --input-null-string
+   * - last column is of STRING data type
+   *
+   * This case will happen when destination table has been modified to add a new column and
+   * user has data for both before and after the table modification, some files has less columns
+   * and some files has new columns
+   *
+   * @throws IOException
+   * @throws SQLException
+   */
+  @Test
+  public void testLessColumnsInFileThanInTableInputNullStringPassed() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    // a column that contains string value of "STRING_NULL",
+    // this should be treated as NULL value during test import
+    // due to --input-null-string is defined using "STRING_NULL"
+    class StringNULLValueColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return "STRING_NULL";
+      }
+      public String getVerifyText(int rowNum) {
+        return "STRING_NULL";
+      }
+      public String getType() {
+          return "VARCHAR(255)";
+        }
+    }
+
+    // a normal string column
+    class  StringColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        int day = rowNum + 1;
+        return "ROW_" + pad(day);
+      }
+      public String getVerifyText(int rowNum) {
+        int day = rowNum + 1;
+        return "ROW_" + pad(day);
+      }
+      public String getType() {
+          return "VARCHAR(255)";
+        }
+    }
+
+    // test that the second column is with NULL values after import
+    class NullColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return null;
+      }
+      public String getVerifyText(int rowNum) {
+        return null;
+      }
+      public String getType() {
+        return "VARCHAR(255)";
+      }
+    }
+
+    ColumnGenerator genString = new StringColumnGenerator();
+    ColumnGenerator genNullString = new StringNULLValueColumnGenerator();
+
+    createTextFile(0, TOTAL_RECORDS, false, genString);
+    createTextFile(1, TOTAL_RECORDS, false, genString, genNullString);
+    createTable(genString, genNullString);
+    runExport(getArgv(true, 10, 10, "--input-null-string", "STRING_NULL"));
+
+    verifyExport(TOTAL_RECORDS * 2);
+    assertColMinAndMax(forIdx(0), genString);
+
+    ColumnGenerator genNull = new NullColumnGenerator();
+    assertColMinAndMax(forIdx(1), genNull);
+  }
+
+  /**
+   * This test case covers the following:
+   *
+   * - two files under export directory
+   * - first file has one missing column
+   * - second file has correct number of columns
+   * - second file has last column with the value defined by parameter --input-null-non-string
+   * - last column is of INTEGER data type
+   *
+   * This case will happen when destination table has been modified to add a new column and
+   * user has data for both before and after the table modification, some files has less columns
+   * and some files has new columns
+   *
+   * @throws IOException
+   * @throws SQLException
+   */
+  @Test
+  public void testLessColumnsInFileThanInTableInputNullIntPassed() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+
+    // a column that contains string value of "INT_NULL",
+    // this should be treated as NULL value during test import
+    // due to --input-null-non-string is defined using "INT_NULL"
+    class IntNULLValueColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return "INT_NULL";
+      }
+      public String getVerifyText(int rowNum) {
+        return "INT_NULL";
+      }
+      public String getType() {
+        return "INT";
+      }
+    }
+
+    // test that the second column is with NULL values after import
+    class NullColumnGenerator implements ColumnGenerator {
+      public String getExportText(int rowNum) {
+        return null;
+      }
+      public String getVerifyText(int rowNum) {
+        return null;
+      }
+      public String getType() {
+        return "INT";
+      }
+    }
+
+    ColumnGenerator genInt = new IntColumnGenerator();
+    ColumnGenerator genNullInt = new IntNULLValueColumnGenerator();
+
+    createTextFile(0, TOTAL_RECORDS, false, genInt);
+    createTextFile(1, TOTAL_RECORDS, false, genInt, genNullInt);
+    createTable(genInt, genNullInt);
+    runExport(getArgv(true, 10, 10, "--input-null-non-string", "INT_NULL"));
+    verifyExport(TOTAL_RECORDS * 2);
+    assertColMinAndMax(forIdx(0), genInt);
+    assertColMinAndMax(forIdx(1), new NullColumnGenerator());
   }
 }

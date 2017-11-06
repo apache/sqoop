@@ -29,6 +29,8 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.junit.After;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -41,6 +43,8 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test free form query import with the Oracle db.
@@ -75,7 +79,7 @@ public class OracleIncrementalImportTest extends ImportJobTestCase {
   /** the names of the tables we're creating. */
   private List<String> tableNames;
 
-  @Override
+  @After
   public void tearDown() {
     // Clean up the database on our way out.
     for (String tableName : tableNames) {
@@ -128,6 +132,7 @@ public class OracleIncrementalImportTest extends ImportJobTestCase {
    * Create a tables with a date column.  Run incremental import on the table
    * with date column as check-column.
    */
+  @Test
   public void testIncrementalImportWithLastModified() throws IOException {
     tableNames = new ArrayList<String>();
     String [] types = { "INT", "VARCHAR(10)", "DATE", };
@@ -156,6 +161,7 @@ public class OracleIncrementalImportTest extends ImportJobTestCase {
                  expectedVal, output);
   }
 
+  @Test
   public void testIncrementalImportWithLastModifiedTimestamp() throws IOException {
     tableNames = new ArrayList<String>();
     String [] types = { "INT", "VARCHAR(10)", "TIMESTAMP", };

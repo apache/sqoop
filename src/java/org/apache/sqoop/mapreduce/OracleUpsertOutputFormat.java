@@ -22,12 +22,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.UpdateOutputFormat;
+import org.apache.sqoop.manager.oracle.OracleUtils;
 
 /**
  * Update an existing table with new value if the table already
@@ -71,7 +73,7 @@ public class OracleUpsertOutputFormat<K extends SqoopRecord, V>
       // lookup table for update columns
       Set<String> updateKeyLookup = new LinkedHashSet<String>();
       for (String updateKey : updateCols) {
-        updateKeyLookup.add(updateKey);
+        updateKeyLookup.add(OracleUtils.escapeIdentifier(updateKey, isOracleEscapingDisabled()));
       }
 
       StringBuilder sb = new StringBuilder();
@@ -85,7 +87,8 @@ public class OracleUpsertOutputFormat<K extends SqoopRecord, V>
         } else {
           sb.append(" AND ");
         }
-        sb.append(updateCols[i]).append(" = ?");
+        sb.append(OracleUtils.escapeIdentifier(updateCols[i], isOracleEscapingDisabled()));
+        sb.append(" = ?");
       }
       sb.append(" )");
 
@@ -126,6 +129,10 @@ public class OracleUpsertOutputFormat<K extends SqoopRecord, V>
       sb.append(" )");
 
       return sb.toString();
+    }
+
+    private boolean isOracleEscapingDisabled() {
+      return OracleUtils.isOracleEscapingDisabled(getConf());
     }
   }
 }

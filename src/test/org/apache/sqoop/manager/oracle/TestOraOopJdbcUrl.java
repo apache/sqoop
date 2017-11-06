@@ -17,9 +17,6 @@
  */
 
 package org.apache.sqoop.manager.oracle;
-
-import static org.junit.Assert.*;
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -28,6 +25,10 @@ import org.junit.Test;
 
 import org.apache.sqoop.manager.oracle.OraOopUtilities.
            JdbcOracleThinConnectionParsingError;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for OraOopJdbcUrl.
@@ -62,21 +63,21 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
     // Null JDBC URL...
     try {
       actual = new OraOopJdbcUrl(null).parseJdbcOracleThinConnectionString();
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     } catch (IllegalArgumentException ex) {
       /* This is what we want to happen. */
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     }
 
     // Empty JDBC URL...
     try {
       actual = new OraOopJdbcUrl("").parseJdbcOracleThinConnectionString();
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     } catch (IllegalArgumentException ex) {
       /* This is what we want to happen. */
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     }
 
     // Incorrect number of fragments in the URL...
@@ -84,7 +85,7 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
       actual =
           new OraOopJdbcUrl("jdbc:oracle:oci8:@dbname.domain")
               .parseJdbcOracleThinConnectionString();
-      Assert.fail(
+      fail(
           "A JdbcOracleThinConnectionParsingError should be been thrown.");
     } catch (JdbcOracleThinConnectionParsingError ex) {
       // This is what we want to happen.
@@ -102,7 +103,7 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           new OraOopJdbcUrl(
               "jdbc:oracle:loremipsum:@hostname.domain.com.au:port1521:dbsid")
               .parseJdbcOracleThinConnectionString();
-      Assert.fail(
+      fail(
           "A JdbcOracleThinConnectionParsingError should be been thrown.");
     } catch (JdbcOracleThinConnectionParsingError ex) {
       // This is what we want to happen.
@@ -125,7 +126,7 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           new OraOopJdbcUrl(
               "jdbc:oracle:thin:@hostname.domain.com.au:port1521:dbsid")
               .parseJdbcOracleThinConnectionString();
-      Assert.fail(
+      fail(
           "An JdbcOracleThinConnectionParsingError should be been thrown.");
     } catch (JdbcOracleThinConnectionParsingError ex) {
       assertTrue(
@@ -139,7 +140,7 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           new OraOopJdbcUrl(
               "jdbc:oracle:thin:@hostname.domain.com.au:-1521:dbsid")
               .parseJdbcOracleThinConnectionString();
-      Assert.fail(
+      fail(
           "An JdbcOracleThinConnectionParsingError should be been thrown.");
     } catch (JdbcOracleThinConnectionParsingError ex) {
       assertTrue(
@@ -153,11 +154,11 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           new OraOopJdbcUrl(
               "JDBC:Oracle:tHiN:@hostname.domain.com.au:1521:dbsid")
               .parseJdbcOracleThinConnectionString();
-      Assert.assertEquals("hostname.domain.com.au", actual.getHost());
-      Assert.assertEquals(1521, actual.getPort());
-      Assert.assertEquals("dbsid", actual.getSid());
+      assertEquals("hostname.domain.com.au", actual.getHost());
+      assertEquals(1521, actual.getPort());
+      assertEquals("dbsid", actual.getSid());
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail(ex.getMessage());
+      fail(ex.getMessage());
     }
 
     // Valid JDBC URL...
@@ -166,11 +167,11 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           new OraOopJdbcUrl(
               " JDBC : Oracle : tHiN : @hostname.domain.com.au : 1529 : dbsid")
               .parseJdbcOracleThinConnectionString();
-      Assert.assertEquals("hostname.domain.com.au", actual.getHost());
-      Assert.assertEquals(1529, actual.getPort());
-      Assert.assertEquals("dbsid", actual.getSid());
+      assertEquals("hostname.domain.com.au", actual.getHost());
+      assertEquals(1529, actual.getPort());
+      assertEquals("dbsid", actual.getSid());
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail(ex.getMessage());
+      fail(ex.getMessage());
     }
 
     // Valid (sid-based) JDBC URL with parameters...
@@ -179,12 +180,12 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           new OraOopJdbcUrl(
               "jdbc:oracle:thin:@hostname:1521:dbsid?param1=loremipsum")
               .parseJdbcOracleThinConnectionString();
-      Assert.assertEquals("hostname", actual.getHost());
-      Assert.assertEquals(1521, actual.getPort());
-      Assert.assertEquals("dbsid", actual.getSid());
-      Assert.assertEquals(null, actual.getService());
+      assertEquals("hostname", actual.getHost());
+      assertEquals(1521, actual.getPort());
+      assertEquals("dbsid", actual.getSid());
+      assertEquals(null, actual.getService());
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail(ex.getMessage());
+      fail(ex.getMessage());
     }
 
     // Valid (service-based) JDBC URL...
@@ -193,12 +194,12 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           new OraOopJdbcUrl(
               "jdbc:oracle:thin:@hostname:1521/dbservice.dbdomain")
               .parseJdbcOracleThinConnectionString();
-      Assert.assertEquals("hostname", actual.getHost());
-      Assert.assertEquals(1521, actual.getPort());
-      Assert.assertEquals(null, actual.getSid());
-      Assert.assertEquals("dbservice.dbdomain", actual.getService());
+      assertEquals("hostname", actual.getHost());
+      assertEquals(1521, actual.getPort());
+      assertEquals(null, actual.getSid());
+      assertEquals("dbservice.dbdomain", actual.getService());
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail(ex.getMessage());
+      fail(ex.getMessage());
     }
 
     // Valid (service-based) JDBC URL with slashes...
@@ -207,12 +208,12 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
           new OraOopJdbcUrl(
               "jdbc:oracle:thin:@//hostname:1521/dbservice.dbdomain")
               .parseJdbcOracleThinConnectionString();
-      Assert.assertEquals("hostname", actual.getHost());
-      Assert.assertEquals(1521, actual.getPort());
-      Assert.assertEquals(null, actual.getSid());
-      Assert.assertEquals("dbservice.dbdomain", actual.getService());
+      assertEquals("hostname", actual.getHost());
+      assertEquals(1521, actual.getPort());
+      assertEquals(null, actual.getSid());
+      assertEquals("dbservice.dbdomain", actual.getService());
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail(ex.getMessage());
+      fail(ex.getMessage());
     }
 
     // Valid (service-based) JDBC URL with parameters...
@@ -220,12 +221,12 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
       actual = new OraOopJdbcUrl(
          "jdbc:oracle:thin:@hostname:1521/dbservice.dbdomain?param1=loremipsum")
               .parseJdbcOracleThinConnectionString();
-      Assert.assertEquals("hostname", actual.getHost());
-      Assert.assertEquals(1521, actual.getPort());
-      Assert.assertEquals(null, actual.getSid());
-      Assert.assertEquals("dbservice.dbdomain", actual.getService());
+      assertEquals("hostname", actual.getHost());
+      assertEquals(1521, actual.getPort());
+      assertEquals(null, actual.getSid());
+      assertEquals("dbservice.dbdomain", actual.getService());
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail(ex.getMessage());
+      fail(ex.getMessage());
     }
 
     // Valid (service-based) JDBC URL with slashes and parameters...
@@ -233,12 +234,12 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
       actual = new OraOopJdbcUrl(
        "jdbc:oracle:thin:@//hostname:1521/dbservice.dbdomain?param1=loremipsum")
               .parseJdbcOracleThinConnectionString();
-      Assert.assertEquals("hostname", actual.getHost());
-      Assert.assertEquals(1521, actual.getPort());
-      Assert.assertEquals(null, actual.getSid());
-      Assert.assertEquals("dbservice.dbdomain", actual.getService());
+      assertEquals("hostname", actual.getHost());
+      assertEquals(1521, actual.getPort());
+      assertEquals(null, actual.getSid());
+      assertEquals("dbservice.dbdomain", actual.getService());
     } catch (JdbcOracleThinConnectionParsingError ex) {
-      Assert.fail(ex.getMessage());
+      fail(ex.getMessage());
     }
   }
 
@@ -250,7 +251,7 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
     // Null JDBC URL...
     try {
       actual = new OraOopJdbcUrl(null).getConnectionUrl();
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     } catch (IllegalArgumentException ex) {
       /* This is what we want to happen. */
     }
@@ -258,7 +259,7 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
     // Empty JDBC URL...
     try {
       actual = new OraOopJdbcUrl("").getConnectionUrl();
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     } catch (IllegalArgumentException ex) {
       /* This is what we want to happen. */
     }
@@ -267,7 +268,7 @@ public class TestOraOopJdbcUrl extends OraOopTestCase {
     actual =
         new OraOopJdbcUrl("jdbc:oracle:thin:@hostname.domain:1521:dbsid")
             .getConnectionUrl();
-    Assert.assertEquals("jdbc:oracle:thin:@hostname.domain:1521:dbsid", actual);
+    assertEquals("jdbc:oracle:thin:@hostname.domain:1521:dbsid", actual);
 
   }
 

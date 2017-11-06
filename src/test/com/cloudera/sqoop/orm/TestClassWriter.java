@@ -30,13 +30,13 @@ import java.util.Random;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.Shell;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -47,14 +47,21 @@ import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test that the ClassWriter generates Java classes based on the given table,
  * which compile.
  */
-public class TestClassWriter extends TestCase {
+public class TestClassWriter {
 
   public static final Log LOG =
       LogFactory.getLog(TestClassWriter.class.getName());
@@ -66,6 +73,9 @@ public class TestClassWriter extends TestCase {
   private HsqldbTestServer testServer;
   private ConnManager manager;
   private SqoopOptions options;
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() {
@@ -637,31 +647,6 @@ public class TestClassWriter extends TestCase {
     fail("we shouldn't successfully generate code");
   }
 
-  private void runFailedGenerationTest(String [] argv,
-      String classNameToCheck) {
-    File codeGenDirFile = new File(CODE_GEN_DIR);
-    File classGenDirFile = new File(JAR_GEN_DIR);
-
-    try {
-      options = new ImportTool().parseArguments(argv,
-          null, options, true);
-    } catch (Exception e) {
-      LOG.error("Could not parse options: " + e.toString());
-    }
-
-    CompilationManager compileMgr = new CompilationManager(options);
-    ClassWriter writer = new ClassWriter(options, manager,
-        HsqldbTestServer.getTableName(), compileMgr);
-
-    try {
-      writer.generate();
-      compileMgr.compile();
-      fail("ORM class file generation succeeded when it was expected to fail");
-    } catch (Exception ioe) {
-      LOG.error("Got Exception from ORM generation as expected : "
-        + ioe.toString());
-    }
-  }
   /**
    * A dummy manager that declares that it ORM is self managed.
    */
@@ -681,10 +666,25 @@ public class TestClassWriter extends TestCase {
       "--outdir",
       CODE_GEN_DIR,
     };
-    runFailedGenerationTest(argv, HsqldbTestServer.getTableName());
+
+    try {
+      options = new ImportTool().parseArguments(argv,
+          null, options, true);
+    } catch (Exception e) {
+      LOG.error("Could not parse options: " + e.toString());
+    }
+
+    CompilationManager compileMgr = new CompilationManager(options);
+    ClassWriter writer = new ClassWriter(options, manager,
+        HsqldbTestServer.getTableName(), compileMgr);
+
+    writer.generate();
+
+    thrown.expect(Exception.class);
+    compileMgr.compile();
   }
 
-  @Test(timeout = 10000)
+  @Test(timeout = 25000)
   public void testWideTableClassGeneration() throws Exception {
     createWideTable();
     options = new SqoopOptions(HsqldbTestServer.getDbUrl(), WIDE_TABLE_NAME);

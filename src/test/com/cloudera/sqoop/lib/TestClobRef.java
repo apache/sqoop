@@ -22,24 +22,31 @@ import java.io.*;
 
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
-import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import com.cloudera.sqoop.io.LobFile;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test parsing of ClobRef objects.
  */
-public class TestClobRef extends TestCase {
+public class TestClobRef {
 
+  @Test
   public void testEmptyStr() {
     ClobRef r = ClobRef.parse("");
     assertFalse(r.isExternal());
     assertEquals("", r.toString());
   }
 
+  @Test
   public void testInline() throws IOException {
     ClobRef r = ClobRef.parse("foo");
     assertFalse(r.isExternal());
@@ -55,6 +62,7 @@ public class TestClobRef extends TestCase {
     assertEquals("foo", str);
   }
 
+  @Test
   public void testEmptyFile() {
     ClobRef r = ClobRef.parse("externalLob()");
     assertFalse(r.isExternal());
@@ -65,6 +73,7 @@ public class TestClobRef extends TestCase {
     assertEquals("externalLob(lf,,0,0)", r.toString());
   }
 
+  @Test
   public void testInlineNearMatch() {
     ClobRef r = ClobRef.parse("externalLob(foo)bar");
     assertFalse(r.isExternal());
@@ -83,6 +92,7 @@ public class TestClobRef extends TestCase {
     assertEquals("externalLob(lf,foo,1,2)x", r.getData());
   }
 
+  @Test
   public void testExternal() throws IOException {
     final String DATA = "This is the clob data!";
     final String FILENAME = "clobdata";
@@ -90,6 +100,7 @@ public class TestClobRef extends TestCase {
     doExternalTest(DATA, FILENAME);
   }
 
+  @Test
   public void testExternalSubdir() throws IOException {
     final String DATA = "This is the clob data!";
     final String FILENAME = "_lob/clobdata";

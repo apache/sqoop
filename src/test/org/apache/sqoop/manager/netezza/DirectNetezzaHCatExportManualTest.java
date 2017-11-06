@@ -34,6 +34,7 @@ import org.apache.sqoop.manager.NetezzaManager;
 import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
+import org.junit.Test;
 
 /**
  * Test the DirectNetezzaManager implementation's hcatalog export functionality.
@@ -88,6 +89,7 @@ public class DirectNetezzaHCatExportManualTest extends HCatalogExportTest {
     setUpNZ();
   }
 
+  @Test
   public void testIntTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -110,6 +112,7 @@ public class DirectNetezzaHCatExportManualTest extends HCatalogExportTest {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testStringTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -125,6 +128,7 @@ public class DirectNetezzaHCatExportManualTest extends HCatalogExportTest {
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
   }
 
+  @Test
   public void testNumberTypes() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
@@ -142,24 +146,31 @@ public class DirectNetezzaHCatExportManualTest extends HCatalogExportTest {
 
   // Disable the following tests for direct mode netezza connector
 
+  @Test
   public void testBinaryTypes() throws Exception {
   }
 
+  @Test
   public void testColumnProjection() throws Exception {
   }
 
+  @Test
   public void testStaticPartitioning() throws Exception {
   }
 
+  @Test
   public void testDynamicPartitioning() throws Exception {
   }
 
+  @Test
   public void testStaticAndDynamicPartitioning() throws Exception {
   }
 
+  @Test
   public void testSequenceFile() throws Exception {
   }
 
+  @Test
   public void testTextFile() throws Exception {
   }
 }

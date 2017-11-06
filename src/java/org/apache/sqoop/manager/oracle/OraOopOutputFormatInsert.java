@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.sqoop.SqoopOptions;
 
 import com.cloudera.sqoop.lib.SqoopRecord;
 
@@ -148,11 +149,14 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V> extends
           // a subpartition of the 'real' export table...
 
           this.oracleTable = createUniqueMapperTable(context);
-          setOracleTableColumns(OraOopOracleQueries.getTableColumns(this
-              .getConnection(), this.oracleTable, OraOopUtilities
-              .omitLobAndLongColumnsDuringImport(conf), OraOopUtilities
-              .recallSqoopJobType(conf), true // <- onlyOraOopSupportedTypes
-              , false) // <- omitOraOopPseudoColumns
+          setOracleTableColumns(OraOopOracleQueries.getTableColumns(
+            this.getConnection(),
+            this.oracleTable,
+            OraOopUtilities.omitLobAndLongColumnsDuringImport(conf),
+            OraOopUtilities.recallSqoopJobType(conf),
+            true, // <- onlyOraOopSupportedTypes
+            false, // <- omitOraOopPseudoColumns
+            OracleUtils.isOracleEscapingDisabled(conf))
           );
 
           this.subPartitionName =
@@ -238,14 +242,15 @@ public class OraOopOutputFormatInsert<K extends SqoopRecord, V> extends
     void configurePreparedStatement(PreparedStatement statement,
         List<SqoopRecord> userRecords) throws SQLException {
 
-      Map<String, Object> fieldMap;
       try {
-        for (SqoopRecord record : userRecords) {
-          fieldMap = record.getFieldMap();
-
-          configurePreparedStatementColumns(statement, fieldMap);
+        for (SqoopRecord sqoopRecord : userRecords) {
+          int fieldCount = sqoopRecord.write(statement, 0);
+          if (this.tableHasMapperRowNumberColumn) {
+            statement.setLong(fieldCount + 1, this.mapperRowNumber);
+            this.mapperRowNumber++;
+          }
+          statement.addBatch();
         }
-
       } catch (Exception ex) {
         if (ex instanceof SQLException) {
           throw (SQLException) ex;

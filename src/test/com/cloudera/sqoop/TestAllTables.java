@@ -35,9 +35,14 @@ import org.junit.After;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.ImportAllTablesTool;
+import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Datasets;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 /**
  * Test the --all-tables functionality that can import multiple tables.
@@ -129,6 +134,7 @@ public class TestAllTables extends ImportJobTestCase {
     super.tearDown();
   }
 
+  @Test
   public void testMultiTableImport() throws IOException {
     String [] argv = getArgv(null, null);
     runImport(new ImportAllTablesTool(), argv);
@@ -165,6 +171,7 @@ public class TestAllTables extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testMultiTableImportAsParquetFormat() throws IOException {
     String [] argv = getArgv(new String[]{"--as-parquetfile"}, null);
     runImport(new ImportAllTablesTool(), argv);
@@ -194,6 +201,7 @@ public class TestAllTables extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testMultiTableImportWithExclude() throws IOException {
     String exclude = this.tableNames.get(0);
     String [] argv = getArgv(null, new String[]{ exclude });

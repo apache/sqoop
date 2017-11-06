@@ -37,6 +37,10 @@ import org.junit.After;
 import org.junit.Before;
 
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class TestAutoResetMapper extends ImportJobTestCase {
 
@@ -140,6 +144,7 @@ public class TestAutoResetMapper extends ImportJobTestCase {
     super.tearDown();
   }
 
+  @Test
   public void testMultiTableImportWithAutoMapperReset() throws IOException {
 
     String[] argv = getArgv();

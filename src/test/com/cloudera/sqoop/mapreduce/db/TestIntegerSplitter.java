@@ -18,6 +18,8 @@
 package com.cloudera.sqoop.mapreduce.db;
 
 
+import org.junit.Test;
+
 /**
  * Test that the IntegerSplitter generates sane splits.
  *
@@ -27,6 +29,7 @@ package com.cloudera.sqoop.mapreduce.db;
 public class TestIntegerSplitter
   extends org.apache.sqoop.mapreduce.db.TestIntegerSplitter {
 
+  @Test
   public void testDummy() {
     // Nothing to do
   }

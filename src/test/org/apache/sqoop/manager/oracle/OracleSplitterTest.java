@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -42,6 +43,8 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test various custom splitters for Oracle.
@@ -111,6 +114,7 @@ public class OracleSplitterTest extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
+  @Test
   public void testTimestampSplitter() throws IOException {
     tableNames = new ArrayList<String>();
     String [] types = { "INT", "VARCHAR(10)", "TIMESTAMP", };

@@ -23,10 +23,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for OraOopUtilities.
@@ -48,60 +49,60 @@ public class TestOraOopUtilities extends OraOopTestCase {
 
     // table
     context = OraOopUtilities.decodeOracleTableName("oraoop", "junk", null);
-    Assert.assertEquals(context.getSchema(), "ORAOOP");
-    Assert.assertEquals(context.getName(), "JUNK");
+    assertEquals(context.getSchema(), "ORAOOP");
+    assertEquals(context.getName(), "JUNK");
 
     // "table"
     context = OraOopUtilities.decodeOracleTableName("oraoop", "\"Junk\"", null);
-    Assert.assertEquals(context.getSchema(), "ORAOOP");
-    Assert.assertEquals(context.getName(), "Junk");
+    assertEquals(context.getSchema(), "ORAOOP");
+    assertEquals(context.getName(), "Junk");
 
     // schema.table
     context =
         OraOopUtilities.decodeOracleTableName("oraoop", "targusr.junk", null);
-    Assert.assertEquals(context.getSchema(), "TARGUSR");
-    Assert.assertEquals(context.getName(), "JUNK");
+    assertEquals(context.getSchema(), "TARGUSR");
+    assertEquals(context.getName(), "JUNK");
 
     // schema."table"
     context =
         OraOopUtilities.decodeOracleTableName("oraoop", "targusr.\"Junk\"",
             null);
-    Assert.assertEquals(context.getSchema(), "TARGUSR");
-    Assert.assertEquals(context.getName(), "Junk");
+    assertEquals(context.getSchema(), "TARGUSR");
+    assertEquals(context.getName(), "Junk");
 
     // "schema".table
     context =
         OraOopUtilities.decodeOracleTableName("oraoop", "\"Targusr\".junk",
             null);
-    Assert.assertEquals(context.getSchema(), "Targusr");
-    Assert.assertEquals(context.getName(), "JUNK");
+    assertEquals(context.getSchema(), "Targusr");
+    assertEquals(context.getName(), "JUNK");
 
     // "schema"."table"
     String inputStr = "\"Targusr\".\"Junk\"";
     context = OraOopUtilities.decodeOracleTableName("oraoop", inputStr, null);
-    Assert.assertEquals(context.getSchema(), "Targusr");
-    Assert.assertEquals(context.getName(), "Junk");
+    assertEquals(context.getSchema(), "Targusr");
+    assertEquals(context.getName(), "Junk");
 
     // Test for "." within schema...
     context =
         OraOopUtilities.decodeOracleTableName("oraoop", "\"targ.usr\".junk",
             null);
-    Assert.assertEquals(context.getSchema(), "targ.usr");
-    Assert.assertEquals(context.getName(), "JUNK");
+    assertEquals(context.getSchema(), "targ.usr");
+    assertEquals(context.getName(), "JUNK");
 
     // Test for "." within table...
     context =
         OraOopUtilities.decodeOracleTableName("oraoop",
             "targusr.\"junk.tab.with.dots\"", null);
-    Assert.assertEquals(context.getSchema(), "TARGUSR");
-    Assert.assertEquals(context.getName(), "junk.tab.with.dots");
+    assertEquals(context.getSchema(), "TARGUSR");
+    assertEquals(context.getName(), "junk.tab.with.dots");
 
     // Test for "." within schema and within table...
     context =
         OraOopUtilities.decodeOracleTableName("oraoop",
             "\"targ.usr\".\"junk.tab.with.dots\"", null);
-    Assert.assertEquals(context.getSchema(), "targ.usr");
-    Assert.assertEquals(context.getName(), "junk.tab.with.dots");
+    assertEquals(context.getSchema(), "targ.usr");
+    assertEquals(context.getName(), "junk.tab.with.dots");
   }
 
   @Test
@@ -110,7 +111,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     String actual = OraOopUtilities.getCurrentMethodName();
     String expected = "testgetCurrentMethodName()";
 
-    Assert.assertEquals(expected, actual);
+    assertEquals(expected, actual);
 
   }
 
@@ -122,11 +123,11 @@ public class TestOraOopUtilities extends OraOopTestCase {
 
     expected = "1_1";
     actual = OraOopUtilities.generateDataChunkId(1, 1);
-    Assert.assertEquals(expected, actual);
+    assertEquals(expected, actual);
 
     expected = "1234_99";
     actual = OraOopUtilities.generateDataChunkId(1234, 99);
-    Assert.assertEquals(expected, actual);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -134,7 +135,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
 
     try {
       OraOopUtilities.getDuplicatedStringArrayValues(null, false);
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     } catch (IllegalArgumentException ex) {
       // This is what we want to happen.
     }
@@ -143,49 +144,49 @@ public class TestOraOopUtilities extends OraOopTestCase {
 
     duplicates =
         OraOopUtilities.getDuplicatedStringArrayValues(new String[] {}, false);
-    Assert.assertEquals(0, duplicates.length);
+    assertEquals(0, duplicates.length);
 
     duplicates =
         OraOopUtilities.getDuplicatedStringArrayValues(new String[] { "a", "b",
             "c", }, false);
-    Assert.assertEquals(0, duplicates.length);
+    assertEquals(0, duplicates.length);
 
     duplicates =
         OraOopUtilities.getDuplicatedStringArrayValues(new String[] { "a", "A",
             "b", }, false);
-    Assert.assertEquals(0, duplicates.length);
+    assertEquals(0, duplicates.length);
 
     duplicates =
         OraOopUtilities.getDuplicatedStringArrayValues(new String[] { "a", "A",
             "b", }, true);
-    Assert.assertEquals(1, duplicates.length);
-    Assert.assertEquals("A", duplicates[0]);
+    assertEquals(1, duplicates.length);
+    assertEquals("A", duplicates[0]);
 
     duplicates =
         OraOopUtilities.getDuplicatedStringArrayValues(new String[] { "A", "a",
             "b", }, true);
-    Assert.assertEquals(1, duplicates.length);
-    Assert.assertEquals("a", duplicates[0]);
+    assertEquals(1, duplicates.length);
+    assertEquals("a", duplicates[0]);
 
     duplicates =
         OraOopUtilities.getDuplicatedStringArrayValues(new String[] { "A", "a",
             "b", "A", }, false);
-    Assert.assertEquals(1, duplicates.length);
-    Assert.assertEquals("A", duplicates[0]);
+    assertEquals(1, duplicates.length);
+    assertEquals("A", duplicates[0]);
 
     duplicates =
         OraOopUtilities.getDuplicatedStringArrayValues(new String[] { "A", "a",
             "b", "A", }, true);
-    Assert.assertEquals(2, duplicates.length);
-    Assert.assertEquals("a", duplicates[0]);
-    Assert.assertEquals("A", duplicates[1]);
+    assertEquals(2, duplicates.length);
+    assertEquals("a", duplicates[0]);
+    assertEquals("A", duplicates[1]);
 
     duplicates =
         OraOopUtilities.getDuplicatedStringArrayValues(new String[] { "A", "a",
             "b", "A", "A", }, true);
-    Assert.assertEquals(2, duplicates.length);
-    Assert.assertEquals("a", duplicates[0]);
-    Assert.assertEquals("A", duplicates[1]);
+    assertEquals(2, duplicates.length);
+    assertEquals("a", duplicates[0]);
+    assertEquals("A", duplicates[1]);
   }
 
   @Test
@@ -206,17 +207,14 @@ public class TestOraOopUtilities extends OraOopTestCase {
     } catch (Exception ex) {
       String msg = OraOopUtilities.getFullExceptionMessage(ex);
       if (!msg.contains("IOException") || !msg.contains("lorem ipsum!")) {
-        Assert
-            .fail("Inner exception text has not been included in the message");
+        fail("Inner exception text has not been included in the message");
       }
       if (!msg.contains("SQLException") || !msg.contains("dolor sit amet")) {
-        Assert
-            .fail("Inner exception text has not been included in the message");
+        fail("Inner exception text has not been included in the message");
       }
       if (!msg.contains("RuntimeException")
           || !msg.contains("consectetur adipisicing elit")) {
-        Assert
-            .fail("Outer exception text has not been included in the message");
+        fail("Outer exception text has not been included in the message");
       }
     }
   }
@@ -225,7 +223,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
   public void testGetOraOopOracleDataChunkMethod() {
     try {
       OraOopUtilities.getOraOopOracleDataChunkMethod(null);
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     } catch (IllegalArgumentException ex) {
       // This is what we want to happen.
     }
@@ -235,7 +233,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
 
     // Check the default is ROWID
     dataChunkMethod = OraOopUtilities.getOraOopOracleDataChunkMethod(conf);
-    Assert.assertEquals(OraOopConstants.OraOopOracleDataChunkMethod.ROWID,
+    assertEquals(OraOopConstants.OraOopOracleDataChunkMethod.ROWID,
         dataChunkMethod);
 
     // Invalid value specified
@@ -246,18 +244,17 @@ public class TestOraOopUtilities extends OraOopTestCase {
     String logText = OraOopUtilities.LOG.getLogEntries();
     OraOopUtilities.LOG.setCacheLogEntries(false);
     if (!logText.toLowerCase().contains("loremipsum")) {
-      Assert
-          .fail("The LOG should inform the user they've selected an invalid "
+      fail("The LOG should inform the user they've selected an invalid "
               + "data chunk method - and what that was.");
     }
-    Assert.assertEquals("Should have used the default value",
+    assertEquals("Should have used the default value",
         OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD_DEFAULT,
         dataChunkMethod);
 
     // Valid value specified
     conf.set(OraOopConstants.ORAOOP_ORACLE_DATA_CHUNK_METHOD, "partition");
     dataChunkMethod = OraOopUtilities.getOraOopOracleDataChunkMethod(conf);
-    Assert.assertEquals(OraOopConstants.OraOopOracleDataChunkMethod.PARTITION,
+    assertEquals(OraOopConstants.OraOopOracleDataChunkMethod.PARTITION,
         dataChunkMethod);
   }
 
@@ -268,7 +265,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     try {
       OraOopUtilities.getOraOopOracleBlockToSplitAllocationMethod(null,
           OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.RANDOM);
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     } catch (IllegalArgumentException ex) {
       // This is what we want to happen.
     }
@@ -280,7 +277,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     allocationMethod =
         OraOopUtilities.getOraOopOracleBlockToSplitAllocationMethod(conf,
             OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.RANDOM);
-    Assert.assertEquals(
+    assertEquals(
         OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.RANDOM,
         allocationMethod);
 
@@ -289,7 +286,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
         OraOopUtilities.getOraOopOracleBlockToSplitAllocationMethod(
            conf,
            OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.SEQUENTIAL);
-    Assert.assertEquals(
+    assertEquals(
         OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.SEQUENTIAL,
         allocationMethod);
 
@@ -305,13 +302,12 @@ public class TestOraOopUtilities extends OraOopTestCase {
     String logText = OraOopUtilities.LOG.getLogEntries();
     OraOopUtilities.LOG.setCacheLogEntries(false);
     if (!logText.toLowerCase().contains("loremipsum")) {
-      Assert
-          .fail("The LOG should inform the user they've selected an invalid "
+      fail("The LOG should inform the user they've selected an invalid "
               + "allocation method - and what that was.");
     }
 
     if (!logText.contains("ROUNDROBIN or SEQUENTIAL or RANDOM")) {
-      Assert.fail("The LOG should inform the user what the valid choices are.");
+      fail("The LOG should inform the user what the valid choices are.");
     }
 
     // An valid property value specified...
@@ -321,7 +317,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
         OraOopUtilities.getOraOopOracleBlockToSplitAllocationMethod(
            conf,
            OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.SEQUENTIAL);
-    Assert.assertEquals(
+    assertEquals(
         OraOopConstants.OraOopOracleBlockToSplitAllocationMethod.SEQUENTIAL,
         allocationMethod);
   }
@@ -333,7 +329,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     try {
       OraOopUtilities.getOraOopTableImportWhereClauseLocation(null,
           OraOopConstants.OraOopTableImportWhereClauseLocation.SPLIT);
-      Assert.fail("An IllegalArgumentException should be been thrown.");
+      fail("An IllegalArgumentException should be been thrown.");
     } catch (IllegalArgumentException ex) {
       // This is what we want to happen.
     }
@@ -345,7 +341,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     location =
         OraOopUtilities.getOraOopTableImportWhereClauseLocation(conf,
             OraOopConstants.OraOopTableImportWhereClauseLocation.SPLIT);
-    Assert.assertEquals(
+    assertEquals(
         OraOopConstants.OraOopTableImportWhereClauseLocation.SPLIT, location);
 
     // An invalid property value specified...
@@ -359,13 +355,12 @@ public class TestOraOopUtilities extends OraOopTestCase {
     String logText = OraOopUtilities.LOG.getLogEntries();
     OraOopUtilities.LOG.setCacheLogEntries(false);
     if (!logText.toLowerCase().contains("loremipsum")) {
-      Assert
-          .fail("The LOG should inform the user they've selected an invalid "
+      fail("The LOG should inform the user they've selected an invalid "
               + "where-clause-location - and what that was.");
     }
 
     if (!logText.contains("SUBSPLIT or SPLIT")) {
-      Assert.fail("The LOG should inform the user what the valid choices are.");
+      fail("The LOG should inform the user what the valid choices are.");
     }
 
     // An valid property value specified...
@@ -374,7 +369,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     location =
         OraOopUtilities.getOraOopTableImportWhereClauseLocation(conf,
             OraOopConstants.OraOopTableImportWhereClauseLocation.SUBSPLIT);
-    Assert.assertEquals(
+    assertEquals(
         OraOopConstants.OraOopTableImportWhereClauseLocation.SPLIT, location);
 
   }
@@ -384,11 +379,11 @@ public class TestOraOopUtilities extends OraOopTestCase {
 
     String expected = "   a";
     String actual = OraOopUtilities.padLeft("a", 4);
-    Assert.assertEquals(expected, actual);
+    assertEquals(expected, actual);
 
     expected = "abcd";
     actual = OraOopUtilities.padLeft("abcd", 3);
-    Assert.assertEquals(expected, actual);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -396,11 +391,11 @@ public class TestOraOopUtilities extends OraOopTestCase {
 
     String expected = "a   ";
     String actual = OraOopUtilities.padRight("a", 4);
-    Assert.assertEquals(expected, actual);
+    assertEquals(expected, actual);
 
     expected = "abcd";
     actual = OraOopUtilities.padRight("abcd", 3);
-    Assert.assertEquals(expected, actual);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -414,7 +409,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
             "alter session set timezone = '{oracle.sessionTimeZone|GMT}';",
             conf);
     String expected = "alter session set timezone = 'GMT';";
-    Assert.assertEquals("OraOop configuration expression failure.", expected,
+    assertEquals("OraOop configuration expression failure.", expected,
         actual);
 
     // Configuration property value exists...
@@ -424,7 +419,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
             "alter session set timezone = '{oracle.sessionTimeZone|GMT}';",
             conf);
     expected = "alter session set timezone = 'Africa/Algiers';";
-    Assert.assertEquals("OraOop configuration expression failure.", expected,
+    assertEquals("OraOop configuration expression failure.", expected,
         actual);
 
     // Multiple properties in one expression...
@@ -436,14 +431,14 @@ public class TestOraOopUtilities extends OraOopTestCase {
         OraOopUtilities.replaceConfigurationExpression("set {expr1}={expr2};",
             conf);
     expected = "set 1=2;";
-    Assert.assertEquals("OraOop configuration expression failure.", expected,
+    assertEquals("OraOop configuration expression failure.", expected,
         actual);
 
     actual =
         OraOopUtilities.replaceConfigurationExpression(
             "set {expr4|0}={expr5|5};", conf);
     expected = "set 4=5;";
-    Assert.assertEquals("OraOop configuration expression failure.", expected,
+    assertEquals("OraOop configuration expression failure.", expected,
         actual);
   }
 
@@ -451,12 +446,12 @@ public class TestOraOopUtilities extends OraOopTestCase {
   public void testStackContainsClass() {
 
     if (OraOopUtilities.stackContainsClass("lorem.ipsum.dolor")) {
-      Assert.fail("There's no way the stack actually contains this!");
+      fail("There's no way the stack actually contains this!");
     }
 
     String expected = "org.apache.sqoop.manager.oracle.TestOraOopUtilities";
     if (!OraOopUtilities.stackContainsClass(expected)) {
-      Assert.fail("The stack should contain the class:" + expected);
+      fail("The stack should contain the class:" + expected);
     }
   }
 
@@ -465,20 +460,20 @@ public class TestOraOopUtilities extends OraOopTestCase {
     org.apache.hadoop.conf.Configuration conf = new Configuration();
 
     String hint = OraOopUtilities.getImportHint(conf);
-    Assert.assertEquals("Default import hint", "/*+ NO_INDEX(t) */ ", hint);
+    assertEquals("Default import hint", "/*+ NO_INDEX(t) */ ", hint);
 
     conf.set("oraoop.import.hint", "NO_INDEX(t) SCN_ASCENDING");
     hint = OraOopUtilities.getImportHint(conf);
-    Assert.assertEquals("Changed import hint",
+    assertEquals("Changed import hint",
         "/*+ NO_INDEX(t) SCN_ASCENDING */ ", hint);
 
     conf.set("oraoop.import.hint", "       ");
     hint = OraOopUtilities.getImportHint(conf);
-    Assert.assertEquals("Whitespace import hint", "", hint);
+    assertEquals("Whitespace import hint", "", hint);
 
     conf.set("oraoop.import.hint", "");
     hint = OraOopUtilities.getImportHint(conf);
-    Assert.assertEquals("Blank import hint", "", hint);
+    assertEquals("Blank import hint", "", hint);
 
   }
 
@@ -491,43 +486,43 @@ public class TestOraOopUtilities extends OraOopTestCase {
     expected.add("abcde");
     expected.add("ghijklm");
     result = OraOopUtilities.splitStringList("abcde,ghijklm");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("\"abcde\"");
     expected.add("\"ghijklm\"");
     result = OraOopUtilities.splitStringList("\"abcde\",\"ghijklm\"");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("abcde");
     expected.add("\"ghijklm\"");
     result = OraOopUtilities.splitStringList("abcde,\"ghijklm\"");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("\"abcde\"");
     expected.add("ghijklm");
     result = OraOopUtilities.splitStringList("\"abcde\",ghijklm");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("\"ab,cde\"");
     expected.add("ghijklm");
     result = OraOopUtilities.splitStringList("\"ab,cde\",ghijklm");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("abcde");
     expected.add("\"ghi,jklm\"");
     result = OraOopUtilities.splitStringList("abcde,\"ghi,jklm\"");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("\"ab,cde\"");
     expected.add("\"ghi,jklm\"");
     result = OraOopUtilities.splitStringList("\"ab,cde\",\"ghi,jklm\"");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("\"ab,cde\"");
@@ -541,7 +536,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
         OraOopUtilities
             .splitStringList("\"ab,cde\",\"ghi,jklm\",\",Lorem\",\"ip!~sum\","
                 + "\"do,lo,,r\",\"s#it\",\"am$e$t\"");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("LOREM");
@@ -550,7 +545,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     expected.add("SIT");
     expected.add("AMET");
     result = OraOopUtilities.splitStringList("LOREM,IPSUM,DOLOR,SIT,AMET");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
   }
 
   @Test
@@ -566,7 +561,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     expected.add("AMET");
     result =
         OraOopUtilities.splitOracleStringList("lorem,ipsum,dolor,sit,amet");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("LOREM");
@@ -577,7 +572,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     result =
         OraOopUtilities
             .splitOracleStringList("lorem,\"ipsum\",\"dolor\",sit,\"amet\"");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
 
     expected = new ArrayList<String>();
     expected.add("LOREM");
@@ -588,7 +583,7 @@ public class TestOraOopUtilities extends OraOopTestCase {
     result =
         OraOopUtilities
           .splitOracleStringList("lorem,\"ip,sum\",\"dol$or\",sit,\"am!~#et\"");
-    Assert.assertEquals(expected, result);
+    assertEquals(expected, result);
   }
 
   @Test
@@ -602,18 +597,18 @@ public class TestOraOopUtilities extends OraOopTestCase {
     conf.set(confProperty, "");
     OraOopUtilities.appendJavaSecurityEgd(conf);
     actual = conf.get(confProperty);
-    Assert.assertEquals("Append to empty string", expected, actual);
+    assertEquals("Append to empty string", expected, actual);
 
     expected = "-Djava.security.egd=file:/dev/random";
     conf.set(confProperty, expected);
     OraOopUtilities.appendJavaSecurityEgd(conf);
     actual = conf.get(confProperty);
-    Assert.assertEquals("Append to empty string", expected, actual);
+    assertEquals("Append to empty string", expected, actual);
 
     expected = confValue + " -Xmx201m";
     conf.set(confProperty, "-Xmx201m");
     OraOopUtilities.appendJavaSecurityEgd(conf);
     actual = conf.get(confProperty);
-    Assert.assertEquals("Append to empty string", expected, actual);
+    assertEquals("Append to empty string", expected, actual);
   }
 }

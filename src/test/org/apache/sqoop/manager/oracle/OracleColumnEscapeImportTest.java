@@ -28,11 +28,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
 
 public class OracleColumnEscapeImportTest extends ImportJobTestCase {
 
@@ -61,7 +65,7 @@ public class OracleColumnEscapeImportTest extends ImportJobTestCase {
     OracleUtils.dropTable(table, getManager());
   }
 
-  @Override
+  @After
   public void tearDown() {
     try {
       OracleUtils.dropTable(getTableName(), getManager());
@@ -92,6 +96,7 @@ public class OracleColumnEscapeImportTest extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
+  @Test
   public void testRegexpReplaceEscapeWithSpecialCharacters() throws IOException {
     String [] types = { "VARCHAR(50)"};
     String [] vals = { "'hello, world:'"};

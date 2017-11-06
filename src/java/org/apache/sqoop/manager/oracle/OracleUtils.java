@@ -19,6 +19,8 @@
 package org.apache.sqoop.manager.oracle;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.SqoopOptions;
 
 /**
  * Utility class for Oracle.
@@ -28,12 +30,20 @@ public final class OracleUtils {
     private static final String PERIOD_REGEX = "\\.";
     private static final String PERIOD_DELIMITER = ".";
 
+    public static boolean isOracleEscapingDisabled(Configuration conf) {
+      return conf.getBoolean(SqoopOptions.ORACLE_ESCAPING_DISABLED, true);
+    }
+
     public static boolean isEscaped(final String identifier) {
         return !StringUtils.isBlank(identifier) && identifier.startsWith("\"") && identifier.endsWith("\"");
     }
 
     public static String escapeIdentifier(final String identifier) {
-        if (StringUtils.isBlank(identifier)) {
+        return escapeIdentifier(identifier, false);
+    }
+
+    public static String escapeIdentifier(final String identifier, boolean escapingDisabled) {
+        if (escapingDisabled || StringUtils.isBlank(identifier)) {
             return identifier;
         }
 

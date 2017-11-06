@@ -34,6 +34,7 @@ import org.apache.sqoop.util.password.CredentialProviderHelper;
 import org.apache.sqoop.util.password.CredentialProviderPasswordLoader;
 import org.apache.sqoop.util.password.CryptoFileLoader;
 import org.apache.sqoop.util.password.PasswordLoader;
+import org.junit.Test;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -49,6 +50,12 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Set of tests for securing passwords.
@@ -67,6 +74,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
   }
 
+  @Test
   public void testPasswordFilePathInOptionIsEnabled() throws Exception {
     String passwordFilePath = TEMP_BASE_DIR + ".pwd";
     createTempFile(passwordFilePath);
@@ -87,6 +95,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
   }
 
+  @Test
   public void testPasswordFileDoesNotExist() throws Exception {
     try {
       ArrayList<String> extraArgs = new ArrayList<String>();
@@ -105,6 +114,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
   }
 
+  @Test
   public void testPasswordFileIsADirectory() throws Exception {
     try {
       ArrayList<String> extraArgs = new ArrayList<String>();
@@ -123,6 +133,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
   }
 
+  @Test
   public void testBothPasswordOptions() throws Exception {
     String passwordFilePath = TEMP_BASE_DIR + ".pwd";
     createTempFile(passwordFilePath);
@@ -151,6 +162,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
   }
 
+  @Test
   public void testPasswordFilePath() throws Exception {
     String passwordFilePath = TEMP_BASE_DIR + ".pwd";
     createTempFile(passwordFilePath);
@@ -176,6 +188,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
   }
 
+  @Test
   public void testPasswordInDBConfiguration() throws Exception {
     JobConf jobConf = new JobConf(getConf());
     DBConfiguration.configureDB(jobConf, "org.hsqldb.jdbcDriver",
@@ -195,6 +208,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     assertNotNull(connection);
   }
 
+  @Test
   public void testPasswordNotInJobConf() throws Exception {
     JobConf jobConf = new JobConf(getConf());
     DBConfiguration.configureDB(jobConf, "org.hsqldb.jdbcDriver",
@@ -203,6 +217,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     assertNull(jobConf.get(DBConfiguration.PASSWORD_PROPERTY, null));
   }
 
+  @Test
   public void testPasswordInMetastoreWithRecordEnabledAndSecureOption()
     throws Exception {
     String passwordFilePath = TEMP_BASE_DIR + ".pwd";
@@ -239,6 +254,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     assertEquals(passwordFilePath, optionsFromMetastore.getPasswordFilePath());
   }
 
+  @Test
   public void testPasswordInMetastoreWithRecordDisabledAndSecureOption()
     throws Exception {
     String passwordFilePath = TEMP_BASE_DIR + ".pwd";
@@ -274,6 +290,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     assertEquals(passwordFilePath, optionsFromMetastore.getPasswordFilePath());
   }
 
+  @Test
   public void testPasswordInMetastoreWithRecordEnabledAndNonSecureOption()
     throws Exception {
     ArrayList<String> extraArgs = new ArrayList<String>();
@@ -328,6 +345,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     return args.toArray(new String[0]);
   }
 
+  @Test
   public void testCryptoFileLoader() throws Exception {
     // Current implementation is limited to ECB mode
     Object[][] ciphers = {
@@ -358,6 +376,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
   }
 
+  @Test
   public void testCredentialProviderLoader() throws Exception {
     CredentialProviderPasswordLoader pl =
         new CredentialProviderPasswordLoader();
@@ -403,6 +422,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
   }
 
+  @Test
   public void testPasswordAliasOption() throws Exception {
     CredentialProviderPasswordLoader pl =
         new CredentialProviderPasswordLoader();

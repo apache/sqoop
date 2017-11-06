@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -29,7 +30,6 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Types;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.GenericJdbcManager;
 import org.apache.sqoop.tool.ExportTool;
@@ -39,6 +39,14 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 
 /**
  * We'll use H2 as a database as the version of HSQLDB we currently depend on
@@ -54,6 +62,14 @@ public class TestExportUsingProcedure extends TestExport {
   private String[] names;
   private String[] types;
   private Connection connection;
+  @Rule
+  public TestName name = new TestName();
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  @Rule
+  public TestName testName = new TestName();
 
   @Override
   @Before
@@ -85,7 +101,7 @@ public class TestExportUsingProcedure extends TestExport {
     create.append(getClass().getName());
     create.append(".insertFunction");
     if (extraNames.length > 0) {
-      create.append(getName());
+      create.append(name.getMethodName());
     }
     create.append('"');
 
@@ -102,7 +118,7 @@ public class TestExportUsingProcedure extends TestExport {
 
   @Override
   protected String getConnectString() {
-    return "jdbc:h2:mem:" + getName();
+    return "jdbc:h2:mem:" + name.getMethodName();
   }
 
   @Override
@@ -120,7 +136,7 @@ public class TestExportUsingProcedure extends TestExport {
     // just use the old class definition even though we've compiled a
     // new one!
     String[] args = newStrArray(additionalArgv, "--" + ExportTool.CALL_ARG,
-        PROCEDURE_NAME, "--" + ExportTool.CLASS_NAME_ARG, getName(), "--"
+        PROCEDURE_NAME, "--" + ExportTool.CLASS_NAME_ARG, name.getMethodName(), "--"
             + ExportTool.CONN_MANAGER_CLASS_NAME,
         GenericJdbcManager.class.getName(), "--" + ExportTool.DRIVER_ARG,
         Driver.class.getName());
@@ -193,31 +209,26 @@ public class TestExportUsingProcedure extends TestExport {
   // TEST OVERRIDES
 
   @Override
-  public void testMultiMapTextExportWithStaging() throws IOException,
-      SQLException {
-    try {
-      super.testMultiMapTextExportWithStaging();
-      fail("staging tables not compatible with --call");
-    } catch (IOException e) {
-      // expected
-    }
+  @Test
+  public void testMultiMapTextExportWithStaging() throws IOException, SQLException {
+    thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException as staging tables are not compatible with --call");
+    super.testMultiMapTextExportWithStaging();
   }
 
   @Override
-  public void testMultiTransactionWithStaging() throws IOException,
-      SQLException {
-    try {
-      super.testMultiTransactionWithStaging();
-      fail("staging tables not compatible with --call");
-    } catch (IOException e) {
-      // expected
-    }
+  @Test
+  public void testMultiTransactionWithStaging() throws IOException, SQLException {
+    thrown.expect(IOException.class);
+    thrown.reportMissingExceptionWithMessage("Expected IOException as staging tables are not compatible with --call");
+    super.testMultiTransactionWithStaging();
   }
 
   /**
    * H2 renames the stored procedure arguments P1, P2, ..., Pn.
    */
   @Override
+  @Test
   public void testColumnsExport() throws IOException, SQLException {
     super.testColumnsExport("P1,P2,P3,P4");
   }
@@ -259,6 +270,7 @@ public class TestExportUsingProcedure extends TestExport {
       statement.close();
     }
   }
+
 
   public static void insertFunction(int id, String msg) throws SQLException {
     insertFunction(id, msg, new SetExtraArgs() {
@@ -326,4 +338,48 @@ public class TestExportUsingProcedure extends TestExport {
     });
   }
 
+  /**
+   * This test case is special - we're only inserting into a subset of the
+   * columns in the table.
+   */
+  public static void insertFunctiontestLessColumnsInFileThanInTable(int id, String msg,
+      final int number, final Timestamp t2) throws SQLException {
+    insertFunction(id, msg, new SetExtraArgs() {
+      @Override
+      public void set(PreparedStatement on) throws SQLException {
+        on.setInt(3, number);
+        on.setNull(4, Types.TIMESTAMP);
+      }
+    });
+  }
+
+  /**
+   * This test case is special - we're only inserting into a subset of the
+   * columns in the table.
+   */
+  public static void insertFunctiontestLessColumnsInFileThanInTableInputNullStringPassed(int id, String msg,
+      final String str1) throws SQLException {
+    insertFunction(id, msg, new SetExtraArgs() {
+      @Override
+      public void set(PreparedStatement on) throws SQLException {
+        on.setString(3, str1);
+        on.setNull(4, Types.VARCHAR);
+      }
+    });
+  }
+
+  /**
+   * This test case is special - we're only inserting into a subset of the
+   * columns in the table.
+   */
+  public static void insertFunctiontestLessColumnsInFileThanInTableInputNullIntPassed(int id, String msg,
+      final int int1) throws SQLException {
+    insertFunction(id, msg, new SetExtraArgs() {
+      @Override
+      public void set(PreparedStatement on) throws SQLException {
+        on.setInt(3, int1);
+        on.setNull(4, Types.INTEGER);
+      }
+    });
+  }
 }

@@ -22,15 +22,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 
 import com.cloudera.sqoop.Sqoop;
+import org.junit.Test;
+
 /**
  * Tests various options file loading scenarios.
  */
-public class TestOptionsFileExpansion extends TestCase {
+public class TestOptionsFileExpansion {
 
   /**
    * Text from options file 1. Each string represents a new line.
@@ -141,17 +141,20 @@ public class TestOptionsFileExpansion extends TestCase {
     "--efgh",
   };
 
+  @Test
   public void testOptionsFiles() throws Exception {
     checkOptionsFile(OPTIONS_FILE_TEXT1, OPTIONS_FILE_TEXT1_OUTPUT);
     checkOptionsFile(OPTIONS_FILE_TEXT2, OPTIONS_FILE_TEXT2_OUTPUT);
     checkOptionsFile(OPTIONS_FILE_TEXT3, OPTIONS_FILE_TEXT3_OUTPUT);
   }
 
+  @Test
   public void testInvalidOptionsFile() {
     checkInvalidOptionsFile(OPTIONS_FILE_TEXT4);
     checkInvalidOptionsFile(OPTIONS_FILE_TEXT5);
   }
 
+  @Test
   public void testMultilineQuotedText() {
     try {
       checkOptionsFile(OPTIONS_FILE_TEXT6, new String[] {});
@@ -160,6 +163,162 @@ public class TestOptionsFileExpansion extends TestCase {
       Assert.assertTrue(
           ex.getMessage().startsWith("Multiline quoted strings not supported"));
     }
+  }
+
+  @Test
+  public void testValidFreeFormQueryNoQuotes() throws Exception {
+    String[] input = new String[]{
+        "--query",
+        "SELECT * FROM table",
+    };
+
+    String[] output = new String[] {
+        "--query",
+        "SELECT * FROM table",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testValidFreeFormQuerySingleQuotesStartAndEnd() throws Exception {
+    String[] input = new String[]{
+        "--query",
+        "'SELECT * FROM table'",
+    };
+
+    String[] output = new String[]{
+        "--query",
+        "SELECT * FROM table",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testValidFreeFormQueryDoubleQuotesStartAndEnd() throws Exception {
+    String[] input = new String[]{
+        "--query",
+        "\"SELECT * FROM table\"",
+    };
+
+    String[] output = new String[]{
+        "--query",
+        "SELECT * FROM table",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testValidFreeFormQuerySingleQuotesInWhere() throws Exception {
+    String[] input = new String[]{
+        "--query",
+        "SELECT * FROM table WHERE a = '1'",
+    };
+
+    String[] output = new String[]{
+        "--query",
+        "SELECT * FROM table WHERE a = '1'",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testValidFreeFormQuerySingleAndDoubleQuotesInWhere() throws Exception {
+    String[] input = new String[] {
+        "--query",
+        "SELECT * FROM table WHERE a = '1' AND b = \"testing\"",
+    };
+
+    String[] output = new String[] {
+        "--query",
+        "SELECT * FROM table WHERE a = '1' AND b = \"testing\"",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testValidFreeFormQueryQuotesInTableNameAndColumnName() throws Exception {
+    String[] input = new String[] {
+        "--query",
+        "select * from `test\"test`  where `c'c`  = 'a'",
+    };
+
+    String[] output = new String[] {
+        "--query",
+        "select * from `test\"test`  where `c'c`  = 'a'",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testValidFreeFormQueryQuotesInTableNameAndColumnName2() throws Exception {
+    String[] input = new String[] {
+        "--query",
+        "select * from `test\"test`  where `c'c`  = 'a\"'",
+    };
+
+    String[] output = new String[] {
+        "--query",
+        "select * from `test\"test`  where `c'c`  = 'a\"'",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testValidFreeFormQueryQuotesInTableNameAndColumnName3() throws Exception {
+    String[] input = new String[] {
+        "--query",
+        "select * from `test\"test`  where `c'c`  = \"\"",
+    };
+
+    String[] output = new String[] {
+        "--query",
+        "select * from `test\"test`  where `c'c`  = \"\"",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testValidFreeFormQueryQuotesInTableNameAndColumnName4() throws Exception {
+    String[] input = new String[] {
+        "--query",
+        "select * from test  where a  = \"\\\"\"",
+    };
+
+    String[] output = new String[] {
+        "--query",
+        "select * from test  where a  = \"\\\"\"",
+    };
+
+    checkOptionsFile(input, output);
+  }
+
+  @Test
+  public void testInvalidFreeFormQueryEndingSingleQuoteOnly() throws Exception {
+    String[] input = new String[]{
+        "--query",
+        "SELECT * FROM table'",
+    };
+
+    checkInvalidOptionsFile(input);
+  }
+
+  @Test
+  public void testInvalidFreeFormQuerySingleQuoteStartDoubleQuoteEnd() throws Exception {
+
+    String[] input = new String[]{
+        "--query",
+        "'SELECT * FROM table\"",
+    };
+
+    checkInvalidOptionsFile(input);
   }
 
   private void checkInvalidOptionsFile(String[] fileContents) {

@@ -50,6 +50,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * Base class for running an export MapReduce job.
@@ -89,9 +90,6 @@ public class ExportJobBase extends JobBase {
    */
   public static final String SQOOP_EXPORT_MAP_TASK_MAX_ATTEMTPS =
     "sqoop.export.mapred.map.max.attempts";
-
-  private static final String HADOOP_MAP_TASK_MAX_ATTEMTPS =
-    "mapred.map.max.attempts";
 
   /** Start and endtime captured for export job. */
   private long startTime;
@@ -232,7 +230,7 @@ public class ExportJobBase extends JobBase {
     }
     Path inputPath = new Path(context.getOptions().getExportDir());
     Configuration conf = options.getConf();
-    inputPath = inputPath.makeQualified(FileSystem.get(conf));
+    inputPath = FileSystemUtil.makeQualified(inputPath, conf);
     return inputPath;
   }
 

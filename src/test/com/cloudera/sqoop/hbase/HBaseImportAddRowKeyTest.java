@@ -18,7 +18,6 @@
 
 package com.cloudera.sqoop.hbase;
 
-import junit.framework.JUnit4TestAdapter;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -134,10 +133,6 @@ public class HBaseImportAddRowKeyTest extends HBaseTestCase {
     }
 
     return result.toArray(new String[result.size()]);
-  }
-
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(HBaseImportAddRowKeyTest.class);
   }
 
 }

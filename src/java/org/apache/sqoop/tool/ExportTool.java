@@ -26,7 +26,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
@@ -34,6 +33,7 @@ import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.util.ExportException;
+import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 
 /**
  * Tool that performs HDFS exports to databases.
@@ -99,20 +99,13 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
     try {
       exportTable(options, options.getTableName());
     } catch (IOException ioe) {
-      LOG.error("Encountered IOException running export job: "
-          + ioe.toString());
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ioe);
-      } else {
-        return 1;
-      }
+      LOG.error("Encountered IOException running export job: ", ioe);
+      rethrowIfRequired(options, ioe);
+      return 1;
     } catch (ExportException ee) {
-      LOG.error("Error during export: " + ee.toString());
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ee);
-      } else {
-        return 1;
-      }
+      LOG.error("Error during export: ", ee);
+      rethrowIfRequired(options, ee);
+      return 1;
     } finally {
       destroy(options);
     }
@@ -393,8 +386,21 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   void vaildateDirectExportOptions(SqoopOptions options) throws InvalidOptionsException {
     if (options.isDirect()) {
       validateHasDirectConnectorOption(options);
+      validateDirectMysqlOptions(options);
     }
   }
+
+  public void validateDirectMysqlOptions(SqoopOptions options) throws InvalidOptionsException {
+    if (!MYSQL.isTheManagerTypeOf(options)) {
+      return;
+    }
+    if (options.getInNullStringValue() != null || options.getInNullNonStringValue() != null) {
+      throw new InvalidOptionsException(
+              "The --direct option is not compatible with the --input-null-string or " +
+                      "--input-null-non-string command for MySQL exports");
+    }
+  }
+
   private void applyNewUpdateOptions(CommandLine in, SqoopOptions out)
       throws InvalidOptionsException {
     if (in.hasOption(UPDATE_MODE_ARG)) {

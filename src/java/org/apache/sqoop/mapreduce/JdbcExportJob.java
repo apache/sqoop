@@ -25,7 +25,6 @@ import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
@@ -38,6 +37,7 @@ import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 
 import java.io.IOException;
 import java.util.Map;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * Run an export using JDBC (JDBC-based ExportOutputFormat).
@@ -79,8 +79,7 @@ public class JdbcExportJob extends ExportJobBase {
     } else if (fileType == FileType.PARQUET_FILE) {
       LOG.debug("Configuring for Parquet export");
       configureGenericRecordExportInputFormat(job, tableName);
-      FileSystem fs = FileSystem.get(job.getConfiguration());
-      String uri = "dataset:" + fs.makeQualified(getInputPath());
+      String uri = "dataset:" + FileSystemUtil.makeQualified(getInputPath(), job.getConfiguration());
       DatasetKeyInputFormat.configure(job).readFrom(uri);
     }
   }

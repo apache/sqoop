@@ -23,8 +23,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.*;
@@ -37,11 +35,17 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.mapreduce.DBWritable;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test aspects of DataDrivenDBInputFormat.
  */
-public class TestDataDrivenDBInputFormat extends TestCase {
+public class TestDataDrivenDBInputFormat {
 
   private static final Log LOG = LogFactory.getLog(
       TestDataDrivenDBInputFormat.class);
@@ -83,13 +87,13 @@ public class TestDataDrivenDBInputFormat extends TestCase {
     createConnection(driverClassName, url);
   }
 
+  @Before
   public void setUp() throws Exception {
     initialize(DRIVER_CLASS, DB_URL);
-    super.setUp();
   }
 
+  @After
   public void tearDown() throws Exception {
-    super.tearDown();
     shutdown();
   }
 
@@ -166,6 +170,7 @@ public class TestDataDrivenDBInputFormat extends TestCase {
     }
   }
 
+  @Test
   public void testDateSplits() throws Exception {
     Statement s = connection.createStatement();
     final String DATE_TABLE = "datetable";

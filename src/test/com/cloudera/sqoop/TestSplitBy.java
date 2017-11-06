@@ -35,6 +35,10 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.SeqFileReader;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test that --split-by works.
@@ -148,11 +152,13 @@ public class TestSplitBy extends ImportJobTestCase {
     }
   }
 
+  @Test
   public void testSplitByFirstCol() throws IOException {
     String splitByCol = "INTFIELD1";
     runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
   }
 
+  @Test
   public void testSplitBySecondCol() throws IOException {
     String splitByCol = "INTFIELD2";
     runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());

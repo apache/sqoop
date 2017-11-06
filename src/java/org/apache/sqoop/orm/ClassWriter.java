@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -38,18 +39,18 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.lib.BigDecimalSerializer;
+import com.cloudera.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.BooleanParser;
+import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.FieldFormatter;
 import com.cloudera.sqoop.lib.JdbcWritableBridge;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.lib.LobSerializer;
 import com.cloudera.sqoop.lib.RecordParser;
-import com.cloudera.sqoop.lib.BlobRef;
-import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.SqoopRecord;
+import com.cloudera.sqoop.manager.ConnManager;
 
 /**
  * Creates an ORM class to represent a table from a database.
@@ -288,10 +289,9 @@ public class ClassWriter {
   }
 
   private String toJavaType(String columnName, int sqlType) {
-    Properties mapping = options.getMapColumnJava();
-
-    if (mapping.containsKey(columnName)) {
-      String type = mapping.getProperty(columnName);
+    Properties columnMapping = options.getColumnNames();
+    if (null != columnMapping && columnMapping.containsKey(columnName)) {
+      String type = (String) columnMapping.get(columnName);
       if (LOG.isDebugEnabled()) {
         LOG.info("Overriding type of column " + columnName + " to " + type);
       }
@@ -896,8 +896,12 @@ public class ClassWriter {
         continue;
       }
 
-      sb.append("    JdbcWritableBridge." + setterMethod + "(" + col + ", "
-          + (i + 1) + " + __off, " + sqlType + ", __dbStmt);\n");
+      if ("writeString".equals(setterMethod) && sqlType == 2002) {
+        sb.append("__dbStmt.setString(" + (i + 1) + ", " + col + ");\n");
+      } else {
+        sb.append("    JdbcWritableBridge." + setterMethod + "(" + col + ", " + (i + 1) + " + __off, " + sqlType
+            + ", __dbStmt);\n");
+      }
     }
 
     if (wrapInMethod) {
@@ -1095,7 +1099,7 @@ public class ClassWriter {
           sb.append("    setters.put(\"" + serializeRawColName(rawColName) + "\", new FieldSetterCommand() {" + sep);
           sb.append("      @Override" + sep);
           sb.append("      public void setField(Object value) {" + sep);
-          sb.append("        " + colName + " = (" + javaType + ")value;" + sep);
+          sb.append("        " +typeName+".this." + colName + " = (" + javaType + ")value;" + sep);
           sb.append("      }" + sep);
           sb.append("    });" + sep);
         }
@@ -1405,8 +1409,21 @@ public class ClassWriter {
   private void parseColumn(String colName, int colType, StringBuilder sb) {
     // assume that we have __it and __cur_str vars, based on
     // __loadFromFields() code.
-    sb.append("    __cur_str = __it.next();\n");
+
     String javaType = toJavaType(colName, colType);
+
+    String nullValue;
+    if (javaType.equals("String")) {
+      nullValue = this.options.getInNullStringValue();
+    } else {
+      nullValue = this.options.getInNullNonStringValue();
+    }
+
+    sb.append("    if (__it.hasNext()) {\n");
+    sb.append("        __cur_str = __it.next();\n");
+    sb.append("    } else {\n");
+    sb.append("        __cur_str = \"" + nullValue + "\";\n");
+    sb.append("    }\n");
 
     parseNullVal(javaType, colName, sb);
     if (javaType.equals("String")) {
@@ -1700,7 +1717,8 @@ public class ClassWriter {
     }
 
     // Check that all explicitly mapped columns are present in result set
-    Properties mapping = options.getMapColumnJava();
+    Properties mapping = options.getColumnNames();
+
     if (mapping != null && !mapping.isEmpty()) {
       for(Object column : mapping.keySet()) {
         if (!uniqColNames.contains((String)column)) {
@@ -1783,7 +1801,7 @@ public class ClassWriter {
     Writer writer = null;
     try {
       ostream = new FileOutputStream(filename);
-      writer = new OutputStreamWriter(ostream);
+      writer = new OutputStreamWriter(ostream, StandardCharsets.UTF_8);
       writer.append(sb.toString());
     } finally {
       if (null != writer) {

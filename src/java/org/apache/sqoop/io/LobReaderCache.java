@@ -24,10 +24,10 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.cloudera.sqoop.io.LobFile;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * A cache of open LobFile.Reader objects.
@@ -55,7 +55,7 @@ public class LobReaderCache {
       throws IOException {
 
     LobFile.Reader reader = null;
-    Path canonicalPath = qualify(path, conf);
+    Path canonicalPath = FileSystemUtil.makeQualified(path, conf);
     // Look up an entry in the cache.
     synchronized(this) {
       reader = readerMap.remove(canonicalPath);
@@ -110,25 +110,5 @@ public class LobReaderCache {
 
   protected LobReaderCache() {
     this.readerMap = new TreeMap<Path, LobFile.Reader>();
-  }
-
-  /**
-   * Created a fully-qualified path object.
-   * @param path the path to fully-qualify with its fs URI.
-   * @param conf the current Hadoop FS configuration.
-   * @return a new path representing the same location as the input 'path',
-   * but with a fully-qualified URI.
-   */
-  public static Path qualify(Path path, Configuration conf)
-      throws IOException {
-    if (null == path) {
-      return null;
-    }
-
-    FileSystem fs = path.getFileSystem(conf);
-    if (null == fs) {
-      fs = FileSystem.get(conf);
-    }
-    return path.makeQualified(fs);
   }
 }

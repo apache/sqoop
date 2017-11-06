@@ -27,21 +27,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.config.ConfigurationConstants;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 public class TestSqoopJobDataPublisher extends ImportJobTestCase {
 
     public static final Log LOG = LogFactory.getLog(TestSqoopJobDataPublisher.class.getName());
 
+    @Before
     public void setUp() {
         super.setUp();
         HiveImport.setTestMode(true);
     }
 
+    @After
     public void tearDown() {
         super.tearDown();
         HiveImport.setTestMode(false);

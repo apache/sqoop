@@ -26,13 +26,10 @@ import java.sql.SQLException;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
-
-import junit.framework.TestCase;
-
 /**
  * Test methods of the generic SqlManager implementation.
  */
-public class TestSqlManager extends TestCase {
+public class TestSqlManager {
 
   @Test
   public void testFilteringSpecifiedColumnNamesWhenNoneSpecified() {

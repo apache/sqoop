@@ -38,6 +38,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.junit.Test;
 
 /**
  * Test free form query import with the MySQL db.
@@ -90,23 +91,23 @@ public class OracleCallExportTest extends ExportJobTestCase {
   private void createObjects() {
 
     String createTableSql = "CREATE TABLE " + tableName + " ( "
-      + "\"id\"  INT NOT NULL PRIMARY KEY, "
-      + "\"msg\" VARCHAR(24) NOT NULL, "
+      + "\"ID\"  INT NOT NULL PRIMARY KEY, "
+      + "\"MSG\" VARCHAR(24) NOT NULL, "
       + "\"d\" DATE, "
       + "\"f\" FLOAT, "
       + "\"vc\" VARCHAR(32))";
 
     String createProcSql = "CREATE PROCEDURE " + procName + " ( "
-      + "\"id\" IN INT,"
-      + "\"msg\" IN VARCHAR,"
+      + "\"ID\" IN INT,"
+      + "\"MSG\" IN VARCHAR,"
       + "\"d\" IN DATE,"
       + "\"f\" IN FLOAT) IS BEGIN "
       + "INSERT INTO " + tableName + " "
-      + "VALUES(\"id\","
-      + "\"msg\","
+      + "VALUES(\"ID\","
+      + "\"MSG\","
       + "\"d\","
       + "\"f\","
-      + "\"msg\" || '_2'); END;";
+      + "\"MSG\" || '_2'); END;";
 
     try {
       dropTableIfExists(tableName);
@@ -194,6 +195,7 @@ public class OracleCallExportTest extends ExportJobTestCase {
       statement.close();
     }
   }
+  @Test
   public void testExportUsingProcedure() throws IOException, SQLException {
     String[] lines = {
       "0,textfield0,2002-12-29 08:40:00,3300",

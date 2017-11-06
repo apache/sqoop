@@ -28,16 +28,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import static org.junit.Assert.assertEquals;
+
 public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       MySqlColumnEscapeImportTest.class.getName());
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
   @Override
   protected boolean useHsqldbTestServer() {
@@ -46,14 +51,14 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
 
   @Override
   protected String getConnectString() {
-    return MySQLTestUtils.CONNECT_STRING;
+    return mySQLTestUtils.getMySqlConnectString();
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(MySQLTestUtils.USER_NAME);
-    opts.setPassword(MySQLTestUtils.USER_PASS);
+    opts.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(opts);
     return opts;
   }
 
@@ -62,7 +67,7 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
     return "DROP TABLE IF EXISTS " + getManager().escapeTableName(table);
   }
 
-    @Override
+  @After
   public void tearDown() {
       try {
         dropTableIfExists(getTableName());
@@ -80,9 +85,8 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
     args.add("--connect");
     args.add(getConnectString());
     args.add("--username");
-    args.add(MySQLTestUtils.USER_NAME);
-    args.add("--password");
-    args.add(MySQLTestUtils.USER_PASS);
+    args.add(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(args);
     args.add("--target-dir");
     args.add(getWarehouseDir());
     args.add("--num-mappers");
@@ -93,6 +97,7 @@ public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
     return args.toArray(new String[0]);
   }
 
+  @Test
   public void testEscapeColumnWithDoubleQuote() throws IOException {
     String[] colNames = { "column\"withdoublequote" };
     String[] types = { "VARCHAR(50)"};

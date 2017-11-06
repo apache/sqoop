@@ -1,3 +1,209 @@
+Release Notes - Sqoop - Version 1.4.7
+
+** Sub-task
+    * [SQOOP-956] - Create a winpkg target for Sqoop to create a Winows installable Sqoop package
+    * [SQOOP-961] - Update Sqoop documentation for Windows changes
+    * [SQOOP-2643] - Incremental imports fail in Sqoop when run using Teradata JDBC driver
+    * [SQOOP-2644] - Sqoop Export does not offer upserts from HDFS to Teradata DB
+    * [SQOOP-2937] - Sqoop mainframe module does not support sequential data sets, GDG
+    * [SQOOP-2938] - Mainframe import module extension to support data sets on tape
+    * [SQOOP-3055] - SQOOP-3055 MYSQL tests are failing due to the tests ignoring specified username, password and dbname, trying to connect to specified host using "currentUser"
+    * [SQOOP-3056] - Add ant ivy report target
+    * [SQOOP-3057] - Fix failing 3rd party Oracle tests
+    * [SQOOP-3091] - Clean up expected exception logic in tests - part I.
+    * [SQOOP-3092] - Clean up expected exception logic in tests - part II.
+    * [SQOOP-3141] - Fix Java7 compile issue (getTypeName is only available after Java 8)
+    * [SQOOP-3142] - Restore fail messages removed in SQOOP-3092
+    * [SQOOP-3143] - Restore fail messages removed in SQOOP-3091
+
+** Bug
+    * [SQOOP-890] - ClassWriter Generates setField Casts Based on the Output Type, not the Input Type
+    * [SQOOP-1198] - Make Sqoop build aware of the protobuf library
+    * [SQOOP-1252] - Sqoop import from db2. Schema of import not in expected format.
+    * [SQOOP-1289] - Sqoop hbase-bulkload does not work with composite key
+    * [SQOOP-1295] - Sqoop Merge supports only one column merge key. Merge fails if source table as composite key
+    * [SQOOP-1301] - 'run' method in Sqoop.java is not thread-safe
+    * [SQOOP-1347] - High performance oracle connector should depend on --direct flag only to disable/enable feature
+    * [SQOOP-1369] - Avro export ignores --columns option
+    * [SQOOP-1493] - Add ability to import/export true decimal in Avro instead of serializing it to String
+    * [SQOOP-1600] - Exception when import data using Data Connector for Oracle with TIMESTAMP column type to Parquet files
+    * [SQOOP-1735] - Sqoop job fails (but not 'sqoop import') if --create-hive-table is set and the hive table already exists
+    * [SQOOP-1760] - Relocated hadoop installation
+    * [SQOOP-1807] - Incremental import to HBase with free form query is broken
+    * [SQOOP-1932] - fix authorization failuare when the --hive-table option contaion a database name for import
+    * [SQOOP-1933] - CryptoFileLoader does not work for saved jobs
+    * [SQOOP-2103] - Not able define Decimal(n,p) data type in map-column-hive option
+    * [SQOOP-2264] - Exclude and remove SqoopUserGuide.xml from git repository
+    * [SQOOP-2283] - Support usage of --exec and --password-alias
+    * [SQOOP-2286] - Ensure Sqoop generates valid avro column names
+    * [SQOOP-2295] - Hive import with Parquet should append automatically
+    * [SQOOP-2296] - Merge statement incorrectly includes table hints
+    * [SQOOP-2297] - Explicitly add zookeeper as a dependency in ivy.xml
+    * [SQOOP-2298] - TestAvroImport test case error
+    * [SQOOP-2326] - Fix Netezza trunc-string option handling and unnecessary log directory during imports
+    * [SQOOP-2328] - Sqoop import does not recognize Primary Key of a IBM DB2 table
+    * [SQOOP-2339] - Move sub-directory might fail in append mode
+    * [SQOOP-2343] - AsyncSqlRecordWriter stucks if any exception is thrown out in its close method
+    * [SQOOP-2346] - compression isn't honored in incremental imports
+    * [SQOOP-2349] - Transaction isolation level for metadata queries should be mutable
+    * [SQOOP-2362] - Add oracle direct mode in list of supported databases
+    * [SQOOP-2363] - wrong option for escape character with mysqlimport
+    * [SQOOP-2367] - Tests from PostgresqlImportTest can fail on various versions of Hadoop
+    * [SQOOP-2370] - Netezza - need to support additional options for full control character handling
+    * [SQOOP-2371] - Tests from *LobAvroImportTest might fail
+    * [SQOOP-2372] - Imports all tables as parquet will meet a NPE
+    * [SQOOP-2381] - Add test for mysql export with --escape-by option
+    * [SQOOP-2387] - Sqoop should support importing from table with column names containing some special character
+    * [SQOOP-2399] - BigDecimalSplitter java.lang.ArrayIndexOutOfBoundsException
+    * [SQOOP-2400] - hive.metastore.sasl.enabled should be set to true for Oozie integration
+    * [SQOOP-2406] - Add support for secure mode when importing Parquet files into Hive
+    * [SQOOP-2437] - Use hive configuration to connect to secure metastore
+    * [SQOOP-2438] - Use Class.cast when creating HiveConf object in ParquetJob
+    * [SQOOP-2454] - Drop JDK6 support
+    * [SQOOP-2470] - Incremental Hive import with append not working after validation check for --hive-import and --import 
+    * [SQOOP-2531] - readlink -f not supported on OS X
+    * [SQOOP-2535] - Add error handling to HiveConf
+    * [SQOOP-2561] - Special Character removal from Column name as avro data results in duplicate column and fails the import
+    * [SQOOP-2566] - Sqoop incremental import using --query switch throws NullPointerException with a managed table
+    * [SQOOP-2582] - Query import won't work for parquet
+    * [SQOOP-2596] - Precision of varchar/char column cannot be retrieved from teradata database during sqoop import 
+    * [SQOOP-2597] - Missing method AvroSchemaGenerator.generate()
+    * [SQOOP-2607] - Direct import from Netezza and encoding
+    * [SQOOP-2617] - Log file that is being used for LOB files
+    * [SQOOP-2620] - Sqoop fails with Incremental Imports and Upserts in Teradata using Teradata JDBC Driver
+    * [SQOOP-2627] - Incremental imports fail in Sqoop when run using Teradata JDBC driver
+    * [SQOOP-2642] - Document ability to specify commas in --map-column-hive option
+    * [SQOOP-2651] - Do not dump data on error in TextExportMapper by default
+    * [SQOOP-2707] - Upgrade commons-collections to 3.2.2
+    * [SQOOP-2712] - Run only one map task attempt during export (second edition)
+    * [SQOOP-2723] - Oracle connector not working with lowercase columns
+    * [SQOOP-2737] - Cannot import table from Oracle with column with spaces in name
+    * [SQOOP-2745] - Using datetime column as a splitter for Oracle no longer works
+    * [SQOOP-2746] - Add test case for Oracle incremental import using Timestamp
+    * [SQOOP-2747] - Allow customizing test username and password for Oracle tests
+    * [SQOOP-2751] - Test TestIncrementalImport is failing
+    * [SQOOP-2753] - TestSqoopJsonUtil.testGetJsonStringFromMap is depending on Map ordering in JDK
+    * [SQOOP-2767] - Test is failing SystemImportTest
+    * [SQOOP-2779] - Sqoop metastore doesn't seem to recognize --schema option
+    * [SQOOP-2780] - Sqoop 1 unit tests fail with TestIncrementalImport test
+    * [SQOOP-2783] - Query import with parquet fails on incompatible schema
+    * [SQOOP-2787] - MySql import and export fails with 5.1 server and 5.1.17+ drivers 
+    * [SQOOP-2810] - Upgrade to non-snapshot dependency on Avro 1.8.0 as soon as it gets released
+    * [SQOOP-2815] - Add documentation for Atlas Integration
+    * [SQOOP-2839] - Sqoop import failure due to data member conflict in ORM code for table
+    * [SQOOP-2846] - Sqoop Export with update-key failing for avro data file
+    * [SQOOP-2847] - Sqoop --incremental + missing parent --target-dir reports success with no data
+    * [SQOOP-2850] - Append mode for hive imports is not  yet supported. Please remove the parameter --append-mode
+    * [SQOOP-2858] - Sqoop export with Avro data using (--update-key <key> and --update-mode allowinsert) fails
+    * [SQOOP-2863] - Properly escape column names for generated INSERT statements
+    * [SQOOP-2864] - ClassWriter chokes on column names containing double quotes
+    * [SQOOP-2880] - Provide argument for overriding temporary directory
+    * [SQOOP-2884] - Document --temporary-rootdir
+    * [SQOOP-2894] - Hive import with Parquet failed in Kerberos enabled cluster
+    * [SQOOP-2896] - Sqoop exec job fails with SQLException Access denied for user
+    * [SQOOP-2909] - Oracle related ImportTest fails after SQOOP-2737
+    * [SQOOP-2911] - Fix failing HCatalogExportTest caused by SQOOP-2863
+    * [SQOOP-2915] - Fixing Oracle related unit tests
+    * [SQOOP-2920] - sqoop performance deteriorates significantly on wide datasets; sqoop 100% on cpu
+    * [SQOOP-2936] - Provide Apache Atlas integration for hcatalog based exports
+    * [SQOOP-2945] - Oracle CLOB mapped to String is unable to import the data (SQLException in nextKeyValue)
+    * [SQOOP-2946] - Netezza export fails when BOOLEAN column is mapped with INTEGER
+    * [SQOOP-2947] - Oracle direct mode do not allow --jar-file to have fewer columns to export the data
+    * [SQOOP-2950] - Sqoop trunk has consistent UT failures - need fixing
+    * [SQOOP-2952] - row key not added into column family using --hbase-bulkload
+    * [SQOOP-2971] - OraOop does not close connections properly
+    * [SQOOP-2978] - Netezza import/export fails when TIME column is mapped with TIMESTAMP
+    * [SQOOP-2979] - Oracle direct mode do not allow FLOAT data type (java.lang.ClassCastException: java.lang.Double cannot be cast to java.math.BigDecimal)
+    * [SQOOP-2980] - Export to DB2 z/OS fails unless --batch mode is used
+    * [SQOOP-2983] - OraOop export has degraded performance with wide tables
+    * [SQOOP-2986] - Add validation check for --hive-import and --incremental lastmodified
+    * [SQOOP-2990] - Sqoop(oracle) export [updateTableToOracle] with "--update-mode allowinsert" : app fails with java.sql.SQLException: Missing IN or OUT parameter at index
+    * [SQOOP-2995] - backward incompatibility introduced by Custom Tool options
+    * [SQOOP-2999] - Sqoop ClassNotFoundException (org.apache.commons.lang3.StringUtils) is thrown when executing Oracle direct import map task
+    * [SQOOP-3010] - Sqoop should not allow --as-parquetfile with hcatalog jobs or when hive import with create-hive-table is used
+    * [SQOOP-3013] - Configuration "tmpjars" is not checked for empty strings before passing to MR
+    * [SQOOP-3014] - Sqoop with HCatalog import loose precision for large numbers that does not fit into double
+    * [SQOOP-3021] - ClassWriter fails if a column name contains a backslash character
+    * [SQOOP-3033] - Sqoop option --skip-dist-cache is not saved as a parameter when saving Sqoop Job
+    * [SQOOP-3038] - Sqoop export using --hcatalog with RDBMS reserved word column name results in "null" value
+    * [SQOOP-3044] - Add missing ASF license information to .java files
+    * [SQOOP-3054] - Get FileSystem from parameter "--target-dir"
+    * [SQOOP-3061] - Sqoop --options-file failed with error "Malformed option in options file" even though the query is correct
+    * [SQOOP-3069] - Get OracleExportTest#testUpsertTestExport in line with SQOOP-3066
+    * [SQOOP-3071] - Fix OracleManager to apply localTimeZone correctly in case of Date objects too
+    * [SQOOP-3072] - Reenable escaping in ImportTest#testProductWithWhiteSpaceImport for proper execution
+    * [SQOOP-3074] - Fix Avro import not to fail with Javac errors in case of non UTF-8 locale
+    * [SQOOP-3081] - use OracleEscapeUtils.escapeIdentifier OracleUpsertOutputFormat + add compatibility with SQOOP-3066
+    * [SQOOP-3083] - Fault injection targets no longer work after SQOOP-2983
+    * [SQOOP-3105] - Postgres Tests should clean up after themselves
+    * [SQOOP-3123] - Import from oracle using oraoop with map-column-java to avro fails if special characters encounter in table name or column name 
+    * [SQOOP-3124] - Fix ordering in column list query of PostgreSQL connector
+    * [SQOOP-3127] - Increase timeout in TestClassWriter#testWideTableClassGeneration to avoid flaky test scenarios in the upstream Jenkins
+    * [SQOOP-3138] - Netezza Direct Import does not support --columns options
+    * [SQOOP-3140] - mapred.map.max.attempts is deprecated. Instead, use mapreduce.map.maxattempts - old property is used by SQOOP-2055
+    * [SQOOP-3152] - --map-column-hive to support DECIMAL(xx,xx)
+    * [SQOOP-3157] - Improve regex introduced in [SQOOP-3152]
+    * [SQOOP-3159] - Sqoop (export + --table) with Oracle table_name having '$' fails with error (ORA-00942 or java.lang.NoClassDefFoundError)
+    * [SQOOP-3173] - support DB2 xml data type when sqoop import with parquet
+
+** Improvement
+    * [SQOOP-816] - Scoop and support for external Hive tables
+    * [SQOOP-957] - Proposed enhancements for getting Sqoop support on Windows
+    * [SQOOP-1281] - Support of glob paths during export 
+    * [SQOOP-1904] - support for DB2 XML data type when importing to hdfs
+    * [SQOOP-1905] - add --schema option for import-all-tables and list-tables against db2
+    * [SQOOP-1906] -  Export support for mixed  update/insert against db2
+    * [SQOOP-1907] - export support for --staging-table against db2
+    * [SQOOP-2457] - Add option to  automatically compute statistics after loading date into a hive table
+    * [SQOOP-2647] - Add option for drop-if-exists when using sqoop hcat import.
+    * [SQOOP-2795] - Clean up useless code in class TestSqoopJsonUtil
+    * [SQOOP-2801] - Secure RDBMS password in Sqoop Metastore in a encrypted form
+    * [SQOOP-2906] - Optimization of AvroUtil.toAvroIdentifier
+    * [SQOOP-2910] - Add capability to Sqoop to require an explicit option to be specified with --split-by for a String column
+    * [SQOOP-2913] - Make sqoop fails if user uses --direct connector for case when --direct connector is not available
+    * [SQOOP-2939] - Extend mainframe module to support GDG, sequential data sets, and data sets stored on tape
+    * [SQOOP-2943] - Make sqoop able to import to Parquet file format in case of HDFS encryption zones are turned on
+    * [SQOOP-2944] - AURORA direct mode to support Sequence file format
+    * [SQOOP-2972] - SQOOP Direct Export To PostgreSQL Supports Selective Columns
+    * [SQOOP-3009] - Import comments for columns for Postgresql
+    * [SQOOP-3026] - Document that Sqoop export with --hcatalog-table <HIVE_VIEW> is not supported
+    * [SQOOP-3027] - Create check/fail fast for Sqoop export with --hcatalog-table <HIVE_VIEW>, as it's not supported by Hive + MR
+    * [SQOOP-3028] - Include stack trace in the logging of exceptions in ExportTool
+    * [SQOOP-3029] - Add an option for uppercase/lowercase column name mapping between HCatalog and RDBMS cloumn name list
+    * [SQOOP-3034] - HBase import should fail fast if using anything other than as-textfile
+    * [SQOOP-3037] - Minor convenience feature - add flag to ant test to enable remote debugging
+    * [SQOOP-3050] - Create an compile/execution profile which is capable of running all the available test (including the 3rd party tests)
+    * [SQOOP-3051] - Remove/delete obsolete profiles from build.xml
+    * [SQOOP-3052] - Introduce Maven/Gradle/etc. based build for Sqoop to make it more developer friendly / open
+    * [SQOOP-3053] - Create a cmd line argument for sqoop.throwOnError and use it through SqoopOptions
+    * [SQOOP-3066] - Introduce an option + env variable to enable/disable SQOOP-2737 feature
+    * [SQOOP-3067] - Add an cmd line option to support split-by feature for database functions/expressions
+    * [SQOOP-3068] - Enhance error (tool.ImportTool: Encountered IOException running import job: java.io.IOException: Expected schema) to suggest workaround (--map-column-java)
+    * [SQOOP-3085] - Add support for client side (JVM) timezone settings
+    * [SQOOP-3090] - Normalize test cases where expect an exception
+    * [SQOOP-3131] - Docuemtn support for DB2 XML data type when importing to hdfs
+    * [SQOOP-3135] - Not enough error message for debugging when parameters missing
+    * [SQOOP-3136] - Sqoop should work well with not default file systems
+    * [SQOOP-3158] - Columns added to Mysql after initial sqoop import, export back to table with same schema fails 
+    * [SQOOP-3169] - Evaluate and fix SQLServer Manual tests
+    * [SQOOP-3190] - Remove dependency on PSQL for postgres direct import
+    * [SQOOP-3192] - upgrade parquet
+
+** New Feature
+    * [SQOOP-1094] - Add Avro support to merge tool
+    * [SQOOP-2331] - Snappy Compression Support in Sqoop-HCatalog
+    * [SQOOP-2332] - Dynamic Partition in Sqoop HCatalog- if Hive table does not exists & add support for Partition Date Format
+    * [SQOOP-2333] - Sqoop to support Custom options for User Defined Plugins(Tool)
+    * [SQOOP-2334] - Sqoop Volume Per Mapper
+    * [SQOOP-2335] - Support for Hive External Table in Sqoop - HCatalog
+    * [SQOOP-2534] - --password-file option doesn't work Teradata jdbc driver
+    * [SQOOP-2585] - merging hive tables using sqoop
+    * [SQOOP-2609] - Provide Apache Atlas integration for hive and hcatalog based imports
+    * [SQOOP-2649] - Support for importing data onto Apache Phoenix tables
+
+** Task
+    * [SQOOP-960] - Update Sqoop documentation for Windows changes
+    * [SQOOP-3080] - Correct default transaction isolation level comment in SqoopOptions
 
 Release Notes - Sqoop - Version 1.4.6
 

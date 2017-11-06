@@ -20,13 +20,16 @@ package com.cloudera.sqoop.manager;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
-import java.util.Arrays;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobConf;
+import org.junit.Test;
+
 import com.cloudera.sqoop.TestExport;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 
@@ -185,18 +188,18 @@ public class PGBulkloadManagerManualTest extends TestExport {
     // PGBulkloadManager does not support --columns option.
   }
 
-
+	@Test
   public void testMultiReduceExport() throws IOException, SQLException {
     multiFileTest(2, 10, 2, "-D", "mapred.reduce.tasks=2");
   }
 
-
+	@Test
   public void testMultiReduceExportWithNewProp()
       throws IOException, SQLException {
     multiFileTest(2, 10, 2, "-D", "mapreduce.job.reduces=2");
   }
 
-
+	@Test
   public void testExportWithTablespace() throws IOException, SQLException {
     multiFileTest(1, 10, 1,
                   "-D", "pgbulkload.staging.tablespace=" + TABLESPACE);

@@ -18,9 +18,9 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for OracleTable.
@@ -30,13 +30,13 @@ public class TestOracleTable extends OraOopTestCase {
   @Test
   public void testToString() {
     OracleTable table = new OracleTable("ORAOOP", "TEST_TABLE");
-    Assert.assertEquals("\"ORAOOP\".\"TEST_TABLE\"", table.toString());
+    assertEquals("\"ORAOOP\".\"TEST_TABLE\"", table.toString());
 
     table = new OracleTable("", "TEST_TABLE2");
-    Assert.assertEquals("\"TEST_TABLE2\"", table.toString());
+    assertEquals("\"TEST_TABLE2\"", table.toString());
 
     table = new OracleTable("TEST_TABLE3");
-    Assert.assertEquals("\"TEST_TABLE3\"", table.toString());
+    assertEquals("\"TEST_TABLE3\"", table.toString());
   }
 
 }

@@ -18,11 +18,11 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import junit.framework.Assert;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test exporting data into Oracle.
@@ -30,6 +30,8 @@ import org.junit.Test;
 public class ExportTest extends OraOopTestCase {
 
   private static final ExportTest TEST_CASE = new ExportTest();
+
+  private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
 
   @BeforeClass
   public static void setUpHdfsData() throws Exception {
@@ -40,23 +42,23 @@ public class ExportTest extends OraOopTestCase {
     TEST_CASE.createTable("table_tst_product.xml");
 
     int retCode =
- TEST_CASE.runImport("TST_PRODUCT", TEST_CASE.getSqoopConf(), false);
-    Assert.assertEquals("Return code should be 0", 0, retCode);
+ TEST_CASE.runImport("TST_PRODUCT", TEST_CASE.getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
+    assertEquals("Return code should be 0", 0, retCode);
   }
 
   @Test
   public void testProductExport() throws Exception {
     int retCode =
-        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP");
-    Assert.assertEquals("Return code should be 0", 0, retCode);
+        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP", false, DISABLE_ORACLE_ESCAPING_FLAG);
+    assertEquals("Return code should be 0", 0, retCode);
   }
 
   @Test
   public void testProductExportMixedCaseTableName() throws Exception {
     int retCode =
         TEST_CASE.runExportFromTemplateTable("TST_PRODUCT",
-            "\"\"T5+_Pr#duct_Exp\"\"");
-    Assert.assertEquals("Return code should be 0", 0, retCode);
+            "\"\"T5+_Pr#duct_Exp\"\"", false, DISABLE_ORACLE_ESCAPING_FLAG);
+    assertEquals("Return code should be 0", 0, retCode);
   }
 
   @AfterClass

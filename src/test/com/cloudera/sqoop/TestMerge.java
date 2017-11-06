@@ -52,6 +52,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.Before;
+import org.junit.Test;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetReader;
+import org.kitesdk.data.Datasets;
+
+import static org.apache.avro.generic.GenericData.Record;
+import static org.junit.Assert.fail;
 
 /**
  * Test that the merge tool works.
@@ -79,7 +87,7 @@ public class TestMerge extends BaseSqoopTestCase {
       Arrays.asList(new Integer(1), new Integer(43)),
       Arrays.asList(new Integer(3), new Integer(313)));
 
-  @Override
+  @Before
   public void setUp() {
     super.setUp();
     manager = getManager();
@@ -92,7 +100,7 @@ public class TestMerge extends BaseSqoopTestCase {
   }
 
   public static final String TABLE_NAME = "MergeTable";
-  private static final String OLD_PATH = "merge-old";
+  private static final String OLD_PATH = "merge_old";
   private static final String NEW_PATH = "merge_new";
   private static final String FINAL_PATH = "merge_final";
 
@@ -145,12 +153,19 @@ public class TestMerge extends BaseSqoopTestCase {
     conn.commit();
   }
 
+  @Test
   public void testTextFileMerge() throws Exception {
     runMergeTest(SqoopOptions.FileLayout.TextFile);
   }
 
+  @Test
   public void testAvroFileMerge() throws Exception {
     runMergeTest(SqoopOptions.FileLayout.AvroDataFile);
+  }
+
+  @Test
+  public void testParquetFileMerge() throws Exception {
+    runMergeTest(SqoopOptions.FileLayout.ParquetFile);
   }
 
   public void runMergeTest(SqoopOptions.FileLayout fileLayout) throws Exception {
@@ -287,6 +302,27 @@ public class TestMerge extends BaseSqoopTestCase {
     return false;
   }
 
+  private boolean checkParquetFileForLine(FileSystem fileSystem, Path path, List<Integer> record) throws IOException
+  {
+    Dataset<Record> parquetRecords = Datasets.load("dataset:" + path.getParent(), Record.class);
+    DatasetReader<Record> datasetReader = null;
+    try {
+      datasetReader = parquetRecords.newReader();
+      for (GenericRecord genericRecord : datasetReader) {
+        if (valueMatches(genericRecord, record)) {
+          return true;
+        }
+      }
+    }
+    finally {
+      if (datasetReader != null) {
+        datasetReader.close();
+      }
+    }
+
+    return false;
+  }
+
   protected boolean checkFileForLine(FileSystem fs, Path p, SqoopOptions.FileLayout fileLayout,
       List<Integer> record) throws IOException {
     boolean result = false;
@@ -296,6 +332,9 @@ public class TestMerge extends BaseSqoopTestCase {
         break;
       case AvroDataFile:
         result = checkAvroFileForLine(fs, p, record);
+        break;
+      case ParquetFile:
+        result = checkParquetFileForLine(fs, p, record);
         break;
     }
     return result;
@@ -320,7 +359,7 @@ public class TestMerge extends BaseSqoopTestCase {
 
     for (FileStatus stat : files) {
       Path p = stat.getPath();
-      if (p.getName().startsWith("part-")) {
+      if (p.getName().startsWith("part-") || p.getName().endsWith(".parquet")) {
         if (checkFileForLine(fs, p, fileLayout, record)) {
           // We found the line. Nothing further to do.
           return true;

@@ -38,6 +38,10 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test the CubridManager implementation.
@@ -104,6 +108,7 @@ public class CubridManagerExportTest extends TestExport {
    * Cubrid could not support --staging-table, Diable this test case.
    */
   @Override
+  @Test
   public void testMultiTransactionWithStaging() throws IOException,
       SQLException {
     return;
@@ -113,6 +118,7 @@ public class CubridManagerExportTest extends TestExport {
    * Cubrid could not support --staging-table, Diable this test case.
    */
   @Override
+  @Test
   public void testMultiMapTextExportWithStaging() throws IOException,
       SQLException {
     return;
@@ -282,6 +288,7 @@ public class CubridManagerExportTest extends TestExport {
   }
 
   /** Make sure mixed update/insert export work correctly. */
+  @Test
   public void testUpsertTextExport() throws IOException, SQLException {
     final int TOTAL_RECORDS = 10;
     createTextFile(0, TOTAL_RECORDS, false);

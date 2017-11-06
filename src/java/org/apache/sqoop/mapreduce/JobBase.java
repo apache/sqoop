@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.config.ConfigurationConstants;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.manager.ConnManager;
@@ -51,6 +52,10 @@ public class JobBase {
 
   public static final String SERIALIZE_SQOOPOPTIONS = "sqoop.jobbase.serialize.sqoopoptions";
   public static final boolean SERIALIZE_SQOOPOPTIONS_DEFAULT = false;
+  public static final String HADOOP_MAP_TASK_MAX_ATTEMTPS =
+      "mapreduce.map.maxattempts";
+  public static final String HADOOP_REDUCE_TASK_MAX_ATTEMTPS =
+      "mapreduce.reduce.maxattempts";
 
   protected SqoopOptions options;
   protected Class<? extends Mapper> mapperClass;
@@ -195,21 +200,39 @@ public class JobBase {
       }
     }
 
+    String tmpjars = conf.get(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM);
+    StringBuilder sb = new StringBuilder();
+
     // If we didn't put anything in our set, then there's nothing to cache.
-    if (localUrls.isEmpty()) {
+    if (localUrls.isEmpty() && (org.apache.commons.lang.StringUtils.isEmpty(tmpjars))) {
       return;
+    }
+
+    if (null != tmpjars) {
+      String[] tmpjarsElements = tmpjars.split(",");
+      for (String jarElement : tmpjarsElements) {
+        if (jarElement.isEmpty()) {
+          warn("Empty input is invalid and was removed from tmpjars.");
+        } else {
+          sb.append(jarElement);
+          sb.append(",");
+        }
+      }
+    }
+
+    int lastComma = sb.lastIndexOf(",");
+    if (localUrls.isEmpty() && lastComma >= 0) {
+      sb.deleteCharAt(lastComma);
     }
 
     // Add these to the 'tmpjars' array, which the MR JobSubmitter
     // will upload to HDFS and put in the DistributedCache libjars.
-    String tmpjars = conf.get("tmpjars");
-    StringBuilder sb = new StringBuilder();
-    if (null != tmpjars) {
-      sb.append(tmpjars);
-      sb.append(",");
-    }
     sb.append(StringUtils.arrayToString(localUrls.toArray(new String[0])));
-    conf.set("tmpjars", sb.toString());
+    conf.set(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM, sb.toString());
+  }
+
+  protected void warn(String message) {
+    LOG.warn(message);
   }
 
   private void addToCache(String file, FileSystem fs, Set<String> localUrls) {

@@ -29,6 +29,8 @@ import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.LobAvroImportTestCase;
 
+import static org.junit.Assert.fail;
+
 /**
  * Tests BLOB/CLOB import for Avro with Oracle Db.
  */

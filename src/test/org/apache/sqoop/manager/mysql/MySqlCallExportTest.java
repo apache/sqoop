@@ -38,6 +38,9 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.MySQLTestUtils;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test free form query import with the MySQL db.
@@ -49,14 +52,15 @@ public class MySqlCallExportTest extends ExportJobTestCase {
 
   private final String tableName = "MYSQL_CALL_EXPORT_BASE_TABLE";
   private final String procName = "MYSQL_CALL_EXPORT_PROC";
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-  @Override
+  @Before
   public void setUp() {
     super.setUp();
     createObjects();
   }
 
-  @Override
+  @After
   public void tearDown() {
     try {
       Statement stmt = getManager().getConnection().createStatement();
@@ -150,13 +154,14 @@ public class MySqlCallExportTest extends ExportJobTestCase {
 
   @Override
   protected String getConnectString() {
-    return MySQLTestUtils.CONNECT_STRING;
+    return mySQLTestUtils.getMySqlConnectString();
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(MySQLTestUtils.getCurrentUser());
+    opts.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(opts);
     return opts;
   }
 
@@ -192,6 +197,7 @@ public class MySqlCallExportTest extends ExportJobTestCase {
     }
   }
 
+  @Test
   public void testExportUsingProcedure() throws IOException, SQLException {
     String[] lines = {
       "0,textfield0,2002-12-29,3300",

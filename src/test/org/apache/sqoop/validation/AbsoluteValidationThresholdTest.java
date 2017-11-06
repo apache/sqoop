@@ -18,17 +18,21 @@
 
 package org.apache.sqoop.validation;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for AbsoluteValidationThreshold.
  */
-public class AbsoluteValidationThresholdTest extends TestCase {
+public class AbsoluteValidationThresholdTest {
 
   /**
    * Test the implementation for AbsoluteValidationThreshold.
    * Both arguments should be same else fail.
    */
+  @Test
   public void testAbsoluteValidationThreshold() {
     ValidationThreshold validationThreshold = new AbsoluteValidationThreshold();
     assertTrue(validationThreshold.compare(100, 100));

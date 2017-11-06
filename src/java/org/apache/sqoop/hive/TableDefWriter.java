@@ -27,6 +27,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -36,6 +37,7 @@ import org.apache.sqoop.io.CodecMap;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.util.FileSystemUtil;
 
 /**
  * Creates (Hive-specific) SQL DDL statements to create tables to hold data
@@ -116,7 +118,7 @@ public class TableDefWriter {
   public String getCreateTableStmt() throws IOException {
     Map<String, Integer> columnTypes;
     Properties userMapping = options.getMapColumnHive();
-
+    Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
     if (externalColTypes != null) {
       // Use pre-defined column types.
       columnTypes = externalColTypes;
@@ -132,9 +134,17 @@ public class TableDefWriter {
     String [] colNames = getColumnNames();
     StringBuilder sb = new StringBuilder();
     if (options.doFailIfHiveTableExists()) {
-      sb.append("CREATE TABLE `");
+      if (isHiveExternalTableSet) {
+        sb.append("CREATE EXTERNAL TABLE `");
+      } else {
+        sb.append("CREATE TABLE `");
+      }
     } else {
-      sb.append("CREATE TABLE IF NOT EXISTS `");
+      if (isHiveExternalTableSet) {
+        sb.append("CREATE EXTERNAL TABLE IF NOT EXISTS `");
+      } else {
+        sb.append("CREATE TABLE IF NOT EXISTS `");
+      }
     }
 
     if(options.getHiveDatabaseName() != null) {
@@ -219,6 +229,11 @@ public class TableDefWriter {
       sb.append("' STORED AS TEXTFILE");
     }
 
+    if (isHiveExternalTableSet) {
+      // add location
+      sb.append(" LOCATION '"+options.getHiveExternalTableDir()+"'");
+    }
+
     LOG.debug("Create statement: " + sb.toString());
     return sb.toString();
   }
@@ -271,8 +286,7 @@ public class TableDefWriter {
     } else {
       tablePath = warehouseDir + inputTableName;
     }
-    FileSystem fs = FileSystem.get(configuration);
-    return new Path(tablePath).makeQualified(fs);
+    return FileSystemUtil.makeQualified(new Path(tablePath), configuration);
   }
 
   /**

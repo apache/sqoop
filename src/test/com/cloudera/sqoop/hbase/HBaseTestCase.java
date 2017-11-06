@@ -18,62 +18,68 @@
 
 package com.cloudera.sqoop.hbase;
 
+import static org.apache.hadoop.hbase.HConstants.MASTER_INFO_PORT;
+import static org.apache.hadoop.hbase.HConstants.ZOOKEEPER_CLIENT_PORT;
+import static org.apache.hadoop.hbase.coprocessor.CoprocessorHost.REGION_COPROCESSOR_CONF_KEY;
+import static org.apache.hadoop.hbase.security.HBaseKerberosUtils.KRB_PRINCIPAL;
+import static org.apache.hadoop.hbase.security.HBaseKerberosUtils.MASTER_KRB_PRINCIPAL;
+import static org.apache.hadoop.hbase.security.User.HBASE_SECURITY_CONF_KEY;
+import static org.apache.hadoop.yarn.conf.YarnConfiguration.RM_PRINCIPAL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.conf.Configuration;
-
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
-import org.apache.hadoop.hbase.HConstants;
-import org.apache.hadoop.hbase.MiniHBaseCluster;
-import org.apache.hadoop.hbase.master.HMaster;
-import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
-
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.security.HBaseKerberosUtils;
+import org.apache.hadoop.hbase.security.token.TokenProvider;
 import org.apache.hadoop.hbase.util.Bytes;
-
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.StringUtils;
-
+import org.apache.sqoop.infrastructure.kerberos.KerberosConfigurationProvider;
 import org.junit.After;
 import org.junit.Before;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.UUID;
-import org.apache.commons.io.FileUtils;
 
 /**
  * Utility methods that facilitate HBase import tests.
  */
 public abstract class HBaseTestCase extends ImportJobTestCase {
 
-  /*
-   * This is to restore test.build.data system property which gets reset
-   * when HBase tests are run. Since other tests in Sqoop also depend upon
-   * this property, they can fail if are run subsequently in the same VM.
-   */
-  private static String testBuildDataProperty = "";
-
-  private static void recordTestBuildDataProperty() {
-    testBuildDataProperty = System.getProperty("test.build.data", "");
-  }
-
-  private static void restoreTestBuidlDataProperty() {
-    System.setProperty("test.build.data", testBuildDataProperty);
-  }
-
   public static final Log LOG = LogFactory.getLog(
       HBaseTestCase.class.getName());
+  private static final int NUM_MASTERS = 1;
+  private static final int NUM_SLAVES = 1;
+  private static final String MASTER_INFO_PORT_DISABLE_WEB_UI = "-1";
+
+  private final KerberosConfigurationProvider kerberosConfigurationProvider;
+  private HBaseTestingUtility hbaseTestUtil;
+
+  public HBaseTestCase() {
+    this(null);
+  }
+
+  public HBaseTestCase(KerberosConfigurationProvider kerberosConfigurationProvider) {
+    this.kerberosConfigurationProvider = kerberosConfigurationProvider;
+  }
 
   /**
    * Create the argv to pass to Sqoop.
@@ -87,8 +93,10 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
 
     if (includeHadoopFlags) {
       CommonArgs.addHadoopFlags(args);
+      String zookeeperPort = hbaseTestUtil.getConfiguration().get(ZOOKEEPER_CLIENT_PORT);
       args.add("-D");
       args.add("hbase.zookeeper.property.clientPort=" + zookeeperPort);
+      args.addAll(getKerberosFlags());
     }
 
     if (null != queryStr) {
@@ -111,79 +119,77 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
     if (hbaseCreate) {
       args.add("--hbase-create-table");
     }
-
     return args.toArray(new String[0]);
   }
-  // Starts a mini hbase cluster in this process.
-  // Starts a mini hbase cluster in this process.
-  private HBaseTestingUtility hbaseTestUtil;
-  private String workDir = createTempDir().getAbsolutePath();
-  private MiniZooKeeperCluster zookeeperCluster;
-  private MiniHBaseCluster hbaseCluster;
-  private int zookeeperPort;
+
+  /**
+   * Create the argv to pass to Sqoop as incremental options.
+   * @return the argv as an array of strings.
+   */
+  protected String [] getIncrementalArgv(boolean includeHadoopFlags,
+      String hbaseTable, String hbaseColFam, boolean hbaseCreate,
+      String queryStr, boolean isAppend, boolean appendTimestamp, String checkColumn, String checkValue, String lastModifiedColumn) {
+
+    String[] argsStrArray = getArgv(includeHadoopFlags, hbaseTable, hbaseColFam, hbaseCreate, queryStr);
+    List<String> args = new ArrayList<String>(Arrays.asList(argsStrArray));
+
+    if (isAppend) {
+      args.add("--incremental");
+      args.add("append");
+      if (!appendTimestamp) {
+        args.add("--check-column");
+        args.add(checkColumn);//"ID");
+      } else {
+        args.add("--check-column");
+        args.add(lastModifiedColumn);//LAST_MODIFIED");
+      }
+    } else {
+      args.add("--incremental");
+      args.add("lastmodified");
+      args.add("--check-column");
+      args.add(checkColumn);
+      args.add("--last-value");
+      args.add(checkValue);
+    }
+    return args.toArray(new String[0]);
+  }
 
   @Override
   @Before
   public void setUp() {
     try {
-      String zookeeperDir = new File(workDir, "zk").getAbsolutePath();
-      zookeeperCluster = new MiniZooKeeperCluster();
-      zookeeperCluster.startup(new File(zookeeperDir));
-      zookeeperPort = zookeeperCluster.getClientPort();
+      hbaseTestUtil = new HBaseTestingUtility();
+      // We set the port for the hbase master web UI to -1 because we do not want the info server to run.
+      hbaseTestUtil.getConfiguration().set(MASTER_INFO_PORT, MASTER_INFO_PORT_DISABLE_WEB_UI);
+      setupKerberos();
 
-      HBaseTestCase.recordTestBuildDataProperty();
-      String hbaseDir = new File(workDir, "hbase").getAbsolutePath();
-      String hbaseRoot = "file://" + hbaseDir;
-      Configuration hbaseConf = HBaseConfiguration.create();
-      hbaseConf.set(HConstants.HBASE_DIR, hbaseRoot);
-      //Hbase 0.90 does not have HConstants.ZOOKEEPER_CLIENT_PORT
-      hbaseConf.setInt("hbase.zookeeper.property.clientPort", zookeeperPort);
-      hbaseConf.set(HConstants.ZOOKEEPER_QUORUM, "0.0.0.0");
-      hbaseConf.setInt("hbase.master.info.port", -1);
-      hbaseConf.setInt("hbase.zookeeper.property.maxClientCnxns", 500);
-      hbaseCluster = new MiniHBaseCluster(hbaseConf, 1);
-      HMaster master = hbaseCluster.getMaster();
-      Object serverName = master.getServerName();
-
-      String hostAndPort;
-      Method m;
-      if (serverName instanceof String) {
-        System.out.println("Server name is string, using HServerAddress.");
-        m = HMaster.class.getDeclaredMethod("getMasterAddress",
-                new Class<?>[]{});
-        Class<?> clazz = Class.forName("org.apache.hadoop.hbase.HServerAddress");
-        /*
-         * Call method to get server address
-         */
-        Object serverAddr = clazz.cast(m.invoke(master, new Object[]{}));
-        //returns the address as hostname:port
-        hostAndPort = serverAddr.toString();
-      } else {
-        System.out.println("ServerName is org.apache.hadoop.hbase.ServerName,"
-                + "using getHostAndPort()");
-        Class<?> clazz = Class.forName("org.apache.hadoop.hbase.ServerName");
-        m = clazz.getDeclaredMethod("getHostAndPort", new Class<?>[]{});
-        hostAndPort = m.invoke(serverName, new Object[]{}).toString();
-      }
-      hbaseConf.set("hbase.master", hostAndPort);
-      hbaseTestUtil = new HBaseTestingUtility(hbaseConf);
-      hbaseTestUtil.setZkCluster(zookeeperCluster);
-      hbaseCluster.startMaster();
+      hbaseTestUtil.startMiniZKCluster();
+      hbaseTestUtil.startMiniHBaseCluster(NUM_MASTERS, NUM_SLAVES);
       super.setUp();
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }
   }
 
+  private void setupKerberos() {
+    if (!isKerberized()){
+      return;
+    }
+
+    String servicePrincipal = kerberosConfigurationProvider.getTestPrincipal() + "@" + kerberosConfigurationProvider.getRealm();
+    HBaseKerberosUtils.setPrincipalForTesting(servicePrincipal);
+    HBaseKerberosUtils.setKeytabFileForTesting(kerberosConfigurationProvider.getKeytabFilePath());
+    HBaseKerberosUtils.setSecuredConfiguration(hbaseTestUtil.getConfiguration());
+
+    UserGroupInformation.setConfiguration(hbaseTestUtil.getConfiguration());
+    hbaseTestUtil.getConfiguration().setStrings(REGION_COPROCESSOR_CONF_KEY, TokenProvider.class.getName());
+  }
+
   public void shutdown() throws Exception {
     LOG.info("In shutdown() method");
-    if (null != hbaseTestUtil) {
-      LOG.info("Shutting down HBase cluster");
-      hbaseCluster.shutdown();
-      zookeeperCluster.shutdown();
-      hbaseTestUtil = null;
-    }
-    FileUtils.deleteDirectory(new File(workDir));
+    LOG.info("Shutting down HBase cluster");
+    hbaseTestUtil.shutdownMiniCluster();
+    hbaseTestUtil = null;
     LOG.info("shutdown() method returning.");
   }
 
@@ -196,7 +202,6 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       LOG.warn("Error shutting down HBase minicluster: "
               + StringUtils.stringifyException(e));
     }
-    HBaseTestCase.restoreTestBuidlDataProperty();
     super.tearDown();
   }
 
@@ -204,9 +209,10 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       String colFamily, String colName, String val) throws IOException {
     Get get = new Get(Bytes.toBytes(rowKey));
     get.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(colName));
-    HTable table = new HTable(new Configuration(
-        hbaseTestUtil.getConfiguration()), Bytes.toBytes(tableName));
-    try {
+    try (
+        Connection hbaseConnection = createHBaseConnection();
+        Table table = getHBaseTable(hbaseConnection, tableName)
+    ) {
       Result r = table.get(get);
       byte [] actualVal = r.getValue(Bytes.toBytes(colFamily),
           Bytes.toBytes(colName));
@@ -216,34 +222,58 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
         assertNotNull("No result, but we expected one", actualVal);
         assertEquals(val, Bytes.toString(actualVal));
       }
-    } finally {
-      table.close();
     }
-  }
-  public static File createTempDir() {
-    File baseDir = new File(System.getProperty("java.io.tmpdir"));
-    File tempDir = new File(baseDir, UUID.randomUUID().toString());
-    if (tempDir.mkdir()) {
-      return tempDir;
-    }
-    throw new IllegalStateException("Failed to create directory");
   }
 
   protected int countHBaseTable(String tableName, String colFamily)
       throws IOException {
     int count = 0;
-    HTable table = new HTable(new Configuration(
-        hbaseTestUtil.getConfiguration()), Bytes.toBytes(tableName));
-    try {
+    try (
+        Connection hbaseConnection = createHBaseConnection();
+        Table table = getHBaseTable(hbaseConnection, tableName)
+    ) {
       ResultScanner scanner = table.getScanner(Bytes.toBytes(colFamily));
       for(Result result = scanner.next();
           result != null;
           result = scanner.next()) {
         count++;
       }
-    } finally {
-      table.close();
     }
     return count;
+  }
+
+  private Connection createHBaseConnection() throws IOException {
+    return ConnectionFactory.createConnection(new Configuration(hbaseTestUtil.getConfiguration()));
+  }
+
+  private Table getHBaseTable(Connection connection, String tableName) throws IOException {
+    return connection.getTable(TableName.valueOf(tableName));
+  }
+
+  protected boolean isKerberized() {
+    return kerberosConfigurationProvider != null;
+  }
+
+  private String createFlagWithValue(String flag, String value) {
+    return String.format("%s=%s", flag, value);
+  }
+
+  private List<String> getKerberosFlags() {
+    if (!isKerberized()) {
+      return Collections.emptyList();
+    }
+    List<String> result = new ArrayList<>();
+
+    String principalForTesting = HBaseKerberosUtils.getPrincipalForTesting();
+    result.add("-D");
+    result.add(createFlagWithValue(HBASE_SECURITY_CONF_KEY, "kerberos"));
+    result.add("-D");
+    result.add(createFlagWithValue(MASTER_KRB_PRINCIPAL, principalForTesting));
+    result.add("-D");
+    result.add(createFlagWithValue(KRB_PRINCIPAL, principalForTesting));
+    result.add("-D");
+    result.add(createFlagWithValue(RM_PRINCIPAL, principalForTesting));
+
+    return result;
   }
 }

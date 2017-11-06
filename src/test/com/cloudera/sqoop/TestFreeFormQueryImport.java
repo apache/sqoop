@@ -36,6 +36,10 @@ import org.apache.hadoop.io.IOUtils;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.junit.After;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test free form query import.
@@ -58,7 +62,7 @@ public class TestFreeFormQueryImport extends ImportJobTestCase {
   /** the names of the tables we're creating. */
   private List<String> tableNames;
 
-  @Override
+  @After
   public void tearDown() {
     // Clean up the database on our way out.
     for (String tableName : tableNames) {
@@ -102,6 +106,7 @@ public class TestFreeFormQueryImport extends ImportJobTestCase {
    * import on the result table that is created by joining the two tables on
    * the id column.
    */
+  @Test
   public void testSimpleJoin() throws IOException {
     tableNames = new ArrayList<String>();
 

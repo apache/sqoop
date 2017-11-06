@@ -31,6 +31,7 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +42,10 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.util.FileListing;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test the PostgresqlManager and DirectPostgresqlManager implementations.
@@ -89,13 +94,13 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     "sqoop.test.postgresql.connectstring.host_url",
     "jdbc:postgresql://localhost/");
   static final String DATABASE_USER = System.getProperty(
-    "sqoop.test.postgresql.connectstring.username",
+    "sqoop.test.postgresql.username",
     "sqooptest");
   static final String DATABASE_NAME = System.getProperty(
-    "sqoop.test.postgresql.connectstring.database",
+    "sqoop.test.postgresql.database",
     "sqooptest");
   static final String PASSWORD = System.getProperty(
-    "sqoop.test.postgresql.connectstring.password");
+    "sqoop.test.postgresql.password");
 
   static final String TABLE_NAME = "EMPLOYEES_PG";
   static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_PG";
@@ -105,9 +110,19 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   static final String SCHEMA_SPECIAL = "special";
   static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
+  protected Connection connection;
+
   @Override
   protected boolean useHsqldbTestServer() {
     return false;
+  }
+
+  public String quoteTableOrSchemaName(String tableName) {
+    return "\"" + tableName + "\"";
+  }
+
+  private String getDropTableStatement(String tableName, String schema) {
+    return "DROP TABLE IF EXISTS " + quoteTableOrSchemaName(schema) + "." + quoteTableOrSchemaName(tableName);
   }
 
   @Before
@@ -124,13 +139,35 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     LOG.debug("setUp complete.");
   }
 
+  @After
+  public void tearDown() {
+    try {
+      Statement stmt = connection.createStatement();
+      stmt.executeUpdate(getDropTableStatement(TABLE_NAME, SCHEMA_PUBLIC));
+      stmt.executeUpdate(getDropTableStatement(NULL_TABLE_NAME, SCHEMA_PUBLIC));
+      stmt.executeUpdate(getDropTableStatement(SPECIAL_TABLE_NAME, SCHEMA_PUBLIC));
+      stmt.executeUpdate(getDropTableStatement(DIFFERENT_TABLE_NAME, SCHEMA_SPECIAL));
+    } catch (SQLException e) {
+      LOG.error("Can't clean up the database:", e);
+    }
+
+    super.tearDown();
+
+    try {
+      connection.close();
+    } catch (SQLException e) {
+      LOG.error("Ignoring exception in tearDown", e);
+    }
+  }
+
+
+
   public void setUpData(String tableName, String schema, boolean nullEntry) {
     SqoopOptions options = new SqoopOptions(CONNECT_STRING, tableName);
     options.setUsername(DATABASE_USER);
     options.setPassword(PASSWORD);
 
     ConnManager manager = null;
-    Connection connection = null;
     Statement st = null;
 
     try {
@@ -221,6 +258,8 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     args.add(CONNECT_STRING);
     args.add("--username");
     args.add(DATABASE_USER);
+    args.add("--password");
+    args.add(PASSWORD);
     args.add("--where");
     args.add("id > 1");
     args.add("-m");
@@ -305,6 +344,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     SqoopOptions options = new SqoopOptions(new Configuration());
     options.setConnectString(CONNECT_STRING);
     options.setUsername(DATABASE_USER);
+    options.setPassword(PASSWORD);
 
     ConnManager mgr = new PostgresqlManager(options);
     String[] tables = mgr.listTables();
@@ -334,6 +374,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     doImportAndVerify(false, expectedResults, TABLE_NAME, extraArgs);
   }
 
+  @Test
   public void testDirectIncrementalImport() throws IOException {
     String [] expectedResults = { };
 
@@ -344,6 +385,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
   }
 
+  @Test
   public void testDirectIncrementalImportMerge() throws IOException {
     String [] expectedResults = { };
 

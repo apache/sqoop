@@ -28,32 +28,31 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-import com.cloudera.sqoop.mapreduce.MergeJob;
-import com.cloudera.sqoop.orm.TableClassName;
-import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.avro.AvroSchemaMismatchException;
 
-import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.RelatedOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.manager.ImportJobContext;
+import com.cloudera.sqoop.mapreduce.MergeJob;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
+import org.apache.sqoop.orm.ClassWriter;
+import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.AppendUtils;
+import com.cloudera.sqoop.util.ClassLoaderStack;
 import com.cloudera.sqoop.util.ImportException;
-import org.apache.sqoop.manager.SupportedManagers;
 
 import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 
@@ -63,6 +62,8 @@ import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(ImportTool.class.getName());
+
+  private static final String IMPORT_FAILED_ERROR_MSG = "Import failed: ";
 
   private CodeGenTool codeGenerator;
 
@@ -82,8 +83,12 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   }
 
   public ImportTool(String toolName, boolean allTables) {
+    this(toolName, new CodeGenTool(), allTables);
+  }
+
+  public ImportTool(String toolName, CodeGenTool codeGenerator, boolean allTables) {
     super(toolName);
-    this.codeGenerator = new CodeGenTool();
+    this.codeGenerator = codeGenerator;
     this.allTables = allTables;
   }
 
@@ -295,7 +300,6 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       return true;
     }
 
-    FileSystem fs = FileSystem.get(options.getConf());
     SqoopOptions.IncrementalMode incrementalMode = options.getIncrementalMode();
     String nextIncrementalValue = null;
 
@@ -320,11 +324,14 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       }
       break;
     case DateLastModified:
-      if (options.getMergeKeyCol() == null && !options.isAppendMode()
-          && fs.exists(getOutputPath(options, context.getTableName(), false))) {
-        throw new ImportException("--" + MERGE_KEY_ARG + " or " + "--" + APPEND_ARG
-          + " is required when using --" + this.INCREMENT_TYPE_ARG
-          + " lastmodified and the output directory exists.");
+      if (options.getMergeKeyCol() == null && !options.isAppendMode()) {
+        Path outputPath = getOutputPath(options, context.getTableName(), false);
+        FileSystem fs = outputPath.getFileSystem(options.getConf());
+        if (fs.exists(outputPath)) {
+          throw new ImportException("--" + MERGE_KEY_ARG + " or " + "--" + APPEND_ARG
+            + " is required when using --" + this.INCREMENT_TYPE_ARG
+            + " lastmodified and the output directory exists.");
+        }
       }
       checkColumnType = manager.getColumnTypes(options.getTableName(),
         options.getSqlQuery()).get(options.getIncrementalTestColumn());
@@ -431,10 +438,14 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
    * Merge HDFS output directories
    */
   protected void lastModifiedMerge(SqoopOptions options, ImportJobContext context) throws IOException {
-    FileSystem fs = FileSystem.get(options.getConf());
-    if (context.getDestination() != null && fs.exists(context.getDestination())) {
+    if (context.getDestination() == null) {
+      return;
+    }
+
+    Path userDestDir = getOutputPath(options, context.getTableName(), false);
+    FileSystem fs = userDestDir.getFileSystem(options.getConf());
+    if (fs.exists(context.getDestination())) {
       LOG.info("Final destination exists, will run merge job.");
-      Path userDestDir = getOutputPath(options, context.getTableName(), false);
       if (fs.exists(userDestDir)) {
         String tableClassName = null;
         if (!context.getConnManager().isORMFacilitySelfManaged()) {
@@ -450,7 +461,12 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         options.setTargetDir(destDir.toString());
 
         // Local job tracker needs jars in the classpath.
-        loadJars(options.getConf(), context.getJarFile(), context.getTableName());
+        if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
+          loadJars(options.getConf(), context.getJarFile(), ClassWriter.toJavaIdentifier("codegen_" +
+            context.getTableName()));
+        } else {
+          loadJars(options.getConf(), context.getJarFile(), context.getTableName());
+        }
 
         MergeJob mergeJob = new MergeJob(options);
         if (mergeJob.runMergeJob()) {
@@ -536,8 +552,8 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
   private void deleteTargetDir(ImportJobContext context) throws IOException {
 
     SqoopOptions options = context.getOptions();
-    FileSystem fs = FileSystem.get(options.getConf());
     Path destDir = context.getDestination();
+    FileSystem fs = destDir.getFileSystem(options.getConf());
 
     if (fs.exists(destDir)) {
       fs.delete(destDir, true);
@@ -617,26 +633,21 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
       // Import a single table (or query) the user specified.
       importTable(options, options.getTableName(), hiveImport);
     } catch (IllegalArgumentException iea) {
-        LOG.error("Imported Failed: " + iea.getMessage());
-        if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-          throw iea;
-        }
-        return 1;
+        LOG.error(IMPORT_FAILED_ERROR_MSG + iea.getMessage());
+      rethrowIfRequired(options, iea);
+      return 1;
     } catch (IOException ioe) {
-      LOG.error("Encountered IOException running import job: "
-          + StringUtils.stringifyException(ioe));
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ioe);
-      } else {
-        return 1;
-      }
+      LOG.error(IMPORT_FAILED_ERROR_MSG + StringUtils.stringifyException(ioe));
+      rethrowIfRequired(options, ioe);
+      return 1;
     } catch (ImportException ie) {
-      LOG.error("Error during import: " + ie.toString());
-      if (System.getProperty(Sqoop.SQOOP_RETHROW_PROPERTY) != null) {
-        throw new RuntimeException(ie);
-      } else {
-        return 1;
-      }
+      LOG.error(IMPORT_FAILED_ERROR_MSG + ie.toString());
+      rethrowIfRequired(options, ie);
+      return 1;
+    } catch (AvroSchemaMismatchException e) {
+      LOG.error(IMPORT_FAILED_ERROR_MSG, e);
+      rethrowIfRequired(options, e);
+      return 1;
     } finally {
       destroy(options);
     }
@@ -1001,6 +1012,11 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
         out.setAutoResetToOneMapper(true);
       }
 
+      if (in.hasOption(ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)) {
+        out.setEscapeMappingColumnNamesEnabled(Boolean.parseBoolean(in.getOptionValue(
+            ESCAPE_MAPPING_COLUMN_NAMES_ENABLED)));
+      }
+
       applyIncrementalOptions(in, out);
       applyHiveOptions(in, out);
       applyOutputFormatOptions(in, out);
@@ -1110,12 +1126,19 @@ public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 	  }
 
 	  void validateDirectMysqlOptions(SqoopOptions options) throws InvalidOptionsException {
-	    if (options.getFileLayout() != SqoopOptions.FileLayout.TextFile
-	        && MYSQL.isTheManagerTypeOf(options)) {
+	    if (!MYSQL.isTheManagerTypeOf(options)) {
+	      return;
+	    }
+	    if (options.getFileLayout() != SqoopOptions.FileLayout.TextFile) {
 	      throw new InvalidOptionsException(
 	          "MySQL direct import currently supports only text output format. "
 	              + "Parameters --as-sequencefile --as-avrodatafile and --as-parquetfile are not "
 	              + "supported with --direct params in MySQL case.");
+	    }
+	    if (options.getNullStringValue() != null || options.getNullNonStringValue() != null) {
+	      throw new InvalidOptionsException(
+	              "The --direct option is not compatible with the --null-string or " +
+	                      "--null-non-string command for MySQL imports");
 	    }
 	  }
   /**

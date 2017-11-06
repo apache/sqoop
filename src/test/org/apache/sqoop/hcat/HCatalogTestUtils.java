@@ -177,29 +177,33 @@ public final class HCatalogTestUtils {
    * memory list.
    */
   public void createHCatTableUsingSchema(String dbName,
-    String tableName, List<HCatFieldSchema> tableCols,
-    List<HCatFieldSchema> partKeys)
-    throws Exception {
+                                         String tableName, List<HCatFieldSchema> tableCols,
+                                         List<HCatFieldSchema> partKeys)
+      throws Exception {
 
     String databaseName = dbName == null
-      ? SqoopHCatUtilities.DEFHCATDB : dbName;
+        ? SqoopHCatUtilities.DEFHCATDB : dbName;
+    dropHCatTableIfExists(tableName, databaseName);
+    LOG.info("Successfully dropped HCatalog table if it existed previously " + databaseName
+        + '.' + tableName);
+    String createCmd = getHCatCreateTableCmd(databaseName, tableName,
+        tableCols, partKeys);
+    utils.launchHCatCli(createCmd);
+    LOG.info("Created HCatalog table " + dbName + "." + tableName);
+  }
+
+  public void dropHCatTableIfExists(String tableName, String databaseName) {
     LOG.info("Dropping HCatalog table if it exists " + databaseName
-      + '.' + tableName);
+        + '.' + tableName);
     String dropCmd = getHCatDropTableCmd(databaseName, tableName);
 
     try {
       utils.launchHCatCli(dropCmd);
     } catch (Exception e) {
       LOG.debug("Drop hcatalog table exception : " + e);
-      LOG.info("Unable to drop table." + dbName + "."
-        + tableName + ".   Assuming it did not exist");
+      LOG.info("Unable to drop table." + databaseName + "."
+          + tableName + ".   Assuming it did not exist");
     }
-    LOG.info("Creating HCatalog table if it exists " + databaseName
-      + '.' + tableName);
-    String createCmd = getHCatCreateTableCmd(databaseName, tableName,
-      tableCols, partKeys);
-    utils.launchHCatCli(createCmd);
-    LOG.info("Created HCatalog table " + dbName + "." + tableName);
   }
 
   /**
@@ -560,6 +564,7 @@ public final class HCatalogTestUtils {
     }
   }
 
+
   /**
    * Verify that on a given row, a column has a given value.
    *
@@ -567,12 +572,12 @@ public final class HCatalogTestUtils {
    *          the id column specifying the row to test.
    */
   public void assertSqlColValForRowId(Connection conn,
-    String table, int id, String colName,
+    String table, int id, String colName, boolean escapeId,
     Object expectedVal) throws SQLException {
     LOG.info("Verifying column " + colName + " has value " + expectedVal);
-
+    String escapeStr = escapeId? "\"" : "";
     PreparedStatement statement = conn.prepareStatement(
-      "SELECT " + colName + " FROM " + table + " WHERE id = " + id,
+      "SELECT \"" + colName +"\" FROM " + table + " WHERE "+escapeStr+"id"+escapeStr+" = " + id,
       ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     Object actualVal = null;
     try {
@@ -589,6 +594,7 @@ public final class HCatalogTestUtils {
 
     assertEquals(expectedVal, actualVal);
   }
+
 
   /**
    * Verify that on a given row, a column has a given value.
@@ -652,12 +658,13 @@ public final class HCatalogTestUtils {
     return "DROP TABLE " + tableName;
   }
 
-  public static String getSqlCreateTableStatement(String tableName,
+  public static String getSqlCreateTableStatement(String tableName, boolean escapeIdMsgCol,
     ColumnGenerator... extraCols) {
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
     sb.append(tableName);
-    sb.append(" (ID INT NOT NULL PRIMARY KEY, MSG VARCHAR(64)");
+    String escapeStr = escapeIdMsgCol? "\"" : "";
+    sb.append(" ("+escapeStr+"id"+escapeStr+" INT NOT NULL PRIMARY KEY, "+escapeStr+"msg"+escapeStr+" VARCHAR(64)");
     int colNum = 0;
     for (ColumnGenerator gen : extraCols) {
       sb.append(", \"" + gen.getName() + "\" " + gen.getDBTypeString());
@@ -686,9 +693,13 @@ public final class HCatalogTestUtils {
     LOG.debug("Generated SQL insert table command : " + s);
     return s;
   }
-
   public void createSqlTable(Connection conn, boolean generateOnly,
-    int count, String table, ColumnGenerator... extraCols)
+                             int count, String table,  ColumnGenerator... extraCols)
+      throws Exception {
+    createSqlTable(conn, generateOnly, count, table, false, extraCols);
+  }
+  public void createSqlTable(Connection conn, boolean generateOnly,
+    int count, String table, boolean escapeIdMsgCols, ColumnGenerator... extraCols)
     throws Exception {
     PreparedStatement statement = conn.prepareStatement(
       getSqlDropTableStatement(table),
@@ -702,7 +713,7 @@ public final class HCatalogTestUtils {
       statement.close();
     }
     statement = conn.prepareStatement(
-      getSqlCreateTableStatement(table, extraCols),
+      getSqlCreateTableStatement(table, escapeIdMsgCols ,extraCols),
       ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     try {
       statement.executeUpdate();

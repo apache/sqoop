@@ -22,6 +22,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import static org.junit.Assert.fail;
+
 /**
  * Test imports of tables into HBase.
  */
@@ -67,6 +69,60 @@ public class HBaseImportTest extends HBaseTestCase {
     // Run a second time.
     runImport(argv);
     verifyHBaseCell("OverwriteT", "0", "OverwriteF", getColName(1), "1");
+  }
+
+  @Test
+  public void testOverwriteNullColumnsSucceeds() throws IOException {
+    // Test that we can create a table and then import immediately
+    // back on top of it without problem and then update with null to validate
+    String [] argv = getArgv(true, "OverwriteTable", "OverwriteColumnFamily", true, null);
+    String [] types = { "INT", "INT", "INT", "DATETIME" };
+    String [] vals = { "0", "1", "1", "'2017-03-20'" };
+    createTableWithColTypes(types, vals);
+    runImport(argv);
+    verifyHBaseCell("OverwriteTable", "0", "OverwriteColumnFamily", getColName(2), "1");
+    // Run a second time.
+    argv = getIncrementalArgv(true, "OverwriteTable", "OverwriteColumnFamily", true, null, false, false, "DATA_COL3", "2017-03-24 01:01:01.0", null);
+    vals = new String[] { "0", "1", null, "'2017-03-25'" };
+    updateTable(types, vals);
+    runImport(argv);
+    verifyHBaseCell("OverwriteTable", "0", "OverwriteColumnFamily", getColName(2), null);
+  }
+
+  @Test
+  public void testAppendWithTimestampSucceeds() throws IOException {
+    // Test that we can create a table and then import multiple rows
+    // validate for append scenario with time stamp
+    String [] argv = getArgv(true, "AppendTable", "AppendColumnFamily", true, null);
+    String [] types = { "INT", "INT", "INT", "DATETIME" };
+    String [] vals = { "0", "1", "1", "'2017-03-20'" };
+    createTableWithColTypes(types, vals);
+    runImport(argv);
+    verifyHBaseCell("AppendTable", "0", "AppendColumnFamily", getColName(2), "1");
+    // Run a second time.
+    argv = getIncrementalArgv(true, "AppendTable", "AppendColumnFamily", true, null, true, false, "DATA_COL1", "2017-03-24 01:01:01.0", null);
+    vals = new String[] { "1", "2", "3", "'2017-06-15'" };
+    insertIntoTable(types, vals);
+    runImport(argv);
+    verifyHBaseCell("AppendTable", "1", "AppendColumnFamily", getColName(2), "3");
+  }
+
+  @Test
+  public void testAppendSucceeds() throws IOException {
+	// Test that we can create a table and then import multiple rows
+	// validate for append scenario with ID column(DATA_COL3)
+    String [] argv = getArgv(true, "AppendTable", "AppendColumnFamily", true, null);
+    String [] types = { "INT", "INT", "INT", "DATETIME" };
+    String [] vals = { "0", "1", "1", "'2017-03-20'" };
+    createTableWithColTypes(types, vals);
+    runImport(argv);
+    verifyHBaseCell("AppendTable", "0", "AppendColumnFamily", getColName(2), "1");
+    // Run a second time.
+    argv = getIncrementalArgv(true, "AppendTable", "AppendColumnFamily", true, null, true, true, "DATA_COL1", null, "DATA_COL3");
+    vals = new String[] { "1", "2", "3", "'2017-06-15'" };
+    insertIntoTable(types, vals);
+    runImport(argv);
+    verifyHBaseCell("AppendTable", "1", "AppendColumnFamily", getColName(2), "3");
   }
 
   @Test

@@ -44,7 +44,6 @@ public class TestValidateImportOptions {
         when(options.getConnectString()).thenReturn(mysqlConnectionString);
         importTool.validateDirectMysqlOptions(options);
         verify(options, times(1)).getFileLayout();
-        verifyNoMoreInteractions(options);
     }
 
 
@@ -105,6 +104,22 @@ public class TestValidateImportOptions {
     public void givenNoDirectOptionWhenNoDirectConnectorAvailableValidationPasses() throws SqoopOptions.InvalidOptionsException {
         SqoopOptions options = stubNotDirectOptions(SupportedManagers.HSQLDB);
         importTool.validateDirectImportOptions(options);
+    }
+
+    @Test(expected = SqoopOptions.InvalidOptionsException.class)
+    public void givenDirectImportNullNonStringThrows() throws SqoopOptions.InvalidOptionsException {
+        SqoopOptions options = stubDirectOptions(SupportedManagers.MYSQL);
+        when(options.getNullNonStringValue()).thenReturn("abc");
+
+        importTool.validateDirectMysqlOptions(options);
+    }
+
+    @Test(expected = SqoopOptions.InvalidOptionsException.class)
+    public void givenDirectImportNullStringThrows() throws SqoopOptions.InvalidOptionsException {
+        SqoopOptions options = stubDirectOptions(SupportedManagers.MYSQL);
+        when(options.getNullStringValue()).thenReturn("abc");
+
+        importTool.validateDirectMysqlOptions(options);
     }
 
     private SqoopOptions stubDirectOptions(SupportedManagers supportedManagers) {

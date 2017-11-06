@@ -31,9 +31,6 @@ public class Sqoop
   public static final Log SQOOP_LOG =
       org.apache.sqoop.Sqoop.SQOOP_LOG;
 
-  public static final String SQOOP_RETHROW_PROPERTY =
-      org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
-
   public static final String SQOOP_OPTIONS_FILE_SPECIFIER =
       org.apache.sqoop.Sqoop.SQOOP_OPTIONS_FILE_SPECIFIER;
 

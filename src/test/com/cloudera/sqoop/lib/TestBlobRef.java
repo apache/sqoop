@@ -22,30 +22,38 @@ import java.io.*;
 
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
-import junit.framework.TestCase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import com.cloudera.sqoop.io.LobFile;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test that the BlobRef.parse() method does the right thing.
  * Note that we don't support inline parsing here; we only expect this to
  * really work for external BLOBs.
  */
-public class TestBlobRef extends TestCase {
+public class TestBlobRef {
 
+  @Test
   public void testEmptyStr() {
     BlobRef r = BlobRef.parse("");
     assertFalse(r.isExternal());
   }
 
+  @Test
   public void testInline() throws IOException {
     BlobRef r = BlobRef.parse("foo");
     assertFalse(r.isExternal());
   }
 
+  @Test
   public void testEmptyFile() {
     BlobRef r = BlobRef.parse("externalLob()");
     assertFalse(r.isExternal());
@@ -55,6 +63,7 @@ public class TestBlobRef extends TestCase {
     assertEquals("externalLob(lf,,0,0)", r.toString());
   }
 
+  @Test
   public void testInlineNearMatch() {
     BlobRef r = BlobRef.parse("externalLob(foo)bar");
     assertFalse(r.isExternal());
@@ -69,6 +78,7 @@ public class TestBlobRef extends TestCase {
     assertFalse(r.isExternal());
   }
 
+  @Test
   public void testExternal() throws IOException {
     final byte [] DATA = { 1, 2, 3, 4, 5 };
     final String FILENAME = "blobdata";
@@ -76,6 +86,7 @@ public class TestBlobRef extends TestCase {
     doExternalTest(DATA, FILENAME);
   }
 
+  @Test
   public void testExternalSubdir() throws IOException {
     final byte [] DATA = { 1, 2, 3, 4, 5 };
     final String FILENAME = "_lob/blobdata";

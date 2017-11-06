@@ -20,6 +20,7 @@ package org.apache.sqoop.mapreduce.db;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +34,7 @@ import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
-import  org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * A RecordReader that reads records from a SQL table.
@@ -41,7 +42,7 @@ import  org.apache.sqoop.lib.SqoopRecord;
  * connection failure handler
  */
 public class SQLServerDBRecordReader<T extends SqoopRecord> extends
-      SqlServerRecordReader<T> {
+    SqlServerRecordReader<T> {
 
   private static final Log LOG =
       LogFactory.getLog(SQLServerDBRecordReader.class);
@@ -55,7 +56,7 @@ public class SQLServerDBRecordReader<T extends SqoopRecord> extends
   // Name of the split column used to re-generate selectQueries after
   // connection failures
   private String splitColumn;
-  private String lastRecordKey;
+  private String lastRecordValue;
 
   public SQLServerDBRecordReader(DBInputFormat.DBInputSplit split,
       Class<T> inputClass, Configuration conf, Connection conn,
@@ -67,13 +68,46 @@ public class SQLServerDBRecordReader<T extends SqoopRecord> extends
   @Override
   /** {@inheritDoc} */
   public T getCurrentValue() {
-    T val = super.getCurrentValue();
-    // Lookup the key of the last read record to use for recovering
-    // As documented, the map may not be null, though it may be empty.
-    Object lastRecordSplitCol = val.getFieldMap().get(splitColumn);
-    lastRecordKey = (lastRecordSplitCol == null) ? null
-        : lastRecordSplitCol.toString();
+    T val = currentValue();
+
+    saveCurrentValue(val);
+
     return val;
+  }
+
+  T currentValue() {
+    return super.getCurrentValue();
+  }
+
+  void saveCurrentValue(T value) {
+    lastRecordValue = getCurrentValueOfSplitByColumnFromORM(value, splitColumn);
+  }
+
+  private String getCurrentValueOfSplitByColumnFromORM(T generatedORMRecord, String columnName) {
+    Object result = generatedORMRecord.getFieldMap().get(columnName);
+    if (result != null) {
+      return result.toString();
+    }
+    return getCurrentValueOfSplitByColumnFromORMIfSplitByDoesNotMatch(generatedORMRecord, columnName);
+  }
+
+  /*
+   * SQOOP-3139: It is a workaround if the database/table/column is used in case insensitive mode and the user
+   * uses Sqoop import with --split-by but the given parameter doesn't match with table name if it is case sensitive
+   * eg.: tableName.equals(split-by) doesn't match only if tableName.equalsIgnorecase(split-by)
+   *
+   */
+  private String getCurrentValueOfSplitByColumnFromORMIfSplitByDoesNotMatch(T generatedORMRecord, String columnName) {
+    for (Map.Entry<String, Object> fields : generatedORMRecord.getFieldMap().entrySet()) {
+      if (columnName.equalsIgnoreCase(fields.getKey())) {
+        return fields.getValue() != null ? fields.getValue().toString() : null;
+      }
+    }
+    return null;
+  }
+
+  String getLastRecordValue() {
+    return lastRecordValue;
   }
 
   /**
@@ -202,7 +236,7 @@ public class SQLServerDBRecordReader<T extends SqoopRecord> extends
     // Last seen record key is only expected to be unavailable if no reads
     // ever happened
     String selectQuery;
-    if (lastRecordKey == null) {
+    if (lastRecordValue == null) {
       selectQuery = super.getSelectQuery();
     } else {
       // If last record key is available, construct the select query to start
@@ -212,7 +246,7 @@ public class SQLServerDBRecordReader<T extends SqoopRecord> extends
       StringBuilder lowerClause = new StringBuilder();
       lowerClause.append(getDBConf().getInputOrderBy());
       lowerClause.append(" > ");
-      lowerClause.append(lastRecordKey.toString());
+      lowerClause.append(lastRecordValue.toString());
 
       // Get the select query with the lowerClause, and split upper clause
       selectQuery = getSelectQuery(lowerClause.toString(),
@@ -221,4 +255,5 @@ public class SQLServerDBRecordReader<T extends SqoopRecord> extends
 
     return selectQuery;
   }
+
 }
