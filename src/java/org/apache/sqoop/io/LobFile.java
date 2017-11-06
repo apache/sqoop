@@ -1665,10 +1665,7 @@ public final class LobFile {
         this.out = null;
       }
 
-      if (this.countingOut != null) {
-        this.countingOut.close();
-        this.countingOut = null;
-      }
+      this.countingOut = null;
     }
 
     @Override
