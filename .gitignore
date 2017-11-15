@@ -27,6 +27,9 @@
 nb-configuration.xml
 patch-process
 target
+*.DS_Store
+out
+*metastore_db
 
 # Sqoop1 specific
 .ant-targets-build.xml
