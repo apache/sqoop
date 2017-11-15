@@ -1092,6 +1092,8 @@ public class SqoopOptions implements Cloneable {
             System.getProperty(GenericJobStorage.AUTO_STORAGE_USER_KEY, GenericJobStorage.DEFAULT_AUTO_USER);
     this.metaPassword =
             System.getProperty(GenericJobStorage.AUTO_STORAGE_PASS_KEY, GenericJobStorage.DEFAULT_AUTO_PASSWORD);
+    // set default transfer mode to ascii
+    this.mainframeFtpTransferMode = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII;
   }
 
   private String getLocalAutoConnectString() {
@@ -2419,8 +2421,6 @@ public class SqoopOptions implements Cloneable {
 
   // gets the FTP transfer mode
   public String getMainframeFtpTransferMode() {
-    // set default transfer mode to ascii
-    if (mainframeFtpTransferMode == null || mainframeFtpTransferMode.trim().equals("")) { return MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII; }
     return mainframeFtpTransferMode;
   }
 
