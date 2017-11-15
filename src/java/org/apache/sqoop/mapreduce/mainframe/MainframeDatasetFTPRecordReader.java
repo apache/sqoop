@@ -19,9 +19,10 @@
 package org.apache.sqoop.mapreduce.mainframe;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.*;
+
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
