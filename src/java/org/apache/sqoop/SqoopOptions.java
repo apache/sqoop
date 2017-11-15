@@ -1155,6 +1155,8 @@ public class SqoopOptions implements Cloneable {
 
     // set escape column mapping to true
     this.escapeColumnMappingEnabled = true;
+    // set default transfer mode to ascii
+    this.mainframeFtpTransferMode = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII;
   }
 
   /**
@@ -2484,8 +2486,6 @@ public class SqoopOptions implements Cloneable {
 
   // gets the FTP transfer mode
   public String getMainframeFtpTransferMode() {
-    // set default transfer mode to ascii
-    if (mainframeFtpTransferMode == null || mainframeFtpTransferMode.trim().equals("")) { return MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII; }
     return mainframeFtpTransferMode;
   }
 
