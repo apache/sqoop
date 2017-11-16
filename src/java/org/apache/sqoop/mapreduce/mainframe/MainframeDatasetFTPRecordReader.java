@@ -109,10 +109,7 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
   protected boolean getNextRecord(T sqoopRecord) throws IOException {
     String line = null;
     Configuration conf = getConfiguration();
-    String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
-    LOG.info("Detected transfer mode: "+transferMode);
     if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE))) {
-      LOG.info("Binary transfer branch");
       return getNextBinaryRecord(sqoopRecord);
     }
     try {
