@@ -99,7 +99,6 @@ public class DataDrivenImportJob extends ImportJobBase {
     if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
       job.setOutputKeyClass(BytesWritable.class);
       job.setOutputValueClass(NullWritable.class);
-
       // this is required as code generated class assumes setField method takes String
       // and will fail with ClassCastException when a byte array is passed instead
       // java.lang.ClassCastException: [B cannot be cast to java.lang.String
