@@ -18,11 +18,10 @@
 
 package org.apache.sqoop.mapreduce.mainframe;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
-
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
@@ -41,7 +40,7 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     extends MainframeDatasetRecordReader<T> {
   private FTPClient ftp = null;
   private BufferedReader datasetReader = null;
-  private InputStream inputStream = null;
+  private BufferedInputStream inputStream = null;
 
   private static final Log LOG = LogFactory.getLog(
       MainframeDatasetFTPRecordReader.class.getName());
@@ -133,8 +132,7 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
         if (dsName == null) {
           return false;
         }
-        inputStream =
-          ftp.retrieveFileStream(dsName);
+        inputStream = new BufferedInputStream(ftp.retrieveFileStream(dsName));
         if (inputStream == null) {
           throw new IOException("Failed to retrieve FTP file stream.");
         }
