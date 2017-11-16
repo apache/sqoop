@@ -89,6 +89,9 @@ public class DataDrivenImportJob extends ImportJobBase {
     if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(options.getMainframeFtpTransferMode())) {
       job.setOutputKeyClass(BytesWritable.class);
       job.setOutputValueClass(NullWritable.class);
+      // this is required as code generated class assumes setField method takes String
+      // and will fail with ClassCastException when a byte array is passed instead
+      // java.lang.ClassCastException: [B cannot be cast to java.lang.String
       Configuration conf = job.getConfiguration();
       conf.setClass(DBConfiguration.INPUT_CLASS_PROPERTY, MainframeDatasetBinaryRecord.class,
         DBWritable.class);
