@@ -20,6 +20,7 @@ package org.apache.sqoop.tool;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.ToolRunner;
@@ -201,12 +202,10 @@ public class MainframeImportTool extends ImportTool {
 	}
     // check if transfer mode is either "ascii" or "binary"
     String ftpTransferMode = options.getMainframeFtpTransferMode();
-    if (ftpTransferMode != null) {
-      if (!ftpTransferMode.toLowerCase().equals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII)
-        && !ftpTransferMode.toLowerCase().equals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY)) {
-        throw new InvalidOptionsException(
-          "--" + FTP_TRANSFER_MODE_ARG + " specified is invalid. " + HELP_STR);
-      }
+    if (!StringUtils.equalsIgnoreCase(ftpTransferMode,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII)
+      && !StringUtils.equalsIgnoreCase(ftpTransferMode,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY)) {
+      throw new InvalidOptionsException(
+        "--" + FTP_TRANSFER_MODE_ARG + " specified is invalid. " + HELP_STR);
     }
     super.validateImportOptions(options);
   }
