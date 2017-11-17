@@ -291,7 +291,7 @@ public class TestMainframeDatasetFTPRecordReader {
   }
 
   // Mock the inputstream.read method and manipulate the function parameters
-  protected Answer returnSqoopRecord(int byteLength) {
+  protected Answer returnSqoopRecord(final int byteLength) {
     return new Answer() {
       public Object answer(InvocationOnMock invocation) {
         Object[] args = invocation.getArguments();
