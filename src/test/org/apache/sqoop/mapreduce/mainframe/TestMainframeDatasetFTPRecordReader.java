@@ -18,7 +18,11 @@
 
 package org.apache.sqoop.mapreduce.mainframe;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.BufferedInputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.sql.PreparedStatement;
