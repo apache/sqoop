@@ -23,6 +23,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -209,7 +210,7 @@ public final class MainframeFTPClientUtils {
       }
       // set ASCII transfer mode
       String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
-      if (transferMode != null && MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(transferMode.toLowerCase())) {
+      if (StringUtils.equalsIgnoreCase(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY,(transferMode))) {
         LOG.info("Setting FTP transfer mode to binary");
         // ftp.setFileTransferMode(FTP.BINARY_FILE_TYPE) doesn't work for MVS, it throws a syntax error
         ftp.sendCommand("TYPE I");
