@@ -20,6 +20,7 @@ package org.apache.sqoop.mapreduce.mainframe;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.Job;
@@ -47,7 +48,7 @@ public class MainframeImportJob extends DataDrivenImportJob {
 
   @Override
   protected Class<? extends Mapper> getMapperClass() {
-    if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(options.getMainframeFtpTransferMode())) {
+    if (StringUtils.equalsIgnoreCase(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY,options.getMainframeFtpTransferMode())) {
       LOG.debug("Using MainframeDatasetBinaryImportMapper");
       return MainframeDatasetBinaryImportMapper.class;
     } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
