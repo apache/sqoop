@@ -29,12 +29,14 @@ import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -196,7 +198,7 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
     mfImportTool.validateImportOptions(sqoopOption);
     String transferMode = sqoopOption.getMainframeFtpTransferMode();
-    assert(transferMode != null && transferMode.toString().equals(transferModeValue));
+    assertEquals(transferMode,transferModeValue);
   }
   @Test
   public void testFtpTransferModeBinary() throws ParseException, InvalidOptionsException {
@@ -208,7 +210,7 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
     mfImportTool.validateImportOptions(sqoopOption);
     String transferMode = sqoopOption.getMainframeFtpTransferMode();
-    assert(transferMode != null && transferMode.toString().equals(transferModeValue));
+    assertEquals(transferMode,transferModeValue);
   }
   @Test
   public void testFtpTransferModeDefaultsToAscii() throws ParseException, InvalidOptionsException {
@@ -219,23 +221,13 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     mfImportTool.configureOptions(toolOptions);
     sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
     mfImportTool.validateImportOptions(sqoopOption);
-    sqoopOption.setMainframeFtpTransferMode(null);
     String transferMode = sqoopOption.getMainframeFtpTransferMode();
-    assert(transferMode != null && transferMode.toString().equals(expectedTransferModeValue));
+    assertEquals(transferMode,expectedTransferModeValue);
   }
-  @Test
-  public void testFtpTransferModeDefaultsToAsciiIfEmptyString() throws ParseException, InvalidOptionsException {
-    String expectedTransferModeValue = "ascii";
-    String[] args = new String[] { "--dataset", "mydatasetname" };
-    ToolOptions toolOptions = new ToolOptions();
-    SqoopOptions sqoopOption = new SqoopOptions();
-    mfImportTool.configureOptions(toolOptions);
-    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
-    mfImportTool.validateImportOptions(sqoopOption);
-    sqoopOption.setMainframeFtpTransferMode(" ");
-    String transferMode = sqoopOption.getMainframeFtpTransferMode();
-    assert(transferMode != null && transferMode.toString().equals(expectedTransferModeValue));
-  }
+
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
   @Test
   public void testFtpTransferModeInvalid() throws ParseException, InvalidOptionsException {
     String transferModeValue = "myinvalidvalue";
@@ -243,12 +235,11 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     ToolOptions toolOptions = new ToolOptions();
     SqoopOptions sqoopOption = new SqoopOptions();
     mfImportTool.configureOptions(toolOptions);
-    try {
-      sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
-      mfImportTool.validateImportOptions(sqoopOption);
-      fail("shouldn't get here");
-    } catch (InvalidOptionsException e) {
-      assert(e.getMessage().contains("--transfermode") && e.getMessage().contains("invalid"));
-    }
+    exception.expect(InvalidOptionsException.class);
+    exception.expectMessage("--transfermode");
+    exception.expectMessage("invalid");
+    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+    mfImportTool.validateImportOptions(sqoopOption);
+    fail("shouldn't get here");
   }
 }
