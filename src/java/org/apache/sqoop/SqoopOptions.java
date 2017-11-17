@@ -1145,7 +1145,7 @@ public class SqoopOptions implements Cloneable {
 
     // set escape column mapping to true
     this.escapeColumnMappingEnabled = true;
-    
+
     // set default transfer mode to ascii
     this.mainframeFtpTransferMode = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII;
   }
