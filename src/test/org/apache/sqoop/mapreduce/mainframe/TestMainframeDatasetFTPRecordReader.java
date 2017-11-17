@@ -45,6 +45,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.util.MainframeFTPClientUtils;
@@ -52,9 +54,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.apache.sqoop.lib.DelimiterSet;
-import org.apache.sqoop.lib.LargeObjectLoader;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -291,6 +290,112 @@ public class TestMainframeDatasetFTPRecordReader {
           ioe.toString());
     } catch (InterruptedException ie) {
       fail("Got InterruptedException: " + ie.toString());
+    }
+  }
+
+  // Mock the inputstream.read method and manipulate the function parameters
+  protected Answer returnSqoopRecord(int byteLength) {
+    return new Answer() {
+      public Object answer(InvocationOnMock invocation) {
+        Object[] args = invocation.getArguments();
+        byte[] bytes = args[0] instanceof byte[] ? ((byte[]) args[0]) : null;
+        int len = args[2] instanceof Integer ? ((int) args[2]) : null;
+        bytes = new byte[byteLength];
+        return byteLength;
+      }
+    };
+  }
+
+  @Test
+  public void testgetNextBinaryRecordForFullRecord() {
+    BufferedInputStream is = mock(BufferedInputStream.class);
+    FTPClient ftp = mock(FTPClient.class);
+    MainframeDatasetBinaryRecord record = new MainframeDatasetBinaryRecord();
+    try {
+      when(is.read(any(byte[].class),anyInt(),anyInt()))
+        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER))
+        .thenReturn(-1);
+      when(ftp.completePendingCommand()).thenReturn(true);
+      mfDFTPRR.setInputStream(is);
+      mfDFTPRR.setFtpClient(ftp);
+      Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
+      Assert.assertFalse(record.getFieldMap().values().isEmpty());
+      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER.equals(((byte[])record.getFieldMap().values().iterator().next()).length));
+    } catch (IOException ioe) {
+      fail ("Got IOException: "+ ioe.toString());
+    }
+  }
+
+  @Test
+  public void testgetNextBinaryRecordForPartialRecord() {
+    BufferedInputStream is = mock(BufferedInputStream.class);
+    FTPClient ftp = mock(FTPClient.class);
+    int expectedBytesRead = 10;
+    MainframeDatasetBinaryRecord record = new MainframeDatasetBinaryRecord();
+    try {
+      when(is.read(any(byte[].class),anyInt(),anyInt()))
+        .thenAnswer(returnSqoopRecord(10))
+        .thenReturn(-1);
+      when(ftp.completePendingCommand()).thenReturn(true);
+      mfDFTPRR.setInputStream(is);
+      mfDFTPRR.setFtpClient(ftp);
+      Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
+      Assert.assertFalse(record.getFieldMap().values().isEmpty());
+      Assert.assertEquals(expectedBytesRead,(((byte[])record.getFieldMap().values().iterator().next()).length));
+    } catch (IOException ioe) {
+      fail ("Got IOException: "+ ioe.toString());
+    }
+  }
+
+  @Test
+  public void testgetNextBinaryRecordFor2Records() {
+    // test 1 full record, and 1 partial
+    BufferedInputStream is = mock(BufferedInputStream.class);
+    FTPClient ftp = mock(FTPClient.class);
+    int expectedBytesRead = 10;
+    MainframeDatasetBinaryRecord record = new MainframeDatasetBinaryRecord();
+    try {
+      when(is.read(any(byte[].class),anyInt(),anyInt()))
+        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER))
+        .thenAnswer(returnSqoopRecord(10))
+        .thenReturn(-1);
+      when(ftp.completePendingCommand()).thenReturn(true);
+      mfDFTPRR.setInputStream(is);
+      mfDFTPRR.setFtpClient(ftp);
+      Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
+      Assert.assertFalse(record.getFieldMap().values().isEmpty());
+      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER.equals((((byte[])record.getFieldMap().values().iterator().next()).length)));
+      record = new MainframeDatasetBinaryRecord();
+      Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
+      Assert.assertFalse(record.getFieldMap().values().isEmpty());
+      Assert.assertEquals(expectedBytesRead,(((byte[])record.getFieldMap().values().iterator().next()).length));
+    } catch (IOException ioe) {
+      fail ("Got IOException: "+ ioe.toString());
+    }
+  }
+
+  @Test
+  public void testgetNextBinaryRecordForMultipleReads() {
+    // test reading 1 record where the stream returns less than a full buffer
+    BufferedInputStream is = mock(BufferedInputStream.class);
+    FTPClient ftp = mock(FTPClient.class);
+    MainframeDatasetBinaryRecord record = new MainframeDatasetBinaryRecord();
+    try {
+      when(is.read(any(byte[].class),anyInt(),anyInt()))
+        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER/2))
+        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER/2))
+        .thenReturn(-1);
+      when(ftp.completePendingCommand()).thenReturn(true);
+      mfDFTPRR.setInputStream(is);
+      mfDFTPRR.setFtpClient(ftp);
+      Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
+      Assert.assertFalse(record.getFieldMap().values().isEmpty());
+      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER.equals((((byte[])record.getFieldMap().values().iterator().next()).length)));
+      record = new MainframeDatasetBinaryRecord();
+      Assert.assertFalse(mfDFTPRR.getNextBinaryRecord(record));
+      Assert.assertNull((((byte[])record.getFieldMap().values().iterator().next())));
+    } catch (IOException ioe) {
+      fail ("Got IOException: "+ ioe.toString());
     }
   }
 }
