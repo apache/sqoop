@@ -205,8 +205,8 @@ public class MainframeImportTool extends ImportTool {
     // check if transfer mode is either "ascii" or "binary"
     String ftpTransferMode = options.getMainframeFtpTransferMode();
     if (ftpTransferMode != null) {
-      if (!ftpTransferMode.toLowerCase().equals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII)
-        && !ftpTransferMode.toLowerCase().equals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY)) {
+      if (!StringUtils.equalsIgnoreCase(ftpTransferMode,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII)
+        && !StringUtils.equalsIgnoreCase(ftpTransferMode,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY)) {
         throw new InvalidOptionsException(
           "--" + BINARY_FTP_ARG + " specified is invalid. " + HELP_STR);
       }
