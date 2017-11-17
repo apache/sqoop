@@ -119,7 +119,7 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     return false;
   }
 
-  private boolean getNextBinaryRecord(T sqoopRecord) throws IOException {
+  protected boolean getNextBinaryRecord(T sqoopRecord) throws IOException {
     // typical estimated max size for mainframe record
     int BUFFER_SIZE = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER;
     byte [] buf = new byte[BUFFER_SIZE];
@@ -183,4 +183,10 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
       = sqoopRecord.getFieldMap().entrySet().iterator().next().getKey();
     sqoopRecord.setField(fieldName, buf);
   }
+  // used for testing only
+  public void setFtpClient(FTPClient client) { this.ftp = client; }
+
+  // used for testing only
+  public void setInputStream(BufferedInputStream is) { this.inputStream = is; }
+
 }
