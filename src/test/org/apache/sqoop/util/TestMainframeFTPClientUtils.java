@@ -19,6 +19,7 @@
 package org.apache.sqoop.util;
 
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -384,6 +385,7 @@ public class TestMainframeFTPClientUtils {
     conf.set(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
     MainframeFTPClientUtils.setMockFTPClient(mockFTPClient);
     FTPClient ftp = MainframeFTPClientUtils.getFTPConnection(conf);
-    assert(ftp.sendCommand("TYPE I") == expectedResponseCode && ftp.getReplyString().equals(expectedResponse));
+    assertEquals(ftp.sendCommand("TYPE I"), expectedResponseCode);
+    assertEquals(ftp.getReplyString(),expectedResponse);
   }
 }
