@@ -1150,6 +1150,14 @@ limitations under the License.
       </roles>
     </developer>
     <developer>
+      <id>vasas</id>
+      <name>Szabolcs Vasas</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
       <id>venkatnrangan</id>
       <name>Venkat Ranganathan</name>
       <organization>Hortonworks</organization>
