@@ -12,7 +12,7 @@ import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.util.*;
+import org.apache.hadoop.util.ReflectionUtils;
 
 /**
  * An {@link OutputFormat} that writes plain text files.
