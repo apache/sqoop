@@ -31,6 +31,7 @@ import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.manager.OracleManager;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -74,6 +75,7 @@ public class OraOopConnManager extends GenericJdbcManager {
   private List<String> columnNamesInOracleTable = null;
   private Map<String, Integer> columnTypesInOracleTable = null;
   private final String timestampJavaType;
+  private final String timestampHiveType;
 
   public OraOopConnManager(final SqoopOptions sqoopOptions) {
     super(OraOopConstants.ORACLE_JDBC_DRIVER_CLASS, sqoopOptions);
@@ -81,8 +83,10 @@ public class OraOopConnManager extends GenericJdbcManager {
         OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING,
         OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING_DEFAULT)) {
       timestampJavaType = "String";
+      timestampHiveType = "STRING";
     } else {
       timestampJavaType = super.toJavaType(Types.TIMESTAMP);
+      timestampHiveType = "TIMESTAMP";
     }
   }
 
@@ -357,7 +361,41 @@ public class OraOopConnManager extends GenericJdbcManager {
   public String toHiveType(int sqlType) {
 
     String hiveType = super.toHiveType(sqlType);
+    
+    if (sqlType == OraOopOracleQueries.getOracleType("TIMESTAMP")) {
+        // Get the Oracle JDBC driver to convert this value to a string
+        // instead of the generic JDBC driver.
+        // If the generic JDBC driver is used, it will take into account the
+        // timezone of the client machine's locale. The problem with this is that
+        // timestamp data should not be associated with a timezone. In practice,
+        // this
+        // leads to problems, for example, the time '2010-10-03 02:01:00' being
+        // changed to '2010-10-03 03:01:00' if the client machine's locale is
+        // Melbourne.
+        // (This is in response to daylight saving starting in Melbourne on
+        // this date at 2am.)
+    	hiveType = timestampHiveType;
+      }
 
+      if (sqlType == OraOopOracleQueries.getOracleType("TIMESTAMPTZ")) {
+        // Returning "String" produces: "2010-08-08 09:00:00.0 +10:00"
+        // Returning "java.sql.Timestamp" produces: "2010-08-08 09:00:00.0"
+
+        // If we use "java.sql.Timestamp", the field's value will not
+        // contain the timezone when converted to a string and written to the HDFS
+        // CSV file.
+        // I.e. Get the Oracle JDBC driver to convert this value to a string
+        // instead of the generic JDBC driver...
+    	hiveType = timestampHiveType;
+      }
+
+      if (sqlType == OraOopOracleQueries.getOracleType("TIMESTAMPLTZ")) {
+        // Returning "String" produces:
+        // "2010-08-08 09:00:00.0 Australia/Melbourne"
+        // Returning "java.sql.Timestamp" produces: "2010-08-08 09:00:00.0"
+    	hiveType = timestampHiveType;
+    }
+      
     if (hiveType == null) {
 
       // http://wiki.apache.org/hadoop/Hive/Tutorial#Primitive_Types
@@ -370,8 +408,6 @@ public class OraOopConnManager extends GenericJdbcManager {
           || sqlType == OraOopOracleQueries.getOracleType("NVARCHAR")
           || sqlType == OraOopOracleQueries.getOracleType("OTHER")
           || sqlType == OraOopOracleQueries.getOracleType("ROWID")
-          || sqlType == OraOopOracleQueries.getOracleType("TIMESTAMPTZ")
-          || sqlType == OraOopOracleQueries.getOracleType("TIMESTAMPLTZ")
           || sqlType == OraOopOracleQueries.getOracleType("STRUCT")) {
         hiveType = "STRING";
       }

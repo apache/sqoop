@@ -48,11 +48,14 @@ public final class HiveTypes {
           case Types.NVARCHAR:
           case Types.NCHAR:
           case Types.LONGNVARCHAR:
-          case Types.DATE:
-          case Types.TIME:
-          case Types.TIMESTAMP:
           case Types.CLOB:
               return "STRING";
+          case Types.DATE:
+        	  return "DATE";
+          case Types.TIME:
+        	  return "BIGINT";
+          case Types.TIMESTAMP:
+        	  return "TIMESTAMP";
           case Types.NUMERIC:
           case Types.DECIMAL:
           case Types.FLOAT:
@@ -78,9 +81,7 @@ public final class HiveTypes {
    * in Hive, and we have to cast it to something more generic.
    */
   public static boolean isHiveTypeImprovised(int sqlType) {
-    return sqlType == Types.DATE || sqlType == Types.TIME
-        || sqlType == Types.TIMESTAMP
-        || sqlType == Types.DECIMAL
+    return sqlType == Types.DECIMAL
         || sqlType == Types.NUMERIC;
   }
 }
