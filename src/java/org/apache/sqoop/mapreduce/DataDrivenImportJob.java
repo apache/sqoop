@@ -105,7 +105,7 @@ public class DataDrivenImportJob extends ImportJobBase {
       // and will fail with ClassCastException when a byte array is passed instead
       // java.lang.ClassCastException: [B cannot be cast to java.lang.String
       Configuration conf = job.getConfiguration();
-      conf.setClass(DBConfiguration.INPUT_CLASS_PROPERTY, MainframeDatasetBinaryRecord.class,
+      conf.setClass(org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_CLASS_PROPERTY, MainframeDatasetBinaryRecord.class,
         DBWritable.class);
     } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       // For text files, specify these as the output types; for
