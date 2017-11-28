@@ -122,7 +122,7 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
   protected boolean getNextBinaryRecord(T sqoopRecord) throws IOException {
     // typical estimated max size for mainframe record
     int BUFFER_SIZE = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER;
-    byte [] buf = new byte[BUFFER_SIZE];
+    byte[] buf = new byte[BUFFER_SIZE];
     int bytesRead = -1;
     int cumulativeBytesRead = 0;
     String dsName = null;
@@ -150,26 +150,27 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
           }
           if (cumulativeBytesRead > 0) {
             // there were some bytes left in the buffer when EOF reached
-            ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
-            buffer.put(buf,0,cumulativeBytesRead);
-            convertToSqoopRecord(buffer.array(), (SqoopRecord)sqoopRecord);
+            writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
             return true;
           }
           return false;
         }
         cumulativeBytesRead += bytesRead;
         if (cumulativeBytesRead == BUFFER_SIZE) {
-          ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
-          buffer.put(buf,0,cumulativeBytesRead);
-          convertToSqoopRecord(buffer.array(), (SqoopRecord)sqoopRecord);
+          writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
           return true;
         }
       } while (bytesRead != -1);
     } catch (IOException ioe) {
-      throw new IOException("IOException during data transfer: " +
-        ioe.toString());
+      throw new IOException("IOException during data transfer: " + ioe);
     }
     return false;
+  }
+
+  protected void writeBytesToSqoopRecord(byte[] buf, int cumulativeBytesRead, SqoopRecord sqoopRecord) {
+    ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
+    buffer.put(buf,0,cumulativeBytesRead);
+    convertToSqoopRecord(buffer.array(), sqoopRecord);
   }
 
   private void convertToSqoopRecord(String line,  SqoopRecord sqoopRecord) {
