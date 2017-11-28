@@ -208,7 +208,7 @@ public final class MainframeFTPClientUtils {
         throw new IOException("Could not login to server " + server
             + ":" + ftp.getReplyString());
       }
-      // set ASCII transfer mode
+      // set transfer mode
       String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
       if (StringUtils.equalsIgnoreCase(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY,(transferMode))) {
         LOG.info("Setting FTP transfer mode to binary");
