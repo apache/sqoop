@@ -15,7 +15,6 @@ import java.io.InputStream;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,8 +31,7 @@ public class TestMainframeDatasetBinaryRecord {
 
   @Before
   public void setUp() throws IOException, InterruptedException {
-    // partially mock this class
-    mfDFTPRR = mock(MainframeDatasetFTPRecordReader.class, CALLS_REAL_METHODS);
+    mfDFTPRR = new MainframeDatasetFTPRecordReader();
     is = mock(InputStream.class);
     ftp = mock(FTPClient.class);
     split = mock(MainframeDatasetInputSplit.class);
@@ -41,8 +39,6 @@ public class TestMainframeDatasetBinaryRecord {
     conf = new Configuration();
     when(ftp.retrieveFileStream(any(String.class))).thenReturn(is);
     when(ftp.changeWorkingDirectory(any(String.class))).thenReturn(true);
-    when(mfDFTPRR.getNextDataset()).thenReturn(DATASET_NAME);
-    when(split.getNextDataset()).thenReturn(DATASET_NAME);
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,DATASET_NAME);
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,DATASET_TYPE);
     mfDFTPRR.initialize(split, context, ftp, conf);
