@@ -173,17 +173,11 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
           } else {
             LOG.info("Data transfer completed.");
           }
-          if (cumulativeBytesRead > 0) {
-            // there were some bytes left in the buffer when EOF reached
-            writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
-            return true;
-          }
-          return false;
+          return writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
         }
         cumulativeBytesRead += bytesRead;
         if (cumulativeBytesRead == BUFFER_SIZE) {
-          writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
-          return true;
+          return writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
         }
       } while (bytesRead != -1);
     } catch (IOException ioe) {
@@ -192,10 +186,14 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     return false;
   }
 
-  protected void writeBytesToSqoopRecord(byte[] buf, int cumulativeBytesRead, SqoopRecord sqoopRecord) {
+  protected Boolean writeBytesToSqoopRecord(byte[] buf, int cumulativeBytesRead, SqoopRecord sqoopRecord) {
+    if (cumulativeBytesRead <= 0) {
+      return false;
+    }
     ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
     buffer.put(buf,0,cumulativeBytesRead);
     convertToSqoopRecord(buffer.array(), sqoopRecord);
+    return true;
   }
 
   private void convertToSqoopRecord(String line,  SqoopRecord sqoopRecord) {
