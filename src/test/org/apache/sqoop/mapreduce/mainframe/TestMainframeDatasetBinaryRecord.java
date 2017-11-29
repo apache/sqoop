@@ -2,6 +2,7 @@ package org.apache.sqoop.mapreduce.mainframe;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,26 +15,37 @@ import java.io.InputStream;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TestMainframeDatasetBinaryRecord {
 
   private MainframeDatasetFTPRecordReader mfDFTPRR;
-  InputStream is;
-  FTPClient ftp;
-  Configuration conf;
+  private InputStream is;
+  private FTPClient ftp;
+  private Configuration conf;
+  private MainframeDatasetInputSplit split;
+  private TaskAttemptContext context;
+  final String DATASET_NAME = "dummy.ds";
+  final String DATASET_TYPE = "g";
 
   @Before
   public void setUp() throws IOException, InterruptedException {
-    mfDFTPRR = new MainframeDatasetFTPRecordReader();
+    // partially mock this class
+    mfDFTPRR = mock(MainframeDatasetFTPRecordReader.class, CALLS_REAL_METHODS);
     is = mock(InputStream.class);
     ftp = mock(FTPClient.class);
+    split = mock(MainframeDatasetInputSplit.class);
+    context = mock(TaskAttemptContext.class);
+    conf = new Configuration();
     when(ftp.retrieveFileStream(any(String.class))).thenReturn(is);
     when(ftp.changeWorkingDirectory(any(String.class))).thenReturn(true);
-    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"dummy.ds");
-    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,"g");
-    mfDFTPRR.initialize(ftp, conf);
+    when(mfDFTPRR.getNextDataset()).thenReturn(DATASET_NAME);
+    when(split.getNextDataset()).thenReturn(DATASET_NAME);
+    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,DATASET_NAME);
+    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,DATASET_TYPE);
+    mfDFTPRR.initialize(split, context, ftp, conf);
   }
 
   // Mock the inputstream.read method and manipulate the function parameters
@@ -62,7 +74,7 @@ public class TestMainframeDatasetBinaryRecord {
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
       Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER.equals(((byte[])record.getFieldMap().values().iterator().next()).length));
     } catch (IOException ioe) {
-      fail ("Got IOException: "+ ioe.toString());
+      fail ("Got IOException: "+ ioe);
     }
   }
 
@@ -79,7 +91,7 @@ public class TestMainframeDatasetBinaryRecord {
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
       Assert.assertEquals(expectedBytesRead,(((byte[])record.getFieldMap().values().iterator().next()).length));
     } catch (IOException ioe) {
-      fail ("Got IOException: "+ ioe.toString());
+      fail ("Got IOException: "+ ioe);
     }
   }
 
@@ -102,7 +114,7 @@ public class TestMainframeDatasetBinaryRecord {
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
       Assert.assertEquals(expectedBytesRead,(((byte[])record.getFieldMap().values().iterator().next()).length));
     } catch (IOException ioe) {
-      fail ("Got IOException: "+ ioe.toString());
+      fail ("Got IOException: "+ ioe);
     }
   }
 
@@ -123,7 +135,7 @@ public class TestMainframeDatasetBinaryRecord {
       Assert.assertFalse(mfDFTPRR.getNextBinaryRecord(record));
       Assert.assertNull((((byte[])record.getFieldMap().values().iterator().next())));
     } catch (IOException ioe) {
-      fail ("Got IOException: "+ ioe.toString());
+      fail ("Got IOException: "+ ioe);
     }
   }
 }
