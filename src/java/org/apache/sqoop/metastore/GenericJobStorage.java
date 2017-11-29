@@ -723,7 +723,7 @@ public class GenericJobStorage extends JobStorage {
   private void setV0Property(String jobName, String propClass,
       String propName, String propVal) throws SQLException {
     LOG.debug("Job: " + jobName + "; Setting property "
-        + propName + " with class " + propClass + " => " + propVal);
+        + propName + " with class " + propClass + " => " + PasswordRedactor.redactValue(propName, propVal));
 
     PreparedStatement s = null;
     try {

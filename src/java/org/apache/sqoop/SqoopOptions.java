@@ -81,6 +81,8 @@ public class SqoopOptions implements Cloneable {
   public static final String DEF_HCAT_HOME_OLD = "/usr/lib/hcatalog";
 
   public static final boolean METASTORE_PASSWORD_DEFAULT = false;
+  public static final String DB_PASSWORD_KEY = "db.password";
+
   /**
    * Thrown when invalid cmdline options are given.
    */
@@ -748,7 +750,7 @@ public class SqoopOptions implements Cloneable {
       // Require that the user enter it now.
       setPasswordFromConsole();
     } else {
-      this.password = props.getProperty("db.password", this.password);
+      this.password = props.getProperty(DB_PASSWORD_KEY, this.password);
     }
   }
 
@@ -832,7 +834,7 @@ public class SqoopOptions implements Cloneable {
     if (this.getConf().getBoolean(
       METASTORE_PASSWORD_KEY, METASTORE_PASSWORD_DEFAULT)) {
       // If the user specifies, we may store the password in the metastore.
-      putProperty(props, "db.password", this.password);
+      putProperty(props, DB_PASSWORD_KEY, this.password);
       putProperty(props, "db.require.password", "false");
     } else if (this.password != null) {
       // Otherwise, if the user has set a password, we just record

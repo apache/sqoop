@@ -22,6 +22,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.mapreduce.ExportJobBase;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
+import org.apache.sqoop.metastore.PasswordRedactor;
 
 import java.util.Properties;
 
@@ -145,7 +146,7 @@ public class SqoopJobDataPublisher {
             return  "Operation=" + operation + ", Url=" + url + ", User=" + user + ", StoreType=" + storeType
                     + ", StoreTable=" + storeTable + ", StoreQuery=" + storeQuery + ", HiveDB=" + hiveDB
                     + ", HiveTable=" + hiveTable + ", StartTime=" + startTime + ", EndTime=" + endTime
-                    + ", CmdLineArgs=" + commandLineOpts;
+                    + ", CmdLineArgs=" + PasswordRedactor.redactValues(commandLineOpts);
         }
     }
 

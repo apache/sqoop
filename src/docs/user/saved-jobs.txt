@@ -90,7 +90,7 @@ Available jobs:
   myjob
 ----
 
-We can inspect the configuration of a job with the +show+ action:
+We can inspect the configuration of a job with the +show+ action. As you can see in the below example even if the password is stored in the metastore the +show+ action will redact its value in the output:
 
 ----
  $ sqoop job --show myjob
@@ -102,6 +102,7 @@ We can inspect the configuration of a job with the +show+ action:
  codegen.input.delimiters.record = 0
  hdfs.append.dir = false
  db.table = mytable
+ db.password = ********
  ...
 ----
 
