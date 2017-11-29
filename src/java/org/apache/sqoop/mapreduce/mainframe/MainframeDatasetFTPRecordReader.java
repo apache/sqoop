@@ -96,6 +96,30 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     }
   }
 
+  // used for testing
+  public void initialize(InputSplit inputSplit,
+       TaskAttemptContext taskAttemptContext,
+       FTPClient ftpClient, Configuration conf)
+    throws IOException, InterruptedException {
+    ftp = ftpClient;
+    if (ftp != null) {
+      String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
+      String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
+      MainframeDatasetPath p = null;
+      try {
+        p = new MainframeDatasetPath(dsName,conf);
+      } catch (Exception e) {
+        LOG.error(e.getMessage());
+        LOG.error("MainframeDatasetPath helper class incorrectly initialised");
+        e.printStackTrace();
+      }
+      if (dsType != null && p != null) {
+        dsName = p.getMainframeDatasetFolder();
+      }
+      ftp.changeWorkingDirectory("'" + dsName + "'");
+    }
+  }
+
   @Override
   public void close() throws IOException {
     if (datasetReader != null) {
@@ -192,6 +216,12 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     return false;
   }
 
+  // this is primarily for testing purposes
+  @Override
+  protected String getNextDataset() {
+    return super.getNextDataset();
+  }
+
   protected void writeBytesToSqoopRecord(byte[] buf, int cumulativeBytesRead, SqoopRecord sqoopRecord) {
     ByteBuffer buffer = ByteBuffer.allocate(cumulativeBytesRead);
     buffer.put(buf,0,cumulativeBytesRead);
@@ -209,10 +239,4 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
       = sqoopRecord.getFieldMap().entrySet().iterator().next().getKey();
     sqoopRecord.setField(fieldName, buf);
   }
-
-  // used for testing only
-  public void setFtpClient(FTPClient client) { this.ftp = client; }
-
-  // used for testing only
-  public void setInputStream(BufferedInputStream is) { this.inputStream = is; }
 }
