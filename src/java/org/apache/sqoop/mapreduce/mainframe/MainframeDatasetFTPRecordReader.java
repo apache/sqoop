@@ -80,6 +80,7 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     if (ftp != null) {
       String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
       String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
+      inputStream = new BufferedInputStream(ftp.retrieveFileStream(dsName));
       MainframeDatasetPath p = null;
       try {
         p = new MainframeDatasetPath(dsName,conf);
@@ -189,12 +190,6 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
       throw new IOException("IOException during data transfer: " + ioe);
     }
     return false;
-  }
-
-  // this is primarily for testing purposes
-  @Override
-  protected String getNextDataset() {
-    return super.getNextDataset();
   }
 
   protected void writeBytesToSqoopRecord(byte[] buf, int cumulativeBytesRead, SqoopRecord sqoopRecord) {
