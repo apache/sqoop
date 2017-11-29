@@ -50,11 +50,15 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
       .getName());
 
   private MainframeImportTool mfImportTool;
+  org.apache.sqoop.cli.ToolOptions toolOptions;
+  org.apache.sqoop.SqoopOptions sqoopOption;
 
   @Before
   public void setUp() {
 
     mfImportTool = new MainframeImportTool();
+    toolOptions = new ToolOptions();
+    sqoopOption = new SqoopOptions();
   }
 
   @After
@@ -188,38 +192,26 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
   }
 
   @Test
-  public void testFtpTransferModeAscii() throws ParseException, InvalidOptionsException {
+  public void testFtpTransferModeAscii() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
     String transferModeValue = "ascii";
     String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
-    ToolOptions toolOptions = new ToolOptions();
-    SqoopOptions sqoopOption = new SqoopOptions();
-    mfImportTool.configureOptions(toolOptions);
-    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
-    mfImportTool.validateImportOptions(sqoopOption);
+    configureAndValidateOptions(args);
     String transferMode = sqoopOption.getMainframeFtpTransferMode();
     assertEquals(transferMode,transferModeValue);
   }
   @Test
-  public void testFtpTransferModeBinary() throws ParseException, InvalidOptionsException {
+  public void testFtpTransferModeBinary() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
     String transferModeValue = "binary";
     String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
-    ToolOptions toolOptions = new ToolOptions();
-    SqoopOptions sqoopOption = new SqoopOptions();
-    mfImportTool.configureOptions(toolOptions);
-    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
-    mfImportTool.validateImportOptions(sqoopOption);
+    configureAndValidateOptions(args);
     String transferMode = sqoopOption.getMainframeFtpTransferMode();
     assertEquals(transferMode,transferModeValue);
   }
   @Test
-  public void testFtpTransferModeDefaultsToAscii() throws ParseException, InvalidOptionsException {
+  public void testFtpTransferModeDefaultsToAscii() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
     String expectedTransferModeValue = "ascii";
     String[] args = new String[] { "--dataset", "mydatasetname" };
-    ToolOptions toolOptions = new ToolOptions();
-    SqoopOptions sqoopOption = new SqoopOptions();
-    mfImportTool.configureOptions(toolOptions);
-    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
-    mfImportTool.validateImportOptions(sqoopOption);
+    configureAndValidateOptions(args);
     String transferMode = sqoopOption.getMainframeFtpTransferMode();
     assertEquals(transferMode,expectedTransferModeValue);
   }
@@ -228,17 +220,18 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
   public final ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void testFtpTransferModeInvalid() throws ParseException, InvalidOptionsException {
+  public void testFtpTransferModeInvalid() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
     String transferModeValue = "myinvalidvalue";
     String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
-    ToolOptions toolOptions = new ToolOptions();
-    SqoopOptions sqoopOption = new SqoopOptions();
-    mfImportTool.configureOptions(toolOptions);
     exception.expect(InvalidOptionsException.class);
     exception.expectMessage("--transfermode");
     exception.expectMessage("invalid");
-    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
-    mfImportTool.validateImportOptions(sqoopOption);
-    fail("shouldn't get here");
+    configureAndValidateOptions(args);
+  }
+
+  private void configureAndValidateOptions(String[] args) throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
+    mfImportTool.configureOptions((ToolOptions) toolOptions);
+    sqoopOption = mfImportTool.parseArguments(args, null, (SqoopOptions) sqoopOption, false);
+    mfImportTool.validateImportOptions((SqoopOptions) sqoopOption);
   }
 }
