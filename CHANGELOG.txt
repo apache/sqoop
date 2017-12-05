@@ -1,7 +1,6 @@
 Release Notes - Sqoop - Version 1.4.7
 
 ** Sub-task
-    * [SQOOP-2937] - Sqoop mainframe module does not support sequential data sets, GDG
     * [SQOOP-2938] - Mainframe import module extension to support data sets on tape
     * [SQOOP-3055] - SQOOP-3055 MYSQL tests are failing due to the tests ignoring specified username, password and dbname, trying to connect to specified host using "currentUser"
     * [SQOOP-3056] - Add ant ivy report target
@@ -57,7 +56,6 @@ Release Notes - Sqoop - Version 1.4.7
     * [SQOOP-2745] - Using datetime column as a splitter for Oracle no longer works
     * [SQOOP-2746] - Add test case for Oracle incremental import using Timestamp
     * [SQOOP-2747] - Allow customizing test username and password for Oracle tests
-    * [SQOOP-2751] - Test TestIncrementalImport is failing
     * [SQOOP-2753] - TestSqoopJsonUtil.testGetJsonStringFromMap is depending on Map ordering in JDK
     * [SQOOP-2767] - Test is failing SystemImportTest
     * [SQOOP-2779] - Sqoop metastore doesn't seem to recognize --schema option
@@ -68,7 +66,6 @@ Release Notes - Sqoop - Version 1.4.7
     * [SQOOP-2839] - Sqoop import failure due to data member conflict in ORM code for table
     * [SQOOP-2846] - Sqoop Export with update-key failing for avro data file
     * [SQOOP-2847] - Sqoop --incremental + missing parent --target-dir reports success with no data
-    * [SQOOP-2850] - Append mode for hive imports is not  yet supported. Please remove the parameter --append-mode
     * [SQOOP-2863] - Properly escape column names for generated INSERT statements
     * [SQOOP-2864] - ClassWriter chokes on column names containing double quotes
     * [SQOOP-2880] - Provide argument for overriding temporary directory
@@ -109,8 +106,6 @@ Release Notes - Sqoop - Version 1.4.7
     * [SQOOP-3152] - --map-column-hive to support DECIMAL(xx,xx)
     * [SQOOP-3157] - Improve regex introduced in [SQOOP-3152]
     * [SQOOP-3159] - Sqoop (export + --table) with Oracle table_name having '$' fails with error (ORA-00942 or java.lang.NoClassDefFoundError)
-    * [SQOOP-3182] - Sqoop1 (import + --incremental + --merge-key + --as-parquetfile) fails with (Can't parse input data: 'PAR1')
-    * [SQOOP-3187] - Sqoop import as PARQUET to S3 failed
     * [SQOOP-3248] - Add missing Apache 2 license information to TestCompilationManager.java PostgresqlExternalTableImportTest.java
 
 ** Improvement
@@ -123,7 +118,6 @@ Release Notes - Sqoop - Version 1.4.7
     * [SQOOP-2906] - Optimization of AvroUtil.toAvroIdentifier
     * [SQOOP-2910] - Add capability to Sqoop to require an explicit option to be specified with --split-by for a String column
     * [SQOOP-2913] - Make sqoop fails if user uses --direct connector for case when --direct connector is not available
-    * [SQOOP-2939] - Extend mainframe module to support GDG, sequential data sets, and data sets stored on tape
     * [SQOOP-3027] - Create check/fail fast for Sqoop export with --hcatalog-table <HIVE_VIEW>, as it's not supported by Hive + MR
     * [SQOOP-3028] - Include stack trace in the logging of exceptions in ExportTool
     * [SQOOP-3034] - HBase import should fail fast if using anything other than as-textfile
@@ -149,7 +143,6 @@ Release Notes - Sqoop - Version 1.4.7
 
 ** Task
     * [SQOOP-3080] - Correct default transaction isolation level comment in SqoopOptions
-
 
 ** Test
     * [SQOOP-3174] - Add SQLServer manual tests to 3rd party test suite
