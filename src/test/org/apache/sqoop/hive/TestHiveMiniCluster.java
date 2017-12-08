@@ -1,5 +1,6 @@
 package org.apache.sqoop.hive;
 
+import org.apache.hive.service.auth.HiveAuthFactory;
 import org.apache.sqoop.db.JdbcConnectionFactory;
 import org.apache.sqoop.hive.hiveserver2.HiveServer2ConnectionFactory;
 import org.junit.After;
@@ -29,7 +30,7 @@ public class TestHiveMiniCluster {
 
   @Before
   public void before() throws SQLException {
-    hiveMiniCluster = new HiveMiniCluster();
+    hiveMiniCluster = new HiveMiniCluster(new PasswordAuthenticationConfiguration("sqoop", "sqoop2"));
     hiveMiniCluster.start();
 
     JdbcConnectionFactory hs2ConnectionFactory = new HiveServer2ConnectionFactory(hiveMiniCluster.getUrl(), null, null);

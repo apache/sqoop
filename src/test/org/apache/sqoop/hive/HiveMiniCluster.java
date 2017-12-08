@@ -5,11 +5,18 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hive.service.Service;
+import org.apache.hive.service.auth.PasswdAuthenticationProvider;
 import org.apache.hive.service.server.HiveServer2;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
 import java.security.PrivilegedAction;
+import java.util.Map;
+
+import static org.apache.hadoop.hive.conf.HiveConf.ConfVars.HIVE_SERVER2_CUSTOM_AUTHENTICATION_CLASS;
 
 public class HiveMiniCluster {
 
@@ -23,22 +30,25 @@ public class HiveMiniCluster {
 
   private final String metastorePath;
 
+  private final AuthenticationConfiguration authenticationConfiguration;
+
   private final HiveServer2 hiveServer2;
 
   private HiveConf config;
 
-  public HiveMiniCluster() {
-    this(DEFAULT_HOST, DEFAULT_PORT);
+  public HiveMiniCluster(AuthenticationConfiguration authenticationConfiguration) {
+    this(DEFAULT_HOST, DEFAULT_PORT, authenticationConfiguration);
   }
 
-  public HiveMiniCluster(String hostname, int port) {
-    this(hostname, port, Files.createTempDir().getAbsolutePath());
+  public HiveMiniCluster(String hostname, int port, AuthenticationConfiguration authenticationConfiguration) {
+    this(hostname, port, Files.createTempDir().getAbsolutePath(), authenticationConfiguration);
   }
 
-  public HiveMiniCluster(String hostname, int port, String metastorePath) {
+  public HiveMiniCluster(String hostname, int port, String metastorePath, AuthenticationConfiguration authenticationConfiguration) {
     this.hostName = hostname;
     this.port = port;
     this.metastorePath = metastorePath;
+    this.authenticationConfiguration = authenticationConfiguration;
     this.hiveServer2 = new HiveServer2();
   }
 
@@ -48,12 +58,22 @@ public class HiveMiniCluster {
     result.setInt(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_PORT.varname, getPort());
     result.set(HiveConf.ConfVars.METASTORECONNECTURLKEY.varname, getMetastoreConnectUrl());
 
+    for (Map.Entry<String, String> authConfig : authenticationConfiguration.getAuthenticationConfig().entrySet()) {
+      result.set(authConfig.getKey(), authConfig.getValue());
+    }
+    result.setClass(HIVE_SERVER2_CUSTOM_AUTHENTICATION_CLASS.varname, PasswordAuthenticationConfiguration.TestPasswordAuthenticationProvider.class, PasswdAuthenticationProvider.class);
+
     return result;
   }
 
   public void start() {
     try {
       config = createHiveConf();
+      File file = new File("hive-site.xml");
+      OutputStream out = new FileOutputStream(file);
+      config.writeXml(out);
+      out.close();
+      HiveConf.setHiveSiteLocation(file.toURI().toURL());
       startHiveServer();
       NetworkUtils.waitForStartUp(getHostName(), getPort(), 5, 100);
     } catch (Exception e) {
