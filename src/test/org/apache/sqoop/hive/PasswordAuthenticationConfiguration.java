@@ -12,16 +12,23 @@ import static org.apache.hadoop.hive.conf.HiveConf.ConfVars.HIVE_SERVER2_CUSTOM_
 
 public class PasswordAuthenticationConfiguration implements AuthenticationConfiguration {
 
-  public static final class TestPasswordAuthenticationProvider implements PasswdAuthenticationProvider {
+  private static String TEST_USERNAME;
+
+  private static String TEST_PASSWORD;
+
+  private static final class TestPasswordAuthenticationProvider implements PasswdAuthenticationProvider {
 
     @Override
     public void Authenticate(String user, String password) throws AuthenticationException {
-      throw new AuthenticationException("BOOOOOM!!!");
+      if (!(TEST_USERNAME.equals(user) && TEST_PASSWORD.equals(password))) {
+        throw new AuthenticationException("Authentication failed!");
+      }
     }
   }
 
   public PasswordAuthenticationConfiguration(String testUsername, String testPassword) {
-
+    TEST_USERNAME = testUsername;
+    TEST_PASSWORD = testPassword;
   }
 
   @Override
