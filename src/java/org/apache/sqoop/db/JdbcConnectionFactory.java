@@ -20,7 +20,7 @@ package org.apache.sqoop.db;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public interface ConnectionFactory {
+public interface JdbcConnectionFactory {
 
   Connection createConnection() throws SQLException;
 
