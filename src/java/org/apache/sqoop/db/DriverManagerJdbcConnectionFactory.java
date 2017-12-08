@@ -23,7 +23,7 @@ public class DriverManagerJdbcConnectionFactory implements JdbcConnectionFactory
   }
 
   public DriverManagerJdbcConnectionFactory(String driverClass, String connectionString, String username, String password) {
-    this(driverClass, connectionString, username, password, null);
+    this(driverClass, connectionString, username, password, new Properties());
   }
 
   @Override
