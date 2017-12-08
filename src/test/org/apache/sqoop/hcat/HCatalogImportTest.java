@@ -446,6 +446,18 @@ public class HCatalogImportTest extends ImportJobTestCase {
           "decimal(18,2)", Types.DECIMAL, HCatFieldSchema.Type.DECIMAL, 18, 2,
           HiveDecimal.create(new BigDecimal("2000")),
           new BigDecimal("2000"), KeyType.NOT_A_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(3),
+              "decimal(18,2)", Types.DECIMAL, HCatFieldSchema.Type.VARCHAR, 20, 0,
+              new HiveVarchar("1999", 20), new BigDecimal("1999"), KeyType.NOT_A_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(4),
+              "decimal(18,2)", Types.DECIMAL, HCatFieldSchema.Type.CHAR, 20, 0,
+              new HiveChar("1998", 20), new BigDecimal("1998"), KeyType.NOT_A_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(5),
+              "int", Types.INTEGER, HCatFieldSchema.Type.VARCHAR, 20, 0,
+              new HiveVarchar("2001", 20 ), new BigDecimal("2001"), KeyType.NOT_A_KEY),
+      HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(6),
+              "int", Types.INTEGER, HCatFieldSchema.Type.CHAR, 20, 0,
+              new HiveChar("2002", 20), new BigDecimal("2002"), KeyType.NOT_A_KEY),
     };
     List<String> addlArgsArray = new ArrayList<String>();
     setExtraArgs(addlArgsArray);
