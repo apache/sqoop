@@ -22,8 +22,8 @@ public class DriverManagerJdbcConnectionFactory implements JdbcConnectionFactory
     this.additionalProps = additionalProps;
   }
 
-  public DriverManagerJdbcConnectionFactory(String driverClass, String connectionString, String username, Properties additionalProps) {
-    this(driverClass, connectionString, username, null, additionalProps);
+  public DriverManagerJdbcConnectionFactory(String driverClass, String connectionString, String username, String password) {
+    this(driverClass, connectionString, username, password, null);
   }
 
   @Override
