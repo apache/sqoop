@@ -29,15 +29,14 @@ public class TestHiveMiniCluster {
 
   private HiveMiniCluster hiveMiniCluster;
 
-  private Connection hs2Connection;
+  private JdbcConnectionFactory connectionFactory;
 
   @Before
   public void before() throws SQLException {
     hiveMiniCluster = new HiveMiniCluster(new PasswordAuthenticationConfiguration(TEST_USERNAME, TEST_PASSWORD));
     hiveMiniCluster.start();
 
-    JdbcConnectionFactory hs2ConnectionFactory = new HiveServer2ConnectionFactory(hiveMiniCluster.getUrl(), TEST_USERNAME, TEST_PASSWORD);
-    hs2Connection = hs2ConnectionFactory.createConnection();
+    connectionFactory = new HiveServer2ConnectionFactory(hiveMiniCluster.getUrl(), TEST_USERNAME, TEST_PASSWORD);
   }
 
   @Test
@@ -49,25 +48,24 @@ public class TestHiveMiniCluster {
   }
 
   private void insertRowIntoTestTable() throws SQLException {
-    PreparedStatement stmnt = hs2Connection.prepareStatement(INSERT_SQL);
-    stmnt.setInt(1, TEST_VALUE);
-    stmnt.executeUpdate();
-    stmnt.close();
+    try (Connection conn = connectionFactory.createConnection(); PreparedStatement stmnt = conn.prepareStatement(INSERT_SQL)) {
+      stmnt.setInt(1, TEST_VALUE);
+      stmnt.executeUpdate();
+    }
   }
 
   private int getDataFromTestTable() throws SQLException {
-    PreparedStatement stmnt = hs2Connection.prepareStatement(SELECT_SQL);
-    ResultSet resultSet = stmnt.executeQuery();
-    resultSet.next();
-
-    return resultSet.getInt(1);
-
+    try (Connection conn = connectionFactory.createConnection(); PreparedStatement stmnt = conn.prepareStatement(SELECT_SQL)) {
+      ResultSet resultSet = stmnt.executeQuery();
+      resultSet.next();
+      return resultSet.getInt(1);
+    }
   }
 
   private void createTestTable() throws SQLException {
-    PreparedStatement stmnt = hs2Connection.prepareStatement(CREATE_TABLE_SQL);
-    stmnt.executeUpdate();
-    stmnt.close();
+    try (Connection conn = connectionFactory.createConnection(); PreparedStatement stmnt = conn.prepareStatement(CREATE_TABLE_SQL)) {
+      stmnt.executeUpdate();
+    }
   }
 
   @After
