@@ -24,6 +24,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
@@ -60,6 +61,9 @@ public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
     private void writeObject(Object o) throws IOException {
       if (o instanceof Text) {
         Text to = (Text) o;
+        out.write(to.getBytes(), 0, to.getLength());
+      } else if (o instanceof BytesWritable) {
+        BytesWritable to = (BytesWritable) o;
         out.write(to.getBytes(), 0, to.getLength());
       } else {
         out.write(o.toString().getBytes(UTF8));
