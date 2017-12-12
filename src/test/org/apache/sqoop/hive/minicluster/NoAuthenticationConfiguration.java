@@ -1,4 +1,6 @@
-package org.apache.sqoop.hive;
+package org.apache.sqoop.hive.minicluster;
+
+import org.apache.sqoop.hive.minicluster.AuthenticationConfiguration;
 
 import java.util.Collections;
 import java.util.Map;

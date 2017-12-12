@@ -1,12 +1,12 @@
-package org.apache.sqoop.hive;
+package org.apache.sqoop.hive.minicluster;
 
 import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hive.service.Service;
-import org.apache.hive.service.auth.PasswdAuthenticationProvider;
 import org.apache.hive.service.server.HiveServer2;
+import org.apache.sqoop.hive.NetworkUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.PrivilegedAction;
 import java.util.Map;
-
-import static org.apache.hadoop.hive.conf.HiveConf.ConfVars.HIVE_SERVER2_CUSTOM_AUTHENTICATION_CLASS;
 
 public class HiveMiniCluster {
 

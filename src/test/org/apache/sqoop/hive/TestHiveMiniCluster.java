@@ -2,6 +2,8 @@ package org.apache.sqoop.hive;
 
 import org.apache.sqoop.db.JdbcConnectionFactory;
 import org.apache.sqoop.hive.hiveserver2.HiveServer2ConnectionFactory;
+import org.apache.sqoop.hive.minicluster.HiveMiniCluster;
+import org.apache.sqoop.hive.minicluster.PasswordAuthenticationConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,4 +1,4 @@
-package org.apache.sqoop.hive;
+package org.apache.sqoop.hive.minicluster;
 
 import java.util.Map;
 

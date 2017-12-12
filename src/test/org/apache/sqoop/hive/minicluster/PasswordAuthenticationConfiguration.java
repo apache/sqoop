@@ -1,7 +1,8 @@
-package org.apache.sqoop.hive;
+package org.apache.sqoop.hive.minicluster;
 
 import org.apache.hive.service.auth.HiveAuthFactory;
 import org.apache.hive.service.auth.PasswdAuthenticationProvider;
+import org.apache.sqoop.hive.minicluster.AuthenticationConfiguration;
 
 import javax.security.sasl.AuthenticationException;
 import java.util.HashMap;
