@@ -226,7 +226,7 @@ public class DataDrivenImportJob extends ImportJobBase {
       return DatasetKeyOutputFormat.class;
     } else if (options.getFileLayout()
         == SqoopOptions.FileLayout.BinaryFile) {
-      return BinaryKeyOutputFormat.class;
+      return RawKeyTextOutputFormat.class;
     }
 
     return null;
