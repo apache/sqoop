@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,8 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-=======
->>>>>>> Added support for binary ftp transfers
+
 package org.apache.sqoop.mapreduce.mainframe;
 
 import java.io.IOException;
