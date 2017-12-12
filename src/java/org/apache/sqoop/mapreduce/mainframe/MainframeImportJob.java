@@ -30,8 +30,8 @@ import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ImportJobContext;
 
-import org.apache.sqoop.mapreduce.BinaryKeyOutputFormat;
 import org.apache.sqoop.mapreduce.DataDrivenImportJob;
+import org.apache.sqoop.mapreduce.RawKeyTextOutputFormat;
 
 /**
  * Import data from a mainframe dataset, using MainframeDatasetInputFormat.
@@ -83,7 +83,7 @@ public class MainframeImportJob extends DataDrivenImportJob {
       MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
       options.getMainframeFtpTransferMode());
     if (StringUtils.equalsIgnoreCase(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY,options.getMainframeFtpTransferMode())) {
-      LazyOutputFormat.setOutputFormatClass(job, BinaryKeyOutputFormat.class);
+      LazyOutputFormat.setOutputFormatClass(job, RawKeyTextOutputFormat.class);
     } else {
       // use the default outputformat
       LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
