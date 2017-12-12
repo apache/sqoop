@@ -1,19 +1,24 @@
 package org.apache.sqoop.hive;
 
-import org.apache.sqoop.SqoopOptions;
+import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.db.JdbcConnectionFactory;
 import org.apache.sqoop.hive.hiveserver2.HiveServer2Client;
 import org.apache.sqoop.hive.hiveserver2.HiveServer2ConnectionFactory;
-import org.apache.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.manager.ConnManager;
 
 public class HiveClientFactory {
 
   public HiveClient createHiveClient(SqoopOptions sqoopOptions, ConnManager connManager) {
     if (useHiveCli()) {
-      return null;
+      return createHiveImportToHiveClientAdapter(sqoopOptions, connManager);
     } else {
       return createHiveServer2Client(sqoopOptions, connManager);
     }
+  }
+
+  private HiveClient createHiveImportToHiveClientAdapter(SqoopOptions sqoopOptions, ConnManager connManager) {
+    HiveImport hiveImport = new HiveImport(sqoopOptions, connManager, sqoopOptions.getConf(), false);
+    return new HiveImportToHiveClientAdapter(hiveImport, sqoopOptions.getTableName(), sqoopOptions.getHiveTableName());
   }
 
   private HiveClient createHiveServer2Client(SqoopOptions sqoopOptions, ConnManager connManager) {
@@ -23,7 +28,7 @@ public class HiveClientFactory {
   }
 
   private boolean useHiveCli() {
-    return false;
+    return true;
   }
 
 }
