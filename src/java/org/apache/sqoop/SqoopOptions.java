@@ -449,6 +449,9 @@ public class SqoopOptions implements Cloneable {
   private String metaUsername;
   private String metaPassword;
 
+  @StoredAsProperty("hs2.url")
+  private String hs2Url;
+
   public SqoopOptions() {
     initDefaults(null);
   }
@@ -2891,6 +2894,13 @@ public class SqoopOptions implements Cloneable {
   public void setMetaPassword(String metaPassword) {
     this.metaPassword = metaPassword;
   }
+  
+  public String getHs2Url() {
+    return hs2Url;
+  }
 
+  public void setHs2Url(String hs2Url) {
+    this.hs2Url = hs2Url;
+  }
 }
 

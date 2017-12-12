@@ -131,6 +131,7 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
   public static final String HCATALOG_STORAGE_STANZA_ARG =
     "hcatalog-storage-stanza";
   public static final String HCATALOG_HOME_ARG = "hcatalog-home";
+  public static final String HS2_URL_ARG = "hs2-url";
   public static final String MAPREDUCE_JOB_NAME = "mapreduce-job-name";
   public static final String NUM_MAPPERS_ARG = "num-mappers";
   public static final String NUM_MAPPERS_SHORT_ARG = "m";
@@ -608,6 +609,11 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
         .withDescription("Override mapping for specific column to hive"
           + " types.")
         .withLongOpt(MAP_COLUMN_HIVE)
+        .create());
+    hiveOpts.addOption(OptionBuilder
+        .hasArg()
+        .withDescription("The URL to the HiveServer2.")
+        .withLongOpt(HS2_URL_ARG)
         .create());
 
     return hiveOpts;
@@ -1237,6 +1243,9 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
    }
    if (in.hasOption(HIVE_EXTERNAL_TABLE_LOCATION_ARG)) {
      out.setHiveExternalTableDir(in.getOptionValue(HIVE_EXTERNAL_TABLE_LOCATION_ARG));
+   }
+   if (in.hasOption(HS2_URL_ARG)) {
+      out.setHs2Url(in.getOptionValue(HS2_URL_ARG));
    }
 
   }
