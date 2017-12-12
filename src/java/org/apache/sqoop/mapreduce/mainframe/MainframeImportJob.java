@@ -30,9 +30,9 @@ import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ImportJobContext;
 
-import org.apache.sqoop.mapreduce.BinaryKeyOutputFormat;
 import org.apache.sqoop.mapreduce.DataDrivenImportJob;
 import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
+import org.apache.sqoop.mapreduce.RawKeyTextOutputFormat;
 
 /**
  * Import data from a mainframe dataset, using MainframeDatasetInputFormat.
