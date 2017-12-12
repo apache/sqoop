@@ -42,6 +42,8 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
+import org.apache.sqoop.hive.HiveClient;
+import org.apache.sqoop.hive.HiveClientFactory;
 import org.apache.sqoop.hive.HiveImport;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.mapreduce.MergeJob;
@@ -78,18 +80,21 @@ public class ImportTool extends BaseSqoopTool {
   // Set classloader for local job runner
   private ClassLoader prevClassLoader = null;
 
+  private final HiveClientFactory hiveClientFactory;
+
   public ImportTool() {
     this("import", false);
   }
 
   public ImportTool(String toolName, boolean allTables) {
-    this(toolName, new CodeGenTool(), allTables);
+    this(toolName, new CodeGenTool(), allTables, new HiveClientFactory());
   }
 
-  public ImportTool(String toolName, CodeGenTool codeGenerator, boolean allTables) {
+  public ImportTool(String toolName, CodeGenTool codeGenerator, boolean allTables, HiveClientFactory hiveClientFactory) {
     super(toolName);
     this.codeGenerator = codeGenerator;
     this.allTables = allTables;
+    this.hiveClientFactory = hiveClientFactory;
   }
 
   @Override
@@ -499,8 +504,7 @@ public class ImportTool extends BaseSqoopTool {
    * Import a table or query.
    * @return true if an import was performed, false otherwise.
    */
-  protected boolean importTable(SqoopOptions options, String tableName,
-      HiveImport hiveImport) throws IOException, ImportException {
+  protected boolean importTable(SqoopOptions options, String tableName) throws IOException, ImportException {
     String jarFile = null;
 
     // Generate the ORM code for the tables.
@@ -540,7 +544,9 @@ public class ImportTool extends BaseSqoopTool {
       // For Parquet file, the import action will create hive table directly via
       // kite. So there is no need to do hive import as a post step again.
       if (options.getFileLayout() != SqoopOptions.FileLayout.ParquetFile) {
-        hiveImport.importTable(tableName, options.getHiveTableName(), false);
+        options.setTableName(tableName);
+        HiveClient hiveClient = hiveClientFactory.createHiveClient(options, manager);
+        hiveClient.importTable();
       }
     }
 
@@ -626,12 +632,8 @@ public class ImportTool extends BaseSqoopTool {
     codeGenerator.setManager(manager);
 
     try {
-      if (options.doHiveImport()) {
-        hiveImport = new HiveImport(options, manager, options.getConf(), false);
-      }
-
       // Import a single table (or query) the user specified.
-      importTable(options, options.getTableName(), hiveImport);
+      importTable(options, options.getTableName());
     } catch (IllegalArgumentException iea) {
         LOG.error(IMPORT_FAILED_ERROR_MSG + iea.getMessage());
       rethrowIfRequired(options, iea);
