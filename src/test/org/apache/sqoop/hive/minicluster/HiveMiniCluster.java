@@ -65,7 +65,7 @@ public class HiveMiniCluster {
       createHiveConf();
       createHiveSiteXml();
       startHiveServer();
-      NetworkUtils.waitForStartUp(getHostName(), getPort(), 5, 100);
+      NetworkUtils.waitForStartUp(getHostName(), getPort(), 500, 100);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
