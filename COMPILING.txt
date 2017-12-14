@@ -76,11 +76,15 @@ Install MySQL server and client 5.0. Download MySQL Connector/J 5.0.8 for
 JDBC. Instructions for configuring the MySQL database are in MySQLAuthTest
 and DirectMySQLTest.
 
-Use the system property sqoop.test.mysql.connectstring.host_url to specify the
-URL for the MySQL host used for testing. Specify this property on the command
-line or via the build.properties file. For example:
+Use the following system properties to configure connection to the MySQL host used for testing:
+sqoop.test.mysql.connectstring.host_url, sqoop.test.mysql.databasename, sqoop.test.mysql.username and
+sqoop.test.mysql.password.
+Specify these properties on the command line or via the build.properties file. For example:
 
 sqoop.test.mysql.connectstring.host_url=jdbc:mysql://host.example.com/
+sqoop.test.mysql.databasename=MYDB
+sqoop.test.mysql.username=MYUSR
+sqoop.test.mysql.password=MYPWD
 
 If not specified, the default value used for this property is:
 jdbc:mysql://localhost/
@@ -93,11 +97,13 @@ database are in OracleManagerTest. Download the ojdbc6_g jar.
 If running the tests against Oracle XE (Express Edition) - a lot of them will
 fail as it does not include the partitioning feature.
 
-Use the system property sqoop.test.oracle.connectstring to specify the
-connection string for Oracle host used for testing. Specify this property on the
-command line or via the build.properties file. For example:
+Use the following system properties to configure connection to the Oracle host used for testing:
+sqoop.test.oracle.connectstring, sqoop.test.oracle.username and  sqoop.test.oracle.password.
+Specify these properties on the command line or via the build.properties file. For example:
 
 sqoop.test.oracle.connectstring=jdbc:oracle:thin:@//host.example.com/xe
+sqoop.test.oracle.username=MYUSR
+sqoop.test.oracle.password=MYPWD
 
 If not specified, the default value used for this property is:
 jdbc:oracle:thin:@//localhost/xe
@@ -110,11 +116,16 @@ SQL script is available in src/test/oraoop/create_users.sql
 Install PostgreSQL 8.3.9. Download the postgresql 8.4 jdbc driver. Instructions
 for configuring the database are in PostgresqlTest.
 
-Use the system property sqoop.test.postgresql.connectstring.host_url to specify
-the URL for the PostgreSQL host used for testing. Specify this property on the
+Use the following system properties to configure connection to the PostgreSQL host used for testing:
+sqoop.test.postgresql.connectstring.host_url, sqoop.test.postgresql.database, sqoop.test.postgresql.username and
+sqoop.test.postgresql.password.
+Specify this property on the
 command line or via the build.properties file. For example:
 
 sqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://sqoop-dbs.sf.cloudera.com/
+sqoop.test.postgresql.database=MYDB
+sqoop.test.postgresql.username=MYUSR
+sqoop.test.postgresql.password=MYPWD
 
 If not specified, the default value used for this property is:
 jdbc:postgresql://localhost/
@@ -125,11 +136,16 @@ Install SQL Server Express 2012 and create a database instance and
 download the appropriate JDBC driver. Instructions for configuring the
 database can be found in SQLServerManagerImportManualTest.
 
-Use the system property sqoop.test.sqlserver.connectstring.host_url to specify
+Use the following system properties to configure connection to the SQL Server host used for testing:
+sqoop.test.sqlserver.connectstring.host_url, sqoop.test.sqlserver.database, sqoop.test.sqlserver.username and
+sqoop.test.sqlserver.password.
 the URL for the SQL Server host used for testing. Specify this property on the
 command line or via the build.properties file. For example:
 
 sqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://sqlserverhost:1433
+sqoop.test.sqlserver.database=MYDB
+ms.sqlserver.username=MYUSR
+ms.sqlserver.password=MYPWD
 
 If not specified, the default value used for this property is:
 jdbc:sqlserver://sqlserverhost:1433
@@ -144,11 +160,16 @@ appropriate JDBC driver. Instructions for configuring the database are in
 CubridAuthTest, CubridCompatTest, CubridManagerImportTest
 and CubridManagerExportTest.
 
-Use the system property sqoop.test.cubrid.connectstring.host_url to specify the
-URL for the Cubrid host used for testing. Specify this property on the command
+Use the following system properties to configure connection to the Cubrid host used for testing:
+sqoop.test.cubrid.connectstring.host_url, sqoop.test.cubrid.connectstring.database,
+sqoop.test.cubrid.connectstring.username and sqoop.test.cubrid.connectstring.password.
+Specify this property on the command
 line or via the build.properties file. For example:
 
 sqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost
+sqoop.test.cubrid.connectstring.database=MYDB
+sqoop.test.cubrid.connectstring.username=MYUSR
+sqoop.test.cubrid.connectstring.password=MYPWD
 
 If not specified, the default value used for this property is:
 jdbc:cubrid:localhost
@@ -159,11 +180,16 @@ Install DB2 9.74 Express C and download the appropriate JDBC driver.
 Instructions for configuring the server can be found in
 DB2ManagerImportManualTest.
 
-Use the system property sqoop.test.db2.connectstring.host_url to specify
-the URL for the DB Server host used for testing. Specify this property on
+Use the following system properties to configure connection to the DB2 host used for testing:
+sqoop.test.db2.connectstring.host_url, sqoop.test.db2.connectstring.database, sqoop.test.db2.connectstring.username and
+sqoop.test.db2.connectstring.password.
+Specify this property on
 the command line or via build.properties file. For example:
 
 sqoop.test.db2.connectstring.host_url=jdbc:db2://db2host:50000
+sqoop.test.db2.connectstring.database=MYDB
+sqoop.test.db2.connectstring.username=MYUSR
+sqoop.test.db2.connectstring.password=MYPWD
 
 If not specified, the default value used for this property is:
 jdbc:db2://db2host:50000
@@ -171,7 +197,7 @@ jdbc:db2://db2host:50000
 This can be useful if you have the hostname db2host mapped to the IP
 address of the DB2 Server instance.
 
-==== Running the Third-party Tests
+=== Running the Third-party Tests on native database servers
 
 After the third-party databases are installed and configured, run:
 
@@ -179,8 +205,8 @@ After the third-party databases are installed and configured, run:
 ant test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
 ++++
 
-This command will run all thirdparty tests except for the SQL Server test.
-To run the SQL Server test, specify the property "manual" instead of "thirdparty"
+This command will run all thirdparty tests except some DB2 tests.
+To run these DB2 test, specify the property "manual" instead of "thirdparty"
 as follows:
 
 ++++
