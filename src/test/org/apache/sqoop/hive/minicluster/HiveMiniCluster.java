@@ -94,6 +94,7 @@ public class HiveMiniCluster {
 
   public void stop() {
     hiveServer2.stop();
+    HiveConf.setHiveSiteLocation(null);
     try {
       FileUtils.deleteDirectory(new File(tempFolderPath));
     } catch (IOException e) {

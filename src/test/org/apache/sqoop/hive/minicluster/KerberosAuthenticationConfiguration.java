@@ -17,7 +17,6 @@ public class KerberosAuthenticationConfiguration implements AuthenticationConfig
 
   public KerberosAuthenticationConfiguration(KerberosConfigurationProvider kerberosConfig) {
     this.kerberosConfig = kerberosConfig;
-    authenticate();
   }
 
   private void authenticate() {
@@ -33,6 +32,8 @@ public class KerberosAuthenticationConfiguration implements AuthenticationConfig
 
   @Override
   public Map<String, String> getAuthenticationConfig() {
+    authenticate();
+
     Map<String, String> result = new HashMap<>();
 
     result.put(HiveConf.ConfVars.HIVE_SERVER2_KERBEROS_PRINCIPAL.varname, kerberosConfig.getTestPrincipal());
