@@ -1,5 +1,6 @@
 package org.apache.sqoop.hive.minicluster;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hive.service.auth.HiveAuthFactory;
 import org.apache.hive.service.auth.PasswdAuthenticationProvider;
 import org.apache.sqoop.hive.minicluster.AuthenticationConfiguration;
@@ -39,5 +40,10 @@ public class PasswordAuthenticationConfiguration implements AuthenticationConfig
     result.put(HIVE_SERVER2_CUSTOM_AUTHENTICATION_CLASS.varname, TestPasswordAuthenticationProvider.class.getName());
 
     return result;
+  }
+
+  @Override
+  public String getUrlParams() {
+    return StringUtils.EMPTY;
   }
 }

@@ -6,4 +6,6 @@ public interface AuthenticationConfiguration {
 
   Map<String, String> getAuthenticationConfig();
 
+  String getUrlParams();
+
 }

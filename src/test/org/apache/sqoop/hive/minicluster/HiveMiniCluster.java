@@ -114,7 +114,7 @@ public class HiveMiniCluster {
   }
 
   public String getUrl() {
-    return String.format("jdbc:hive2://%s:%d/default", hostName, port);
+    return String.format("jdbc:hive2://%s:%d/default%s", hostName, port, authenticationConfiguration.getUrlParams());
   }
 
   public String getTempFolderPath() {
