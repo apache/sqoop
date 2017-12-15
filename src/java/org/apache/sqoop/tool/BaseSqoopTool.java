@@ -312,7 +312,7 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   }
 
   /**
-   * Examines a subset of the arrray presented, and determines if it
+   * Examines a subset of the array presented, and determines if it
    * contains any non-empty arguments. If so, logs the arguments
    * and returns true.
    *
