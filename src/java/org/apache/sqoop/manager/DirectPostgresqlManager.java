@@ -52,7 +52,7 @@ import org.apache.sqoop.util.ErrorableThread;
 import org.apache.sqoop.util.ExportException;
 import org.apache.sqoop.util.Executor;
 import org.apache.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.JdbcUrl;
+import org.apache.sqoop.util.JdbcUrl;
 import com.cloudera.sqoop.util.LoggingAsyncSink;
 import com.cloudera.sqoop.util.PerfCounters;
 
