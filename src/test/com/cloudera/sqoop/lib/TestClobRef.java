@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.io.LobFile;
+import org.apache.sqoop.lib.ClobRef;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

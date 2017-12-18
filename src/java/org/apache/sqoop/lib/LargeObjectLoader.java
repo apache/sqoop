@@ -282,7 +282,7 @@ public class LargeObjectLoader implements Closeable  {
    * @throws IOException if an error occurs writing to the FileSystem.
    * @throws SQLException if an error occurs reading from the database.
    */
-  public com.cloudera.sqoop.lib.ClobRef readClobRef(int colNum, ResultSet r)
+  public org.apache.sqoop.lib.ClobRef readClobRef(int colNum, ResultSet r)
       throws IOException, InterruptedException, SQLException {
 
     long maxInlineLobLen = conf.getLong(
@@ -316,11 +316,11 @@ public class LargeObjectLoader implements Closeable  {
         lobWriter.finishRecord();
       }
 
-      return new com.cloudera.sqoop.lib.ClobRef(
+      return new org.apache.sqoop.lib.ClobRef(
           getRelativePath(lobWriter), recordOffset, len);
     } else {
       // This is a 1-based array.
-      return new com.cloudera.sqoop.lib.ClobRef(
+      return new org.apache.sqoop.lib.ClobRef(
           c.getSubString(1, (int) c.length()));
     }
   }

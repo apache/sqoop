@@ -45,7 +45,7 @@ import org.apache.sqoop.manager.oracle.util.*;
 import org.junit.Test;
 
 import org.apache.sqoop.lib.BlobRef;
-import com.cloudera.sqoop.lib.ClobRef;
+import org.apache.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.OracleUtils;
 

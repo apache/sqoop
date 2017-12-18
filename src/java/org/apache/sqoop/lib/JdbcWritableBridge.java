@@ -27,8 +27,6 @@ import java.sql.Timestamp;
 
 import org.apache.hadoop.io.BytesWritable;
 
-import com.cloudera.sqoop.lib.ClobRef;
-
 /**
  * Contains a set of methods which can read db columns from a ResultSet into
  * Java types, and do serialization of these types to/from DataInput/DataOutput
@@ -247,7 +245,7 @@ public final class JdbcWritableBridge {
     throw new RuntimeException("Unsupported: Cannot export BLOB data");
   }
 
-  public static void writeClobRef(com.cloudera.sqoop.lib.ClobRef val,
+  public static void writeClobRef(org.apache.sqoop.lib.ClobRef val,
       int paramIdx, int sqlType, PreparedStatement s) throws SQLException {
     // TODO: support this.
     throw new RuntimeException("Unsupported: Cannot export CLOB data");

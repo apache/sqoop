@@ -43,7 +43,7 @@ import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.lib.BlobRef;
-import com.cloudera.sqoop.lib.ClobRef;
+import org.apache.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.manager.SqlManager;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;

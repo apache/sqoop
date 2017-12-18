@@ -42,7 +42,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.BigDecimalSerializer;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.BooleanParser;
-import com.cloudera.sqoop.lib.ClobRef;
+import org.apache.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.lib.FieldFormatter;
 import com.cloudera.sqoop.lib.JdbcWritableBridge;

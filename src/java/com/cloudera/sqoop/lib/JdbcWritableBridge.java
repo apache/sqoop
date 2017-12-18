@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.lib.BlobRef;
+import org.apache.sqoop.lib.ClobRef;
 
 /**
  * Contains a set of methods which can read db columns from a ResultSet into
