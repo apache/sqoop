@@ -46,7 +46,7 @@ import org.apache.sqoop.manager.ManagerFactory;
 import org.apache.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.JobTool;
 import org.apache.sqoop.metastore.AutoGenericJobStorage;
 import org.junit.Before;

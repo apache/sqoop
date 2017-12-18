@@ -37,7 +37,7 @@ import com.cloudera.sqoop.util.ImportException;
 /**
  * Tool that performs database imports of all tables in a database to HDFS.
  */
-public class ImportAllTablesTool extends com.cloudera.sqoop.tool.ImportTool {
+public class ImportAllTablesTool extends ImportTool {
 
   public static final Log LOG = LogFactory.getLog(
       ImportAllTablesTool.class.getName());

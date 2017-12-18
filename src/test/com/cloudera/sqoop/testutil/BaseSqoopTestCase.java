@@ -22,7 +22,7 @@ import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.metastore.JobData;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import com.google.common.collect.ObjectArrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

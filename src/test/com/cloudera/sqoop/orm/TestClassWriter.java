@@ -46,7 +46,7 @@ import org.apache.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.testutil.DirUtil;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.junit.rules.ExpectedException;
 

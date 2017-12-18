@@ -38,7 +38,7 @@ import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.orm.CompilationManager;
 
 import com.cloudera.sqoop.testutil.ExplicitSetMapper;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.junit.Test;
 

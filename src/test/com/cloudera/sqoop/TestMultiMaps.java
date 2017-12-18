@@ -35,7 +35,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.junit.Test;
 

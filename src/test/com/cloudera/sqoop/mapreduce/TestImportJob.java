@@ -44,7 +44,7 @@ import org.apache.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.InjectableManagerFactory;
 import com.cloudera.sqoop.testutil.InjectableConnManager;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.util.ClassLoaderStack;

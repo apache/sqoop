@@ -21,7 +21,7 @@ package org.apache.sqoop;
 import org.apache.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

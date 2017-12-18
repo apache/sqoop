@@ -51,7 +51,7 @@ import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.tool.CodeGenTool;
 import org.apache.sqoop.tool.CreateHiveTableTool;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
 import org.apache.commons.cli.ParseException;
 import org.junit.rules.ExpectedException;

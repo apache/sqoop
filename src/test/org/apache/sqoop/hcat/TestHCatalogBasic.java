@@ -22,7 +22,7 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.ExportTool;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 
 import org.junit.Test;
 

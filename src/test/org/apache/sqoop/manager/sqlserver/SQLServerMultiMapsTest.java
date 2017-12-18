@@ -42,7 +42,7 @@ import org.apache.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.SeqFileReader;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.junit.After;

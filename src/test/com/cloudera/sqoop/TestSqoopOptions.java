@@ -31,7 +31,7 @@ import org.junit.rules.ExpectedException;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.tool.BaseSqoopTool;
-import com.cloudera.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.ImportTool;
 
 import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
 import static org.hamcrest.CoreMatchers.equalTo;
