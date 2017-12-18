@@ -28,8 +28,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import com.cloudera.sqoop.cli.RelatedOptions;
-
 /**
  * Class that holds several sets of related options, providing a container
  * for all the options associated with a single tool.
