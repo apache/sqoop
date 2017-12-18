@@ -39,7 +39,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.tool.SqoopTool;
-import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.ClassLoaderStack;
 import com.cloudera.sqoop.util.Jars;
 
 /**

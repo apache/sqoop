@@ -37,7 +37,7 @@ import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.tool.CodeGenTool;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.tool.MergeTool;
-import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.ClassLoaderStack;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;

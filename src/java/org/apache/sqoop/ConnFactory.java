@@ -41,7 +41,7 @@ import org.apache.sqoop.manager.DefaultManagerFactory;
 import org.apache.sqoop.manager.ManagerFactory;
 import org.apache.sqoop.metastore.JobData;
 
-import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.ClassLoaderStack;
 import org.apache.sqoop.manager.GenericJdbcManager;
 import org.apache.sqoop.manager.oracle.OraOopManagerFactory;
 

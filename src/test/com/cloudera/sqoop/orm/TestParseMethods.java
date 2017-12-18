@@ -39,7 +39,7 @@ import org.apache.sqoop.orm.CompilationManager;
 
 import com.cloudera.sqoop.testutil.ExplicitSetMapper;
 import org.apache.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

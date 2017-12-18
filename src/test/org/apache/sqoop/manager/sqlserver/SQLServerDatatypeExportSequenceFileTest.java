@@ -35,7 +35,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.tool.CodeGenTool;
-import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.ClassLoaderStack;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

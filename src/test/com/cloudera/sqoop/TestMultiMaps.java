@@ -36,7 +36,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
 import org.apache.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
