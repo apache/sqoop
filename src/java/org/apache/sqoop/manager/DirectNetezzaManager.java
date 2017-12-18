@@ -39,7 +39,7 @@ import org.apache.sqoop.mapreduce.netezza.NetezzaExternalTableImportJob;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.cli.RelatedOptions;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 
 /**

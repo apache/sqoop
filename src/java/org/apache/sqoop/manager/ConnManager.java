@@ -45,7 +45,7 @@ import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
 import org.apache.sqoop.manager.SqlManager;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 
 /**

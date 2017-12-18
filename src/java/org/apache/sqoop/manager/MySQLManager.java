@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.util.ExportException;
 import org.apache.sqoop.mapreduce.JdbcUpsertExportJob;
 import org.apache.sqoop.mapreduce.mysql.MySQLUpsertOutputFormat;
 import org.apache.sqoop.util.LoggingUtils;

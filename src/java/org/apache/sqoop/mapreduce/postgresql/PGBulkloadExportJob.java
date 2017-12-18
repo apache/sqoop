@@ -20,7 +20,7 @@ package org.apache.sqoop.mapreduce.postgresql;
 
 import java.io.IOException;
 import org.apache.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.util.ExportException;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

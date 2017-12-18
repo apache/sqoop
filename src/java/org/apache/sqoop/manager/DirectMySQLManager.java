@@ -26,7 +26,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.MySQLDumpImportJob;
 import org.apache.sqoop.mapreduce.MySQLExportJob;
 import com.cloudera.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.util.ExportException;
 
 /**
  * Manages direct connections to MySQL databases

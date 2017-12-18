@@ -49,7 +49,7 @@ import org.apache.sqoop.util.AsyncSink;
 import org.apache.sqoop.util.DirectImportUtils;
 import org.apache.sqoop.util.ErrorableAsyncSink;
 import org.apache.sqoop.util.ErrorableThread;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.util.ExportException;
 import org.apache.sqoop.util.Executor;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.JdbcUrl;

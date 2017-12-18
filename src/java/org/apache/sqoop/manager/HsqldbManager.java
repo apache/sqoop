@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.AsyncSqlOutputFormat;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.util.ExportException;
 import java.io.IOException;
 
 /**
