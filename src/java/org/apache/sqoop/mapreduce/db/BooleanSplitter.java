@@ -25,8 +25,6 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 
-import com.cloudera.sqoop.mapreduce.db.DBSplitter;
-
 /**
  * Implement DBSplitter over boolean values.
  */
