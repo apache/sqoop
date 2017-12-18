@@ -36,7 +36,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.sqoop.ConnFactory;
+import org.apache.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;

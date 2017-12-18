@@ -38,7 +38,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import com.cloudera.sqoop.ConnFactory;
+import org.apache.sqoop.ConnFactory;
 import com.cloudera.sqoop.Sqoop;
 import org.apache.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
