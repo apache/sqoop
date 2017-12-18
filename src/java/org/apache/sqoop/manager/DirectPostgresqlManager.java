@@ -54,7 +54,7 @@ import org.apache.sqoop.util.Executor;
 import org.apache.sqoop.util.ImportException;
 import org.apache.sqoop.util.JdbcUrl;
 import org.apache.sqoop.util.LoggingAsyncSink;
-import com.cloudera.sqoop.util.PerfCounters;
+import org.apache.sqoop.util.PerfCounters;
 
 
 /**
