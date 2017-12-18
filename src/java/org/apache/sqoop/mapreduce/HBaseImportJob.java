@@ -42,7 +42,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.hbase.HBasePutProcessor;
-import com.cloudera.sqoop.lib.FieldMapProcessor;
+import org.apache.sqoop.lib.FieldMapProcessor;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ImportJobContext;

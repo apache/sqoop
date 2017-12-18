@@ -126,7 +126,7 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
    * @throws com.cloudera.sqoop.lib.ProcessingException if the FieldMapProcessor
    * encounters a general processing error when operating on this object.
    */
-  public void delegate(com.cloudera.sqoop.lib.FieldMapProcessor processor)
+  public void delegate(org.apache.sqoop.lib.FieldMapProcessor processor)
       throws IOException, com.cloudera.sqoop.lib.ProcessingException {
     processor.accept(this);
   }
