@@ -159,7 +159,7 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
             && (boundaryQuery == null || boundaryQuery.isEmpty())
             && splitLimit <= 0) {
       List<InputSplit> singletonSplit = new ArrayList<InputSplit>();
-      singletonSplit.add(new com.cloudera.sqoop.mapreduce.db.
+      singletonSplit.add(new org.apache.sqoop.mapreduce.db.
           DataDrivenDBInputFormat.DataDrivenDBInputSplit("1=1", "1=1"));
       return singletonSplit;
     }

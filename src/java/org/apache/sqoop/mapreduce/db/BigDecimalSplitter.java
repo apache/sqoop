@@ -30,7 +30,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 
 import org.apache.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.mapreduce.db.DBSplitter;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import org.apache.sqoop.validation.ValidationException;
 
 /**

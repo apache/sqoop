@@ -29,7 +29,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.manager.MySQLUtils;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
+import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
 /**
  * Class that runs an import job using mysqldump in the mapper.

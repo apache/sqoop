@@ -30,7 +30,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 
 import org.apache.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import com.cloudera.sqoop.mapreduce.db.IntegerSplitter;
 
 /**

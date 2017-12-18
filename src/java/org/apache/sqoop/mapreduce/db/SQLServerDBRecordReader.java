@@ -32,7 +32,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
 import org.apache.sqoop.lib.SqoopRecord;
 
