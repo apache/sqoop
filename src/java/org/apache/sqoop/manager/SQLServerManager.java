@@ -38,7 +38,7 @@ import org.apache.sqoop.mapreduce.db.SQLServerConnectionFailureHandler;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
+import org.apache.sqoop.mapreduce.JdbcUpdateExportJob;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 
