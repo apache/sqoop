@@ -33,7 +33,7 @@ import org.apache.sqoop.io.LobFile;
  * reference to a file that holds the CLOB data.
  */
 public class ClobRef
-  extends com.cloudera.sqoop.lib.LobRef<String, String, Reader> {
+  extends LobRef<String, String, Reader> {
 
   public ClobRef() {
     super();

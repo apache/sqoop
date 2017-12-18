@@ -36,7 +36,7 @@ import org.apache.sqoop.io.LobFile;
  * reference to a file that holds the BLOB data.
  */
 public class BlobRef extends
-  com.cloudera.sqoop.lib.LobRef<byte[], BytesWritable, InputStream> {
+    LobRef<byte[], BytesWritable, InputStream> {
 
   public static final Log LOG = LogFactory.getLog(BlobRef.class.getName());
 
