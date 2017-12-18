@@ -49,7 +49,7 @@ import org.apache.sqoop.metastore.JobData;
 import org.apache.sqoop.metastore.JobStorage;
 import org.apache.sqoop.metastore.JobStorageFactory;
 import org.apache.sqoop.orm.ClassWriter;
-import com.cloudera.sqoop.orm.TableClassName;
+import org.apache.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.AppendUtils;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import com.cloudera.sqoop.util.ImportException;

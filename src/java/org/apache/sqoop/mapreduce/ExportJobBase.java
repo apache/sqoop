@@ -24,7 +24,7 @@ import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.JobBase;
-import com.cloudera.sqoop.orm.TableClassName;
+import org.apache.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.ExportException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
