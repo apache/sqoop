@@ -48,7 +48,7 @@ import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
-import com.cloudera.sqoop.orm.AvroSchemaGenerator;
+import org.apache.sqoop.orm.AvroSchemaGenerator;
 import org.apache.sqoop.util.FileSystemUtil;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
