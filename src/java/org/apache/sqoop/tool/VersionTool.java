@@ -19,7 +19,7 @@
 package org.apache.sqoop.tool;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.cli.ToolOptions;
+import org.apache.sqoop.cli.ToolOptions;
 
 /**
  * Tool that prints Sqoop's version.

@@ -28,7 +28,7 @@ import org.apache.hadoop.util.StringUtils;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
-import com.cloudera.sqoop.cli.ToolOptions;
+import org.apache.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.mapreduce.MergeJob;
 import org.apache.sqoop.util.LoggingUtils;
 

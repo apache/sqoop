@@ -33,7 +33,7 @@ import com.cloudera.sqoop.SqoopOptions;
 
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 
-import com.cloudera.sqoop.cli.ToolOptions;
+import org.apache.sqoop.cli.ToolOptions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

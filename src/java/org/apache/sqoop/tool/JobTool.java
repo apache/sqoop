@@ -18,9 +18,9 @@
 
 package org.apache.sqoop.tool;
 
-import static com.cloudera.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
-import static com.cloudera.sqoop.metastore.GenericJobStorage.META_PASSWORD_KEY;
-import static com.cloudera.sqoop.metastore.GenericJobStorage.META_USERNAME_KEY;
+import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
+import static org.apache.sqoop.metastore.GenericJobStorage.META_PASSWORD_KEY;
+import static org.apache.sqoop.metastore.GenericJobStorage.META_USERNAME_KEY;
 
 import java.io.IOException;
 
@@ -41,7 +41,7 @@ import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.ToolRunner;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.cli.ToolOptions;
+import org.apache.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
