@@ -52,7 +52,7 @@ import org.apache.sqoop.mapreduce.sqlserver.SqlServerUpsertOutputFormat;
  * driver.
  */
 public class SQLServerManager
-    extends com.cloudera.sqoop.manager.InformationSchemaManager {
+    extends InformationSchemaManager {
 
   public static final String SCHEMA = "schema";
   public static final String TABLE_HINTS = "table-hints";

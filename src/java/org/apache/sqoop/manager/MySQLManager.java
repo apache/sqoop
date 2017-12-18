@@ -49,7 +49,7 @@ import org.apache.sqoop.util.LoggingUtils;
  * Manages connections to MySQL databases.
  */
 public class MySQLManager
-    extends com.cloudera.sqoop.manager.InformationSchemaManager {
+    extends InformationSchemaManager {
 
   public static final Log LOG = LogFactory.getLog(MySQLManager.class.getName());
 
