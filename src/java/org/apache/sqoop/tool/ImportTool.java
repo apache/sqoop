@@ -44,7 +44,7 @@ import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.hive.HiveImport;
 import org.apache.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.mapreduce.MergeJob;
+import org.apache.sqoop.mapreduce.MergeJob;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.metastore.JobStorageFactory;
