@@ -38,7 +38,6 @@ import org.junit.Test;
 
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.util.ImportException;

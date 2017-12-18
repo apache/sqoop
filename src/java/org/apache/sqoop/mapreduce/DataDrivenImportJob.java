@@ -44,7 +44,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.ImportJobBase;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;

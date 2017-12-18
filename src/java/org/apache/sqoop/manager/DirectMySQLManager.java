@@ -47,7 +47,7 @@ public class DirectMySQLManager
    * the database and upload the files directly to HDFS.
    */
   @Override
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
 
     context.setConnManager(this);

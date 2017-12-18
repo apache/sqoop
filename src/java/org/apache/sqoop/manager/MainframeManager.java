@@ -63,7 +63,7 @@ public class MainframeManager extends org.apache.sqoop.manager.ConnManager {
    * partitioned dataset with MainframeDatasetInputFormat.
    */
   @Override
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     String pdsName = context.getTableName();
     String jarFile = context.getJarFile();

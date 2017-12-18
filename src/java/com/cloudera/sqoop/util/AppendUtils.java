@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop.util;
 
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

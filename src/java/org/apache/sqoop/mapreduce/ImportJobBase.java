@@ -21,7 +21,7 @@ package org.apache.sqoop.mapreduce;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.io.CodecMap;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.JobBase;
 import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.ImportException;

@@ -345,7 +345,7 @@ public class DirectPostgresqlManager
    * Import the table into HDFS by using psql to pull the data out of the db
    * via COPY FILE TO STDOUT.
    */
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
     throws IOException, ImportException {
 
     context.setConnManager(this);

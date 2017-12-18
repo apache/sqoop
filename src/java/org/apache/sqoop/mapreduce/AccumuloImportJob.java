@@ -42,7 +42,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.FieldMapProcessor;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.DataDrivenImportJob;
 import com.cloudera.sqoop.util.ImportException;
 

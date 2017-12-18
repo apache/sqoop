@@ -628,7 +628,7 @@ public abstract class SqlManager
    * @throws ImportException if the import is misconfigured.
    */
   protected void checkTableImportOptions(
-          com.cloudera.sqoop.manager.ImportJobContext context)
+      org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     String tableName = context.getTableName();
     SqoopOptions opts = context.getOptions();
@@ -653,7 +653,7 @@ public abstract class SqlManager
    * Default implementation of importTable() is to launch a MapReduce job
    * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat.
    */
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     String tableName = context.getTableName();
     String jarFile = context.getJarFile();
@@ -697,7 +697,7 @@ public abstract class SqlManager
    * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat,
    * using its free-form query importer.
    */
-  public void importQuery(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importQuery(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     String jarFile = context.getJarFile();
     SqoopOptions opts = context.getOptions();

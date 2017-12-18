@@ -19,7 +19,7 @@
 package com.cloudera.sqoop.mapreduce;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.hadoop.mapreduce.InputFormat;
 
 /**

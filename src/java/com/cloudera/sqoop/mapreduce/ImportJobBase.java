@@ -22,7 +22,7 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

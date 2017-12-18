@@ -100,7 +100,7 @@ public class MySQLManager
   }
 
   @Override
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
 
     // Check that we're not doing a MapReduce from localhost. If we are, point

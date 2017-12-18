@@ -21,7 +21,7 @@ package com.cloudera.sqoop.mapreduce;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

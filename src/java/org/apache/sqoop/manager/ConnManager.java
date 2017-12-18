@@ -579,13 +579,13 @@ public abstract class ConnManager {
    * Perform an import of a table from the database into HDFS.
    */
   public abstract void importTable(
-          com.cloudera.sqoop.manager.ImportJobContext context)
+      org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException;
 
   /**
    * Perform an import of a free-form query from the database into HDFS.
    */
-  public void importQuery(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importQuery(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     throw new ImportException(
         "This database only supports table-based imports.");

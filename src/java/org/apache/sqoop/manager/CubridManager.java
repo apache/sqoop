@@ -50,7 +50,7 @@ public class CubridManager extends
 
   @Override
   public void importTable(
-      com.cloudera.sqoop.manager.ImportJobContext context)
+      org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
 
     // Then run the normal importTable() method.

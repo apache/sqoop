@@ -95,7 +95,7 @@ public class Db2Manager
    */
   @Override
   public void importTable(
-          com.cloudera.sqoop.manager.ImportJobContext context)
+      org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     context.setConnManager(this);
     // Specify the DB2-specific DBInputFormat for import.

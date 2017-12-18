@@ -37,7 +37,7 @@ import org.apache.sqoop.io.SplittingOutputStream;
 import org.apache.sqoop.io.SplittableBufferedWriter;
 
 import org.apache.hadoop.util.Shell;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 
 /**
  * Utility methods that are common to various the direct import managers.

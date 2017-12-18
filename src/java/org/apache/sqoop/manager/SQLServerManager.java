@@ -134,7 +134,7 @@ public class SQLServerManager
    */
   @Override
   public void importTable(
-          com.cloudera.sqoop.manager.ImportJobContext context)
+      org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     // We're the correct connection manager
     context.setConnManager(this);
@@ -389,7 +389,7 @@ public class SQLServerManager
    * SQLServerDBInputFormat which handles connection failures while
    * using free-form query importer.
    */
-  public void importQuery(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importQuery(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     if (!isNonResilientOperation()) {
       // Enable connection recovery only if split column is provided
@@ -408,7 +408,7 @@ public class SQLServerManager
    * SQLServerConnectionFailureHandler by default.
    */
   protected void configureConnectionRecoveryForImport(
-      com.cloudera.sqoop.manager.ImportJobContext context) {
+      org.apache.sqoop.manager.ImportJobContext context) {
 
     Configuration conf = context.getOptions().getConf();
 
