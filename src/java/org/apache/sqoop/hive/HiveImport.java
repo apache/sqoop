@@ -47,7 +47,7 @@ import org.apache.sqoop.util.SubprocessSecurityManager;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.util.ExitSecurityException;
+import org.apache.sqoop.util.ExitSecurityException;
 
 /**
  * Utility to import a table into the Hive metastore. Manages the connection

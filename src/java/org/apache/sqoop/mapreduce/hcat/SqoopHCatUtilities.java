@@ -76,7 +76,7 @@ import org.apache.sqoop.util.SubprocessSecurityManager;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.util.ExitSecurityException;
+import org.apache.sqoop.util.ExitSecurityException;
 
 /**
  * Utility methods for the HCatalog support for Sqoop.
