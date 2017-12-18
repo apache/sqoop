@@ -40,7 +40,7 @@ import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.util.ClassLoaderStack;
-import com.cloudera.sqoop.util.Jars;
+import org.apache.sqoop.util.Jars;
 
 /**
  * Base class for configuring and running a MapReduce job.
