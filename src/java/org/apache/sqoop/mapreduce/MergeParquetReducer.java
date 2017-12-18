@@ -33,7 +33,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.sqoop.avro.AvroUtil;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 
 public class MergeParquetReducer extends Reducer<Text, MergeRecord,GenericRecord,NullWritable> {

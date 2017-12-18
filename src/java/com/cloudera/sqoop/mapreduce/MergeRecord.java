@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

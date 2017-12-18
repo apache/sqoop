@@ -49,7 +49,7 @@ import org.apache.sqoop.lib.JdbcWritableBridge;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.lib.LobSerializer;
 import org.apache.sqoop.lib.RecordParser;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.ConnManager;
 
 /**

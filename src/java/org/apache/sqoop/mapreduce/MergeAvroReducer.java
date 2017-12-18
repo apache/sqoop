@@ -24,7 +24,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroWrapper;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.sqoop.avro.AvroUtil;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 public class MergeAvroReducer extends MergeReducerBase<AvroWrapper<GenericRecord>, NullWritable> {
   private AvroWrapper<GenericRecord> wrapper;

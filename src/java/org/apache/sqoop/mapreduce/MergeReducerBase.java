@@ -23,7 +23,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Reducer.Context;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 public abstract class MergeReducerBase<KEYOUT, VALUEOUT> extends
     Reducer<Text, MergeRecord, KEYOUT, VALUEOUT> {

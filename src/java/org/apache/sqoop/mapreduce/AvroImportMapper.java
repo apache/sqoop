@@ -19,7 +19,7 @@
 package org.apache.sqoop.mapreduce;
 
 import org.apache.sqoop.lib.LargeObjectLoader;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;

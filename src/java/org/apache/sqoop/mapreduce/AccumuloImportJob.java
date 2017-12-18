@@ -40,7 +40,7 @@ import org.apache.sqoop.accumulo.AccumuloUtil;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.FieldMapProcessor;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.DataDrivenImportJob;

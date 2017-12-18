@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.mapreduce;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import com.cloudera.sqoop.orm.ClassWriter;
 import org.apache.avro.Conversions;

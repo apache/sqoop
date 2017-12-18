@@ -20,7 +20,7 @@ package com.cloudera.sqoop.mapreduce;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

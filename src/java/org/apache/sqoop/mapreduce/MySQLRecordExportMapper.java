@@ -20,7 +20,7 @@ package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
 import org.apache.hadoop.io.LongWritable;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.MySQLExportMapper;
 
 /**
