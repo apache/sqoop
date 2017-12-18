@@ -40,7 +40,7 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.util.AppendUtils;
+import org.apache.sqoop.util.AppendUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
