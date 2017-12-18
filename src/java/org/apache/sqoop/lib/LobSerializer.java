@@ -34,7 +34,7 @@ public final class LobSerializer {
   }
 
   public static void writeBlob(
-      com.cloudera.sqoop.lib.BlobRef blob, DataOutput out) throws IOException {
+      org.apache.sqoop.lib.BlobRef blob, DataOutput out) throws IOException {
     blob.write(out);
   }
 
@@ -45,9 +45,9 @@ public final class LobSerializer {
     return clob;
   }
 
-  public static com.cloudera.sqoop.lib.BlobRef readBlobFields(
+  public static org.apache.sqoop.lib.BlobRef readBlobFields(
       DataInput in) throws IOException {
-    com.cloudera.sqoop.lib.BlobRef blob = new com.cloudera.sqoop.lib.BlobRef();
+    org.apache.sqoop.lib.BlobRef blob = new org.apache.sqoop.lib.BlobRef();
     blob.readFields(in);
     return blob;
   }

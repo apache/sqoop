@@ -107,7 +107,7 @@ public class BlobRef extends
    * @return a new BlobRef containing a reference to an external BLOB, or
    * an empty BlobRef if the data to be parsed is actually inline.
    */
-  public static com.cloudera.sqoop.lib.BlobRef parse(String inputString) {
+  public static org.apache.sqoop.lib.BlobRef parse(String inputString) {
     // If inputString is of the form 'externalLob(lf,%s,%d,%d)', then this is
     // an external BLOB stored at the LobFile indicated by '%s' with the next
     // two arguments representing its offset and length in the file.
@@ -118,13 +118,13 @@ public class BlobRef extends
     if (m.matches()) {
       // This is a LobFile. Extract the filename, offset and len from the
       // matcher.
-      return new com.cloudera.sqoop.lib.BlobRef(m.group(1),
+      return new org.apache.sqoop.lib.BlobRef(m.group(1),
           Long.valueOf(m.group(2)), Long.valueOf(m.group(3)));
     } else {
       // This is inline BLOB string data.
       LOG.warn(
           "Reparsing inline BLOB data is not supported; use SequenceFiles.");
-      return new com.cloudera.sqoop.lib.BlobRef();
+      return new org.apache.sqoop.lib.BlobRef();
     }
   }
 }

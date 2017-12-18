@@ -44,7 +44,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.sqoop.manager.oracle.util.*;
 import org.junit.Test;
 
-import com.cloudera.sqoop.lib.BlobRef;
+import org.apache.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.OracleUtils;

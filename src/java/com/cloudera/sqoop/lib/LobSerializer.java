@@ -21,6 +21,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.sqoop.lib.BlobRef;
+
 /**
  * Serialize LOB classes to/from DataInput and DataOutput objects.
  *
