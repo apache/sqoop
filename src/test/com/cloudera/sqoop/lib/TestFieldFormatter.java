@@ -19,6 +19,8 @@
 package com.cloudera.sqoop.lib;
 
 import org.junit.Test;
+import org.apache.sqoop.lib.FieldFormatter;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
