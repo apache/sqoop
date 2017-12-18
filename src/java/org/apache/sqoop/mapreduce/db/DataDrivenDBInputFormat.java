@@ -42,7 +42,6 @@ import org.apache.sqoop.mapreduce.DBWritable;
 
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader;
-import com.cloudera.sqoop.mapreduce.db.TextSplitter;
 import org.apache.sqoop.validation.ValidationException;
 
 /**
