@@ -46,7 +46,7 @@ import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobData;
 
 /**
  * Layer on top of SqoopTool that provides some basic common code

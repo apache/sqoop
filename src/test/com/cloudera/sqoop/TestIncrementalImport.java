@@ -43,7 +43,7 @@ import org.apache.sqoop.hive.HiveImport;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.HsqldbManager;
 import org.apache.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;

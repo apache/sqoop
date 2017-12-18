@@ -36,7 +36,7 @@ import org.junit.Test;
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.SqoopTool;

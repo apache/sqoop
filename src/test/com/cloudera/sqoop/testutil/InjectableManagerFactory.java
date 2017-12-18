@@ -20,7 +20,7 @@ package com.cloudera.sqoop.testutil;
 
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobData;
 
 /**
  * ManagerFactory that is used for testing; this accepts any

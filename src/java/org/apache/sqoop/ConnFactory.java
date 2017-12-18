@@ -39,7 +39,7 @@ import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.DefaultManagerFactory;
 import org.apache.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobData;
 
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.apache.sqoop.manager.GenericJdbcManager;

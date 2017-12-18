@@ -27,7 +27,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.metastore.hsqldb.HsqldbMetaStore;
+import org.apache.sqoop.metastore.hsqldb.HsqldbMetaStore;
 
 /**
  * Tool that runs a standalone Sqoop metastore.

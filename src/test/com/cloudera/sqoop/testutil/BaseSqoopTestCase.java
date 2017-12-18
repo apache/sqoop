@@ -21,7 +21,7 @@ package com.cloudera.sqoop.testutil;
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.google.common.collect.ObjectArrays;
 import org.apache.commons.logging.Log;

@@ -206,8 +206,8 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
         options.setConnectString(metaConnectString);
         options.setUsername(metaUser);
         options.setPassword(metaPass);
-        com.cloudera.sqoop.metastore.JobData jd =
-                new com.cloudera.sqoop.metastore.JobData(options, new JobTool());
+        org.apache.sqoop.metastore.JobData jd =
+                new org.apache.sqoop.metastore.JobData(options, new JobTool());
         DefaultManagerFactory dmf = new DefaultManagerFactory();
         cm = dmf.accept(jd);
         connMeta= cm.getConnection();

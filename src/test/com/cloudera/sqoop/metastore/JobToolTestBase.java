@@ -95,7 +95,7 @@ public abstract class JobToolTestBase extends BaseSqoopTestCase {
 
     private Connection getConnection(SqoopOptions options) {
         try {
-            com.cloudera.sqoop.metastore.JobData jd = new com.cloudera.sqoop.metastore.JobData(options, null);
+            org.apache.sqoop.metastore.JobData jd = new org.apache.sqoop.metastore.JobData(options, null);
             DefaultManagerFactory dmf = new DefaultManagerFactory();
             cm = dmf.accept(jd);
             return cm.getConnection();

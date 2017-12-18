@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.metastore.JobStorage;
 
 /**
  * Factory that produces the correct JobStorage system to work with

@@ -33,6 +33,9 @@ import com.cloudera.sqoop.tool.VersionTool;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.DefaultManagerFactory;
 import org.apache.sqoop.tool.ImportTool;
+import org.apache.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobStorage;
+import org.apache.sqoop.metastore.JobStorageFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -301,11 +304,11 @@ public abstract class SavedJobsTestBase {
             outData.getSqoopTool().getToolName());
   }
 
-  private com.cloudera.sqoop.metastore.JobData createTestJobData(String setTableName) throws IOException {
+  private org.apache.sqoop.metastore.JobData createTestJobData(String setTableName) throws IOException {
     SqoopOptions testOpts = new SqoopOptions();
     testOpts.setTableName(setTableName);
     ImportTool testTool = new ImportTool();
-    return new com.cloudera.sqoop.metastore.JobData(testOpts,testTool);
+    return new org.apache.sqoop.metastore.JobData(testOpts,testTool);
 
   }
 }

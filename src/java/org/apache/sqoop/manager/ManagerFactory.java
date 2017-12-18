@@ -19,7 +19,7 @@
 package org.apache.sqoop.manager;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobData;
 
 /**
  * Interface for factory classes for ConnManager implementations.

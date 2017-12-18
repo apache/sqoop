@@ -42,9 +42,11 @@ import org.apache.hadoop.util.ToolRunner;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.metastore.JobStorage;
-import com.cloudera.sqoop.metastore.JobStorageFactory;
+import org.apache.sqoop.metastore.GenericJobStorage;
+import org.apache.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobStorage;
+import org.apache.sqoop.metastore.JobStorageFactory;
+import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.metastore.PasswordRedactor;
 import org.apache.sqoop.util.LoggingUtils;
 
