@@ -40,7 +40,7 @@ import org.apache.sqoop.lib.FieldFormatter;
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.manager.MySQLUtils;
 import org.apache.sqoop.util.ErrorableAsyncSink;
-import com.cloudera.sqoop.util.ErrorableThread;
+import org.apache.sqoop.util.ErrorableThread;
 import com.cloudera.sqoop.util.LoggingAsyncSink;
 
 /**
