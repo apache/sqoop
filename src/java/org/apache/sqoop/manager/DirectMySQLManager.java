@@ -23,7 +23,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.MySQLDumpImportJob;
+import org.apache.sqoop.mapreduce.MySQLDumpImportJob;
 import com.cloudera.sqoop.mapreduce.MySQLExportJob;
 import com.cloudera.sqoop.util.ImportException;
 import com.cloudera.sqoop.util.ExportException;
