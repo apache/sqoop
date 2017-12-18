@@ -70,13 +70,13 @@ public final class CodecMap {
   /**
    * Given a codec name, return the name of the concrete class
    * that implements it (or 'null' in the case of the "none" codec).
-   * @throws com.cloudera.sqoop.io.UnsupportedCodecException if a codec cannot
+   * @throws org.apache.sqoop.io.UnsupportedCodecException if a codec cannot
    * be found with the supplied name.
    */
   public static String getCodecClassName(String codecName)
-      throws com.cloudera.sqoop.io.UnsupportedCodecException {
+      throws org.apache.sqoop.io.UnsupportedCodecException {
     if (!codecNames.containsKey(codecName)) {
-      throw new com.cloudera.sqoop.io.UnsupportedCodecException(codecName);
+      throw new org.apache.sqoop.io.UnsupportedCodecException(codecName);
     }
 
     return codecNames.get(codecName);
@@ -85,11 +85,11 @@ public final class CodecMap {
   /**
    * Given a codec name, instantiate the concrete implementation
    * class that implements it.
-   * @throws com.cloudera.sqoop.io.UnsupportedCodecException if a codec cannot
+   * @throws org.apache.sqoop.io.UnsupportedCodecException if a codec cannot
    * be found with the supplied name.
    */
   public static CompressionCodec getCodec(String codecName,
-    Configuration conf) throws com.cloudera.sqoop.io.UnsupportedCodecException {
+    Configuration conf) throws org.apache.sqoop.io.UnsupportedCodecException {
     // Try standard Hadoop mechanism first
     CompressionCodec codec = getCodecByName(codecName, conf);
     if (codec != null) {
@@ -108,7 +108,7 @@ public final class CodecMap {
       return (CompressionCodec) ReflectionUtils.newInstance(
           codecClass, conf);
     } catch (ClassNotFoundException cnfe) {
-      throw new com.cloudera.sqoop.io.UnsupportedCodecException(
+      throw new org.apache.sqoop.io.UnsupportedCodecException(
           "Cannot find codec class "
           + codecClassName + " for codec " + codecName);
     }
@@ -162,11 +162,11 @@ public final class CodecMap {
    *
    * @return the short name of the codec
    *
-   * @throws com.cloudera.sqoop.io.UnsupportedCodecException
+   * @throws org.apache.sqoop.io.UnsupportedCodecException
    *          if no short name could be found
    */
   public static String getCodecShortNameByName(String codecName,
-    Configuration conf) throws com.cloudera.sqoop.io.UnsupportedCodecException {
+    Configuration conf) throws org.apache.sqoop.io.UnsupportedCodecException {
     if (codecNames.containsKey(codecName)) {
       return codecName;
     }
@@ -186,7 +186,7 @@ public final class CodecMap {
       return simpleName.toLowerCase();
     }
 
-    throw new com.cloudera.sqoop.io.UnsupportedCodecException(
+    throw new org.apache.sqoop.io.UnsupportedCodecException(
       "Cannot find codec class " + codecName + " for codec " + codecName);
   }
 
