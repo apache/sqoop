@@ -19,7 +19,7 @@
 package org.apache.sqoop.metastore;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.SqoopTool;
 
 /**
  * Container for all job data that should be stored to a

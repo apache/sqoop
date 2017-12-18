@@ -17,6 +17,9 @@
  */
 package com.cloudera.sqoop.tool;
 
+
+import org.apache.sqoop.tool.SqoopTool;
+
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.
  */

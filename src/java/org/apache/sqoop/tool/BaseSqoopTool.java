@@ -55,7 +55,7 @@ import org.apache.sqoop.metastore.JobData;
  * Subclasses should call init() at the top of their run() method,
  * and call destroy() at the end in a finally block.
  */
-public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
+public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
 
   public static final String METADATA_TRANSACTION_ISOLATION_LEVEL = "metadata-transaction-isolation-level";
 

@@ -33,7 +33,7 @@ import org.apache.hadoop.fs.Path;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.Sqoop;
 import org.apache.sqoop.orm.CompilationManager;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.junit.Before;

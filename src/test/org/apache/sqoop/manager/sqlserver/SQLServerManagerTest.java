@@ -39,7 +39,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.SqoopTool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

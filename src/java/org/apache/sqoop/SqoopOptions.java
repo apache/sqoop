@@ -50,7 +50,7 @@ import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.LargeObjectLoader;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
 

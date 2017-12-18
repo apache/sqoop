@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.manager.DefaultManagerFactory;
 import org.apache.sqoop.manager.JdbcDrivers;
 

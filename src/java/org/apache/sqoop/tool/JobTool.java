@@ -182,8 +182,7 @@ public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     // Now that the tool is fully configured, materialize the job.
     //TODO(jarcec): Remove the cast when JobData will be moved to apache package
-    JobData jobData = new JobData(jobOptions,
-            (com.cloudera.sqoop.tool.SqoopTool)jobTool);
+    JobData jobData = new JobData(jobOptions, jobTool);
     this.storage.create(jobName, jobData);
     return 0; // Success.
   }

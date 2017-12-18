@@ -29,7 +29,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.OptionsFileUtil;
 
 import static com.cloudera.sqoop.SqoopOptions.isSqoopRethrowSystemPropertySet;

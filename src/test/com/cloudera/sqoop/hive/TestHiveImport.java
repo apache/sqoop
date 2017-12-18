@@ -52,7 +52,7 @@ import com.cloudera.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.tool.CodeGenTool;
 import org.apache.sqoop.tool.CreateHiveTableTool;
 import org.apache.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.SqoopTool;
 import org.apache.commons.cli.ParseException;
 import org.junit.rules.ExpectedException;
 import org.kitesdk.data.Dataset;

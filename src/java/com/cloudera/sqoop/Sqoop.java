@@ -20,7 +20,7 @@ package com.cloudera.sqoop;
 
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.SqoopTool;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

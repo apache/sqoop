@@ -412,7 +412,7 @@ public abstract class SqoopTool {
     // This tool is the "active" tool; bind it in the SqoopOptions.
     //TODO(jarcec): Remove the cast when SqoopOptions will be moved
     //              to apache package
-    out.setActiveSqoopTool((com.cloudera.sqoop.tool.SqoopTool)this);
+    out.setActiveSqoopTool(this);
 
     String [] toolArgs = args; // args after generic parser is done.
     if (useGenericOptions) {
