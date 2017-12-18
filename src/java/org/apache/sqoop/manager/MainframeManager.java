@@ -38,7 +38,7 @@ import org.apache.sqoop.mapreduce.mainframe.MainframeDatasetInputFormat;
 import org.apache.sqoop.mapreduce.mainframe.MainframeImportJob;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 
 /**

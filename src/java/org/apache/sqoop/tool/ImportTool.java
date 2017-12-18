@@ -52,7 +52,7 @@ import org.apache.sqoop.orm.ClassWriter;
 import org.apache.sqoop.orm.TableClassName;
 import org.apache.sqoop.util.AppendUtils;
 import org.apache.sqoop.util.ClassLoaderStack;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 

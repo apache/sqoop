@@ -33,7 +33,7 @@ import org.apache.sqoop.mapreduce.ExportBatchOutputFormat;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
 import org.apache.sqoop.mapreduce.JdbcUpsertExportJob;
 import org.apache.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * Manages connections to CUBRID databases.

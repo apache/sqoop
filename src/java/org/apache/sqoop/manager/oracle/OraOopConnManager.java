@@ -40,7 +40,7 @@ import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
 import org.apache.sqoop.mapreduce.JdbcUpdateExportJob;
 import org.apache.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * OraOop manager for high performance Oracle import / export.

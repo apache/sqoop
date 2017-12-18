@@ -41,7 +41,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.ExportBatchOutputFormat;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
 import org.apache.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**

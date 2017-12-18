@@ -40,7 +40,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
 import org.apache.sqoop.mapreduce.JdbcUpdateExportJob;
 import org.apache.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.sqlserver.SqlServerExportBatchOutputFormat;

@@ -24,7 +24,7 @@ import org.apache.sqoop.io.CodecMap;
 import org.apache.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.JobBase;
 import org.apache.sqoop.orm.TableClassName;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.mapred.AvroJob;
 import org.apache.commons.logging.Log;

@@ -37,7 +37,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * Manages connections to Netezza databases.

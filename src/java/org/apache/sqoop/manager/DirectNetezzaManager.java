@@ -40,7 +40,7 @@ import org.apache.sqoop.mapreduce.netezza.NetezzaExternalTableImportJob;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * Manages direct mode transfers from Netezza databases using the external table

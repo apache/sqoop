@@ -26,7 +26,7 @@ import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.manager.SqlManager;
 import org.apache.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * Test external connection factory classes on the classpath.

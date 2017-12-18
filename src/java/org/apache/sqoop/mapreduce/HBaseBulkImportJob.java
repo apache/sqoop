@@ -41,7 +41,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import org.apache.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 import com.cloudera.sqoop.SqoopOptions;
 import com.google.common.base.Preconditions;
 

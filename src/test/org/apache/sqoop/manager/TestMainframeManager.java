@@ -40,7 +40,7 @@ import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.util.ImportException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
