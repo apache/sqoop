@@ -38,7 +38,7 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
-import com.cloudera.sqoop.mapreduce.MySQLExportMapper;
+import org.apache.sqoop.mapreduce.MySQLExportMapper;
 import org.junit.Ignore;
 import org.junit.Test;
 
