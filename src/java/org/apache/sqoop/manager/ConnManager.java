@@ -41,7 +41,7 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.hive.HiveTypes;
+import org.apache.sqoop.hive.HiveTypes;
 import com.cloudera.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.manager.SqlManager;
