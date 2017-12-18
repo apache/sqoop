@@ -34,6 +34,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.sqoop.ConnFactory;
+import org.apache.sqoop.manager.SQLServerManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

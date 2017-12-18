@@ -22,6 +22,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.manager.SQLServerManager;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
