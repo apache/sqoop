@@ -34,7 +34,7 @@ import org.junit.After;
 
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.tool.ImportAllTablesTool;
+import org.apache.sqoop.tool.ImportAllTablesTool;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
