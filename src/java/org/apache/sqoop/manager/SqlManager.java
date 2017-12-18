@@ -49,7 +49,7 @@ import org.apache.sqoop.util.SqlTypeMap;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.hbase.HBaseUtil;
-import com.cloudera.sqoop.mapreduce.DataDrivenImportJob;
+import org.apache.sqoop.mapreduce.DataDrivenImportJob;
 import com.cloudera.sqoop.mapreduce.HBaseImportJob;
 import com.cloudera.sqoop.mapreduce.ImportJobBase;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
