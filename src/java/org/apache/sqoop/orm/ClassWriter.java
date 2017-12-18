@@ -39,7 +39,7 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.lib.BigDecimalSerializer;
+import org.apache.sqoop.lib.BigDecimalSerializer;
 import com.cloudera.sqoop.lib.BlobRef;
 import com.cloudera.sqoop.lib.BooleanParser;
 import com.cloudera.sqoop.lib.ClobRef;
