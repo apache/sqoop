@@ -52,7 +52,7 @@ import org.apache.sqoop.hbase.HBaseUtil;
 import org.apache.sqoop.mapreduce.DataDrivenImportJob;
 import org.apache.sqoop.mapreduce.HBaseImportJob;
 import org.apache.sqoop.mapreduce.ImportJobBase;
-import com.cloudera.sqoop.mapreduce.JdbcExportJob;
+import org.apache.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import com.cloudera.sqoop.util.ExportException;
