@@ -57,7 +57,7 @@ import org.apache.sqoop.mapreduce.JdbcUpdateExportJob;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import org.apache.sqoop.util.ExportException;
 import org.apache.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.ResultSetPrinter;
+import org.apache.sqoop.util.ResultSetPrinter;
 
 /**
  * ConnManager implementation for generic SQL-compliant database.

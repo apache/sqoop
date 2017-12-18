@@ -37,7 +37,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.util.ResultSetPrinter;
+import org.apache.sqoop.util.ResultSetPrinter;
 
 /**
  * Tool that evaluates a SQL statement and displays the results.
