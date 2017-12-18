@@ -25,7 +25,6 @@ import org.apache.sqoop.mapreduce.DBWritable;
 
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBRecordReader;
 import com.cloudera.sqoop.mapreduce.db.OracleDBRecordReader;
 
 /**

@@ -44,7 +44,7 @@ import org.apache.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
 import com.cloudera.sqoop.mapreduce.db.DBSplitter;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBRecordReader;
+import org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader;
 import com.cloudera.sqoop.mapreduce.db.DateSplitter;
 import com.cloudera.sqoop.mapreduce.db.FloatSplitter;
 import com.cloudera.sqoop.mapreduce.db.IntegerSplitter;

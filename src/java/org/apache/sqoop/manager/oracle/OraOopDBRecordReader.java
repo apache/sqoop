@@ -30,7 +30,7 @@ import org.apache.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBRecordReader;
+import org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.OraOopConstants.
