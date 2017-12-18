@@ -33,7 +33,7 @@ import com.cloudera.sqoop.util.ExportException;
  * so we can use mysqldump to get really fast dumps.
  */
 public class DirectMySQLManager
-    extends com.cloudera.sqoop.manager.MySQLManager {
+    extends MySQLManager {
 
   public static final Log LOG = LogFactory.getLog(
       DirectMySQLManager.class.getName());

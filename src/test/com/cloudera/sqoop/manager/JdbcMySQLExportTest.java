@@ -26,6 +26,7 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.manager.MySQLManager;
 import org.junit.After;
 import org.junit.Before;
 
