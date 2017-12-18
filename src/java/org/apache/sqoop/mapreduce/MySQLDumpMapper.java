@@ -41,7 +41,7 @@ import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.manager.MySQLUtils;
 import org.apache.sqoop.util.ErrorableAsyncSink;
 import org.apache.sqoop.util.ErrorableThread;
-import com.cloudera.sqoop.util.LoggingAsyncSink;
+import org.apache.sqoop.util.LoggingAsyncSink;
 
 /**
  * Mapper that opens up a pipe to mysqldump and pulls data directly.
