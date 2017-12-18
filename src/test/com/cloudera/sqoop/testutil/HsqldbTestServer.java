@@ -31,7 +31,7 @@ import org.hsqldb.Server;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.HsqldbManager;
+import org.apache.sqoop.manager.HsqldbManager;
 
 /**
  * Create a simple hsqldb server and schema to use for testing.

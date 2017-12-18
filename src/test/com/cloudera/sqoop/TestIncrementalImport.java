@@ -41,7 +41,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.hive.HiveImport;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.HsqldbManager;
+import org.apache.sqoop.manager.HsqldbManager;
 import com.cloudera.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
