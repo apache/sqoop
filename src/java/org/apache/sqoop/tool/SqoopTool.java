@@ -46,7 +46,6 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.SqoopParser;
 import org.apache.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.tool.ToolDesc;
 
 /**
  * Base class for Sqoop subprograms (e.g., SqoopImport, SqoopExport, etc.)

@@ -38,6 +38,7 @@ import org.apache.sqoop.cli.ToolOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.tool.SqoopTool;
+import org.apache.sqoop.tool.ToolDesc;
 
 import org.junit.Test;
 
