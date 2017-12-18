@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hadoop.io.Text;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
+import org.apache.sqoop.mapreduce.db.DBInputFormat;
 
 class OraOopDBInputSplit extends DBInputFormat.DBInputSplit {
 

@@ -28,8 +28,8 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit;
+import org.apache.sqoop.mapreduce.db.DBInputFormat;
+import org.apache.sqoop.mapreduce.db.DBInputFormat.DBInputSplit;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader;
 
 import org.apache.sqoop.SqoopOptions;

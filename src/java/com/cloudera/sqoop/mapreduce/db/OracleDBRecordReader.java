@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBInputFormat;
 
 /**
  * A RecordReader that reads records from an Oracle SQL table.

@@ -35,8 +35,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.mapreduce.DBWritable;
 
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat.NullDBWritable;
-
 /**
  * A container for configuration property names for jobs with DB input/output.
  *
@@ -401,7 +399,7 @@ public class DBConfiguration {
 
   public Class<?> getInputClass() {
     return conf.getClass(DBConfiguration.INPUT_CLASS_PROPERTY,
-                         NullDBWritable.class);
+                         DBInputFormat.NullDBWritable.class);
   }
 
   public void setInputClass(Class<? extends DBWritable> inputClass) {

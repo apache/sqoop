@@ -229,7 +229,7 @@ extends InputFormat<LongWritable, T> implements Configurable  {
   }
 
   protected RecordReader<LongWritable, T> createDBRecordReader(
-      com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit split,
+      DBInputFormat.DBInputSplit split,
       Configuration conf) throws IOException {
 
     @SuppressWarnings("unchecked")
@@ -263,7 +263,7 @@ extends InputFormat<LongWritable, T> implements Configurable  {
       TaskAttemptContext context) throws IOException, InterruptedException {
 
     return createDBRecordReader(
-        (com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit) split,
+        (DBInputFormat.DBInputSplit) split,
         context.getConfiguration());
   }
 

@@ -23,8 +23,6 @@ import java.sql.SQLException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.mapreduce.DBWritable;
 
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-
 /**
  * A RecordReader that reads records from DB2 via DataDrivenDBRecordReader.
  */

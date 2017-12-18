@@ -30,7 +30,6 @@ import org.apache.sqoop.mapreduce.DBWritable;
 import com.cloudera.sqoop.mapreduce.db.DBSplitter;
 import com.cloudera.sqoop.mapreduce.db.OracleDataDrivenDBRecordReader;
 import com.cloudera.sqoop.mapreduce.db.OracleDateSplitter;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit;
 
 /**
  * A InputFormat that reads input data from an SQL table in an Oracle db.
