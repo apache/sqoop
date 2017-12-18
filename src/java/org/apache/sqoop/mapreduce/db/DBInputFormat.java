@@ -44,7 +44,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.mapreduce.DBWritable;
 
 import org.apache.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.mapreduce.db.OracleDBRecordReader;
 
 /**
  * A InputFormat that reads input data from an SQL table.
