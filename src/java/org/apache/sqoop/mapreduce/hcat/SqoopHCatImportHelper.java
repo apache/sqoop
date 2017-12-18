@@ -56,7 +56,7 @@ import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.FieldFormatter;
-import com.cloudera.sqoop.lib.LargeObjectLoader;
+import org.apache.sqoop.lib.LargeObjectLoader;
 
 /**
  * Helper class for Sqoop HCat Integration import jobs.

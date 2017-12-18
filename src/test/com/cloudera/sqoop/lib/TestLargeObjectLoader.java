@@ -32,6 +32,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
+import org.apache.sqoop.lib.LargeObjectLoader;
 
 import com.cloudera.sqoop.testutil.MockResultSet;
 import org.junit.Before;

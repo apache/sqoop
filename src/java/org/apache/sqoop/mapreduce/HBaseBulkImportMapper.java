@@ -33,7 +33,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.hbase.PutTransformer;
 import org.apache.sqoop.hbase.ToStringPutTransformer;
 
-import com.cloudera.sqoop.lib.LargeObjectLoader;
+import org.apache.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import static org.apache.sqoop.hbase.HBasePutProcessor.*;

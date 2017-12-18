@@ -51,7 +51,7 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
   public abstract void parse(CharBuffer s)
       throws com.cloudera.sqoop.lib.RecordParser.ParseError;
   public abstract void loadLargeObjects(
-      com.cloudera.sqoop.lib.LargeObjectLoader objLoader)
+      org.apache.sqoop.lib.LargeObjectLoader objLoader)
       throws SQLException, IOException, InterruptedException;
 
   /**

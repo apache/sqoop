@@ -46,7 +46,7 @@ import org.apache.sqoop.lib.ClobRef;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.FieldFormatter;
 import org.apache.sqoop.lib.JdbcWritableBridge;
-import com.cloudera.sqoop.lib.LargeObjectLoader;
+import org.apache.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.lib.LobSerializer;
 import com.cloudera.sqoop.lib.RecordParser;
 import com.cloudera.sqoop.lib.SqoopRecord;
