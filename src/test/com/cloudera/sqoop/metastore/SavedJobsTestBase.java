@@ -28,7 +28,7 @@ import static org.junit.Assert.assertThat;
 
 import org.apache.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.tool.VersionTool;
+import org.apache.sqoop.tool.VersionTool;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.DefaultManagerFactory;
