@@ -288,7 +288,7 @@ more. Consequently, these must both be handled, and preferably asynchronously.
 
 In Sqoop parlance, an "async sink" is a thread that takes an +InputStream+ and
 reads it to completion. These are realized by +AsyncSink+ implementations. The
-+com.cloudera.sqoop.util.AsyncSink+ abstract class defines the operations
++org.apache.sqoop.util.AsyncSink+ abstract class defines the operations
 this factory must perform. +processStream()+ will spawn another thread to
 immediately begin handling the data read from the +InputStream+ argument; it
 must read this stream to completion. The +join()+ method allows external threads
