@@ -25,7 +25,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.MergeMapperBase;
 
 /**
  * Mapper for the merge program which operates on text files that we need to
