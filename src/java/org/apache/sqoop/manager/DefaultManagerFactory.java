@@ -40,7 +40,7 @@ import static org.apache.sqoop.manager.SupportedManagers.SQLSERVER;
  * shipped and enabled by default in Sqoop.
  */
 public class DefaultManagerFactory
-    extends com.cloudera.sqoop.manager.ManagerFactory {
+    extends org.apache.sqoop.manager.ManagerFactory {
 
   public static final Log LOG = LogFactory.getLog(
       DefaultManagerFactory.class.getName());

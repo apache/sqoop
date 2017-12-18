@@ -40,7 +40,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.Sqoop;
-import com.cloudera.sqoop.manager.ManagerFactory;
+import org.apache.sqoop.manager.ManagerFactory;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.InjectableManagerFactory;
 import com.cloudera.sqoop.testutil.InjectableConnManager;

@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ManagerFactory;
+import org.apache.sqoop.manager.ManagerFactory;
 
 /**
  * An external ConnFactory used by ExtConnFactoryTest.
