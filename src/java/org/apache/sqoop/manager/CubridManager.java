@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.mapreduce.cubrid.CubridUpsertOutputFormat;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
+import org.apache.sqoop.mapreduce.ExportBatchOutputFormat;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.mapreduce.JdbcUpsertExportJob;
 import com.cloudera.sqoop.util.ExportException;

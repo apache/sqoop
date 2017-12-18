@@ -51,7 +51,7 @@ import org.apache.sqoop.util.LoggingUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
-import com.cloudera.sqoop.mapreduce.ExportBatchOutputFormat;
+import org.apache.sqoop.mapreduce.ExportBatchOutputFormat;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;
 import com.cloudera.sqoop.mapreduce.JdbcUpsertExportJob;
 import com.cloudera.sqoop.mapreduce.OracleUpsertOutputFormat;
