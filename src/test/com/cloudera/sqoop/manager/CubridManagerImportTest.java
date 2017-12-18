@@ -34,9 +34,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.CubridManager;
 import org.apache.sqoop.manager.cubrid.CubridTestUtils;
 import org.apache.sqoop.util.FileListing;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.sqoop.manager.ConnManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

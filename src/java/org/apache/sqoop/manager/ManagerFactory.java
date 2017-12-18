@@ -19,7 +19,6 @@
 package org.apache.sqoop.manager;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
 
 /**

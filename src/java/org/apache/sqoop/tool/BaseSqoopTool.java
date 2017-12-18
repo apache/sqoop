@@ -45,7 +45,7 @@ import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
 
 /**

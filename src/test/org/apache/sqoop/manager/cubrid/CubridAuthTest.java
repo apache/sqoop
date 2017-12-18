@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 
 import static org.junit.Assert.assertTrue;

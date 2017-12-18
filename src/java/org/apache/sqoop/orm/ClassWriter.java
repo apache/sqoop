@@ -50,7 +50,7 @@ import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.lib.LobSerializer;
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 
 /**
  * Creates an ORM class to represent a table from a database.

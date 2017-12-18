@@ -65,7 +65,7 @@ import com.cloudera.sqoop.util.ResultSetPrinter;
  * ConnManager implementation to actually create the connection.
  */
 public abstract class SqlManager
-    extends com.cloudera.sqoop.manager.ConnManager {
+    extends org.apache.sqoop.manager.ConnManager {
 
   public static final Log LOG = LogFactory.getLog(SqlManager.class.getName());
 

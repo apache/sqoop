@@ -21,6 +21,7 @@ package com.cloudera.sqoop.manager;
 import org.apache.hadoop.fs.Path;
 
 import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.ConnManager;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

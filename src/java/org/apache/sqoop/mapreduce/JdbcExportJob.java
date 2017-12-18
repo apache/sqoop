@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.mapreduce;
 
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.ExportJobBase;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;

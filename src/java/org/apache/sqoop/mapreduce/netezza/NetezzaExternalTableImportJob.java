@@ -40,7 +40,7 @@ import
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;

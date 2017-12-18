@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.manager.ConnManager;
 
 import static org.apache.sqoop.manager.SupportedManagers.CUBRID;
 import static org.apache.sqoop.manager.SupportedManagers.DB2;

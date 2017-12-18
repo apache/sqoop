@@ -20,7 +20,7 @@ package com.cloudera.sqoop.testutil;
 
 import com.cloudera.sqoop.ConnFactory;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.google.common.collect.ObjectArrays;

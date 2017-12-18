@@ -18,7 +18,7 @@
 package com.cloudera.sqoop.orm;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

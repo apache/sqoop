@@ -44,7 +44,7 @@ import com.cloudera.sqoop.util.ImportException;
 /**
  * ConnManager implementation for mainframe datasets.
  */
-public class MainframeManager extends com.cloudera.sqoop.manager.ConnManager {
+public class MainframeManager extends org.apache.sqoop.manager.ConnManager {
   public static final String DEFAULT_DATASET_COLUMN_NAME = "DEFAULT_COLUMN";
   protected SqoopOptions options;
   private static final Log LOG

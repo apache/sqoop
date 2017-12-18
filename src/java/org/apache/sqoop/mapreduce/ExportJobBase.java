@@ -21,7 +21,7 @@ package org.apache.sqoop.mapreduce;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.JobBase;
 import com.cloudera.sqoop.orm.TableClassName;
