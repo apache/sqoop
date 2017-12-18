@@ -19,8 +19,6 @@ package org.apache.sqoop.mapreduce.db;
 
 import java.util.Date;
 
-import com.cloudera.sqoop.mapreduce.db.DateSplitter;
-
 /**
  * Implement DBSplitter over date/time values returned by an Oracle db.
  * Make use of logic from DateSplitter, since this just needs to use
