@@ -21,7 +21,7 @@ package com.cloudera.sqoop;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.tool.ExportTool;
+import org.apache.sqoop.tool.ExportTool;
 
 import java.io.IOException;
 import java.sql.Connection;

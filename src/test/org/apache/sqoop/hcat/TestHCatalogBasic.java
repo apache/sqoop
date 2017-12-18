@@ -21,7 +21,7 @@ package org.apache.sqoop.hcat;
 import org.junit.Before;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.tool.ExportTool;
+import org.apache.sqoop.tool.ExportTool;
 import com.cloudera.sqoop.tool.ImportTool;
 
 import org.junit.Test;
