@@ -27,7 +27,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.sqoop.mapreduce.DBWritable;
 
-import com.cloudera.sqoop.mapreduce.db.OracleDataDrivenDBRecordReader;
 import com.cloudera.sqoop.mapreduce.db.OracleDateSplitter;
 
 /**
