@@ -118,7 +118,7 @@ public class DBOutputFormat<K extends DBWritable, V>
 
       statement = connection.prepareStatement(
                     constructQuery(tableName, fieldNames));
-      return new com.cloudera.sqoop.mapreduce.db.DBOutputFormat.DBRecordWriter(
+      return new org.apache.sqoop.mapreduce.db.DBOutputFormat.DBRecordWriter(
                      connection, statement);
     } catch (Exception ex) {
       throw new IOException(ex);

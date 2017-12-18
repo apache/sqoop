@@ -41,7 +41,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.ExportJobBase;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
+import org.apache.sqoop.mapreduce.db.DBOutputFormat;
 import org.apache.sqoop.util.FileSystemUtil;
 
 /**

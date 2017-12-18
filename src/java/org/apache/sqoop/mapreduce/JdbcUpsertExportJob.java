@@ -30,7 +30,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
+import org.apache.sqoop.mapreduce.db.DBOutputFormat;
 
 /**
  * Run an update/insert export using JDBC (JDBC-based UpsertOutputFormat).
