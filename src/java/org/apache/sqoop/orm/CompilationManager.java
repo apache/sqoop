@@ -42,7 +42,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.Shell;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.util.FileListing;
+import org.apache.sqoop.util.FileListing;
 import com.cloudera.sqoop.util.Jars;
 
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
