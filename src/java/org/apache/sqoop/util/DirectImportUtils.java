@@ -33,7 +33,7 @@ import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.conf.Configuration;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.io.CodecMap;
-import com.cloudera.sqoop.io.SplittingOutputStream;
+import org.apache.sqoop.io.SplittingOutputStream;
 import org.apache.sqoop.io.SplittableBufferedWriter;
 
 import org.apache.hadoop.util.Shell;
