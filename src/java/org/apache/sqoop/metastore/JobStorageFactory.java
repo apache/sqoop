@@ -41,7 +41,7 @@ public class JobStorageFactory {
 
   /** The default list of available JobStorage implementations. */
   private static final String DEFAULT_AVAILABLE_STORAGES =
-      "com.cloudera.sqoop.metastore.GenericJobStorage,"
+      "org.apache.sqoop.metastore.GenericJobStorage,"
       + "org.apache.sqoop.metastore.AutoGenericJobStorage";
 
   public JobStorageFactory(Configuration config) {
