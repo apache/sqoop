@@ -53,7 +53,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import org.apache.sqoop.mapreduce.ExportBatchOutputFormat;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.mapreduce.JdbcUpsertExportJob;
+import org.apache.sqoop.mapreduce.JdbcUpsertExportJob;
 import com.cloudera.sqoop.mapreduce.OracleUpsertOutputFormat;
 import org.apache.sqoop.mapreduce.db.OracleDataDrivenDBInputFormat;
 import com.cloudera.sqoop.util.ExportException;
