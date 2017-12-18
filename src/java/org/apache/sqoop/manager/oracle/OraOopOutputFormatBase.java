@@ -34,7 +34,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.SqoopOptions;
 
 import org.apache.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
+import org.apache.sqoop.mapreduce.AsyncSqlOutputFormat;
 import com.cloudera.sqoop.mapreduce.ExportOutputFormat;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
