@@ -20,7 +20,7 @@ package org.apache.sqoop.hbase;
 
 import org.apache.sqoop.lib.FieldMapProcessor;
 import org.apache.sqoop.lib.FieldMappable;
-import com.cloudera.sqoop.lib.ProcessingException;
+import org.apache.sqoop.lib.ProcessingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;

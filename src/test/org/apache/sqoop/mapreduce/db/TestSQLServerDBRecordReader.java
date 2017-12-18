@@ -2,7 +2,7 @@ package org.apache.sqoop.mapreduce.db;
 
 import com.cloudera.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.LargeObjectLoader;
-import com.cloudera.sqoop.lib.RecordParser;
+import org.apache.sqoop.lib.RecordParser;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
 import org.apache.commons.lang.StringUtils;

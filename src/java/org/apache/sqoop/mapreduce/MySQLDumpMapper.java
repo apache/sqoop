@@ -37,7 +37,7 @@ import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.FieldFormatter;
-import com.cloudera.sqoop.lib.RecordParser;
+import org.apache.sqoop.lib.RecordParser;
 import com.cloudera.sqoop.manager.MySQLUtils;
 import com.cloudera.sqoop.util.ErrorableAsyncSink;
 import com.cloudera.sqoop.util.ErrorableThread;

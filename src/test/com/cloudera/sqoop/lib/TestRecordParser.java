@@ -21,6 +21,7 @@ package com.cloudera.sqoop.lib;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.sqoop.lib.RecordParser;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

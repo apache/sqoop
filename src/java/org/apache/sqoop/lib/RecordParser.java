@@ -99,9 +99,9 @@ public class RecordParser {
    * next call to parseRecord().
    */
   public List<String> parseRecord(CharSequence input)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError {
+      throws org.apache.sqoop.lib.RecordParser.ParseError {
     if (null == input) {
-      throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+      throw new org.apache.sqoop.lib.RecordParser.ParseError(
           "null input string");
     }
 
@@ -114,9 +114,9 @@ public class RecordParser {
    * next call to parseRecord().
    */
   public List<String> parseRecord(Text input)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError {
+      throws org.apache.sqoop.lib.RecordParser.ParseError {
     if (null == input) {
-      throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+      throw new org.apache.sqoop.lib.RecordParser.ParseError(
           "null input string");
     }
 
@@ -131,9 +131,9 @@ public class RecordParser {
    * next call to parseRecord().
    */
   public List<String> parseRecord(byte [] input)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError {
+      throws org.apache.sqoop.lib.RecordParser.ParseError {
     if (null == input) {
-      throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+      throw new org.apache.sqoop.lib.RecordParser.ParseError(
           "null input string");
     }
 
@@ -146,9 +146,9 @@ public class RecordParser {
    * next call to parseRecord().
    */
   public List<String> parseRecord(char [] input)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError {
+      throws org.apache.sqoop.lib.RecordParser.ParseError {
     if (null == input) {
-      throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+      throw new org.apache.sqoop.lib.RecordParser.ParseError(
           "null input string");
     }
 
@@ -156,9 +156,9 @@ public class RecordParser {
   }
 
   public List<String> parseRecord(ByteBuffer input)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError {
+      throws org.apache.sqoop.lib.RecordParser.ParseError {
     if (null == input) {
-      throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+      throw new org.apache.sqoop.lib.RecordParser.ParseError(
           "null input string");
     }
 
@@ -173,9 +173,9 @@ public class RecordParser {
    * next call to parseRecord().
    */
   public List<String> parseRecord(CharBuffer input)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError {
+      throws org.apache.sqoop.lib.RecordParser.ParseError {
     if (null == input) {
-      throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+      throw new org.apache.sqoop.lib.RecordParser.ParseError(
           "null input string");
     }
 
@@ -259,7 +259,7 @@ public class RecordParser {
           sb.append(curChar);
 
           if (enclosingRequired) {
-            throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+            throw new org.apache.sqoop.lib.RecordParser.ParseError(
                 "Opening field-encloser expected at position " + pos);
           }
         }
@@ -316,7 +316,7 @@ public class RecordParser {
           pos = len;
         } else {
           // Don't know what to do with this character.
-          throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+          throw new org.apache.sqoop.lib.RecordParser.ParseError(
               "Expected delimiter at position " + pos);
         }
 
@@ -330,7 +330,7 @@ public class RecordParser {
         break;
 
       default:
-        throw new com.cloudera.sqoop.lib.RecordParser.ParseError(
+        throw new org.apache.sqoop.lib.RecordParser.ParseError(
             "Unexpected parser state: " + state);
       }
     }

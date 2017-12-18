@@ -32,7 +32,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.lib.RecordParser;
+import org.apache.sqoop.lib.RecordParser;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;

@@ -39,17 +39,17 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
 
 
   public abstract void parse(CharSequence s)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError;
+      throws org.apache.sqoop.lib.RecordParser.ParseError;
   public abstract void parse(Text s)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError;
+      throws org.apache.sqoop.lib.RecordParser.ParseError;
   public abstract void parse(byte [] s)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError;
+      throws org.apache.sqoop.lib.RecordParser.ParseError;
   public abstract void parse(char [] s)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError;
+      throws org.apache.sqoop.lib.RecordParser.ParseError;
   public abstract void parse(ByteBuffer s)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError;
+      throws org.apache.sqoop.lib.RecordParser.ParseError;
   public abstract void parse(CharBuffer s)
-      throws com.cloudera.sqoop.lib.RecordParser.ParseError;
+      throws org.apache.sqoop.lib.RecordParser.ParseError;
   public abstract void loadLargeObjects(
       org.apache.sqoop.lib.LargeObjectLoader objLoader)
       throws SQLException, IOException, InterruptedException;
@@ -123,11 +123,11 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
    * @param processor A delegate that operates on this object.
    * @throws IOException if the processor encounters an IO error when
    * operating on this object.
-   * @throws com.cloudera.sqoop.lib.ProcessingException if the FieldMapProcessor
+   * @throws org.apache.sqoop.lib.ProcessingException if the FieldMapProcessor
    * encounters a general processing error when operating on this object.
    */
   public void delegate(org.apache.sqoop.lib.FieldMapProcessor processor)
-      throws IOException, com.cloudera.sqoop.lib.ProcessingException {
+      throws IOException, org.apache.sqoop.lib.ProcessingException {
     processor.accept(this);
   }
 

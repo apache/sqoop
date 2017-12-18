@@ -45,7 +45,7 @@ import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.cloudera.sqoop.lib.RecordParser;
+import org.apache.sqoop.lib.RecordParser;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import com.cloudera.sqoop.tool.CodeGenTool;
