@@ -35,7 +35,7 @@ import org.apache.sqoop.util.LoggingAsyncSink;
 import org.apache.sqoop.util.NullAsyncSink;
 import org.apache.sqoop.util.TaskId;
 import org.apache.sqoop.io.NamedFifo;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.manager.MySQLUtils;
 
 /**

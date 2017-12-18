@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.mapreduce.sqlserver;
 
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader;

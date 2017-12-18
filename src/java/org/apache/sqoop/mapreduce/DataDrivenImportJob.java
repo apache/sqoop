@@ -46,7 +46,7 @@ import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.ImportJobBase;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import com.cloudera.sqoop.orm.AvroSchemaGenerator;
 import org.apache.sqoop.util.FileSystemUtil;

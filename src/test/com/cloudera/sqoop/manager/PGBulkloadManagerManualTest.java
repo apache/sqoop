@@ -31,7 +31,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.junit.Test;
 
 import com.cloudera.sqoop.TestExport;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
 
 /**

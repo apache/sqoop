@@ -35,7 +35,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
 /**
  * Update an existing table of data with new value data.

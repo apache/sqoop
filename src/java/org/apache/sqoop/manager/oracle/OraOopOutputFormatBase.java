@@ -36,7 +36,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
 import com.cloudera.sqoop.mapreduce.ExportOutputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
 abstract class OraOopOutputFormatBase<K extends SqoopRecord, V> extends
     ExportOutputFormat<K, V> {

@@ -40,7 +40,7 @@ import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.ExportJobBase;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBOutputFormat;
 import org.apache.sqoop.util.FileSystemUtil;
 

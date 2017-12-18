@@ -44,7 +44,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.mapreduce.DBWritable;
 
 import org.apache.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DBRecordReader;
 import com.cloudera.sqoop.mapreduce.db.OracleDBRecordReader;
 
