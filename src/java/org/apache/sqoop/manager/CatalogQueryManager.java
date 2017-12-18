@@ -36,7 +36,7 @@ import org.apache.sqoop.util.LoggingUtils;
  * (instead of metadata calls) to retrieve information.
  */
 public abstract class CatalogQueryManager
-    extends com.cloudera.sqoop.manager.GenericJdbcManager {
+    extends org.apache.sqoop.manager.GenericJdbcManager {
 
   public static final Log LOG = LogFactory.getLog(
     CatalogQueryManager.class.getName());

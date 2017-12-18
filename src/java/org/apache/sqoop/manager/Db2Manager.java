@@ -48,7 +48,7 @@ import org.apache.sqoop.util.LoggingUtils;
  * Manages connections to DB2 databases. Requires the DB2 JDBC driver.
  */
 public class Db2Manager
-    extends com.cloudera.sqoop.manager.GenericJdbcManager {
+    extends org.apache.sqoop.manager.GenericJdbcManager {
 
   public static final Log LOG = LogFactory.getLog(
       Db2Manager.class.getName());

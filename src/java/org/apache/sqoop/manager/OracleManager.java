@@ -64,7 +64,7 @@ import com.cloudera.sqoop.util.ImportException;
  * Requires the Oracle JDBC driver.
  */
 public class OracleManager
-    extends com.cloudera.sqoop.manager.GenericJdbcManager {
+    extends org.apache.sqoop.manager.GenericJdbcManager {
 
   public static final Log LOG = LogFactory.getLog(
       OracleManager.class.getName());

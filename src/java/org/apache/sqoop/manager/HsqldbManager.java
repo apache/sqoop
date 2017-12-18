@@ -33,7 +33,7 @@ import java.io.IOException;
  * Extends generic SQL manager.
  */
 public class HsqldbManager
-    extends com.cloudera.sqoop.manager.GenericJdbcManager {
+    extends org.apache.sqoop.manager.GenericJdbcManager {
 
   public static final Log LOG = LogFactory.getLog(
       HsqldbManager.class.getName());
