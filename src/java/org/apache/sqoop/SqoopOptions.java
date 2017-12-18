@@ -52,7 +52,7 @@ import com.cloudera.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.util.RandomHash;
-import com.cloudera.sqoop.util.StoredAsProperty;
+import org.apache.sqoop.util.StoredAsProperty;
 
 import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
 import static org.apache.sqoop.orm.ClassWriter.toJavaIdentifier;
