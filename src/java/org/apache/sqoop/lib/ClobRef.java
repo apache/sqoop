@@ -26,7 +26,7 @@ import java.util.regex.Matcher;
 
 import org.apache.hadoop.io.Text;
 
-import com.cloudera.sqoop.io.LobFile;
+import org.apache.sqoop.io.LobFile;
 
 /**
  * ClobRef is a wrapper that holds a CLOB either directly, or a

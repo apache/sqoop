@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
 
-import com.cloudera.sqoop.io.LobFile;
+import org.apache.sqoop.io.LobFile;
 
 /**
  * BlobRef is a wrapper that holds a BLOB either directly, or a

@@ -26,7 +26,7 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import com.cloudera.sqoop.io.LobFile;
+import org.apache.sqoop.io.LobFile;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
