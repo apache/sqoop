@@ -36,7 +36,7 @@ import org.apache.sqoop.util.NullAsyncSink;
 import org.apache.sqoop.util.TaskId;
 import org.apache.sqoop.io.NamedFifo;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.manager.MySQLUtils;
+import org.apache.sqoop.manager.MySQLUtils;
 
 /**
  * Mapper that starts a 'mysqlimport' process and uses that to export rows from

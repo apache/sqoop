@@ -27,7 +27,7 @@ import org.apache.hadoop.mapreduce.Job;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.manager.MySQLUtils;
+import org.apache.sqoop.manager.MySQLUtils;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
