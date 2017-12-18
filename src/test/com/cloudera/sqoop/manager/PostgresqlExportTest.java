@@ -23,6 +23,7 @@ import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.PostgresqlManager;
 import org.junit.Before;
 import org.junit.Test;
 

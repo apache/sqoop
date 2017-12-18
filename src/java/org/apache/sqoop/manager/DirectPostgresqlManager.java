@@ -62,7 +62,7 @@ import com.cloudera.sqoop.util.PerfCounters;
  * commands.
  */
 public class DirectPostgresqlManager
-    extends com.cloudera.sqoop.manager.PostgresqlManager {
+    extends PostgresqlManager {
 
   public static final Log LOG = LogFactory.getLog(
       DirectPostgresqlManager.class.getName());

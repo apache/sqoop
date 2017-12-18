@@ -38,7 +38,7 @@ import org.apache.sqoop.cli.RelatedOptions;
  * class to load.
  */
 public class GenericJdbcManager
-    extends com.cloudera.sqoop.manager.SqlManager {
+    extends SqlManager {
 
   public static final Log LOG = LogFactory.getLog(
       GenericJdbcManager.class.getName());

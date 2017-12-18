@@ -86,7 +86,7 @@ Sqoop's solution to this problem is by introducing the +ConnManager+ API
 
 +ConnManager+ is an abstract class defining all methods that interact with the
 database itself. Most implementations of +ConnManager+ will extend the
-+com.cloudera.sqoop.manager.SqlManager+ abstract class, which uses standard
++org.apache.sqoop.manager.SqlManager+ abstract class, which uses standard
 SQL to perform most actions. Subclasses are required to implement the
 +getConnection()+ method which returns the actual JDBC connection to the
 database. Subclasses are free to override all other methods as well. The
