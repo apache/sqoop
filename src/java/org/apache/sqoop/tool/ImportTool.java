@@ -42,7 +42,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.hive.HiveImport;
+import org.apache.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.MergeJob;
 import com.cloudera.sqoop.metastore.JobData;

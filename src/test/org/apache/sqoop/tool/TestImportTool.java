@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 import java.sql.Connection;
 
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.hive.HiveImport;
+import org.apache.sqoop.hive.HiveImport;
 import org.apache.avro.Schema;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;

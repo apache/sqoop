@@ -30,7 +30,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.hive.HiveImport;
+import org.apache.sqoop.hive.HiveImport;
 
 /**
  * Tool that creates a Hive table definition.

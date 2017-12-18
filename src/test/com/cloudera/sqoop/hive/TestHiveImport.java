@@ -37,6 +37,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;
+import org.apache.sqoop.hive.HiveImport;
 import org.apache.sqoop.mapreduce.ParquetJob;
 import org.junit.After;
 import org.junit.Before;
