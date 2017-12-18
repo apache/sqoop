@@ -48,6 +48,7 @@ import com.cloudera.sqoop.tool.ImportTool;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.mapreduce.AutoProgressMapper;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
