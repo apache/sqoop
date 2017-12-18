@@ -37,7 +37,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import org.apache.sqoop.io.LobFile;
-import com.cloudera.sqoop.util.TaskId;
+import org.apache.sqoop.util.TaskId;
 
 /**
  * Contains a set of methods which can read db columns from a ResultSet into
