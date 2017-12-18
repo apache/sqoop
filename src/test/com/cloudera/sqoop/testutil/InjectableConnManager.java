@@ -29,7 +29,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.HsqldbManager;
 import org.apache.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.mapreduce.ImportJobBase;
+import org.apache.sqoop.mapreduce.ImportJobBase;
 import com.cloudera.sqoop.util.ImportException;
 import org.apache.hadoop.util.ReflectionUtils;
 
