@@ -34,7 +34,7 @@ import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.hive.HiveImport;
 import com.cloudera.sqoop.orm.ClassWriter;
-import com.cloudera.sqoop.orm.CompilationManager;
+import org.apache.sqoop.orm.CompilationManager;
 
 /**
  * Tool that generates code from a database schema.

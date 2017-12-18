@@ -32,7 +32,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.Sqoop;
-import com.cloudera.sqoop.orm.CompilationManager;
+import org.apache.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;

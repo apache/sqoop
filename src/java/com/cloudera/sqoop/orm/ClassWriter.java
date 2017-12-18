@@ -21,6 +21,7 @@ import java.util.HashSet;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.orm.CompilationManager;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

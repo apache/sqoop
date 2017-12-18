@@ -34,7 +34,7 @@ import org.apache.hadoop.mapred.Utils;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.orm.CompilationManager;
+import org.apache.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
 import org.junit.Test;
