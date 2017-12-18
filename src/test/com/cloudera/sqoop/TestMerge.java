@@ -34,7 +34,7 @@ import com.cloudera.sqoop.SqoopOptions.FileLayout;
 import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import org.apache.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
-import com.cloudera.sqoop.tool.CodeGenTool;
+import org.apache.sqoop.tool.CodeGenTool;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.MergeTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;
