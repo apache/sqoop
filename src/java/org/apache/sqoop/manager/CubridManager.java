@@ -39,7 +39,7 @@ import com.cloudera.sqoop.util.ImportException;
  * Manages connections to CUBRID databases.
  */
 public class CubridManager extends
-    com.cloudera.sqoop.manager.CatalogQueryManager {
+    CatalogQueryManager {
 
   public static final Log LOG = LogFactory
       .getLog(CubridManager.class.getName());

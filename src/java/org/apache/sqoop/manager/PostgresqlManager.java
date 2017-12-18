@@ -39,7 +39,7 @@ import org.apache.sqoop.cli.RelatedOptions;
  * Manages connections to Postgresql databases.
  */
 public class PostgresqlManager
-    extends com.cloudera.sqoop.manager.CatalogQueryManager {
+    extends CatalogQueryManager {
 
   public static final String SCHEMA = "schema";
 

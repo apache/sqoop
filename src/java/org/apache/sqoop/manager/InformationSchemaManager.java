@@ -28,7 +28,7 @@ import com.cloudera.sqoop.SqoopOptions;
  * (instead of metadata calls) to retrieve information.
  */
 public abstract class InformationSchemaManager
-    extends com.cloudera.sqoop.manager.CatalogQueryManager {
+    extends CatalogQueryManager {
 
   public static final Log LOG = LogFactory.getLog(
     InformationSchemaManager.class.getName());
