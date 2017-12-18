@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.apache.sqoop.util.OptionsFileUtil;
 import org.junit.Assert;
 
 import com.cloudera.sqoop.Sqoop;

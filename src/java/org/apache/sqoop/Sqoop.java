@@ -30,7 +30,7 @@ import org.apache.hadoop.util.ToolRunner;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.SqoopTool;
-import com.cloudera.sqoop.util.OptionsFileUtil;
+import org.apache.sqoop.util.OptionsFileUtil;
 
 import static com.cloudera.sqoop.SqoopOptions.isSqoopRethrowSystemPropertySet;
 import static org.apache.sqoop.tool.BaseSqoopTool.THROW_ON_ERROR_ARG;
