@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.hbase;
 
-import com.cloudera.sqoop.lib.FieldMappable;
+import org.apache.sqoop.lib.FieldMappable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.Connection;

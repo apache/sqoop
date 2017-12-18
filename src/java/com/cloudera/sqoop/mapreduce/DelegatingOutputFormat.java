@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import com.cloudera.sqoop.lib.FieldMappable;
+import org.apache.sqoop.lib.FieldMappable;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

@@ -39,7 +39,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.cloudera.sqoop.lib.FieldMapProcessor;
-import com.cloudera.sqoop.lib.FieldMappable;
+import org.apache.sqoop.lib.FieldMappable;
 import com.cloudera.sqoop.lib.ProcessingException;
 
 /**
