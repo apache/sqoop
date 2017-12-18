@@ -63,7 +63,7 @@ import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.io.compress.DecompressorStream;
 
 import com.cloudera.sqoop.io.LobReaderCache;
-import com.cloudera.sqoop.util.RandomHash;
+import org.apache.sqoop.util.RandomHash;
 
 /**
  * File format which stores large object records.

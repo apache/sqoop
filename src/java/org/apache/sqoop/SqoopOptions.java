@@ -51,7 +51,7 @@ import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import com.cloudera.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.tool.SqoopTool;
-import com.cloudera.sqoop.util.RandomHash;
+import org.apache.sqoop.util.RandomHash;
 import com.cloudera.sqoop.util.StoredAsProperty;
 
 import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
