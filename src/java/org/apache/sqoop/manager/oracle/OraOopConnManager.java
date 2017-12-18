@@ -34,7 +34,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.manager.OracleManager;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.manager.GenericJdbcManager;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.JdbcExportJob;

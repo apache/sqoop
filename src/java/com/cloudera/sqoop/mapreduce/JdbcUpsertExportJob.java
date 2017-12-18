@@ -20,7 +20,7 @@ package com.cloudera.sqoop.mapreduce;
 
 import java.io.IOException;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import com.cloudera.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ExportJobContext;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

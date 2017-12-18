@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop.mapreduce;
 
-import com.cloudera.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ExportJobContext;
 
 /**
  * @deprecated Moving to use org.apache.sqoop namespace.

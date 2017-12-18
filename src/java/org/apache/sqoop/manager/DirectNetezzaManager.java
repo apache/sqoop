@@ -184,7 +184,7 @@ public class DirectNetezzaManager extends NetezzaManager {
   /**
    * Export data stored in HDFS into a table in a database.
    */
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     options = context.getOptions();
     context.setConnManager(this);

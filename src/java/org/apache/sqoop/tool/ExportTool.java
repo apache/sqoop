@@ -33,7 +33,7 @@ import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.util.ExportException;
 import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 

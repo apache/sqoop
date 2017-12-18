@@ -649,7 +649,7 @@ public abstract class ConnManager {
    * Export data stored in HDFS into a table in a database.
    * This inserts new rows into the target table.
    */
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("This database does not support exports");
   }
@@ -658,7 +658,7 @@ public abstract class ConnManager {
    * Export data stored in HDFS into a table in a database. This calls a stored
    * procedure to insert rows into the target table.
    */
-  public void callTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void callTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("This database does not support exports "
         + "using stored procedures");
@@ -669,7 +669,7 @@ public abstract class ConnManager {
    * This updates existing rows in the target table, based on the
    * updateKeyCol specified in the context's SqoopOptions.
    */
-  public void updateTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void updateTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("This database does not support updates");
   }
@@ -679,7 +679,7 @@ public abstract class ConnManager {
    * This may update or insert rows into the target table depending on
    * whether rows already exist in the target table or not.
    */
-  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void upsertTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("Mixed update/insert is not supported"
         + " against the target database yet");

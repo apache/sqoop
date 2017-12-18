@@ -107,7 +107,7 @@ public class Db2Manager
    * Export data stored in HDFS into a table in a database.
    */
   @Override
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcExportJob exportJob = new JdbcExportJob(context, null, null,

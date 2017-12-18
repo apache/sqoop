@@ -924,7 +924,7 @@ public abstract class SqlManager
   /**
    * Export data stored in HDFS into a table in a database.
    */
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcExportJob exportJob = new JdbcExportJob(context);
@@ -932,7 +932,7 @@ public abstract class SqlManager
   }
 
   @Override
-  public void callTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void callTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException,
       ExportException {
     context.setConnManager(this);
@@ -958,7 +958,7 @@ public abstract class SqlManager
    * {@inheritDoc}
    */
   public void updateTable(
-          com.cloudera.sqoop.manager.ExportJobContext context)
+      org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcUpdateExportJob exportJob = new JdbcUpdateExportJob(context);

@@ -117,7 +117,7 @@ public class NetezzaManager extends GenericJdbcManager {
   }
 
   @Override
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     // The user probably should have requested --direct to invoke external
     // table option.
@@ -152,7 +152,7 @@ public class NetezzaManager extends GenericJdbcManager {
   }
 
   @Override
-  public void updateTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void updateTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     if (options.getNumMappers() > 1) {
       String msg = "Netezza update with multiple mappers can lead to "

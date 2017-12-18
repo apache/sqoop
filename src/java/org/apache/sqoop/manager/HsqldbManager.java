@@ -83,7 +83,7 @@ public class HsqldbManager
 
   @Override
   /** {@inheritDoc} */
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     // HSQLDB does not support multi-row inserts; disable that before export.
     context.getOptions().getConf().setInt(

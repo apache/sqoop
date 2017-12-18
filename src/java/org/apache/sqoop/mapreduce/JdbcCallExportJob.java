@@ -30,7 +30,7 @@ import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.mapreduce.db.DBOutputFormat;
 
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ExportJobContext;
 import com.google.common.base.Strings;
 
 /**

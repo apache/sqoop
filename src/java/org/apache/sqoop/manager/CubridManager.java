@@ -61,7 +61,7 @@ public class CubridManager extends
    * Export data stored in HDFS into a table in a database.
    */
   public void exportTable(
-      com.cloudera.sqoop.manager.ExportJobContext context)
+      org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
@@ -75,7 +75,7 @@ public class CubridManager extends
    */
   @Override
   public void upsertTable(
-      com.cloudera.sqoop.manager.ExportJobContext context)
+      org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
 

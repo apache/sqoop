@@ -128,7 +128,7 @@ public class MySQLManager
    * {@inheritDoc}
    */
   @Override
-  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void upsertTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     LOG.warn("MySQL Connector upsert functionality is using INSERT ON");

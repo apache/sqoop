@@ -44,7 +44,7 @@ import org.apache.sqoop.util.SubstitutionUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.io.SplittableBufferedWriter;
-import com.cloudera.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.util.AsyncSink;
 import com.cloudera.sqoop.util.DirectImportUtils;
 import com.cloudera.sqoop.util.ErrorableAsyncSink;

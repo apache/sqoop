@@ -165,7 +165,7 @@ public class SQLServerManager
    * Export data stored in HDFS into a table in a database.
    */
   @Override
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
 
@@ -195,7 +195,7 @@ public class SQLServerManager
    * {@inheritDoc}
    */
   public void updateTable(
-          com.cloudera.sqoop.manager.ExportJobContext context)
+      org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     if (isNonResilientOperation()) {
       super.updateTable(context);
@@ -212,7 +212,7 @@ public class SQLServerManager
   /**
    * {@inheritDoc}
    */
-  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void upsertTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
 
@@ -430,7 +430,7 @@ public class SQLServerManager
    * using SQLServerConnectionFailureHandler by default.
    */
   protected void configureConnectionRecoveryForExport(
-      com.cloudera.sqoop.manager.ExportJobContext context) {
+      org.apache.sqoop.manager.ExportJobContext context) {
 
     Configuration conf = context.getOptions().getConf();
 
@@ -451,7 +451,7 @@ public class SQLServerManager
    * using SQLServerConnectionFailureHandler by default.
    */
   protected void configureConnectionRecoveryForUpdate(
-      com.cloudera.sqoop.manager.ExportJobContext context) {
+      org.apache.sqoop.manager.ExportJobContext context) {
 
     Configuration conf = context.getOptions().getConf();
 

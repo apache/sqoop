@@ -22,7 +22,7 @@ import java.sql.SQLException;
 
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.manager.SqlManager;
 import com.cloudera.sqoop.util.ExportException;

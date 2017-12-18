@@ -97,14 +97,14 @@ public class DirectMySQLManager
    * back into the database.
    */
   @Override
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     MySQLExportJob exportJob = new MySQLExportJob(context);
     exportJob.runExport();
   }
 
-  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void upsertTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("MySQL direct connector does not support upsert"
       + " mode. Please use JDBC based connector (remove --direct parameter)");

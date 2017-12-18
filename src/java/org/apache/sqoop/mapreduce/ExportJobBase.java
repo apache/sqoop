@@ -22,7 +22,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ExportJobContext;
 import com.cloudera.sqoop.mapreduce.JobBase;
 import com.cloudera.sqoop.orm.TableClassName;
 import com.cloudera.sqoop.util.ExportException;
