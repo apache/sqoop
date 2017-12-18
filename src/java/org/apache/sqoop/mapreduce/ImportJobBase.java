@@ -19,7 +19,7 @@
 package org.apache.sqoop.mapreduce;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.io.CodecMap;
 import com.cloudera.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.mapreduce.JobBase;

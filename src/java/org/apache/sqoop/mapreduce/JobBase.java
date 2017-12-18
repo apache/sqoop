@@ -36,7 +36,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.config.ConfigurationConstants;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.ClassLoaderStack;

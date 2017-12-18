@@ -35,7 +35,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.util.LoggingUtils;
 

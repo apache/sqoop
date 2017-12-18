@@ -19,7 +19,7 @@
 package org.apache.sqoop.mapreduce;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.ExportJobContext;

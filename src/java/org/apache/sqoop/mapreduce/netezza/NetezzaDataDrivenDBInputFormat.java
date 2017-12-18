@@ -30,7 +30,7 @@ import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import org.apache.sqoop.mapreduce.db.netezza.NetezzaDBDataSliceSplitter;
 
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.config.ConfigurationHelper;
 
 /**
  * Netezza specific DB input format.

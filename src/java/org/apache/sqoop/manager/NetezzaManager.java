@@ -35,7 +35,7 @@ import org.apache.sqoop.mapreduce.netezza.NetezzaDataDrivenDBInputFormat;
 
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.cli.RelatedOptions;
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.config.ConfigurationHelper;
 import com.cloudera.sqoop.util.ExportException;
 import com.cloudera.sqoop.util.ImportException;
 
