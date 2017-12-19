@@ -53,7 +53,7 @@ import org.apache.sqoop.hcat.HCatalogTestUtils.KeyType;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.junit.Before;
 
-import com.cloudera.sqoop.Sqoop;
+import org.apache.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;

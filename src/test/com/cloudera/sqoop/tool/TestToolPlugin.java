@@ -28,7 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.hadoop.util.StringUtils;
 
-import com.cloudera.sqoop.Sqoop;
+import org.apache.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;

@@ -31,7 +31,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.Sqoop;
+import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.orm.CompilationManager;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.tool.ImportTool;

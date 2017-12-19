@@ -25,7 +25,7 @@ import java.io.IOException;
 import org.apache.sqoop.util.OptionsFileUtil;
 import org.junit.Assert;
 
-import com.cloudera.sqoop.Sqoop;
+import org.apache.sqoop.Sqoop;
 import org.junit.Test;
 
 /**

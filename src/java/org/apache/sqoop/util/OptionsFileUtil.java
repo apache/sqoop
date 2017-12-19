@@ -30,7 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.Sqoop;
+import org.apache.sqoop.Sqoop;
 
 /**
  * Provides utility functions to read in options file. An options file is a

@@ -179,7 +179,7 @@ Sqoop Internals
 
 This section describes the internal architecture of Sqoop.
 
-The Sqoop program is driven by the +com.cloudera.sqoop.Sqoop+ main class.
+The Sqoop program is driven by the +org.apache.sqoop.Sqoop+ main class.
 A limited number of additional classes are in the same package; +SqoopOptions+
 (described earlier) and +ConnFactory+ (which manipulates +ManagerFactory+
 instances).
@@ -189,7 +189,7 @@ General program flow
 
 The general program flow is as follows:
 
-+com.cloudera.sqoop.Sqoop+ is the main class and implements _Tool_. A new
++org.apache.sqoop.Sqoop+ is the main class and implements _Tool_. A new
 instance is launched with +ToolRunner+. The first argument to Sqoop is
 a string identifying the name of a +SqoopTool+ to run. The +SqoopTool+
 itself drives the execution of the user's requested operation (e.g.,

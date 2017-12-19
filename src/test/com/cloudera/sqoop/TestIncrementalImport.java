@@ -39,6 +39,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.hive.HiveImport;
 import org.apache.sqoop.manager.ConnManager;

@@ -20,7 +20,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.cloudera.sqoop.Sqoop;
+import org.apache.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.manager.ImportJobContext;

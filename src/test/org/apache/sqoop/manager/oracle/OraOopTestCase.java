@@ -43,7 +43,7 @@ import org.apache.log4j.WriterAppender;
 import org.apache.sqoop.manager.oracle.util.HadoopFiles;
 import org.apache.sqoop.manager.oracle.util.OracleData;
 
-import com.cloudera.sqoop.Sqoop;
+import org.apache.sqoop.Sqoop;
 import com.cloudera.sqoop.manager.OracleUtils;
 
 import static org.junit.Assert.assertEquals;

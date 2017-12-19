@@ -449,7 +449,7 @@
     <if>
       <equals arg1="${windows}" arg2="true" />
       <then>
-        <java classname="com.cloudera.sqoop.Sqoop"
+        <java classname="org.apache.sqoop.Sqoop"
             fork="true"
             failonerror="true"
             output="${build.dir}/tools-list"
@@ -466,7 +466,7 @@
         </exec>
       </then>
       <else>
-        <java classname="com.cloudera.sqoop.Sqoop"
+        <java classname="org.apache.sqoop.Sqoop"
             fork="true"
             failonerror="true"
             output="${build.dir}/tools-list"

@@ -31,7 +31,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
-import com.cloudera.sqoop.Sqoop;
+import org.apache.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.testutil.CommonArgs;

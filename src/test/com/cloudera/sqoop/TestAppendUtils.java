@@ -39,6 +39,7 @@ import org.apache.sqoop.manager.ImportJobContext;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.AppendUtils;
 import org.junit.Test;
