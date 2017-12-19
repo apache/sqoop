@@ -32,7 +32,7 @@ import org.apache.sqoop.metastore.hsqldb.HsqldbMetaStore;
 /**
  * Tool that runs a standalone Sqoop metastore.
  */
-public class MetastoreTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class MetastoreTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(
       MetastoreTool.class.getName());

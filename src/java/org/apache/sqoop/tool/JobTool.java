@@ -53,7 +53,7 @@ import org.apache.sqoop.util.LoggingUtils;
 /**
  * Tool that creates and executes saved jobs.
  */
-public class JobTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class JobTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(
       JobTool.class.getName());

@@ -40,7 +40,7 @@ import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 /**
  * Tool that performs HDFS exports to databases.
  */
-public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class ExportTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(ExportTool.class.getName());
   public static final String NOT_SUPPORTED_FILE_FORMAT_ERROR_MSG = "Please note that the export tool " +

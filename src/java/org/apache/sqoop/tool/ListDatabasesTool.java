@@ -29,7 +29,7 @@ import org.apache.sqoop.cli.ToolOptions;
 /**
  * Tool that lists available databases on a server.
  */
-public class ListDatabasesTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class ListDatabasesTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(
       ListDatabasesTool.class.getName());

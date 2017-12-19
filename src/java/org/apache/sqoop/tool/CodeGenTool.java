@@ -39,7 +39,7 @@ import org.apache.sqoop.orm.CompilationManager;
 /**
  * Tool that generates code from a database schema.
  */
-public class CodeGenTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class CodeGenTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(CodeGenTool.class.getName());
 

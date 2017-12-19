@@ -24,7 +24,7 @@ import org.apache.sqoop.cli.ToolOptions;
 /**
  * Tool that prints Sqoop's version.
  */
-public class VersionTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class VersionTool extends BaseSqoopTool {
 
   public VersionTool() {
     super("version");

@@ -42,7 +42,7 @@ import org.apache.sqoop.util.ResultSetPrinter;
 /**
  * Tool that evaluates a SQL statement and displays the results.
  */
-public class EvalSqlTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class EvalSqlTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(EvalSqlTool.class.getName());
 

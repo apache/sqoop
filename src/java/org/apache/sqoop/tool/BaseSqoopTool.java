@@ -33,6 +33,7 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.manager.SupportedManagers;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.apache.sqoop.util.CredentialsUtil;
 import org.apache.sqoop.util.LoggingUtils;
@@ -1822,6 +1823,14 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
     }
 
     return dashPos;
+  }
+
+  protected void validateHasDirectConnectorOption(SqoopOptions options) throws SqoopOptions.InvalidOptionsException {
+    SupportedManagers m = SupportedManagers.createFrom(options);
+    if (m != null && options.isDirect() && !m.hasDirectConnector()) {
+      throw new SqoopOptions.InvalidOptionsException(
+          "Was called with the --direct option, but no direct connector available.");
+    }
   }
 }
 

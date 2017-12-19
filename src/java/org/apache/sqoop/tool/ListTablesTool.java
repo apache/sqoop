@@ -29,7 +29,7 @@ import org.apache.sqoop.cli.ToolOptions;
 /**
  * Tool that lists available tables in a database.
  */
-public class ListTablesTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class ListTablesTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(
       ListTablesTool.class.getName());

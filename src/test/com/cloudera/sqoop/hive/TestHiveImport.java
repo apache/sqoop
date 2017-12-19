@@ -48,7 +48,7 @@ import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.tool.BaseSqoopTool;
+import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.tool.CodeGenTool;
 import org.apache.sqoop.tool.CreateHiveTableTool;
 import org.apache.sqoop.tool.ImportTool;

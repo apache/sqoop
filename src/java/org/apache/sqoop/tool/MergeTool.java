@@ -35,7 +35,7 @@ import org.apache.sqoop.util.LoggingUtils;
 /**
  * Tool that merges a more recent dataset on top of an older one.
  */
-public class MergeTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class MergeTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(MergeTool.class.getName());
 

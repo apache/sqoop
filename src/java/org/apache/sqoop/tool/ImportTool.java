@@ -59,7 +59,7 @@ import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 /**
  * Tool that performs database imports to HDFS.
  */
-public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class ImportTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(ImportTool.class.getName());
 

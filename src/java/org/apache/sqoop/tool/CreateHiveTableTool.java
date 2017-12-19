@@ -35,7 +35,7 @@ import org.apache.sqoop.hive.HiveImport;
 /**
  * Tool that creates a Hive table definition.
  */
-public class CreateHiveTableTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class CreateHiveTableTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(
       CreateHiveTableTool.class.getName());
