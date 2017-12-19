@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.JobBase;
 
 public class TestJobBase {
 

@@ -22,7 +22,6 @@ import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.io.CodecMap;
 import org.apache.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.mapreduce.JobBase;
 import org.apache.sqoop.orm.TableClassName;
 import org.apache.sqoop.util.ImportException;
 import org.apache.avro.file.DataFileConstants;

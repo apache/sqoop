@@ -311,7 +311,7 @@ Sqoop schedules MapReduce jobs to effect imports and exports.
 Configuration and execution of MapReduce jobs follows a few common
 steps (configuring the +InputFormat+; configuring the +OutputFormat+;
 setting the +Mapper+ implementation; etc...). These steps are
-formalized in the +com.cloudera.sqoop.mapreduce.JobBase+ class.
+formalized in the +org.apache.sqoop.mapreduce.JobBase+ class.
 The +JobBase+ allows a user to specify the +InputFormat+,
 +OutputFormat+, and +Mapper+ to use. 
 
