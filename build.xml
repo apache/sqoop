@@ -50,7 +50,7 @@
   <property name="oldversion" value="1.4.7" />
   <!-- The point when we branched for the previous release. -->
   <property name="prev.git.hash"
-      value="81624ddf3c8ca5834ab015ebafc8b8649ac36ab7" />
+      value="b0f391e75154be86f95378ab141f6dd1b3b59475" />
 
   <property name="artifact.name" value="${name}-${version}" />
   <property name="dest.jar" value="${artifact.name}.jar" />
