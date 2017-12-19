@@ -46,7 +46,7 @@ import org.apache.sqoop.util.FileUploader;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.util.TaskId;
 
-import com.cloudera.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.DelimiterSet;
 
 /**
  * Netezza export mapper using external tables.

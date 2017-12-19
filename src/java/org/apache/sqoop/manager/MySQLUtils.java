@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.manager;
 
-import static com.cloudera.sqoop.lib.DelimiterSet.NULL_CHAR;
+import static org.apache.sqoop.lib.DelimiterSet.NULL_CHAR;
 
 import java.io.BufferedWriter;
 import java.io.File;

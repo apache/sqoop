@@ -60,6 +60,21 @@ public class DelimiterSet implements Cloneable {
       "sqoop.input.escaped.by";
   public static final String INPUT_ENCLOSE_REQUIRED_KEY =
       "sqoop.input.enclose.required";
+
+  // Static delimiter sets for the commonly-used delimiter arrangements.
+
+  public static final DelimiterSet DEFAULT_DELIMITERS;
+  public static final DelimiterSet HIVE_DELIMITERS;
+  public static final DelimiterSet MYSQL_DELIMITERS;
+
+  static {
+    DEFAULT_DELIMITERS = new DelimiterSet(',', '\n', NULL_CHAR, NULL_CHAR,
+        false);
+    MYSQL_DELIMITERS = new DelimiterSet(',', '\n', '\'', '\\', false);
+    HIVE_DELIMITERS = new DelimiterSet('\001', '\n',
+        NULL_CHAR, NULL_CHAR, false);
+  }
+
   /**
    * Create a delimiter set with the default delimiters
    * (comma for fields, newline for records).

@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.mapreduce.postgresql;
 
-import com.cloudera.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.DelimiterSet;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;

@@ -84,11 +84,11 @@ public class RecordParser {
     }
   }
 
-  private com.cloudera.sqoop.lib.DelimiterSet delimiters;
+  private DelimiterSet delimiters;
   private ArrayList<String> outputs;
 
 
-  public RecordParser(final com.cloudera.sqoop.lib.DelimiterSet delimitersIn) {
+  public RecordParser(final DelimiterSet delimitersIn) {
     this.delimiters = delimitersIn.copy();
     this.outputs = new ArrayList<String>();
   }
@@ -218,7 +218,7 @@ public class RecordParser {
         add charater literal to current string, return to UNENCLOSED_FIELD
     */
 
-    char curChar = com.cloudera.sqoop.lib.DelimiterSet.NULL_CHAR;
+    char curChar = DelimiterSet.NULL_CHAR;
     ParseState state = ParseState.FIELD_START;
     int len = input.length();
     StringBuilder sb = null;

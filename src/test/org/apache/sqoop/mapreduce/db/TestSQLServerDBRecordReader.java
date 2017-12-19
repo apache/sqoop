@@ -1,6 +1,6 @@
 package org.apache.sqoop.mapreduce.db;
 
-import com.cloudera.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.commons.lang.StringUtils;

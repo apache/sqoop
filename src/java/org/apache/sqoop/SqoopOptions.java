@@ -48,7 +48,7 @@ import org.apache.sqoop.validation.RowCountValidator;
 import com.cloudera.sqoop.SqoopOptions.FileLayout;
 import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
 import com.cloudera.sqoop.SqoopOptions.UpdateMode;
-import com.cloudera.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.util.RandomHash;

@@ -28,7 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.cloudera.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.DelimiterSet;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.tool.ImportTool;

@@ -65,8 +65,7 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
   /**
    * Format output data according to the specified delimiters.
    */
-  public abstract String toString(
-      com.cloudera.sqoop.lib.DelimiterSet delimiters);
+  public abstract String toString(DelimiterSet delimiters);
 
   /**
    * Use the default delimiters, but only append an end-of-record delimiter
@@ -91,8 +90,7 @@ public abstract class SqoopRecord implements Cloneable, DBWritable,
    * use with TextOutputFormat, calling this with useRecordDelim=false may
    * make more sense.
    */
-  public String toString(
-      com.cloudera.sqoop.lib.DelimiterSet delimiters, boolean useRecordDelim) {
+  public String toString(DelimiterSet delimiters, boolean useRecordDelim) {
     if (useRecordDelim) {
       return toString(delimiters);
     } else {

@@ -54,7 +54,7 @@ import org.apache.sqoop.mapreduce.ImportJobBase;
 
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
-import com.cloudera.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.FieldFormatter;
 import org.apache.sqoop.lib.LargeObjectLoader;
 
