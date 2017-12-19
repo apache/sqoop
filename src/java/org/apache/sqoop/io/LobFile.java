@@ -62,7 +62,6 @@ import org.apache.hadoop.io.compress.CompressorStream;
 import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.io.compress.DecompressorStream;
 
-import com.cloudera.sqoop.io.LobReaderCache;
 import org.apache.sqoop.util.RandomHash;
 
 /**
