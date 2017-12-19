@@ -48,6 +48,7 @@ import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.orm.ClassWriter;
 import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;

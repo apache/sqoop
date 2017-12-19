@@ -33,7 +33,7 @@ import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.hive.HiveImport;
-import com.cloudera.sqoop.orm.ClassWriter;
+import org.apache.sqoop.orm.ClassWriter;
 import org.apache.sqoop.orm.CompilationManager;
 
 /**
