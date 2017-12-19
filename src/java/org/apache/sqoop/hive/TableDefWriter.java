@@ -35,7 +35,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.io.CodecMap;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.util.FileSystemUtil;
 

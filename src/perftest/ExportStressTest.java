@@ -24,7 +24,7 @@ import org.apache.hadoop.conf.*;
 import org.apache.hadoop.util.*;
 
 import org.apache.sqoop.Sqoop;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.ExportTool;
 import org.apache.sqoop.tool.SqoopTool;
 

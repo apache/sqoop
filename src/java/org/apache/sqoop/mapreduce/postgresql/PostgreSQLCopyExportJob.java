@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.mapreduce.postgresql;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.manager.ExportJobContext;
 import java.io.IOException;

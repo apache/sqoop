@@ -33,7 +33,7 @@ import org.apache.sqoop.hcat.HCatalogTestUtils.KeyType;
 import org.apache.sqoop.manager.NetezzaManager;
 import org.junit.Before;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.junit.Test;
 
 /**

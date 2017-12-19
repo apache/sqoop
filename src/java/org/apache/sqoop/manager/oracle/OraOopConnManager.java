@@ -33,7 +33,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.manager.OracleManager;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.manager.GenericJdbcManager;
 import org.apache.sqoop.manager.ImportJobContext;

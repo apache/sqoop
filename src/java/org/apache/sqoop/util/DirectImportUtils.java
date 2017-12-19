@@ -31,7 +31,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.conf.Configuration;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.io.CodecMap;
 import org.apache.sqoop.io.SplittingOutputStream;
 import org.apache.sqoop.io.SplittableBufferedWriter;

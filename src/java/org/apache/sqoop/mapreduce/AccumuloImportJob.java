@@ -38,7 +38,7 @@ import org.apache.sqoop.accumulo.AccumuloConstants;
 import org.apache.sqoop.accumulo.AccumuloMutationProcessor;
 import org.apache.sqoop.accumulo.AccumuloUtil;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.FieldMapProcessor;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.manager.ConnManager;

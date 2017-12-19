@@ -20,7 +20,7 @@ package com.cloudera.sqoop.metastore;
 
 import static org.junit.Assert.assertEquals;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 

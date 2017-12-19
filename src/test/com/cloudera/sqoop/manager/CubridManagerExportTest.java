@@ -36,7 +36,7 @@ import org.apache.sqoop.manager.cubrid.CubridTestUtils;
 import org.junit.After;
 import org.junit.Before;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
 import org.junit.Test;
 

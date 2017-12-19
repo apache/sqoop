@@ -22,8 +22,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.ToolOptions;
 
 /**

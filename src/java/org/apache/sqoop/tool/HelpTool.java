@@ -20,7 +20,7 @@ package org.apache.sqoop.tool;
 
 import java.util.Set;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.cli.ToolOptions;
 
 /**

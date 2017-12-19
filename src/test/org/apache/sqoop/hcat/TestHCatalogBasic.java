@@ -20,7 +20,7 @@ package org.apache.sqoop.hcat;
 
 import org.junit.Before;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.ExportTool;
 import org.apache.sqoop.tool.ImportTool;
 

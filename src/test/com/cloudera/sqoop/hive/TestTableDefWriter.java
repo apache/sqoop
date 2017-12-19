@@ -26,7 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.util.SqlTypeMap;
 import org.apache.sqoop.hive.TableDefWriter;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 

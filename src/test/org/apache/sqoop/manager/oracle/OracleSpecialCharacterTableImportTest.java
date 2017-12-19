@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.OracleUtils;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;

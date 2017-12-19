@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.sqoop.Sqoop;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.manager.SqlManager;

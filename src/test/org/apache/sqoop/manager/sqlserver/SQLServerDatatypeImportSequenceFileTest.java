@@ -33,7 +33,7 @@ import org.apache.hadoop.util.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestData.KEY_STRINGS;

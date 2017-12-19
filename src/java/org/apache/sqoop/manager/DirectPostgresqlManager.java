@@ -42,7 +42,7 @@ import org.apache.sqoop.mapreduce.postgresql.PostgreSQLCopyExportJob;
 import org.apache.sqoop.util.PostgreSQLUtils;
 import org.apache.sqoop.util.SubstitutionUtils;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.io.SplittableBufferedWriter;
 import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.util.AsyncSink;

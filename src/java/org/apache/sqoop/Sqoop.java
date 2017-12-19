@@ -28,11 +28,10 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import com.cloudera.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.util.OptionsFileUtil;
 
-import static com.cloudera.sqoop.SqoopOptions.isSqoopRethrowSystemPropertySet;
+import static org.apache.sqoop.SqoopOptions.isSqoopRethrowSystemPropertySet;
 import static org.apache.sqoop.tool.BaseSqoopTool.THROW_ON_ERROR_ARG;
 
 /**

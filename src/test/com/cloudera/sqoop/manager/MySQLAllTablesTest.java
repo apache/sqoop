@@ -25,7 +25,7 @@ import java.sql.SQLException;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestAllTables;
 
 /**

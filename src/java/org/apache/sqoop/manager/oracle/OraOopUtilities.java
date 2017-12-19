@@ -42,7 +42,7 @@ import org.apache.sqoop.manager.oracle.OraOopOutputFormatInsert.InsertMode;
 import org.apache.sqoop.manager.oracle.OraOopOutputFormatUpdate.UpdateMode;
 
 import org.apache.sqoop.Sqoop;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.ExportJobBase;
 
 /**

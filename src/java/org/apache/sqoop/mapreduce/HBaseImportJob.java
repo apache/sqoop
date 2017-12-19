@@ -40,7 +40,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.hbase.HBasePutProcessor;
 import org.apache.sqoop.lib.FieldMapProcessor;
 import org.apache.sqoop.lib.SqoopRecord;

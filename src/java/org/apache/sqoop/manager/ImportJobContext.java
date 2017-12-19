@@ -20,7 +20,7 @@ package org.apache.sqoop.manager;
 
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;

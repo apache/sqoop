@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.metastore;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.SqoopTool;
 
 /**

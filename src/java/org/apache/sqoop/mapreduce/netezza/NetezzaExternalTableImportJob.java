@@ -39,7 +39,7 @@ import
   org.apache.sqoop.mapreduce.db.netezza.NetezzaExternalTableTextImportMapper;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;

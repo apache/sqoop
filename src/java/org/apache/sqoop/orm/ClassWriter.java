@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.BigDecimalSerializer;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.BooleanParser;

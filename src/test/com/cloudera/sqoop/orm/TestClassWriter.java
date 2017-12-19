@@ -39,7 +39,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestConnFactory.DummyManager;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.orm.CompilationManager;

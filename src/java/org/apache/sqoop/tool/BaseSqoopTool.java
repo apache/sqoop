@@ -40,9 +40,9 @@ import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.password.CredentialProviderHelper;
 
 import org.apache.sqoop.ConnFactory;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.IncrementalMode;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.lib.DelimiterSet;

@@ -26,7 +26,8 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;

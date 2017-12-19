@@ -25,7 +25,7 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 /**
  * Test methods of the generic SqlManager implementation.
  */

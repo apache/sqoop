@@ -18,7 +18,7 @@
 package com.cloudera.sqoop.manager;
 
 import org.apache.sqoop.ConnFactory;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

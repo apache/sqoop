@@ -40,7 +40,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.manager.ConnManager;

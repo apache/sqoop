@@ -31,7 +31,7 @@ import org.apache.sqoop.config.ConfigurationConstants;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 
 public class TestJobBase {
 

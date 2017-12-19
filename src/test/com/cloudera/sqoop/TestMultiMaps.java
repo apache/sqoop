@@ -33,7 +33,8 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.Utils;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;

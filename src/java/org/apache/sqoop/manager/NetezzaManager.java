@@ -33,7 +33,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.mapreduce.AsyncSqlOutputFormat;
 import org.apache.sqoop.mapreduce.netezza.NetezzaDataDrivenDBInputFormat;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.util.ExportException;

@@ -18,6 +18,7 @@
 
 package com.cloudera.sqoop;
 
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.orm.CompilationManager;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;

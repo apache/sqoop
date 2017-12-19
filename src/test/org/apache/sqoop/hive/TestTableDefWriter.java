@@ -20,7 +20,7 @@ package org.apache.sqoop.hive;
 import static org.mockito.Mockito.*;
 
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;

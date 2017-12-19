@@ -33,7 +33,7 @@ import org.apache.hadoop.util.StringUtils;
 import org.junit.Before;
 
 import org.apache.sqoop.Sqoop;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.ExportOutputFormat;
 import org.apache.sqoop.tool.ExportTool;
 

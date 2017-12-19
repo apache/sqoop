@@ -32,8 +32,8 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.tool.BaseSqoopTool;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.orm.CompilationManager;
 

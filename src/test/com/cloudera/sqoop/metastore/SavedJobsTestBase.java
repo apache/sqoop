@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.VersionTool;
 
 import org.apache.hadoop.conf.Configuration;
@@ -248,7 +248,7 @@ public abstract class SavedJobsTestBase {
         assertEquals("Job list should start out empty", 0, jobs.size());
 
         // Create a job with extra args
-        com.cloudera.sqoop.SqoopOptions opts = new SqoopOptions();
+        SqoopOptions opts = new SqoopOptions();
         String[] args = {"-schema", "test"};
         opts.setExtraArgs(args);
         JobData data = new JobData(opts, new VersionTool());

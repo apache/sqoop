@@ -49,8 +49,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.manager.oracle.OracleUtils;
 import org.apache.sqoop.util.LoggingUtils;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.UpdateMode;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.UpdateMode;
 import org.apache.sqoop.mapreduce.ExportBatchOutputFormat;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
 import org.apache.sqoop.mapreduce.JdbcUpsertExportJob;

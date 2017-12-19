@@ -47,7 +47,7 @@ import org.apache.sqoop.mapreduce.JdbcCallExportJob;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.SqlTypeMap;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.hbase.HBaseUtil;
 import org.apache.sqoop.mapreduce.DataDrivenImportJob;
 import org.apache.sqoop.mapreduce.HBaseImportJob;

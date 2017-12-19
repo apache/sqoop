@@ -42,8 +42,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.sqoop.util.ClassLoaderStack;
 import org.apache.sqoop.config.ConfigurationHelper;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.SqoopParser;
 import org.apache.sqoop.cli.ToolOptions;
 

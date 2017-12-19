@@ -119,7 +119,7 @@ public class ConnFactory {
    * @throws IOException if it cannot find a ConnManager for this schema.
    */
   public ConnManager getManager(JobData data) throws IOException {
-    com.cloudera.sqoop.SqoopOptions options = data.getSqoopOptions();
+    SqoopOptions options = data.getSqoopOptions();
     String manualDriver = options.getDriverClassName();
     String managerClassName = options.getConnManagerClassName();
 
@@ -151,12 +151,11 @@ public class ConnFactory {
         // connectors are forcing to use their building class names.
         if (manualDriver == null) {
           Constructor<ConnManager> constructor =
-            cls.getDeclaredConstructor(com.cloudera.sqoop.SqoopOptions.class);
+            cls.getDeclaredConstructor(SqoopOptions.class);
           connManager = constructor.newInstance(options);
         } else {
           Constructor<ConnManager> constructor =
-            cls.getDeclaredConstructor(String.class,
-                                       com.cloudera.sqoop.SqoopOptions.class);
+            cls.getDeclaredConstructor(String.class, SqoopOptions.class);
           connManager = constructor.newInstance(manualDriver, options);
         }
       } catch (ClassNotFoundException e) {

@@ -32,7 +32,7 @@ import org.apache.hadoop.util.StringUtils;
 import org.hsqldb.Server;
 import org.hsqldb.ServerConstants;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 
 import org.apache.sqoop.manager.HsqldbManager;
 

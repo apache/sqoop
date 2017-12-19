@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.orm;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.junit.Before;
 import org.junit.Test;
 

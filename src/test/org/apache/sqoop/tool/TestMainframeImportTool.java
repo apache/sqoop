@@ -24,15 +24,14 @@ import java.lang.reflect.Method;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 

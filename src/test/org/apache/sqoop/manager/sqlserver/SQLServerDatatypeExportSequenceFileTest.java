@@ -31,7 +31,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.tool.CodeGenTool;

@@ -21,7 +21,7 @@ package org.apache.sqoop.manager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 
 /**
  * Database manager that queries "information schema" directly

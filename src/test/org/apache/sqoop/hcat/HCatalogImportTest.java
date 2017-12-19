@@ -54,7 +54,7 @@ import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.junit.Before;
 
 import org.apache.sqoop.Sqoop;
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.ImportTool;
