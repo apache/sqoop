@@ -34,7 +34,7 @@ import org.junit.Before;
 
 import com.cloudera.sqoop.Sqoop;
 import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.ExportOutputFormat;
+import org.apache.sqoop.mapreduce.ExportOutputFormat;
 import org.apache.sqoop.tool.ExportTool;
 
 import static org.junit.Assert.assertEquals;
