@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.orm;
+package org.apache.sqoop.orm;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +35,6 @@ import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.config.ConfigurationHelper;
-import org.apache.sqoop.orm.CompilationManager;
 
 import com.cloudera.sqoop.testutil.ExplicitSetMapper;
 import org.apache.sqoop.tool.ImportTool;
