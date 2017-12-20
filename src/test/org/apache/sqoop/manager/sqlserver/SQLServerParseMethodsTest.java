@@ -42,7 +42,7 @@ import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.orm.CompilationManager;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.testutil.ReparseMapper;
+import org.apache.sqoop.testutil.ReparseMapper;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.After;

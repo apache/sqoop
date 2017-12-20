@@ -21,7 +21,6 @@ package org.apache.sqoop.orm;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.cloudera.sqoop.testutil.*;
 import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
