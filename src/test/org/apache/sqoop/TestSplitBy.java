@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package org.apache.sqoop;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,16 +42,20 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
- * Test that --query works in Sqoop.
+ * Test that --split-by works.
  */
-public class TestQuery extends ImportJobTestCase {
+public class TestSplitBy extends ImportJobTestCase {
 
   /**
    * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
-  protected String [] getArgv(boolean includeHadoopFlags, String query,
-      String targetDir, boolean allowParallel) {
+  protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
+      String splitByCol) {
+    String columnsString = "";
+    for (String col : colNames) {
+      columnsString += col + ",";
+    }
 
     ArrayList<String> args = new ArrayList<String>();
 
@@ -59,24 +63,19 @@ public class TestQuery extends ImportJobTestCase {
       CommonArgs.addHadoopFlags(args);
     }
 
-    args.add("--query");
-    args.add(query);
+    args.add("--table");
+    args.add(HsqldbTestServer.getTableName());
+    args.add("--columns");
+    args.add(columnsString);
     args.add("--split-by");
-    args.add("INTFIELD1");
+    args.add(splitByCol);
+    args.add("--warehouse-dir");
+    args.add(getWarehouseDir());
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
     args.add("--as-sequencefile");
-    args.add("--target-dir");
-    args.add(targetDir);
-    args.add("--class-name");
-    args.add(getTableName());
-    if (allowParallel) {
-      args.add("--num-mappers");
-      args.add("2");
-    } else {
-      args.add("--num-mappers");
-      args.add("1");
-    }
+    args.add("--num-mappers");
+    args.add("1");
 
     return args.toArray(new String[0]);
   }
@@ -97,22 +96,23 @@ public class TestQuery extends ImportJobTestCase {
     return Integer.parseInt(parts[0]);
   }
 
-  public void runQueryTest(String query, String firstValStr,
-      int numExpectedResults, int expectedSum, String targetDir)
+  public void runSplitByTest(String splitByCol, int expectedSum)
       throws IOException {
 
+    String [] columns = HsqldbTestServer.getFieldNames();
     ClassLoader prevClassLoader = null;
     SequenceFile.Reader reader = null;
 
-    String [] argv = getArgv(true, query, targetDir, false);
+    String [] argv = getArgv(true, columns, splitByCol);
     runImport(argv);
     try {
       SqoopOptions opts = new ImportTool().parseArguments(
-          getArgv(false, query, targetDir, false),
+          getArgv(false, columns, splitByCol),
           null, null, true);
 
       CompilationManager compileMgr = new CompilationManager(opts);
       String jarFileName = compileMgr.getJarFilename();
+      LOG.debug("Got jar from import job: " + jarFileName);
 
       prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
           getTableName());
@@ -124,35 +124,22 @@ public class TestQuery extends ImportJobTestCase {
       Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
       Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
 
-      if (reader.next(key) == null) {
-        fail("Empty SequenceFile during import");
-      }
-
-      // make sure that the value we think should be at the top, is.
-      reader.getCurrentValue(val);
-      assertEquals("Invalid ordering within sorted SeqFile", firstValStr,
-          val.toString());
-
       // We know that these values are two ints separated by a ',' character.
       // Since this is all dynamic, though, we don't want to actually link
       // against the class and use its methods. So we just parse this back
       // into int fields manually.  Sum them up and ensure that we get the
       // expected total for the first column, to verify that we got all the
       // results from the db into the file.
-      int curSum = getFirstInt(val.toString());
-      int totalResults = 1;
 
-      // now sum up everything else in the file.
+      // Sum up everything in the file.
+      int curSum = 0;
       while (reader.next(key) != null) {
         reader.getCurrentValue(val);
         curSum += getFirstInt(val.toString());
-        totalResults++;
       }
 
       assertEquals("Total sum of first db column mismatch", expectedSum,
           curSum);
-      assertEquals("Incorrect number of results for query", numExpectedResults,
-          totalResults);
     } catch (InvalidOptionsException ioe) {
       fail(ioe.toString());
     } catch (ParseException pe) {
@@ -167,28 +154,14 @@ public class TestQuery extends ImportJobTestCase {
   }
 
   @Test
-  public void testSelectStar() throws IOException {
-    runQueryTest("SELECT * FROM " + getTableName()
-        + " WHERE INTFIELD2 > 4 AND $CONDITIONS",
-        "1,8\n", 2, 4, getTablePath().toString());
+  public void testSplitByFirstCol() throws IOException {
+    String splitByCol = "INTFIELD1";
+    runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
   }
 
   @Test
-  public void testCompoundWhere() throws IOException {
-    runQueryTest("SELECT * FROM " + getTableName()
-        + " WHERE INTFIELD1 > 4 AND INTFIELD2 < 3 AND $CONDITIONS",
-        "7,2\n", 1, 7, getTablePath().toString());
-  }
-
-  @Test
-  public void testFailNoConditions() throws IOException {
-    String [] argv = getArgv(true, "SELECT * FROM " + getTableName(),
-        getTablePath().toString(), true);
-    try {
-      runImport(argv);
-      fail("Expected exception running import without $CONDITIONS");
-    } catch (Exception e) {
-      LOG.info("Got exception " + e + " running job (expected; ok)");
-    }
+  public void testSplitBySecondCol() throws IOException {
+    String splitByCol = "INTFIELD2";
+    runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
   }
 }

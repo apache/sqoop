@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package org.apache.sqoop;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,8 +39,6 @@ import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.testutil.ImportJobTestCase;
-import org.apache.sqoop.Sqoop;
-import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.AppendUtils;
 import org.junit.Test;

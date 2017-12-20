@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package org.apache.sqoop;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,23 +42,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
- * Test that --where works in Sqoop.
- * Methods essentially copied out of the other Test* classes.
- * TODO(kevin or aaron): Factor out these common test methods
- * so that every new Test* class doesn't need to copy the code.
+ * Test that --query works in Sqoop.
  */
-public class TestWhere extends ImportJobTestCase {
+public class TestQuery extends ImportJobTestCase {
 
   /**
    * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
-  protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
-      String whereClause) {
-    String columnsString = "";
-    for (String col : colNames) {
-      columnsString += col + ",";
-    }
+  protected String [] getArgv(boolean includeHadoopFlags, String query,
+      String targetDir, boolean allowParallel) {
 
     ArrayList<String> args = new ArrayList<String>();
 
@@ -66,21 +59,24 @@ public class TestWhere extends ImportJobTestCase {
       CommonArgs.addHadoopFlags(args);
     }
 
-    args.add("--table");
-    args.add(HsqldbTestServer.getTableName());
-    args.add("--columns");
-    args.add(columnsString);
-    args.add("--where");
-    args.add(whereClause);
+    args.add("--query");
+    args.add(query);
     args.add("--split-by");
     args.add("INTFIELD1");
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
     args.add("--as-sequencefile");
-    args.add("--num-mappers");
-    args.add("1");
+    args.add("--target-dir");
+    args.add(targetDir);
+    args.add("--class-name");
+    args.add(getTableName());
+    if (allowParallel) {
+      args.add("--num-mappers");
+      args.add("2");
+    } else {
+      args.add("--num-mappers");
+      args.add("1");
+    }
 
     return args.toArray(new String[0]);
   }
@@ -101,18 +97,18 @@ public class TestWhere extends ImportJobTestCase {
     return Integer.parseInt(parts[0]);
   }
 
-  public void runWhereTest(String whereClause, String firstValStr,
-      int numExpectedResults, int expectedSum) throws IOException {
+  public void runQueryTest(String query, String firstValStr,
+      int numExpectedResults, int expectedSum, String targetDir)
+      throws IOException {
 
-    String [] columns = HsqldbTestServer.getFieldNames();
     ClassLoader prevClassLoader = null;
     SequenceFile.Reader reader = null;
 
-    String [] argv = getArgv(true, columns, whereClause);
+    String [] argv = getArgv(true, query, targetDir, false);
     runImport(argv);
     try {
       SqoopOptions opts = new ImportTool().parseArguments(
-          getArgv(false, columns, whereClause),
+          getArgv(false, query, targetDir, false),
           null, null, true);
 
       CompilationManager compileMgr = new CompilationManager(opts);
@@ -171,14 +167,28 @@ public class TestWhere extends ImportJobTestCase {
   }
 
   @Test
-  public void testSingleClauseWhere() throws IOException {
-    String whereClause = "INTFIELD2 > 4";
-    runWhereTest(whereClause, "1,8\n", 2, 4);
+  public void testSelectStar() throws IOException {
+    runQueryTest("SELECT * FROM " + getTableName()
+        + " WHERE INTFIELD2 > 4 AND $CONDITIONS",
+        "1,8\n", 2, 4, getTablePath().toString());
   }
 
   @Test
-  public void testMultiClauseWhere() throws IOException {
-    String whereClause = "INTFIELD1 > 4 AND INTFIELD2 < 3";
-    runWhereTest(whereClause, "7,2\n", 1, 7);
+  public void testCompoundWhere() throws IOException {
+    runQueryTest("SELECT * FROM " + getTableName()
+        + " WHERE INTFIELD1 > 4 AND INTFIELD2 < 3 AND $CONDITIONS",
+        "7,2\n", 1, 7, getTablePath().toString());
+  }
+
+  @Test
+  public void testFailNoConditions() throws IOException {
+    String [] argv = getArgv(true, "SELECT * FROM " + getTableName(),
+        getTablePath().toString(), true);
+    try {
+      runImport(argv);
+      fail("Expected exception running import without $CONDITIONS");
+    } catch (Exception e) {
+      LOG.info("Got exception " + e + " running job (expected; ok)");
+    }
   }
 }

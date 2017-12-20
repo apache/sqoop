@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package org.apache.sqoop;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,8 +30,6 @@ import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import org.apache.sqoop.Sqoop;
-import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.CodeGenTool;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.tool.MergeTool;

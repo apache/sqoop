@@ -16,19 +16,21 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package org.apache.sqoop;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ExportJobTestCase;
 import com.google.common.collect.Lists;
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.junit.Rule;
+
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.kitesdk.data.*;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,27 +40,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.avro.Conversions;
-import org.apache.avro.LogicalTypes;
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.DatumWriter;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.junit.Test;
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 
 /**
- * Test that we can export Avro Data Files from HDFS into databases.
+ * Test that we can export Parquet Data Files from HDFS into databases.
  */
-
-public class TestAvroExport extends ExportJobTestCase {
+public class TestParquetExport extends ExportJobTestCase {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -85,18 +74,18 @@ public class TestAvroExport extends ExportJobTestCase {
 
   /** When generating data for export tests, each column is generated
       according to a ColumnGenerator. Methods exist for determining
-      what to put into Avro objects in the files to export, as well
+      what to put into Parquet objects in the files to export, as well
       as what the object representation of the column as returned by
       the database should look like.
     */
   public interface ColumnGenerator {
     /** For a row with id rowNum, what should we write into that
-        Avro record to export?
+        Parquet record to export?
       */
     Object getExportValue(int rowNum);
 
-    /** Return the Avro schema for the field. */
-    Schema getColumnAvroSchema();
+    /** Return the Parquet schema for the field. */
+    Schema getColumnParquetSchema();
 
     /** For a row with id rowNum, what should the database return
         for the given column's value?
@@ -124,7 +113,7 @@ public class TestAvroExport extends ExportJobTestCase {
         return columnType;
       }
       @Override
-      public Schema getColumnAvroSchema() {
+      public Schema getColumnParquetSchema() {
         return schema;
       }
     };
@@ -135,49 +124,39 @@ public class TestAvroExport extends ExportJobTestCase {
    * @param fileNum the number of the file (for multi-file export)
    * @param numRecords how many records to write to the file.
    */
-  protected void createAvroFile(int fileNum, int numRecords,
+  protected void createParquetFile(int fileNum, int numRecords,
       ColumnGenerator... extraCols) throws IOException {
 
-    Path tablePath = getTablePath();
-    Path filePath = new Path(tablePath, "part" + fileNum);
-
-    Configuration conf = new Configuration();
-    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
-      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    String uri = "dataset:file:" + getTablePath();
+    Schema schema = buildSchema(extraCols);
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+      .schema(schema)
+      .format(Formats.PARQUET)
+      .build();
+    Dataset dataset = Datasets.create(uri, descriptor);
+    DatasetWriter writer = dataset.newWriter();
+    try {
+      for (int i = 0; i < numRecords; i++) {
+        GenericRecord record = new GenericData.Record(schema);
+        record.put("id", i);
+        record.put("msg", getMsgPrefix() + i);
+        addExtraColumns(record, i, extraCols);
+        writer.write(record);
+      }
+    } finally {
+      writer.close();
     }
-    FileSystem fs = FileSystem.get(conf);
-    fs.mkdirs(tablePath);
-    OutputStream os = fs.create(filePath);
-
-    Schema schema = buildAvroSchema(extraCols);
-    DatumWriter<GenericRecord> datumWriter =
-      new GenericDatumWriter<GenericRecord>();
-    DataFileWriter<GenericRecord> dataFileWriter =
-      new DataFileWriter<GenericRecord>(datumWriter);
-    dataFileWriter.create(schema, os);
-
-    for (int i = 0; i < numRecords; i++) {
-      GenericRecord record = new GenericData.Record(schema);
-      record.put("id", i);
-      record.put("msg", getMsgPrefix() + i);
-      addExtraColumns(record, i, extraCols);
-      dataFileWriter.append(record);
-    }
-
-    dataFileWriter.close();
-    os.close();
   }
 
-  private Schema buildAvroSchema(ColumnGenerator... extraCols) {
+  private Schema buildSchema(ColumnGenerator... extraCols) {
     List<Field> fields = new ArrayList<Field>();
-    fields.add(buildAvroField("id", Schema.Type.INT));
-    fields.add(buildAvroField("msg", Schema.Type.STRING));
+    fields.add(buildField("id", Schema.Type.INT));
+    fields.add(buildField("msg", Schema.Type.STRING));
     int colNum = 0;
-    // Issue [SQOOP-2846]
     if (null != extraCols) {
       for (ColumnGenerator gen : extraCols) {
-        if (gen.getColumnAvroSchema() != null) {
-          fields.add(buildAvroField(forIdx(colNum++), gen.getColumnAvroSchema()));
+        if (gen.getColumnParquetSchema() != null) {
+          fields.add(buildParquetField(forIdx(colNum++), gen.getColumnParquetSchema()));
         }
       }
     }
@@ -189,21 +168,20 @@ public class TestAvroExport extends ExportJobTestCase {
   private void addExtraColumns(GenericRecord record, int rowNum,
       ColumnGenerator[] extraCols) {
     int colNum = 0;
-    // Issue [SQOOP-2846]
     if (null != extraCols) {
       for (ColumnGenerator gen : extraCols) {
-        if (gen.getColumnAvroSchema() != null) {
+        if (gen.getColumnParquetSchema() != null) {
           record.put(forIdx(colNum++), gen.getExportValue(rowNum));
         }
       }
     }
   }
 
-  private Field buildAvroField(String name, Schema.Type type) {
+  private Field buildField(String name, Schema.Type type) {
     return new Field(name, Schema.create(type), null, null);
   }
 
-  private Field buildAvroField(String name, Schema schema) {
+  private Field buildParquetField(String name, Schema schema) {
     return new Field(name, schema, null, null);
   }
 
@@ -248,11 +226,11 @@ public class TestAvroExport extends ExportJobTestCase {
     StringBuilder sb = new StringBuilder();
     sb.append("CREATE TABLE ");
     sb.append(getTableName());
-    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
+    sb.append(" (\"ID\" INT NOT NULL PRIMARY KEY, \"MSG\" VARCHAR(64)");
     int colNum = 0;
     for (ColumnGenerator gen : extraColumns) {
       if (gen.getColumnType() != null) {
-        sb.append(", " + forIdx(colNum++)  + " " + gen.getColumnType());
+        sb.append(", \"" + forIdx(colNum++) + "\" " + gen.getColumnType());
       }
     }
     sb.append(")");
@@ -299,7 +277,6 @@ public class TestAvroExport extends ExportJobTestCase {
     }
   }
 
-
   /** Verify that on a given row, a column has a given value.
    * @param id the id column specifying the row to test.
    */
@@ -309,7 +286,7 @@ public class TestAvroExport extends ExportJobTestCase {
     LOG.info("Verifying column " + colName + " has value " + expectedVal);
 
     PreparedStatement statement = conn.prepareStatement(
-        "SELECT " + colName + " FROM " + getTableName() + " WHERE ID = " + id,
+        "SELECT \"" + colName + "\" FROM " + getTableName() + " WHERE \"ID\" = " + id,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     Object actualVal = null;
     try {
@@ -351,9 +328,7 @@ public class TestAvroExport extends ExportJobTestCase {
   }
 
   @Test
-  public void testSupportedAvroTypes() throws IOException, SQLException {
-    GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
-
+  public void testSupportedParquetTypes() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1 * 10;
 
@@ -361,8 +336,6 @@ public class TestAvroExport extends ExportJobTestCase {
     Schema fixed = Schema.createFixed("myfixed", null, null, 2);
     Schema enumeration = Schema.createEnum("myenum", null, null,
         Lists.newArrayList("a", "b"));
-    Schema decimalSchema = LogicalTypes.decimal(3,2)
-        .addToSchema(Schema.createFixed("dec1", null, null, 2));
 
     ColumnGenerator[] gens = new ColumnGenerator[] {
       colGenerator(true, Schema.create(Schema.Type.BOOLEAN), true, "BIT"),
@@ -378,39 +351,14 @@ public class TestAvroExport extends ExportJobTestCase {
           b, "BINARY(2)"),
       colGenerator(new GenericData.EnumSymbol(enumeration, "a"), enumeration,
           "a", "VARCHAR(8)"),
-      colGenerator(new BigDecimal("2.00"), decimalSchema,
-          new BigDecimal("2.00"), "DECIMAL(3,2)"),
-      colGenerator("22.00", Schema.create(Schema.Type.STRING),
-          new BigDecimal("22.00"), "DECIMAL(4,2)"),
     };
-    createAvroFile(0, TOTAL_RECORDS, gens);
+    createParquetFile(0, TOTAL_RECORDS, gens);
     createTable(gens);
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
     verifyExport(TOTAL_RECORDS);
     for (int i = 0; i < gens.length; i++) {
       assertColMinAndMax(forIdx(i), gens[i]);
     }
-  }
-
-  @Test
-  public void testPathPatternInExportDir() throws IOException, SQLException {
-    final int TOTAL_RECORDS = 10;
-
-    ColumnGenerator[] gens = new ColumnGenerator[] {
-      colGenerator(true, Schema.create(Schema.Type.BOOLEAN), true, "BIT"),
-    };
-
-    createAvroFile(0, TOTAL_RECORDS, gens);
-    createTable(gens);
-
-    // Converts path to an unary set while preserving the leading '/'
-    String pathPattern = new StringBuilder(getTablePath().toString())
-            .insert(1, "{")
-            .append("}")
-            .toString();
-
-    runExport(getArgv(true, 10, 10, "--export-dir", pathPattern));
-    verifyExport(TOTAL_RECORDS);
   }
 
   @Test
@@ -424,7 +372,7 @@ public class TestAvroExport extends ExportJobTestCase {
     Schema schema =  Schema.createUnion(childSchemas);
     ColumnGenerator gen0 = colGenerator(null, schema, null, "VARCHAR(64)");
     ColumnGenerator gen1 = colGenerator("s", schema, "s", "VARCHAR(64)");
-    createAvroFile(0, TOTAL_RECORDS, gen0, gen1);
+    createParquetFile(0, TOTAL_RECORDS, gen0, gen1);
     createTable(gen0, gen1);
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
     verifyExport(TOTAL_RECORDS);
@@ -433,22 +381,22 @@ public class TestAvroExport extends ExportJobTestCase {
   }
 
   @Test
-  public void testAvroRecordsNotSupported() throws IOException, SQLException {
+  public void testParquetRecordsNotSupported() throws IOException, SQLException {
     String[] argv = {};
     final int TOTAL_RECORDS = 1;
 
     Schema schema =  Schema.createRecord("nestedrecord", null, null, false);
-    schema.setFields(Lists.newArrayList(buildAvroField("myint",
+    schema.setFields(Lists.newArrayList(buildField("myint",
         Schema.Type.INT)));
     GenericRecord record = new GenericData.Record(schema);
     record.put("myint", 100);
     // DB type is not used so can be anything:
     ColumnGenerator gen = colGenerator(record, schema, null, "VARCHAR(64)");
-    createAvroFile(0, TOTAL_RECORDS,  gen);
+    createParquetFile(0, TOTAL_RECORDS,  gen);
     createTable(gen);
 
     thrown.expect(Exception.class);
-    thrown.reportMissingExceptionWithMessage("Expected Exception as Avro records are not supported");
+    thrown.reportMissingExceptionWithMessage("Expected Exception as Parquet records are not supported");
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
@@ -458,79 +406,54 @@ public class TestAvroExport extends ExportJobTestCase {
     final int TOTAL_RECORDS = 1;
 
     // null column type means don't create a database column
-    // the Avro value will not be exported
+    // the Parquet value will not be exported
     ColumnGenerator gen = colGenerator(100, Schema.create(Schema.Type.INT),
         null, null);
-    createAvroFile(0, TOTAL_RECORDS, gen);
+    createParquetFile(0, TOTAL_RECORDS, gen);
     createTable(gen);
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
     verifyExport(TOTAL_RECORDS);
   }
 
-  // Test Case for Issue [SQOOP-2846]
   @Test
-  public void testAvroWithUpsert() throws IOException, SQLException {
-    String[] argv = { "--update-key", "ID", "--update-mode", "allowinsert" };
-    final int TOTAL_RECORDS = 2;
-    // ColumnGenerator gen = colGenerator("100",
-    // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
-    createAvroFile(0, TOTAL_RECORDS, null);
-    createTableWithInsert();
-
-    thrown.expect(Exception.class);
-    thrown.reportMissingExceptionWithMessage("Expected Exception during Avro export with --update-mode");
-    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
-  }
-
-  // Test Case for Issue [SQOOP-2846]
-  @Test
-  public void testAvroWithUpdateKey() throws IOException, SQLException {
+  public void testParquetWithUpdateKey() throws IOException, SQLException {
     String[] argv = { "--update-key", "ID" };
     final int TOTAL_RECORDS = 1;
-    // ColumnGenerator gen = colGenerator("100",
-    // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
-    createAvroFile(0, TOTAL_RECORDS, null);
+    createParquetFile(0, TOTAL_RECORDS, null);
     createTableWithInsert();
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
     verifyExport(getMsgPrefix() + "0");
   }
 
+  // Test Case for Issue [SQOOP-2846]
   @Test
-  public void testMissingAvroFields()  throws IOException, SQLException {
-    String[] argv = {};
-    final int TOTAL_RECORDS = 1;
-
-    // null Avro schema means don't create an Avro field
-    ColumnGenerator gen = colGenerator(null, null, null, "VARCHAR(64)");
-    createAvroFile(0, TOTAL_RECORDS, gen);
-    createTable(gen);
+  public void testParquetWithUpsert() throws IOException, SQLException {
+    String[] argv = { "--update-key", "ID", "--update-mode", "allowinsert" };
+    final int TOTAL_RECORDS = 2;
+    // ColumnGenerator gen = colGenerator("100",
+    // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
+    createParquetFile(0, TOTAL_RECORDS, null);
+    createTableWithInsert();
 
     thrown.expect(Exception.class);
-    thrown.reportMissingExceptionWithMessage("Expected Exception on missing Avro fields");
+    thrown.reportMissingExceptionWithMessage("Expected Exception during Parquet export with --update-mode");
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
 
   @Test
-  public void testSpecifiedColumnsAsAvroFields()  throws IOException, SQLException {
-    final int TOTAL_RECORDS = 10;
-    ColumnGenerator[] gens = new ColumnGenerator[] {
-      colGenerator(000, Schema.create(Schema.Type.INT), 100, "INTEGER"), //col0
-      colGenerator(111, Schema.create(Schema.Type.INT), 100, "INTEGER"), //col1
-      colGenerator(222, Schema.create(Schema.Type.INT), 100, "INTEGER"), //col2
-      colGenerator(333, Schema.create(Schema.Type.INT), 100, "INTEGER")  //col3
-    };
-    createAvroFile(0, TOTAL_RECORDS, gens);
-    createTable(gens);
-    runExport(getArgv(true, 10, 10, newStrArray(null, "-m", "" + 1, "--columns", "ID,MSG,COL1,COL2")));
-    verifyExport(TOTAL_RECORDS);
-    assertColValForRowId(0, "col0", null);
-    assertColValForRowId(0, "col1", 111);
-    assertColValForRowId(0, "col2", 222);
-    assertColValForRowId(0, "col3", null);
-    assertColValForRowId(9, "col0", null);
-    assertColValForRowId(9, "col1", 111);
-    assertColValForRowId(9, "col2", 222);
-    assertColValForRowId(9, "col3", null);
+  public void testMissingParquetFields()  throws IOException, SQLException {
+    String[] argv = {};
+    final int TOTAL_RECORDS = 1;
+
+    // null Parquet schema means don't create an Parquet field
+    ColumnGenerator gen = colGenerator(null, null, null, "VARCHAR(64)");
+    createParquetFile(0, TOTAL_RECORDS, gen);
+    createTable(gen);
+
+    thrown.expect(Exception.class);
+    thrown.reportMissingExceptionWithMessage("Expected Exception on missing Parquet fields");
+    runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
   }
+
 
 }

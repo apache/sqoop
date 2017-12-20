@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package org.apache.sqoop;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -16,42 +16,49 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
-import org.apache.commons.cli.ParseException;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.util.ReflectionUtils;
+package org.apache.sqoop;
 
 import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.SeqFileReader;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.compress.BZip2Codec;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.GzipCodec;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
 /**
- * Test that --split-by works.
+ * Test that compression options (--compress, --compression-codec) work.
  */
-public class TestSplitBy extends ImportJobTestCase {
+public class TestCompression extends ImportJobTestCase {
 
   /**
    * Create the argv to pass to Sqoop.
    * @return the argv as an array of strings.
    */
   protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
-      String splitByCol) {
+      CompressionCodec codec, String fileFormat) {
     String columnsString = "";
     for (String col : colNames) {
       columnsString += col + ",";
@@ -67,13 +74,16 @@ public class TestSplitBy extends ImportJobTestCase {
     args.add(HsqldbTestServer.getTableName());
     args.add("--columns");
     args.add(columnsString);
-    args.add("--split-by");
-    args.add(splitByCol);
+    args.add("--compress");
+    if (codec != null) {
+      args.add("--compression-codec");
+      args.add(codec.getClass().getName());
+    }
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
     args.add(HsqldbTestServer.getUrl());
-    args.add("--as-sequencefile");
+    args.add(fileFormat);
     args.add("--num-mappers");
     args.add("1");
 
@@ -85,29 +95,18 @@ public class TestSplitBy extends ImportJobTestCase {
     return HsqldbTestServer.getTableName();
   }
 
-
-  /**
-   * Given a comma-delimited list of integers, grab and parse the first int.
-   * @param str a comma-delimited list of values, the first of which is an int.
-   * @return the first field in the string, cast to int
-   */
-  private int getFirstInt(String str) {
-    String [] parts = str.split(",");
-    return Integer.parseInt(parts[0]);
-  }
-
-  public void runSplitByTest(String splitByCol, int expectedSum)
-      throws IOException {
+  public void runSequenceFileCompressionTest(CompressionCodec codec,
+      int expectedNum) throws Exception {
 
     String [] columns = HsqldbTestServer.getFieldNames();
     ClassLoader prevClassLoader = null;
     SequenceFile.Reader reader = null;
 
-    String [] argv = getArgv(true, columns, splitByCol);
+    String [] argv = getArgv(true, columns, codec, "--as-sequencefile");
     runImport(argv);
     try {
       SqoopOptions opts = new ImportTool().parseArguments(
-          getArgv(false, columns, splitByCol),
+          getArgv(false, columns, codec, "--as-sequencefile"),
           null, null, true);
 
       CompilationManager compileMgr = new CompilationManager(opts);
@@ -118,6 +117,12 @@ public class TestSplitBy extends ImportJobTestCase {
           getTableName());
 
       reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
+
+      if (codec == null) {
+        codec = new GzipCodec();
+      }
+      assertTrue("Block compressed", reader.isBlockCompressed());
+      assertEquals(codec.getClass(), reader.getCompressionCodec().getClass());
 
       // here we can actually instantiate (k, v) pairs.
       Configuration conf = new Configuration();
@@ -132,18 +137,13 @@ public class TestSplitBy extends ImportJobTestCase {
       // results from the db into the file.
 
       // Sum up everything in the file.
-      int curSum = 0;
+      int numLines = 0;
       while (reader.next(key) != null) {
         reader.getCurrentValue(val);
-        curSum += getFirstInt(val.toString());
+        numLines++;
       }
 
-      assertEquals("Total sum of first db column mismatch", expectedSum,
-          curSum);
-    } catch (InvalidOptionsException ioe) {
-      fail(ioe.toString());
-    } catch (ParseException pe) {
-      fail(pe.toString());
+      assertEquals(expectedNum, numLines);
     } finally {
       IOUtils.closeStream(reader);
 
@@ -153,15 +153,51 @@ public class TestSplitBy extends ImportJobTestCase {
     }
   }
 
-  @Test
-  public void testSplitByFirstCol() throws IOException {
-    String splitByCol = "INTFIELD1";
-    runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
+  public void runTextCompressionTest(CompressionCodec codec, int expectedNum)
+    throws IOException {
+
+    String [] columns = HsqldbTestServer.getFieldNames();
+    String [] argv = getArgv(true, columns, codec, "--as-textfile");
+    runImport(argv);
+
+    Configuration conf = new Configuration();
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    }
+    FileSystem fs = FileSystem.get(conf);
+
+    if (codec == null) {
+      codec = new GzipCodec();
+    }
+    ReflectionUtils.setConf(codec, getConf());
+    Path p = new Path(getDataFilePath().toString()
+        + codec.getDefaultExtension());
+    InputStream is = codec.createInputStream(fs.open(p));
+    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+    int numLines = 0;
+    while (true) {
+      String ln = r.readLine();
+      if (ln == null) {
+        break;
+      }
+      numLines++;
+    }
+    r.close();
+    assertEquals(expectedNum, numLines);
   }
 
   @Test
-  public void testSplitBySecondCol() throws IOException {
-    String splitByCol = "INTFIELD2";
-    runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
+  public void testDefaultTextCompression() throws IOException {
+    runTextCompressionTest(null, 4);
+  }
+
+  @Test
+  public void testBzip2TextCompression() throws IOException {
+    runTextCompressionTest(new BZip2Codec(), 4);
+  }
+
+  @Test
+  public void testBzip2SequenceFileCompression() throws Exception {
+    runSequenceFileCompressionTest(new BZip2Codec(), 4);
   }
 }

@@ -16,12 +16,11 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package org.apache.sqoop;
 
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.testutil.ImportJobTestCase;
-import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.tool.ExportTool;
 
 import java.io.IOException;
