@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop;
+package org.apache.sqoop;
 
 import java.io.BufferedReader;
 import java.io.File;

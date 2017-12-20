@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.TestFreeFormQueryImport;
+import org.apache.sqoop.TestFreeFormQueryImport;
 
 /**
  * Test free form query import with the MySQL db.
