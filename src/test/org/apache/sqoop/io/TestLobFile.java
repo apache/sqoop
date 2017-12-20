@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.io;
+package org.apache.sqoop.io;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,9 +36,6 @@ import org.apache.hadoop.crypto.JceAesCtrCryptoCodec;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.sqoop.io.CodecMap;
-import org.apache.sqoop.io.LobFile;
-import org.apache.sqoop.io.UnsupportedCodecException;
 import org.junit.Before;
 
 import org.junit.Test;

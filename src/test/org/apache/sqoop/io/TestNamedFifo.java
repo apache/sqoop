@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.io;
+package org.apache.sqoop.io;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,7 +35,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Shell;
-import org.apache.sqoop.io.NamedFifo;
 import org.junit.Before;
 import org.junit.Test;
 
