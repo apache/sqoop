@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.mapreduce.db;
+package org.apache.sqoop.mapreduce.db;
 
 import java.sql.*;
 import java.io.DataInput;

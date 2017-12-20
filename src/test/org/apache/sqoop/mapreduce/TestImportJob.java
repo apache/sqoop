@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.mapreduce;
+package org.apache.sqoop.mapreduce;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
