@@ -21,7 +21,7 @@ package com.cloudera.sqoop;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import com.google.common.collect.Lists;

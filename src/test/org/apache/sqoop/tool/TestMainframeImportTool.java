@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -21,7 +21,7 @@ package org.apache.sqoop.metastore;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 
 import org.apache.commons.logging.Log;

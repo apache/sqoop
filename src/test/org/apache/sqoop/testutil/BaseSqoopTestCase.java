@@ -16,8 +16,11 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.testutil;
+package org.apache.sqoop.testutil;
 
+import com.cloudera.sqoop.testutil.CommonArgs;
+import com.cloudera.sqoop.testutil.DirUtil;
+import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;

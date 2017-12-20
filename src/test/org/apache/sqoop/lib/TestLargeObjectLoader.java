@@ -24,7 +24,7 @@ import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 
 import org.apache.hadoop.conf.Configuration;

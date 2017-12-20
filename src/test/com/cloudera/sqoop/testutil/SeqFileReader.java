@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 
 /**
  * Utility class to help with test cases. Just reads the first (k, v) pair

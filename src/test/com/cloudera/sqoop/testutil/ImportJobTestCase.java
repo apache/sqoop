@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -33,6 +32,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.orm.CompilationManager;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;

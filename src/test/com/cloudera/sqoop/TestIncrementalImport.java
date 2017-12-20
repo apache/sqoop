@@ -47,7 +47,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.HsqldbManager;
 import org.apache.sqoop.manager.ManagerFactory;
 import org.apache.sqoop.metastore.JobData;
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.tool.JobTool;

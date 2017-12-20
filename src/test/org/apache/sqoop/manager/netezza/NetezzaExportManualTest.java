@@ -35,7 +35,7 @@ import org.junit.Before;
 
 import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestExport;
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 
 import static org.junit.Assert.fail;
