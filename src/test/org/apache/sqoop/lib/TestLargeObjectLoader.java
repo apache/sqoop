@@ -30,7 +30,7 @@ import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import com.cloudera.sqoop.testutil.MockResultSet;
+import org.apache.sqoop.testutil.MockResultSet;
 import org.junit.Before;
 import org.junit.Test;
 
