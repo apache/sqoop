@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobConf;
-import com.cloudera.sqoop.TestExport;
+import org.apache.sqoop.TestExport;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.junit.Ignore;
 import org.junit.Test;

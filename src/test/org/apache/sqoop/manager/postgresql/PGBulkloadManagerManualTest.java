@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobConf;
 import org.junit.Test;
 
-import com.cloudera.sqoop.TestExport;
+import org.apache.sqoop.TestExport;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
 

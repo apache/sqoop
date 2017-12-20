@@ -37,7 +37,6 @@ import org.h2.Driver;
 import org.junit.After;
 import org.junit.Before;
 
-import com.cloudera.sqoop.TestExport;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 

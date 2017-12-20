@@ -31,7 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.TestExport;
+import org.apache.sqoop.TestExport;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
