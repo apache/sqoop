@@ -16,11 +16,8 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.testutil;
+package org.apache.sqoop.testutil;
 
-import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import org.apache.sqoop.testutil.CommonArgs;
-import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.junit.After;
 import org.junit.FixMethodOrder;
 import org.junit.Test;

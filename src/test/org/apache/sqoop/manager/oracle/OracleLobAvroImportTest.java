@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.LobAvroImportTestCase;
+import org.apache.sqoop.testutil.LobAvroImportTestCase;
 
 import static org.junit.Assert.fail;
 
