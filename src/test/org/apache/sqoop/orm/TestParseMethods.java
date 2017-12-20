@@ -38,7 +38,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.config.ConfigurationHelper;
 
-import com.cloudera.sqoop.testutil.ExplicitSetMapper;
+import org.apache.sqoop.testutil.ExplicitSetMapper;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.Test;
