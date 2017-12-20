@@ -16,20 +16,19 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.db2;
+package org.apache.sqoop.metastore.db2;
 
-import com.cloudera.sqoop.metastore.SavedJobsTestBase;
-import org.apache.sqoop.manager.JdbcDrivers;
+import org.apache.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
 /**
- * Test of GenericJobStorage compatibility with DB2
+ * Test that Incremental-Import values are stored correctly in DB2
  *
  * This uses JDBC to store and retrieve metastore data from a DB2 server
  *
  * Since this requires a DB2 installation,
  * this class is named in such a way that Sqoop's default QA process does
  * not run it. You need to run this manually with
- * -Dtestcase=DB2SavedJobsTest or -Dthirdparty=true.
+ * -Dtestcase=DB2MetaConnectIncrementalImportTest or -Dthirdparty=true.
  *
  * You need to put DB2 JDBC driver library (db2jcc4.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
@@ -41,7 +40,7 @@ import org.apache.sqoop.manager.JdbcDrivers;
  *   -Dsqoop.test.db2.connectstring.username and -Dsqoop.test.db2.connectstring.password respectively
  */
 
-public class DB2SavedJobsTest extends SavedJobsTestBase {
+public class DB2MetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
 
     private static final String HOST_URL = System.getProperty(
         "sqoop.test.db2.connectstring.host_url",
@@ -60,7 +59,7 @@ public class DB2SavedJobsTest extends SavedJobsTestBase {
         + "/" + DATABASE_NAME
         + ":currentSchema=" + DATABASE_USER +";";
 
-    public DB2SavedJobsTest() {
-        super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD, JdbcDrivers.DB2.getDriverClass());
+    public DB2MetaConnectIncrementalImportTest() {
+        super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);
     }
 }

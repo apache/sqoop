@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.sqlserver;
+package org.apache.sqoop.metastore.sqlserver;
 
-import com.cloudera.sqoop.metastore.SavedJobsTestBase;
+import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 

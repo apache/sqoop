@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.postgres;
+package org.apache.sqoop.metastore.postgres;
 
-import com.cloudera.sqoop.metastore.SavedJobsTestBase;
+import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 
 /**

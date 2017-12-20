@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.db2;
+package org.apache.sqoop.metastore.db2;
 
-import com.cloudera.sqoop.metastore.JobToolTestBase;
+import org.apache.sqoop.metastore.JobToolTestBase;
 
 /**
  * Test that the Job Tool works in DB2

@@ -16,19 +16,19 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.postgres;
+package org.apache.sqoop.metastore.postgres;
 
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
+import org.apache.sqoop.metastore.JobToolTestBase;
 
 /**
- * Test that Incremental-Import values are stored correctly in PostgreSQL
+ * Test that the Job Tool works in PostgreSQL
  *
  * This uses JDBC to store and retrieve metastore data from a Postgres server
  *
  * Since this requires a Postgres installation,
  * this class is named in such a way that Sqoop's default QA process does
  * not run it. You need to run this manually with
- * -Dtestcase=PostgresMetaConnectIncrementalImportTest or -Dthirdparty=true.
+ * -Dtestcase=PostgresJobToolTest or -Dthirdparty=true.
  *
  *   Once you have a running Postgres database,
  *   Set server URL, database name, username, and password with system variables
@@ -36,7 +36,7 @@ import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
  *   -Dsqoop.test.postgresql.username and -Dsqoop.test.postgresql.password respectively
  */
 
-public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
+public class PostgresJobToolTest extends JobToolTestBase {
 
     private static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",
         "jdbc:postgresql://localhost/");
@@ -47,7 +47,7 @@ public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncreme
     private static final String PASSWORD = System.getProperty("sqoop.test.postgresql.password");
     private static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
-    public PostgresMetaConnectIncrementalImportTest() {
+    public PostgresJobToolTest() {
         super(CONNECT_STRING, DATABASE_USER, PASSWORD);
     }
 }

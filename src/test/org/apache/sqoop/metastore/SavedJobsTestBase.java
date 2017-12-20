@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore;
+package org.apache.sqoop.metastore;
 
 import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
 import static org.apache.sqoop.metastore.GenericJobStorage.META_PASSWORD_KEY;

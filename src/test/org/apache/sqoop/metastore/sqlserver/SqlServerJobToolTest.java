@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.sqlserver;
+package org.apache.sqoop.metastore.sqlserver;
 
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
+import org.apache.sqoop.metastore.JobToolTestBase;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
 /**
- * Test that Incremental-Import values are stored correctly in SQLServer
+ * Test that the Job Tool works in SQLServer
  *
  * This uses JDBC to store and retrieve metastore data from an SQLServer
  *
@@ -41,11 +41,11 @@ import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
  *   -Dms.sqlserver.username and -Dms.sqlserver.password respectively
  */
 
-public class SqlServerMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
+public class SqlServerJobToolTest extends JobToolTestBase {
 
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-    public SqlServerMetaConnectIncrementalImportTest() {
+    public SqlServerJobToolTest() {
         super(msSQLTestUtils.getDBConnectString(),
                 msSQLTestUtils.getDBUserName(),
                 msSQLTestUtils.getDBPassWord());

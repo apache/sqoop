@@ -16,23 +16,25 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.hsqldb;
+package org.apache.sqoop.metastore.hsqldb;
 
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
+import org.apache.sqoop.metastore.SavedJobsTestBase;
+import org.apache.sqoop.manager.JdbcDrivers;
 
 /**
- * Test that Incremental-Import values are stored correctly in Hsqldb
+ * Test of GenericJobStorage compatibility with Hsqldb
  *
  * This class is named in such a way that Sqoop's default QA process does
  * not run it. You need to run this manually with
- * -Dtestcase=HsqldbMetaConnectIncrementalImportTest or -Dthirdparty=true.
+ * -Dtestcase=HsqldbSavedJobsTest or -Dthirdparty=true.
  *
  * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
  */
 
-public class HsqldbMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
+public class HsqldbSavedJobsTest extends SavedJobsTestBase {
 
-    public HsqldbMetaConnectIncrementalImportTest() {
-        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
+    public HsqldbSavedJobsTest() {
+        super("jdbc:hsqldb:mem:sqoopmetastore",
+                "SA" , "", JdbcDrivers.HSQLDB.getDriverClass());
     }
 }

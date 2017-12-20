@@ -16,25 +16,23 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.hsqldb;
+package org.apache.sqoop.metastore.hsqldb;
 
-import com.cloudera.sqoop.metastore.SavedJobsTestBase;
-import org.apache.sqoop.manager.JdbcDrivers;
+import org.apache.sqoop.metastore.JobToolTestBase;
 
 /**
- * Test of GenericJobStorage compatibility with Hsqldb
+ * Test that the Job Tool works in Hsqldb
  *
  * This class is named in such a way that Sqoop's default QA process does
  * not run it. You need to run this manually with
- * -Dtestcase=HsqldbSavedJobsTest or -Dthirdparty=true.
+ * -Dtestcase=HsqldbJobToolTest or -Dthirdparty=true.
  *
  * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
  */
 
-public class HsqldbSavedJobsTest extends SavedJobsTestBase {
+public class HsqldbJobToolTest extends JobToolTestBase {
 
-    public HsqldbSavedJobsTest() {
-        super("jdbc:hsqldb:mem:sqoopmetastore",
-                "SA" , "", JdbcDrivers.HSQLDB.getDriverClass());
+    public HsqldbJobToolTest() {
+        super( "jdbc:hsqldb:mem:sqoopmetastore", "SA" , "");
     }
 }

@@ -16,37 +16,36 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.mysql;
+package org.apache.sqoop.metastore.oracle;
 
-import org.apache.sqoop.manager.mysql.MySQLTestUtils;
-import com.cloudera.sqoop.metastore.JobToolTestBase;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.sqoop.metastore.JobToolTestBase;
 
 /**
- * Test that the Job Tool works in MySql
+ * Test that the Job Tool works in Oracle
  *
- * This uses JDBC to store and retrieve metastore data from a MySql server
+ * This uses JDBC to store and retrieve metastore data from an Oracle server
  *
- * Since this requires a MySql installation,
+ * Since this requires an Oracle installation,
  * this class is named in such a way that Sqoop's default QA process does
  * not run it. You need to run this manually with
- * -Dtestcase=MySqlJobToolTest or -Dthirdparty=true.
+ * -Dtestcase=OracleJobToolTest or -Dthirdparty=true.
  *
- * You need to put MySql JDBC driver library (mysql-connector-java-5.1.38-bin.jar) in a location
+ * You need to put Oracle JDBC driver library (ojdbc6.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
  * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
  *
- *   Once you have a running MySql database,
- *   Set server URL, database name, username, and password with system variables
- *   -Dsqoop.test.mysql.connectstring.host_url, -Dsqoop.test.mysql.databasename,
- *   -Dsqoop.test.mysql.username and -Dsqoop.test.mysql.password respectively
+ *   Once you have a running Oracle database,
+ *   Set server URL, username, and password with system variables
+ *   -Dsqoop.test.oracle.connectstring, -Dsqoop.test.oracle.username
+ *   and -Dsqoop.test.oracle.password respectively
  */
 
-public class MySqlJobToolTest extends JobToolTestBase {
+public class OracleJobToolTest extends JobToolTestBase {
 
-    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
-
-    public MySqlJobToolTest() {
-        super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-                mySQLTestUtils.getUserPass());
+    public OracleJobToolTest() {
+        super(OracleUtils.CONNECT_STRING,
+                OracleUtils.ORACLE_USER_NAME,
+                OracleUtils.ORACLE_USER_PASS);
     }
 }

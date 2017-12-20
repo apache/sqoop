@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore;
+package org.apache.sqoop.metastore;
 
 import static org.junit.Assert.assertEquals;
 

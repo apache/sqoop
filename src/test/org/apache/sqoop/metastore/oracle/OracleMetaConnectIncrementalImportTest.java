@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.metastore.oracle;
+package org.apache.sqoop.metastore.oracle;
 
 import org.apache.sqoop.manager.oracle.util.OracleUtils;
-import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
+import org.apache.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
 /**
  * Test that Incremental-Import values are stored correctly in Oracle
