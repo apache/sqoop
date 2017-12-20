@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.hive;
+package org.apache.sqoop.hive;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,7 +37,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;
-import org.apache.sqoop.hive.HiveImport;
 import org.apache.sqoop.mapreduce.ParquetJob;
 import org.junit.After;
 import org.junit.Before;
