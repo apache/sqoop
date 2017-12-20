@@ -42,7 +42,7 @@ import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.manager.ManagerFactory;
 import org.apache.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.testutil.InjectableManagerFactory;
+import org.apache.sqoop.testutil.InjectableManagerFactory;
 import org.apache.sqoop.testutil.InjectableConnManager;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.hadoop.util.StringUtils;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.testutil;
+package org.apache.sqoop.testutil;
 
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ManagerFactory;
