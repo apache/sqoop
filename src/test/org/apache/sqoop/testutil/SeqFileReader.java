@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.testutil;
+package org.apache.sqoop.testutil;
 
 import java.io.IOException;
 
@@ -28,8 +28,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import org.apache.sqoop.testutil.CommonArgs;
 
 /**
  * Utility class to help with test cases. Just reads the first (k, v) pair

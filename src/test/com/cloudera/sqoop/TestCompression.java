@@ -24,7 +24,7 @@ import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.testutil.SeqFileReader;
+import org.apache.sqoop.testutil.SeqFileReader;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
 
