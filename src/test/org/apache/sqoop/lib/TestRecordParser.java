@@ -16,13 +16,11 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.lib;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.sqoop.lib.RecordParser;
-import org.apache.sqoop.lib.DelimiterSet;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.lib;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,10 +30,6 @@ import com.cloudera.sqoop.testutil.CommonArgs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.sqoop.lib.BlobRef;
-import org.apache.sqoop.lib.ClobRef;
-import org.apache.sqoop.lib.LargeObjectLoader;
-
 import com.cloudera.sqoop.testutil.MockResultSet;
 import org.junit.Before;
 import org.junit.Test;

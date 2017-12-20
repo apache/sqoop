@@ -16,11 +16,9 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.lib;
+package org.apache.sqoop.lib;
 
 import org.junit.Test;
-import org.apache.sqoop.lib.FieldFormatter;
-import org.apache.sqoop.lib.DelimiterSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
