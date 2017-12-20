@@ -33,7 +33,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
 
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.testutil.ExportJobTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

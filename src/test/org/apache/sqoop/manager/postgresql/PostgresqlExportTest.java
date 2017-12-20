@@ -19,7 +19,7 @@ package org.apache.sqoop.manager.postgresql;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.manager.ConnManager;

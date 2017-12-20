@@ -34,7 +34,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

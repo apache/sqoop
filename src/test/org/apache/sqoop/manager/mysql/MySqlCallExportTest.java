@@ -36,7 +36,7 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

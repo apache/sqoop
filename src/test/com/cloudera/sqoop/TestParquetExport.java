@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop;
 
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.testutil.ExportJobTestCase;
 import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.testutil;
+package org.apache.sqoop.testutil;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -30,8 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import org.apache.sqoop.testutil.CommonArgs;
 import org.junit.Before;
 
 import org.apache.sqoop.Sqoop;

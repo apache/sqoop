@@ -48,7 +48,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.apache.sqoop.tool.CodeGenTool;
 import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.Test;

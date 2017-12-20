@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.testutil.ExportJobTestCase;
 import com.google.common.collect.Lists;
 
 import java.io.IOException;

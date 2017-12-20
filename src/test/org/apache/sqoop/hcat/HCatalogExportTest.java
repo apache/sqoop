@@ -47,7 +47,7 @@ import org.apache.sqoop.hcat.HCatalogTestUtils.KeyType;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.junit.Before;
 
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
