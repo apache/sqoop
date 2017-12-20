@@ -47,7 +47,7 @@ import org.junit.Test;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
 import org.apache.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.manager.OracleUtils;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 
 /**
  * OraOop system tests of importing data from oracle to hadoop.

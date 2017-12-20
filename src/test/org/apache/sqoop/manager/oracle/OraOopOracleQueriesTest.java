@@ -25,7 +25,7 @@ import java.sql.PreparedStatement;
 
 import org.junit.Test;
 
-import com.cloudera.sqoop.manager.OracleUtils;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 
 /**
  * Test Oracle queries against Oracle database.

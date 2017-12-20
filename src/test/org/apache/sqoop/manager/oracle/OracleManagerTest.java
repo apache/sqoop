@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.oracle;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,9 +36,11 @@ import java.text.ParseException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -553,6 +555,6 @@ public class OracleManagerTest extends ImportJobTestCase {
     // Make sure that the session username is the same as the Oracle
     // sqoop user name
     String sessionUserName = m1.getSessionUser(c1);
-    assertEquals(OracleUtils.ORACLE_USER_NAME, sessionUserName);
+    Assert.assertEquals(OracleUtils.ORACLE_USER_NAME, sessionUserName);
   }
 }

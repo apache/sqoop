@@ -16,8 +16,11 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.mysql;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
@@ -28,12 +31,18 @@ import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestFreeFormQueryImport;
 
 /**
- * Test free form query import with the Oracle db.
+ * Test free form query import with the MySQL db.
  */
-public class OracleFreeFormQueryTest extends TestFreeFormQueryImport {
+public class MySQLFreeFormQueryTest extends TestFreeFormQueryImport {
 
   public static final Log LOG = LogFactory.getLog(
-      OracleFreeFormQueryTest.class.getName());
+      MySQLFreeFormQueryTest.class.getName());
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+
+  @Override
+  protected Log getLogger() {
+    return LOG;
+  }
 
   @Override
   protected boolean useHsqldbTestServer() {
@@ -42,19 +51,28 @@ public class OracleFreeFormQueryTest extends TestFreeFormQueryImport {
 
   @Override
   protected String getConnectString() {
-    return OracleUtils.CONNECT_STRING;
+    return mySQLTestUtils.getMySqlConnectString();
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    OracleUtils.setOracleAuth(opts);
+    opts.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(opts);
     return opts;
   }
 
   @Override
   protected void dropTableIfExists(String table) throws SQLException {
-    OracleUtils.dropTable(table, getManager());
+    Connection conn = getManager().getConnection();
+    PreparedStatement statement = conn.prepareStatement(
+        "DROP TABLE IF EXISTS " + table,
+        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
+    }
   }
 }
-

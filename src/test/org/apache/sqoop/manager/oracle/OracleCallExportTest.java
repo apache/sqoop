@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.OracleUtils;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ExportJobTestCase;
 import org.junit.Test;

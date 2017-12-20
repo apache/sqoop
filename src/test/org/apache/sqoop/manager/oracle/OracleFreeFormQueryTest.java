@@ -16,24 +16,25 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.oracle;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.TestAllTables;
+import com.cloudera.sqoop.TestFreeFormQueryImport;
 
 /**
- * Test the --all-tables functionality with MySQL.
+ * Test free form query import with the Oracle db.
  */
-public class MySQLAllTablesTest extends TestAllTables {
+public class OracleFreeFormQueryTest extends TestFreeFormQueryImport {
 
-  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+  public static final Log LOG = LogFactory.getLog(
+      OracleFreeFormQueryTest.class.getName());
 
   @Override
   protected boolean useHsqldbTestServer() {
@@ -42,28 +43,19 @@ public class MySQLAllTablesTest extends TestAllTables {
 
   @Override
   protected String getConnectString() {
-    return mySQLTestUtils.getMySqlConnectString();
+    return OracleUtils.CONNECT_STRING;
   }
 
   @Override
   protected SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(mySQLTestUtils.getUserName());
-    mySQLTestUtils.addPasswordIfIsSet(opts);
+    OracleUtils.setOracleAuth(opts);
     return opts;
   }
 
   @Override
   protected void dropTableIfExists(String table) throws SQLException {
-    Connection conn = getManager().getConnection();
-    PreparedStatement statement = conn.prepareStatement(
-        "DROP TABLE IF EXISTS " + table,
-        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
-    }
+    OracleUtils.dropTable(table, getManager());
   }
 }
+

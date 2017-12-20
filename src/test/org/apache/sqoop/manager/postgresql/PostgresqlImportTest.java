@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.postgresql;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -26,7 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ import org.apache.sqoop.manager.oracle.util.HadoopFiles;
 import org.apache.sqoop.manager.oracle.util.OracleData;
 
 import org.apache.sqoop.Sqoop;
-import com.cloudera.sqoop.manager.OracleUtils;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 
 import static org.junit.Assert.assertEquals;
 

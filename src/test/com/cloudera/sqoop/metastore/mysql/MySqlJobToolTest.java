@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop.metastore.mysql;
 
-import com.cloudera.sqoop.manager.MySQLTestUtils;
+import org.apache.sqoop.manager.mysql.MySQLTestUtils;
 import com.cloudera.sqoop.metastore.JobToolTestBase;
 
 /**

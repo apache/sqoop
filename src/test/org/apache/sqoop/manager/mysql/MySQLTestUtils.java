@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.mysql;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.commons.lang3.StringUtils;

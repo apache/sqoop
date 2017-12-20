@@ -16,37 +16,28 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.mysql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.LobAvroImportTestCase;
+import com.cloudera.sqoop.TestAllTables;
 
 /**
- * Tests BLOB/CLOB import for Avro with MySQL Db.
+ * Test the --all-tables functionality with MySQL.
  */
-public class MySQLLobAvroImportTest extends LobAvroImportTestCase {
+public class MySQLAllTablesTest extends TestAllTables {
 
-  public static final Log LOG = LogFactory.getLog(
-      OracleCompatTest.class.getName());
   private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
   @Override
-  protected Log getLogger() {
-    return LOG;
-  }
-
-  @Override
-  protected String getDbFriendlyName() {
-    return "MySQL";
+  protected boolean useHsqldbTestServer() {
+    return false;
   }
 
   @Override
@@ -74,10 +65,5 @@ public class MySQLLobAvroImportTest extends LobAvroImportTestCase {
     } finally {
       statement.close();
     }
-  }
-
-  @Override
-  protected String getBlobType() {
-    return "MEDIUMBLOB";
   }
 }

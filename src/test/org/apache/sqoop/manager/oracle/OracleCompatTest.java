@@ -16,12 +16,13 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.oracle;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Formatter;
 
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

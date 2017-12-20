@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.cubrid;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -32,7 +32,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.manager.CubridManager;
-import org.apache.sqoop.manager.cubrid.CubridTestUtils;
 import org.junit.After;
 import org.junit.Before;
 

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.mysql;
 
 import java.io.IOException;
 import java.sql.Connection;

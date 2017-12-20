@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop.metastore.oracle;
 
-import com.cloudera.sqoop.manager.OracleUtils;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import com.cloudera.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 
 /**

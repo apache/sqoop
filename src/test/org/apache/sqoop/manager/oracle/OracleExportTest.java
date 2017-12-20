@@ -16,12 +16,13 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.oracle;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;

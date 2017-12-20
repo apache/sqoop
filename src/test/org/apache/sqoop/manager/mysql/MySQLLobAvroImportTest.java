@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.mysql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,15 +28,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.TestFreeFormQueryImport;
+import com.cloudera.sqoop.testutil.LobAvroImportTestCase;
 
 /**
- * Test free form query import with the MySQL db.
+ * Tests BLOB/CLOB import for Avro with MySQL Db.
  */
-public class MySQLFreeFormQueryTest extends TestFreeFormQueryImport {
+public class MySQLLobAvroImportTest extends LobAvroImportTestCase {
 
   public static final Log LOG = LogFactory.getLog(
-      MySQLFreeFormQueryTest.class.getName());
+      MySQLLobAvroImportTest.class.getName());
   private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
   @Override
@@ -45,8 +45,8 @@ public class MySQLFreeFormQueryTest extends TestFreeFormQueryImport {
   }
 
   @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
+  protected String getDbFriendlyName() {
+    return "MySQL";
   }
 
   @Override
@@ -74,5 +74,10 @@ public class MySQLFreeFormQueryTest extends TestFreeFormQueryImport {
     } finally {
       statement.close();
     }
+  }
+
+  @Override
+  protected String getBlobType() {
+    return "MEDIUMBLOB";
   }
 }

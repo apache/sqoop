@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.manager;
+package org.apache.sqoop.manager.sqlserver;
 
 import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.SqoopOptions;
