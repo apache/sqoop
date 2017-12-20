@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.TestAllTables;
+import org.apache.sqoop.TestAllTables;
 
 /**
  * Test the --all-tables functionality with MySQL.
