@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.tool;
+package org.apache.sqoop.tool;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,10 +37,6 @@ import org.apache.sqoop.cli.ToolOptions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.sqoop.tool.BaseSqoopTool;
-import org.apache.sqoop.tool.SqoopTool;
-import org.apache.sqoop.tool.ToolDesc;
-import org.apache.sqoop.tool.ToolPlugin;
 
 import org.junit.Test;
 
