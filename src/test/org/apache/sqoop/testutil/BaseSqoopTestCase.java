@@ -18,7 +18,6 @@
 
 package org.apache.sqoop.testutil;
 
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;

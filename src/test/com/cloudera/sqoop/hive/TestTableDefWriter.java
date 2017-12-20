@@ -28,7 +28,7 @@ import org.apache.sqoop.hive.TableDefWriter;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import org.apache.sqoop.testutil.HsqldbTestServer;
 
 import org.junit.Rule;
 import org.junit.Test;

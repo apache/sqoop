@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.Sqoop;

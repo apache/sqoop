@@ -30,7 +30,7 @@ import org.junit.rules.ExpectedException;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.tool.BaseSqoopTool;
 import org.apache.sqoop.tool.ImportTool;
 
