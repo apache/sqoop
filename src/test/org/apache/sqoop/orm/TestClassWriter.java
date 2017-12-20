@@ -42,7 +42,7 @@ import org.junit.Test;
 import org.apache.sqoop.SqoopOptions;
 import com.cloudera.sqoop.TestConnFactory.DummyManager;
 import org.apache.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.testutil.DirUtil;
+import org.apache.sqoop.testutil.DirUtil;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.ImportTool;
