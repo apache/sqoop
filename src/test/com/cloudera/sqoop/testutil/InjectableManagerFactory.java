@@ -21,6 +21,7 @@ package com.cloudera.sqoop.testutil;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ManagerFactory;
 import org.apache.sqoop.metastore.JobData;
+import org.apache.sqoop.testutil.InjectableConnManager;
 
 /**
  * ManagerFactory that is used for testing; this accepts any
