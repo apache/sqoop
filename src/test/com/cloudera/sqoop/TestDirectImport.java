@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop;
 
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.junit.Rule;

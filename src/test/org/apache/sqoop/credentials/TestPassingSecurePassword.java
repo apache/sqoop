@@ -20,7 +20,7 @@ package org.apache.sqoop.credentials;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;

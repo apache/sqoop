@@ -37,6 +37,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.Test;

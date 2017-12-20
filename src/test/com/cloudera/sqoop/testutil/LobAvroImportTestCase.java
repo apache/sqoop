@@ -19,6 +19,7 @@
 package com.cloudera.sqoop.testutil;
 
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.CommonArgs;
 import org.junit.After;
 import org.junit.FixMethodOrder;
 import org.junit.Test;

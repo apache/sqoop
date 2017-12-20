@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

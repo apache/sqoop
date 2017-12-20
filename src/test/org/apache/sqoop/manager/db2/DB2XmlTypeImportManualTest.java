@@ -37,7 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.FileListing;
 

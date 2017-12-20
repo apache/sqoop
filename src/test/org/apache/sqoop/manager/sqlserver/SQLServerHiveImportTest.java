@@ -28,7 +28,7 @@ import org.apache.hadoop.util.StringUtils;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.hive.TestHiveImport;
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.tool.SqoopTool;
 import org.junit.After;
 import org.junit.Before;

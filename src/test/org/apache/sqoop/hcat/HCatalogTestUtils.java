@@ -65,7 +65,7 @@ import org.junit.Assert;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 
 /**
  * HCatalog common test utilities.

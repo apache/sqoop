@@ -33,6 +33,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.orm.CompilationManager;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;

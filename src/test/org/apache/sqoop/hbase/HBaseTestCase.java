@@ -66,7 +66,7 @@ import org.apache.sqoop.infrastructure.kerberos.KerberosConfigurationProvider;
 import org.junit.After;
 import org.junit.Before;
 
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 

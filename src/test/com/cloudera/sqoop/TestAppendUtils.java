@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.sqoop.manager.ImportJobContext;
 
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.HsqldbTestServer;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.Sqoop;

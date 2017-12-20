@@ -26,7 +26,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 import org.apache.commons.logging.Log;
@@ -43,7 +42,7 @@ import org.junit.Test;
 
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.util.FileListing;
