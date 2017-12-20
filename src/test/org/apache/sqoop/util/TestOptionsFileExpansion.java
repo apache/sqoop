@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.sqoop.util;
+package org.apache.sqoop.util;
 
 import java.io.BufferedWriter;
 import java.io.File;
