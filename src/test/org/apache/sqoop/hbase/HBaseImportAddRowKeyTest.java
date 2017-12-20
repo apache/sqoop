@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.hbase;
+package org.apache.sqoop.hbase;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;

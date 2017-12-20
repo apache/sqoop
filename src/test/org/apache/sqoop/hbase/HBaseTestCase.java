@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.hbase;
+package org.apache.sqoop.hbase;
 
 import static org.apache.hadoop.hbase.HConstants.MASTER_INFO_PORT;
 import static org.apache.hadoop.hbase.HConstants.ZOOKEEPER_CLIENT_PORT;

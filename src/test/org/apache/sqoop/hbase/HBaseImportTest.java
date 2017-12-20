@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.hbase;
+package org.apache.sqoop.hbase;
 
 import java.io.IOException;
 
-import org.apache.sqoop.hbase.HBaseUtil;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
