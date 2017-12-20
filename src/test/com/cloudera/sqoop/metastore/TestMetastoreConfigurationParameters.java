@@ -18,7 +18,7 @@
 
 package com.cloudera.sqoop.metastore;
 
-import com.cloudera.sqoop.testutil.HsqldbTestServer;
+import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.testutil.Argument;
 import org.apache.sqoop.tool.JobTool;
