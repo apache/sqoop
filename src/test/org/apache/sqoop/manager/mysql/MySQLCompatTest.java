@@ -30,7 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
+import org.apache.sqoop.testutil.ManagerCompatTestCase;
 
 /**
  * Test the basic mysql connection manager with the various column types.

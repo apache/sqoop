@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
+import org.apache.sqoop.testutil.ManagerCompatTestCase;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;

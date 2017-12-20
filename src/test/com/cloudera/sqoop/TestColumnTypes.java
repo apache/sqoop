@@ -21,7 +21,7 @@ package com.cloudera.sqoop;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
+import org.apache.sqoop.testutil.ManagerCompatTestCase;
 
 /**
  * Test that each of the different SQL Column types that we support

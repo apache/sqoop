@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.testutil;
+package org.apache.sqoop.testutil;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.Blob;
@@ -27,7 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.BytesWritable;
 
-import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
