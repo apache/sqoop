@@ -44,7 +44,7 @@ import org.junit.Test;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -41,7 +41,7 @@ import org.apache.sqoop.manager.DirectMySQLManager;
 import org.apache.sqoop.manager.MySQLManager;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.FileListing;
 
 import static org.junit.Assert.assertEquals;

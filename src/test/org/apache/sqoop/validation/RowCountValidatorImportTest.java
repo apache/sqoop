@@ -19,7 +19,7 @@
 package org.apache.sqoop.validation;
 
 import org.apache.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.tool.ImportTool;
 import org.junit.Test;

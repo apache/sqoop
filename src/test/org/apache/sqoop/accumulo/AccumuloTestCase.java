@@ -50,7 +50,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import org.apache.sqoop.testutil.HsqldbTestServer;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

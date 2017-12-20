@@ -38,7 +38,7 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.sqoop.manager.DirectMySQLManager;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

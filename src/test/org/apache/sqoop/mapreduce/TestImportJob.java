@@ -41,15 +41,13 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.InjectableManagerFactory;
 import com.cloudera.sqoop.testutil.InjectableConnManager;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.util.ClassLoaderStack;
-import org.apache.sqoop.mapreduce.AutoProgressMapper;
-import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

@@ -16,13 +16,14 @@
  * limitations under the License.
  */
 
-package com.cloudera.sqoop.testutil;
+package org.apache.sqoop.testutil;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cloudera.sqoop.testutil.SeqFileReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -32,8 +33,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.orm.CompilationManager;
-import org.apache.sqoop.testutil.BaseSqoopTestCase;
-import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;

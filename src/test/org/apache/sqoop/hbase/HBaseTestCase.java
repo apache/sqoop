@@ -68,7 +68,7 @@ import org.junit.Before;
 
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 
 /**
  * Utility methods that facilitate HBase import tests.

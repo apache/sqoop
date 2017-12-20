@@ -40,7 +40,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import com.cloudera.sqoop.testutil.SeqFileReader;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.tool.SqoopTool;

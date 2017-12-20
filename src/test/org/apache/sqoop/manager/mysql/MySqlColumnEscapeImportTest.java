@@ -20,7 +20,7 @@ package org.apache.sqoop.manager.mysql;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.logging.Log;

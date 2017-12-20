@@ -20,7 +20,7 @@ package com.cloudera.sqoop;
 
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
