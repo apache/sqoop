@@ -83,7 +83,7 @@ A well-defined programmatic entry-point to Sqoop is *not* defined by this specif
 
 h3. Base package
 
-The base package in Sqoop is currently @org.apache.hadoop.sqoop@. To reflect Sqoop's migration from an Apache Hadoop subproject to its own project, the class hierarchy should be moved to @com.cloudera.sqoop@.
+The base package in Sqoop is currently @org.apache.hadoop.sqoop@.
 
 h2. Compatibility Issues
 
