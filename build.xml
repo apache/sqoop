@@ -132,8 +132,6 @@
       value="${findbugs.out.dir}/report.xml" />
   <property name="findbugs.output.html.file"
       value="${findbugs.out.dir}/report.html" />
-  <property name="findbugs.excludes"
-      location="${test.dir}/findbugsExcludeFile.xml" />
 
   <!-- maven -->
   <property name="mvn.build.dir" value="${build.dir}/m2" />
@@ -1134,7 +1132,7 @@
     <mkdir dir="${findbugs.out.dir}"/>
     <findbugs home="${findbugs.home}" output="xml:withMessages"
         outputFile="${findbugs.output.xml.file}" effort="max"
-        excludeFilter="${findbugs.excludes}" jvmargs="-Xms512m -Xmx512m">
+        jvmargs="-Xms512m -Xmx512m">
       <auxClasspath>
         <path refid="test.classpath"/>
       </auxClasspath>
