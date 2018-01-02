@@ -50,7 +50,7 @@ import org.apache.sqoop.util.TaskId;
  * Netezza import mapper using external tables.
  */
 public abstract class NetezzaExternalTableImportMapper<K, V> extends
-    AutoProgressMapper<Integer, NullWritable, K, V> {
+  AutoProgressMapper<Integer, NullWritable, K, V> {
   /**
    * Create a named FIFO, and start Netezza import connected to that FIFO. A
    * File object representing the FIFO is in 'fifoFile'.
