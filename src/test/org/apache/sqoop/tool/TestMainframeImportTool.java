@@ -145,7 +145,7 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 	  } catch (InvalidOptionsException e) {
 		  String errorMessage = "--datasettype specified is invalid.";
 		  e.printStackTrace();
-		  assert(e.getMessage().contains(errorMessage));
+      assertTrue(e.getMessage().contains(errorMessage));
 	  } catch (ParseException e) {
 		e.printStackTrace();
 		assertFalse(e != null);
@@ -160,7 +160,7 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 	  mfImportTool.configureOptions(toolOptions);
 	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
 	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
-	  assert(isTape != null && isTape.toString().equals("true"));
+    assertTrue(isTape != null && isTape.toString().equals("true"));
   }
   @Test
   public void testTapeOptionDefaultIsSet() throws ParseException, InvalidOptionsException {
@@ -170,7 +170,7 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 	  mfImportTool.configureOptions(toolOptions);
 	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
 	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
-	  assert(isTape != null && isTape.toString().equals("false"));
+	  assertTrue(isTape != null && isTape.toString().equals("false"));
   }
   @Test
   public void testTapeOptionInvalidReturnsFalse() throws ParseException, InvalidOptionsException {
@@ -181,6 +181,6 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
 	  mfImportTool.validateImportOptions(sqoopOption);
 	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
-	  assert(isTape != null && isTape.toString().equals("false"));
+    assertTrue(isTape != null && isTape.toString().equals("false"));
   }
 }

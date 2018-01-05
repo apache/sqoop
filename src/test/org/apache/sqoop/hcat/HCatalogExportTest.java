@@ -52,6 +52,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -502,9 +503,9 @@ public class HCatalogExportTest extends ExportJobTestCase {
     addlArgsArray.add("-D");
     addlArgsArray.add(ConfigurationConstants.DATA_PUBLISH_CLASS + "=" + DummyDataPublisher.class.getName());
     runHCatExport(addlArgsArray, TOTAL_RECORDS, table, cols);
-    assert (DummyDataPublisher.storeTable.equals(getTableName()));
-    assert (DummyDataPublisher.storeType.equals("hsqldb"));
-    assert (DummyDataPublisher.operation.equals("export"));
+    assertEquals(getTableName(), DummyDataPublisher.storeTable);
+    assertEquals("hsqldb", DummyDataPublisher.storeType);
+    assertEquals("export", DummyDataPublisher.operation);
   }
 
   @Test
