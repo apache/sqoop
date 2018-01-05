@@ -48,7 +48,7 @@ import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import com.cloudera.sqoop.testutil.CommonArgs;
 import com.cloudera.sqoop.tool.ImportTool;
 import com.cloudera.sqoop.tool.JobTool;
-import org.apache.sqoop.metastore.GenericJobStorage;
+import org.apache.sqoop.metastore.AutoGenericJobStorage;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -80,11 +80,6 @@ public class TestIncrementalImport  {
 
   @Before
   public void setUp() throws Exception {
-    // Delete db state between tests
-    System.setProperty(GenericJobStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
-    System.setProperty(GenericJobStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
-    System.setProperty(GenericJobStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
-            SOURCE_DB_URL);
     resetSourceDataSchema();
   }
 
@@ -98,9 +93,9 @@ public class TestIncrementalImport  {
 
   public static Configuration newConf() {
     Configuration conf = new Configuration();
-    conf.set(GenericJobStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
-    conf.set(GenericJobStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
-    conf.set(GenericJobStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
+    conf.set(AutoGenericJobStorage.AUTO_STORAGE_USER_KEY, AUTO_STORAGE_USERNAME);
+    conf.set(AutoGenericJobStorage.AUTO_STORAGE_PASS_KEY, AUTO_STORAGE_PASSWORD);
+    conf.set(AutoGenericJobStorage.AUTO_STORAGE_CONNECT_STRING_KEY,
             SOURCE_DB_URL);
     return conf;
   }

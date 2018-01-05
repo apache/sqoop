@@ -19,7 +19,6 @@
 package com.cloudera.sqoop.metastore;
 
 import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
-import static org.apache.sqoop.metastore.GenericJobStorage.META_DRIVER_KEY;
 import static org.apache.sqoop.metastore.GenericJobStorage.META_PASSWORD_KEY;
 import static org.apache.sqoop.metastore.GenericJobStorage.META_USERNAME_KEY;
 
@@ -91,7 +90,6 @@ public abstract class SavedJobsTestBase {
     descriptor.put(META_CONNECT_KEY, metaConnect);
     descriptor.put(META_USERNAME_KEY, metaUser);
     descriptor.put(META_PASSWORD_KEY, metaPassword);
-    descriptor.put(META_DRIVER_KEY, driverClass);
 
     JobStorageFactory ssf = new JobStorageFactory(conf);
     storage = ssf.getJobStorage(descriptor);
@@ -144,7 +142,6 @@ public abstract class SavedJobsTestBase {
     conf.set(META_CONNECT_KEY, metaConnect);
     conf.set(META_USERNAME_KEY, metaUser);
     conf.set(META_PASSWORD_KEY, metaPassword);
-    conf.set(META_DRIVER_KEY, driverClass);
 
     return conf;
   }

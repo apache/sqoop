@@ -113,7 +113,19 @@ public class HsqldbTestServer {
     }
   }
 
+  public void stop() {
+    if (null == server) {
+      return;
+    }
+    server.stop();
+    server = null;
+  }
+
   public Connection getConnection() throws SQLException {
+    return getConnection(null, null);
+  }
+
+  public Connection getConnection(String user, String password) throws SQLException {
     try {
       Class.forName(DRIVER_CLASS);
     } catch (ClassNotFoundException cnfe) {
@@ -122,7 +134,7 @@ public class HsqldbTestServer {
       return null;
     }
 
-    Connection connection = DriverManager.getConnection(DB_URL);
+    Connection connection = DriverManager.getConnection(DB_URL, user, password);
     connection.setAutoCommit(false);
     return connection;
   }
@@ -267,5 +279,16 @@ public class HsqldbTestServer {
     return new HsqldbManager(getSqoopOptions());
   }
 
+  public void createNewUser(String username, String password) throws SQLException {
+    try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
+      statement.executeUpdate(String.format("CREATE USER %s PASSWORD %s ADMIN", username, password));
+    }
+  }
+
+  public void changePasswordForUser(String username, String newPassword) throws SQLException {
+    try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
+      statement.executeUpdate(String.format("ALTER USER %s SET PASSWORD %s", username, newPassword));
+    }
+  }
 
 }

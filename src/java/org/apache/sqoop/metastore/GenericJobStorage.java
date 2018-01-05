@@ -25,9 +25,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import com.cloudera.sqoop.manager.ConnManager;
 import org.apache.commons.logging.Log;
@@ -40,6 +42,15 @@ import com.cloudera.sqoop.metastore.JobData;
 import com.cloudera.sqoop.metastore.JobStorage;
 import com.cloudera.sqoop.tool.SqoopTool;
 import org.apache.sqoop.manager.DefaultManagerFactory;
+import org.apache.sqoop.manager.JdbcDrivers;
+
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.sqoop.manager.JdbcDrivers.DB2;
+import static org.apache.sqoop.manager.JdbcDrivers.HSQLDB;
+import static org.apache.sqoop.manager.JdbcDrivers.MYSQL;
+import static org.apache.sqoop.manager.JdbcDrivers.ORACLE;
+import static org.apache.sqoop.manager.JdbcDrivers.POSTGRES;
+import static org.apache.sqoop.manager.JdbcDrivers.SQLSERVER;
 
 /**
  * JobStorage implementation that uses a database to
@@ -62,9 +73,6 @@ public class GenericJobStorage extends JobStorage {
    * to the metastore.
    */
   public static final String META_PASSWORD_KEY = "metastore.password";
-
-  /** descriptor key identifying the class name of the jdbc driver */
-  public static final String META_DRIVER_KEY = "metastore.driver.class";
 
   /** Default name for the root metadata table. */
   private static final String DEFAULT_ROOT_TABLE_NAME = "SQOOP_ROOT";
@@ -119,49 +127,16 @@ public class GenericJobStorage extends JobStorage {
   private static final String PROPERTY_CLASS_CONFIG = "config";
 
   /**
-   * Configuration key specifying whether this storage agent is active.
-   * Defaults to "on" to allow zero-conf local users.
-   */
-  public static final String AUTO_STORAGE_IS_ACTIVE_KEY =
-          "sqoop.metastore.client.enable.autoconnect";
-
-  /**
-   * Configuration key specifying the connect string used by this
-   * storage agent.
-   */
-  public static final String AUTO_STORAGE_CONNECT_STRING_KEY =
-          "sqoop.metastore.client.autoconnect.url";
-
-  /**
-   * Configuration key specifying the username to bind with.
-   */
-  public static final String AUTO_STORAGE_USER_KEY =
-          "sqoop.metastore.client.autoconnect.username";
-
-
-  /** HSQLDB default user is named 'SA'. */
-  public static final String DEFAULT_AUTO_USER = "SA";
-
-  /**
-   * Configuration key specifying the password to bind with.
-   */
-  public static final String AUTO_STORAGE_PASS_KEY =
-          "sqoop.metastore.client.autoconnect.password";
-
-  /** HSQLDB default user has an empty password. */
-  public static final String DEFAULT_AUTO_PASSWORD = "";
-
-  /**
    * Per-job key with propClass 'schema' that specifies the SqoopTool
    * to load.
    */
   private static final String SQOOP_TOOL_KEY = "sqoop.tool";
+  private static final Set<JdbcDrivers> SUPPORTED_DRIVERS = EnumSet.of(HSQLDB, MYSQL, ORACLE, POSTGRES, DB2, SQLSERVER);
   private Map<String, String> connectedDescriptor;
   private String metastoreConnectStr;
   private String metastoreUser;
   private String metastorePassword;
   private Connection connection;
-  private String driverClass;
   private ConnManager connManager;
 
   protected Connection getConnection() {
@@ -184,9 +159,6 @@ public class GenericJobStorage extends JobStorage {
     this.metastorePassword = pass;
   }
 
-  protected void setDriverClass(String driverClass) {
-    this.driverClass = driverClass;
-  }
   /**
    * Set the descriptor used to open() this storage.
    */
@@ -199,13 +171,25 @@ public class GenericJobStorage extends JobStorage {
    * Initialize the connection to the database.
    */
   public void open(Map<String, String> descriptor) throws IOException {
-    setMetastoreConnectStr(descriptor.get(META_CONNECT_KEY));
-    setMetastoreUser(descriptor.get(META_USERNAME_KEY));
-    setMetastorePassword(descriptor.get(META_PASSWORD_KEY));
-    setDriverClass(descriptor.get(META_DRIVER_KEY));
+    setConnectionParameters(descriptor);
+    validateMetastoreConnectionString(metastoreConnectStr);
     setConnectedDescriptor(descriptor);
 
     init();
+  }
+
+  protected void validateMetastoreConnectionString(String metastoreConnectStr) {
+    if (!isDbSupported(metastoreConnectStr)) {
+      String errorMessage = metastoreConnectStr + " is an invalid connection string or the required RDBMS is not supported." +
+          "Supported RDBMSs are: " + SUPPORTED_DRIVERS.toString();
+      throw new RuntimeException(errorMessage);
+    }
+  }
+
+  protected void setConnectionParameters(Map<String, String> descriptor) {
+    setMetastoreConnectStr(descriptor.get(META_CONNECT_KEY));
+    setMetastoreUser(descriptor.get(META_USERNAME_KEY));
+    setMetastorePassword(descriptor.get(META_PASSWORD_KEY));
   }
 
   protected void init() throws IOException {
@@ -263,8 +247,10 @@ public class GenericJobStorage extends JobStorage {
   @Override
   public void close() throws IOException {
       try {
-          LOG.debug("Closing connection manager");
-          connManager.close();
+          if (connManager != null) {
+            LOG.debug("Closing connection manager");
+            connManager.close();
+          }
       } catch (SQLException sqlE) {
           throw new IOException("Exception closing connection manager", sqlE);
       } finally {
@@ -275,12 +261,7 @@ public class GenericJobStorage extends JobStorage {
   @Override
   /** {@inheritDoc} */
   public boolean canAccept(Map<String, String> descriptor) {
-    // We return true if the desciptor contains a connect string to find
-    // the database or auto-connect is enabled
-    Configuration conf = this.getConf();
-    boolean metaConnectTrue = descriptor.get(META_CONNECT_KEY) != null;
-    boolean autoConnectEnabled = conf.getBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, true);
-    return metaConnectTrue || autoConnectEnabled;
+    return descriptor.get(META_CONNECT_KEY) != null;
   }
 
   @Override
@@ -854,5 +835,13 @@ public class GenericJobStorage extends JobStorage {
     return dmf.accept(jd);
   }
 
-}
+  protected boolean isDbSupported(String metaConnectString) {
+    for (JdbcDrivers driver : SUPPORTED_DRIVERS) {
+      if (startsWith(metaConnectString, driver.getSchemePrefix())) {
+        return true;
+      }
+    }
+    return false;
+  }
 
+}
