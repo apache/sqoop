@@ -947,6 +947,9 @@ public class TestSqoopOptions {
     else if(type.equals(String.class)) {
       return UUID.randomUUID().toString();
     }
+    else if(type.equals(Character.TYPE) || type.equals(Character.class)) {
+      return UUID.randomUUID().toString().charAt(0);
+    }
     else if(type.equals(BigInteger.class)){
       return BigInteger.valueOf(random.nextInt());
     }
