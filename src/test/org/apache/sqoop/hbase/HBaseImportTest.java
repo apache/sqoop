@@ -72,6 +72,8 @@ public class HBaseImportTest extends HBaseTestCase {
   }
 
   @Test
+
+  @Test
   public void testAppendWithTimestampSucceeds() throws IOException {
     // Test that we can create a table and then import multiple rows
     // validate for append scenario with time stamp

@@ -335,6 +335,7 @@ public abstract class BaseSqoopTestCase {
     Objects.requireNonNull(colNames);
     Objects.requireNonNull(colTypes);
     if (colNames.length != colTypes.length) {
+      throw new IllegalArgumentException("The length of colNames and colTypes arrays have to be equal!");
       throw new IllegalArgumentException("The length of the colNames and colTypes arrays have to be equal!");
     }
 
@@ -511,6 +512,7 @@ public abstract class BaseSqoopTestCase {
     if (colNames.length != vals.length) {
       throw new IllegalArgumentException("The length of the colNames and vals arrays have to be equal!");
     }
+
 
     Connection conn = null;
     PreparedStatement statement = null;
