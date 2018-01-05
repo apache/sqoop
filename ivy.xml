@@ -94,6 +94,8 @@ under the License.
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
       conf="test->default"/>
+    <dependency org="org.assertj" name="assertj-core" rev="${assertj.version}"
+      conf="test->default"/>
     <dependency org="org.mockito" name="mockito-all"
       rev="${mockito-all.version}" conf="test->default"/>
     <!-- We're only using H2 for tests as it supports stored

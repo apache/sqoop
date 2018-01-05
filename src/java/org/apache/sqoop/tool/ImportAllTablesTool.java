@@ -97,17 +97,12 @@ public class ImportAllTablesTool extends com.cloudera.sqoop.tool.ImportTool {
         LOG.error("manager.listTables() returned null");
         return 1;
       } else {
-        int numMappers = options.getNumMappers();
         for (String tableName : tables) {
           if (excludes.contains(tableName)) {
             System.out.println("Skipping table: " + tableName);
           } else {
-            /*
-             * Number of mappers could be potentially reset in imports.  So
-             * we set it to the configured number before each import.
-             */
-            options.setNumMappers(numMappers);
-            importTable(options, tableName, hiveImport);
+            SqoopOptions clonedOptions = (SqoopOptions) options.clone();
+            importTable(clonedOptions, tableName, hiveImport);
           }
         }
       }
