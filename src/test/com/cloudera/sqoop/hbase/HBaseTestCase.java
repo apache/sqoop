@@ -24,6 +24,16 @@ import static org.apache.hadoop.hbase.coprocessor.CoprocessorHost.REGION_COPROCE
 import static org.apache.hadoop.hbase.security.HBaseKerberosUtils.KRB_PRINCIPAL;
 import static org.apache.hadoop.hbase.security.HBaseKerberosUtils.MASTER_KRB_PRINCIPAL;
 import static org.apache.hadoop.hbase.security.User.HBASE_SECURITY_CONF_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_DATANODE_HTTPS_ADDRESS_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_DATANODE_KERBEROS_PRINCIPAL_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_DATANODE_KEYTAB_FILE_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_HTTP_POLICY_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_NAMENODE_HTTPS_ADDRESS_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_NAMENODE_KEYTAB_FILE_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_WEB_AUTHENTICATION_KERBEROS_PRINCIPAL_KEY;
+import static org.apache.hadoop.hdfs.DFSConfigKeys.IGNORE_SECURE_PORTS_FOR_TESTING_KEY;
 import static org.apache.hadoop.yarn.conf.YarnConfiguration.RM_PRINCIPAL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -49,6 +59,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.security.HBaseKerberosUtils;
 import org.apache.hadoop.hbase.security.token.TokenProvider;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.http.HttpConfig;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.infrastructure.kerberos.KerberosConfigurationProvider;
@@ -66,9 +77,8 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       HBaseTestCase.class.getName());
-  private static final int NUM_MASTERS = 1;
-  private static final int NUM_SLAVES = 1;
   private static final String MASTER_INFO_PORT_DISABLE_WEB_UI = "-1";
+  private static final String DEFAULT_DFS_HTTPS_ADDRESS = "localhost:0";
 
   private final KerberosConfigurationProvider kerberosConfigurationProvider;
   private HBaseTestingUtility hbaseTestUtil;
@@ -163,8 +173,7 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       hbaseTestUtil.getConfiguration().set(MASTER_INFO_PORT, MASTER_INFO_PORT_DISABLE_WEB_UI);
       setupKerberos();
 
-      hbaseTestUtil.startMiniZKCluster();
-      hbaseTestUtil.startMiniHBaseCluster(NUM_MASTERS, NUM_SLAVES);
+      hbaseTestUtil.startMiniCluster();
       super.setUp();
     } catch (Throwable e) {
       throw new RuntimeException(e);
@@ -179,10 +188,26 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
     String servicePrincipal = kerberosConfigurationProvider.getTestPrincipal() + "@" + kerberosConfigurationProvider.getRealm();
     HBaseKerberosUtils.setPrincipalForTesting(servicePrincipal);
     HBaseKerberosUtils.setKeytabFileForTesting(kerberosConfigurationProvider.getKeytabFilePath());
-    HBaseKerberosUtils.setSecuredConfiguration(hbaseTestUtil.getConfiguration());
 
-    UserGroupInformation.setConfiguration(hbaseTestUtil.getConfiguration());
-    hbaseTestUtil.getConfiguration().setStrings(REGION_COPROCESSOR_CONF_KEY, TokenProvider.class.getName());
+    Configuration configuration = hbaseTestUtil.getConfiguration();
+    HBaseKerberosUtils.setSecuredConfiguration(configuration);
+    UserGroupInformation.setConfiguration(configuration);
+    configuration.setStrings(REGION_COPROCESSOR_CONF_KEY, TokenProvider.class.getName());
+
+    setupKerberosForHdfs(servicePrincipal, configuration);
+  }
+
+  private void setupKerberosForHdfs(String servicePrincipal, Configuration configuration) {
+    configuration.set(DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY, servicePrincipal);
+    configuration.set(DFS_NAMENODE_KEYTAB_FILE_KEY, kerberosConfigurationProvider.getKeytabFilePath());
+    configuration.set(DFS_DATANODE_KERBEROS_PRINCIPAL_KEY, servicePrincipal);
+    configuration.set(DFS_DATANODE_KEYTAB_FILE_KEY, kerberosConfigurationProvider.getKeytabFilePath());
+    configuration.setBoolean(DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, true);
+    configuration.set(DFS_WEB_AUTHENTICATION_KERBEROS_PRINCIPAL_KEY, servicePrincipal);
+    configuration.set(DFS_HTTP_POLICY_KEY, HttpConfig.Policy.HTTP_ONLY.name());
+    configuration.set(DFS_NAMENODE_HTTPS_ADDRESS_KEY, DEFAULT_DFS_HTTPS_ADDRESS);
+    configuration.set(DFS_DATANODE_HTTPS_ADDRESS_KEY, DEFAULT_DFS_HTTPS_ADDRESS);
+    configuration.setBoolean(IGNORE_SECURE_PORTS_FOR_TESTING_KEY, true);
   }
 
   public void shutdown() throws Exception {

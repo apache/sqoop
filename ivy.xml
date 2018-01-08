@@ -225,7 +225,6 @@ under the License.
     </dependency>
 
     <exclude org="org.apache.hadoop" module="avro"/>
-    <exclude org="commons-daemon" module="commons-daemon" />
     <exclude type="pom" />
 
   </dependencies>
