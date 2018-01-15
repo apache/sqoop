@@ -709,7 +709,7 @@
     <!-- use ant test -DremoteDebug=true to enable remote debugging -->
     <condition property="remoteDebugJvmArgs"
                value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=2601"
-               else="-ea">
+               else="-Dsqoop.placeholderJvmProperty=true">
       <istrue value="${remoteDebug}"/>
     </condition>
     <delete dir="${test.log.dir}"/>
@@ -730,9 +730,6 @@
       errorProperty="tests.failed" failureProperty="tests.failed"
       timeout="${test.timeout}"
       dir="${build.test}/data">
-
-      <!-- enable asserts in tests -->
-      <jvmarg value="-ea" />
 
       <jvmarg value="${remoteDebugJvmArgs}"/>
 
