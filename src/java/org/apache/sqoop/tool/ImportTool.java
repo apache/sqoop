@@ -504,16 +504,16 @@ public class ImportTool extends BaseSqoopTool {
    * Import a table or query.
    * @return true if an import was performed, false otherwise.
    */
-  protected boolean importTable(SqoopOptions options, String tableName) throws IOException, ImportException {
+  protected boolean importTable(SqoopOptions options) throws IOException, ImportException {
     String jarFile = null;
 
     // Generate the ORM code for the tables.
-    jarFile = codeGenerator.generateORM(options, tableName);
+    jarFile = codeGenerator.generateORM(options, options.getTableName());
 
-    Path outputPath = getOutputPath(options, tableName);
+    Path outputPath = getOutputPath(options, options.getTableName());
 
     // Do the actual import.
-    ImportJobContext context = new ImportJobContext(tableName, jarFile,
+    ImportJobContext context = new ImportJobContext(options.getTableName(), jarFile,
         options, outputPath);
 
     // If we're doing an incremental import, set up the
@@ -526,7 +526,7 @@ public class ImportTool extends BaseSqoopTool {
       deleteTargetDir(context);
     }
 
-    if (null != tableName) {
+    if (null != options.getTableName()) {
       manager.importTable(context);
     } else {
       manager.importQuery(context);
@@ -544,7 +544,6 @@ public class ImportTool extends BaseSqoopTool {
       // For Parquet file, the import action will create hive table directly via
       // kite. So there is no need to do hive import as a post step again.
       if (options.getFileLayout() != SqoopOptions.FileLayout.ParquetFile) {
-        options.setTableName(tableName);
         HiveClient hiveClient = hiveClientFactory.createHiveClient(options, manager);
         hiveClient.importTable();
       }
@@ -633,7 +632,7 @@ public class ImportTool extends BaseSqoopTool {
 
     try {
       // Import a single table (or query) the user specified.
-      importTable(options, options.getTableName());
+      importTable(options);
     } catch (IllegalArgumentException iea) {
         LOG.error(IMPORT_FAILED_ERROR_MSG + iea.getMessage());
       rethrowIfRequired(options, iea);
