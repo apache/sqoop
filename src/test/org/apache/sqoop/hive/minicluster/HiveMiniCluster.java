@@ -69,6 +69,7 @@ public class HiveMiniCluster {
 
   private void createHiveConf() {
     config = new HiveConf();
+    config.set(HiveConf.ConfVars.METASTOREWAREHOUSE.varname, tempFolderPath);
     config.set(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_BIND_HOST.varname, getHostName());
     config.setInt(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_PORT.varname, getPort());
     config.set(HiveConf.ConfVars.METASTORECONNECTURLKEY.varname, getMetastoreConnectUrl());
