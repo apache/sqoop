@@ -614,8 +614,6 @@ public class ImportTool extends BaseSqoopTool {
   @Override
   /** {@inheritDoc} */
   public int run(SqoopOptions options) {
-    HiveImport hiveImport = null;
-
     if (allTables) {
       // We got into this method, but we should be in a subclass.
       // (This method only handles a single table)
