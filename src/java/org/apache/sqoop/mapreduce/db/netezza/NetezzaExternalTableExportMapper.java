@@ -18,13 +18,13 @@
 
 package org.apache.sqoop.mapreduce.db.netezza;
 
-import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -62,7 +62,7 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
   private DBConfiguration dbc;
   private File fifoFile;
   private Connection con;
-  private OutputStream recordWriter;
+  private BufferedWriter recordWriter;
   public static final Log LOG = LogFactory
     .getLog(NetezzaExternalTableImportMapper.class.getName());
   private NetezzaJDBCStatementRunner extTableThread;
@@ -218,7 +218,9 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     extTableThread.start();
     // We start the JDBC thread first in this case as we want the FIFO reader to
     // be running.
-    recordWriter = new BufferedOutputStream(new FileOutputStream(nf.getFile()));
+    final String encoding = conf
+        .get(DirectNetezzaManager.NETEZZA_TABLE_ENCODING_OPT);
+    recordWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(nf.getFile()),encoding));
     counter.startClock();
   }
 
@@ -264,7 +266,7 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     String outputStr = record.toString() + "\n";
     byte[] outputBytes = outputStr.getBytes("UTF-8");
     counter.addBytes(outputBytes.length);
-    recordWriter.write(outputBytes, 0, outputBytes.length);
+    recordWriter.write(outputStr);
   }
 
   protected void writeSqoopRecord(SqoopRecord sqr) throws IOException,
@@ -272,7 +274,7 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     String outputStr = sqr.toString(this.outputDelimiters);
     byte[] outputBytes = outputStr.getBytes("UTF-8");
     counter.addBytes(outputBytes.length);
-    recordWriter.write(outputBytes, 0, outputBytes.length);
+    recordWriter.write(outputStr);
   }
 
 }
