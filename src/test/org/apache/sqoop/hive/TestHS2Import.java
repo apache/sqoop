@@ -1,11 +1,11 @@
 package org.apache.sqoop.hive;
 
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sqoop.hive.minicluster.HiveMiniCluster;
 import org.apache.sqoop.hive.minicluster.NoAuthenticationConfiguration;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.HS2TestUtil;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

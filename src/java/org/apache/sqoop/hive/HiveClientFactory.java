@@ -18,12 +18,12 @@
 
 package org.apache.sqoop.hive;
 
-import com.cloudera.sqoop.SqoopOptions;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.db.JdbcConnectionFactory;
 import org.apache.sqoop.hive.hiveserver2.HiveServer2Client;
 import org.apache.sqoop.hive.hiveserver2.HiveServer2ConnectionFactory;
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 
 public class HiveClientFactory {
 
