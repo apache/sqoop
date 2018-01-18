@@ -25,7 +25,7 @@ import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * Class that holds a record to be merged. This contains a SqoopRecord which

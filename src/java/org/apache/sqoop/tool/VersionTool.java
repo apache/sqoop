@@ -18,13 +18,13 @@
 
 package org.apache.sqoop.tool;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.cli.ToolOptions;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.cli.ToolOptions;
 
 /**
  * Tool that prints Sqoop's version.
  */
-public class VersionTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class VersionTool extends BaseSqoopTool {
 
   public VersionTool() {
     super("version");

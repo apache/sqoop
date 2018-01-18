@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
-import com.cloudera.sqoop.io.LobFile;
+import org.apache.sqoop.io.LobFile;
 import org.apache.sqoop.util.FileSystemUtil;
 
 /**
@@ -43,6 +43,30 @@ public class LobReaderCache {
       LogFactory.getLog(LobReaderCache.class.getName());
 
   private Map<Path, LobFile.Reader> readerMap;
+
+  private static final LobReaderCache CACHE;
+  static {
+    CACHE = new LobReaderCache();
+  }
+
+  /**
+   * @return the singleton LobReaderCache instance.
+   */
+  public static LobReaderCache getCache() {
+    return CACHE;
+  }
+
+  /**
+   * Created a fully-qualified path object.
+   * @param path the path to fully-qualify with its fs URI.
+   * @param conf the current Hadoop FS configuration.
+   * @return a new path representing the same location as the input 'path',
+   * but with a fully-qualified URI.
+   */
+  public static Path qualify(Path path, Configuration conf)
+      throws IOException {
+    return org.apache.sqoop.util.FileSystemUtil.makeQualified(path, conf);
+  }
 
   /**
    * Open a LobFile for read access, returning a cached reader if one is

@@ -25,10 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.mapreduce.DBWritable;
 
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBRecordReader;
-
 /**
  * A RecordReader that reads records from DB2.
  */

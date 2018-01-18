@@ -19,9 +19,6 @@ package org.apache.sqoop.lib;
 
 import java.io.IOException;
 
-import com.cloudera.sqoop.lib.FieldMappable;
-import com.cloudera.sqoop.lib.ProcessingException;
-
 /**
  * Interface implemented by classes that process FieldMappable objects.
  */

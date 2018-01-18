@@ -40,14 +40,13 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.hbase.HBasePutProcessor;
-import com.cloudera.sqoop.lib.FieldMapProcessor;
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.mapreduce.DataDrivenImportJob;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.hbase.HBasePutProcessor;
+import org.apache.sqoop.lib.FieldMapProcessor;
+import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * Runs an HBase import via DataDrivenDBInputFormat to the HBasePutProcessor

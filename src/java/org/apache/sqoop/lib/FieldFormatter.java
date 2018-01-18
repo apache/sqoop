@@ -36,8 +36,7 @@ public final class FieldFormatter {
    * @param delimiters
    * @return
    */
-  public static String hiveStringDropDelims(String str,
-      com.cloudera.sqoop.lib.DelimiterSet delimiters) {
+  public static String hiveStringDropDelims(String str, DelimiterSet delimiters) {
     return hiveStringReplaceDelims(str, "", delimiters);
   }
 
@@ -48,8 +47,7 @@ public final class FieldFormatter {
    * @param delimiters
    * @return
    */
-  public static String hiveStringReplaceDelims(String str, String replacement,
-      com.cloudera.sqoop.lib.DelimiterSet delimiters) {
+  public static String hiveStringReplaceDelims(String str, String replacement, DelimiterSet delimiters) {
     String droppedDelims = REPLACE_PATTERN.matcher(str).replaceAll(replacement);
     return escapeAndEnclose(droppedDelims, delimiters);
   }
@@ -75,16 +73,14 @@ public final class FieldFormatter {
    * '\000', those operations are not performed.
    * @return the escaped, enclosed version of 'str'.
    */
-  public static String escapeAndEnclose(String str,
-      com.cloudera.sqoop.lib.DelimiterSet delimiters) {
+  public static String escapeAndEnclose(String str, DelimiterSet delimiters) {
 
     char escape = delimiters.getEscapedBy();
     char enclose = delimiters.getEnclosedBy();
     boolean encloseRequired = delimiters.isEncloseRequired();
 
     // true if we can use an escape character.
-    boolean escapingLegal =
-        com.cloudera.sqoop.lib.DelimiterSet.NULL_CHAR != escape;
+    boolean escapingLegal = DelimiterSet.NULL_CHAR != escape;
     String withEscapes;
 
     if (null == str) {
@@ -99,7 +95,7 @@ public final class FieldFormatter {
       withEscapes = str;
     }
 
-    if (com.cloudera.sqoop.lib.DelimiterSet.NULL_CHAR == enclose) {
+    if (DelimiterSet.NULL_CHAR == enclose) {
       // The enclose-with character was left unset, so we can't enclose items.
 
       if (escapingLegal) {

@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.metastore.JobStorage;
 
 /**
  * Factory that produces the correct JobStorage system to work with
@@ -42,7 +41,7 @@ public class JobStorageFactory {
 
   /** The default list of available JobStorage implementations. */
   private static final String DEFAULT_AVAILABLE_STORAGES =
-      "com.cloudera.sqoop.metastore.GenericJobStorage,"
+      "org.apache.sqoop.metastore.GenericJobStorage,"
       + "org.apache.sqoop.metastore.AutoGenericJobStorage";
 
   public JobStorageFactory(Configuration config) {

@@ -25,12 +25,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.manager.MySQLUtils;
-import com.cloudera.sqoop.mapreduce.ExportJobBase;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
+import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.MySQLUtils;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
 /**
  * Class that runs an export job using mysqlimport in the mapper.

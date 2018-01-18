@@ -36,13 +36,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.sqoop.ConnFactory;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.ConnFactory;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.metastore.JobData;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.util.ImportException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

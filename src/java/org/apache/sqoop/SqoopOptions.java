@@ -45,14 +45,11 @@ import org.apache.sqoop.validation.AbortOnFailureHandler;
 import org.apache.sqoop.validation.AbsoluteValidationThreshold;
 import org.apache.sqoop.validation.RowCountValidator;
 
-import com.cloudera.sqoop.SqoopOptions.FileLayout;
-import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
-import com.cloudera.sqoop.SqoopOptions.UpdateMode;
-import com.cloudera.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.lib.LargeObjectLoader;
-import com.cloudera.sqoop.tool.SqoopTool;
-import com.cloudera.sqoop.util.RandomHash;
-import com.cloudera.sqoop.util.StoredAsProperty;
+import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.LargeObjectLoader;
+import org.apache.sqoop.tool.SqoopTool;
+import org.apache.sqoop.util.RandomHash;
+import org.apache.sqoop.util.StoredAsProperty;
 
 import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
 import static org.apache.sqoop.orm.ClassWriter.toJavaIdentifier;
@@ -82,6 +79,44 @@ public class SqoopOptions implements Cloneable {
 
   public static final boolean METASTORE_PASSWORD_DEFAULT = false;
   public static final String DB_PASSWORD_KEY = "db.password";
+
+  /** Selects in-HDFS destination file format. */
+  public enum FileLayout {
+    TextFile,
+    SequenceFile,
+    AvroDataFile,
+    ParquetFile
+  }
+
+  /**
+   * Incremental imports support two modes:
+   * <ul>
+   * <li>new rows being appended to the end of a table with an
+   * incrementing id</li>
+   * <li>new data results in a date-last-modified column being
+   * updated to NOW(); Sqoop will pull all dirty rows in the next
+   * incremental import.</li>
+   * </ul>
+   */
+  public enum IncrementalMode {
+    None,
+    AppendRows,
+    DateLastModified,
+  }
+
+  /**
+   * Update mode option specifies how updates are performed when
+   * new rows are found with non-matching keys in database.
+   * It supports two modes:
+   * <ul>
+   * <li>UpdateOnly: This is the default. New rows are silently ignored.</li>
+   * <li>AllowInsert: New rows are inserted into the database.</li>
+   * </ul>
+   */
+  public enum UpdateMode {
+    UpdateOnly,
+    AllowInsert
+  }
 
   /**
    * Thrown when invalid cmdline options are given.
@@ -370,7 +405,7 @@ public class SqoopOptions implements Cloneable {
   // If we restore a job and then allow the user to apply arguments on
   // top, we retain the version without the arguments in a reference to the
   // 'parent' SqoopOptions instance, here.
-  private com.cloudera.sqoop.SqoopOptions parent;
+  private SqoopOptions parent;
 
   // Nonce directory name. Generate one per process, lazily, if
   // getNonceJarDir() is called. Not recorded in metadata. This is used as
@@ -2312,14 +2347,14 @@ public class SqoopOptions implements Cloneable {
   /**
    * Return the parent instance this SqoopOptions is derived from.
    */
-  public com.cloudera.sqoop.SqoopOptions getParent() {
+  public SqoopOptions getParent() {
     return this.parent;
   }
 
   /**
    * Set the parent instance this SqoopOptions is derived from.
    */
-  public void setParent(com.cloudera.sqoop.SqoopOptions options) {
+  public void setParent(SqoopOptions options) {
     this.parent = options;
   }
 

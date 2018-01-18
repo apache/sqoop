@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.tool;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,10 +29,10 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 
-import static com.cloudera.sqoop.SqoopOptions.FileLayout.SequenceFile;
-import static com.cloudera.sqoop.SqoopOptions.FileLayout.AvroDataFile;
-import static com.cloudera.sqoop.SqoopOptions.FileLayout.ParquetFile;
-import static com.cloudera.sqoop.SqoopOptions.FileLayout.TextFile;
+import static org.apache.sqoop.SqoopOptions.FileLayout.SequenceFile;
+import static org.apache.sqoop.SqoopOptions.FileLayout.AvroDataFile;
+import static org.apache.sqoop.SqoopOptions.FileLayout.ParquetFile;
+import static org.apache.sqoop.SqoopOptions.FileLayout.TextFile;
 
 @RunWith(Parameterized.class)
 public class ImportToolValidateOptionsTest {

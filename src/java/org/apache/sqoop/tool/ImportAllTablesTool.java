@@ -28,16 +28,16 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.cli.RelatedOptions;
-import com.cloudera.sqoop.hive.HiveImport;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.cli.RelatedOptions;
+import org.apache.sqoop.hive.HiveImport;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * Tool that performs database imports of all tables in a database to HDFS.
  */
-public class ImportAllTablesTool extends com.cloudera.sqoop.tool.ImportTool {
+public class ImportAllTablesTool extends ImportTool {
 
   public static final Log LOG = LogFactory.getLog(
       ImportAllTablesTool.class.getName());

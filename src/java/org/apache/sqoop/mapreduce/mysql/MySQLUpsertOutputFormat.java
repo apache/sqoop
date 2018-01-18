@@ -17,8 +17,8 @@
  */
 package org.apache.sqoop.mapreduce.mysql;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.UpdateOutputFormat;
+import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.mapreduce.UpdateOutputFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.RecordWriter;

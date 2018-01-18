@@ -36,12 +36,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
 
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.DefaultManagerFactory;
-import com.cloudera.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.DefaultManagerFactory;
+import org.apache.sqoop.manager.ManagerFactory;
+import org.apache.sqoop.metastore.JobData;
 
-import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.ClassLoaderStack;
 import org.apache.sqoop.manager.GenericJdbcManager;
 import org.apache.sqoop.manager.oracle.OraOopManagerFactory;
 
@@ -119,7 +119,7 @@ public class ConnFactory {
    * @throws IOException if it cannot find a ConnManager for this schema.
    */
   public ConnManager getManager(JobData data) throws IOException {
-    com.cloudera.sqoop.SqoopOptions options = data.getSqoopOptions();
+    SqoopOptions options = data.getSqoopOptions();
     String manualDriver = options.getDriverClassName();
     String managerClassName = options.getConnManagerClassName();
 
@@ -151,12 +151,11 @@ public class ConnFactory {
         // connectors are forcing to use their building class names.
         if (manualDriver == null) {
           Constructor<ConnManager> constructor =
-            cls.getDeclaredConstructor(com.cloudera.sqoop.SqoopOptions.class);
+            cls.getDeclaredConstructor(SqoopOptions.class);
           connManager = constructor.newInstance(options);
         } else {
           Constructor<ConnManager> constructor =
-            cls.getDeclaredConstructor(String.class,
-                                       com.cloudera.sqoop.SqoopOptions.class);
+            cls.getDeclaredConstructor(String.class, SqoopOptions.class);
           connManager = constructor.newInstance(manualDriver, options);
         }
       } catch (ClassNotFoundException e) {

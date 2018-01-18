@@ -34,8 +34,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**

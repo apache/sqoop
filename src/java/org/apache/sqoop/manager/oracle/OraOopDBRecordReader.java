@@ -26,11 +26,11 @@ import java.util.ArrayList;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBRecordReader;
+import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBInputFormat;
+import org.apache.sqoop.mapreduce.db.DBInputFormat.DBInputSplit;
+import org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.OraOopConstants.

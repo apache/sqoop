@@ -33,11 +33,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.mapreduce.AsyncSqlOutputFormat;
 import org.apache.sqoop.mapreduce.netezza.NetezzaDataDrivenDBInputFormat;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.cli.RelatedOptions;
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.cli.RelatedOptions;
+import org.apache.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.util.ExportException;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * Manages connections to Netezza databases.
@@ -93,7 +93,7 @@ public class NetezzaManager extends GenericJdbcManager {
   }
 
   @Override
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     context.setConnManager(this);
     // The user probably should have requested --direct to invoke external
@@ -117,7 +117,7 @@ public class NetezzaManager extends GenericJdbcManager {
   }
 
   @Override
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     // The user probably should have requested --direct to invoke external
     // table option.
@@ -152,7 +152,7 @@ public class NetezzaManager extends GenericJdbcManager {
   }
 
   @Override
-  public void updateTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void updateTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     if (options.getNumMappers() > 1) {
       String msg = "Netezza update with multiple mappers can lead to "

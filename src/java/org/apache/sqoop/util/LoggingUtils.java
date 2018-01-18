@@ -52,7 +52,6 @@ public final class LoggingUtils {
 
   public static void setDebugLevel() {
     Logger.getLogger("org.apache.sqoop").setLevel(Level.DEBUG);
-    Logger.getLogger("com.cloudera.apache").setLevel(Level.DEBUG);
   }
 }
 

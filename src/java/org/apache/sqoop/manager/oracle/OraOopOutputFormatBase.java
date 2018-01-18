@@ -33,10 +33,10 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.SqoopOptions;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.AsyncSqlOutputFormat;
-import com.cloudera.sqoop.mapreduce.ExportOutputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.mapreduce.AsyncSqlOutputFormat;
+import org.apache.sqoop.mapreduce.ExportOutputFormat;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
 abstract class OraOopOutputFormatBase<K extends SqoopRecord, V> extends
     ExportOutputFormat<K, V> {
@@ -199,7 +199,7 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V> extends
   }
 
   abstract class OraOopDBRecordWriterBase extends
-      ExportOutputFormat<K, V>.ExportRecordWriter<K, V> {
+      ExportOutputFormat<K, V>.ExportRecordWriter {
 
     protected OracleTable oracleTable; // <- If exporting into a partitioned
                                        // table, this table will be unique for

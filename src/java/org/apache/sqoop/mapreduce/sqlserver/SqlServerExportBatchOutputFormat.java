@@ -17,7 +17,7 @@
  */
 package org.apache.sqoop.mapreduce.sqlserver;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.manager.SQLServerManager;

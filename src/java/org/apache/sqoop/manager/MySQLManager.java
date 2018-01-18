@@ -38,10 +38,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.ExportException;
-import com.cloudera.sqoop.mapreduce.JdbcUpsertExportJob;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.util.ImportException;
+import org.apache.sqoop.util.ExportException;
+import org.apache.sqoop.mapreduce.JdbcUpsertExportJob;
 import org.apache.sqoop.mapreduce.mysql.MySQLUpsertOutputFormat;
 import org.apache.sqoop.util.LoggingUtils;
 
@@ -49,7 +49,7 @@ import org.apache.sqoop.util.LoggingUtils;
  * Manages connections to MySQL databases.
  */
 public class MySQLManager
-    extends com.cloudera.sqoop.manager.InformationSchemaManager {
+    extends InformationSchemaManager {
 
   public static final Log LOG = LogFactory.getLog(MySQLManager.class.getName());
 
@@ -100,7 +100,7 @@ public class MySQLManager
   }
 
   @Override
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
 
     // Check that we're not doing a MapReduce from localhost. If we are, point
@@ -128,7 +128,7 @@ public class MySQLManager
    * {@inheritDoc}
    */
   @Override
-  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void upsertTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     LOG.warn("MySQL Connector upsert functionality is using INSERT ON");

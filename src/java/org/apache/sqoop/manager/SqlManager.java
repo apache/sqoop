@@ -47,17 +47,17 @@ import org.apache.sqoop.mapreduce.JdbcCallExportJob;
 import org.apache.sqoop.util.LoggingUtils;
 import org.apache.sqoop.util.SqlTypeMap;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.hbase.HBaseUtil;
-import com.cloudera.sqoop.mapreduce.DataDrivenImportJob;
-import com.cloudera.sqoop.mapreduce.HBaseImportJob;
-import com.cloudera.sqoop.mapreduce.ImportJobBase;
-import com.cloudera.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
-import com.cloudera.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.ResultSetPrinter;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.hbase.HBaseUtil;
+import org.apache.sqoop.mapreduce.DataDrivenImportJob;
+import org.apache.sqoop.mapreduce.HBaseImportJob;
+import org.apache.sqoop.mapreduce.ImportJobBase;
+import org.apache.sqoop.mapreduce.JdbcExportJob;
+import org.apache.sqoop.mapreduce.JdbcUpdateExportJob;
+import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
+import org.apache.sqoop.util.ExportException;
+import org.apache.sqoop.util.ImportException;
+import org.apache.sqoop.util.ResultSetPrinter;
 
 /**
  * ConnManager implementation for generic SQL-compliant database.
@@ -65,7 +65,7 @@ import com.cloudera.sqoop.util.ResultSetPrinter;
  * ConnManager implementation to actually create the connection.
  */
 public abstract class SqlManager
-    extends com.cloudera.sqoop.manager.ConnManager {
+    extends org.apache.sqoop.manager.ConnManager {
 
   public static final Log LOG = LogFactory.getLog(SqlManager.class.getName());
 
@@ -628,7 +628,7 @@ public abstract class SqlManager
    * @throws ImportException if the import is misconfigured.
    */
   protected void checkTableImportOptions(
-          com.cloudera.sqoop.manager.ImportJobContext context)
+      org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     String tableName = context.getTableName();
     SqoopOptions opts = context.getOptions();
@@ -653,7 +653,7 @@ public abstract class SqlManager
    * Default implementation of importTable() is to launch a MapReduce job
    * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat.
    */
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     String tableName = context.getTableName();
     String jarFile = context.getJarFile();
@@ -697,7 +697,7 @@ public abstract class SqlManager
    * via DataDrivenImportJob to read the table with DataDrivenDBInputFormat,
    * using its free-form query importer.
    */
-  public void importQuery(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importQuery(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     String jarFile = context.getJarFile();
     SqoopOptions opts = context.getOptions();
@@ -924,7 +924,7 @@ public abstract class SqlManager
   /**
    * Export data stored in HDFS into a table in a database.
    */
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcExportJob exportJob = new JdbcExportJob(context);
@@ -932,7 +932,7 @@ public abstract class SqlManager
   }
 
   @Override
-  public void callTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void callTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException,
       ExportException {
     context.setConnManager(this);
@@ -958,7 +958,7 @@ public abstract class SqlManager
    * {@inheritDoc}
    */
   public void updateTable(
-          com.cloudera.sqoop.manager.ExportJobContext context)
+      org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     JdbcUpdateExportJob exportJob = new JdbcUpdateExportJob(context);

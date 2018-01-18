@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.hive.TestHiveImport;
-import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.hive.TestHiveImport;
+import org.apache.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.tool.SqoopTool;
 import org.junit.After;
 import org.junit.Before;
 

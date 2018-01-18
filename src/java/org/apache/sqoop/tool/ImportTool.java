@@ -38,28 +38,28 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.cli.RelatedOptions;
-import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.hive.HiveImport;
-import com.cloudera.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.mapreduce.MergeJob;
-import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.metastore.JobStorage;
-import com.cloudera.sqoop.metastore.JobStorageFactory;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.cli.RelatedOptions;
+import org.apache.sqoop.cli.ToolOptions;
+import org.apache.sqoop.hive.HiveImport;
+import org.apache.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.mapreduce.MergeJob;
+import org.apache.sqoop.metastore.JobData;
+import org.apache.sqoop.metastore.JobStorage;
+import org.apache.sqoop.metastore.JobStorageFactory;
 import org.apache.sqoop.orm.ClassWriter;
-import com.cloudera.sqoop.orm.TableClassName;
-import com.cloudera.sqoop.util.AppendUtils;
-import com.cloudera.sqoop.util.ClassLoaderStack;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.orm.TableClassName;
+import org.apache.sqoop.util.AppendUtils;
+import org.apache.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.ImportException;
 
 import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 
 /**
  * Tool that performs database imports to HDFS.
  */
-public class ImportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class ImportTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(ImportTool.class.getName());
 

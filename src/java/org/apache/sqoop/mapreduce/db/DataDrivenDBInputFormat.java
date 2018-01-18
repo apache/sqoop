@@ -40,17 +40,8 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.sqoop.mapreduce.DBWritable;
 
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.mapreduce.db.BigDecimalSplitter;
-import com.cloudera.sqoop.mapreduce.db.BooleanSplitter;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBSplitter;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBRecordReader;
-import com.cloudera.sqoop.mapreduce.db.DateSplitter;
-import com.cloudera.sqoop.mapreduce.db.FloatSplitter;
-import com.cloudera.sqoop.mapreduce.db.IntegerSplitter;
-import com.cloudera.sqoop.mapreduce.db.TextSplitter;
+import org.apache.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.mapreduce.db.DataDrivenDBRecordReader;
 import org.apache.sqoop.validation.ValidationException;
 
 /**
@@ -161,7 +152,7 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
             && (boundaryQuery == null || boundaryQuery.isEmpty())
             && splitLimit <= 0) {
       List<InputSplit> singletonSplit = new ArrayList<InputSplit>();
-      singletonSplit.add(new com.cloudera.sqoop.mapreduce.db.
+      singletonSplit.add(new org.apache.sqoop.mapreduce.db.
           DataDrivenDBInputFormat.DataDrivenDBInputSplit("1=1", "1=1"));
       return singletonSplit;
     }

@@ -31,15 +31,15 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.util.ImportException;
 import org.apache.sqoop.cli.RelatedOptions;
 
 /**
  * Manages connections to Postgresql databases.
  */
 public class PostgresqlManager
-    extends com.cloudera.sqoop.manager.CatalogQueryManager {
+    extends CatalogQueryManager {
 
   public static final String SCHEMA = "schema";
 
@@ -109,7 +109,7 @@ public class PostgresqlManager
 
   @Override
   public void importTable(
-          com.cloudera.sqoop.manager.ImportJobContext context)
+      org.apache.sqoop.manager.ImportJobContext context)
         throws IOException, ImportException {
 
     // The user probably should have requested --direct to invoke pg_dump.

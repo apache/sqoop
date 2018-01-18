@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.manager;
 
-import static com.cloudera.sqoop.lib.DelimiterSet.NULL_CHAR;
+import static org.apache.sqoop.lib.DelimiterSet.NULL_CHAR;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,9 +31,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 
-import com.cloudera.sqoop.config.ConfigurationConstants;
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.util.DirectImportUtils;
+import org.apache.sqoop.config.ConfigurationConstants;
+import org.apache.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.util.DirectImportUtils;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 

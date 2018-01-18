@@ -20,13 +20,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.cloudera.sqoop.Sqoop;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.manager.SqlManager;
-import com.cloudera.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.Sqoop;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.SqlManager;
+import org.apache.sqoop.util.ExportException;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * Test external connection factory classes on the classpath.

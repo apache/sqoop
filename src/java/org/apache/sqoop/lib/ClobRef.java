@@ -26,14 +26,14 @@ import java.util.regex.Matcher;
 
 import org.apache.hadoop.io.Text;
 
-import com.cloudera.sqoop.io.LobFile;
+import org.apache.sqoop.io.LobFile;
 
 /**
  * ClobRef is a wrapper that holds a CLOB either directly, or a
  * reference to a file that holds the CLOB data.
  */
 public class ClobRef
-  extends com.cloudera.sqoop.lib.LobRef<String, String, Reader> {
+  extends LobRef<String, String, Reader> {
 
   public ClobRef() {
     super();
@@ -90,7 +90,7 @@ public class ClobRef
    * @param inputString the text-based input data to parse.
    * @return a ClobRef to the given data.
    */
-  public static com.cloudera.sqoop.lib.ClobRef parse(String inputString) {
+  public static org.apache.sqoop.lib.ClobRef parse(String inputString) {
     // If inputString is of the form 'externalLob(lf,%s,%d,%d)', then this is
     // an external CLOB stored at the LobFile indicated by '%s' with the next
     // two arguments representing its offset and length in the file.
@@ -101,11 +101,11 @@ public class ClobRef
     if (m.matches()) {
       // This is a LobFile. Extract the filename, offset and len from the
       // matcher.
-      return new com.cloudera.sqoop.lib.ClobRef(m.group(1),
+      return new org.apache.sqoop.lib.ClobRef(m.group(1),
           Long.valueOf(m.group(2)), Long.valueOf(m.group(3)));
     } else {
       // This is inline CLOB string data.
-      return new com.cloudera.sqoop.lib.ClobRef(inputString);
+      return new org.apache.sqoop.lib.ClobRef(inputString);
     }
   }
 }

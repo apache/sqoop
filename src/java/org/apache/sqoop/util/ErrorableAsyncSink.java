@@ -18,8 +18,6 @@
 
 package org.apache.sqoop.util;
 
-import com.cloudera.sqoop.util.AsyncSink;
-
 /**
  * Partial implementation of AsyncSink that relies on ErrorableThread to
  * provide a status bit for the join() method.

@@ -28,19 +28,19 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.SqoopOptions.UpdateMode;
-import com.cloudera.sqoop.cli.RelatedOptions;
-import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.SqoopOptions.UpdateMode;
+import org.apache.sqoop.cli.RelatedOptions;
+import org.apache.sqoop.cli.ToolOptions;
+import org.apache.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.util.ExportException;
 import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 
 /**
  * Tool that performs HDFS exports to databases.
  */
-public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class ExportTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(ExportTool.class.getName());
   public static final String NOT_SUPPORTED_FILE_FORMAT_ERROR_MSG = "Please note that the export tool " +

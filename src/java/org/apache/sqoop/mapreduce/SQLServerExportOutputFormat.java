@@ -22,8 +22,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.ExportOutputFormat;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * SQLServer-specific SQL formatting overrides default ExportOutputFormat's.
@@ -47,7 +46,7 @@ public class SQLServerExportOutputFormat<K extends SqoopRecord, V>
    * The actual database updates are executed in a second thread.
    */
   public class SQLServerExportRecordWriter<K extends SqoopRecord, V>
-    extends ExportRecordWriter<K, V> {
+    extends ExportRecordWriter {
 
     public SQLServerExportRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {

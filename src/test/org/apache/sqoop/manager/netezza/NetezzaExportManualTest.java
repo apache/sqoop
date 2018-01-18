@@ -33,10 +33,10 @@ import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.manager.NetezzaManager;
 import org.junit.Before;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.TestExport;
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
-import com.cloudera.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.TestExport;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.CommonArgs;
 
 import static org.junit.Assert.fail;
 

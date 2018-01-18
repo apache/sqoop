@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configured;
-import com.cloudera.sqoop.metastore.JobData;
 
 /**
  * API that defines how jobs are saved, restored, and manipulated.

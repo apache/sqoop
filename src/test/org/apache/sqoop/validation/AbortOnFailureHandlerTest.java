@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.validation;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 

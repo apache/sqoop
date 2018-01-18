@@ -30,8 +30,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.util.LoggingUtils;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * Abstract RecordWriter base class that buffers SqoopRecords to be injected

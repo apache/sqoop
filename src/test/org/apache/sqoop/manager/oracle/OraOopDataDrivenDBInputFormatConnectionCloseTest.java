@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.junit.Before;

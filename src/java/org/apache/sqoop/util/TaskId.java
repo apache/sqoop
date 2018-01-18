@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.config.ConfigurationConstants;
+import org.apache.sqoop.config.ConfigurationConstants;
 
 /**
  * Utility class; returns task attempt Id of the current job

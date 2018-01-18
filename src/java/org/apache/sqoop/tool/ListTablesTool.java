@@ -22,14 +22,14 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.cli.ToolOptions;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.cli.ToolOptions;
 
 /**
  * Tool that lists available tables in a database.
  */
-public class ListTablesTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class ListTablesTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(
       ListTablesTool.class.getName());

@@ -36,11 +36,11 @@ import org.apache.sqoop.mapreduce.SQLServerResilientUpdateOutputFormat;
 import org.apache.sqoop.mapreduce.db.SQLServerDBInputFormat;
 import org.apache.sqoop.mapreduce.db.SQLServerConnectionFailureHandler;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
-import com.cloudera.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.mapreduce.JdbcExportJob;
+import org.apache.sqoop.mapreduce.JdbcUpdateExportJob;
+import org.apache.sqoop.util.ExportException;
+import org.apache.sqoop.util.ImportException;
 
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.sqlserver.SqlServerExportBatchOutputFormat;
@@ -52,7 +52,7 @@ import org.apache.sqoop.mapreduce.sqlserver.SqlServerUpsertOutputFormat;
  * driver.
  */
 public class SQLServerManager
-    extends com.cloudera.sqoop.manager.InformationSchemaManager {
+    extends InformationSchemaManager {
 
   public static final String SCHEMA = "schema";
   public static final String TABLE_HINTS = "table-hints";
@@ -134,7 +134,7 @@ public class SQLServerManager
    */
   @Override
   public void importTable(
-          com.cloudera.sqoop.manager.ImportJobContext context)
+      org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     // We're the correct connection manager
     context.setConnManager(this);
@@ -165,7 +165,7 @@ public class SQLServerManager
    * Export data stored in HDFS into a table in a database.
    */
   @Override
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
 
@@ -195,7 +195,7 @@ public class SQLServerManager
    * {@inheritDoc}
    */
   public void updateTable(
-          com.cloudera.sqoop.manager.ExportJobContext context)
+      org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     if (isNonResilientOperation()) {
       super.updateTable(context);
@@ -212,7 +212,7 @@ public class SQLServerManager
   /**
    * {@inheritDoc}
    */
-  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void upsertTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
 
@@ -389,7 +389,7 @@ public class SQLServerManager
    * SQLServerDBInputFormat which handles connection failures while
    * using free-form query importer.
    */
-  public void importQuery(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importQuery(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     if (!isNonResilientOperation()) {
       // Enable connection recovery only if split column is provided
@@ -408,7 +408,7 @@ public class SQLServerManager
    * SQLServerConnectionFailureHandler by default.
    */
   protected void configureConnectionRecoveryForImport(
-      com.cloudera.sqoop.manager.ImportJobContext context) {
+      org.apache.sqoop.manager.ImportJobContext context) {
 
     Configuration conf = context.getOptions().getConf();
 
@@ -430,7 +430,7 @@ public class SQLServerManager
    * using SQLServerConnectionFailureHandler by default.
    */
   protected void configureConnectionRecoveryForExport(
-      com.cloudera.sqoop.manager.ExportJobContext context) {
+      org.apache.sqoop.manager.ExportJobContext context) {
 
     Configuration conf = context.getOptions().getConf();
 
@@ -451,7 +451,7 @@ public class SQLServerManager
    * using SQLServerConnectionFailureHandler by default.
    */
   protected void configureConnectionRecoveryForUpdate(
-      com.cloudera.sqoop.manager.ExportJobContext context) {
+      org.apache.sqoop.manager.ExportJobContext context) {
 
     Configuration conf = context.getOptions().getConf();
 

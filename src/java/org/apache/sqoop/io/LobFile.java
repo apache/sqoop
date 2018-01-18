@@ -62,8 +62,7 @@ import org.apache.hadoop.io.compress.CompressorStream;
 import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.io.compress.DecompressorStream;
 
-import com.cloudera.sqoop.io.LobReaderCache;
-import com.cloudera.sqoop.util.RandomHash;
+import org.apache.sqoop.util.RandomHash;
 
 /**
  * File format which stores large object records.
@@ -97,7 +96,7 @@ public final class LobFile {
   /**
    * Creates a LobFile Reader configured to read from the specified file.
    */
-  public static com.cloudera.sqoop.io.LobFile.Reader
+  public static org.apache.sqoop.io.LobFile.Reader
       open(Path p, Configuration conf) throws IOException {
     FileSystem fs = p.getFileSystem(conf);
     FileStatus [] stats = fs.listStatus(p);
@@ -125,7 +124,7 @@ public final class LobFile {
    * @param codec the compression codec to use (or null for none).
    * @param entriesPerSegment number of entries per index segment.
    */
-  public static com.cloudera.sqoop.io.LobFile.Writer
+  public static org.apache.sqoop.io.LobFile.Writer
             create(Path p, Configuration conf, boolean isCharData,
             String codec, int entriesPerSegment)
       throws IOException {
@@ -139,7 +138,7 @@ public final class LobFile {
    * @param isCharData true if this is for CLOBs, false for BLOBs.
    * @param codec the compression codec to use (or null for none).
    */
-  public static com.cloudera.sqoop.io.LobFile.Writer
+  public static org.apache.sqoop.io.LobFile.Writer
             create(Path p, Configuration conf, boolean isCharData,
             String codec) throws IOException {
     return create(p, conf, isCharData, codec,
@@ -152,7 +151,7 @@ public final class LobFile {
    * @param conf the configuration to use to interact with the filesystem.
    * @param isCharData true if this is for CLOBs, false for BLOBs.
    */
-  public static com.cloudera.sqoop.io.LobFile.Writer
+  public static org.apache.sqoop.io.LobFile.Writer
             create(Path p, Configuration conf, boolean isCharData)
       throws IOException {
     return create(p, conf, isCharData, null);
@@ -163,7 +162,7 @@ public final class LobFile {
    * @param p the path to create.
    * @param conf the configuration to use to interact with the filesystem.
    */
-  public static com.cloudera.sqoop.io.LobFile.Writer
+  public static org.apache.sqoop.io.LobFile.Writer
             create(Path p, Configuration conf) throws IOException {
     return create(p, conf, false);
   }
@@ -962,7 +961,7 @@ public final class LobFile {
    * Reader implementation for LobFile format version 0. Acquire with
    * LobFile.open().
    */
-  private static class V0Reader extends com.cloudera.sqoop.io.LobFile.Reader {
+  private static class V0Reader extends org.apache.sqoop.io.LobFile.Reader {
     public static final Log LOG = LogFactory.getLog(
         V0Reader.class.getName());
 
@@ -1523,7 +1522,7 @@ public final class LobFile {
    * Concrete writer implementation for LobFile format version 0.
    * Instantiate via LobFile.create().
    */
-  private static class V0Writer extends com.cloudera.sqoop.io.LobFile.Writer {
+  private static class V0Writer extends org.apache.sqoop.io.LobFile.Writer {
     public static final Log LOG = LogFactory.getLog(
         V0Writer.class.getName());
 

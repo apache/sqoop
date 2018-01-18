@@ -33,16 +33,16 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.util.StringUtils;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.cli.RelatedOptions;
-import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.util.ResultSetPrinter;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.cli.RelatedOptions;
+import org.apache.sqoop.cli.ToolOptions;
+import org.apache.sqoop.util.ResultSetPrinter;
 
 /**
  * Tool that evaluates a SQL statement and displays the results.
  */
-public class EvalSqlTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class EvalSqlTool extends BaseSqoopTool {
 
   public static final Log LOG = LogFactory.getLog(EvalSqlTool.class.getName());
 

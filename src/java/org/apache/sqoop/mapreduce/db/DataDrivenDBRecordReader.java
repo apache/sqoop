@@ -27,11 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.mapreduce.DBWritable;
 
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.DBRecordReader;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
-
 /**
  * A RecordReader that reads records from a SQL table,
  * using data-driven WHERE clause splits.

@@ -37,14 +37,14 @@ import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.mainframe.MainframeDatasetInputFormat;
 import org.apache.sqoop.mapreduce.mainframe.MainframeImportJob;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.util.ImportException;
 
 
 /**
  * ConnManager implementation for mainframe datasets.
  */
-public class MainframeManager extends com.cloudera.sqoop.manager.ConnManager {
+public class MainframeManager extends org.apache.sqoop.manager.ConnManager {
   public static final String DEFAULT_DATASET_COLUMN_NAME = "DEFAULT_COLUMN";
   protected SqoopOptions options;
   private static final Log LOG
@@ -63,7 +63,7 @@ public class MainframeManager extends com.cloudera.sqoop.manager.ConnManager {
    * partitioned dataset with MainframeDatasetInputFormat.
    */
   @Override
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     String pdsName = context.getTableName();
     String jarFile = context.getJarFile();

@@ -28,7 +28,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * Given a set of SqoopRecord instances which are from a "new" dataset

@@ -29,11 +29,11 @@ import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.IncrementalMode;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.ManagerFactory;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.IncrementalMode;
+import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ManagerFactory;
+import org.apache.sqoop.metastore.JobData;
 
 import org.apache.sqoop.manager.OracleManager;
 import org.apache.sqoop.manager.oracle.OraOopOutputFormatUpdate.UpdateMode;

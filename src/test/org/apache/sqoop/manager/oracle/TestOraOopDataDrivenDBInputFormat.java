@@ -25,7 +25,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 import org.apache.sqoop.manager.oracle.OraOopConstants.
            OraOopOracleBlockToSplitAllocationMethod;

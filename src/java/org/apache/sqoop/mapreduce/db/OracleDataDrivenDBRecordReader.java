@@ -23,11 +23,6 @@ import java.sql.SQLException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.mapreduce.DBWritable;
 
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBRecordReader;
-import com.cloudera.sqoop.mapreduce.db.OracleDBRecordReader;
-
 /**
  * A RecordReader that reads records from a Oracle table
  * via DataDrivenDBRecordReader.

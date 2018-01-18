@@ -42,19 +42,19 @@ import org.apache.sqoop.mapreduce.postgresql.PostgreSQLCopyExportJob;
 import org.apache.sqoop.util.PostgreSQLUtils;
 import org.apache.sqoop.util.SubstitutionUtils;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.io.SplittableBufferedWriter;
-import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.util.AsyncSink;
-import com.cloudera.sqoop.util.DirectImportUtils;
-import com.cloudera.sqoop.util.ErrorableAsyncSink;
-import com.cloudera.sqoop.util.ErrorableThread;
-import com.cloudera.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.Executor;
-import com.cloudera.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.JdbcUrl;
-import com.cloudera.sqoop.util.LoggingAsyncSink;
-import com.cloudera.sqoop.util.PerfCounters;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.io.SplittableBufferedWriter;
+import org.apache.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.util.AsyncSink;
+import org.apache.sqoop.util.DirectImportUtils;
+import org.apache.sqoop.util.ErrorableAsyncSink;
+import org.apache.sqoop.util.ErrorableThread;
+import org.apache.sqoop.util.ExportException;
+import org.apache.sqoop.util.Executor;
+import org.apache.sqoop.util.ImportException;
+import org.apache.sqoop.util.JdbcUrl;
+import org.apache.sqoop.util.LoggingAsyncSink;
+import org.apache.sqoop.util.PerfCounters;
 
 
 /**
@@ -62,7 +62,7 @@ import com.cloudera.sqoop.util.PerfCounters;
  * commands.
  */
 public class DirectPostgresqlManager
-    extends com.cloudera.sqoop.manager.PostgresqlManager {
+    extends PostgresqlManager {
 
   public static final Log LOG = LogFactory.getLog(
       DirectPostgresqlManager.class.getName());
@@ -345,7 +345,7 @@ public class DirectPostgresqlManager
    * Import the table into HDFS by using psql to pull the data out of the db
    * via COPY FILE TO STDOUT.
    */
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
     throws IOException, ImportException {
 
     context.setConnManager(this);

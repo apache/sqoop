@@ -21,7 +21,7 @@ package org.apache.sqoop.manager;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.util.Jars;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 
 /**
  * A set of parameters describing an export operation; this is passed to

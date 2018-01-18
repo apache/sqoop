@@ -28,8 +28,8 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.manager.SQLServerManager;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.UpdateOutputFormat;
+import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.mapreduce.UpdateOutputFormat;
 
 /**
  * Update an existing table with new value if the table already

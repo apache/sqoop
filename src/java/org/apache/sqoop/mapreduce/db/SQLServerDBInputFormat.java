@@ -31,8 +31,6 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.sqoop.lib.SqoopRecord;
 
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-
 /**
  * A InputFormat that reads input data from a SQL table.
  * Operates like DataDrivenDBInputFormat, but attempts to recover from

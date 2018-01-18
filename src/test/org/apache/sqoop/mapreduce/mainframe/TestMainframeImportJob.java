@@ -30,8 +30,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.ImportJobContext;
 
 public class TestMainframeImportJob {
 

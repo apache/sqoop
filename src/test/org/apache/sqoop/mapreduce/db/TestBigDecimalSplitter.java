@@ -20,7 +20,6 @@ package org.apache.sqoop.mapreduce.db;
 
 import java.math.BigDecimal;
 
-import com.cloudera.sqoop.mapreduce.db.BigDecimalSplitter;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

@@ -18,11 +18,11 @@
 
 package org.apache.sqoop;
 
-import com.cloudera.sqoop.hive.HiveImport;
-import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
-import com.cloudera.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.hive.HiveImport;
+import org.apache.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.tool.ImportTool;
+import org.apache.sqoop.tool.SqoopTool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
@@ -107,7 +107,7 @@ public class TestSqoopJobDataPublisher extends ImportJobTestCase {
 
         // set up our mock hive shell to compare our generated script
         // against the correct expected one.
-        com.cloudera.sqoop.SqoopOptions options = getSqoopOptions(args, tool);
+        SqoopOptions options = getSqoopOptions(args, tool);
         String hiveHome = options.getHiveHome();
         assertNotNull("hive.home was not set", hiveHome);
         String testDataPath = new Path(new Path(hiveHome),
@@ -119,8 +119,8 @@ public class TestSqoopJobDataPublisher extends ImportJobTestCase {
         runImport(tool, args);
     }
 
-    private com.cloudera.sqoop.SqoopOptions getSqoopOptions(String [] args, SqoopTool tool) {
-        com.cloudera.sqoop.SqoopOptions opts = null;
+    private SqoopOptions getSqoopOptions(String [] args, SqoopTool tool) {
+        SqoopOptions opts = null;
         try {
             opts = tool.parseArguments(args, null, null, true);
         } catch (Exception e) {

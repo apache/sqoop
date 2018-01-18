@@ -25,9 +25,8 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import com.cloudera.sqoop.lib.LargeObjectLoader;
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
+import org.apache.sqoop.lib.LargeObjectLoader;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * Imports records by transforming them to strings for a plain-text flat file.

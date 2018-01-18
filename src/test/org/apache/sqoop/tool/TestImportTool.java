@@ -32,8 +32,8 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.hive.HiveImport;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.hive.HiveImport;
 import org.apache.avro.Schema;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;
@@ -77,7 +77,7 @@ public class TestImportTool {
 
     ImportTool importTool = spy(new ImportTool("import", mock(CodeGenTool.class), false));
 
-    doReturn(true).when(importTool).init(any(com.cloudera.sqoop.SqoopOptions.class));
+    doReturn(true).when(importTool).init(any(SqoopOptions.class));
 
     Schema writtenWithSchema = mock(Schema.class);
     when(writtenWithSchema.toString()).thenReturn(writtenWithSchemaString);
@@ -85,9 +85,9 @@ public class TestImportTool {
     when(actualSchema.toString()).thenReturn(actualSchemaString);
 
     AvroSchemaMismatchException expectedException = new AvroSchemaMismatchException(errorMessage, writtenWithSchema, actualSchema);
-    doThrow(expectedException).when(importTool).importTable(any(com.cloudera.sqoop.SqoopOptions.class), anyString(), any(HiveImport.class));
+    doThrow(expectedException).when(importTool).importTable(any(SqoopOptions.class), anyString(), any(HiveImport.class));
 
-    com.cloudera.sqoop.SqoopOptions sqoopOptions = mock(com.cloudera.sqoop.SqoopOptions.class);
+    SqoopOptions sqoopOptions = mock(SqoopOptions.class);
     when(sqoopOptions.doHiveImport()).thenReturn(true);
 
     logMessage.expectError(expectedException.getMessage());
@@ -100,7 +100,7 @@ public class TestImportTool {
   @Test (expected = InvalidOptionsException.class)
   public void testExternalTableNoHiveImportThrowsException() throws InvalidOptionsException {
     String hdfsTableDir = "/data/movielens/genre";
-    com.cloudera.sqoop.SqoopOptions options = new com.cloudera.sqoop.SqoopOptions("jdbc:postgresql://localhost/movielens", "genres");
+    SqoopOptions options = new SqoopOptions("jdbc:postgresql://localhost/movielens", "genres");
     options.setHiveExternalTableDir(hdfsTableDir);
     ImportTool tool = new ImportTool("Import Tool", false);
     tool.validateHiveOptions(options);

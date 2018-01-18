@@ -29,9 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
-import com.cloudera.sqoop.mapreduce.db.IntegerSplitter;
+import org.apache.sqoop.config.ConfigurationHelper;
 
 /**
  * Implement DBSplitter over date/time values.

@@ -43,10 +43,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.mapreduce.DBWritable;
 
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.mapreduce.db.DBRecordReader;
-import com.cloudera.sqoop.mapreduce.db.OracleDBRecordReader;
+import org.apache.sqoop.config.ConfigurationHelper;
 
 /**
  * A InputFormat that reads input data from an SQL table.
@@ -230,7 +227,7 @@ extends InputFormat<LongWritable, T> implements Configurable  {
   }
 
   protected RecordReader<LongWritable, T> createDBRecordReader(
-      com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit split,
+      DBInputFormat.DBInputSplit split,
       Configuration conf) throws IOException {
 
     @SuppressWarnings("unchecked")
@@ -264,7 +261,7 @@ extends InputFormat<LongWritable, T> implements Configurable  {
       TaskAttemptContext context) throws IOException, InterruptedException {
 
     return createDBRecordReader(
-        (com.cloudera.sqoop.mapreduce.db.DBInputFormat.DBInputSplit) split,
+        (DBInputFormat.DBInputSplit) split,
         context.getConfiguration());
   }
 

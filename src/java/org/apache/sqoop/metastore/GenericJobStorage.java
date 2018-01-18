@@ -31,16 +31,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.cloudera.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ConnManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.JobData;
-import com.cloudera.sqoop.metastore.JobStorage;
-import com.cloudera.sqoop.tool.SqoopTool;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.manager.DefaultManagerFactory;
 import org.apache.sqoop.manager.JdbcDrivers;
 

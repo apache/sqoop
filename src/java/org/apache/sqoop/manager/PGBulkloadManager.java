@@ -19,9 +19,8 @@
 package org.apache.sqoop.manager;
 
 import java.io.IOException;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.util.ExportException;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

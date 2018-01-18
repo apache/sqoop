@@ -20,8 +20,6 @@ package org.apache.sqoop.tool;
 
 import java.util.List;
 
-import com.cloudera.sqoop.tool.ToolDesc;
-
 /**
  * Abstract base class that defines the ToolPlugin API; additional SqoopTool
  * implementations may be registered with the system via ToolPlugin classes.

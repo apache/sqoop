@@ -22,18 +22,18 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.mapreduce.MySQLDumpImportJob;
-import com.cloudera.sqoop.mapreduce.MySQLExportJob;
-import com.cloudera.sqoop.util.ImportException;
-import com.cloudera.sqoop.util.ExportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.mapreduce.MySQLDumpImportJob;
+import org.apache.sqoop.mapreduce.MySQLExportJob;
+import org.apache.sqoop.util.ImportException;
+import org.apache.sqoop.util.ExportException;
 
 /**
  * Manages direct connections to MySQL databases
  * so we can use mysqldump to get really fast dumps.
  */
 public class DirectMySQLManager
-    extends com.cloudera.sqoop.manager.MySQLManager {
+    extends MySQLManager {
 
   public static final Log LOG = LogFactory.getLog(
       DirectMySQLManager.class.getName());
@@ -47,7 +47,7 @@ public class DirectMySQLManager
    * the database and upload the files directly to HDFS.
    */
   @Override
-  public void importTable(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
 
     context.setConnManager(this);
@@ -97,14 +97,14 @@ public class DirectMySQLManager
    * back into the database.
    */
   @Override
-  public void exportTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     context.setConnManager(this);
     MySQLExportJob exportJob = new MySQLExportJob(context);
     exportJob.runExport();
   }
 
-  public void upsertTable(com.cloudera.sqoop.manager.ExportJobContext context)
+  public void upsertTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
     throw new ExportException("MySQL direct connector does not support upsert"
       + " mode. Please use JDBC based connector (remove --direct parameter)");

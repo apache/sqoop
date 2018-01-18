@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.TestExport.ColumnGenerator;
+import org.apache.sqoop.TestExport.ColumnGenerator;
 
 /**
  * Utilities for Netezza tests.

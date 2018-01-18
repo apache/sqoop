@@ -20,7 +20,6 @@ package org.apache.sqoop.mapreduce.db;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.cloudera.sqoop.mapreduce.db.IntegerSplitter;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

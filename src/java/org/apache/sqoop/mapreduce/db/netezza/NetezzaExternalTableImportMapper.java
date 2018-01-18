@@ -40,12 +40,11 @@ import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.io.NamedFifo;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.DirectNetezzaManager;
+import org.apache.sqoop.mapreduce.AutoProgressMapper;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.util.FileUploader;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.util.TaskId;
-
-import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 
 /**
  * Netezza import mapper using external tables.

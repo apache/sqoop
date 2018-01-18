@@ -28,22 +28,20 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.tool.SqoopTool;
-import com.cloudera.sqoop.util.OptionsFileUtil;
+import org.apache.sqoop.tool.SqoopTool;
+import org.apache.sqoop.util.OptionsFileUtil;
 
-import static com.cloudera.sqoop.SqoopOptions.isSqoopRethrowSystemPropertySet;
+import static org.apache.sqoop.SqoopOptions.isSqoopRethrowSystemPropertySet;
 import static org.apache.sqoop.tool.BaseSqoopTool.THROW_ON_ERROR_ARG;
 
 /**
  * Main entry-point for Sqoop
- * Usage: hadoop jar (this_jar_name) com.cloudera.sqoop.Sqoop (options)
+ * Usage: hadoop jar (this_jar_name) org.apache.sqoop.Sqoop (options)
  * See the SqoopOptions class for options.
  */
 public class Sqoop extends Configured implements Tool {
 
-  public static final Log SQOOP_LOG = LogFactory.getLog("com.cloudera.sqoop");
+  public static final Log SQOOP_LOG = LogFactory.getLog("org.apache.sqoop");
   public static final Log LOG = LogFactory.getLog(Sqoop.class.getName());
 
   /**

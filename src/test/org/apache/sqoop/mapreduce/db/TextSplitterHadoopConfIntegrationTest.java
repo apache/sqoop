@@ -25,7 +25,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.sqoop.validation.ValidationException;
 
-import com.cloudera.sqoop.testutil.MockResultSet;
+import org.apache.sqoop.testutil.MockResultSet;
 
 import org.junit.Rule;
 import org.junit.Test;

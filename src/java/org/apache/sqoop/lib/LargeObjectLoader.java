@@ -36,8 +36,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.cloudera.sqoop.io.LobFile;
-import com.cloudera.sqoop.util.TaskId;
+import org.apache.sqoop.io.LobFile;
+import org.apache.sqoop.util.TaskId;
 
 /**
  * Contains a set of methods which can read db columns from a ResultSet into
@@ -228,7 +228,7 @@ public class LargeObjectLoader implements Closeable  {
    * @throws IOException if an error occurs writing to the FileSystem.
    * @throws SQLException if an error occurs reading from the database.
    */
-  public com.cloudera.sqoop.lib.BlobRef readBlobRef(int colNum, ResultSet r)
+  public org.apache.sqoop.lib.BlobRef readBlobRef(int colNum, ResultSet r)
       throws IOException, InterruptedException, SQLException {
 
     long maxInlineLobLen = conf.getLong(
@@ -262,11 +262,11 @@ public class LargeObjectLoader implements Closeable  {
         lobWriter.finishRecord();
       }
 
-      return new com.cloudera.sqoop.lib.BlobRef(
+      return new org.apache.sqoop.lib.BlobRef(
           getRelativePath(curBlobWriter), recordOffset, len);
     } else {
       // This is a 1-based array.
-      return new com.cloudera.sqoop.lib.BlobRef(
+      return new org.apache.sqoop.lib.BlobRef(
           b.getBytes(1, (int) b.length()));
     }
   }
@@ -282,7 +282,7 @@ public class LargeObjectLoader implements Closeable  {
    * @throws IOException if an error occurs writing to the FileSystem.
    * @throws SQLException if an error occurs reading from the database.
    */
-  public com.cloudera.sqoop.lib.ClobRef readClobRef(int colNum, ResultSet r)
+  public org.apache.sqoop.lib.ClobRef readClobRef(int colNum, ResultSet r)
       throws IOException, InterruptedException, SQLException {
 
     long maxInlineLobLen = conf.getLong(
@@ -316,11 +316,11 @@ public class LargeObjectLoader implements Closeable  {
         lobWriter.finishRecord();
       }
 
-      return new com.cloudera.sqoop.lib.ClobRef(
+      return new org.apache.sqoop.lib.ClobRef(
           getRelativePath(lobWriter), recordOffset, len);
     } else {
       // This is a 1-based array.
-      return new com.cloudera.sqoop.lib.ClobRef(
+      return new org.apache.sqoop.lib.ClobRef(
           c.getSubString(1, (int) c.length()));
     }
   }

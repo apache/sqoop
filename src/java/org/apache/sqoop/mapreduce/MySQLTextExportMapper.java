@@ -21,8 +21,7 @@ package org.apache.sqoop.mapreduce;
 import java.io.IOException;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import com.cloudera.sqoop.manager.MySQLUtils;
-import com.cloudera.sqoop.mapreduce.MySQLExportMapper;
+import org.apache.sqoop.manager.MySQLUtils;
 
 /**
  * mysqlimport-based exporter which accepts lines of text from files

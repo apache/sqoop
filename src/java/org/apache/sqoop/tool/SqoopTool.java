@@ -42,11 +42,10 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.sqoop.util.ClassLoaderStack;
 import org.apache.sqoop.config.ConfigurationHelper;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.cli.SqoopParser;
-import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.tool.ToolDesc;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
+import org.apache.sqoop.cli.SqoopParser;
+import org.apache.sqoop.cli.ToolOptions;
 
 /**
  * Base class for Sqoop subprograms (e.g., SqoopImport, SqoopExport, etc.)
@@ -412,7 +411,7 @@ public abstract class SqoopTool {
     // This tool is the "active" tool; bind it in the SqoopOptions.
     //TODO(jarcec): Remove the cast when SqoopOptions will be moved
     //              to apache package
-    out.setActiveSqoopTool((com.cloudera.sqoop.tool.SqoopTool)this);
+    out.setActiveSqoopTool(this);
 
     String [] toolArgs = args; // args after generic parser is done.
     if (useGenericOptions) {

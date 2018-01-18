@@ -38,7 +38,7 @@ under the License.
   <!--
   <property>
     <name>sqoop.connection.factories</name>
-    <value>com.cloudera.sqoop.manager.DefaultManagerFactory</value>
+    <value>org.apache.sqoop.manager.DefaultManagerFactory</value>
     <description>A comma-delimited list of ManagerFactory implementations
       which are consulted, in order, to instantiate ConnManager instances
       used to drive connections to databases.

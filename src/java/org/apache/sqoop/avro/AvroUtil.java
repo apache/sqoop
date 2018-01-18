@@ -155,7 +155,7 @@ public final class AvroUtil {
   private static final String TIME_TYPE = "java.sql.Time";
   private static final String DATE_TYPE = "java.sql.Date";
   private static final String BIG_DECIMAL_TYPE = "java.math.BigDecimal";
-  private static final String BLOB_REF_TYPE = "com.cloudera.sqoop.lib.BlobRef";
+  private static final String BLOB_REF_TYPE = "org.apache.sqoop.lib.BlobRef";
 
   /**
    * Convert from Avro type to Sqoop's java representation of the SQL type

@@ -36,7 +36,7 @@ import org.apache.sqoop.tool.ImportAllTablesTool;
 import org.junit.After;
 import org.junit.Before;
 
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

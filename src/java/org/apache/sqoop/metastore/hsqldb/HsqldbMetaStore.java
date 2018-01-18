@@ -32,9 +32,9 @@ import org.apache.hadoop.util.StringUtils;
 import org.hsqldb.Server;
 import org.hsqldb.ServerConstants;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 
-import com.cloudera.sqoop.manager.HsqldbManager;
+import org.apache.sqoop.manager.HsqldbManager;
 
 /**
  * Container for an HSQLDB-backed metastore.

@@ -18,10 +18,10 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.OracleUtils;
-import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.logging.Log;

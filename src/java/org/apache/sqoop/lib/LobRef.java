@@ -34,8 +34,8 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-import com.cloudera.sqoop.io.LobFile;
-import com.cloudera.sqoop.io.LobReaderCache;
+import org.apache.sqoop.io.LobFile;
+import org.apache.sqoop.io.LobReaderCache;
 
 /**
  * Abstract base class that holds a reference to a Blob or a Clob.

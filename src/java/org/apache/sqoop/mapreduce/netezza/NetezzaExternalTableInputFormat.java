@@ -31,7 +31,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.config.ConfigurationHelper;
 
 /**
  * InputFormat designed to take data-driven splits and use them in the netezza

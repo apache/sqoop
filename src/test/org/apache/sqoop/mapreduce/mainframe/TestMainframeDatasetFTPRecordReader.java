@@ -51,8 +51,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.lib.LargeObjectLoader;
+import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.LargeObjectLoader;
 
 public class TestMainframeDatasetFTPRecordReader {
 

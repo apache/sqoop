@@ -18,8 +18,8 @@
 
 package org.apache.sqoop.manager;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.metastore.JobData;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.metastore.JobData;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;

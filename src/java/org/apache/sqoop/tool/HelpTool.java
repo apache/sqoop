@@ -20,13 +20,13 @@ package org.apache.sqoop.tool;
 
 import java.util.Set;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.cli.ToolOptions;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.cli.ToolOptions;
 
 /**
  * Tool that explains the usage of Sqoop.
  */
-public class HelpTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
+public class HelpTool extends BaseSqoopTool {
 
   public HelpTool() {
     super("help");

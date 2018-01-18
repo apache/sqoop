@@ -35,13 +35,13 @@ import org.apache.sqoop.util.AsyncSink;
 import org.apache.sqoop.util.JdbcUrl;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
-import com.cloudera.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.lib.FieldFormatter;
-import com.cloudera.sqoop.lib.RecordParser;
-import com.cloudera.sqoop.manager.MySQLUtils;
-import com.cloudera.sqoop.util.ErrorableAsyncSink;
-import com.cloudera.sqoop.util.ErrorableThread;
-import com.cloudera.sqoop.util.LoggingAsyncSink;
+import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.FieldFormatter;
+import org.apache.sqoop.lib.RecordParser;
+import org.apache.sqoop.manager.MySQLUtils;
+import org.apache.sqoop.util.ErrorableAsyncSink;
+import org.apache.sqoop.util.ErrorableThread;
+import org.apache.sqoop.util.LoggingAsyncSink;
 
 /**
  * Mapper that opens up a pipe to mysqldump and pulls data directly.

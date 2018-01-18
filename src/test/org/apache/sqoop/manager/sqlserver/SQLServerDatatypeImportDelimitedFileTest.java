@@ -31,12 +31,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
-import com.cloudera.sqoop.Sqoop;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.orm.CompilationManager;
-import com.cloudera.sqoop.testutil.CommonArgs;
-import com.cloudera.sqoop.tool.ImportTool;
-import com.cloudera.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.Sqoop;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.orm.CompilationManager;
+import org.apache.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.tool.ImportTool;
+import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.Ignore;
 import org.junit.Test;
 

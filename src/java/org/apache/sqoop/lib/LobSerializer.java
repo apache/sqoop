@@ -29,25 +29,25 @@ public final class LobSerializer {
   private LobSerializer() { }
 
   public static void writeClob(
-      com.cloudera.sqoop.lib.ClobRef clob, DataOutput out) throws IOException {
+      org.apache.sqoop.lib.ClobRef clob, DataOutput out) throws IOException {
     clob.write(out);
   }
 
   public static void writeBlob(
-      com.cloudera.sqoop.lib.BlobRef blob, DataOutput out) throws IOException {
+      org.apache.sqoop.lib.BlobRef blob, DataOutput out) throws IOException {
     blob.write(out);
   }
 
-  public static com.cloudera.sqoop.lib.ClobRef readClobFields(
+  public static org.apache.sqoop.lib.ClobRef readClobFields(
       DataInput in) throws IOException {
-    com.cloudera.sqoop.lib.ClobRef clob = new com.cloudera.sqoop.lib.ClobRef();
+    org.apache.sqoop.lib.ClobRef clob = new org.apache.sqoop.lib.ClobRef();
     clob.readFields(in);
     return clob;
   }
 
-  public static com.cloudera.sqoop.lib.BlobRef readBlobFields(
+  public static org.apache.sqoop.lib.BlobRef readBlobFields(
       DataInput in) throws IOException {
-    com.cloudera.sqoop.lib.BlobRef blob = new com.cloudera.sqoop.lib.BlobRef();
+    org.apache.sqoop.lib.BlobRef blob = new org.apache.sqoop.lib.BlobRef();
     blob.readFields(in);
     return blob;
   }

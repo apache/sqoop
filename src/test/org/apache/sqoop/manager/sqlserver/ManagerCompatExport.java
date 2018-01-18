@@ -34,10 +34,10 @@ import org.apache.sqoop.manager.sqlserver.MSSQLTestData.KEY_STRINGS;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 import org.junit.Before;
 import org.junit.Test;
-import com.cloudera.sqoop.Sqoop;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.ExportJobTestCase;
-import com.cloudera.sqoop.tool.ExportTool;
+import org.apache.sqoop.Sqoop;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testutil.ExportJobTestCase;
+import org.apache.sqoop.tool.ExportTool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

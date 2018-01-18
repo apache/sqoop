@@ -21,14 +21,14 @@ package org.apache.sqoop.manager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 
 /**
  * Database manager that queries "information schema" directly
  * (instead of metadata calls) to retrieve information.
  */
 public abstract class InformationSchemaManager
-    extends com.cloudera.sqoop.manager.CatalogQueryManager {
+    extends CatalogQueryManager {
 
   public static final Log LOG = LogFactory.getLog(
     InformationSchemaManager.class.getName());

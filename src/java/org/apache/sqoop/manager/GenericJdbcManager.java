@@ -29,7 +29,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.cli.RelatedOptions;
 
 /**
@@ -38,7 +38,7 @@ import org.apache.sqoop.cli.RelatedOptions;
  * class to load.
  */
 public class GenericJdbcManager
-    extends com.cloudera.sqoop.manager.SqlManager {
+    extends SqlManager {
 
   public static final Log LOG = LogFactory.getLog(
       GenericJdbcManager.class.getName());

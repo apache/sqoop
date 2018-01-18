@@ -33,7 +33,7 @@ import java.util.Map;
 import org.apache.avro.mapred.Pair;
 
 import org.apache.sqoop.avro.AvroUtil;
-import com.cloudera.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.SqoopRecord;
 
 
 public class MergeParquetMapper

@@ -52,11 +52,11 @@ import org.apache.hive.hcatalog.mapreduce.StorerInfo;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 
-import com.cloudera.sqoop.lib.BlobRef;
-import com.cloudera.sqoop.lib.ClobRef;
-import com.cloudera.sqoop.lib.DelimiterSet;
-import com.cloudera.sqoop.lib.FieldFormatter;
-import com.cloudera.sqoop.lib.LargeObjectLoader;
+import org.apache.sqoop.lib.BlobRef;
+import org.apache.sqoop.lib.ClobRef;
+import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.FieldFormatter;
+import org.apache.sqoop.lib.LargeObjectLoader;
 
 /**
  * Helper class for Sqoop HCat Integration import jobs.

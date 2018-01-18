@@ -33,14 +33,14 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.manager.OracleManager;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ExportJobContext;
-import com.cloudera.sqoop.manager.GenericJdbcManager;
-import com.cloudera.sqoop.manager.ImportJobContext;
-import com.cloudera.sqoop.mapreduce.JdbcExportJob;
-import com.cloudera.sqoop.mapreduce.JdbcUpdateExportJob;
-import com.cloudera.sqoop.util.ExportException;
-import com.cloudera.sqoop.util.ImportException;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.ExportJobContext;
+import org.apache.sqoop.manager.GenericJdbcManager;
+import org.apache.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.mapreduce.JdbcExportJob;
+import org.apache.sqoop.mapreduce.JdbcUpdateExportJob;
+import org.apache.sqoop.util.ExportException;
+import org.apache.sqoop.util.ImportException;
 
 /**
  * OraOop manager for high performance Oracle import / export.

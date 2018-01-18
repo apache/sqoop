@@ -18,7 +18,6 @@
 
 package org.apache.sqoop.hbase;
 
-import com.cloudera.sqoop.hbase.PutTransformer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;

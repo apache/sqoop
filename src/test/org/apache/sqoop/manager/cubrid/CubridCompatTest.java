@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.ManagerCompatTestCase;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testutil.ManagerCompatTestCase;
 
 /**
  * Test the basic Cubrid connection manager with the various column types.

@@ -18,8 +18,8 @@
 
 package org.apache.sqoop.validation;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.tool.ImportTool;
 import org.junit.Test;
@@ -129,8 +129,7 @@ public class RowCountValidatorImportTest extends ImportJobTestCase {
     } catch (Exception e) {
       System.out.println("e.getMessage() = " + e.getMessage());
       System.out.println("e.getClass() = " + e.getClass());
-      assertEquals(
-        com.cloudera.sqoop.SqoopOptions.InvalidOptionsException.class,
+      assertEquals(SqoopOptions.InvalidOptionsException.class,
         e.getClass());
     } finally {
       dropTableIfExists(getTableName());

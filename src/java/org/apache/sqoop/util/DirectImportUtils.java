@@ -31,13 +31,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.conf.Configuration;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.io.CodecMap;
-import com.cloudera.sqoop.io.SplittingOutputStream;
-import com.cloudera.sqoop.io.SplittableBufferedWriter;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.io.CodecMap;
+import org.apache.sqoop.io.SplittingOutputStream;
+import org.apache.sqoop.io.SplittableBufferedWriter;
 
 import org.apache.hadoop.util.Shell;
-import com.cloudera.sqoop.manager.ImportJobContext;
+import org.apache.sqoop.manager.ImportJobContext;
 
 /**
  * Utility methods that are common to various the direct import managers.

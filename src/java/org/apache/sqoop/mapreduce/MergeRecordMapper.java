@@ -20,8 +20,7 @@ package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
 import org.apache.hadoop.io.LongWritable;
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.MergeMapperBase;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * Mapper for the merge program which operates on SequenceFiles.

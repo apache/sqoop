@@ -20,6 +20,7 @@ package org.apache.sqoop.mapreduce;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,14 +34,16 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.config.ConfigurationConstants;
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.config.ConfigurationHelper;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.tool.SqoopTool;
-import com.cloudera.sqoop.util.ClassLoaderStack;
-import com.cloudera.sqoop.util.Jars;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.tool.SqoopTool;
+import org.apache.sqoop.util.ClassLoaderStack;
+import org.apache.sqoop.util.Jars;
+import org.apache.sqoop.validation.*;
 
 /**
  * Base class for configuring and running a MapReduce job.
@@ -436,4 +439,40 @@ public class JobBase {
     // So far, propagate only verbose flag
     configuration.setBoolean(PROPERTY_VERBOSE, options.getVerbose());
   }
+
+  protected long getRowCountFromDB(ConnManager connManager, String tableName)
+      throws SQLException {
+    return connManager.getTableRowCount(tableName);
+  }
+
+  protected long getRowCountFromHadoop(Job job)
+      throws IOException, InterruptedException {
+    return ConfigurationHelper.getNumMapOutputRecords(job);
+  }
+
+  protected void doValidate(SqoopOptions options, Configuration conf,
+                            ValidationContext validationContext)
+      throws ValidationException {
+    Validator validator = (Validator) ReflectionUtils.newInstance(
+        options.getValidatorClass(), conf);
+    ValidationThreshold threshold = (ValidationThreshold)
+        ReflectionUtils.newInstance(options.getValidationThresholdClass(),
+            conf);
+    ValidationFailureHandler failureHandler = (ValidationFailureHandler)
+        ReflectionUtils.newInstance(options.getValidationFailureHandlerClass(),
+            conf);
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("Validating the integrity of the import using the "
+        + "following configuration\n");
+    sb.append("\tValidator : ").append(validator.getClass().getName())
+        .append('\n');
+    sb.append("\tThreshold Specifier : ")
+        .append(threshold.getClass().getName()).append('\n');
+    sb.append("\tFailure Handler : ")
+        .append(failureHandler.getClass().getName()).append('\n');
+    LOG.info(sb.toString());
+    validator.validate(validationContext, threshold, failureHandler);
+  }
+
 }

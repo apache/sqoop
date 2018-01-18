@@ -25,8 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.cloudera.sqoop.lib.SqoopRecord;
-import com.cloudera.sqoop.mapreduce.UpdateOutputFormat;
+import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.mapreduce.UpdateOutputFormat;
 
 /**
  * Output format for CUBRID Update/insert functionality. We will use CUBID

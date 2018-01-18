@@ -27,7 +27,7 @@ import org.apache.sqoop.mapreduce.db.DBSplitter;
 import
   org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.DataDrivenDBInputSplit;
 
-import com.cloudera.sqoop.config.ConfigurationHelper;
+import org.apache.sqoop.config.ConfigurationHelper;
 
 /**
  * Netezza specific splitter based on data slice id.
