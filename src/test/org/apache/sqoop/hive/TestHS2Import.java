@@ -39,7 +39,7 @@ public class TestHS2Import extends ImportJobTestCase {
 
   @Test
   public void testImport() throws Exception {
-    List<Object> columnValues = Arrays.asList("test", 42, "somestring");
+    List<Object> columnValues = Arrays.<Object>asList("test", 42, "somestring");
 
     String[] types = {"VARCHAR(32)", "INTEGER", "CHAR(64)"};
     createTableWithColTypes(types, toStringArray(columnValues));
