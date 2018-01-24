@@ -132,6 +132,7 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
     "hcatalog-storage-stanza";
   public static final String HCATALOG_HOME_ARG = "hcatalog-home";
   public static final String HS2_URL_ARG = "hs2-url";
+  public static final String HS2_KEYTAB_ARG = "hs2-keytab";
   public static final String MAPREDUCE_JOB_NAME = "mapreduce-job-name";
   public static final String NUM_MAPPERS_ARG = "num-mappers";
   public static final String NUM_MAPPERS_SHORT_ARG = "m";
@@ -614,6 +615,11 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
         .hasArg()
         .withDescription("The URL to the HiveServer2.")
         .withLongOpt(HS2_URL_ARG)
+        .create());
+    hiveOpts.addOption(OptionBuilder
+        .hasArg()
+        .withDescription("The location of the keytab of the HiveServer2 user.")
+        .withLongOpt(HS2_KEYTAB_ARG)
         .create());
 
     return hiveOpts;
@@ -1246,6 +1252,9 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
    }
    if (in.hasOption(HS2_URL_ARG)) {
       out.setHs2Url(in.getOptionValue(HS2_URL_ARG));
+   }
+   if (in.hasOption(HS2_KEYTAB_ARG)) {
+      out.setHs2Keytab(in.getOptionValue(HS2_KEYTAB_ARG));
    }
 
   }

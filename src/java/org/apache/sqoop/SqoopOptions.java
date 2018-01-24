@@ -452,6 +452,9 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hs2.url")
   private String hs2Url;
 
+  @StoredAsProperty("hs2.keytab")
+  private String hs2Keytab;
+
   public SqoopOptions() {
     initDefaults(null);
   }
@@ -2902,5 +2905,14 @@ public class SqoopOptions implements Cloneable {
   public void setHs2Url(String hs2Url) {
     this.hs2Url = hs2Url;
   }
+
+  public String getHs2Keytab() {
+    return hs2Keytab;
+  }
+
+  public void setHs2Keytab(String hs2Keytab) {
+    this.hs2Keytab = hs2Keytab;
+  }
+
 }
 
