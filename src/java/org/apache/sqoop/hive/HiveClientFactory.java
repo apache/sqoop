@@ -42,8 +42,12 @@ public class HiveClientFactory {
 
   private HiveClient createHiveServer2Client(SqoopOptions sqoopOptions, ConnManager connManager) {
     TableDefWriter tableDefWriter = new TableDefWriter(sqoopOptions, connManager, sqoopOptions.getTableName(), sqoopOptions.getHiveTableName(), sqoopOptions.getConf(), false);
-    JdbcConnectionFactory hs2JdbcConnectionFactory = new HiveServer2ConnectionFactory(sqoopOptions.getHs2Url(), null, null);
+    JdbcConnectionFactory hs2JdbcConnectionFactory = getJdbcConnectionFactory(sqoopOptions);
     return new HiveServer2Client(sqoopOptions, tableDefWriter, hs2JdbcConnectionFactory);
+  }
+
+  private JdbcConnectionFactory getJdbcConnectionFactory(SqoopOptions sqoopOptions) {
+    return new HiveServer2ConnectionFactory(sqoopOptions.getHs2Url(), null, null);
   }
 
   private boolean useHiveCli(SqoopOptions sqoopOptions) {

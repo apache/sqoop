@@ -45,7 +45,7 @@ public class DriverManagerJdbcConnectionFactory implements JdbcConnectionFactory
   }
 
   @Override
-  public Connection createConnection() throws SQLException {
+  public Connection createConnection() {
     loadDriverClass();
 
     Properties connectionProperties = new Properties();
@@ -58,7 +58,11 @@ public class DriverManagerJdbcConnectionFactory implements JdbcConnectionFactory
     }
 
     connectionProperties.putAll(additionalProps);
-    return DriverManager.getConnection(connectionString, connectionProperties);
+    try {
+      return DriverManager.getConnection(connectionString, connectionProperties);
+    } catch (SQLException e) {
+      throw new RuntimeException("Establishing connection failed!", e);
+    }
   }
 
   private void loadDriverClass() {
