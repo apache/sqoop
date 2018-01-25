@@ -72,4 +72,24 @@ public class DriverManagerJdbcConnectionFactory implements JdbcConnectionFactory
       throw new RuntimeException("Could not load db driver class: " + driverClass);
     }
   }
+
+  public String getDriverClass() {
+    return driverClass;
+  }
+
+  public String getConnectionString() {
+    return connectionString;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public Properties getAdditionalProps() {
+    return new Properties(additionalProps);
+  }
 }

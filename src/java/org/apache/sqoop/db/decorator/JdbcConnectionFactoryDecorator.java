@@ -28,4 +28,7 @@ public abstract class JdbcConnectionFactoryDecorator implements JdbcConnectionFa
     this.decorated = decorated;
   }
 
+  public JdbcConnectionFactory getDecorated() {
+    return decorated;
+  }
 }
