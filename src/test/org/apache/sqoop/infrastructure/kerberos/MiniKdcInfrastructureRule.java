@@ -103,7 +103,7 @@ public class MiniKdcInfrastructureRule implements TestRule, MiniKdcInfrastructur
 
   @Override
   public String getTestPrincipal() {
-    return testPrincipal;
+    return testPrincipal + "@" + miniKdc.getRealm();
   }
 
   @Override

@@ -64,7 +64,7 @@ public class KerberosAuthenticationConfiguration implements AuthenticationConfig
 
   @Override
   public String getUrlParams() {
-    return ";principal=" + kerberosConfig.getTestPrincipal() + "@" + kerberosConfig.getRealm();
+    return ";principal=" + kerberosConfig.getTestPrincipal();
   }
 
 }
