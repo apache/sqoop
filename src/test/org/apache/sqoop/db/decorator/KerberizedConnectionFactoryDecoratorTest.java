@@ -25,13 +25,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.InOrder;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.sql.Connection;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +45,10 @@ public class KerberizedConnectionFactoryDecoratorTest {
 
   private JdbcConnectionFactory decoratedFactory;
   
+  private UserGroupInformation testUser;
+
+  private UserGroupInformation capturedCurrentUser;
+  
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
   
@@ -50,19 +56,26 @@ public class KerberizedConnectionFactoryDecoratorTest {
   public void before() throws Exception {
     decoratedFactory = mock(JdbcConnectionFactory.class);
     kerberosAuthenticator = mock(KerberosAuthenticator.class);
-    when(kerberosAuthenticator.authenticate()).thenReturn(UserGroupInformation.getLoginUser());
+    testUser = UserGroupInformation.createUserForTesting("testUser", new String[]{});
+    when(kerberosAuthenticator.authenticate()).thenReturn(testUser);
 
     kerberizedConnectionFactoryDecorator = new KerberizedConnectionFactoryDecorator(decoratedFactory, kerberosAuthenticator);
   }
 
   @Test
-  public void testCreateConnectionAuthenticatesBeforeConnectionCreating() throws Exception {
+  public void testCreateConnectionInvokedAsAuthenticatedUser() throws Exception {
+    // We want to capture the current user when the createConnection() method is invoked on the decorated factory.
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+        capturedCurrentUser = UserGroupInformation.getCurrentUser();
+        return null;
+      }
+    }).when(decoratedFactory).createConnection();
+    
     kerberizedConnectionFactoryDecorator.createConnection();
-
-    InOrder inOrder = inOrder(kerberosAuthenticator, decoratedFactory);
-
-    inOrder.verify(kerberosAuthenticator).authenticate();
-    inOrder.verify(decoratedFactory).createConnection();
+    
+    assertEquals(testUser, capturedCurrentUser);
   }
 
   @Test
