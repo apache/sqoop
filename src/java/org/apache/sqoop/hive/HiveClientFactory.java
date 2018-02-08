@@ -33,13 +33,13 @@ public class HiveClientFactory {
 
   public HiveClient createHiveClient(SqoopOptions sqoopOptions, ConnManager connManager) {
     if (useHiveCli(sqoopOptions)) {
-      return createHiveImportToHiveClientAdapter(sqoopOptions, connManager);
+      return createHiveImport(sqoopOptions, connManager);
     } else {
       return createHiveServer2Client(sqoopOptions, connManager);
     }
   }
 
-  private HiveClient createHiveImportToHiveClientAdapter(SqoopOptions sqoopOptions, ConnManager connManager) {
+  private HiveClient createHiveImport(SqoopOptions sqoopOptions, ConnManager connManager) {
     return new HiveImport(sqoopOptions, connManager, sqoopOptions.getConf(), false);
   }
 
