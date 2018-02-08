@@ -31,16 +31,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.FileOutputCommitter;
-import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.Shell;
-import org.apache.hadoop.util.ToolRunner;
-import org.apache.hadoop.util.Tool;
-import org.apache.sqoop.io.CodecMap;
 import org.apache.sqoop.util.Executor;
 import org.apache.sqoop.util.LoggingAsyncSink;
 import org.apache.sqoop.util.SubprocessSecurityManager;
@@ -62,6 +55,7 @@ public class HiveImport {
   private ConnManager connManager;
   private Configuration configuration;
   private boolean generateOnly;
+  private HiveClientCommon hiveClientCommon;
   private static boolean testMode = false;
 
   public static boolean getTestMode() {
@@ -77,13 +71,17 @@ public class HiveImport {
       "org.apache.hadoop.hive.cli.CliDriver";
 
   public HiveImport(final SqoopOptions opts, final ConnManager connMgr,
-      final Configuration conf, final boolean generateOnly) {
+      final Configuration conf, final boolean generateOnly, final HiveClientCommon hiveClientCommon) {
     this.options = opts;
     this.connManager = connMgr;
     this.configuration = conf;
     this.generateOnly = generateOnly;
+    this.hiveClientCommon = hiveClientCommon;
   }
 
+  public HiveImport(SqoopOptions opts, ConnManager connMgr, Configuration conf, boolean generateOnly) {
+    this(opts, connMgr, conf, generateOnly, new HiveClientCommon());
+  }
 
   /**
    * @return the filename of the hive executable to run to do the import
@@ -107,22 +105,6 @@ public class HiveImport {
       return hiveBinStr;
     } else {
       return hiveCommand;
-    }
-  }
-
-  /**
-   * If we used a MapReduce-based upload of the data, remove the _logs dir
-   * from where we put it, before running Hive LOAD DATA INPATH.
-   */
-  private void removeTempLogs(Path tablePath) throws IOException {
-    FileSystem fs = tablePath.getFileSystem(configuration);
-    Path logsPath = new Path(tablePath, "_logs");
-    if (fs.exists(logsPath)) {
-      LOG.info("Removing temporary files from import process: " + logsPath);
-      if (!fs.delete(logsPath, true)) {
-        LOG.warn("Could not delete temporary files; "
-            + "continuing with import, but it may fail.");
-      }
     }
   }
 
@@ -191,23 +173,10 @@ public class HiveImport {
     Path finalPath = tableWriter.getFinalPath();
 
     if (!isGenerateOnly()) {
-      removeTempLogs(finalPath);
+      hiveClientCommon.removeTempLogs(configuration, finalPath);
       LOG.info("Loading uploaded data into Hive");
 
-      String codec = options.getCompressionCodec();
-      if (codec != null && (codec.equals(CodecMap.LZOP)
-              || codec.equals(CodecMap.getCodecClassName(CodecMap.LZOP)))) {
-        try {
-          Tool tool = ReflectionUtils.newInstance(Class.
-                  forName("com.hadoop.compression.lzo.DistributedLzoIndexer").
-                  asSubclass(Tool.class), configuration);
-          ToolRunner.run(configuration, tool,
-              new String[] { finalPath.toString() });
-        } catch (Exception ex) {
-          LOG.error("Error indexing lzo files", ex);
-          throw new IOException("Error indexing lzo files", ex);
-        }
-      }
+      hiveClientCommon.indexLzoFiles(options, finalPath);
     }
 
     // write them to a script file.
@@ -242,7 +211,7 @@ public class HiveImport {
 
         LOG.info("Hive import complete.");
 
-        cleanUp(finalPath);
+        hiveClientCommon.cleanUp(configuration, finalPath);
       }
     } finally {
       if (!isGenerateOnly()) {
@@ -253,37 +222,6 @@ public class HiveImport {
           scriptFile.deleteOnExit();
         }
       }
-    }
-  }
-
-  /**
-   * Clean up after successful HIVE import.
-   *
-   * @param outputPath path to the output directory
-   * @throws IOException
-   */
-  private void cleanUp(Path outputPath) throws IOException {
-    FileSystem fs = outputPath.getFileSystem(configuration);
-
-    // HIVE is not always removing input directory after LOAD DATA statement
-    // (which is our export directory). We're removing export directory in case
-    // that is blank for case that user wants to periodically populate HIVE
-    // table (for example with --hive-overwrite).
-    try {
-      if (outputPath != null && fs.exists(outputPath)) {
-        FileStatus[] statuses = fs.listStatus(outputPath);
-        if (statuses.length == 0) {
-          LOG.info("Export directory is empty, removing it.");
-          fs.delete(outputPath, true);
-        } else if (statuses.length == 1 && statuses[0].getPath().getName().equals(FileOutputCommitter.SUCCEEDED_FILE_NAME)) {
-          LOG.info("Export directory is contains the _SUCCESS file only, removing the directory.");
-          fs.delete(outputPath, true);
-        } else {
-          LOG.info("Export directory is not empty, keeping it.");
-        }
-      }
-    } catch(IOException e) {
-      LOG.error("Issue with cleaning (safe to ignore)", e);
     }
   }
 

@@ -20,18 +20,12 @@ package org.apache.sqoop.hive.hiveserver2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileOutputCommitter;
-import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.db.JdbcConnectionFactory;
 import org.apache.sqoop.hive.HiveClient;
+import org.apache.sqoop.hive.HiveClientCommon;
 import org.apache.sqoop.hive.TableDefWriter;
-import org.apache.sqoop.io.CodecMap;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -51,10 +45,17 @@ public class HiveServer2Client implements HiveClient {
 
   private final JdbcConnectionFactory hs2ConnectionFactory;
 
-  public HiveServer2Client(SqoopOptions sqoopOptions, TableDefWriter tableDefWriter, JdbcConnectionFactory hs2ConnectionFactory) {
+  private final HiveClientCommon hiveClientCommon;
+  
+  public HiveServer2Client(SqoopOptions sqoopOptions, TableDefWriter tableDefWriter, JdbcConnectionFactory hs2ConnectionFactory, HiveClientCommon hiveClientCommon) {
     this.sqoopOptions = sqoopOptions;
     this.tableDefWriter = tableDefWriter;
     this.hs2ConnectionFactory = hs2ConnectionFactory;
+    this.hiveClientCommon = hiveClientCommon;
+  }
+  
+  public HiveServer2Client(SqoopOptions sqoopOptions, TableDefWriter tableDefWriter, JdbcConnectionFactory hs2ConnectionFactory) {
+    this(sqoopOptions, tableDefWriter, hs2ConnectionFactory, new HiveClientCommon());
   }
 
   @Override
@@ -76,17 +77,17 @@ public class HiveServer2Client implements HiveClient {
 
     Path finalPath = tableDefWriter.getFinalPath();
 
-    removeTempLogs(finalPath);
+    hiveClientCommon.removeTempLogs(sqoopOptions.getConf(), finalPath);
 
-    indexLzoFiles(finalPath);
+    hiveClientCommon.indexLzoFiles(sqoopOptions, finalPath);
 
     try {
       executeCommands(commands);
     } catch (SQLException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Error executing Hive import.", e);
     }
-
-    cleanUp(finalPath);
+    
+    hiveClientCommon.cleanUp(sqoopOptions.getConf(), finalPath);
   }
 
   private void executeCommands(List<String> commands) throws SQLException {
@@ -94,66 +95,8 @@ public class HiveServer2Client implements HiveClient {
       for (String command : commands) {
         try (PreparedStatement statement = hs2Connection.prepareStatement(command)) {
           statement.execute();
-        } catch (SQLException e) {
-          LOG.error("Error executing command", e);
         }
       }
-    } catch (SQLException e) {
-      LOG.error("Error establishing connection to HiveServer2.", e);
-    }
-  }
-
-  private void indexLzoFiles(Path finalPath) throws IOException {
-    String codec = sqoopOptions.getCompressionCodec();
-    if (codec != null && (codec.equals(CodecMap.LZOP)
-        || codec.equals(CodecMap.getCodecClassName(CodecMap.LZOP)))) {
-      try {
-        Tool tool = ReflectionUtils.newInstance(Class.
-            forName("com.hadoop.compression.lzo.DistributedLzoIndexer").
-            asSubclass(Tool.class), sqoopOptions.getConf());
-        ToolRunner.run(sqoopOptions.getConf(), tool,
-            new String[]{finalPath.toString()});
-      } catch (Exception ex) {
-        LOG.error("Error indexing lzo files", ex);
-        throw new IOException("Error indexing lzo files", ex);
-      }
-    }
-  }
-
-  private void removeTempLogs(Path tablePath) throws IOException {
-    FileSystem fs = tablePath.getFileSystem(sqoopOptions.getConf());
-    Path logsPath = new Path(tablePath, "_logs");
-    if (fs.exists(logsPath)) {
-      LOG.info("Removing temporary files from import process: " + logsPath);
-      if (!fs.delete(logsPath, true)) {
-        LOG.warn("Could not delete temporary files; "
-            + "continuing with import, but it may fail.");
-      }
-    }
-  }
-
-  private void cleanUp(Path outputPath) throws IOException {
-    FileSystem fs = outputPath.getFileSystem(sqoopOptions.getConf());
-
-    // HIVE is not always removing input directory after LOAD DATA statement
-    // (which is our export directory). We're removing export directory in case
-    // that is blank for case that user wants to periodically populate HIVE
-    // table (for example with --hive-overwrite).
-    try {
-      if (outputPath != null && fs.exists(outputPath)) {
-        FileStatus[] statuses = fs.listStatus(outputPath);
-        if (statuses.length == 0) {
-          LOG.info("Export directory is empty, removing it.");
-          fs.delete(outputPath, true);
-        } else if (statuses.length == 1 && statuses[0].getPath().getName().equals(FileOutputCommitter.SUCCEEDED_FILE_NAME)) {
-          LOG.info("Export directory is contains the _SUCCESS file only, removing the directory.");
-          fs.delete(outputPath, true);
-        } else {
-          LOG.info("Export directory is not empty, keeping it.");
-        }
-      }
-    } catch (IOException e) {
-      LOG.error("Issue with cleaning (safe to ignore)", e);
     }
   }
 
