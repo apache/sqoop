@@ -313,5 +313,28 @@ public class TableDefWriter {
     return String.format("\\%03o", charNum);
   }
 
+  SqoopOptions getOptions() {
+    return options;
+  }
+
+  ConnManager getConnManager() {
+    return connManager;
+  }
+
+  Configuration getConfiguration() {
+    return configuration;
+  }
+
+  String getInputTableName() {
+    return inputTableName;
+  }
+
+  String getOutputTableName() {
+    return outputTableName;
+  }
+
+  boolean isCommentsEnabled() {
+    return commentsEnabled;
+  }
 }
 

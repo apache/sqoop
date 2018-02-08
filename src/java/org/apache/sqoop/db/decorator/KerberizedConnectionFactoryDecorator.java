@@ -44,4 +44,8 @@ public class KerberizedConnectionFactoryDecorator extends JdbcConnectionFactoryD
       }
     });
   }
+
+  public KerberosAuthenticator getAuthenticator() {
+    return authenticator;
+  }
 }

@@ -23,8 +23,6 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.authentication.KerberosAuthenticator;
 import org.apache.sqoop.db.JdbcConnectionFactory;
 import org.apache.sqoop.db.decorator.KerberizedConnectionFactoryDecorator;
-import org.apache.sqoop.hive.hiveserver2.HiveServer2Client;
-import org.apache.sqoop.hive.hiveserver2.HiveServer2ConnectionFactory;
 import org.apache.sqoop.manager.ConnManager;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -44,7 +42,7 @@ public class HiveClientFactory {
   }
 
   private HiveClient createHiveServer2Client(SqoopOptions sqoopOptions, ConnManager connManager) {
-    TableDefWriter tableDefWriter = new TableDefWriter(sqoopOptions, connManager, sqoopOptions.getTableName(), sqoopOptions.getHiveTableName(), sqoopOptions.getConf(), false);
+    TableDefWriter tableDefWriter = createTableDefWriter(sqoopOptions, connManager);
     JdbcConnectionFactory hs2JdbcConnectionFactory = createJdbcConnectionFactory(sqoopOptions);
     return new HiveServer2Client(sqoopOptions, tableDefWriter, hs2JdbcConnectionFactory);
   }
@@ -56,10 +54,18 @@ public class HiveClientFactory {
   JdbcConnectionFactory createJdbcConnectionFactory(SqoopOptions sqoopOptions) {
     JdbcConnectionFactory result = new HiveServer2ConnectionFactory(sqoopOptions.getHs2Url());
     if (useKerberizedConnection(sqoopOptions)) {
-      KerberosAuthenticator authenticator = new KerberosAuthenticator(sqoopOptions.getConf(), sqoopOptions.getHs2User(), sqoopOptions.getHs2Keytab());
+      KerberosAuthenticator authenticator = createKerberosAuthenticator(sqoopOptions);
       result = new KerberizedConnectionFactoryDecorator(result, authenticator);
     }
     return result;
+  }
+
+  KerberosAuthenticator createKerberosAuthenticator(SqoopOptions sqoopOptions) {
+    return new KerberosAuthenticator(sqoopOptions.getConf(), sqoopOptions.getHs2User(), sqoopOptions.getHs2Keytab());
+  }
+
+  TableDefWriter createTableDefWriter(SqoopOptions sqoopOptions, ConnManager connManager) {
+    return new TableDefWriter(sqoopOptions, connManager, sqoopOptions.getTableName(), sqoopOptions.getHiveTableName(), sqoopOptions.getConf(), false);
   }
 
   private boolean useKerberizedConnection(SqoopOptions sqoopOptions) {

@@ -46,4 +46,15 @@ public class KerberosAuthenticator {
     }
   }
 
+  public Configuration getConfiguration() {
+    return configuration;
+  }
+
+  public String getPrincipal() {
+    return principal;
+  }
+
+  public String getKeytabLocation() {
+    return keytabLocation;
+  }
 }

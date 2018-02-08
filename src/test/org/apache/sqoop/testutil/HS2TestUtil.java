@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.testutil;
 
-import org.apache.sqoop.hive.hiveserver2.HiveServer2ConnectionFactory;
+import org.apache.sqoop.hive.HiveServer2ConnectionFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

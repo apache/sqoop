@@ -113,7 +113,7 @@ public class HiveImport implements HiveClient {
    * not actually running it (i.e., --generate-only mode). If so, don't
    * do any side-effecting actions in Hive.
    */
-  private boolean isGenerateOnly() {
+  boolean isGenerateOnly() {
     return generateOnly;
   }
 
@@ -344,5 +344,18 @@ public class HiveImport implements HiveClient {
   public void createTable() throws IOException {
     importTable(options.getTableName(), options.getHiveTableName(), true);
   }
+
+  SqoopOptions getOptions() {
+    return options;
+  }
+
+  ConnManager getConnManager() {
+    return connManager;
+  }
+
+  Configuration getConfiguration() {
+    return configuration;
+  }
+
 }
 

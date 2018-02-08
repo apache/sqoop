@@ -16,16 +16,13 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.hive.hiveserver2;
+package org.apache.sqoop.hive;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.db.JdbcConnectionFactory;
-import org.apache.sqoop.hive.HiveClient;
-import org.apache.sqoop.hive.HiveClientCommon;
-import org.apache.sqoop.hive.TableDefWriter;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -100,4 +97,15 @@ public class HiveServer2Client implements HiveClient {
     }
   }
 
+  SqoopOptions getSqoopOptions() {
+    return sqoopOptions;
+  }
+
+  TableDefWriter getTableDefWriter() {
+    return tableDefWriter;
+  }
+
+  JdbcConnectionFactory getHs2ConnectionFactory() {
+    return hs2ConnectionFactory;
+  }
 }

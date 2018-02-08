@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.hive.hiveserver2;
+package org.apache.sqoop.hive;
 
 import org.apache.sqoop.db.DriverManagerJdbcConnectionFactory;
 
