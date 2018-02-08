@@ -47,7 +47,7 @@ import org.apache.sqoop.util.ExitSecurityException;
  * to Hive itself as well as orchestrating the use of the other classes in this
  * package.
  */
-public class HiveImport {
+public class HiveImport implements HiveClient {
 
   public static final Log LOG = LogFactory.getLog(HiveImport.class.getName());
 
@@ -335,6 +335,16 @@ public class HiveImport {
     }
 
     return newArgs.toArray(new String[newArgs.size()]);
+  }
+
+  @Override
+  public void importTable() throws IOException {
+    importTable(options.getTableName(), options.getHiveTableName(), false);
+  }
+
+  @Override
+  public void createTable() throws IOException {
+    importTable(options.getTableName(), options.getHiveTableName(), true);
   }
 }
 

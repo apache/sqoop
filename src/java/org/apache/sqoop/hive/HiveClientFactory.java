@@ -40,8 +40,7 @@ public class HiveClientFactory {
   }
 
   private HiveClient createHiveImportToHiveClientAdapter(SqoopOptions sqoopOptions, ConnManager connManager) {
-    HiveImport hiveImport = new HiveImport(sqoopOptions, connManager, sqoopOptions.getConf(), false);
-    return new HiveImportToHiveClientAdapter(hiveImport, sqoopOptions.getTableName(), sqoopOptions.getHiveTableName());
+    return new HiveImport(sqoopOptions, connManager, sqoopOptions.getConf(), false);
   }
 
   private HiveClient createHiveServer2Client(SqoopOptions sqoopOptions, ConnManager connManager) {
