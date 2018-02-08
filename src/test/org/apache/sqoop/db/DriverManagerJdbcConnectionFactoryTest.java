@@ -25,6 +25,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.sql.Connection;
+
 import static org.junit.Assert.assertFalse;
 
 public class DriverManagerJdbcConnectionFactoryTest {
@@ -58,7 +60,7 @@ public class DriverManagerJdbcConnectionFactoryTest {
   }
 
   @Test
-  public void testCreateConnectionWithInvalidDriverClassThrows() throws Exception {
+  public void testCreateConnectionThrowsWithInvalidDriverClass() throws Exception {
     String invalidDriverClass = "this_is_an_invalid_driver_class";
     connectionFactory = new DriverManagerJdbcConnectionFactory(invalidDriverClass, HsqldbTestServer.getUrl(), DB_USERNAME, DB_PASSWORD);
 
@@ -68,7 +70,7 @@ public class DriverManagerJdbcConnectionFactoryTest {
   }
 
   @Test
-  public void testCreateConnectionWithoutRunningDatabaseThrows() throws Exception {
+  public void testCreateConnectionThrowsWithoutRunningDatabase() throws Exception {
     String notRunningDb = "jdbc:postgresql://myhost:1234/database";
     connectionFactory = new DriverManagerJdbcConnectionFactory(POSTGRESQL_DRIVER_CLASS, notRunningDb, DB_USERNAME, DB_PASSWORD);
 
@@ -78,7 +80,7 @@ public class DriverManagerJdbcConnectionFactoryTest {
   }
 
   @Test
-  public void testCreateConnectionWithInvalidUsernameThrows() throws Exception {
+  public void testCreateConnectionThrowsWithInvalidUsername() throws Exception {
     String invalidUsername = "invalid_username";
     connectionFactory = new DriverManagerJdbcConnectionFactory(HSQLDB_DRIVER_CLASS, HsqldbTestServer.getUrl(), invalidUsername, DB_PASSWORD);
 
@@ -88,7 +90,7 @@ public class DriverManagerJdbcConnectionFactoryTest {
   }
 
   @Test
-  public void testCreateConnectionWithInvalidPasswordThrows() throws Exception {
+  public void testCreateConnectionThrowsWithInvalidPassword() throws Exception {
     String invalidPassword = "invalid_password";
     connectionFactory = new DriverManagerJdbcConnectionFactory(HSQLDB_DRIVER_CLASS, HsqldbTestServer.getUrl(), DB_USERNAME, invalidPassword);
 
@@ -98,10 +100,12 @@ public class DriverManagerJdbcConnectionFactoryTest {
   }
 
   @Test
-  public void testCreateConnectionWithValidParametersSucceeds() throws Exception {
+  public void testCreateConnectionSucceedsWithValidParameters() throws Exception {
     connectionFactory = new DriverManagerJdbcConnectionFactory(HSQLDB_DRIVER_CLASS, HsqldbTestServer.getUrl(), DB_USERNAME, DB_PASSWORD);
 
-    assertFalse(connectionFactory.createConnection().isClosed());
+    try (Connection connection = connectionFactory.createConnection()) {
+      assertFalse(connection.isClosed());
+    } 
   }
 
 }
