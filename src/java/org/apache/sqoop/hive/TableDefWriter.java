@@ -77,6 +77,8 @@ public class TableDefWriter {
     this.outputTableName = outputTable;
     this.configuration = config;
     this.commentsEnabled = withComments;
+    // reset the connection as it might have timed out
+    this.connManager.discardConnection(true);
   }
 
   private Map<String, Integer> externalColTypes;
