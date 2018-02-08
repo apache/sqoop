@@ -44,7 +44,6 @@ import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.hive.HiveClient;
 import org.apache.sqoop.hive.HiveClientFactory;
-import org.apache.sqoop.hive.HiveImport;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.mapreduce.MergeJob;
 import org.apache.sqoop.metastore.JobData;

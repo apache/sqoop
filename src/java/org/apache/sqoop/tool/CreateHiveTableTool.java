@@ -32,7 +32,6 @@ import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.hive.HiveClient;
 import org.apache.sqoop.hive.HiveClientFactory;
-import org.apache.sqoop.hive.HiveImport;
 
 /**
  * Tool that creates a Hive table definition.
