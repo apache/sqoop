@@ -34,7 +34,7 @@ import static org.junit.Assert.assertSame;
 
 public class KerberosAuthenticatorTest {
 
-  private static final String EXAMPLE_COM_RULE = "RULE:[2:$1@$0](.*@EXAMPLE.COM)s/@EXAMPLE.COM//";
+  private static final String KERBEROS_RULE_TEMPLATE = "RULE:[2:$1@$0](.*@%s)s/@%s//";
 
   @ClassRule
   public static MiniKdcInfrastructureRule miniKdc = new MiniKdcInfrastructureRule();
@@ -97,9 +97,13 @@ public class KerberosAuthenticatorTest {
   private Configuration createKerberosConfiguration() {
     Configuration configuration = new Configuration();
     configuration.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTHENTICATION, "kerberos");
-    // Adding a rule for EXAMPLE.COM since the default kerberos configuration might contain another realm.
-    configuration.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTH_TO_LOCAL, EXAMPLE_COM_RULE);
+    // Adding a rule for the realm used by the MiniKdc since the default kerberos configuration might contain another realm.
+    configuration.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTH_TO_LOCAL, buildKerberosRule());
     return configuration;
+  }
+
+  private String buildKerberosRule() {
+    return String.format(KERBEROS_RULE_TEMPLATE, miniKdc.getRealm(), miniKdc.getRealm());
   }
 
 }
