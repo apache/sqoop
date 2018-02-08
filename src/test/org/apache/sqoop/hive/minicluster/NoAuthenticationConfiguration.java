@@ -20,6 +20,7 @@ package org.apache.sqoop.hive.minicluster;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.Map;
 
@@ -32,5 +33,10 @@ public class NoAuthenticationConfiguration implements AuthenticationConfiguratio
   @Override
   public String getUrlParams() {
     return StringUtils.EMPTY;
+  }
+
+  @Override
+  public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
+    return action.run();
   }
 }

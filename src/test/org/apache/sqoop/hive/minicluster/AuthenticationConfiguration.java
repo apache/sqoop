@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.hive.minicluster;
 
+import java.security.PrivilegedAction;
 import java.util.Map;
 
 public interface AuthenticationConfiguration {
@@ -26,4 +27,6 @@ public interface AuthenticationConfiguration {
 
   String getUrlParams();
 
+  <T> T doAsAuthenticated(PrivilegedAction<T> action);
+  
 }

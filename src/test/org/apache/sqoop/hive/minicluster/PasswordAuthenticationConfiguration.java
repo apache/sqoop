@@ -23,6 +23,7 @@ import org.apache.hive.service.auth.HiveAuthFactory;
 import org.apache.hive.service.auth.PasswdAuthenticationProvider;
 
 import javax.security.sasl.AuthenticationException;
+import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,5 +63,10 @@ public class PasswordAuthenticationConfiguration implements AuthenticationConfig
   @Override
   public String getUrlParams() {
     return StringUtils.EMPTY;
+  }
+
+  @Override
+  public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
+    return action.run();
   }
 }

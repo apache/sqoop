@@ -100,8 +100,7 @@ public class HiveMiniCluster {
   }
 
   private void startHiveServer() throws Exception {
-    UserGroupInformation loginUser = UserGroupInformation.getLoginUser();
-    loginUser.doAs(new PrivilegedAction<Void>() {
+    authenticationConfiguration.doAsAuthenticated(new PrivilegedAction<Void>() {
       @Override
       public Void run() {
         hiveServer2.init(config);

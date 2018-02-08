@@ -1,13 +1,16 @@
 package org.apache.sqoop.hive;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.sqoop.hive.minicluster.HiveMiniCluster;
-import org.apache.sqoop.hive.minicluster.NoAuthenticationConfiguration;
+import org.apache.sqoop.hive.minicluster.KerberosAuthenticationConfiguration;
+import org.apache.sqoop.infrastructure.kerberos.MiniKdcInfrastructureRule;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.HS2TestUtil;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -17,6 +20,9 @@ import static org.junit.Assert.assertEquals;
 
 public class TestHS2Import extends ImportJobTestCase {
 
+  @ClassRule
+  public static MiniKdcInfrastructureRule miniKdcInfrastructure = new MiniKdcInfrastructureRule();
+  
   private HiveMiniCluster hiveMiniCluster;
 
   private HS2TestUtil hs2TestUtil;
@@ -25,7 +31,7 @@ public class TestHS2Import extends ImportJobTestCase {
   @Before
   public void setUp() {
     super.setUp();
-    hiveMiniCluster = new HiveMiniCluster(new NoAuthenticationConfiguration());
+    hiveMiniCluster = new HiveMiniCluster(new KerberosAuthenticationConfiguration(miniKdcInfrastructure));
     hiveMiniCluster.start();
     hs2TestUtil = new HS2TestUtil(hiveMiniCluster.getUrl());
   }
@@ -45,6 +51,7 @@ public class TestHS2Import extends ImportJobTestCase {
     createTableWithColTypes(types, toStringArray(columnValues));
 
     String[] args = new ArgumentArrayBuilder()
+        .withProperty(YarnConfiguration.RM_PRINCIPAL, miniKdcInfrastructure.getTestPrincipal())
         .withOption("connect", getConnectString())
         .withOption("table", getTableName())
         .withOption("hive-import")
