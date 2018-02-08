@@ -68,7 +68,7 @@ public class HiveServer2Client implements HiveClient {
     executeHiveImport(asList(createTableStmt));
   }
 
-  private void executeHiveImport(List<String> commands) throws IOException {
+  void executeHiveImport(List<String> commands) throws IOException {
     LOG.debug("Hive.inputTable: " + sqoopOptions.getTableName());
     LOG.debug("Hive.outputTable: " + sqoopOptions.getHiveTableName());
 
@@ -87,7 +87,7 @@ public class HiveServer2Client implements HiveClient {
     hiveClientCommon.cleanUp(sqoopOptions.getConf(), finalPath);
   }
 
-  private void executeCommands(List<String> commands) throws SQLException {
+  void executeCommands(List<String> commands) throws SQLException {
     try (Connection hs2Connection = hs2ConnectionFactory.createConnection()) {
       for (String command : commands) {
         try (PreparedStatement statement = hs2Connection.prepareStatement(command)) {
