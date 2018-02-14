@@ -167,7 +167,7 @@ public abstract class BaseSqoopTestCase {
 
   // instance variables populated during setUp, used during tests
   private HsqldbTestServer testServer;
-  private ConnManager manager;
+  protected ConnManager manager;
 
   private static boolean isLog4jConfigured = false;
 
@@ -299,7 +299,8 @@ public abstract class BaseSqoopTestCase {
    */
   protected void dropTableIfExists(String table) throws SQLException {
     Connection conn = getManager().getConnection();
-    PreparedStatement statement = conn.prepareStatement(dropTableIfExistsCommand(table),
+    String dropStatement = dropTableIfExistsCommand(table);
+    PreparedStatement statement = conn.prepareStatement(dropStatement,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     try {
       statement.executeUpdate();
@@ -351,7 +352,6 @@ public abstract class BaseSqoopTestCase {
             columnDefStr += ", ";
           }
         }
-
         createTableStr = "CREATE TABLE " + manager.escapeTableName(newTableName) + "(" + columnDefStr + ")";
         LOG.info("Creating table: " + createTableStr);
         statement = conn.prepareStatement(
@@ -423,22 +423,28 @@ public abstract class BaseSqoopTestCase {
     }
   }
 
-  /**
-   * insert into a table with a set of columns values for a given row.
-   * @param colTypes the types of the columns to make
-   * @param vals the SQL text for each value to insert
-   */
   protected void insertIntoTable(String[] colTypes, String[] vals) {
-    assert colNames != null;
-    assert colNames.length == vals.length;
+    insertIntoTable(null, colTypes, vals);
+  }
+
+  protected void insertIntoTable(String[] columns, String[] colTypes, String[] vals) {
+    assert colTypes != null;
+    assert colTypes.length == vals.length;
 
     Connection conn = null;
     PreparedStatement statement = null;
 
-    String[] colNames = new String[vals.length];
-    for( int i = 0; i < vals.length; i++) {
-      colNames[i] = BASE_COL_NAME + Integer.toString(i);
+    String[] colNames;
+    if (columns == null){
+      colNames = new String[vals.length];
+      for( int i = 0; i < vals.length; i++) {
+        colNames[i] = BASE_COL_NAME + Integer.toString(i);
+      }
     }
+    else {
+      colNames = columns;
+    }
+
     try {
         conn = getManager().getConnection();
         for (int count=0; vals != null && count < vals.length/colTypes.length;

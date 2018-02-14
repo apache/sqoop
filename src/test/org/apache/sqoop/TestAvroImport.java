@@ -31,17 +31,14 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.file.DataFileReader;
-import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.DatumReader;
-import org.apache.avro.mapred.FsInput;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
-import org.apache.sqoop.testutil.BaseSqoopTestCase;
+import org.apache.sqoop.testutil.AvroTestUtils;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.testutil.ImportJobTestCase;
@@ -365,13 +362,7 @@ public class TestAvroImport extends ImportJobTestCase {
 
   protected DataFileReader<GenericRecord> read(Path filename) throws IOException {
     Configuration conf = new Configuration();
-    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
-      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
-    }
-    FsInput fsInput = new FsInput(filename, conf);
-    DatumReader<GenericRecord> datumReader =
-      new GenericDatumReader<GenericRecord>();
-    return new DataFileReader<GenericRecord>(fsInput, datumReader);
+    return AvroTestUtils.read(filename, conf);
   }
 
   protected void checkSchemaFile(final Schema schema) throws IOException {

@@ -18,9 +18,9 @@
 
 package org.apache.sqoop.metastore;
 
+import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.Sqoop;
-import org.apache.sqoop.testutil.Argument;
 import org.apache.sqoop.tool.JobTool;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -33,12 +33,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import static org.apache.sqoop.testutil.Argument.from;
-import static org.apache.sqoop.testutil.Argument.fromPair;
-import static org.apache.sqoop.testutil.ArgumentUtils.createArgumentArray;
-import static org.apache.sqoop.testutil.ArgumentUtils.createArgumentArrayFromProperties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -74,8 +68,9 @@ public class TestMetastoreConfigurationParameters {
 
     @Test
     public void testJobToolWithAutoConnectDisabledFails() throws IOException {
-        Argument autoConnectProperty = fromPair("sqoop.metastore.client.enable.autoconnect", "false");
-        String[] arguments = createArgumentArrayFromProperties(singleton(autoConnectProperty));
+        ArgumentArrayBuilder builder = new ArgumentArrayBuilder()
+            .withProperty("sqoop.metastore.client.enable.autoconnect", "false");
+        String[] arguments = builder.build();
         assertEquals(STATUS_FAILURE, Sqoop.runSqoop(sqoop, arguments));
     }
 
@@ -92,15 +87,12 @@ public class TestMetastoreConfigurationParameters {
     }
 
     private int runJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecified() {
-        Argument url = fromPair("sqoop.metastore.client.autoconnect.url", HsqldbTestServer.getUrl());
-        Argument user = fromPair("sqoop.metastore.client.autoconnect.username", TEST_USER);
-        Argument password = fromPair("sqoop.metastore.client.autoconnect.password", TEST_PASSWORD);
-        Argument listJob = from("list");
-
-        Iterable<Argument> properties = asList(url, user, password);
-        Iterable<Argument> options = singleton(listJob);
-
-        String[] arguments = createArgumentArray(properties, options);
+        ArgumentArrayBuilder builder = new ArgumentArrayBuilder()
+            .withProperty("sqoop.metastore.client.autoconnect.url", HsqldbTestServer.getUrl())
+            .withProperty("sqoop.metastore.client.autoconnect.username", TEST_USER)
+            .withProperty("sqoop.metastore.client.autoconnect.password", TEST_PASSWORD)
+            .withOption("list");
+        String[] arguments = builder.build();
         return Sqoop.runSqoop(sqoop, arguments);
     }
 

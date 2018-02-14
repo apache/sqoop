@@ -106,6 +106,11 @@ public final class ConfigurationConstants {
   public static final String PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL = "sqoop.avro.logical_types.decimal.enable";
 
   /**
+   * Enable padding for avro logical types (decimal support only).
+   */
+  public static final String PROP_ENABLE_AVRO_DECIMAL_PADDING = "sqoop.avro.decimal_padding.enable";
+
+  /**
    * The Configuration property identifying data publisher class.
    */
   public static final String DATA_PUBLISH_CLASS = "sqoop.job.data.publish.class";

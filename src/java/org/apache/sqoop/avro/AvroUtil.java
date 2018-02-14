@@ -51,6 +51,9 @@ import java.util.Map;
  * The service class provides methods for creating and converting Avro objects.
  */
 public final class AvroUtil {
+
+  public static final String DECIMAL = "decimal";
+
   public static boolean isDecimal(Schema.Field field) {
     return isDecimal(field.schema());
   }
@@ -65,20 +68,54 @@ public final class AvroUtil {
 
       return false;
     } else {
-      return "decimal".equals(schema.getProp(LogicalType.LOGICAL_TYPE_PROP));
+      return DECIMAL.equals(schema.getProp(LogicalType.LOGICAL_TYPE_PROP));
     }
+  }
+
+  private static BigDecimal padBigDecimal(BigDecimal bd, Schema schema) {
+    Schema schemaContainingScale = getDecimalSchema(schema);
+    if(schemaContainingScale != null) {
+      int scale = Integer.valueOf(schemaContainingScale.getObjectProp("scale").toString());
+      if (bd.scale() != scale) {
+        return bd.setScale(scale);
+      }
+    }
+    return bd;
+  }
+
+  private static Schema getDecimalSchema(Schema schema) {
+    if (schema.getType().equals(Schema.Type.UNION)) {
+      for (Schema type : schema.getTypes()) {
+        // search for decimal schema
+        Schema schemaContainingScale = getDecimalSchema(type);
+        if (schemaContainingScale != null) {
+          return schemaContainingScale;
+        }
+      }
+    } else {
+      if(DECIMAL.equals(schema.getProp(LogicalType.LOGICAL_TYPE_PROP))) {
+        return schema;
+      }
+    }
+    return null;
   }
 
   /**
    * Convert a Sqoop's Java representation to Avro representation.
    */
-  public static Object toAvro(Object o, Schema.Field field, boolean bigDecimalFormatString) {
-    if (o instanceof BigDecimal && !isDecimal(field)) {
-      if (bigDecimalFormatString) {
-        // Returns a string representation of this without an exponent field.
-        return ((BigDecimal) o).toPlainString();
-      } else {
-        return o.toString();
+  public static Object toAvro(Object o, Schema.Field field, boolean bigDecimalFormatString, boolean bigDecimalPaddingEnabled) {
+
+    if (o instanceof BigDecimal) {
+      if(bigDecimalPaddingEnabled) {
+        o = padBigDecimal((BigDecimal) o, field.schema());
+      }
+      if (!isDecimal(field)) {
+        if (bigDecimalFormatString) {
+          // Returns a string representation of this without an exponent field.
+          return ((BigDecimal) o).toPlainString();
+        } else {
+          return o.toString();
+        }
       }
     } else if (o instanceof Date) {
       return ((Date) o).getTime();
@@ -136,16 +173,21 @@ public final class AvroUtil {
     }
   }
 
+  public static GenericRecord toGenericRecord(Map<String, Object> fieldMap,
+                                              Schema schema, boolean bigDecimalFormatString) {
+    return toGenericRecord(fieldMap, schema, bigDecimalFormatString, false);
+  }
+
   /**
    * Manipulate a GenericRecord instance.
    */
   public static GenericRecord toGenericRecord(Map<String, Object> fieldMap,
-      Schema schema, boolean bigDecimalFormatString) {
+      Schema schema, boolean bigDecimalFormatString, boolean bigDecimalPaddingEnabled) {
     GenericRecord record = new GenericData.Record(schema);
     for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
       String avroColumn = toAvroColumn(entry.getKey());
       Schema.Field field = schema.getField(avroColumn);
-      Object avroObject = toAvro(entry.getValue(), field, bigDecimalFormatString);
+      Object avroObject = toAvro(entry.getValue(), field, bigDecimalFormatString, bigDecimalPaddingEnabled);
       record.put(avroColumn, avroObject);
     }
     return record;
