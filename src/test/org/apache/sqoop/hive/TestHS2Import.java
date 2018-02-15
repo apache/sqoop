@@ -31,7 +31,9 @@ public class TestHS2Import extends ImportJobTestCase {
   @Before
   public void setUp() {
     super.setUp();
-    hiveMiniCluster = new HiveMiniCluster(new KerberosAuthenticationConfiguration(miniKdcInfrastructure));
+    KerberosAuthenticationConfiguration authenticationConfiguration = new KerberosAuthenticationConfiguration(miniKdcInfrastructure);
+    authenticationConfiguration.init();
+    hiveMiniCluster = new HiveMiniCluster(authenticationConfiguration);
     hiveMiniCluster.start();
     hs2TestUtil = new HS2TestUtil(hiveMiniCluster.getUrl());
   }
