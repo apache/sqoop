@@ -69,4 +69,9 @@ public class PasswordAuthenticationConfiguration implements AuthenticationConfig
   public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
     return action.run();
   }
+
+  @Override
+  public void init() {
+    //do nothing
+  }
 }

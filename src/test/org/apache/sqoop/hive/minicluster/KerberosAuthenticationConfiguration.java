@@ -34,20 +34,12 @@ public class KerberosAuthenticationConfiguration implements AuthenticationConfig
 
   private final KerberosConfigurationProvider kerberosConfig;
   
-  private final KerberosAuthenticator authenticator;
+  private KerberosAuthenticator authenticator;
   
   public KerberosAuthenticationConfiguration(KerberosConfigurationProvider kerberosConfig) {
     this.kerberosConfig = kerberosConfig;
-    this.authenticator = createKerberosAuthenticator();
   }
 
-  private KerberosAuthenticator createKerberosAuthenticator() {
-    Configuration conf = new Configuration();
-    conf.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTHENTICATION, "kerberos");
-    KerberosAuthenticator result = new KerberosAuthenticator(conf, kerberosConfig.getTestPrincipal(), kerberosConfig.getKeytabFilePath());
-    return result;
-  }
-  
   @Override
   public Map<String, String> getAuthenticationConfig() {
     Map<String, String> result = new HashMap<>();
@@ -68,6 +60,18 @@ public class KerberosAuthenticationConfiguration implements AuthenticationConfig
   @Override
   public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
     return authenticator.authenticate().doAs(action);
+  }
+
+  @Override
+  public void init() {
+    authenticator = createKerberosAuthenticator();
+  }
+
+  private KerberosAuthenticator createKerberosAuthenticator() {
+    Configuration conf = new Configuration();
+    conf.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTHENTICATION, "kerberos");
+    KerberosAuthenticator result = new KerberosAuthenticator(conf, kerberosConfig.getTestPrincipal(), kerberosConfig.getKeytabFilePath());
+    return result;
   }
 
 }

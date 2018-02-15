@@ -39,4 +39,9 @@ public class NoAuthenticationConfiguration implements AuthenticationConfiguratio
   public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
     return action.run();
   }
+
+  @Override
+  public void init() {
+    // do nothing
+  }
 }

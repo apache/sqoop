@@ -78,6 +78,7 @@ public class TestHiveMiniCluster {
 
   public TestHiveMiniCluster(AuthenticationConfiguration authenticationConfiguration) {
     this.authenticationConfiguration = authenticationConfiguration;
+    this.authenticationConfiguration.init();
   }
 
   @Before

@@ -29,4 +29,6 @@ public interface AuthenticationConfiguration {
 
   <T> T doAsAuthenticated(PrivilegedAction<T> action);
   
+  void init();
+  
 }
