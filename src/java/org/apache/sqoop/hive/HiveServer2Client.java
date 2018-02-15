@@ -57,21 +57,22 @@ public class HiveServer2Client implements HiveClient {
 
   @Override
   public void importTable() throws IOException {
+    LOG.info("Loading uploaded data into Hive.");
     String createTableStmt = tableDefWriter.getCreateTableStmt();
     String loadDataStmt = tableDefWriter.getLoadDataStmt();
     executeHiveImport(asList(createTableStmt, loadDataStmt));
+    LOG.info("Hive import complete.");
   }
 
   @Override
   public void createTable() throws IOException {
+    LOG.info("Creating Hive table: " + tableDefWriter.getOutputTableName());
     String createTableStmt = tableDefWriter.getCreateTableStmt();
     executeHiveImport(asList(createTableStmt));
+    LOG.info("Hive table is successfully created.");
   }
 
   void executeHiveImport(List<String> commands) throws IOException {
-    LOG.debug("Hive.inputTable: " + sqoopOptions.getTableName());
-    LOG.debug("Hive.outputTable: " + sqoopOptions.getHiveTableName());
-
     Path finalPath = tableDefWriter.getFinalPath();
 
     hiveClientCommon.removeTempLogs(sqoopOptions.getConf(), finalPath);
@@ -90,6 +91,7 @@ public class HiveServer2Client implements HiveClient {
   void executeCommands(List<String> commands) throws SQLException {
     try (Connection hs2Connection = hs2ConnectionFactory.createConnection()) {
       for (String command : commands) {
+        LOG.debug("Executing command: " + command);
         try (PreparedStatement statement = hs2Connection.prepareStatement(command)) {
           statement.execute();
         }
