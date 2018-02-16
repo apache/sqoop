@@ -18,9 +18,19 @@
 
 package org.apache.sqoop.hive;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.db.DriverManagerJdbcConnectionFactory;
 
+import java.io.IOException;
+import java.sql.Connection;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 public class HiveServer2ConnectionFactory extends DriverManagerJdbcConnectionFactory {
+
+  private static final Log LOG = LogFactory.getLog(HiveServer2ConnectionFactory.class.getName());
 
   private static final String HS2_DRIVER_CLASS = "org.apache.hive.jdbc.HiveDriver";
 
@@ -31,5 +41,21 @@ public class HiveServer2ConnectionFactory extends DriverManagerJdbcConnectionFac
   public HiveServer2ConnectionFactory(String connectionString) {
     this(connectionString, null, null);
   }
+
+  @Override
+  public Connection createConnection() {
+    LOG.info("Creating connection to HiveServer2 as: " + getCurrentUser());
+    return super.createConnection();
+  }
+
+  private String getCurrentUser() {
+    try {
+      return UserGroupInformation.getCurrentUser().toString();
+    } catch (IOException e) {
+      LOG.error("Unable to determine current user: " + e.getMessage());
+    }
+    return EMPTY;
+  }
+
 } 
   
