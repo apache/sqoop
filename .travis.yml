@@ -1,0 +1,7 @@
+language: java
+jdk:
+  - oraclejdk8
+
+script: ant clean test
+after_failure:
+  - cat ./build/test/TEST-org.apache.sqoop.hive.TestHiveMiniCluster.txt
