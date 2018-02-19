@@ -2,6 +2,11 @@ language: java
 jdk:
   - oraclejdk8
 
+cache:
+  directories:
+  - $HOME/.ivy2
+  - $HOME/.m2
+
 script: ant clean test
 after_failure:
   - cat ./build/test/TEST-org.apache.sqoop.hive.TestHiveMiniCluster.txt
