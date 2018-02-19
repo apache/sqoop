@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.tool;
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -1645,6 +1647,8 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
       throw new InvalidOptionsException("Importing to external Hive table requires --hive-import parameter to be set."
           + HELP_STR);
     }
+    
+    validateHS2Options(options);
   }
 
   protected void validateAccumuloOptions(SqoopOptions options)
@@ -1876,6 +1880,22 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
     if (m != null && options.isDirect() && !m.hasDirectConnector()) {
       throw new SqoopOptions.InvalidOptionsException(
           "Was called with the --direct option, but no direct connector available.");
+    }
+  }
+
+  protected void validateHS2Options(SqoopOptions options) throws SqoopOptions.InvalidOptionsException {
+    final String exceptionTemplate = "The %s option cannot be used without the %s option.";
+    
+    if (isSet(options.getHs2Url()) && !options.doHiveImport()) {
+      throw new InvalidOptionsException(format(exceptionTemplate, HS2_URL_ARG, HIVE_IMPORT_ARG));
+    }
+    
+    if (isSet(options.getHs2User()) && !isSet(options.getHs2Url())) {
+      throw  new InvalidOptionsException(format(exceptionTemplate, HS2_USER_ARG, HS2_URL_ARG));
+    }
+
+    if (isSet(options.getHs2Keytab()) && !isSet(options.getHs2User())) {
+      throw  new InvalidOptionsException(format(exceptionTemplate, HS2_KEYTAB_ARG, HS2_USER_ARG));
     }
   }
 }
