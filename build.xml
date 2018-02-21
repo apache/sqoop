@@ -888,7 +888,7 @@
         <!-- include cobertura itself on the classpath -->
         <path refid="cobertura.classpath" />
       </classpath>
-      
+      <formatter type="${test.junit.output.format}" />
       <batchtest todir="${build.test}" unless="testcase">
         <fileset dir="${test.dir}"
                  includes="**/${test.pattern}.java"
