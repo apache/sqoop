@@ -63,6 +63,8 @@ public class HBasePutProcessor implements Closeable, Configurable,
   public static final String ROW_KEY_COLUMN_KEY =
       "sqoop.hbase.insert.row.key.column";
 
+  public static final String NULL_INCREMENTAL_MODE = "hbase.null.incremental.mode";
+
   /**
    * Configuration key specifying the PutTransformer implementation to use.
    */

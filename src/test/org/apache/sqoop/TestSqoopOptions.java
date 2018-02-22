@@ -89,6 +89,7 @@ public class TestSqoopOptions {
     excludedFieldsFromClone.add("updateMode");
     excludedFieldsFromClone.add("layout");
     excludedFieldsFromClone.add("activeSqoopTool");
+    excludedFieldsFromClone.add("hbaseNullIncrementalMode");
   }
 
   @After

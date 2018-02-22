@@ -20,19 +20,22 @@
 
 .HBase arguments:
 [grid="all"]
-`-----------------------------`-------------------------------------------
-Argument                      Description
---------------------------------------------------------------------------
-+\--column-family <family>+   Sets the target column family for the import
-+\--hbase-create-table+       If specified, create missing HBase tables
-+\--hbase-row-key <col>+      Specifies which input column to use as the\
-                              row key
-                              In case, if input table contains composite
-                              key, then <col> must be in the form of a
-                              comma-separated list of composite key
-                              attributes
-+\--hbase-table <table-name>+ Specifies an HBase table to use as the \
-                              target instead of HDFS
-+\--hbase-bulkload+           Enables bulk loading
---------------------------------------------------------------------------
+`---------------------------------------`-------------------------------------------
+Argument                                Description
+------------------------------------------------------------------------------------
++\--column-family <family>+             Sets the target column family for the import
++\--hbase-create-table+                 If specified, create missing HBase tables
++\--hbase-row-key <col>+                Specifies which input column to use as the\
+                                        row key
+                                        In case, if input table contains composite
+                                        key, then <col> must be in the form of a
+                                        comma-separated list of composite key
+                                        attributes
++\--hbase-table <table-name>+           Specifies an HBase table to use as the \
+                                        target instead of HDFS
++\--hbase-bulkload+                     Enables bulk loading
++\--hbase-null-incremental-mode <mode>+ How to handle columns updated to null. \
+                                        Legal values for <mode> are +ignore+ \
+                                        (default) and +delete+.
+------------------------------------------------------------------------------------
 

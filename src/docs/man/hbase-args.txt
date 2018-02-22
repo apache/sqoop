@@ -36,4 +36,9 @@ HBase options
 --hbase-table (table-name)::
   Specifies an HBase table to use as the target instead of HDFS
 
+--hbase-null-incremental-mode (mode)::
+  How to handle columns updated to null during incremental imports. +ignore+ is the default and
+  will result in retaining the previously imported value. +delete+ mode will delete all previous
+  versions of the column from HBase.
+
 

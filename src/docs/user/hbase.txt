@@ -58,5 +58,10 @@ mode), and then inserts the UTF-8 bytes of this string in the target
 cell. Sqoop will skip all rows containing null values in all columns
 except the row key column.
 
+By default Sqoop will retain the previously imported value for columns
+updated to null during incremental imports. This can be changed to
+delete all previous versions of the column by using
++\--hbase-null-incremental-mode delete+.
+
 To decrease the load on hbase, Sqoop can do bulk loading as opposed to
 direct writes. To use bulk loading, enable it using +\--hbase-bulkload+.

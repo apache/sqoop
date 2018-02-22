@@ -138,7 +138,7 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
    */
   protected String [] getIncrementalArgv(boolean includeHadoopFlags,
       String hbaseTable, String hbaseColFam, boolean hbaseCreate,
-      String queryStr, boolean isAppend, boolean appendTimestamp, String checkColumn, String checkValue, String lastModifiedColumn) {
+      String queryStr, boolean isAppend, boolean appendTimestamp, String checkColumn, String checkValue, String lastModifiedColumn, String nullMode) {
 
     String[] argsStrArray = getArgv(includeHadoopFlags, hbaseTable, hbaseColFam, hbaseCreate, queryStr);
     List<String> args = new ArrayList<String>(Arrays.asList(argsStrArray));
@@ -161,6 +161,14 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       args.add("--last-value");
       args.add(checkValue);
     }
+
+    // Set --hbase-null-incremental-mode (default is 'ignore')
+    if (nullMode == null) {
+      nullMode = "ignore";
+    }
+    args.add("--hbase-null-incremental-mode");
+    args.add(nullMode);
+
     return args.toArray(new String[0]);
   }
 

@@ -26,6 +26,7 @@ import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 
 import java.io.IOException;
@@ -57,6 +58,7 @@ public class ToStringPutTransformer extends PutTransformer {
   protected boolean addRowKey;
   private boolean isCompositeKey = false;
   private List<String> compositeKeyAttributes;
+  private SqoopOptions.HBaseNullIncrementalMode nullMode;
 
   /**
    * Used as delimiter to combine composite-key column names when passed as.
@@ -170,6 +172,7 @@ public class ToStringPutTransformer extends PutTransformer {
     String colFamily, String rowKey) {
     byte[] colFamilyBytes = Bytes.toBytes(colFamily);
     List<Mutation> mutationList = new ArrayList<Mutation>();
+    Put put = null;
     for (Map.Entry<String, Object> fieldEntry : record.entrySet()) {
       String colName = fieldEntry.getKey();
       boolean rowKeyCol = false;
@@ -187,7 +190,10 @@ public class ToStringPutTransformer extends PutTransformer {
         Object val = fieldEntry.getValue();
         if (null != val) {
           // Put row-key in HBase
-          Put put = new Put(Bytes.toBytes(rowKey));
+          if (put == null) {
+            put = new Put(Bytes.toBytes(rowKey));
+            mutationList.add(put);
+          }
           if ( val instanceof byte[]) {
             put.addColumn(colFamilyBytes, getFieldNameBytes(colName),
                 (byte[])val);
@@ -197,9 +203,16 @@ public class ToStringPutTransformer extends PutTransformer {
           }
           mutationList.add(put);
         } else {
+          switch (nullMode) {
+          case Delete:
             Delete delete = new Delete(Bytes.toBytes(rowKey));
-            delete.addColumn(colFamilyBytes, getFieldNameBytes(colName));
+            delete.addColumns(colFamilyBytes, getFieldNameBytes(colName));
             mutationList.add(delete);
+            break;
+          case Ignore:
+            // Do nothing
+            break;
+          }
         }
       }
     }
@@ -218,6 +231,7 @@ public class ToStringPutTransformer extends PutTransformer {
 
   @Override
   public void init(Configuration conf) {
+    nullMode = conf.getEnum(HBasePutProcessor.NULL_INCREMENTAL_MODE, SqoopOptions.HBaseNullIncrementalMode.Ignore);
     setColumnFamily(conf.get(COL_FAMILY_KEY, null));
     setRowKeyColumn(conf.get(ROW_KEY_COLUMN_KEY, null));
 
