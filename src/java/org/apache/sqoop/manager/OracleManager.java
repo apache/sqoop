@@ -649,7 +649,7 @@ public class OracleManager
 
   @Override
   protected String getCurTimestampQuery() {
-    return "SELECT SYSDATE FROM dual";
+    return "SELECT CURRENT_TIMESTAMP FROM dual";
   }
 
   @Override
