@@ -30,20 +30,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-<<<<<<< HEAD
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
-=======
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.SqoopOptions.InvalidOptionsException;
-import com.cloudera.sqoop.cli.ToolOptions;
-import com.cloudera.sqoop.testutil.BaseSqoopTestCase;
 import org.junit.rules.ExpectedException;
->>>>>>> Updated unit tests and used helper classes
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
