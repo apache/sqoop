@@ -24,6 +24,8 @@ import org.apache.commons.el.IntegerLiteral;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
+import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.lib.SqoopRecord;
 
 import java.io.ByteArrayOutputStream;
@@ -105,9 +107,6 @@ public class MainframeDatasetBinaryRecord extends SqoopRecord {
     return field.hashCode();
   }
 
-  public void loadLargeObjects(LargeObjectLoader loader) {
-  }
-
   public void parse(CharSequence s) {
   }
 
@@ -124,5 +123,10 @@ public class MainframeDatasetBinaryRecord extends SqoopRecord {
   }
 
   public void parse(CharBuffer s) {
+  }
+
+  @Override
+  public void loadLargeObjects(LargeObjectLoader objLoader) throws SQLException, IOException, InterruptedException {
+
   }
 }
