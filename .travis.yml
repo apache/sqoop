@@ -9,6 +9,7 @@ cache:
   - $HOME/.ivy2
   - $HOME/.m2
 
+install: ulimit -n
 script: ant clean test
 after_failure:
   - cat ./build/test/TEST-org.apache.sqoop.hive.TestHiveMiniCluster.txt
