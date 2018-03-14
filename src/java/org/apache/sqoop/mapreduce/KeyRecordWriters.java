@@ -58,10 +58,6 @@ public class KeyRecordWriters<K,V> {
    */
   public static class BinaryKeyRecordWriter<K, V> extends GenericRecordWriter<K, V> {
 
-    private static final String UTF8 = "UTF-8";
-
-    protected DataOutputStream out;
-
     public BinaryKeyRecordWriter(DataOutputStream out) {
       this.out = out;
     }
