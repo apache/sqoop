@@ -85,7 +85,7 @@ public class DataDrivenImportJob extends ImportJobBase {
       job.setMapperClass(SqoopHCatUtilities.getImportMapperClass());
       return;
     }
-    if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(options.getMainframeFtpTransferMode())) {
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
       job.setOutputKeyClass(BytesWritable.class);
       job.setOutputValueClass(NullWritable.class);
       // this is required as code generated class assumes setField method takes String

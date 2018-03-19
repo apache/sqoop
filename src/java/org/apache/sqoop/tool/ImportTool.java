@@ -748,6 +748,10 @@ public class ImportTool extends BaseSqoopTool {
         .withDescription("Imports data to Parquet files")
         .withLongOpt(BaseSqoopTool.FMT_PARQUETFILE_ARG)
         .create());
+    importOpts.addOption(OptionBuilder
+      .withDescription("Imports data to Binary files")
+      .withLongOpt(BaseSqoopTool.FMT_BINARYFILE_ARG)
+      .create());
     importOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg().withDescription("Use 'n' map tasks to import in parallel")
         .withLongOpt(NUM_MAPPERS_ARG)
@@ -972,6 +976,10 @@ public class ImportTool extends BaseSqoopTool {
 
       if (in.hasOption(FMT_PARQUETFILE_ARG)) {
         out.setFileLayout(SqoopOptions.FileLayout.ParquetFile);
+      }
+
+      if (in.hasOption(FMT_BINARYFILE_ARG)) {
+        out.setFileLayout(SqoopOptions.FileLayout.BinaryFile);
       }
 
       if (in.hasOption(NUM_MAPPERS_ARG)) {
