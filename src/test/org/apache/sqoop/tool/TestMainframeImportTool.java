@@ -194,40 +194,26 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
   @Test
   public void testFtpTransferModeAscii() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
     String transferModeValue = "ascii";
-    String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-textfile" };
     configureAndValidateOptions(args);
-    String transferMode = sqoopOption.getMainframeFtpTransferMode();
-    assertEquals(transferMode,transferModeValue);
+    assertEquals(SqoopOptions.FileLayout.TextFile,sqoopOption.getFileLayout());
   }
   @Test
   public void testFtpTransferModeBinary() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
     String transferModeValue = "binary";
-    String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile" };
     configureAndValidateOptions(args);
-    String transferMode = sqoopOption.getMainframeFtpTransferMode();
-    assertEquals(transferMode,transferModeValue);
+    assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
   }
   @Test
   public void testFtpTransferModeDefaultsToAscii() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
-    String expectedTransferModeValue = "ascii";
     String[] args = new String[] { "--dataset", "mydatasetname" };
     configureAndValidateOptions(args);
-    String transferMode = sqoopOption.getMainframeFtpTransferMode();
-    assertEquals(transferMode,expectedTransferModeValue);
+    assertEquals(SqoopOptions.FileLayout.TextFile,sqoopOption.getFileLayout());
   }
 
   @Rule
   public final ExpectedException exception = ExpectedException.none();
-
-  @Test
-  public void testFtpTransferModeInvalid() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
-    String transferModeValue = "myinvalidvalue";
-    String[] args = new String[] { "--dataset", "mydatasetname", "--transfermode", transferModeValue };
-    exception.expect(InvalidOptionsException.class);
-    exception.expectMessage("--transfermode");
-    exception.expectMessage("invalid");
-    configureAndValidateOptions(args);
-  }
 
   private void configureAndValidateOptions(String[] args) throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
     mfImportTool.configureOptions((ToolOptions) toolOptions);

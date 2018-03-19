@@ -49,7 +49,7 @@ public class MainframeImportJob extends DataDrivenImportJob {
 
   @Override
   protected Class<? extends Mapper> getMapperClass() {
-    if (StringUtils.equalsIgnoreCase(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY,options.getMainframeFtpTransferMode())) {
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
       LOG.debug("Using MainframeDatasetBinaryImportMapper");
       return MainframeDatasetBinaryImportMapper.class;
     } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
@@ -72,9 +72,16 @@ public class MainframeImportJob extends DataDrivenImportJob {
     job.getConfiguration().set(
             MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE,
             options.getMainframeInputDatasetTape().toString());
-    job.getConfiguration().set(
-      MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
-      options.getMainframeFtpTransferMode());
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
+      job.getConfiguration().set(
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
+    } else {
+      job.getConfiguration().set(
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII);
+    }
+
   }
 
   @Override
