@@ -2484,6 +2484,7 @@ public class SqoopOptions implements Cloneable {
 	  mainframeInputDatasetTape = Boolean.valueOf(Boolean.parseBoolean(txtIsFromTape)).toString();
   }
 
+/*
   // gets the FTP transfer mode
   public String getMainframeFtpTransferMode() {
     return mainframeFtpTransferMode;
@@ -2493,6 +2494,7 @@ public class SqoopOptions implements Cloneable {
   public void setMainframeFtpTransferMode(String transferMode) {
     mainframeFtpTransferMode = transferMode;
   }
+*/
 
   public static String getAccumuloHomeDefault() {
     // Set this with $ACCUMULO_HOME, but -Daccumulo.home can override.

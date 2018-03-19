@@ -72,10 +72,6 @@ public class MainframeImportTool extends ImportTool {
     		.hasArg().withDescription("Dataset is on tape (true|false)")
     		.withLongOpt(DS_TAPE_ARG)
     		.create());
-    importOpts.addOption(OptionBuilder.withArgName("Binary FTP transfer mode")
-      .withDescription("Binary FTP transfer mode")
-      .withLongOpt(BINARY_FTP_ARG)
-      .create());
     addValidationOpts(importOpts);
 
     importOpts.addOption(OptionBuilder.withArgName("dir")
@@ -86,6 +82,10 @@ public class MainframeImportTool extends ImportTool {
         .withDescription("Imports data as plain text (default)")
         .withLongOpt(FMT_TEXTFILE_ARG)
         .create());
+    importOpts.addOption(OptionBuilder
+      .withDescription("Imports data as plain text (default)")
+      .withLongOpt(FMT_BINARYFILE_ARG)
+      .create());
     importOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg().withDescription("Use 'n' map tasks to import in parallel")
         .withLongOpt(NUM_MAPPERS_ARG)
@@ -172,7 +172,7 @@ public class MainframeImportTool extends ImportTool {
     	// set default tape value to false
     	out.setMainframeInputDatasetTape("false");
     }
-    if (in.hasOption(BINARY_FTP_ARG)) {
+    if (in.hasOption(FMT_BINARYFILE_ARG)) {
       out.setMainframeFtpTransferMode(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
       out.setFileLayout(SqoopOptions.FileLayout.BinaryFile);
     } else {
@@ -202,14 +202,9 @@ public class MainframeImportTool extends ImportTool {
 		throw new InvalidOptionsException(
 				"--" + DS_TAPE_ARG + " specified is invalid. " + HELP_STR);
 	}
-    // check if transfer mode is either "ascii" or "binary"
-    String ftpTransferMode = options.getMainframeFtpTransferMode();
-    if (ftpTransferMode != null) {
-      if (!StringUtils.equalsIgnoreCase(ftpTransferMode,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII)
-        && !StringUtils.equalsIgnoreCase(ftpTransferMode,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY)) {
-        throw new InvalidOptionsException(
-          "--" + BINARY_FTP_ARG + " specified is invalid. " + HELP_STR);
-      }
+    /* only allow FileLayout.BinaryFile to be selected for mainframe import */
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout()) && options.getMainframeInputDatasetName() == null || options.getMainframeInputDatasetName().equals("")) {
+      throw new InvalidOptionsException("--as-binaryfile should only be used with import-mainframe module.");
     }
     super.validateImportOptions(options);
   }
