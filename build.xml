@@ -709,7 +709,7 @@
     <!-- use ant test -DremoteDebug=true to enable remote debugging -->
     <condition property="remoteDebugJvmArgs"
                value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=2601"
-               else="-Dsqoop.placeholderJvmProperty=true">
+               else="-ea">
       <istrue value="${remoteDebug}"/>
     </condition>
     <delete dir="${test.log.dir}"/>
@@ -731,6 +731,12 @@
       timeout="${test.timeout}"
       dir="${build.test}/data">
 
+      <!-- enable asserts in tests -->
+      <jvmarg value="-ea" />
+      
+      <!-- We need to disable asserts in HadoopThriftAuthBridge to be able to run HiveMiniCluster tests. -->
+      <jvmarg value="-da:org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge" />
+      
       <jvmarg value="${remoteDebugJvmArgs}"/>
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>
