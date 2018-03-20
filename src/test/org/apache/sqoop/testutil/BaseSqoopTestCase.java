@@ -42,7 +42,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Objects;
 
 import static org.junit.Assert.fail;
 
@@ -332,11 +331,9 @@ public abstract class BaseSqoopTestCase {
                                                  String[] colNames,
                                                  String[] colTypes,
                                                  String[] vals) {
-    Objects.requireNonNull(colNames);
-    Objects.requireNonNull(colTypes);
-    if (colNames.length != colTypes.length) {
-      throw new IllegalArgumentException("The length of the colNames and colTypes arrays have to be equal!");
-    }
+    assert colNames != null;
+    assert colTypes != null;
+    assert colNames.length == colTypes.length;
 
     Connection conn = null;
     PreparedStatement statement = null;
@@ -431,10 +428,8 @@ public abstract class BaseSqoopTestCase {
   }
 
   protected void insertIntoTable(String[] columns, String[] colTypes, String[] vals) {
-    Objects.requireNonNull(colTypes);
-    if (colTypes.length != vals.length) {
-      throw new IllegalArgumentException("The length of the colTypes and vals arrays have to be equal!");
-    }	
+    assert colTypes != null;
+    assert colTypes.length == vals.length;
 
     Connection conn = null;
     PreparedStatement statement = null;
@@ -504,13 +499,12 @@ public abstract class BaseSqoopTestCase {
 
   /**
    * update a table with a set of columns values for a given row.
+   * @param colTypes the types of the columns to make
    * @param vals the SQL text for each value to insert
    */
-  protected void updateTable(String[] vals) {
-    Objects.requireNonNull(colNames);
-    if (colNames.length != vals.length) {
-      throw new IllegalArgumentException("The length of the colNames and vals arrays have to be equal!");
-    }
+  protected void updateTable(String[] colTypes, String[] vals) {
+    assert colNames != null;
+    assert colNames.length == vals.length;
 
     Connection conn = null;
     PreparedStatement statement = null;

@@ -35,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -150,10 +149,10 @@ public class TestSqoopJobDataPublisher extends ImportJobTestCase {
         String [] vals = { "'test'", "42", "'somestring'" };
         runImportTest(TABLE_NAME, types, vals, "normalImport.q",
                 getArgv(false, null), new ImportTool());
-        assertEquals("NORMAL_HIVE_IMPORT", DummyDataPublisher.hiveTable);
-        assertEquals("NORMAL_HIVE_IMPORT", DummyDataPublisher.storeTable);
-        assertEquals("hsqldb", DummyDataPublisher.storeType);
-        assertEquals("import", DummyDataPublisher.operation);
+        assert (DummyDataPublisher.hiveTable.equals("NORMAL_HIVE_IMPORT"));
+        assert (DummyDataPublisher.storeTable.equals("NORMAL_HIVE_IMPORT"));
+        assert (DummyDataPublisher.storeType.equals("hsqldb"));
+        assert (DummyDataPublisher.operation.equals("import"));
     }
 
 }

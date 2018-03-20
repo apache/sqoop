@@ -62,7 +62,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -1027,9 +1026,9 @@ public class HCatalogImportTest extends ImportJobTestCase {
     cfgParams.add(ConfigurationConstants.DATA_PUBLISH_CLASS + "=" + DummyDataPublisher.class.getName());
     setConfigParams(cfgParams);
     runHCatQueryImport(new ArrayList<String>(), TOTAL_RECORDS, table, cols, null);
-    assertEquals("hsqldb", DummyDataPublisher.storeType);
-    assertEquals("import", DummyDataPublisher.operation);
-    assertEquals(getTableName(), DummyDataPublisher.storeTable);
+    assert (DummyDataPublisher.storeType.equals("hsqldb"));
+    assert (DummyDataPublisher.operation.equals("import"));
+    assert (DummyDataPublisher.storeTable.equals(getTableName()));
   }
 
   @Test
@@ -1053,9 +1052,9 @@ public class HCatalogImportTest extends ImportJobTestCase {
     setExtraArgs(addlArgsArray);
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true, false);
-    assertEquals("hsqldb", DummyDataPublisher.storeType);
-    assertEquals("import", DummyDataPublisher.operation);
-    assertEquals(getTableName(), DummyDataPublisher.storeTable);
+    assert (DummyDataPublisher.storeType.equals("hsqldb"));
+    assert (DummyDataPublisher.operation.equals("import"));
+    assert (DummyDataPublisher.storeTable.equals(getTableName()));
   }
 
   @Test

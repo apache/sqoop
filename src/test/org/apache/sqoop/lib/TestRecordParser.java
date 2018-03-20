@@ -54,6 +54,9 @@ public class TestRecordParser {
       return; // ok. Both null; nothing to do.
     }
 
+    assert(null != expected);
+    assert(null != actual);
+
     int expectedLen = expected.size();
     int actualLen = actual.size();
 

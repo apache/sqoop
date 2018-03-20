@@ -17,7 +17,6 @@
  */
 package org.apache.sqoop.hive;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import org.apache.sqoop.manager.ConnManager;
@@ -72,7 +71,7 @@ public class TestTableDefWriterForExternalTable {
     String stmt = tableDefWriter.getCreateTableStmt();
     Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
     LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-    assertTrue(isHiveExternalTableSet && stmt.contains("CREATE EXTERNAL TABLE ") && stmt.contains("LOCATION '" + hdfsTableDir));
+    assert (isHiveExternalTableSet && stmt.contains("CREATE EXTERNAL TABLE ") && stmt.contains("LOCATION '" + hdfsTableDir));
   }
 
   @Test
@@ -84,7 +83,7 @@ public class TestTableDefWriterForExternalTable {
     String stmt = tableDefWriter.getCreateTableStmt();
     Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
     LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-    assertTrue(!isHiveExternalTableSet && stmt.contains("CREATE TABLE "));
+    assert (!isHiveExternalTableSet && stmt.contains("CREATE TABLE "));
   }
 
   @Test
@@ -97,7 +96,7 @@ public class TestTableDefWriterForExternalTable {
     String stmt = tableDefWriter.getCreateTableStmt();
     Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
     LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-    assertTrue(isHiveExternalTableSet && stmt.contains("CREATE EXTERNAL TABLE IF NOT EXISTS") && stmt.contains("LOCATION '"
+    assert (isHiveExternalTableSet && stmt.contains("CREATE EXTERNAL TABLE IF NOT EXISTS") && stmt.contains("LOCATION '"
         + hdfsTableDir));
   }
 
@@ -110,7 +109,7 @@ public class TestTableDefWriterForExternalTable {
     String stmt = tableDefWriter.getCreateTableStmt();
     Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
     LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-    assertTrue(!isHiveExternalTableSet && stmt.contains("CREATE TABLE IF NOT EXISTS"));
+    assert (!isHiveExternalTableSet && stmt.contains("CREATE TABLE IF NOT EXISTS"));
   }
 
   @Test
@@ -122,6 +121,6 @@ public class TestTableDefWriterForExternalTable {
     String stmt = tableDefWriter.getLoadDataStmt();
     Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
     LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-    assertTrue(isHiveExternalTableSet && stmt.contains("LOAD DATA INPATH ") && stmt.contains(testTargetDir));
+    assert (isHiveExternalTableSet && stmt.contains("LOAD DATA INPATH ") && stmt.contains(testTargetDir));
   }
 }

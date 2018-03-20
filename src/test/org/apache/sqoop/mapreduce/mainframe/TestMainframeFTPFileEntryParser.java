@@ -28,8 +28,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-
 public class TestMainframeFTPFileEntryParser {
 	static List<String> listing;
 	static MainframeFTPFileEntryParser parser2;
@@ -65,7 +63,8 @@ xxx305 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD3
 
 	@Test
 	public void testMainframeFTPFileEntryParserString() {
-		new MainframeFTPFileEntryParser();
+		MainframeFTPFileEntryParser parser = new MainframeFTPFileEntryParser();
+		assert(parser != null);
 	}
 
 	@Test
@@ -78,6 +77,6 @@ xxx305 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD3
 				i++;
 			}
 		}
-		assertEquals(listing.size() - 1, i);
+		assert(i == listing.size()-1);
 	}
 }
