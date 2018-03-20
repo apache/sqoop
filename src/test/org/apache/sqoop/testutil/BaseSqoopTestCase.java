@@ -335,7 +335,7 @@ public abstract class BaseSqoopTestCase {
     Objects.requireNonNull(colNames);
     Objects.requireNonNull(colTypes);
     if (colNames.length != colTypes.length) {
-      throw new IllegalArgumentException("The length of colNames and colTypes arrays have to be equal!");
+      throw new IllegalArgumentException("The length of the colNames and colTypes arrays have to be equal!");
     }
 
     Connection conn = null;
@@ -431,9 +431,9 @@ public abstract class BaseSqoopTestCase {
   }
 
   protected void insertIntoTable(String[] columns, String[] colTypes, String[] vals) {
-	Objects.requireNonNull(colTypes);
+    Objects.requireNonNull(colTypes);
     if (colTypes.length != vals.length) {
-      throw new IllegalArgumentException("The length of colNames and vals arrays have to be equal!");
+      throw new IllegalArgumentException("The length of the colTypes and vals arrays have to be equal!");
     }	
 
     Connection conn = null;
@@ -509,9 +509,8 @@ public abstract class BaseSqoopTestCase {
   protected void updateTable(String[] vals) {
     Objects.requireNonNull(colNames);
     if (colNames.length != vals.length) {
-      throw new IllegalArgumentException("The length of colNames and vals arrays have to be equal!");
+      throw new IllegalArgumentException("The length of the colNames and vals arrays have to be equal!");
     }
-
 
     Connection conn = null;
     PreparedStatement statement = null;

@@ -72,29 +72,6 @@ public class HBaseImportTest extends HBaseTestCase {
   }
 
   @Test
-
-  @Test
-  public void testOverwriteNullColumnsSucceeds() throws IOException {
-    // Test that we can create a table and then import immediately
-    // back on top of it without problem and then update with null to validate
-    String [] argv = getArgv(true, "OverwriteTable", "OverwriteColumnFamily", true, null);
-    String [] types = { "INT", "INT", "INT", "DATETIME" };
-    String [] vals = { "0", "1", "1", "'2017-03-20'" };
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-    verifyHBaseCell("OverwriteTable", "0", "OverwriteColumnFamily", getColName(2), "1");
-    // Run a second time.
-    argv = getIncrementalArgv(true, "OverwriteTable", "OverwriteColumnFamily", true, null, false, false, "DATA_COL3", "2017-03-24 01:01:01.0", null);
-    vals = new String[] { "0", "1", null, "'2017-03-25'" };
-    updateTable(vals);
-    runImport(argv);
-    verifyHBaseCell("OverwriteTable", "0", "OverwriteColumnFamily", getColName(2), null);
-  }
-
-  @Test
-  }
-
-  @Test
   public void testAppendWithTimestampSucceeds() throws IOException {
     // Test that we can create a table and then import multiple rows
     // validate for append scenario with time stamp
@@ -162,12 +139,12 @@ public class HBaseImportTest extends HBaseTestCase {
     verifyHBaseCell("OverwriteTable", "0", "OverwriteColumnFamily", getColName(1), "1");
 
     // Run a second time after updating.
-    updateTable(types, new String[] { "0", "2", "'2017-03-25'" });
+    updateTable(new String[] { "0", "2", "'2017-03-25'" });
     runImport(getIncrementalArgv(true, "OverwriteTable", "OverwriteColumnFamily", true, null, false, false, getColName(2), "2017-03-24 01:01:01.0", null, nullMode));
     verifyHBaseCell("OverwriteTable", "0", "OverwriteColumnFamily", getColName(1), "2");
 
     // Run third time after deleting (setting to null)
-    updateTable(types, new String[] { "0", null, "'2017-03-28'" });
+    updateTable(new String[] { "0", null, "'2017-03-28'" });
     runImport(getIncrementalArgv(true, "OverwriteTable", "OverwriteColumnFamily", true, null, false, false, getColName(2), "2017-03-26 01:01:01.0", null, nullMode));
     verifyHBaseCell("OverwriteTable", "0", "OverwriteColumnFamily", getColName(1), expectedValue);
   }
