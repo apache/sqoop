@@ -40,9 +40,9 @@ import static org.mockito.Mockito.when;
 public class KerberizedConnectionFactoryDecoratorTest {
 
   private KerberizedConnectionFactoryDecorator kerberizedConnectionFactoryDecorator;
-
+  
   private KerberosAuthenticator kerberosAuthenticator;
-
+  
   private JdbcConnectionFactory decoratedFactory;
   
   private UserGroupInformation testUser;

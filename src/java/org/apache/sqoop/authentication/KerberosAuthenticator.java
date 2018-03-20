@@ -26,7 +26,7 @@ import java.io.IOException;
 public class KerberosAuthenticator {
 
   private final Configuration configuration;
-  
+
   private final String principal;
 
   private final String keytabLocation;

@@ -31,9 +31,16 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.FileOutputCommitter;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.Shell;
+import org.apache.hadoop.util.ToolRunner;
+import org.apache.hadoop.util.Tool;
+import org.apache.sqoop.io.CodecMap;
 import org.apache.sqoop.util.Executor;
 import org.apache.sqoop.util.LoggingAsyncSink;
 import org.apache.sqoop.util.SubprocessSecurityManager;
@@ -47,7 +54,7 @@ import org.apache.sqoop.util.ExitSecurityException;
  * to Hive itself as well as orchestrating the use of the other classes in this
  * package.
  */
-public class HiveImport implements HiveClient {
+public class HiveImport {
 
   public static final Log LOG = LogFactory.getLog(HiveImport.class.getName());
 
@@ -55,7 +62,6 @@ public class HiveImport implements HiveClient {
   private ConnManager connManager;
   private Configuration configuration;
   private boolean generateOnly;
-  private HiveClientCommon hiveClientCommon;
   private static boolean testMode = false;
 
   public static boolean getTestMode() {
@@ -71,17 +77,13 @@ public class HiveImport implements HiveClient {
       "org.apache.hadoop.hive.cli.CliDriver";
 
   public HiveImport(final SqoopOptions opts, final ConnManager connMgr,
-      final Configuration conf, final boolean generateOnly, final HiveClientCommon hiveClientCommon) {
+      final Configuration conf, final boolean generateOnly) {
     this.options = opts;
     this.connManager = connMgr;
     this.configuration = conf;
     this.generateOnly = generateOnly;
-    this.hiveClientCommon = hiveClientCommon;
   }
 
-  public HiveImport(SqoopOptions opts, ConnManager connMgr, Configuration conf, boolean generateOnly) {
-    this(opts, connMgr, conf, generateOnly, new HiveClientCommon());
-  }
 
   /**
    * @return the filename of the hive executable to run to do the import
@@ -109,11 +111,27 @@ public class HiveImport implements HiveClient {
   }
 
   /**
+   * If we used a MapReduce-based upload of the data, remove the _logs dir
+   * from where we put it, before running Hive LOAD DATA INPATH.
+   */
+  private void removeTempLogs(Path tablePath) throws IOException {
+    FileSystem fs = tablePath.getFileSystem(configuration);
+    Path logsPath = new Path(tablePath, "_logs");
+    if (fs.exists(logsPath)) {
+      LOG.info("Removing temporary files from import process: " + logsPath);
+      if (!fs.delete(logsPath, true)) {
+        LOG.warn("Could not delete temporary files; "
+            + "continuing with import, but it may fail.");
+      }
+    }
+  }
+
+  /**
    * @return true if we're just generating the DDL for the import, but
    * not actually running it (i.e., --generate-only mode). If so, don't
    * do any side-effecting actions in Hive.
    */
-  boolean isGenerateOnly() {
+  private boolean isGenerateOnly() {
     return generateOnly;
   }
 
@@ -163,6 +181,8 @@ public class HiveImport implements HiveClient {
     }
 
     // generate the HQL statements to run.
+    // reset the connection as it might have timed out
+    connManager.discardConnection(true);
     TableDefWriter tableWriter = new TableDefWriter(options, connManager,
         inputTableName, outputTableName,
         configuration, !debugMode);
@@ -171,10 +191,23 @@ public class HiveImport implements HiveClient {
     Path finalPath = tableWriter.getFinalPath();
 
     if (!isGenerateOnly()) {
-      hiveClientCommon.removeTempLogs(configuration, finalPath);
+      removeTempLogs(finalPath);
       LOG.info("Loading uploaded data into Hive");
 
-      hiveClientCommon.indexLzoFiles(options, finalPath);
+      String codec = options.getCompressionCodec();
+      if (codec != null && (codec.equals(CodecMap.LZOP)
+              || codec.equals(CodecMap.getCodecClassName(CodecMap.LZOP)))) {
+        try {
+          Tool tool = ReflectionUtils.newInstance(Class.
+                  forName("com.hadoop.compression.lzo.DistributedLzoIndexer").
+                  asSubclass(Tool.class), configuration);
+          ToolRunner.run(configuration, tool,
+              new String[] { finalPath.toString() });
+        } catch (Exception ex) {
+          LOG.error("Error indexing lzo files", ex);
+          throw new IOException("Error indexing lzo files", ex);
+        }
+      }
     }
 
     // write them to a script file.
@@ -209,7 +242,7 @@ public class HiveImport implements HiveClient {
 
         LOG.info("Hive import complete.");
 
-        hiveClientCommon.cleanUp(configuration, finalPath);
+        cleanUp(finalPath);
       }
     } finally {
       if (!isGenerateOnly()) {
@@ -220,6 +253,37 @@ public class HiveImport implements HiveClient {
           scriptFile.deleteOnExit();
         }
       }
+    }
+  }
+
+  /**
+   * Clean up after successful HIVE import.
+   *
+   * @param outputPath path to the output directory
+   * @throws IOException
+   */
+  private void cleanUp(Path outputPath) throws IOException {
+    FileSystem fs = outputPath.getFileSystem(configuration);
+
+    // HIVE is not always removing input directory after LOAD DATA statement
+    // (which is our export directory). We're removing export directory in case
+    // that is blank for case that user wants to periodically populate HIVE
+    // table (for example with --hive-overwrite).
+    try {
+      if (outputPath != null && fs.exists(outputPath)) {
+        FileStatus[] statuses = fs.listStatus(outputPath);
+        if (statuses.length == 0) {
+          LOG.info("Export directory is empty, removing it.");
+          fs.delete(outputPath, true);
+        } else if (statuses.length == 1 && statuses[0].getPath().getName().equals(FileOutputCommitter.SUCCEEDED_FILE_NAME)) {
+          LOG.info("Export directory is contains the _SUCCESS file only, removing the directory.");
+          fs.delete(outputPath, true);
+        } else {
+          LOG.info("Export directory is not empty, keeping it.");
+        }
+      }
+    } catch(IOException e) {
+      LOG.error("Issue with cleaning (safe to ignore)", e);
     }
   }
 
@@ -334,28 +398,5 @@ public class HiveImport implements HiveClient {
 
     return newArgs.toArray(new String[newArgs.size()]);
   }
-
-  @Override
-  public void importTable() throws IOException {
-    importTable(options.getTableName(), options.getHiveTableName(), false);
-  }
-
-  @Override
-  public void createTable() throws IOException {
-    importTable(options.getTableName(), options.getHiveTableName(), true);
-  }
-
-  SqoopOptions getOptions() {
-    return options;
-  }
-
-  ConnManager getConnManager() {
-    return connManager;
-  }
-
-  Configuration getConfiguration() {
-    return configuration;
-  }
-
 }
 

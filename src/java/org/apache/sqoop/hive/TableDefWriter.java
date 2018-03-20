@@ -77,8 +77,6 @@ public class TableDefWriter {
     this.outputTableName = outputTable;
     this.configuration = config;
     this.commentsEnabled = withComments;
-    // reset the connection as it might have timed out
-    this.connManager.discardConnection(true);
   }
 
   private Map<String, Integer> externalColTypes;
@@ -313,28 +311,5 @@ public class TableDefWriter {
     return String.format("\\%03o", charNum);
   }
 
-  SqoopOptions getOptions() {
-    return options;
-  }
-
-  ConnManager getConnManager() {
-    return connManager;
-  }
-
-  Configuration getConfiguration() {
-    return configuration;
-  }
-
-  String getInputTableName() {
-    return inputTableName;
-  }
-
-  String getOutputTableName() {
-    return outputTableName;
-  }
-
-  boolean isCommentsEnabled() {
-    return commentsEnabled;
-  }
 }
 

@@ -105,7 +105,7 @@ public class DriverManagerJdbcConnectionFactoryTest {
 
     try (Connection connection = connectionFactory.createConnection()) {
       assertFalse(connection.isClosed());
-    } 
+    }
   }
 
 }

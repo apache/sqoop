@@ -726,17 +726,14 @@
     </copy>
     <junit
       printsummary="yes" showoutput="${test.output}"
-      haltonfailure="no" fork="yes" maxmemory="2048m"
+      haltonfailure="no" fork="yes" maxmemory="1024m"
       errorProperty="tests.failed" failureProperty="tests.failed"
       timeout="${test.timeout}"
       dir="${build.test}/data">
 
       <!-- enable asserts in tests -->
       <jvmarg value="-ea" />
-      
-      <!-- We need to disable asserts in HadoopThriftAuthBridge to be able to run HiveMiniCluster tests. -->
-      <jvmarg value="-da:org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge" />
-      
+
       <jvmarg value="${remoteDebugJvmArgs}"/>
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>

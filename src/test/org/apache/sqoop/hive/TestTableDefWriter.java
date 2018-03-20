@@ -23,18 +23,15 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.util.SqlTypeMap;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mockito;
 
 import java.sql.Types;
 
@@ -52,16 +49,9 @@ public class TestTableDefWriter {
   public static final Log LOG = LogFactory.getLog(
       TestTableDefWriter.class.getName());
 
-  private ConnManager connManager;
-  
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  @Before
-  public void before() {
-    connManager = Mockito.mock(ConnManager.class);
-  }
-  
   // Test getHiveOctalCharCode and expect an IllegalArgumentException.
   private void expectExceptionInCharCode(int charCode) {
     thrown.expect(IllegalArgumentException.class);
@@ -85,7 +75,7 @@ public class TestTableDefWriter {
   public void testDifferentTableNames() throws Exception {
     Configuration conf = new Configuration();
     SqoopOptions options = new SqoopOptions();
-    TableDefWriter writer = new TableDefWriter(options, connManager,
+    TableDefWriter writer = new TableDefWriter(options, null,
         "inputTable", "outputTable", conf, false);
 
     Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
@@ -114,7 +104,7 @@ public class TestTableDefWriter {
     SqoopOptions options = new SqoopOptions();
     // Specify a different target dir from input table name
     options.setTargetDir(targetDir);
-    TableDefWriter writer = new TableDefWriter(options, connManager,
+    TableDefWriter writer = new TableDefWriter(options, null,
         inputTable, outputTable, conf, false);
 
     Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
@@ -143,7 +133,7 @@ public class TestTableDefWriter {
     SqoopOptions options =
       new ImportTool().parseArguments(args, null, null, false);
     TableDefWriter writer = new TableDefWriter(options,
-        connManager, "inputTable", "outputTable", conf, false);
+        null, "inputTable", "outputTable", conf, false);
 
     Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     writer.setColumnTypes(colTypes);
@@ -170,7 +160,7 @@ public class TestTableDefWriter {
     SqoopOptions options =
       new ImportTool().parseArguments(args, null, null, false);
     TableDefWriter writer = new TableDefWriter(options,
-        connManager, "inputTable", "outputTable", conf, false);
+        null, "inputTable", "outputTable", conf, false);
 
     Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     writer.setColumnTypes(colTypes);
@@ -198,7 +188,7 @@ public class TestTableDefWriter {
     SqoopOptions options =
       new ImportTool().parseArguments(args, null, null, false);
     TableDefWriter writer = new TableDefWriter(options,
-        connManager, HsqldbTestServer.getTableName(), "outputTable", conf, false);
+        null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
 
     Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     colTypes.put("id", Types.INTEGER);
@@ -226,7 +216,7 @@ public class TestTableDefWriter {
     SqoopOptions options =
         new ImportTool().parseArguments(args, null, null, false);
     TableDefWriter writer = new TableDefWriter(options,
-        connManager, HsqldbTestServer.getTableName(), "outputTable", conf, false);
+        null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
 
     Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     colTypes.put("id", Types.INTEGER);
@@ -262,7 +252,7 @@ public class TestTableDefWriter {
     SqoopOptions options =
       new ImportTool().parseArguments(args, null, null, false);
     TableDefWriter writer = new TableDefWriter(options,
-        connManager, HsqldbTestServer.getTableName(), "outputTable", conf, false);
+        null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
 
     Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     colTypes.put("id", Types.INTEGER);
@@ -282,7 +272,7 @@ public class TestTableDefWriter {
     SqoopOptions options =
       new ImportTool().parseArguments(args, null, null, false);
     TableDefWriter writer = new TableDefWriter(options,
-        connManager, HsqldbTestServer.getTableName(), "outputTable", conf, false);
+        null, HsqldbTestServer.getTableName(), "outputTable", conf, false);
 
     Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
     writer.setColumnTypes(colTypes);

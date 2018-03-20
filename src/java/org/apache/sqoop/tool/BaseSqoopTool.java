@@ -18,8 +18,6 @@
 
 package org.apache.sqoop.tool;
 
-import static java.lang.String.format;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -133,9 +131,6 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
   public static final String HCATALOG_STORAGE_STANZA_ARG =
     "hcatalog-storage-stanza";
   public static final String HCATALOG_HOME_ARG = "hcatalog-home";
-  public static final String HS2_URL_ARG = "hs2-url";
-  public static final String HS2_USER_ARG = "hs2-user";
-  public static final String HS2_KEYTAB_ARG = "hs2-keytab";
   public static final String MAPREDUCE_JOB_NAME = "mapreduce-job-name";
   public static final String NUM_MAPPERS_ARG = "num-mappers";
   public static final String NUM_MAPPERS_SHORT_ARG = "m";
@@ -613,21 +608,6 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
         .withDescription("Override mapping for specific column to hive"
           + " types.")
         .withLongOpt(MAP_COLUMN_HIVE)
-        .create());
-    hiveOpts.addOption(OptionBuilder
-        .hasArg()
-        .withDescription("The URL to the HiveServer2.")
-        .withLongOpt(HS2_URL_ARG)
-        .create());
-    hiveOpts.addOption(OptionBuilder
-        .hasArg()
-        .withDescription("The user/principal for HiveServer2.")
-        .withLongOpt(HS2_USER_ARG)
-        .create());
-    hiveOpts.addOption(OptionBuilder
-        .hasArg()
-        .withDescription("The location of the keytab of the HiveServer2 user.")
-        .withLongOpt(HS2_KEYTAB_ARG)
         .create());
 
     return hiveOpts;
@@ -1258,15 +1238,6 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
    if (in.hasOption(HIVE_EXTERNAL_TABLE_LOCATION_ARG)) {
      out.setHiveExternalTableDir(in.getOptionValue(HIVE_EXTERNAL_TABLE_LOCATION_ARG));
    }
-   if (in.hasOption(HS2_URL_ARG)) {
-      out.setHs2Url(in.getOptionValue(HS2_URL_ARG));
-   }
-   if (in.hasOption(HS2_USER_ARG)) {
-      out.setHs2User(in.getOptionValue(HS2_USER_ARG));
-   }
-   if (in.hasOption(HS2_KEYTAB_ARG)) {
-      out.setHs2Keytab(in.getOptionValue(HS2_KEYTAB_ARG));
-   }
 
   }
 
@@ -1647,8 +1618,6 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
       throw new InvalidOptionsException("Importing to external Hive table requires --hive-import parameter to be set."
           + HELP_STR);
     }
-    
-    validateHS2Options(options);
   }
 
   protected void validateAccumuloOptions(SqoopOptions options)
@@ -1880,22 +1849,6 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
     if (m != null && options.isDirect() && !m.hasDirectConnector()) {
       throw new SqoopOptions.InvalidOptionsException(
           "Was called with the --direct option, but no direct connector available.");
-    }
-  }
-
-  protected void validateHS2Options(SqoopOptions options) throws SqoopOptions.InvalidOptionsException {
-    final String exceptionTemplate = "The %s option cannot be used without the %s option.";
-    
-    if (isSet(options.getHs2Url()) && !options.doHiveImport()) {
-      throw new InvalidOptionsException(format(exceptionTemplate, HS2_URL_ARG, HIVE_IMPORT_ARG));
-    }
-    
-    if (isSet(options.getHs2User()) && !isSet(options.getHs2Url())) {
-      throw  new InvalidOptionsException(format(exceptionTemplate, HS2_USER_ARG, HS2_URL_ARG));
-    }
-
-    if (isSet(options.getHs2Keytab()) && !isSet(options.getHs2User())) {
-      throw  new InvalidOptionsException(format(exceptionTemplate, HS2_KEYTAB_ARG, HS2_USER_ARG));
     }
   }
 }
