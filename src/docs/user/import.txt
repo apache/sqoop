@@ -257,7 +257,7 @@ username is +someuser+, then the import tool will write to
 the import with the +\--warehouse-dir+ argument. For example:
 
 ----
-$ sqoop import --connnect <connect-str> --table foo --warehouse-dir /shared \
+$ sqoop import --connect <connect-str> --table foo --warehouse-dir /shared \
     ...
 ----
 
@@ -266,7 +266,7 @@ This command would write to a set of files in the +/shared/foo/+ directory.
 You can also explicitly choose the target directory, like so:
 
 ----
-$ sqoop import --connnect <connect-str> --table foo --target-dir /dest \
+$ sqoop import --connect <connect-str> --table foo --target-dir /dest \
     ...
 ----
 
@@ -443,6 +443,27 @@ using the deflate (gzip) algorithm with the +-z+ or +\--compress+
 argument, or specify any Hadoop compression codec using the
 +\--compression-codec+ argument. This applies to SequenceFile, text,
 and Avro files.
+
+Enabling Logical Types in Avro and Parquet import for numbers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To enable the use of logical types in Sqoop's avro schema generation,
+i.e. used during both avro and parquet imports, one has to use the
+sqoop.avro.logical_types.decimal.enable flag. This is necessary if one
+wants to store values as decimals in the avro file format.
+
+Padding number types in avro import
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Certain databases, such as Oracle and Postgres store number and decimal
+values without padding. For example 1.5 in a column declared
+as NUMBER (20,5) is stored as is in Oracle, while the equivalent
+DECIMAL (20, 5) is stored as 1.50000 in an SQL server instance.
+This leads to a scale mismatch during avro import.
+
+To avoid this error, one can use the sqoop.avro.decimal_padding.enable flag
+to turn on padding with 0s. This flag has to be used together with the
+sqoop.avro.logical_types.decimal.enable flag set to true.
 
 Large Objects
 ^^^^^^^^^^^^^
@@ -776,4 +797,13 @@ rows copied into HDFS:
 ----
 $ sqoop import --connect jdbc:mysql://db.foo.com/corp \
     --table EMPLOYEES --validate
+----
+
+Enabling logical types in avro import and also turning on padding with 0s:
+
+----
+$ sqoop import -Dsqoop.avro.decimal_padding.enable=true -Dsqoop.avro.logical_types.decimal.enable=true
+    --connect $CON --username $USER --password $PASS --query "select * from table_name where \$CONDITIONS"
+    --target-dir hdfs://nameservice1//etl/target_path --as-avrodatafile --verbose -m 1
+
 ----

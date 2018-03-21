@@ -411,3 +411,13 @@ To switch back to the previous version of Hadoop 0.20, for example, run:
 ++++
 ant test -Dhadoopversion=20
 ++++
+
+== Building the documentation
+
+Building the documentation requires that you have toxml installed.
+Also, one needs to set the XML_CATALOG_FILES environment variable.
+
+++++
+export XML_CATALOG_FILES=/usr/local/etc/xml/catalog
+ant docs
+++++
