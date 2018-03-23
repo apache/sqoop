@@ -193,8 +193,7 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
       return;
     }
 
-    String servicePrincipal = kerberosConfigurationProvider.getTestPrincipal() + "@" + kerberosConfigurationProvider.getRealm();
-    HBaseKerberosUtils.setPrincipalForTesting(servicePrincipal);
+    HBaseKerberosUtils.setPrincipalForTesting(kerberosConfigurationProvider.getTestPrincipal());
     HBaseKerberosUtils.setKeytabFileForTesting(kerberosConfigurationProvider.getKeytabFilePath());
 
     Configuration configuration = hbaseTestUtil.getConfiguration();
@@ -202,7 +201,7 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
     UserGroupInformation.setConfiguration(configuration);
     configuration.setStrings(REGION_COPROCESSOR_CONF_KEY, TokenProvider.class.getName());
 
-    setupKerberosForHdfs(servicePrincipal, configuration);
+    setupKerberosForHdfs(kerberosConfigurationProvider.getTestPrincipal(), configuration);
   }
 
   private void setupKerberosForHdfs(String servicePrincipal, Configuration configuration) {
