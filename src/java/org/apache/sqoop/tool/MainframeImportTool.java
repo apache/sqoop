@@ -20,7 +20,6 @@ package org.apache.sqoop.tool;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.ToolRunner;
@@ -40,6 +39,7 @@ public class MainframeImportTool extends ImportTool {
   public static final String DS_ARG = "dataset";
   public static final String DS_TYPE_ARG = "datasettype";
   public static final String DS_TAPE_ARG = "tape";
+  public static final String BUFFERSIZE_ARG = "buffersize";
 
   public MainframeImportTool() {
     super("import-mainframe", false);
@@ -82,8 +82,12 @@ public class MainframeImportTool extends ImportTool {
         .withLongOpt(FMT_TEXTFILE_ARG)
         .create());
     importOpts.addOption(OptionBuilder
-      .withDescription("Imports data as plain text (default)")
+      .withDescription("Imports data as binary")
       .withLongOpt(FMT_BINARYFILE_ARG)
+      .create());
+    importOpts.addOption(OptionBuilder
+      .hasArg().withDescription("Sets buffer size for binary import (default=32kB)")
+      .withLongOpt(BUFFERSIZE_ARG)
       .create());
     importOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg().withDescription("Use 'n' map tasks to import in parallel")
@@ -178,6 +182,14 @@ public class MainframeImportTool extends ImportTool {
       // set default transfer mode to ascii
       out.setFileLayout(SqoopOptions.FileLayout.TextFile);
     }
+
+    if (in.hasOption(BUFFERSIZE_ARG)) {
+      // if we specify --buffersize set the buffer size
+      out.setBufferSize(in.getOptionValue(BUFFERSIZE_ARG));
+    } else {
+      // set the default buffer size to 32kB
+      out.setBufferSize(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE.toString());
+    }
   }
 
   @Override
@@ -205,6 +217,13 @@ public class MainframeImportTool extends ImportTool {
     if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout()) && options.getMainframeInputDatasetName() == null || options.getMainframeInputDatasetName().equals("")) {
       throw new InvalidOptionsException("--as-binaryfile should only be used with import-mainframe module.");
     }
+
+    // only allow buffer size to be set different to default when binary file is selected
+    // in any case, if --as-binaryfile isn't selected, --buffersize parameter is harmless
+    if (!SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout()) && !MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE.equals(options.getBufferSize())) {
+      throw new InvalidOptionsException("--buffersize should only be used with --as-binaryfile parameter.");
+    }
+
     super.validateImportOptions(options);
   }
 }
