@@ -76,6 +76,10 @@ public class MainframeImportJob extends DataDrivenImportJob {
       job.getConfiguration().set(
         MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
         MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
+      job.getConfiguration().setInt(
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE,
+        options.getBufferSize()
+      );
     } else {
       job.getConfiguration().set(
         MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,

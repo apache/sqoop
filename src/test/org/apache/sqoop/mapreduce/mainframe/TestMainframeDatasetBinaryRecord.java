@@ -58,6 +58,7 @@ public class TestMainframeDatasetBinaryRecord {
     when(ftp.changeWorkingDirectory(any(String.class))).thenReturn(true);
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,DATASET_NAME);
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,DATASET_TYPE);
+    conf.setInt(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE);
     mfDFTPRR.initialize(split, context, ftp, conf);
   }
 
@@ -80,12 +81,12 @@ public class TestMainframeDatasetBinaryRecord {
     MainframeDatasetBinaryRecord record = new MainframeDatasetBinaryRecord();
     try {
       when(is.read(any(byte[].class),anyInt(),anyInt()))
-        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER))
+        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE))
         .thenReturn(-1);
       when(ftp.completePendingCommand()).thenReturn(true);
       Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
-      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER.equals(((byte[])record.getFieldMap().values().iterator().next()).length));
+      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE.equals(((byte[])record.getFieldMap().values().iterator().next()).length));
     } catch (IOException ioe) {
       fail ("Got IOException: "+ ioe);
     }
@@ -115,13 +116,13 @@ public class TestMainframeDatasetBinaryRecord {
     MainframeDatasetBinaryRecord record = new MainframeDatasetBinaryRecord();
     try {
       when(is.read(any(byte[].class),anyInt(),anyInt()))
-        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER))
+        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE))
         .thenAnswer(returnSqoopRecord(10))
         .thenReturn(-1);
       when(ftp.completePendingCommand()).thenReturn(true);
       Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
-      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER.equals((((byte[])record.getFieldMap().values().iterator().next()).length)));
+      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE.equals((((byte[])record.getFieldMap().values().iterator().next()).length)));
       record = new MainframeDatasetBinaryRecord();
       Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
@@ -137,13 +138,13 @@ public class TestMainframeDatasetBinaryRecord {
     MainframeDatasetBinaryRecord record = new MainframeDatasetBinaryRecord();
     try {
       when(is.read(any(byte[].class),anyInt(),anyInt()))
-        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER/2))
-        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER/2))
+        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE /2))
+        .thenAnswer(returnSqoopRecord(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE /2))
         .thenReturn(-1);
       when(ftp.completePendingCommand()).thenReturn(true);
       Assert.assertTrue(mfDFTPRR.getNextBinaryRecord(record));
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
-      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER.equals((((byte[])record.getFieldMap().values().iterator().next()).length)));
+      Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE.equals((((byte[])record.getFieldMap().values().iterator().next()).length)));
       record = new MainframeDatasetBinaryRecord();
       Assert.assertFalse(mfDFTPRR.getNextBinaryRecord(record));
       Assert.assertNull((((byte[])record.getFieldMap().values().iterator().next())));

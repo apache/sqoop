@@ -2489,6 +2489,10 @@ public class SqoopOptions implements Cloneable {
   public void setMainframeInputDatasetTape(String txtIsFromTape) {
 	  mainframeInputDatasetTape = Boolean.valueOf(Boolean.parseBoolean(txtIsFromTape)).toString();
   }
+  // returns the buffer size set.
+  public Integer getBufferSize() {
+    return bufferSize;
+  }
 
 /*
   // gets the FTP transfer mode

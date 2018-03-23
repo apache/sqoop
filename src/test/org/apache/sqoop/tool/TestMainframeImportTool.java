@@ -212,8 +212,40 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     assertEquals(SqoopOptions.FileLayout.TextFile,sqoopOption.getFileLayout());
   }
 
+  @Test
+  public void testAsBinaryFileSetsCorrectFileLayoutAndDefaultBufferSize() throws ParseException, InvalidOptionsException {
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile" };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
+    assertEquals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE, sqoopOption.getBufferSize());
+  }
+
+  @Test
+  public void testSetBufferSize() throws ParseException, InvalidOptionsException {
+    Integer expectedBuffer = 1024;
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile", "--buffersize", expectedBuffer.toString() };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
+    assertEquals(expectedBuffer, sqoopOption.getBufferSize());
+  }
+
   @Rule
   public final ExpectedException exception = ExpectedException.none();
+
+  @Test
+  public void testBufferSizeWithoutBinaryThrowsException() throws ParseException, InvalidOptionsException {
+    Integer expectedBuffer = 1024;
+    String[] args = new String[] { "--buffersize", expectedBuffer.toString() };
+    exception.expect(InvalidOptionsException.class);
+    configureAndValidateOptions(args);
+  }
+
+  @Test
+  public void testInvalidBufferSizeThrowsNumberFormatException() throws ParseException, InvalidOptionsException {
+    String[] args = new String[] { "--buffersize", "invalidinteger" };
+    exception.expect(NumberFormatException.class);
+    configureAndValidateOptions(args);
+  }
 
   private void configureAndValidateOptions(String[] args) throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
     mfImportTool.configureOptions((ToolOptions) toolOptions);
