@@ -726,7 +726,7 @@
     </copy>
     <junit
       printsummary="yes" showoutput="${test.output}"
-      haltonfailure="no" fork="yes" maxmemory="1024m"
+      haltonfailure="no" fork="yes" maxmemory="5120m"
       errorProperty="tests.failed" failureProperty="tests.failed"
       timeout="${test.timeout}"
       dir="${build.test}/data">
