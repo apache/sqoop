@@ -419,7 +419,7 @@ public class TestParquetExport extends ExportJobTestCase {
   public void testParquetWithUpdateKey() throws IOException, SQLException {
     String[] argv = { "--update-key", "ID" };
     final int TOTAL_RECORDS = 1;
-    createParquetFile(0, TOTAL_RECORDS, null);
+    createParquetFile(0, TOTAL_RECORDS);
     createTableWithInsert();
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
     verifyExport(getMsgPrefix() + "0");
@@ -432,7 +432,7 @@ public class TestParquetExport extends ExportJobTestCase {
     final int TOTAL_RECORDS = 2;
     // ColumnGenerator gen = colGenerator("100",
     // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
-    createParquetFile(0, TOTAL_RECORDS, null);
+    createParquetFile(0, TOTAL_RECORDS);
     createTableWithInsert();
 
     thrown.expect(Exception.class);

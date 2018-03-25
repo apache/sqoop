@@ -474,7 +474,7 @@ public class TestAvroExport extends ExportJobTestCase {
     final int TOTAL_RECORDS = 2;
     // ColumnGenerator gen = colGenerator("100",
     // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
-    createAvroFile(0, TOTAL_RECORDS, null);
+    createAvroFile(0, TOTAL_RECORDS);
     createTableWithInsert();
 
     thrown.expect(Exception.class);
@@ -489,7 +489,7 @@ public class TestAvroExport extends ExportJobTestCase {
     final int TOTAL_RECORDS = 1;
     // ColumnGenerator gen = colGenerator("100",
     // Schema.create(Schema.Type.STRING), null, "VARCHAR(64)");
-    createAvroFile(0, TOTAL_RECORDS, null);
+    createAvroFile(0, TOTAL_RECORDS);
     createTableWithInsert();
     runExport(getArgv(true, 10, 10, newStrArray(argv, "-m", "" + 1)));
     verifyExport(getMsgPrefix() + "0");
