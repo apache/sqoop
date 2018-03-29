@@ -20,7 +20,6 @@ package org.apache.sqoop.hive;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Date;
 import java.text.DateFormat;
@@ -79,17 +78,6 @@ public class TableDefWriter {
     this.commentsEnabled = withComments;
   }
 
-  private Map<String, Integer> externalColTypes;
-
-  /**
-   * Set the column type map to be used.
-   * (dependency injection for testing; not used in production.)
-   */
-  public void setColumnTypes(Map<String, Integer> colTypes) {
-    this.externalColTypes = colTypes;
-    LOG.debug("Using test-controlled type map");
-  }
-
   /**
    * Get the column names to import.
    */
@@ -97,14 +85,6 @@ public class TableDefWriter {
     String [] colNames = options.getColumns();
     if (null != colNames) {
       return colNames; // user-specified column names.
-    } else if (null != externalColTypes) {
-      // Test-injection column mapping. Extract the col names from this.
-      ArrayList<String> keyList = new ArrayList<String>();
-      for (String key : externalColTypes.keySet()) {
-        keyList.add(key);
-      }
-
-      return keyList.toArray(new String[keyList.size()]);
     } else if (null != inputTableName) {
       return connManager.getColumnNames(inputTableName);
     } else {
@@ -119,16 +99,11 @@ public class TableDefWriter {
     Map<String, Integer> columnTypes;
     Properties userMapping = options.getMapColumnHive();
     Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
-    if (externalColTypes != null) {
-      // Use pre-defined column types.
-      columnTypes = externalColTypes;
+    // Get these from the database.
+    if (null != inputTableName) {
+      columnTypes = connManager.getColumnTypes(inputTableName);
     } else {
-      // Get these from the database.
-      if (null != inputTableName) {
-        columnTypes = connManager.getColumnTypes(inputTableName);
-      } else {
-        columnTypes = connManager.getColumnTypesForQuery(options.getSqlQuery());
-      }
+      columnTypes = connManager.getColumnTypesForQuery(options.getSqlQuery());
     }
 
     String [] colNames = getColumnNames();
