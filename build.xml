@@ -1390,7 +1390,7 @@
 
   <target name="report" depends="ivy-resolve-hadoop">
     <mkdir dir="build/report"/>
-    <ivy:report todir="build/report"/>
+    <ivy:report todir="build/report" xsl="false" />
   </target>
 
 </project>
