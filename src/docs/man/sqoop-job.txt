@@ -58,6 +58,11 @@ can also specify the metastore connect string here:
 --meta-connect (jdbc-uri)::
   Specifies the JDBC connect string used to connect to the metastore
 
+--meta-user::
+  Specify a jdbc connection username to a database. Default value is 'SA'
+
+--meta-password::
+  Specify a jdbc connection password to a database. Default value is empty string.
 
 Common options
 ~~~~~~~~~~~~~~
@@ -68,6 +73,29 @@ Common options
 --verbose::
   Print more information while working
 
+EXAMPLES
+--------
+
+Listing available jobs in the metastore:
+sqoop job --list --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password
+
+Creating a new job in the metastore:
+sqoop job --create myjob1 --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password -- import
+--connect jdbc:mysql://mysqlhost:3306/sqoop --username sqoop --password sqoop --table "TestTable" -m 1
+
+Executing an existing job:
+sqoop job --exec myjob1 --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password
+
+Showing the definition of an existing job:
+sqoop job --show myjob2 --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password
+
+Deleting an existing job:
+sqoop job --delete myjob1 --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password
 
 ENVIRONMENT
 -----------

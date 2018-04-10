@@ -151,10 +151,57 @@ filesystem other than your home directory.
 If you configure +sqoop.metastore.client.enable.autoconnect+ with the
 value +false+, then you must explicitly supply +\--meta-connect+.
 
+If the +--meta-connect+ option is present, then Sqoop will try to connect to the
++metastore+ database specified in this parameter value. It will use the username
+and password specified in the +--meta-username+ and +--meta-password+ parameters.
+If they are not present Sqoop will use empty username/password. If the database
+in the connection string is not supported then Sqoop will throw an exception.
+
+If the +--meta-connect+ parameter is not preset and the +sqoop.metastore.client.enable.autoconnect+
+configuration parameter is false (default value is true) then Sqoop will throw an error since
+there are no applicable +metastore+ implementations.
+
 Job data can be stored in MySql, PostgreSql, DB2, SqlServer, and Oracle with
 the +\--meta-connect+ argument. The +\--meta-username+ and +\--meta-password+ arguments are necessary
 if the database containing the saved jobs requires a username and password.
+In case of using any of these implementations, you have to ensure that the
+database is online and accessible when Sqoop tries to access them.
 
+Examples
+~~~~~~~~
+
+Listing available jobs in the metastore:
+----
+sqoop job --list --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password
+----
+
+Creating a new job in the metastore:
+----
+sqoop job --create myjob1 --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password -- import
+--connect jdbc:mysql://mysqlhost:3306/sqoop --username sqoop --password sqoop --table "TestTable" -m 1
+----
+
+Executing an existing job:
+----
+sqoop job --exec myjob1 --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password
+----
+
+Showing the definition of an existing job:
+----
+sqoop job --show myjob2 --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password
+----
+
+Deleting an existing job:
+----
+sqoop job --delete myjob1 --meta-connect jdbc:oracle:thin:@//myhost:1521/ORCLCDB
+--meta-username ms_user --meta-password ms_password
+----
+
+Using a Hsqldb:
 ----
 $ sqoop job --exec myjob --meta-connect jdbc:hsqldb:hsql://localhost:3000/ --meta-username *username* --meta-password *password*
 
@@ -240,13 +287,14 @@ The metastore is available over TCP/IP. The port is controlled by the
 +sqoop.metastore.server.port+ configuration parameter, and defaults to 16000.
 
 Clients should connect to the metastore by specifying
-+sqoop.metastore.client.autoconnect.url+ or +\--meta-connect+ with the
++sqoop.metastore.client.autoconnect.url+ or +\--meta-connect+ with a
 JDBC-URI string. For example,
 +jdbc:hsqldb:hsql://metaserver.example.com:16000/sqoop+.
 
-This metastore may be hosted on a machine within the Hadoop cluster, or
-elsewhere on the network.
-
+Alternatively, one can start an RDBMS to host the metastore and pass the
+connection parameters to Sqoop. This metastore may be hosted on a machine
+within the Hadoop cluster, or elsewhere in the network. Sqoop supports the
+following database implementations: MySql, Oracle, Postgresql, MSSql and DB2.
 
 +sqoop-merge+
 -------------
