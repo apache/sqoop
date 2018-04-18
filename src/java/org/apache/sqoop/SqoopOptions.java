@@ -449,6 +449,15 @@ public class SqoopOptions implements Cloneable {
   private String metaUsername;
   private String metaPassword;
 
+  @StoredAsProperty("hs2.url")
+  private String hs2Url;
+
+  @StoredAsProperty("hs2.user")
+  private String hs2User;
+
+  @StoredAsProperty("hs2.keytab")
+  private String hs2Keytab;
+
   public SqoopOptions() {
     initDefaults(null);
   }
@@ -2890,6 +2899,30 @@ public class SqoopOptions implements Cloneable {
 
   public void setMetaPassword(String metaPassword) {
     this.metaPassword = metaPassword;
+  }
+
+  public String getHs2Url() {
+    return hs2Url;
+  }
+
+  public void setHs2Url(String hs2Url) {
+    this.hs2Url = hs2Url;
+  }
+
+  public String getHs2User() {
+    return hs2User;
+  }
+
+  public void setHs2User(String hs2User) {
+    this.hs2User = hs2User;
+  }
+
+  public String getHs2Keytab() {
+    return hs2Keytab;
+  }
+
+  public void setHs2Keytab(String hs2Keytab) {
+    this.hs2Keytab = hs2Keytab;
   }
 
 }

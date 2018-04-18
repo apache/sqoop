@@ -734,6 +734,9 @@
       <!-- enable asserts in tests -->
       <jvmarg value="-ea" />
 
+      <!-- We need to disable asserts in HadoopThriftAuthBridge to be able to run HiveMiniCluster tests. -->
+      <jvmarg value="-da:org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge" />
+
       <jvmarg value="${remoteDebugJvmArgs}"/>
 
       <sysproperty key="test.build.data" value="${build.test}/data"/>

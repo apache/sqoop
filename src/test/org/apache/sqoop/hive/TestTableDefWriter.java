@@ -42,6 +42,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -246,6 +247,13 @@ public class TestTableDefWriter {
     String loadStmt = writer.getLoadDataStmt();
     assertNotNull(loadStmt);
     assertTrue(createTable.contains("`db`.`outputTable`"));
+  }
+
+  @Test
+  public void testGetCreateTableStmtDiscardsConnection() throws Exception {
+    writer.getCreateTableStmt();
+
+    verify(connManager).discardConnection(true);
   }
 
   private void setUpMockConnManager(String tableName, Map<String, Integer> typeMap) {

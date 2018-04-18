@@ -96,6 +96,7 @@ public class TableDefWriter {
    * @return the CREATE TABLE statement for the table to load into hive.
    */
   public String getCreateTableStmt() throws IOException {
+    resetConnManager();
     Map<String, Integer> columnTypes;
     Properties userMapping = options.getMapColumnHive();
     Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
@@ -286,5 +287,38 @@ public class TableDefWriter {
     return String.format("\\%03o", charNum);
   }
 
+  /**
+   * The JDBC connection owned by the ConnManager has been most probably opened when the import was started
+   * so it might have timed out by the time TableDefWriter methods are invoked which happens at the end of import.
+   * The task of this method is to discard the current connection held by ConnManager to make sure
+   * that TableDefWriter will have a working one.
+   */
+  private void resetConnManager() {
+    this.connManager.discardConnection(true);
+  }
+
+  SqoopOptions getOptions() {
+    return options;
+  }
+
+  ConnManager getConnManager() {
+    return connManager;
+  }
+
+  Configuration getConfiguration() {
+    return configuration;
+  }
+
+  String getInputTableName() {
+    return inputTableName;
+  }
+
+  String getOutputTableName() {
+    return outputTableName;
+  }
+
+  boolean isCommentsEnabled() {
+    return commentsEnabled;
+  }
 }
 

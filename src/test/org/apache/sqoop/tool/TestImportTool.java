@@ -23,7 +23,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -33,10 +32,10 @@ import static org.mockito.Mockito.when;
 import java.sql.Connection;
 
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
-import org.apache.sqoop.hive.HiveImport;
 import org.apache.avro.Schema;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;
+import org.apache.sqoop.hive.HiveClientFactory;
 import org.apache.sqoop.util.ExpectedLogMessage;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -75,7 +74,7 @@ public class TestImportTool {
     final String actualSchemaString = "actualSchema";
     final String errorMessage = "Import failed";
 
-    ImportTool importTool = spy(new ImportTool("import", mock(CodeGenTool.class), false));
+    ImportTool importTool = spy(new ImportTool("import", mock(CodeGenTool.class), false, mock(HiveClientFactory.class)));
 
     doReturn(true).when(importTool).init(any(SqoopOptions.class));
 
@@ -85,7 +84,7 @@ public class TestImportTool {
     when(actualSchema.toString()).thenReturn(actualSchemaString);
 
     AvroSchemaMismatchException expectedException = new AvroSchemaMismatchException(errorMessage, writtenWithSchema, actualSchema);
-    doThrow(expectedException).when(importTool).importTable(any(SqoopOptions.class), anyString(), any(HiveImport.class));
+    doThrow(expectedException).when(importTool).importTable(any(SqoopOptions.class));
 
     SqoopOptions sqoopOptions = mock(SqoopOptions.class);
     when(sqoopOptions.doHiveImport()).thenReturn(true);

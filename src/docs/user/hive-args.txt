@@ -43,5 +43,10 @@ Argument                      Description
                   Hive type for configured columns. If specify commas in\
                   this argument, use URL encoded keys and values, for example,\
                   use DECIMAL(1%2C%201) instead of DECIMAL(1, 1).
++\--hs2-url+                  The JDBC connection string to HiveServer2 as you would specify in Beeline. If you use this option with \
+                    --hive-import then Sqoop will try to connect to HiveServer2 instead of using Hive CLI.
++\--hs2-user+                 The user for creating the JDBC connection to HiveServer2. The default is the current OS user.
++\--hs2-keytab+               The path to the keytab file of the user connecting to HiveServer2. If you choose another \
+                       HiveServer2 user (with --hs2-user) then --hs2-keytab has to be also specified otherwise it can be omitted.
 --------------------------------------------------------------------------
 

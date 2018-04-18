@@ -30,7 +30,8 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
-import org.apache.sqoop.hive.HiveImport;
+import org.apache.sqoop.hive.HiveClient;
+import org.apache.sqoop.hive.HiveClientFactory;
 
 /**
  * Tool that creates a Hive table definition.
@@ -40,8 +41,15 @@ public class CreateHiveTableTool extends BaseSqoopTool {
   public static final Log LOG = LogFactory.getLog(
       CreateHiveTableTool.class.getName());
 
-  public CreateHiveTableTool() {
+  private final HiveClientFactory hiveClientFactory;
+
+  public CreateHiveTableTool(HiveClientFactory hiveClientFactory) {
     super("create-hive-table");
+    this.hiveClientFactory = hiveClientFactory;
+  }
+
+  public CreateHiveTableTool() {
+    this(new HiveClientFactory());
   }
 
   @Override
@@ -52,10 +60,8 @@ public class CreateHiveTableTool extends BaseSqoopTool {
     }
 
     try {
-      HiveImport hiveImport = new HiveImport(options, manager,
-          options.getConf(), false);
-      hiveImport.importTable(options.getTableName(),
-          options.getHiveTableName(), true);
+      HiveClient hiveClient = hiveClientFactory.createHiveClient(options, manager);
+      hiveClient.createTable();
     } catch (IOException ioe) {
       LOG.error("Encountered IOException running create table job: "
           + StringUtils.stringifyException(ioe));

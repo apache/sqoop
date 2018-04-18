@@ -35,11 +35,21 @@ omitted, Sqoop will generate a Hive script containing a +CREATE TABLE+
 operation defining your columns using Hive's types, and a +LOAD DATA INPATH+
 statement to move the data files into Hive's warehouse directory.
 
-The script will be executed by calling
+The script can be executed in two ways:
+
+- By the default the script will be executed by calling
 the installed copy of hive on the machine where Sqoop is run. If you have
 multiple Hive installations, or +hive+ is not in your +$PATH+, use the
 *+\--hive-home+* option to identify the Hive installation directory.
 Sqoop will use +$HIVE_HOME/bin/hive+ from here.
+
+- If the user specifies the *+\--hs2-url+* parameter then the script will
+ be sent to HiveServer2 through a JDBC connection. Note that the data itself
+ will not be transferred via the JDBC connection it is written directly to HDFS
+ just like in case of the default hive import. As HiveServer2 provides proper
+ authorization and auditing features it is recommended to use this instead of
+ the default. Currently only Kerberos authentication and text file format is
+ supported with this option.
 
 NOTE: This function is incompatible with +\--as-avrodatafile+ and
 +\--as-sequencefile+.
