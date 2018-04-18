@@ -92,26 +92,6 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
       PostgresqlImportTest.class.getName());
 
-  static final String HOST_URL = System.getProperty(
-    "sqoop.test.postgresql.connectstring.host_url",
-    "jdbc:postgresql://localhost/");
-  static final String DATABASE_USER = System.getProperty(
-    "sqoop.test.postgresql.username",
-    "sqooptest");
-  static final String DATABASE_NAME = System.getProperty(
-    "sqoop.test.postgresql.database",
-    "sqooptest");
-  static final String PASSWORD = System.getProperty(
-    "sqoop.test.postgresql.password");
-
-  static final String TABLE_NAME = "EMPLOYEES_PG";
-  static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_PG";
-  static final String SPECIAL_TABLE_NAME = "EMPLOYEES_PG's";
-  static final String DIFFERENT_TABLE_NAME = "DIFFERENT_TABLE";
-  static final String SCHEMA_PUBLIC = "public";
-  static final String SCHEMA_SPECIAL = "special";
-  static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
-
   protected Connection connection;
 
   @Override
@@ -119,24 +99,16 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     return false;
   }
 
-  public String quoteTableOrSchemaName(String tableName) {
-    return "\"" + tableName + "\"";
-  }
-
-  private String getDropTableStatement(String tableName, String schema) {
-    return "DROP TABLE IF EXISTS " + quoteTableOrSchemaName(schema) + "." + quoteTableOrSchemaName(tableName);
-  }
-
   @Before
   public void setUp() {
     super.setUp();
 
-    LOG.debug("Setting up another postgresql test: " + CONNECT_STRING);
+    LOG.debug("Setting up another postgresql test: " + PostgresqlTestUtil.CONNECT_STRING);
 
-    setUpData(TABLE_NAME, SCHEMA_PUBLIC, false);
-    setUpData(NULL_TABLE_NAME, SCHEMA_PUBLIC, true);
-    setUpData(SPECIAL_TABLE_NAME, SCHEMA_PUBLIC, false);
-    setUpData(DIFFERENT_TABLE_NAME, SCHEMA_SPECIAL, false);
+    setUpData(PostgresqlTestUtil.TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC, false);
+    setUpData(PostgresqlTestUtil.NULL_TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC, true);
+    setUpData(PostgresqlTestUtil.SPECIAL_TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC, false);
+    setUpData(PostgresqlTestUtil.DIFFERENT_TABLE_NAME, PostgresqlTestUtil.SCHEMA_SPECIAL, false);
 
     LOG.debug("setUp complete.");
   }
@@ -145,10 +117,10 @@ public class PostgresqlImportTest extends ImportJobTestCase {
   public void tearDown() {
     try {
       Statement stmt = connection.createStatement();
-      stmt.executeUpdate(getDropTableStatement(TABLE_NAME, SCHEMA_PUBLIC));
-      stmt.executeUpdate(getDropTableStatement(NULL_TABLE_NAME, SCHEMA_PUBLIC));
-      stmt.executeUpdate(getDropTableStatement(SPECIAL_TABLE_NAME, SCHEMA_PUBLIC));
-      stmt.executeUpdate(getDropTableStatement(DIFFERENT_TABLE_NAME, SCHEMA_SPECIAL));
+      stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(PostgresqlTestUtil.TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC));
+      stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(PostgresqlTestUtil.NULL_TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC));
+      stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(PostgresqlTestUtil.SPECIAL_TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC));
+      stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(PostgresqlTestUtil.DIFFERENT_TABLE_NAME, PostgresqlTestUtil.SCHEMA_SPECIAL));
     } catch (SQLException e) {
       LOG.error("Can't clean up the database:", e);
     }
@@ -165,9 +137,9 @@ public class PostgresqlImportTest extends ImportJobTestCase {
 
 
   public void setUpData(String tableName, String schema, boolean nullEntry) {
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING, tableName);
-    options.setUsername(DATABASE_USER);
-    options.setPassword(PASSWORD);
+    SqoopOptions options = new SqoopOptions(PostgresqlTestUtil.CONNECT_STRING, tableName);
+    options.setUsername(PostgresqlTestUtil.DATABASE_USER);
+    options.setPassword(PostgresqlTestUtil.PASSWORD);
 
     ConnManager manager = null;
     Statement st = null;
@@ -257,11 +229,11 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     args.add("--warehouse-dir");
     args.add(getWarehouseDir());
     args.add("--connect");
-    args.add(CONNECT_STRING);
+    args.add(PostgresqlTestUtil.CONNECT_STRING);
     args.add("--username");
-    args.add(DATABASE_USER);
+    args.add(PostgresqlTestUtil.DATABASE_USER);
     args.add("--password");
-    args.add(PASSWORD);
+    args.add(PostgresqlTestUtil.PASSWORD);
     args.add("--where");
     args.add("id > 1");
     args.add("-m");
@@ -328,7 +300,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
       "3,Fred,2009-01-23,15.0,false,marketing",
     };
 
-    doImportAndVerify(false, expectedResults, TABLE_NAME);
+    doImportAndVerify(false, expectedResults, PostgresqlTestUtil.TABLE_NAME);
   }
 
   @Test
@@ -338,21 +310,21 @@ public class PostgresqlImportTest extends ImportJobTestCase {
       "3,Fred,2009-01-23,15,FALSE,marketing",
     };
 
-    doImportAndVerify(true, expectedResults, TABLE_NAME);
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME);
   }
 
   @Test
   public void testListTables() throws IOException {
     SqoopOptions options = new SqoopOptions(new Configuration());
-    options.setConnectString(CONNECT_STRING);
-    options.setUsername(DATABASE_USER);
-    options.setPassword(PASSWORD);
+    options.setConnectString(PostgresqlTestUtil.CONNECT_STRING);
+    options.setUsername(PostgresqlTestUtil.DATABASE_USER);
+    options.setPassword(PostgresqlTestUtil.PASSWORD);
 
     ConnManager mgr = new PostgresqlManager(options);
     String[] tables = mgr.listTables();
     Arrays.sort(tables);
-    assertTrue(TABLE_NAME + " is not found!",
-        Arrays.binarySearch(tables, TABLE_NAME) >= 0);
+    assertTrue(PostgresqlTestUtil.TABLE_NAME + " is not found!",
+        Arrays.binarySearch(tables, PostgresqlTestUtil.TABLE_NAME) >= 0);
   }
 
   @Test
@@ -362,7 +334,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
         "3,Fred,2009-01-23,15.0,false,marketing",
     };
 
-    doImportAndVerify(false, expectedResults, SPECIAL_TABLE_NAME);
+    doImportAndVerify(false, expectedResults, PostgresqlTestUtil.SPECIAL_TABLE_NAME);
   }
 
   @Test
@@ -373,7 +345,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
        "--check-column", "start_date",
     };
 
-    doImportAndVerify(false, expectedResults, TABLE_NAME, extraArgs);
+    doImportAndVerify(false, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
   }
 
   @Test
@@ -384,7 +356,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
             "--check-column", "start_date",
     };
 
-    doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
   }
 
   @Test
@@ -395,7 +367,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
             "--check-column", "start_date",
     };
 
-    doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
 
     extraArgs = new String[] { "--incremental", "lastmodified",
             "--check-column", "start_date",
@@ -403,7 +375,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
             "--last-value", "2009-04-20"
     };
 
-    doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
   }
 
  @Test
@@ -414,10 +386,10 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     };
 
     String [] extraArgs = { "--",
-      "--schema", SCHEMA_SPECIAL,
+      "--schema", PostgresqlTestUtil.SCHEMA_SPECIAL,
     };
 
-    doImportAndVerify(false, expectedResults, DIFFERENT_TABLE_NAME, extraArgs);
+    doImportAndVerify(false, expectedResults, PostgresqlTestUtil.DIFFERENT_TABLE_NAME, extraArgs);
   }
 
   @Test
@@ -428,10 +400,10 @@ public class PostgresqlImportTest extends ImportJobTestCase {
     };
 
     String [] extraArgs = { "--",
-      "--schema", SCHEMA_SPECIAL,
+      "--schema", PostgresqlTestUtil.SCHEMA_SPECIAL,
     };
 
-    doImportAndVerify(true, expectedResults, DIFFERENT_TABLE_NAME, extraArgs);
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.DIFFERENT_TABLE_NAME, extraArgs);
   }
 
   @Test
@@ -447,7 +419,7 @@ public class PostgresqlImportTest extends ImportJobTestCase {
       "--null-non-string", "\\\\\\\\N",
     };
 
-    doImportAndVerify(true, expectedResults, NULL_TABLE_NAME, extraArgs);
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.NULL_TABLE_NAME, extraArgs);
   }
 
   @Test
@@ -463,6 +435,6 @@ public class PostgresqlImportTest extends ImportJobTestCase {
       "--boolean-false-string", "REAL_FALSE",
     };
 
-    doImportAndVerify(true, expectedResults, TABLE_NAME, extraArgs);
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
   }
 }

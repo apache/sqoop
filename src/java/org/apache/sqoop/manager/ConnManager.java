@@ -33,18 +33,18 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.avro.LogicalType;
-import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema.Type;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.sqoop.avro.AvroUtil;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
-import org.apache.sqoop.manager.SqlManager;
 import org.apache.sqoop.util.ExportException;
 import org.apache.sqoop.util.ImportException;
 
@@ -56,6 +56,8 @@ import org.apache.sqoop.util.ImportException;
 public abstract class ConnManager {
 
   public static final Log LOG = LogFactory.getLog(SqlManager.class.getName());
+
+  protected SqoopOptions options;
 
   /**
    * Return a list of all databases on a server.
@@ -226,14 +228,17 @@ public abstract class ConnManager {
 
   /**
    * Resolve a database-specific type to Avro logical data type.
-   * @param sqlType     sql type
-   * @return            avro type
+   * @param sqlType sql type
+   * @param precision
+   * @param scale
+   * @return avro type
    */
   public LogicalType toAvroLogicalType(int sqlType, Integer precision, Integer scale) {
+    Configuration conf = options.getConf();
     switch (sqlType) {
       case Types.NUMERIC:
       case Types.DECIMAL:
-        return LogicalTypes.decimal(precision, scale);
+        return AvroUtil.createDecimalType(precision, scale, conf);
       default:
         throw new IllegalArgumentException("Cannot convert SQL type "
             + sqlType + " to avro logical type");

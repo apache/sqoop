@@ -106,6 +106,16 @@ public final class ConfigurationConstants {
   public static final String PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL = "sqoop.avro.logical_types.decimal.enable";
 
   /**
+   * Default precision for avro schema
+   */
+  public static final String PROP_AVRO_DECIMAL_PRECISION = "sqoop.avro.logical_types.decimal.default.precision";
+
+  /**
+   * Default scale for avro schema
+   */
+  public static final String PROP_AVRO_DECIMAL_SCALE = "sqoop.avro.logical_types.decimal.default.scale";
+
+  /**
    * Enable padding for avro logical types (decimal support only).
    */
   public static final String PROP_ENABLE_AVRO_DECIMAL_PADDING = "sqoop.avro.decimal_padding.enable";

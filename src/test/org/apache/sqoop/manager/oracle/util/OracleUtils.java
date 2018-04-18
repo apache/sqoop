@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.testutil.SqlUtil;
 
 /**
  * Helper methods for Oracle testing.
@@ -69,7 +70,9 @@ public final class OracleUtils {
 
   /**
    * Drop a table if it exists.
+   * Use the executeStatement method in {@link SqlUtil} instead.
    */
+  @Deprecated
   public static void dropTable(String tableName, ConnManager manager)
       throws SQLException {
     Connection connection = null;
@@ -99,4 +102,5 @@ public final class OracleUtils {
     return "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName + "'; "
         + "exception when others then null; end;";
   }
+
 }

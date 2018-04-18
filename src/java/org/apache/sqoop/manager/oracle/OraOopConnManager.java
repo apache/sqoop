@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.avro.LogicalType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -647,5 +648,11 @@ public class OraOopConnManager extends GenericJdbcManager {
    */
   public boolean isDirectModeAccumuloSupported() {
     return true;
+  }
+
+  @Override
+  public LogicalType toAvroLogicalType(int sqlType, Integer precision, Integer scale) {
+    Configuration conf = options.getConf();
+    return OracleUtils.toAvroLogicalType(sqlType, precision, scale, conf);
   }
 }

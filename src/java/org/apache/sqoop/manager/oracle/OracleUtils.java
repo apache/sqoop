@@ -18,19 +18,28 @@
 
 package org.apache.sqoop.manager.oracle;
 
+import org.apache.avro.LogicalType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.avro.AvroUtil;
+import org.apache.sqoop.config.ConfigurationConstants;
+import org.apache.sqoop.config.ConfigurationHelper;
+
+import java.sql.Types;
 
 /**
  * Utility class for Oracle.
  *
  */
 public final class OracleUtils {
-    private static final String PERIOD_REGEX = "\\.";
-    private static final String PERIOD_DELIMITER = ".";
+  private static final String PERIOD_REGEX = "\\.";
 
-    public static boolean isOracleEscapingDisabled(Configuration conf) {
+  private static final String PERIOD_DELIMITER = ".";
+
+  private static final int SCALE_VALUE_NOT_SET = -127;
+
+  public static boolean isOracleEscapingDisabled(Configuration conf) {
       return conf.getBoolean(SqoopOptions.ORACLE_ESCAPING_DISABLED, true);
     }
 
@@ -76,4 +85,47 @@ public final class OracleUtils {
             return identifier;
         }
     }
+
+    public static LogicalType toAvroLogicalType(int sqlType, Integer precision, Integer scale, Configuration conf) {
+      switch (sqlType) {
+        case Types.NUMERIC:
+        case Types.DECIMAL:
+          // Negative scale means that there are a couple of zeros before the decimal point.
+          // We need to add it to precision as an offset because negative scales are not allowed in Avro.
+          if (scale < 0 && isValidScale(scale) && isValidPrecision(precision)) {
+            precision = precision - scale;
+            scale = 0;
+          }
+          Integer configuredScale = ConfigurationHelper.getIntegerConfigIfExists(
+              conf, ConfigurationConstants.PROP_AVRO_DECIMAL_SCALE);
+          if (!isValidScale(scale) && configuredScale == null) {
+            throw new RuntimeException("Invalid scale for Avro Schema. Please specify a default scale with the -D" +
+                ConfigurationConstants.PROP_AVRO_DECIMAL_SCALE + " flag to avoid this issue.");
+          }
+
+          // AvroUtil will take care of a precision that's 0.
+          return AvroUtil.createDecimalType(precision, scale, conf);
+        default:
+          throw new IllegalArgumentException("Cannot convert SQL type "
+              + sqlType + " to avro logical type");
+      }
+    }
+
+  /**
+   * When the scale is not set, Oracle returns it as -127
+   * @param scale
+   * @return
+   */
+  public static boolean isValidScale(Integer scale) {
+    return scale != SCALE_VALUE_NOT_SET;
+  }
+
+  /**
+   * Oracle returns 0 as precision if it's not set
+   * @param precision
+   * @return
+   */
+  public static boolean isValidPrecision(Integer precision) {
+    return precision >= 1;
+  }
 }

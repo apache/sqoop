@@ -465,6 +465,20 @@ To avoid this error, one can use the sqoop.avro.decimal_padding.enable flag
 to turn on padding with 0s. This flag has to be used together with the
 sqoop.avro.logical_types.decimal.enable flag set to true.
 
+Default precision and scale in avro import
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+All of the databases allow users to specify numeric columns without
+a precision or scale. While MS SQL and MySQL translate these into
+a valid precision and scale values, Oracle and Postgres don't.
+
+Therefore, when a table contains NUMBER in a table in Oracle or
+NUMERIC/DECIMAL in Postgres, one can specify a default precision and scale
+to be used in the avro schema by using the +sqoop.avro.logical_types.decimal.default.precision+
+and +sqoop.avro.logical_types.decimal.default.scale+ flags.
+Avro padding also has to be enabled, if the values are shorter than
+the specified default scale.
+
 Large Objects
 ^^^^^^^^^^^^^
 
@@ -803,6 +817,16 @@ Enabling logical types in avro import and also turning on padding with 0s:
 
 ----
 $ sqoop import -Dsqoop.avro.decimal_padding.enable=true -Dsqoop.avro.logical_types.decimal.enable=true
+    --connect $CON --username $USER --password $PASS --query "select * from table_name where \$CONDITIONS"
+    --target-dir hdfs://nameservice1//etl/target_path --as-avrodatafile --verbose -m 1
+
+----
+
+Enabling logical types in avro import and also turning on padding with 0s, while specifying default precision and scale as well:
+
+----
+$ sqoop import -Dsqoop.avro.decimal_padding.enable=true -Dsqoop.avro.logical_types.decimal.enable=true
+    -Dsqoop.avro.logical_types.decimal.default.precision=38 -Dsqoop.avro.logical_types.decimal.default.scale=10
     --connect $CON --username $USER --password $PASS --query "select * from table_name where \$CONDITIONS"
     --target-dir hdfs://nameservice1//etl/target_path --as-avrodatafile --verbose -m 1
 

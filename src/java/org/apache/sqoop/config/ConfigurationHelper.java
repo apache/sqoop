@@ -249,4 +249,13 @@ public final class ConfigurationHelper {
   private ConfigurationHelper() {
     // Disable explicit object creation
   }
+
+  public static Integer getIntegerConfigIfExists(Configuration conf, String key) {
+    Integer config = null;
+    String configString = conf.get(key, null);
+    if (configString != null) {
+      config = Integer.valueOf(configString);
+    }
+    return config;
+  }
 }

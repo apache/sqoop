@@ -37,11 +37,11 @@ public class MSSQLTestUtils {
   public static final Log LOG = LogFactory.getLog(
       MSSQLTestUtils.class.getName());
 
-  static final String DATABASE_USER = System.getProperty(
+  public static final String DATABASE_USER = System.getProperty(
           "ms.sqlserver.username", "SQOOPUSER");
-  static final String DATABASE_PASSWORD = System.getProperty(
+  public static final String DATABASE_PASSWORD = System.getProperty(
           "ms.sqlserver.password", "PASSWORD");
-  static final String DATABASE_NAME = System.getProperty(
+  public static final String DATABASE_NAME = System.getProperty(
       "sqoop.test.sqlserver.database",
       "sqooptest");
   public static final String HOST_URL = System.getProperty(

@@ -77,7 +77,6 @@ public abstract class SqlManager
 
   protected static final int DEFAULT_FETCH_SIZE = 1000;
 
-  protected SqoopOptions options;
   private Statement lastStatement;
 
   /**

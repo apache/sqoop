@@ -18,6 +18,7 @@
 package org.apache.sqoop.avro;
 
 import org.apache.avro.LogicalType;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
@@ -34,6 +35,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.sqoop.config.ConfigurationConstants;
+import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
 import org.apache.sqoop.orm.ClassWriter;
@@ -307,5 +310,34 @@ public final class AvroUtil {
     Schema result = fileReader.getSchema();
     fileReader.close();
     return result;
+  }
+
+  /**
+   * This method checks if the precision is an invalid value, i.e. smaller than 0 and
+   * if so, tries to overwrite precision and scale with the configured defaults from
+   * the configuration object. If a default precision is not defined, then throws an Exception.
+   *
+   * @param precision precision
+   * @param scale scale
+   * @param conf Configuration that contains the default values if the user specified them
+   * @return an avro decimal type, that can be added as a column type in the avro schema generation
+   */
+  public static LogicalType createDecimalType(Integer precision, Integer scale, Configuration conf) {
+    if (precision == null || precision <= 0) {
+      // we check if the user configured default precision and scale and use these values instead of invalid ones.
+      Integer configuredPrecision = ConfigurationHelper.getIntegerConfigIfExists(conf, ConfigurationConstants.PROP_AVRO_DECIMAL_PRECISION);
+      if (configuredPrecision != null) {
+        precision = configuredPrecision;
+      } else {
+        throw new RuntimeException("Invalid precision for Avro Schema. Please specify a default precision with the -D" +
+            ConfigurationConstants.PROP_AVRO_DECIMAL_PRECISION + " flag to avoid this issue.");
+      }
+      Integer configuredScale = ConfigurationHelper.getIntegerConfigIfExists(conf, ConfigurationConstants.PROP_AVRO_DECIMAL_SCALE);
+      if (configuredScale != null) {
+        scale = configuredScale;
+      }
+    }
+
+    return LogicalTypes.decimal(precision, scale);
   }
 }
