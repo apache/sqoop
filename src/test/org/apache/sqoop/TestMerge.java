@@ -48,13 +48,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.sqoop.util.ParquetReader;
 import org.junit.Before;
 import org.junit.Test;
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.Datasets;
 
-import static org.apache.avro.generic.GenericData.Record;
 import static org.junit.Assert.fail;
 
 /**
@@ -298,21 +295,11 @@ public class TestMerge extends BaseSqoopTestCase {
     return false;
   }
 
-  private boolean checkParquetFileForLine(FileSystem fileSystem, Path path, List<Integer> record) throws IOException
-  {
-    Dataset<Record> parquetRecords = Datasets.load("dataset:" + path.getParent(), Record.class);
-    DatasetReader<Record> datasetReader = null;
-    try {
-      datasetReader = parquetRecords.newReader();
-      for (GenericRecord genericRecord : datasetReader) {
-        if (valueMatches(genericRecord, record)) {
-          return true;
-        }
-      }
-    }
-    finally {
-      if (datasetReader != null) {
-        datasetReader.close();
+  private boolean checkParquetFileForLine(Path path, List<Integer> record) throws IOException {
+    List<GenericRecord> resultRecords = new ParquetReader(path.getParent()).readAll();
+    for (GenericRecord resultRecord : resultRecords) {
+      if (valueMatches(resultRecord, record)) {
+        return true;
       }
     }
 
@@ -330,7 +317,7 @@ public class TestMerge extends BaseSqoopTestCase {
         result = checkAvroFileForLine(fs, p, record);
         break;
       case ParquetFile:
-        result = checkParquetFileForLine(fs, p, record);
+        result = checkParquetFileForLine(p, record);
         break;
     }
     return result;

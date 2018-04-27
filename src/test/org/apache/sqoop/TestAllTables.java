@@ -23,12 +23,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.sqoop.util.ParquetReader;
 import org.junit.Before;
 import org.junit.After;
 
@@ -36,10 +36,8 @@ import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.ImportAllTablesTool;
 import org.junit.Test;
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.Datasets;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
@@ -180,7 +178,6 @@ public class TestAllTables extends ImportJobTestCase {
     int i = 0;
     for (String tableName : this.tableNames) {
       Path tablePath = new Path(warehousePath, tableName);
-      Dataset dataset = Datasets.load("dataset:file:" + tablePath);
 
       // dequeue the expected value for this table. This
       // list has the same order as the tableNames list.
@@ -188,16 +185,9 @@ public class TestAllTables extends ImportJobTestCase {
           + this.expectedStrings.get(0);
       this.expectedStrings.remove(0);
 
-      DatasetReader<GenericRecord> reader = dataset.newReader();
-      try {
-        GenericRecord record = reader.next();
-        String line = record.get(0) + "," + record.get(1);
-        assertEquals("Table " + tableName + " expected a different string",
-            expectedVal, line);
-        assertFalse(reader.hasNext());
-      } finally {
-        reader.close();
-      }
+      List<String> result = new ParquetReader(tablePath).readAllInCsv();
+      assertEquals("Table " + tableName + " expected a different string",
+          singletonList(expectedVal), result);
     }
   }
 
