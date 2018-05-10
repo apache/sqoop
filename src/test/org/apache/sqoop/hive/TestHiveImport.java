@@ -288,7 +288,7 @@ public class TestHiveImport extends ImportJobTestCase {
    * file. */
   @Test
   public void testNormalHiveImportAsParquet() throws IOException {
-    final String TABLE_NAME = "NORMAL_HIVE_IMPORT_AS_PARQUET";
+    final String TABLE_NAME = "normal_hive_import_as_parquet";
     setCurTableName(TABLE_NAME);
     setNumCols(3);
     String [] types = getTypes();
@@ -371,7 +371,7 @@ public class TestHiveImport extends ImportJobTestCase {
    */
   @Test
   public void testCreateOverwriteHiveImportAsParquet() throws IOException {
-    final String TABLE_NAME = "CREATE_OVERWRITE_HIVE_IMPORT_AS_PARQUET";
+    final String TABLE_NAME = "create_overwrite_hive_import_as_parquet";
     setCurTableName(TABLE_NAME);
     setNumCols(3);
     String [] types = getTypes();
@@ -430,7 +430,7 @@ public class TestHiveImport extends ImportJobTestCase {
    */
   @Test
   public void testAppendHiveImportAsParquet() throws IOException {
-    final String TABLE_NAME = "APPEND_HIVE_IMPORT_AS_PARQUET";
+    final String TABLE_NAME = "append_hive_import_as_parquet";
     setCurTableName(TABLE_NAME);
     setNumCols(3);
     String [] types = getTypes();
