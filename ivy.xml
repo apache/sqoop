@@ -87,9 +87,14 @@ under the License.
     <dependency org="commons-cli" name="commons-cli"
       rev="${commons-cli.version}" conf="common->default"/>
     <dependency org="commons-logging" name="commons-logging"
-      rev="${commons-logging.version}" conf="common->default"/>
+      rev="${commons-logging.version}" conf="common->default;redist->default"/>
     <dependency org="commons-net" name="commons-net"
       rev="${commons-net.version}" conf="common->default"/>
+    <dependency org="commons-pool" name="commons-pool"
+      rev="${commons-pool.version}" conf="common->default"/>
+    <dependency org="commons-codec" name="commons-codec"
+      rev="${commons-codec.version}" conf="common->default;redist->default"/>
+
     <dependency org="log4j" name="log4j" rev="${log4j.version}"
       conf="common->master" />
     <dependency org="junit" name="junit" rev="${junit.version}"
@@ -118,6 +123,12 @@ under the License.
       <exclude org="com.twitter" module="parquet-hive-bundle"/>
       <exclude org="org.apache.avro" module="avro" />
     </dependency>
+
+    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="${jackson-databind.version}"
+          conf="common->default;redist->default" />
+
+    <dependency org="org.slf4j" name="slf4j-api" rev="${slf4j.version}"
+                conf="common->default;redist->default" />
 
     <!-- dependencies for static analysis -->
     <dependency org="checkstyle" name="checkstyle" rev="${checkstyle.version}"
