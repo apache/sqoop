@@ -48,5 +48,7 @@ Argument                      Description
 +\--hs2-user+                 The user for creating the JDBC connection to HiveServer2. The default is the current OS user.
 +\--hs2-keytab+               The path to the keytab file of the user connecting to HiveServer2. If you choose another \
                        HiveServer2 user (with --hs2-user) then --hs2-keytab has to be also specified otherwise it can be omitted.
++\--external-table-dir+       Used to specify that the table is external, not managed. \
+                              Has to be specified with the +\--hive-import+ option.
 --------------------------------------------------------------------------
 

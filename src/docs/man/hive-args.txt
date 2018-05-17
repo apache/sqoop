@@ -39,3 +39,7 @@ Hive options
   Override default mapping for SQL types or input field types into Hive types for configured columns.
   If specify commas in this argument, use URL encoded keys and values, for example,
   use DECIMAL(1%2C1) instead of DECIMAL(1,1), NUMERIC(1%2C%202) instead of NUMERIC(1, 2).
+
+--external-table-dir::
+  Used to specify that the Hive table is an external one,
+  needs to be specified along with +\--hive-import+.

@@ -111,3 +111,18 @@ with this codec, Sqoop will automatically index the files for splitting and
 configuring a new Hive table with the correct InputFormat. This feature
 currently requires that all partitions of a table be compressed with the lzop
 codec.
+
+The user can specify the +\--external-table-dir+ option in the sqoop command to
+work with an external Hive table (instead of a managed table, i.e. the default behavior).
+To import data into an external table, one has to specify +\--hive-import+ in the command
+line arguments. Table creation is also supported with the use of +\--create-hive-table+.
+
+Importing into an external Hive table:
+----
+$ sqoop import --hive-import --connect $CONN --table $TABLENAME --username $USER --password $PASS --external-table-dir /tmp/external_table_example
+----
+
+Create an external Hive table:
+----
+$ sqoop import --hive-import --create-hive-table --connect $CONN --table $TABLENAME --username $USER --password $PASS --external-table-dir /tmp/foobar_example --hive-table foobar
+----
