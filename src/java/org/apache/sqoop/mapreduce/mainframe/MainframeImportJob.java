@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ImportJobContext;
 
+import org.apache.sqoop.mapreduce.BinaryKeyOutputFormat;
 import org.apache.sqoop.mapreduce.DataDrivenImportJob;
 import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
 
@@ -46,7 +47,10 @@ public class MainframeImportJob extends DataDrivenImportJob {
 
   @Override
   protected Class<? extends Mapper> getMapperClass() {
-    if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
+    if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(options.getMainframeFtpTransferMode())) {
+      LOG.debug("Using MainframeDatasetBinaryImportMapper");
+      return MainframeDatasetBinaryImportMapper.class;
+    } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       return MainframeDatasetImportMapper.class;
     } else {
       return super.getMapperClass();
@@ -66,13 +70,24 @@ public class MainframeImportJob extends DataDrivenImportJob {
     job.getConfiguration().set(
             MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE,
             options.getMainframeInputDatasetTape().toString());
+    job.getConfiguration().set(
+      MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+      options.getMainframeFtpTransferMode());
   }
 
   @Override
   protected void configureOutputFormat(Job job, String tableName,
       String tableClassName) throws ClassNotFoundException, IOException {
     super.configureOutputFormat(job, tableName, tableClassName);
-    LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
+    job.getConfiguration().set(
+      MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+      options.getMainframeFtpTransferMode());
+    if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(options.getMainframeFtpTransferMode())) {
+      LazyOutputFormat.setOutputFormatClass(job, BinaryKeyOutputFormat.class);
+    } else {
+      // use the default outputformat
+      LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
+    }
   }
 
 }
