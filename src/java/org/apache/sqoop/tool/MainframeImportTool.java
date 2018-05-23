@@ -39,7 +39,7 @@ public class MainframeImportTool extends ImportTool {
   public static final String DS_ARG = "dataset";
   public static final String DS_TYPE_ARG = "datasettype";
   public static final String DS_TAPE_ARG = "tape";
-  public static final String FTP_TRANSFER_MODE_ARG = "transfermode";
+  public static final String BINARY_FTP_ARG = "as-binaryfile";
 
   public MainframeImportTool() {
     super("import-mainframe", false);
@@ -72,8 +72,8 @@ public class MainframeImportTool extends ImportTool {
     		.withLongOpt(DS_TAPE_ARG)
     		.create());
     importOpts.addOption(OptionBuilder.withArgName("FTP transfer mode")
-      .hasArg().withDescription("FTP transfer mode (ascii=ASCII|binary=BINARY")
-      .withLongOpt(FTP_TRANSFER_MODE_ARG)
+      .withDescription("FTP transfer mode (ascii=ASCII|binary=BINARY")
+      .withLongOpt(BINARY_FTP_ARG)
       .create());
     addValidationOpts(importOpts);
 
@@ -171,11 +171,13 @@ public class MainframeImportTool extends ImportTool {
     	// set default tape value to false
     	out.setMainframeInputDatasetTape("false");
     }
-    if (in.hasOption(FTP_TRANSFER_MODE_ARG)) {
-      out.setMainframeFtpTransferMode(in.getOptionValue(FTP_TRANSFER_MODE_ARG));
+    if (in.hasOption(BINARY_FTP_ARG)) {
+      out.setMainframeFtpTransferMode(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
+      out.setFileLayout(SqoopOptions.FileLayout.BinaryFile);
     } else {
       // set default transfer mode to ascii
       out.setMainframeFtpTransferMode(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII);
+      out.setFileLayout(SqoopOptions.FileLayout.TextFile);
     }
   }
 
@@ -205,7 +207,7 @@ public class MainframeImportTool extends ImportTool {
       if (!ftpTransferMode.toLowerCase().equals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII)
         && !ftpTransferMode.toLowerCase().equals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY)) {
         throw new InvalidOptionsException(
-          "--" + FTP_TRANSFER_MODE_ARG + " specified is invalid. " + HELP_STR);
+          "--" + BINARY_FTP_ARG + " specified is invalid. " + HELP_STR);
       }
     }
     super.validateImportOptions(options);
