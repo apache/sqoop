@@ -82,12 +82,8 @@ public class MainframeImportJob extends DataDrivenImportJob {
     job.getConfiguration().set(
       MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
       options.getMainframeFtpTransferMode());
-    if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(options.getMainframeFtpTransferMode())) {
-      LazyOutputFormat.setOutputFormatClass(job, BinaryKeyOutputFormat.class);
-    } else {
-      // use the default outputformat
-      LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
-    }
+    // use the default outputformat
+    LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
   }
 
 }
