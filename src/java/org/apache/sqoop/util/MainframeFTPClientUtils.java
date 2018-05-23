@@ -208,7 +208,17 @@ public final class MainframeFTPClientUtils {
             + ":" + ftp.getReplyString());
       }
       // set ASCII transfer mode
-      ftp.setFileType(FTP.ASCII_FILE_TYPE);
+      String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
+      if (transferMode != null && MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(transferMode.toLowerCase())) {
+        LOG.info("Setting FTP transfer mode to binary");
+        // ftp.setFileTransferMode(FTP.BINARY_FILE_TYPE) doesn't work for MVS, it throws a syntax error
+        ftp.sendCommand("TYPE I");
+        // this is IMPORTANT - otherwise it will convert 0x0d0a to 0x0a = dropping bytes
+        ftp.setFileType(FTP.BINARY_FILE_TYPE);
+      } else {
+        LOG.info("Defaulting FTP transfer mode to ascii");
+        ftp.setFileTransferMode(FTP.ASCII_FILE_TYPE);
+      }
       // Use passive mode as default.
       ftp.enterLocalPassiveMode();
       LOG.info("System type detected: " + ftp.getSystemType());

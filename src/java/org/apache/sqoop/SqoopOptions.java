@@ -359,7 +359,9 @@ public class SqoopOptions implements Cloneable {
   // Indicates if the data set is on tape to use different FTP parser
   @StoredAsProperty("mainframe.input.dataset.tape")
   private String mainframeInputDatasetTape;
-
+  // Indicates if binary or ascii FTP transfer mode should be used
+  @StoredAsProperty("mainframe.ftp.transfermode")
+  private String mainframeFtpTransferMode;
   // Accumulo home directory
   private String accumuloHome; // not serialized to metastore.
   // Zookeeper home directory
@@ -2477,6 +2479,18 @@ public class SqoopOptions implements Cloneable {
   // sets whether the dataset is on tape
   public void setMainframeInputDatasetTape(String txtIsFromTape) {
 	  mainframeInputDatasetTape = Boolean.valueOf(Boolean.parseBoolean(txtIsFromTape)).toString();
+  }
+
+  // gets the FTP transfer mode
+  public String getMainframeFtpTransferMode() {
+    // set default transfer mode to ascii
+    if (mainframeFtpTransferMode == null || mainframeFtpTransferMode.trim().equals("")) { return MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII; }
+    return mainframeFtpTransferMode;
+  }
+
+  // sets the FTP transfer mode
+  public void setMainframeFtpTransferMode(String transferMode) {
+    mainframeFtpTransferMode = transferMode;
   }
 
   public static String getAccumuloHomeDefault() {
