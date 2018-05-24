@@ -147,7 +147,10 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
   protected boolean getNextBinaryRecord(T sqoopRecord) throws IOException {
     // typical estimated max size for mainframe record
     Configuration conf = getConfiguration();
-    int BUFFER_SIZE = conf.getInt(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE);
+    int BUFFER_SIZE = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE;
+    if (conf != null) {
+      BUFFER_SIZE = conf.getInt(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE, MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE);
+    }
     byte[] buf = new byte[BUFFER_SIZE];
     int bytesRead = -1;
     int cumulativeBytesRead = 0;
