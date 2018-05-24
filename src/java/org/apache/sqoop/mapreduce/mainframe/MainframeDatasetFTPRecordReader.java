@@ -53,25 +53,9 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
 
     Configuration conf = getConfiguration();
     ftp = MainframeFTPClientUtils.getFTPConnection(conf);
-    if (ftp != null) {
-		String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
-		String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
-		MainframeDatasetPath p = null;
-		try {
-			p = new MainframeDatasetPath(dsName,conf);
-		} catch (Exception e) {
-			LOG.error(e.getMessage());
-			LOG.error("MainframeDatasetPath helper class incorrectly initialised");
-			e.printStackTrace();
-		}
-		if (dsType != null && p != null) {
-			dsName = p.getMainframeDatasetFolder();
-		}
-		ftp.changeWorkingDirectory("'" + dsName + "'");
-    }
+    initialize(inputSplit,taskAttemptContext,ftp,conf);
   }
 
-  // used for testing
   public void initialize(InputSplit inputSplit,
        TaskAttemptContext taskAttemptContext,
        FTPClient ftpClient, Configuration conf)
