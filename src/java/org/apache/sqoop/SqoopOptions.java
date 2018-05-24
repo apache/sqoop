@@ -2494,22 +2494,13 @@ public class SqoopOptions implements Cloneable {
     return bufferSize;
   }
 
-/*
-  // gets the FTP transfer mode
-  public String getMainframeFtpTransferMode() {
-    return mainframeFtpTransferMode;
-  }
-
-  // returns the buffer size set.
-  public Integer getBufferSize() {
-    return bufferSize;
-  }
-
-  // sets the FTP transfer mode
   public void setMainframeFtpTransferMode(String transferMode) {
     mainframeFtpTransferMode = transferMode;
   }
-*/
+
+  public String getMainframeFtpTransferMode() {
+    return mainframeFtpTransferMode;
+  }
 
   // sets the binary transfer buffer size, defaults to MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE
   public void setBufferSize(String buf) {
