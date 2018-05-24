@@ -254,11 +254,7 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     ToolOptions toolOptions = new ToolOptions();
     SqoopOptions sqoopOption = new SqoopOptions();
     mfImportTool.configureOptions(toolOptions);
-    exception.expect(InvalidOptionsException.class);
-    exception.expectMessage("--transfermode");
-    exception.expectMessage("invalid");
     sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
     mfImportTool.validateImportOptions(sqoopOption);
-    fail("shouldn't get here");
   }
 }
