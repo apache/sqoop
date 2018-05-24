@@ -20,6 +20,7 @@ package org.apache.sqoop.mapreduce.mainframe;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.Job;
@@ -29,6 +30,7 @@ import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ImportJobContext;
 
+import org.apache.sqoop.mapreduce.BinaryKeyOutputFormat;
 import org.apache.sqoop.mapreduce.DataDrivenImportJob;
 
 /**
@@ -45,7 +47,10 @@ public class MainframeImportJob extends DataDrivenImportJob {
 
   @Override
   protected Class<? extends Mapper> getMapperClass() {
-    if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
+      LOG.debug("Using MainframeDatasetBinaryImportMapper");
+      return MainframeDatasetBinaryImportMapper.class;
+    } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
       return MainframeDatasetImportMapper.class;
     } else {
       return super.getMapperClass();
@@ -65,13 +70,42 @@ public class MainframeImportJob extends DataDrivenImportJob {
     job.getConfiguration().set(
             MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE,
             options.getMainframeInputDatasetTape().toString());
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
+      job.getConfiguration().set(
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
+      job.getConfiguration().setInt(
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE,
+        options.getBufferSize()
+      );
+    } else {
+      job.getConfiguration().set(
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII);
+    }
+
   }
 
   @Override
   protected void configureOutputFormat(Job job, String tableName,
       String tableClassName) throws ClassNotFoundException, IOException {
     super.configureOutputFormat(job, tableName, tableClassName);
-    LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
+      job.getConfiguration().set(
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
+    } else {
+      job.getConfiguration().set(
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII);
+    }
+
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
+      LazyOutputFormat.setOutputFormatClass(job, BinaryKeyOutputFormat.class);
+    } else {
+      // use the default outputformat
+      LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
+    }
   }
 
 }

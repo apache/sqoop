@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.BufferedInputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.sql.PreparedStatement;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -43,6 +45,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.util.MainframeFTPClientUtils;
@@ -50,9 +54,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.apache.sqoop.lib.DelimiterSet;
-import org.apache.sqoop.lib.LargeObjectLoader;
 
 public class TestMainframeDatasetFTPRecordReader {
 

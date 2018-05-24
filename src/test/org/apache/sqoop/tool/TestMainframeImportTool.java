@@ -28,18 +28,19 @@ import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
-
+import org.junit.rules.ExpectedException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestMainframeImportTool extends BaseSqoopTestCase {
 
@@ -47,11 +48,15 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
       .getName());
 
   private MainframeImportTool mfImportTool;
+  org.apache.sqoop.cli.ToolOptions toolOptions;
+  org.apache.sqoop.SqoopOptions sqoopOption;
 
   @Before
   public void setUp() {
 
     mfImportTool = new MainframeImportTool();
+    toolOptions = new ToolOptions();
+    sqoopOption = new SqoopOptions();
   }
 
   @After
@@ -182,5 +187,67 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 	  mfImportTool.validateImportOptions(sqoopOption);
 	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
 	  assert(isTape != null && isTape.toString().equals("false"));
+  }
+
+  @Test
+  public void testFtpTransferModeAscii() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
+    String transferModeValue = "ascii";
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-textfile" };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.TextFile,sqoopOption.getFileLayout());
+  }
+  @Test
+  public void testFtpTransferModeBinary() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
+    String transferModeValue = "binary";
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile" };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
+  }
+  @Test
+  public void testFtpTransferModeDefaultsToAscii() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
+    String[] args = new String[] { "--dataset", "mydatasetname" };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.TextFile,sqoopOption.getFileLayout());
+  }
+
+  @Test
+  public void testAsBinaryFileSetsCorrectFileLayoutAndDefaultBufferSize() throws ParseException, InvalidOptionsException {
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile" };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
+    assertEquals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE, sqoopOption.getBufferSize());
+  }
+
+  @Test
+  public void testSetBufferSize() throws ParseException, InvalidOptionsException {
+    Integer expectedBuffer = 1024;
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile", "--buffersize", expectedBuffer.toString() };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
+    assertEquals(expectedBuffer, sqoopOption.getBufferSize());
+  }
+
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
+  @Test
+  public void testBufferSizeWithoutBinaryThrowsException() throws ParseException, InvalidOptionsException {
+    Integer expectedBuffer = 1024;
+    String[] args = new String[] { "--buffersize", expectedBuffer.toString() };
+    exception.expect(InvalidOptionsException.class);
+    configureAndValidateOptions(args);
+  }
+
+  @Test
+  public void testInvalidBufferSizeThrowsNumberFormatException() throws ParseException, InvalidOptionsException {
+    String[] args = new String[] { "--buffersize", "invalidinteger" };
+    exception.expect(NumberFormatException.class);
+    configureAndValidateOptions(args);
+  }
+
+  private void configureAndValidateOptions(String[] args) throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
+    mfImportTool.configureOptions((ToolOptions) toolOptions);
+    sqoopOption = mfImportTool.parseArguments(args, null, (SqoopOptions) sqoopOption, false);
+    mfImportTool.validateImportOptions((SqoopOptions) sqoopOption);
   }
 }

@@ -85,7 +85,8 @@ public class SqoopOptions implements Cloneable {
     TextFile,
     SequenceFile,
     AvroDataFile,
-    ParquetFile
+    ParquetFile,
+    BinaryFile
   }
 
   /**
@@ -359,7 +360,12 @@ public class SqoopOptions implements Cloneable {
   // Indicates if the data set is on tape to use different FTP parser
   @StoredAsProperty("mainframe.input.dataset.tape")
   private String mainframeInputDatasetTape;
-
+  // Indicates if binary or ascii FTP transfer mode should be used
+  @StoredAsProperty("mainframe.ftp.transfermode")
+  private String mainframeFtpTransferMode;
+  // Buffer size to use when using binary FTP transfer mode
+  @StoredAsProperty("mainframe.ftp.buffersize")
+  private Integer bufferSize;
   // Accumulo home directory
   private String accumuloHome; // not serialized to metastore.
   // Zookeeper home directory
@@ -1152,6 +1158,24 @@ public class SqoopOptions implements Cloneable {
 
     // set escape column mapping to true
     this.escapeColumnMappingEnabled = true;
+
+    // set default transfer mode to ascii
+    this.mainframeFtpTransferMode = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII;
+
+    // set default buffer size for mainframe binary transfers
+    this.bufferSize = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE;
+  }
+
+  private String getLocalAutoConnectString() {
+    String homeDir = System.getProperty("user.home");
+
+    File homeDirObj = new File(homeDir);
+    File sqoopDataDirObj = new File(homeDirObj, ".sqoop");
+    File databaseFileObj = new File(sqoopDataDirObj, "metastore.db");
+
+    String dbFileStr = databaseFileObj.toString();
+    return "jdbc:hsqldb:file:" + dbFileStr
+            + ";hsqldb.write_delay=false;shutdown=true";
   }
 
   /**
@@ -2477,6 +2501,20 @@ public class SqoopOptions implements Cloneable {
   // sets whether the dataset is on tape
   public void setMainframeInputDatasetTape(String txtIsFromTape) {
 	  mainframeInputDatasetTape = Boolean.valueOf(Boolean.parseBoolean(txtIsFromTape)).toString();
+  }
+  // returns the buffer size set.
+  public Integer getBufferSize() {
+    return bufferSize;
+  }
+
+  // sets the binary transfer buffer size, defaults to MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE
+  public void setBufferSize(String buf) {
+    if (buf == null || "".equals(buf)) {
+      bufferSize = MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE;
+    }
+    else {
+      bufferSize = Integer.valueOf(buf);
+    }
   }
 
   public static String getAccumuloHomeDefault() {
