@@ -143,9 +143,11 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
       if (inputStream == null) {
         dsName = getNextDataset();
         if (dsName == null) {
+          LOG.info("No more datasets to process. Returning.");
           return false;
         }
         LOG.info("Attempting to retrieve file stream for: "+dsName);
+        LOG.info("Buffer size: "+BUFFER_SIZE);
         inputStream = new BufferedInputStream(ftp.retrieveFileStream(dsName));
         if (inputStream == null) {
           throw new IOException("Failed to retrieve FTP file stream.");
