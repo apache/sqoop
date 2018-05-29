@@ -32,6 +32,7 @@ import org.apache.sqoop.mapreduce.db.DBOutputFormat;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ExportJobContext;
 import com.google.common.base.Strings;
+import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 
 /**
  * Run an export using JDBC (JDBC-based ExportCallOutputFormat) to
@@ -43,15 +44,16 @@ public class JdbcCallExportJob extends JdbcExportJob {
   public static final Log LOG = LogFactory.getLog(
       JdbcCallExportJob.class.getName());
 
-  public JdbcCallExportJob(final ExportJobContext context) {
-    super(context, null, null, ExportCallOutputFormat.class);
+  public JdbcCallExportJob(final ExportJobContext context, final ParquetExportJobConfigurator parquetExportJobConfigurator) {
+    super(context, null, null, ExportCallOutputFormat.class, parquetExportJobConfigurator);
   }
 
   public JdbcCallExportJob(final ExportJobContext ctxt,
       final Class<? extends Mapper> mapperClass,
       final Class<? extends InputFormat> inputFormatClass,
-      final Class<? extends OutputFormat> outputFormatClass) {
-    super(ctxt, mapperClass, inputFormatClass, outputFormatClass);
+      final Class<? extends OutputFormat> outputFormatClass,
+      final ParquetExportJobConfigurator parquetExportJobConfigurator) {
+    super(ctxt, mapperClass, inputFormatClass, outputFormatClass, parquetExportJobConfigurator);
   }
 
   /**

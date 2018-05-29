@@ -19,6 +19,7 @@
 package org.apache.sqoop.mapreduce.mainframe;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,7 +58,7 @@ public class TestMainframeImportJob {
     Path path = new Path("dummyPath");
     ImportJobContext context = new ImportJobContext(tableName, jarFile,
         options, path);
-    mfImportJob = new MainframeImportJob(options, context);
+    mfImportJob = new MainframeImportJob(options, context, mock(ParquetImportJobConfigurator.class));
 
     // To access protected method by means of reflection
     Class[] types = {};
@@ -79,7 +81,7 @@ public class TestMainframeImportJob {
     options.setFileLayout(SqoopOptions.FileLayout.AvroDataFile);
     ImportJobContext context = new ImportJobContext(tableName, jarFile,
         options, path);
-    avroImportJob = new MainframeImportJob(options, context);
+    avroImportJob = new MainframeImportJob(options, context, mock(ParquetImportJobConfigurator.class));
 
     // To access protected method by means of reflection
     Class[] types = {};

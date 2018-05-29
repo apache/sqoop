@@ -30,6 +30,7 @@ import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.mapreduce.MergeJob;
+import org.apache.sqoop.mapreduce.parquet.ParquetMergeJobConfigurator;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**
@@ -52,7 +53,8 @@ public class MergeTool extends BaseSqoopTool {
   public int run(SqoopOptions options) {
     try {
       // Configure and execute a MapReduce job to merge these datasets.
-      MergeJob mergeJob = new MergeJob(options);
+      ParquetMergeJobConfigurator parquetMergeJobConfigurator = getParquetJobConfigurator(options.getConf()).createParquetMergeJobConfigurator();
+      MergeJob mergeJob = new MergeJob(options, parquetMergeJobConfigurator);
       if (!mergeJob.runMergeJob()) {
         LOG.error("MapReduce job failed!");
         return 1;

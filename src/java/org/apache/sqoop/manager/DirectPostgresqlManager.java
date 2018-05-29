@@ -585,7 +585,8 @@ public class DirectPostgresqlManager
       new PostgreSQLCopyExportJob(context,
                                   null,
                                   ExportInputFormat.class,
-                                  NullOutputFormat.class);
+                                  NullOutputFormat.class,
+                                  getParquetJobConfigurator().createParquetExportJobConfigurator());
     job.runExport();
   }
 }

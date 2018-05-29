@@ -32,7 +32,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
-
+import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 
 
 /**
@@ -42,15 +42,16 @@ public class PostgreSQLCopyExportJob extends JdbcExportJob {
   public static final Log LOG =
     LogFactory.getLog(PostgreSQLCopyExportJob.class.getName());
 
-  public PostgreSQLCopyExportJob(final ExportJobContext context) {
-    super(context);
+  public PostgreSQLCopyExportJob(final ExportJobContext context, final ParquetExportJobConfigurator parquetExportJobConfigurator) {
+    super(context, parquetExportJobConfigurator);
   }
 
   public PostgreSQLCopyExportJob(final ExportJobContext ctxt,
       final Class<? extends Mapper> mapperClass,
       final Class<? extends InputFormat> inputFormatClass,
-      final Class<? extends OutputFormat> outputFormatClass) {
-    super(ctxt, mapperClass, inputFormatClass, outputFormatClass);
+      final Class<? extends OutputFormat> outputFormatClass,
+      final ParquetExportJobConfigurator parquetExportJobConfigurator) {
+    super(ctxt, mapperClass, inputFormatClass, outputFormatClass, parquetExportJobConfigurator);
   }
 
   @Override

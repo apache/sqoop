@@ -30,6 +30,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.mapreduce.db.DBOutputFormat;
+import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 
 /**
  * Run an update/insert export using JDBC (JDBC-based UpsertOutputFormat).
@@ -40,9 +41,10 @@ public class JdbcUpsertExportJob extends JdbcUpdateExportJob {
       JdbcUpsertExportJob.class.getName());
 
   public JdbcUpsertExportJob(final ExportJobContext context,
-      final Class<? extends OutputFormat> outputFormatClass)
+                             final Class<? extends OutputFormat> outputFormatClass,
+                             final ParquetExportJobConfigurator parquetExportJobConfigurator)
       throws IOException {
-    super(context, null, null, outputFormatClass);
+    super(context, null, null, outputFormatClass, parquetExportJobConfigurator);
   }
 
   @Override

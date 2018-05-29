@@ -30,6 +30,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ImportJobContext;
 
 import org.apache.sqoop.mapreduce.DataDrivenImportJob;
+import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
 
 /**
  * Import data from a mainframe dataset, using MainframeDatasetInputFormat.
@@ -39,8 +40,8 @@ public class MainframeImportJob extends DataDrivenImportJob {
   private static final Log LOG = LogFactory.getLog(
       MainframeImportJob.class.getName());
 
-  public MainframeImportJob(final SqoopOptions opts, ImportJobContext context) {
-    super(opts, MainframeDatasetInputFormat.class, context);
+  public MainframeImportJob(final SqoopOptions opts, ImportJobContext context, ParquetImportJobConfigurator parquetImportJobConfigurator) {
+    super(opts, MainframeDatasetInputFormat.class, context, parquetImportJobConfigurator);
   }
 
   @Override

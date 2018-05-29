@@ -32,10 +32,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.util.ParquetReader;
 import org.junit.Test;
+import parquet.avro.AvroSchemaConverter;
 import parquet.format.CompressionCodec;
 import parquet.hadoop.Footer;
 import parquet.hadoop.ParquetFileReader;
 import parquet.hadoop.metadata.ParquetMetadata;
+import parquet.schema.MessageType;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -311,8 +313,9 @@ public class TestParquetImport extends ImportJobTestCase {
   }
 
   private Schema getSchema() {
-    String schemaString = getOutputMetadata().getFileMetaData().getKeyValueMetaData().get("parquet.avro.schema");
-    return new Schema.Parser().parse(schemaString);
+    MessageType parquetSchema = getOutputMetadata().getFileMetaData().getSchema();
+    AvroSchemaConverter avroSchemaConverter = new AvroSchemaConverter();
+    return avroSchemaConverter.convert(parquetSchema);
   }
 
   private void checkField(Field field, String name, Type type) {

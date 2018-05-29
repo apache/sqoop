@@ -33,15 +33,13 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.sqoop.mapreduce.ExportJobBase.FileType;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
-import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.mapreduce.db.DBOutputFormat;
-import org.apache.sqoop.util.FileSystemUtil;
+import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 
 /**
  * Run an update-based export using JDBC (JDBC-based UpdateOutputFormat).
@@ -53,6 +51,8 @@ public class JdbcUpdateExportJob extends ExportJobBase {
   public static final Log LOG = LogFactory.getLog(
       JdbcUpdateExportJob.class.getName());
 
+  private ParquetExportJobConfigurator parquetExportJobConfigurator;
+
   /**
    * Return an instance of the UpdateOutputFormat class object loaded
    * from the shim jar.
@@ -62,16 +62,19 @@ public class JdbcUpdateExportJob extends ExportJobBase {
     return UpdateOutputFormat.class;
   }
 
-  public JdbcUpdateExportJob(final ExportJobContext context)
+  public JdbcUpdateExportJob(final ExportJobContext context, final ParquetExportJobConfigurator parquetExportJobConfigurator)
       throws IOException {
     super(context, null, null, getUpdateOutputFormat());
+    this.parquetExportJobConfigurator = parquetExportJobConfigurator;
   }
 
   public JdbcUpdateExportJob(final ExportJobContext ctxt,
       final Class<? extends Mapper> mapperClass,
       final Class<? extends InputFormat> inputFormatClass,
-      final Class<? extends OutputFormat> outputFormatClass) {
+      final Class<? extends OutputFormat> outputFormatClass,
+      final ParquetExportJobConfigurator parquetExportJobConfigurator) {
     super(ctxt, mapperClass, inputFormatClass, outputFormatClass);
+    this.parquetExportJobConfigurator = parquetExportJobConfigurator;
   }
 
   // Fix For Issue [SQOOP-2846]
@@ -86,7 +89,7 @@ public class JdbcUpdateExportJob extends ExportJobBase {
     case AVRO_DATA_FILE:
       return AvroExportMapper.class;
     case PARQUET_FILE:
-      return ParquetExportMapper.class;
+      return parquetExportJobConfigurator.getMapperClass();
     case UNKNOWN:
     default:
       return TextExportMapper.class;
@@ -186,8 +189,7 @@ public class JdbcUpdateExportJob extends ExportJobBase {
     } else if (fileType == FileType.PARQUET_FILE) {
       LOG.debug("Configuring for Parquet export");
       configureGenericRecordExportInputFormat(job, tableName);
-      String uri = "dataset:" + FileSystemUtil.makeQualified(getInputPath(), job.getConfiguration());
-      DatasetKeyInputFormat.configure(job).readFrom(uri);
+      parquetExportJobConfigurator.configureInputFormat(job, getInputPath());
     }
   }
 
@@ -222,7 +224,7 @@ public class JdbcUpdateExportJob extends ExportJobBase {
     case AVRO_DATA_FILE:
       return AvroInputFormat.class;
     case PARQUET_FILE:
-      return DatasetKeyInputFormat.class;
+      return parquetExportJobConfigurator.getInputFormatClass();
     default:
       return super.getInputFormatClass();
     }

@@ -36,6 +36,7 @@ import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.sqoop.mapreduce.ExportJobBase.FileType;
+import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 import org.junit.Test;
 
 import org.apache.sqoop.SqoopOptions;
@@ -117,7 +118,7 @@ public class TestJdbcExportJob {
     when(mockConnManager.getColumnTypes(anyString(), anyString())).thenReturn(columnTypeInts);
     when(mockConnManager.toJavaType(anyString(), anyString(), anyInt())).thenReturn("String");
     when(mockContext.getConnManager()).thenReturn(mockConnManager);
-    JdbcExportJob jdbcExportJob = new JdbcExportJob(mockContext) {
+    JdbcExportJob jdbcExportJob = new JdbcExportJob(mockContext, mock(ParquetExportJobConfigurator.class)) {
       @Override
       protected FileType getInputFileType() {
         return inputFileType;

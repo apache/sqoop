@@ -35,7 +35,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;
-import org.apache.sqoop.mapreduce.ParquetJob;
+import org.apache.sqoop.mapreduce.parquet.kite.KiteParquetUtils;
 import org.apache.sqoop.util.ParquetReader;
 import org.junit.After;
 import org.junit.Before;
@@ -404,7 +404,7 @@ public class TestHiveImport extends ImportJobTestCase {
     createTableWithColTypes(types, vals);
 
     thrown.expect(AvroSchemaMismatchException.class);
-    thrown.expectMessage(ParquetJob.INCOMPATIBLE_AVRO_SCHEMA_MSG + ParquetJob.HIVE_INCOMPATIBLE_AVRO_SCHEMA_MSG);
+    thrown.expectMessage(KiteParquetUtils.INCOMPATIBLE_AVRO_SCHEMA_MSG + KiteParquetUtils.HIVE_INCOMPATIBLE_AVRO_SCHEMA_MSG);
 
     SqoopOptions sqoopOptions = getSqoopOptions(getConf());
     sqoopOptions.setThrowOnError(true);
@@ -422,7 +422,7 @@ public class TestHiveImport extends ImportJobTestCase {
             .name(getColName(2)).type().nullable().stringType().noDefault()
             .endRecord();
     String dataSetUri = "dataset:hive:/default/" + tableName;
-    ParquetJob.createDataset(dataSetSchema, ParquetJob.getCompressionType(new Configuration()), dataSetUri);
+    KiteParquetUtils.createDataset(dataSetSchema, KiteParquetUtils.getCompressionType(new Configuration()), dataSetUri);
   }
 
   /**

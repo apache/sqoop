@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce;
+package org.apache.sqoop.mapreduce.parquet.kite;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -41,12 +41,15 @@ import org.kitesdk.data.spi.SchemaValidationUtil;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
+import static org.apache.sqoop.mapreduce.parquet.ParquetConstants.SQOOP_PARQUET_AVRO_SCHEMA_KEY;
+import static org.apache.sqoop.mapreduce.parquet.ParquetConstants.SQOOP_PARQUET_OUTPUT_CODEC_KEY;
+
 /**
  * Helper class for setting up a Parquet MapReduce job.
  */
-public final class ParquetJob {
+public final class KiteParquetUtils {
 
-  public static final Log LOG = LogFactory.getLog(ParquetJob.class.getName());
+  public static final Log LOG = LogFactory.getLog(KiteParquetUtils.class.getName());
 
   public static final String HIVE_METASTORE_CLIENT_CLASS = "org.apache.hadoop.hive.metastore.HiveMetaStoreClient";
 
@@ -66,22 +69,16 @@ public final class ParquetJob {
 
   private static final String HIVE_URI_PREFIX = "dataset:hive";
 
-  private ParquetJob() {
+  private KiteParquetUtils() {
   }
 
-  private static final String CONF_AVRO_SCHEMA = "parquetjob.avro.schema";
-  static final String CONF_OUTPUT_CODEC = "parquetjob.output.codec";
-  enum WriteMode {
+  public enum WriteMode {
     DEFAULT, APPEND, OVERWRITE
   };
 
-  public static Schema getAvroSchema(Configuration conf) {
-    return new Schema.Parser().parse(conf.get(CONF_AVRO_SCHEMA));
-  }
-
   public static CompressionType getCompressionType(Configuration conf) {
     CompressionType defaults = Formats.PARQUET.getDefaultCompressionType();
-    String codec = conf.get(CONF_OUTPUT_CODEC, defaults.getName());
+    String codec = conf.get(SQOOP_PARQUET_OUTPUT_CODEC_KEY, defaults.getName());
     try {
       return CompressionType.forName(codec);
     } catch (IllegalArgumentException ex) {
@@ -129,7 +126,7 @@ public final class ParquetJob {
     } else {
       dataset = createDataset(schema, getCompressionType(conf), uri);
     }
-    conf.set(CONF_AVRO_SCHEMA, schema.toString());
+    conf.set(SQOOP_PARQUET_AVRO_SCHEMA_KEY, schema.toString());
 
     DatasetKeyOutputFormat.ConfigBuilder builder =
         DatasetKeyOutputFormat.configure(conf);

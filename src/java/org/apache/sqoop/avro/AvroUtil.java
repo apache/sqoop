@@ -340,4 +340,8 @@ public final class AvroUtil {
 
     return LogicalTypes.decimal(precision, scale);
   }
+
+  public static Schema parseAvroSchema(String schemaString) {
+    return new Schema.Parser().parse(schemaString);
+  }
 }
