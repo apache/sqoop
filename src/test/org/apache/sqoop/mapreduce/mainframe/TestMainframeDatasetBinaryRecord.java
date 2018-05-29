@@ -34,6 +34,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.doReturn;
 
 public class TestMainframeDatasetBinaryRecord {
 
@@ -48,7 +50,8 @@ public class TestMainframeDatasetBinaryRecord {
 
   @Before
   public void setUp() throws IOException, InterruptedException {
-    mfDFTPRR = new MainframeDatasetFTPRecordReader();
+    MainframeDatasetFTPRecordReader rdr = new MainframeDatasetFTPRecordReader();
+    mfDFTPRR = spy(rdr);
     is = mock(InputStream.class);
     ftp = mock(FTPClient.class);
     split = mock(MainframeDatasetInputSplit.class);
@@ -56,6 +59,9 @@ public class TestMainframeDatasetBinaryRecord {
     conf = new Configuration();
     when(ftp.retrieveFileStream(any(String.class))).thenReturn(is);
     when(ftp.changeWorkingDirectory(any(String.class))).thenReturn(true);
+    doReturn("file1").when(mfDFTPRR).getNextDataset();
+    when(split.getNextDataset()).thenReturn("dummy.ds");
+    when(mfDFTPRR.getNextDataset()).thenReturn("dummy.ds");
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,DATASET_NAME);
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,DATASET_TYPE);
     conf.setInt(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE);
