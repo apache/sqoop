@@ -64,7 +64,6 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     if (ftp != null) {
       String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
       String dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
-      inputStream = new BufferedInputStream(ftp.retrieveFileStream(dsName));
       MainframeDatasetPath p = null;
       try {
         p = new MainframeDatasetPath(dsName,conf);
