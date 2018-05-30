@@ -20,6 +20,7 @@ package org.apache.sqoop.tool;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.ToolRunner;
@@ -215,7 +216,7 @@ public class MainframeImportTool extends ImportTool {
 				"--" + DS_TAPE_ARG + " specified is invalid. " + HELP_STR);
 	}
     /* only allow FileLayout.BinaryFile to be selected for mainframe import */
-    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout()) && options.getMainframeInputDatasetName() == null || options.getMainframeInputDatasetName().equals("")) {
+    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout()) && StringUtils.isEmpty(options.getMainframeInputDatasetName())) {
       throw new InvalidOptionsException("--as-binaryfile should only be used with import-mainframe module.");
     }
 
