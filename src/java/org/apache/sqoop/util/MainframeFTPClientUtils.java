@@ -210,7 +210,7 @@ public final class MainframeFTPClientUtils {
       }
       // set transfer mode
       String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
-      if (StringUtils.equalsIgnoreCase(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY,(transferMode))) {
+      if (StringUtils.equalsIgnoreCase(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY,transferMode)) {
         LOG.info("Setting FTP transfer mode to binary");
         // ftp.setFileTransferMode(FTP.BINARY_FILE_TYPE) doesn't work for MVS, it throws a syntax error
         ftp.sendCommand("TYPE I");
