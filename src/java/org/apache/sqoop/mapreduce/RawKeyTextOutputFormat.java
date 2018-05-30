@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.*;
+import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 
 /**
  * An {@link OutputFormat} that writes plain text files.
@@ -64,6 +65,12 @@ public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
       ostream = new DataOutputStream(codec.createOutputStream(fileOut));
     }
 
+    // if it is binary return KeyRecordWriters.BinaryKeyRecordWriter 
+    // otherwise it will be plain text
+    String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
+    if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(transferMode)) {
+      return new KeyRecordWriters.BinaryKeyRecordWriter<K,V>(ostream);
+    }
     return new KeyRecordWriters.RawKeyRecordWriter<K, V>(ostream);
   }
 
