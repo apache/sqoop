@@ -87,7 +87,7 @@ public class MainframeImportTool extends ImportTool {
       .withLongOpt(FMT_BINARYFILE_ARG)
       .create());
     importOpts.addOption(OptionBuilder
-      .hasArg().withDescription("Sets buffer size for binary import (default=32kB)")
+      .hasArg().withDescription("Sets buffer size for binary import in bytes (default=32kB)")
       .withLongOpt(BUFFERSIZE_ARG)
       .create());
     importOpts.addOption(OptionBuilder.withArgName("n")
