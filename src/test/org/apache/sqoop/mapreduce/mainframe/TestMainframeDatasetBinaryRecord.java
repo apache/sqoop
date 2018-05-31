@@ -17,6 +17,8 @@
  */
 package org.apache.sqoop.mapreduce.mainframe;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -47,6 +49,8 @@ public class TestMainframeDatasetBinaryRecord {
   private TaskAttemptContext context;
   final String DATASET_NAME = "dummy.ds";
   final String DATASET_TYPE = "g";
+  private static final Log LOG = LogFactory.getLog(
+      TestMainframeDatasetBinaryRecord.class.getName());
 
   @Before
   public void setUp() throws IOException, InterruptedException {
@@ -94,7 +98,8 @@ public class TestMainframeDatasetBinaryRecord {
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
       Assert.assertTrue(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE.equals(((byte[])record.getFieldMap().values().iterator().next()).length));
     } catch (IOException ioe) {
-      fail ("Got IOException: "+ ioe);
+      LOG.error("Issue with reading 1 full binary buffer record", ioe);
+      throw new RuntimeException(ioe);
     }
   }
 
@@ -111,7 +116,8 @@ public class TestMainframeDatasetBinaryRecord {
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
       Assert.assertEquals(expectedBytesRead,(((byte[])record.getFieldMap().values().iterator().next()).length));
     } catch (IOException ioe) {
-      fail ("Got IOException: "+ ioe);
+      LOG.error("Issue with reading 10 byte binary record", ioe);
+      throw new RuntimeException(ioe);
     }
   }
 
@@ -134,7 +140,8 @@ public class TestMainframeDatasetBinaryRecord {
       Assert.assertFalse(record.getFieldMap().values().isEmpty());
       Assert.assertEquals(expectedBytesRead,(((byte[])record.getFieldMap().values().iterator().next()).length));
     } catch (IOException ioe) {
-      fail ("Got IOException: "+ ioe);
+      LOG.error("Issue with reading 1 full binary buffer record followed by 1 partial binary buffer record", ioe);
+      throw new RuntimeException(ioe);
     }
   }
 
@@ -155,7 +162,8 @@ public class TestMainframeDatasetBinaryRecord {
       Assert.assertFalse(mfDFTPRR.getNextBinaryRecord(record));
       Assert.assertNull((((byte[])record.getFieldMap().values().iterator().next())));
     } catch (IOException ioe) {
-      fail ("Got IOException: "+ ioe);
+      LOG.error("Issue with verifying reading partial buffer binary records", ioe);
+      throw new RuntimeException(ioe);
     }
   }
 }
