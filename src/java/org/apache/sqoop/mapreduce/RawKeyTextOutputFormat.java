@@ -65,7 +65,7 @@ public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
       ostream = new DataOutputStream(codec.createOutputStream(fileOut));
     }
 
-    // if it is binary return KeyRecordWriters.BinaryKeyRecordWriter 
+    // if it is binary return KeyRecordWriters.BinaryKeyRecordWriter
     // otherwise it will be plain text
     String transferMode = conf.get(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE);
     if (MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY.equals(transferMode)) {
