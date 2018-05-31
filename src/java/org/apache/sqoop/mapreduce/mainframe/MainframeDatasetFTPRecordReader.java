@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ftp.FTPClient;
@@ -137,32 +138,18 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
     byte[] buf = new byte[BUFFER_SIZE];
     int bytesRead = -1;
     int cumulativeBytesRead = 0;
-    String dsName = null;
     try {
-      if (inputStream == null) {
-        dsName = getNextDataset();
-        if (dsName == null) {
-          LOG.info("No more datasets to process. Returning.");
-          return false;
-        }
-        LOG.info("Attempting to retrieve file stream for: "+dsName);
-        LOG.info("Buffer size: "+BUFFER_SIZE);
-        inputStream = new BufferedInputStream(ftp.retrieveFileStream(dsName));
-        if (inputStream == null) {
-          throw new IOException("Failed to retrieve FTP file stream.");
-        }
+      Boolean streamInited = initInputStream(BUFFER_SIZE);
+      if (!streamInited) {
+        LOG.info("No more datasets to process.");
+        return false;
       }
       do {
         bytesRead = inputStream.read(buf,cumulativeBytesRead,BUFFER_SIZE-cumulativeBytesRead);
         if (bytesRead == -1) {
           // EOF
-          inputStream.close();
-          inputStream = null;
-          if (!ftp.completePendingCommand()) {
-            throw new IOException("Failed to complete ftp command. FTP Response: "+ftp.getReplyString());
-          } else {
-            LOG.info("Data transfer completed.");
-          }
+          closeFtpInputStream();
+          LOG.info("Data transfer completed.");
           return writeBytesToSqoopRecord(buf,cumulativeBytesRead,sqoopRecord);
         }
         cumulativeBytesRead += bytesRead;
@@ -174,6 +161,31 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
       throw new IOException("IOException during data transfer: " + ioe);
     }
     return false;
+  }
+
+  protected Boolean initInputStream(int bufferSize) throws IOException {
+    if (inputStream == null) {
+      String dsName = getNextDataset();
+      if (dsName == null) {
+        LOG.info("No more datasets to process. Returning.");
+        return false;
+      }
+      LOG.info("Attempting to retrieve file stream for: "+dsName);
+      LOG.info("Buffer size: "+bufferSize);
+      inputStream = new BufferedInputStream(ftp.retrieveFileStream(dsName));
+      if (inputStream == null) {
+        throw new IOException("Failed to retrieve FTP file stream.");
+      }
+    }
+    return true;
+  }
+
+  protected void closeFtpInputStream() throws IOException {
+    inputStream.close();
+    inputStream = null;
+    if (!ftp.completePendingCommand()) {
+      throw new IOException("Failed to complete ftp command. FTP Response: "+ftp.getReplyString());
+    }
   }
 
   protected Boolean writeBytesToSqoopRecord(byte[] buf, int cumulativeBytesRead, SqoopRecord sqoopRecord) {
