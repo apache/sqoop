@@ -50,8 +50,8 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
       .getName());
 
   private MainframeImportTool mfImportTool;
-  org.apache.sqoop.cli.ToolOptions toolOptions;
-  org.apache.sqoop.SqoopOptions sqoopOption;
+  private ToolOptions toolOptions;
+  private SqoopOptions sqoopOption;
 
   @Before
   public void setUp() {
@@ -193,14 +193,12 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 
   @Test
   public void testFtpTransferModeAscii() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
-    String transferModeValue = "ascii";
     String[] args = new String[] { "--dataset", "mydatasetname", "--as-textfile" };
     configureAndValidateOptions(args);
     assertEquals(SqoopOptions.FileLayout.TextFile,sqoopOption.getFileLayout());
   }
   @Test
   public void testFtpTransferModeBinary() throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
-    String transferModeValue = "binary";
     String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile" };
     configureAndValidateOptions(args);
     assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
@@ -222,11 +220,11 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 
   @Test
   public void testSetBufferSize() throws ParseException, InvalidOptionsException {
-    Integer expectedBuffer = 1024;
-    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile", "--buffersize", expectedBuffer.toString() };
+    final Integer EXPECTED_BUFFER = 1024;
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile", "--buffersize", EXPECTED_BUFFER.toString() };
     configureAndValidateOptions(args);
     assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
-    assertEquals(expectedBuffer, sqoopOption.getBufferSize());
+    assertEquals(EXPECTED_BUFFER, sqoopOption.getBufferSize());
   }
 
   @Rule
@@ -234,8 +232,8 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 
   @Test
   public void testBufferSizeWithoutBinaryThrowsException() throws ParseException, InvalidOptionsException {
-    Integer expectedBuffer = 1024;
-    String[] args = new String[] { "--buffersize", expectedBuffer.toString() };
+    final Integer EXPECTED_BUFFER = 1024;
+    String[] args = new String[] { "--buffersize", EXPECTED_BUFFER.toString() };
     exception.expect(InvalidOptionsException.class);
     configureAndValidateOptions(args);
   }
@@ -247,12 +245,7 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     configureAndValidateOptions(args);
   }
 
-  private void configureAndValidateOptions(String[] args) throws ParseException, org.apache.sqoop.SqoopOptions.InvalidOptionsException {
-    mfImportTool.configureOptions((ToolOptions) toolOptions);
-    sqoopOption = mfImportTool.parseArguments(args, null, (SqoopOptions) sqoopOption, false);
-    mfImportTool.validateImportOptions((SqoopOptions) sqoopOption);
-    ToolOptions toolOptions = new ToolOptions();
-    SqoopOptions sqoopOption = new SqoopOptions();
+  private void configureAndValidateOptions(String[] args) throws ParseException, SqoopOptions.InvalidOptionsException {
     mfImportTool.configureOptions(toolOptions);
     sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
     mfImportTool.validateImportOptions(sqoopOption);
