@@ -246,6 +246,13 @@
   <property name="sqoop.test.netezza.db.name" value="SQOOP" />
   <property name="sqoop.test.netezza.table.name" value="EMPNZ" />
 
+  <property name="sqoop.test.mainframe.ftp.host" value="localhost" />
+  <property name="sqoop.test.mainframe.ftp.port" value="2121" />
+  <property name="sqoop.test.mainframe.ftp.username" value="test" />
+  <property name="sqoop.test.mainframe.ftp.password" value="test" />
+  <property name="sqoop.test.mainframe.ftp.dataset.gdg" value="TSODIQ1.GDGTEXT" />
+  <property name="sqoop.test.mainframe.ftp.dataset.gdg.filename" value="G0001V43" />
+  <property name="sqoop.test.mainframe.ftp.dataset.gdg.md5" value="f0d0d171fdb8a03dbc1266ed179d7093" />
 
   <condition property="windows">
     <os family="windows" />
@@ -872,6 +879,14 @@
       <sysproperty key="sqoop.test.netezza.password" value="${sqoop.test.netezza.password}" />
       <sysproperty key="sqoop.test.netezza.db.name" value="${sqoop.test.netezza.db.name}" />
       <sysproperty key="sqoop.test.netezza.table.name" value="${sqoop.test.netezza.table.name}" />
+
+      <sysproperty key="sqoop.test.mainframe.ftp.host" value="${sqoop.test.mainframe.ftp.host}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.port" value="${sqoop.test.mainframe.ftp.port}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.username" value="${sqoop.test.mainframe.ftp.username}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.password" value="${sqoop.test.mainframe.ftp.password}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.dataset.gdg" value="${sqoop.test.mainframe.ftp.dataset.gdg}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.dataset.gdg.filename" value="${sqoop.test.mainframe.ftp.dataset.gdg.filename}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.dataset.gdg.md5" value="${sqoop.test.mainframe.ftp.dataset.gdg.md5}" />
 
       <!-- Location of Hive logs -->
       <!--<sysproperty key="hive.log.dir"

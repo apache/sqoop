@@ -111,3 +111,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 20
+  mainframe:
+    image: cntroversycubed/sqoopgdg:afdf57b15d8e71eb77d24d606b77e185ef39ceb3
+    container_name: sqoop_mainframe_gdg_container
+    ports:
+      - 2121:2121
+      - 60000-60009:60000-60009
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2121"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
