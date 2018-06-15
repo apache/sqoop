@@ -193,6 +193,26 @@ $ sqoop import-mainframe --dataset SomePDS --jar-file mydatatypes.jar \
 
 This command will load the +SomePDSType+ class out of +mydatatypes.jar+.
 
+Support for Generation Data Group and Sequential data sets.
+This can be specified with the --datasettype parameter followed by one of:-
+'p' for partitioned dataset (default)
+'g' for generation data group dataset
+'s' for sequential dataset
+
+In the case of generation data group datasets, Sqoop will retrieve just the last or 
+latest file (or generation).
+
+In the case of sequential datasets, Sqoop will retrieve just the file specified.
+
+Support of datasets that are stored on tape volumes by specifying --tape true.
+
+By default, mainframe datasets are assumed to be plain text. Attempting to transfer
+binary datasets using this method will result in data corruption.
+Support for binary datasets by specifying --as-binaryfile and optionally --buffersize followed by 
+buffer size specified in bytes. By default, --buffersize is set to 32760 bytes. Altering buffersize
+will alter the number of records Sqoop reports to have imported. This is because it reads the 
+binary dataset in chunks specified by buffersize. Larger buffer size means lower number of records.
+
 Additional Import Configuration Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 There are some additional properties which can be configured by modifying
@@ -226,6 +246,23 @@ A basic import of all sequential files in a partitioned dataset named
 $ sqoop import-mainframe --connect z390 --dataset EMPLOYEES \
     --username SomeUser -P
 Enter password: (hidden)
+----
+
+Import of a tape based generation data group dataset using a password alias and writing out to 
+an intermediate directory (--outdir) before moving it to (--target-dir).
+----
+$ sqoop import-mainframe --dataset SomeGdg --connect <host> --username myuser --password-alias \
+    mypasswordalias --datasettype g --tape true --outdir /tmp/imported/sqoop \
+    --target-dir /data/imported/mainframe/SomeGdg
+----
+
+Import of a tape based binary generation data group dataset with a buffer size of 64000 using a 
+password alias and writing out to an intermediate directory (--outdir) before moving it 
+to (--target-dir).
+----
+$ sqoop import-mainframe --dataset SomeGdg --connect <host> --username myuser --password-alias \
+    mypasswordalias --datasettype g --tape true --as-binaryfile --buffersize 64000 --outdir /tmp/imported/sqoop \
+    --target-dir /data/imported/mainframe/SomeGdg
 ----
 
 Controlling the import parallelism (using 8 parallel tasks):
