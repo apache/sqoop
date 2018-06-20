@@ -33,6 +33,7 @@ public class ExportJobContext {
   private String jarFile;
   private SqoopOptions options;
   private ConnManager manager;
+  private Class outputFormatClass;
 
   public ExportJobContext(final String table, final String jar,
       final SqoopOptions opts) {
@@ -78,5 +79,12 @@ public class ExportJobContext {
     return this.manager;
   }
 
+  public Class getOutputFormatClass() {
+    return outputFormatClass;
+  }
+
+  public void setOutputFormatClass(Class outputFormatClass) {
+    this.outputFormatClass = outputFormatClass;
+  }
 }
 

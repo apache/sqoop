@@ -18,6 +18,24 @@
 
 package org.apache.sqoop.manager.sqlserver;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.sqoop.ConnFactory;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.SQLServerManager;
+import org.apache.sqoop.testutil.ArgumentArrayBuilder;
+import org.apache.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.util.FileListing;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,28 +44,13 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.sqoop.ConnFactory;
-import org.apache.sqoop.manager.SQLServerManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.testutil.CommonArgs;
-import org.apache.sqoop.testutil.ImportJobTestCase;
-import org.apache.sqoop.util.FileListing;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@RunWith(Parameterized.class)
 /**
  * Test the SQLServerManager implementation.
  *
@@ -92,8 +95,7 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
   static final String DBO_TABLE_NAME = "EMPLOYEES_MSSQL";
   static final String SCHEMA_SCH = "sch";
   static final String SCH_TABLE_NAME = "PRIVATE_TABLE";
-  static final String CONNECT_STRING = HOST_URL
-              + ";databaseName=" + DATABASE_NAME;
+  static final String CONNECT_STRING = HOST_URL + ";databaseName=" + DATABASE_NAME;
 
   static final String CONNECTOR_FACTORY = System.getProperty(
       "sqoop.test.msserver.connector.factory",
@@ -103,7 +105,33 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
   private SQLServerManager manager;
 
   private Configuration conf = new Configuration();
+
   private Connection conn = null;
+
+  public static final String[] EXPECTED_RESULTS = new String[]{
+      "1,Aaron,1000000.0,engineering",
+      "2,Bob,400.0,sales",
+      "3,Fred,15.0,marketing",
+  };
+
+  @Parameters(name = "Builder: {0}, Table: {1}")
+  public static Iterable<? extends Object> testConfigurations() {
+    ArgumentArrayBuilder builderForTableImportWithExplicitSchema = getArgsBuilderForTableImport().withToolOption("schema", SCHEMA_DBO);
+    return Arrays.asList(
+        new Object[] { getArgsBuilderForQueryImport(), DBO_TABLE_NAME },
+        new Object[] { getArgsBuilderForTableImport(), DBO_TABLE_NAME },
+        new Object[] { getArgsBuilderForDifferentSchemaTableImport(), SCH_TABLE_NAME },
+        new Object[] { builderForTableImportWithExplicitSchema, DBO_TABLE_NAME }
+    );
+  }
+
+  private final ArgumentArrayBuilder builder;
+  private final String tableName;
+
+  public SQLServerManagerImportTest(ArgumentArrayBuilder builder, String tableName) {
+    this.builder = builder;
+    this.tableName = tableName;
+  }
 
   @Override
   protected Configuration getConf() {
@@ -124,8 +152,7 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
   public void setUp() {
     super.setUp();
 
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING,
-      DBO_TABLE_NAME);
+    SqoopOptions options = new SqoopOptions(CONNECT_STRING, DBO_TABLE_NAME);
     options.setUsername(DATABASE_USER);
     options.setPassword(DATABASE_PASSWORD);
 
@@ -241,96 +268,74 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
 
   @Test
   public void testImportSimple() throws IOException {
-    String [] expectedResults = {
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-    };
-
-    doImportAndVerify(DBO_TABLE_NAME, expectedResults);
-  }
-
-  @Test
-  public void testImportExplicitDefaultSchema() throws IOException {
-    String [] expectedResults = {
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-    };
-
-    String[] extraArgs = new String[] {"--schema", SCHEMA_DBO};
-
-    doImportAndVerify(DBO_TABLE_NAME, expectedResults, extraArgs);
-  }
-
-  @Test
-  public void testImportDifferentSchema() throws IOException {
-    String [] expectedResults = {
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-    };
-
-    String[] extraArgs = new String[] {"--schema", SCHEMA_SCH};
-
-    doImportAndVerify(SCH_TABLE_NAME, expectedResults, extraArgs);
+    doImportAndVerify(builder, tableName);
   }
 
   @Test
   public void testImportTableHints() throws IOException {
-    String [] expectedResults = {
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-    };
-
-    String[] extraArgs = new String[] {"--table-hints", "NOLOCK"};
-    doImportAndVerify(DBO_TABLE_NAME, expectedResults, extraArgs);
+    builder.withToolOption("table-hints", "NOLOCK");
+    doImportAndVerify(builder, tableName);
   }
 
   @Test
   public void testImportTableHintsMultiple() throws IOException {
-    String [] expectedResults = {
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-    };
-
-    String[] extraArgs = new String[] {"--table-hints", "NOLOCK,NOWAIT"};
-    doImportAndVerify(DBO_TABLE_NAME, expectedResults, extraArgs);
+    builder.withToolOption("table-hints", "NOLOCK,NOWAIT");
+    doImportAndVerify(builder, tableName);
   }
 
-  private String [] getArgv(String tableName, String ... extraArgs) {
-    ArrayList<String> args = new ArrayList<String>();
-
-    CommonArgs.addHadoopFlags(args);
-
-    args.add("--table");
-    args.add(tableName);
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(CONNECT_STRING);
-    args.add("--username");
-    args.add(DATABASE_USER);
-    args.add("--password");
-    args.add(DATABASE_PASSWORD);
-    args.add("--num-mappers");
-    args.add("1");
-
-    if (extraArgs.length > 0) {
-      args.add("--");
-      for (String arg : extraArgs) {
-        args.add(arg);
-      }
-    }
-
-    return args.toArray(new String[0]);
+  @Test
+  public void testImportTableResilient() throws IOException {
+    builder.withToolOption("resilient");
+    doImportAndVerify(builder, tableName);
   }
 
-  private void doImportAndVerify(String tableName,
-                                 String [] expectedResults,
-                                 String ... extraArgs) throws IOException {
+  /**
+   * The resilient option was named non-resilient before, but got renamed.
+   * This test is here to ensure backward compatibility in the sense that
+   * using the non-resilient option won't break any job.
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testImportTableNonResilient() throws IOException {
+    builder.withToolOption("non-resilient");
+    doImportAndVerify(builder, tableName);
+  }
+
+  private static ArgumentArrayBuilder getArgsBuilder() {
+    ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+    return builder.withCommonHadoopFlags(true)
+        .withOption("connect", CONNECT_STRING)
+        .withOption("username", DATABASE_USER)
+        .withOption("password", DATABASE_PASSWORD)
+        .withOption("num-mappers",  "1")
+        .withOption("split-by", "id");
+  }
+
+  private static ArgumentArrayBuilder getArgsBuilderForTableImport() {
+    ArgumentArrayBuilder builder = getArgsBuilder();
+    return builder.withCommonHadoopFlags(true)
+        .withOption("warehouse-dir", LOCAL_WAREHOUSE_DIR)
+        .withOption("table", DBO_TABLE_NAME);
+  }
+
+  private static ArgumentArrayBuilder getArgsBuilderForQueryImport() {
+    ArgumentArrayBuilder builder = getArgsBuilder();
+    return builder.withCommonHadoopFlags(true)
+        .withOption("query", "SELECT * FROM EMPLOYEES_MSSQL WHERE $CONDITIONS")
+        .withOption("target-dir", LOCAL_WAREHOUSE_DIR + "/" + DBO_TABLE_NAME);
+  }
+
+  private static ArgumentArrayBuilder getArgsBuilderForDifferentSchemaTableImport() {
+    ArgumentArrayBuilder builder = getArgsBuilder();
+    return builder.withCommonHadoopFlags(true)
+        .withOption("warehouse-dir", LOCAL_WAREHOUSE_DIR)
+        .withOption("table", SCH_TABLE_NAME)
+        .withToolOption("schema", SCHEMA_SCH);
+  }
+
+  private void doImportAndVerify(ArgumentArrayBuilder argBuilder,
+                                 String tableName) throws IOException {
 
     Path warehousePath = new Path(this.getWarehouseDir());
     Path tablePath = new Path(warehousePath, tableName);
@@ -342,7 +347,7 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
       FileListing.recursiveDeleteDir(tableFile);
     }
 
-    String [] argv = getArgv(tableName, extraArgs);
+    String [] argv = argBuilder.build();
     try {
       runImport(argv);
     } catch (IOException ioe) {
@@ -357,7 +362,7 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
     try {
       // Read through the file and make sure it's all there.
       r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-      for (String expectedLine : expectedResults) {
+      for (String expectedLine : EXPECTED_RESULTS) {
         assertEquals(expectedLine, r.readLine());
       }
     } catch (IOException ioe) {

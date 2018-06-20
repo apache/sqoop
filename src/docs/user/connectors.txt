@@ -127,7 +127,7 @@ Argument                                 Description
 ---------------------------------------------------------------------------------
 +\--identity-insert                      Set IDENTITY_INSERT to ON before \
                                          export insert.
-+\--non-resilient+                       Don't attempt to recover failed \
++\--resilient+                           Attempt to recover failed \
                                          export operations.
 +\--schema <name>+                       Scheme name that sqoop should use. \
                                          Default is "dbo".
@@ -144,14 +144,18 @@ You can allow inserts on columns that have identity. For example:
 $ sqoop export ... --export-dir custom_dir --table custom_table -- --identity-insert
 ----
 
-Non-resilient operations
-^^^^^^^^^^^^^^^^^^^^^^^^
+Resilient operations
+^^^^^^^^^^^^^^^^^^^^
 
-You can override the default and not use resilient operations during export.
-This will avoid retrying failed operations. For example:
+You can override the default and use resilient operations during export.
+This will retry failed operations, i.e. if the connection gets dropped by
+SQL Server, the mapper will try to reconnect and continue from where it was before.
+The split-by column has to be specified and it is also required to be unique
+and in ascending order.
+For example:
 
 ----
-$ sqoop export ... --export-dir custom_dir --table custom_table -- --non-resilient
+$ sqoop export ... --export-dir custom_dir --table custom_table -- --resilient
 ----
 
 Schema support

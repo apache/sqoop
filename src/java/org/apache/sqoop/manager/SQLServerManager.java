@@ -31,28 +31,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.mapreduce.JdbcUpsertExportJob;
-import org.apache.sqoop.mapreduce.SQLServerResilientExportOutputFormat;
-import org.apache.sqoop.mapreduce.SQLServerResilientUpdateOutputFormat;
-import org.apache.sqoop.mapreduce.db.SQLServerDBInputFormat;
-import org.apache.sqoop.mapreduce.db.SQLServerConnectionFailureHandler;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
 import org.apache.sqoop.mapreduce.JdbcUpdateExportJob;
+import org.apache.sqoop.mapreduce.sqlserver.SqlServerInputFormat;
 import org.apache.sqoop.util.ExportException;
 import org.apache.sqoop.util.ImportException;
 
 import org.apache.sqoop.cli.RelatedOptions;
-import org.apache.sqoop.mapreduce.sqlserver.SqlServerExportBatchOutputFormat;
-import org.apache.sqoop.mapreduce.sqlserver.SqlServerInputFormat;
 import org.apache.sqoop.mapreduce.sqlserver.SqlServerUpsertOutputFormat;
 
 /**
  * Manages connections to SQLServer databases. Requires the SQLServer JDBC
  * driver.
  */
-public class SQLServerManager
-    extends InformationSchemaManager {
+public class SQLServerManager extends InformationSchemaManager {
 
   public static final String SCHEMA = "schema";
   public static final String TABLE_HINTS = "table-hints";
@@ -62,8 +56,6 @@ public class SQLServerManager
   public static final Log LOG = LogFactory.getLog(
       SQLServerManager.class.getName());
 
-  // Option set in extra-arguments to disable resiliency and use default mode
-  public static final String NON_RESILIENT_OPTION = "non-resilient";
 
   // Option to allow inserts on identity columns
   public static final String IDENTITY_INSERT = "identity-insert";
@@ -88,12 +80,19 @@ public class SQLServerManager
    */
   private boolean identityInserts;
 
+  final SqlServerManagerContextConfigurator formatConfigurator;
+
   public SQLServerManager(final SqoopOptions opts) {
     this(SQLSERVER.getDriverClass(), opts);
   }
 
   public SQLServerManager(final String driver, final SqoopOptions opts) {
+    this(driver, opts, new SqlServerManagerContextConfigurator());
+  }
+
+  public SQLServerManager(final String driver, final SqoopOptions opts, final SqlServerManagerContextConfigurator configurator) {
     super(driver, opts);
+    this.formatConfigurator = configurator;
 
     // Try to parse extra arguments
     try {
@@ -121,7 +120,7 @@ public class SQLServerManager
        * import/export.
        */
       javaType = "String";
-    }else {
+    } else {
       //If none of the above data types match, it returns parent method's
       //status, which can be null.
       javaType = super.toJavaType(sqlType);
@@ -133,8 +132,7 @@ public class SQLServerManager
    * {@inheritDoc}
    */
   @Override
-  public void importTable(
-      org.apache.sqoop.manager.ImportJobContext context)
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     // We're the correct connection manager
     context.setConnManager(this);
@@ -144,20 +142,9 @@ public class SQLServerManager
     if (tableHints != null) {
       configuration.set(TABLE_HINTS_PROP, tableHints);
     }
-    if (!isNonResilientOperation()) {
-      // Enable connection recovery only if split column is provided
-      SqoopOptions opts = context.getOptions();
-      String splitCol = getSplitColumn(opts, context.getTableName());
-      if (splitCol != null) {
-        // Configure SQLServer table import jobs for connection recovery
-        configureConnectionRecoveryForImport(context);
-      } else {
-        // Set our own input format
-        context.setInputFormat(SqlServerInputFormat.class);
-      }
-    } else {
-      context.setInputFormat(SqlServerInputFormat.class);
-    }
+    String splitColumn = getSplitColumn(context.getOptions(), context.getTableName());
+    context.setInputFormat(SqlServerInputFormat.class);
+    formatConfigurator.configureContextForImport(context, splitColumn);
     super.importTable(context);
   }
 
@@ -165,8 +152,7 @@ public class SQLServerManager
    * Export data stored in HDFS into a table in a database.
    */
   @Override
-  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
-      throws IOException, ExportException {
+  public void exportTable(org.apache.sqoop.manager.ExportJobContext context) throws IOException, ExportException {
     context.setConnManager(this);
 
     // Propagate table hints to job
@@ -178,15 +164,9 @@ public class SQLServerManager
     // Propagate whether to allow identity inserts to job
     configuration.setBoolean(IDENTITY_INSERT_PROP, identityInserts);
 
-    JdbcExportJob exportJob;
-    if (isNonResilientOperation()) {
-      exportJob = new JdbcExportJob(context, null, null,
-      SqlServerExportBatchOutputFormat.class, getParquetJobConfigurator().createParquetExportJobConfigurator());
-    } else {
-      exportJob = new JdbcExportJob(context, null, null,
-        SQLServerResilientExportOutputFormat.class, getParquetJobConfigurator().createParquetExportJobConfigurator());
-      configureConnectionRecoveryForExport(context);
-    }
+    formatConfigurator.configureContextForExport(context);
+    JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
+        context.getOutputFormatClass(), getParquetJobConfigurator().createParquetExportJobConfigurator());
     exportJob.runExport();
   }
 
@@ -194,17 +174,15 @@ public class SQLServerManager
   /**
    * {@inheritDoc}
    */
-  public void updateTable(
-      org.apache.sqoop.manager.ExportJobContext context)
+  public void updateTable(org.apache.sqoop.manager.ExportJobContext context)
       throws IOException, ExportException {
-    if (isNonResilientOperation()) {
-      super.updateTable(context);
-    } else {
-      context.setConnManager(this);
+    boolean runAsExportJob = formatConfigurator.configureContextForUpdate(context, this);
+    if (runAsExportJob) {
       JdbcUpdateExportJob exportJob = new JdbcUpdateExportJob(context, null,
-        null, SQLServerResilientUpdateOutputFormat.class, getParquetJobConfigurator().createParquetExportJobConfigurator());
-      configureConnectionRecoveryForUpdate(context);
+          null, context.getOutputFormatClass(), getParquetJobConfigurator().createParquetExportJobConfigurator());
       exportJob.runExport();
+    } else {
+      super.updateTable(context);
     }
   }
 
@@ -391,99 +369,10 @@ public class SQLServerManager
    */
   public void importQuery(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
-    if (!isNonResilientOperation()) {
-      // Enable connection recovery only if split column is provided
-      SqoopOptions opts = context.getOptions();
-      String splitCol = getSplitColumn(opts, context.getTableName());
-      if (splitCol != null) {
-        // Configure SQLServer query import jobs for connection recovery
-        configureConnectionRecoveryForImport(context);
-      }
-    }
+    String splitColumn = getSplitColumn(context.getOptions(), context.getTableName());
+    formatConfigurator.configureContextForImport(context, splitColumn);
     super.importQuery(context);
   }
 
-  /**
-   * Configure SQLServer Sqoop Jobs to recover failed connections by using
-   * SQLServerConnectionFailureHandler by default.
-   */
-  protected void configureConnectionRecoveryForImport(
-      org.apache.sqoop.manager.ImportJobContext context) {
-
-    Configuration conf = context.getOptions().getConf();
-
-    // Configure input format class
-    context.setInputFormat(SQLServerDBInputFormat.class);
-
-    // Set connection failure handler and recovery settings
-    // Default settings can be overridden if provided as Configuration
-    // properties by the user
-    if (conf.get(SQLServerDBInputFormat.IMPORT_FAILURE_HANDLER_CLASS)
-        == null) {
-      conf.set(SQLServerDBInputFormat.IMPORT_FAILURE_HANDLER_CLASS,
-        SQLServerConnectionFailureHandler.class.getName());
-    }
-  }
-
-  /**
-   * Configure SQLServer Sqoop export Jobs to recover failed connections by
-   * using SQLServerConnectionFailureHandler by default.
-   */
-  protected void configureConnectionRecoveryForExport(
-      org.apache.sqoop.manager.ExportJobContext context) {
-
-    Configuration conf = context.getOptions().getConf();
-
-    // Set connection failure handler and recovery settings
-    // Default settings can be overridden if provided as Configuration
-    // properties by the user
-    String clsFailureHandler = conf.get(
-      SQLServerResilientExportOutputFormat.EXPORT_FAILURE_HANDLER_CLASS);
-    if (clsFailureHandler == null) {
-      conf.set(
-        SQLServerResilientExportOutputFormat.EXPORT_FAILURE_HANDLER_CLASS,
-        SQLServerConnectionFailureHandler.class.getName());
-    }
-  }
-
-  /**
-   * Configure SQLServer Sqoop Update Jobs to recover connection failures by
-   * using SQLServerConnectionFailureHandler by default.
-   */
-  protected void configureConnectionRecoveryForUpdate(
-      org.apache.sqoop.manager.ExportJobContext context) {
-
-    Configuration conf = context.getOptions().getConf();
-
-    // Set connection failure handler and recovery settings
-    // Default settings can be overridden if provided as Configuration
-    // properties by the user
-    String clsFailureHandler = conf.get(
-      SQLServerResilientExportOutputFormat.EXPORT_FAILURE_HANDLER_CLASS);
-    if (clsFailureHandler == null) {
-      conf.set(
-        SQLServerResilientExportOutputFormat.EXPORT_FAILURE_HANDLER_CLASS,
-        SQLServerConnectionFailureHandler.class.getName());
-    }
-  }
-
-  /**
-   * Check if the user has requested the operation to be non resilient.
-   */
-  protected boolean isNonResilientOperation() {
-    String [] extraArgs = options.getExtraArgs();
-    if (extraArgs != null) {
-      // Traverse the extra options
-      for (int iArg = 0; iArg < extraArgs.length; ++iArg) {
-        String currentArg = extraArgs[iArg];
-        if (currentArg.startsWith("--")
-          && currentArg.substring(2).equalsIgnoreCase(NON_RESILIENT_OPTION)) {
-          // User has explicitly requested the operation to be non-resilient
-          return true;
-        }
-      }
-    }
-    return false;
-  }
 }
 
