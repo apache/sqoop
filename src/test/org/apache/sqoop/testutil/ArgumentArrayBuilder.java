@@ -18,11 +18,12 @@
 
 package org.apache.sqoop.testutil;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -31,55 +32,57 @@ public class ArgumentArrayBuilder {
   private static final String PROPERTY_PREFIX = "-D";
 
   private static final String OPTION_PREFIX = "--";
-  public static final String TOOL_ARG_SEPARATOR = "--";
 
-  private List<Argument> properties;
+  private static final String TOOL_ARG_SEPARATOR = "--";
 
-  private List<Argument> options;
+  private Map<String, Argument> properties;
 
-  private List<Argument> toolOptions;
+  private Map<String, Argument> options;
+
+  private Map<String, Argument> toolOptions;
 
   private boolean withCommonHadoopFlags;
 
   public ArgumentArrayBuilder() {
-    properties = new ArrayList<>();
-    options = new ArrayList<>();
-    toolOptions = new ArrayList<>();
+    properties = new HashMap<>();
+    options = new HashMap<>();
+    toolOptions = new HashMap<>();
   }
 
   public ArgumentArrayBuilder withProperty(String name, String value) {
-    properties.add(new Argument(name, value));
+    properties.put(name, new Argument(name, value));
     return this;
   }
 
   public ArgumentArrayBuilder withProperty(String name) {
-    properties.add(new Argument(name));
+    properties.put(name, new Argument(name));
     return this;
   }
 
   public ArgumentArrayBuilder withOption(String name, String value) {
-    options.add(new Argument(name, value));
+    options.put(name, new Argument(name, value));
     return this;
   }
 
   public ArgumentArrayBuilder withOption(String name) {
-    options.add(new Argument(name));
+    options.put(name, new Argument(name));
     return this;
   }
 
   public ArgumentArrayBuilder withToolOption(String name, String value) {
-    toolOptions.add(new Argument(name, value));
+    toolOptions.put(name, new Argument(name, value));
     return this;
   }
 
   public ArgumentArrayBuilder withToolOption(String name) {
-    toolOptions.add(new Argument(name));
+    toolOptions.put(name, new Argument(name));
     return this;
   }
 
   public ArgumentArrayBuilder with(ArgumentArrayBuilder otherBuilder) {
-    properties.addAll(otherBuilder.properties);
-    options.addAll(otherBuilder.options);
+    properties.putAll(otherBuilder.properties);
+    options.putAll(otherBuilder.options);
+    toolOptions.putAll(otherBuilder.toolOptions);
     return this;
   }
 
@@ -103,20 +106,20 @@ public class ArgumentArrayBuilder {
     if (withCommonHadoopFlags) {
       CommonArgs.addHadoopFlags(result);
     }
-    if (CollectionUtils.isNotEmpty(properties)) {
-      Collections.addAll(result, createArgumentArrayFromProperties(properties));
+    if (!properties.isEmpty()) {
+      Collections.addAll(result, createArgumentArrayFromProperties(properties.values()));
     }
-    if (CollectionUtils.isNotEmpty(options)) {
-      Collections.addAll(result, createArgumentArrayFromOptions(options));
+    if (!options.isEmpty()) {
+      Collections.addAll(result, createArgumentArrayFromOptions(options.values()));
     }
-    if (CollectionUtils.isNotEmpty(toolOptions)) {
+    if (!toolOptions.isEmpty()) {
       result.add(TOOL_ARG_SEPARATOR);
-      Collections.addAll(result, createArgumentArrayFromOptions(toolOptions));
+      Collections.addAll(result, createArgumentArrayFromOptions(toolOptions.values()));
     }
     return result.toArray(new String[result.size()]);
   }
 
-  private String[] createArgumentArrayFromProperties(List<Argument> properties) {
+  private String[] createArgumentArrayFromProperties(Iterable<Argument> properties) {
     List<String> result = new ArrayList<>();
     for (Argument property : properties) {
       result.add(PROPERTY_PREFIX);
@@ -125,7 +128,7 @@ public class ArgumentArrayBuilder {
     return result.toArray(new String[result.size()]);
   }
 
-  private String[] createArgumentArrayFromOptions(List<Argument> options) {
+  private String[] createArgumentArrayFromOptions(Iterable<Argument> options) {
     List<String> result = new ArrayList<>();
     for (Argument option : options) {
       result.add(OPTION_PREFIX + option.getName());
@@ -134,5 +137,10 @@ public class ArgumentArrayBuilder {
       }
     }
     return result.toArray(new String[result.size()]);
+  }
+
+  @Override
+  public String toString() {
+    return Arrays.toString(build());
   }
 }
