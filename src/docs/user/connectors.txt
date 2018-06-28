@@ -147,16 +147,31 @@ $ sqoop export ... --export-dir custom_dir --table custom_table -- --identity-in
 Resilient operations
 ^^^^^^^^^^^^^^^^^^^^
 
-You can override the default and use resilient operations during export.
+You can override the default and use resilient operations during export or import.
 This will retry failed operations, i.e. if the connection gets dropped by
 SQL Server, the mapper will try to reconnect and continue from where it was before.
-The split-by column has to be specified and it is also required to be unique
-and in ascending order.
-For example:
 
+In case of export, the +\--resilient+ option will ensure that Sqoop will try to recover
+from connection resets.
+
+In case of import, however, one has to use both the +\--resilient+ option and specify
+the +\--split-by+ column to trigger the retry mechanism. An important requirement is
+that the data must be unique and ordered ascending by the split-by column, otherwise
+records could be either lost or duplicated.
+
+Example commands using resilient operations:
 ----
 $ sqoop export ... --export-dir custom_dir --table custom_table -- --resilient
 ----
+
+Importing from a table:
+----
+$ sqoop import ... --table custom_table --split-by id -- --resilient
+----
+
+Importing via a query:
+----
+$ sqoop import ... --query "SELECT ... WHERE $CONDITIONS" --split-by ordered_column -- --resilient
 
 Schema support
 ^^^^^^^^^^^^^^

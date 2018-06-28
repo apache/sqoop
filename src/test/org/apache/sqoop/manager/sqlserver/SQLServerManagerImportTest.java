@@ -28,9 +28,11 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.SQLServerManager;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.util.ExpectedLogMessage;
 import org.apache.sqoop.util.FileListing;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -129,7 +131,7 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
   private final String tableName;
 
   public SQLServerManagerImportTest(ArgumentArrayBuilder builder, String tableName) {
-    this.builder = builder;
+    this.builder = new ArgumentArrayBuilder().with(builder);
     this.tableName = tableName;
   }
 
@@ -266,6 +268,9 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
     }
   }
 
+  @Rule
+  public ExpectedLogMessage logMessage = new ExpectedLogMessage();
+
   @Test
   public void testImportSimple() throws IOException {
     doImportAndVerify(builder, tableName);
@@ -285,6 +290,7 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
 
   @Test
   public void testImportTableResilient() throws IOException {
+    logMessage.expectWarn("Sqoop will use resilient operations! In case of import, the split-by column also has to be specified, unique, and in ascending order.");
     builder.withToolOption("resilient");
     doImportAndVerify(builder, tableName);
   }

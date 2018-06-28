@@ -333,6 +333,11 @@ public class SQLServerManager extends InformationSchemaManager {
       this.tableHints = hints;
     }
 
+    if (cmdLine.hasOption(SqlServerManagerContextConfigurator.RESILIENT_OPTION)) {
+      LOG.warn("Sqoop will use resilient operations! In case of import, " +
+          "the split-by column also has to be specified, unique, and in ascending order.");
+    }
+
     identityInserts = cmdLine.hasOption(IDENTITY_INSERT);
   }
 
@@ -358,6 +363,9 @@ public class SQLServerManager extends InformationSchemaManager {
     extraOptions.addOption(OptionBuilder
       .withDescription("Allow identity inserts")
       .withLongOpt(IDENTITY_INSERT).create());
+
+    extraOptions.addOption(OptionBuilder
+        .withLongOpt(SqlServerManagerContextConfigurator.RESILIENT_OPTION).create());
 
     return extraOptions;
   }

@@ -28,7 +28,7 @@ import org.apache.sqoop.mapreduce.sqlserver.SqlServerExportBatchOutputFormat;
 
 public class SqlServerManagerContextConfigurator {
 
-  private static final String RESILIENT_OPTION = "resilient";
+  public static final String RESILIENT_OPTION = "resilient";
 
   /**
    * Check if the user has requested the operation to be resilient.
