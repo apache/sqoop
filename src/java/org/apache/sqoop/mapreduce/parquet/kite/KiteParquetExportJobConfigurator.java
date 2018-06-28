@@ -28,6 +28,9 @@ import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 
 import java.io.IOException;
 
+/**
+ * An implementation of {@link ParquetExportJobConfigurator} which depends on the Kite Dataset API.
+ */
 public class KiteParquetExportJobConfigurator implements ParquetExportJobConfigurator {
 
   @Override

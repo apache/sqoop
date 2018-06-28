@@ -37,6 +37,7 @@ import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.junit.Test;
 
+import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -57,7 +58,7 @@ public class TestBigDecimalExport extends ExportJobTestCase {
     writer.close();
     String[] types =
       { "DECIMAL", "NUMERIC" };
-    createTableWithColTypes(types, null);
+    createTableWithColTypes(types, emptyList());
 
     List<String> args = new ArrayList<String>();
 

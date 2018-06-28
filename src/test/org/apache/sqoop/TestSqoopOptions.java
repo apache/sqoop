@@ -90,6 +90,7 @@ public class TestSqoopOptions {
     excludedFieldsFromClone.add("layout");
     excludedFieldsFromClone.add("activeSqoopTool");
     excludedFieldsFromClone.add("hbaseNullIncrementalMode");
+    excludedFieldsFromClone.add("parquetConfiguratorImplementation");
   }
 
   @After

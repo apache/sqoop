@@ -16,40 +16,48 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce.parquet.kite;
+package org.apache.sqoop.mapreduce.parquet.hadoop;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.sqoop.avro.AvroUtil;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.mapreduce.ParquetImportMapper;
 
 import java.io.IOException;
 
-import static org.apache.sqoop.mapreduce.parquet.ParquetConstants.SQOOP_PARQUET_AVRO_SCHEMA_KEY;
-
 /**
- * An implementation of {@link ParquetImportMapper} which depends on the Kite Dataset API.
+ * An implementation of {@link ParquetImportMapper} which depends on the Hadoop Parquet library.
  */
-public class KiteParquetImportMapper extends ParquetImportMapper<GenericRecord, Void> {
+public class HadoopParquetImportMapper extends ParquetImportMapper<NullWritable, GenericRecord> {
+
+  private static final Log LOG = LogFactory.getLog(HadoopParquetImportMapper.class.getName());
+
+  /**
+   * The key to get the configuration value set by
+   * parquet.avro.AvroParquetOutputFormat#setSchema(org.apache.hadoop.mapreduce.Job, org.apache.avro.Schema)
+   */
+  private static final String HADOOP_PARQUET_AVRO_SCHEMA_KEY = "parquet.avro.schema";
 
   @Override
   protected LargeObjectLoader createLobLoader(Context context) throws IOException, InterruptedException {
-    Configuration conf = context.getConfiguration();
-    Path workPath = new Path(conf.get("sqoop.kite.lob.extern.dir", "/tmp/sqoop-parquet-" + context.getTaskAttemptID()));
-    return new LargeObjectLoader(conf, workPath);
+    return new LargeObjectLoader(context.getConfiguration(), FileOutputFormat.getWorkOutputPath(context));
   }
 
   @Override
   protected Schema getAvroSchema(Configuration configuration) {
-    String schemaString = configuration.get(SQOOP_PARQUET_AVRO_SCHEMA_KEY);
+    String schemaString = configuration.get(HADOOP_PARQUET_AVRO_SCHEMA_KEY);
+    LOG.debug("Found Avro schema: " + schemaString);
     return AvroUtil.parseAvroSchema(schemaString);
   }
 
   @Override
   protected void write(Context context, GenericRecord record) throws IOException, InterruptedException {
-    context.write(record, null);
+    context.write(null, record);
   }
 }

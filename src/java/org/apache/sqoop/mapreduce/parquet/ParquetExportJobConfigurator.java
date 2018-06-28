@@ -25,6 +25,10 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 
+/**
+ * This interface defines the type of a product of {@link ParquetJobConfiguratorFactory}.
+ * The implementations of the methods of this interface help to configure Sqoop Parquet export jobs.
+ */
 public interface ParquetExportJobConfigurator {
 
   void configureInputFormat(Job job, Path inputPath) throws IOException;

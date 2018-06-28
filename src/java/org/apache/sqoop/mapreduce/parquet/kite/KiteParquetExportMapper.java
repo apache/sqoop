@@ -25,7 +25,7 @@ import org.apache.sqoop.mapreduce.GenericRecordExportMapper;
 import java.io.IOException;
 
 /**
- * Exports Parquet records from a data source.
+ * An implementation of {@link GenericRecordExportMapper} which depends on the Kite Dataset API.
  */
 public class KiteParquetExportMapper extends GenericRecordExportMapper<GenericRecord, NullWritable> {
 

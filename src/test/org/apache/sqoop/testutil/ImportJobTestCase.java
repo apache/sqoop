@@ -37,6 +37,7 @@ import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.Before;
 
+import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -219,12 +220,7 @@ public abstract class ImportJobTestCase extends BaseSqoopTestCase {
     // run the tool through the normal entry-point.
     int ret;
     try {
-      Configuration conf = getConf();
-      //Need to disable OraOop for existing tests
-      conf.set("oraoop.disabled", "true");
-      SqoopOptions opts = getSqoopOptions(conf);
-      Sqoop sqoop = new Sqoop(tool, conf, opts);
-      ret = Sqoop.runSqoop(sqoop, argv);
+      ret = runSqoopTool(tool, argv, getSqoopOptions(getConf()));
     } catch (Exception e) {
       LOG.error("Got exception running Sqoop: " + e.toString());
       e.printStackTrace();
@@ -237,9 +233,40 @@ public abstract class ImportJobTestCase extends BaseSqoopTestCase {
     }
   }
 
+  private int runSqoopTool(SqoopTool tool, String [] argv, SqoopOptions sqoopOptions) {
+    Configuration conf = getConf();
+    //Need to disable OraOop for existing tests
+    conf.set("oraoop.disabled", "true");
+    Sqoop sqoop = new Sqoop(tool, conf, sqoopOptions);
+
+    return Sqoop.runSqoop(sqoop, argv);
+  }
+
+  protected int runImportThrowingException(SqoopTool tool, String [] argv) {
+    String oldRethrowProperty = System.getProperty(SQOOP_RETHROW_PROPERTY);
+    System.setProperty(SQOOP_RETHROW_PROPERTY, "true");
+
+    SqoopOptions sqoopOptions = getSqoopOptions(getConf());
+    sqoopOptions.setThrowOnError(true);
+
+    try {
+      return runSqoopTool(tool, argv, sqoopOptions);
+    } finally {
+      if (oldRethrowProperty == null) {
+        System.clearProperty(SQOOP_RETHROW_PROPERTY);
+      } else {
+        System.setProperty(SQOOP_RETHROW_PROPERTY, oldRethrowProperty);
+      }
+    }
+  }
+
   /** run an import using the default ImportTool. */
   protected void runImport(String [] argv) throws IOException {
     runImport(new ImportTool(), argv);
+  }
+
+  protected void runImportThrowingException(String [] argv) {
+    runImportThrowingException(new ImportTool(), argv);
   }
 
 }

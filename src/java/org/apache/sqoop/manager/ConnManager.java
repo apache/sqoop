@@ -46,7 +46,6 @@ import org.apache.sqoop.hive.HiveTypes;
 import org.apache.sqoop.lib.BlobRef;
 import org.apache.sqoop.lib.ClobRef;
 import org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorFactory;
-import org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorFactoryProvider;
 import org.apache.sqoop.util.ExportException;
 import org.apache.sqoop.util.ImportException;
 
@@ -869,7 +868,7 @@ public abstract class ConnManager {
   }
 
   public ParquetJobConfiguratorFactory getParquetJobConfigurator() {
-    return ParquetJobConfiguratorFactoryProvider.createParquetJobConfiguratorFactory(options.getConf());
+    return options.getParquetConfiguratorImplementation().createFactory();
   }
 }
 

@@ -16,19 +16,20 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce.parquet;
+package org.apache.sqoop.mapreduce.parquet.hadoop;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.mapreduce.parquet.kite.KiteParquetJobConfiguratorFactory;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.sqoop.mapreduce.MergeParquetReducer;
 
-public final class ParquetJobConfiguratorFactoryProvider {
+import java.io.IOException;
 
-  private ParquetJobConfiguratorFactoryProvider() {
-    throw new AssertionError("This class is meant for static use only.");
+/**
+ * An implementation of {@link MergeParquetReducer} which depends on the Hadoop Parquet library.
+ */
+public class HadoopMergeParquetReducer extends MergeParquetReducer<Void, GenericRecord> {
+
+  @Override
+  protected void write(Context context, GenericRecord record) throws IOException, InterruptedException {
+    context.write(null, record);
   }
-
-  public static ParquetJobConfiguratorFactory createParquetJobConfiguratorFactory(Configuration configuration) {
-    return new KiteParquetJobConfiguratorFactory();
-  }
-
 }

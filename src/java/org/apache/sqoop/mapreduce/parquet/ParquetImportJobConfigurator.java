@@ -27,6 +27,10 @@ import org.apache.sqoop.SqoopOptions;
 
 import java.io.IOException;
 
+/**
+ * This interface defines the type of a product of {@link ParquetJobConfiguratorFactory}.
+ * The implementations of the methods of this interface help to configure Sqoop Parquet import jobs.
+ */
 public interface ParquetImportJobConfigurator {
 
   void configureMapper(Job job, Schema schema, SqoopOptions options, String tableName, Path destination) throws IOException;

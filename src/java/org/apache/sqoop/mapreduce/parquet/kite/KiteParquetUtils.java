@@ -45,7 +45,7 @@ import static org.apache.sqoop.mapreduce.parquet.ParquetConstants.SQOOP_PARQUET_
 import static org.apache.sqoop.mapreduce.parquet.ParquetConstants.SQOOP_PARQUET_OUTPUT_CODEC_KEY;
 
 /**
- * Helper class for setting up a Parquet MapReduce job.
+ * Helper class using the Kite Dataset API for setting up a Parquet MapReduce job.
  */
 public final class KiteParquetUtils {
 

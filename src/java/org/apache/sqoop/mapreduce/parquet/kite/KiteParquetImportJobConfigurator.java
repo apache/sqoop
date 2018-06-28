@@ -35,6 +35,9 @@ import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
 
 import java.io.IOException;
 
+/**
+ * An implementation of {@link ParquetImportJobConfigurator} which depends on the Kite Dataset API.
+ */
 public class KiteParquetImportJobConfigurator implements ParquetImportJobConfigurator {
 
   public static final Log LOG = LogFactory.getLog(KiteParquetImportJobConfigurator.class.getName());

@@ -473,7 +473,7 @@ public class ImportTool extends BaseSqoopTool {
           loadJars(options.getConf(), context.getJarFile(), context.getTableName());
         }
 
-        ParquetMergeJobConfigurator parquetMergeJobConfigurator = getParquetJobConfigurator(options.getConf()).createParquetMergeJobConfigurator();
+        ParquetMergeJobConfigurator parquetMergeJobConfigurator = getParquetJobConfigurator(options).createParquetMergeJobConfigurator();
         MergeJob mergeJob = new MergeJob(options, parquetMergeJobConfigurator);
         if (mergeJob.runMergeJob()) {
           // Rename destination directory to proper location.

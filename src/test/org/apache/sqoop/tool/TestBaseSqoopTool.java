@@ -18,15 +18,21 @@
 
 package org.apache.sqoop.tool;
 
+import org.apache.commons.cli.CommandLine;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.HADOOP;
+import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.KITE;
 import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestBaseSqoopTool {
 
@@ -35,11 +41,13 @@ public class TestBaseSqoopTool {
 
   private BaseSqoopTool testBaseSqoopTool;
   private SqoopOptions testSqoopOptions;
+  private CommandLine mockCommandLine;
 
   @Before
   public void setup() {
     testBaseSqoopTool = mock(BaseSqoopTool.class, Mockito.CALLS_REAL_METHODS);
     testSqoopOptions = new SqoopOptions();
+    mockCommandLine = mock(CommandLine.class);
   }
 
   @Test
@@ -69,4 +77,61 @@ public class TestBaseSqoopTool {
     testBaseSqoopTool.rethrowIfRequired(testSqoopOptions, expectedCauseException);
   }
 
+  @Test
+  public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromCommandLine() throws Exception {
+    ParquetJobConfiguratorImplementation expectedValue = HADOOP;
+
+    when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn(expectedValue.toString());
+
+    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+
+    assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
+  }
+
+  @Test
+  public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromCommandLineCaseInsensitively() throws Exception {
+    String hadoopImplementationLowercase = "haDooP";
+
+    when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn(hadoopImplementationLowercase);
+
+    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+
+    assertEquals(HADOOP, testSqoopOptions.getParquetConfiguratorImplementation());
+  }
+
+  @Test
+  public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromConfiguration() throws Exception {
+    ParquetJobConfiguratorImplementation expectedValue = HADOOP;
+    testSqoopOptions.getConf().set("parquetjob.configurator.implementation", expectedValue.toString());
+
+    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+
+    assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
+  }
+
+  @Test
+  public void testApplyCommonOptionsPrefersParquetJobConfigurationImplementationFromCommandLine() throws Exception {
+    ParquetJobConfiguratorImplementation expectedValue = HADOOP;
+    testSqoopOptions.getConf().set("parquetjob.configurator.implementation", "kite");
+    when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn(expectedValue.toString());
+
+    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+
+    assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
+  }
+
+  @Test
+  public void testApplyCommonOptionsThrowsWhenInvalidParquetJobConfigurationImplementationIsSet() throws Exception {
+    when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn("this_is_definitely_not_valid");
+
+    exception.expectMessage("Invalid Parquet job configurator implementation is set: this_is_definitely_not_valid. Supported values are: [KITE, HADOOP]");
+    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+  }
+
+  @Test
+  public void testApplyCommonOptionsDoesNotChangeDefaultParquetJobConfigurationImplementationWhenNothingIsSet() throws Exception {
+    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+
+    assertEquals(KITE, testSqoopOptions.getParquetConfiguratorImplementation());
+  }
 }

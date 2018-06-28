@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce.parquet.kite;
+package org.apache.sqoop.mapreduce.parquet.hadoop;
 
 import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
@@ -24,22 +24,22 @@ import org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorFactory;
 import org.apache.sqoop.mapreduce.parquet.ParquetMergeJobConfigurator;
 
 /**
- * A concrete factory implementation which produces configurator objects using the Kite Dataset API.
+ * A concrete factory implementation which produces configurator objects using the Hadoop Parquet library.
  */
-public class KiteParquetJobConfiguratorFactory implements ParquetJobConfiguratorFactory {
+public class HadoopParquetJobConfiguratorFactory implements ParquetJobConfiguratorFactory {
 
   @Override
   public ParquetImportJobConfigurator createParquetImportJobConfigurator() {
-    return new KiteParquetImportJobConfigurator();
+    return new HadoopParquetImportJobConfigurator();
   }
 
   @Override
   public ParquetExportJobConfigurator createParquetExportJobConfigurator() {
-    return new KiteParquetExportJobConfigurator();
+    return new HadoopParquetExportJobConfigurator();
   }
 
   @Override
   public ParquetMergeJobConfigurator createParquetMergeJobConfigurator() {
-    return new KiteParquetMergeJobConfigurator();
+    return new HadoopParquetMergeJobConfigurator();
   }
 }

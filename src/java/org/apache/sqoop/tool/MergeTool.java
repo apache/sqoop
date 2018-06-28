@@ -53,7 +53,7 @@ public class MergeTool extends BaseSqoopTool {
   public int run(SqoopOptions options) {
     try {
       // Configure and execute a MapReduce job to merge these datasets.
-      ParquetMergeJobConfigurator parquetMergeJobConfigurator = getParquetJobConfigurator(options.getConf()).createParquetMergeJobConfigurator();
+      ParquetMergeJobConfigurator parquetMergeJobConfigurator = getParquetJobConfigurator(options).createParquetMergeJobConfigurator();
       MergeJob mergeJob = new MergeJob(options, parquetMergeJobConfigurator);
       if (!mergeJob.runMergeJob()) {
         LOG.error("MapReduce job failed!");

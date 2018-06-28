@@ -42,7 +42,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.junit.Assert.fail;
 
 /**
@@ -427,6 +429,16 @@ public abstract class BaseSqoopTestCase {
     insertIntoTable(null, colTypes, vals);
   }
 
+  protected void insertIntoTable(String[] colTypes, List<Object> record) {
+    insertIntoTable(null, colTypes, toStringArray(record));
+  }
+
+  protected void insertRecordsIntoTable(String[] colTypes, List<List<Object>> records) {
+    for (List<Object> record : records) {
+      insertIntoTable(colTypes, record);
+    }
+  }
+
   protected void insertIntoTable(String[] columns, String[] colTypes, String[] vals) {
     assert colTypes != null;
     assert colTypes.length == vals.length;
@@ -575,6 +587,17 @@ public abstract class BaseSqoopTestCase {
     createTableWithColTypesAndNames(colNames, colTypes, vals);
   }
 
+  protected void createTableWithColTypes(String [] colTypes, List<Object> record) {
+    createTableWithColTypes(colTypes, toStringArray(record));
+  }
+
+  protected void createTableWithRecords(String [] colTypes, List<List<Object>> records) {
+    createTableWithColTypes(colTypes, records.get(0));
+    for (int i = 1; i < records.size(); i++) {
+      insertIntoTable(colTypes, records.get(i));
+    }
+  }
+
   /**
    * Create a table with a single column and put a data element in it.
    * @param colType the type of the column to create
@@ -626,5 +649,29 @@ public abstract class BaseSqoopTestCase {
     }
 
     return ObjectArrays.concat(entries, moreEntries, String.class);
+  }
+
+  protected void clearTable(String tableName) throws SQLException {
+    String truncateCommand = "DELETE FROM " + tableName;
+    Connection conn = getManager().getConnection();
+    try (PreparedStatement statement = conn.prepareStatement(truncateCommand)){
+      statement.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private String[] toStringArray(List<Object> columnValues) {
+    String[] result = new String[columnValues.size()];
+
+    for (int i = 0; i < columnValues.size(); i++) {
+      if (columnValues.get(i) instanceof String) {
+        result[i] = wrap((String) columnValues.get(i), '\'');
+      } else {
+        result[i] = columnValues.get(i).toString();
+      }
+    }
+
+    return result;
   }
 }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,21 +16,22 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce.parquet.kite;
+package org.apache.sqoop.mapreduce.parquet.hadoop;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.sqoop.mapreduce.MergeParquetReducer;
+import org.apache.sqoop.mapreduce.GenericRecordExportMapper;
 
 import java.io.IOException;
 
 /**
- * An implementation of {@link MergeParquetReducer} which depends on the Kite Dataset API.
+ * An implementation of {@link GenericRecordExportMapper} which depends on the Hadoop Parquet library.
  */
-public class KiteMergeParquetReducer extends MergeParquetReducer<GenericRecord, NullWritable> {
+public class HadoopParquetExportMapper extends GenericRecordExportMapper<Void, GenericRecord> {
 
   @Override
-  protected void write(Context context, GenericRecord record) throws IOException, InterruptedException {
-    context.write(record, null);
+  protected void map(Void key, GenericRecord val, Context context) throws IOException, InterruptedException {
+    context.write(toSqoopRecord(val), NullWritable.get());
   }
+
 }

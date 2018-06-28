@@ -16,21 +16,34 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce.parquet.kite;
+package org.apache.sqoop.mapreduce.parquet.hadoop;
 
-import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.sqoop.mapreduce.MergeParquetReducer;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
+import parquet.avro.AvroParquetInputFormat;
 
 import java.io.IOException;
 
 /**
- * An implementation of {@link MergeParquetReducer} which depends on the Kite Dataset API.
+ * An implementation of {@link ParquetExportJobConfigurator} which depends on the Hadoop Parquet library.
  */
-public class KiteMergeParquetReducer extends MergeParquetReducer<GenericRecord, NullWritable> {
+public class HadoopParquetExportJobConfigurator implements ParquetExportJobConfigurator {
 
   @Override
-  protected void write(Context context, GenericRecord record) throws IOException, InterruptedException {
-    context.write(record, null);
+  public void configureInputFormat(Job job, Path inputPath) throws IOException {
+    // do nothing
+  }
+
+  @Override
+  public Class<? extends Mapper> getMapperClass() {
+    return HadoopParquetExportMapper.class;
+  }
+
+  @Override
+  public Class<? extends InputFormat> getInputFormatClass() {
+    return AvroParquetInputFormat.class;
   }
 }

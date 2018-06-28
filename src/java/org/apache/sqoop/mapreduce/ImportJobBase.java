@@ -152,6 +152,7 @@ public class ImportJobBase extends JobBase {
           String shortName = CodecMap.getCodecShortNameByName(codecName, conf);
           if (!shortName.equalsIgnoreCase("default")) {
             conf.set(SQOOP_PARQUET_OUTPUT_CODEC_KEY, shortName);
+            options.getConf().set(SQOOP_PARQUET_OUTPUT_CODEC_KEY, shortName);
           }
         }
       }

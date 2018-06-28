@@ -18,7 +18,6 @@
 
 package org.apache.sqoop.hive;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.sqoop.hive.minicluster.HiveMiniCluster;
 import org.apache.sqoop.hive.minicluster.KerberosAuthenticationConfiguration;
@@ -67,7 +66,7 @@ public class TestHiveServer2TextImport extends ImportJobTestCase {
     List<Object> columnValues = Arrays.<Object>asList("test", 42, "somestring");
 
     String[] types = {"VARCHAR(32)", "INTEGER", "CHAR(64)"};
-    createTableWithColTypes(types, toStringArray(columnValues));
+    createTableWithColTypes(types, columnValues);
 
     String[] args = new ArgumentArrayBuilder()
         .withProperty(YarnConfiguration.RM_PRINCIPAL, miniKdcInfrastructure.getTestPrincipal())
@@ -83,19 +82,4 @@ public class TestHiveServer2TextImport extends ImportJobTestCase {
     List<List<Object>> rows = hiveServer2TestUtil.loadRawRowsFromTable(getTableName());
     assertEquals(columnValues, rows.get(0));
   }
-
-  private String[] toStringArray(List<Object> columnValues) {
-    String[] result = new String[columnValues.size()];
-
-    for (int i = 0; i < columnValues.size(); i++) {
-      if (columnValues.get(i) instanceof String) {
-        result[i] = StringUtils.wrap((String) columnValues.get(i), '\'');
-      } else {
-        result[i] = columnValues.get(i).toString();
-      }
-    }
-
-    return result;
-  }
-
 }

@@ -48,6 +48,9 @@ import java.util.List;
 
 import static org.apache.sqoop.mapreduce.parquet.ParquetConstants.SQOOP_PARQUET_AVRO_SCHEMA_KEY;
 
+/**
+ * An implementation of {@link ParquetMergeJobConfigurator} which depends on the Kite Dataset API.
+ */
 public class KiteParquetMergeJobConfigurator implements ParquetMergeJobConfigurator {
 
   public static final Log LOG = LogFactory.getLog(KiteParquetMergeJobConfigurator.class.getName());
