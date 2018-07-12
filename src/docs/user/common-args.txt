@@ -34,6 +34,8 @@ Argument                                  Description
 +-P+                                      Read password from console
 +\--password <password>+                  Set authentication password
 +\--username <username>+                  Set authentication username
++\--delete-compile-dir+                   Remove temporarily generated class Jar\
+                                          files after job finishes
 +\--verbose+                              Print more information while working
 +\--connection-param-file <filename>+     Optional properties file that\
                                           provides connection parameters

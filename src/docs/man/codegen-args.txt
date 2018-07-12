@@ -34,6 +34,9 @@ Code generation options
 --outdir (dir)::
   Output directory for generated code
 
+--delete-compile-dir::
+  Remove temporarily generated class Jar files after job finishes
+
 --package-name (package)::
   Puts auto-generated classes in the named Java package
 
