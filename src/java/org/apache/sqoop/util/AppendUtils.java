@@ -43,7 +43,7 @@ public class AppendUtils {
   private static final String FILEPART_SEPARATOR = "-";
   private static final String FILEEXT_SEPARATOR = ".";
 
-  private static final Pattern DATA_PART_PATTERN = Pattern.compile("part.*-([0-9]{" + PARTITION_DIGITS + "}+).*");
+  public static final String DATA_PART_PATTERN_PREFIX = "part";
 
   private ImportJobContext context = null;
 
@@ -115,7 +115,7 @@ public class AppendUtils {
       for (FileStatus fileStat : existingFiles) {
         if (!fileStat.isDir()) {
           String filename = fileStat.getPath().getName();
-          Matcher mat = DATA_PART_PATTERN.matcher(filename);
+          Matcher mat = getDataFileNamePattern().matcher(filename);
           if (mat.matches()) {
             int thisPart = Integer.parseInt(mat.group(1));
             if (thisPart >= nextPartition) {
@@ -204,7 +204,7 @@ public class AppendUtils {
 
           LOG.debug("Directory: " + sourceFilename + " renamed to: " + destPath.getName());
         }
-      } else if (DATA_PART_PATTERN.matcher(sourceFilename).matches()) {    // move only matching top-level files
+      } else if (getDataFileNamePattern().matcher(sourceFilename).matches()) {    // move only matching top-level files
         do {
           // clear the builder in case this isn't the first iteration
           destFilename.setLength(0);
@@ -276,4 +276,21 @@ public class AppendUtils {
     return new Path(tempDir);
   }
 
+  /**
+   * Return the Pattern of the file name that will end up in the target directory
+   *
+   * Take into account that user might pass mapreduce.output.basename, which should
+   * override the default filename prefix of "part"
+   *
+   * @return Pattern
+   */
+  private Pattern getDataFileNamePattern() {
+    String prefix = context.getOptions().getConf().get("mapreduce.output.basename");
+
+    if(null == prefix || prefix.length() == 0) {
+      prefix = DATA_PART_PATTERN_PREFIX;
+    }
+
+    return Pattern.compile(prefix + ".*-([0-9]{" + PARTITION_DIGITS + "}+).*");
+  }
 }

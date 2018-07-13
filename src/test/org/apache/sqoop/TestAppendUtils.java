@@ -131,10 +131,10 @@ public class TestAppendUtils extends ImportJobTestCase {
   }
 
   /** @return FileStatus for data files only. */
-  private FileStatus[] listFiles(FileSystem fs, Path path) throws IOException {
+  private FileStatus[] listFiles(FileSystem fs, Path path, String prefix) throws IOException {
     FileStatus[] fileStatuses = fs.listStatus(path);
     ArrayList files = new ArrayList();
-    Pattern patt = Pattern.compile("part.*-([0-9][0-9][0-9][0-9][0-9]).*");
+    Pattern patt = Pattern.compile(prefix + ".*-([0-9][0-9][0-9][0-9][0-9]).*");
     for (FileStatus fstat : fileStatuses) {
       String fname = fstat.getPath().getName();
       if (!fstat.isDir()) {
@@ -145,6 +145,10 @@ public class TestAppendUtils extends ImportJobTestCase {
       }
     }
     return (FileStatus[]) files.toArray(new FileStatus[files.size()]);
+  }
+
+  private FileStatus[] listFiles(FileSystem fs, Path path) throws IOException {
+    return listFiles(fs, path, AppendUtils.DATA_PART_PATTERN_PREFIX);
   }
 
   private class StatusPathComparator implements Comparator<FileStatus> {
@@ -183,13 +187,17 @@ public class TestAppendUtils extends ImportJobTestCase {
     }
   }
 
+  public void runAppendTest(ArrayList args, Path outputPath) throws IOException {
+    runAppendTest(args, outputPath, AppendUtils.DATA_PART_PATTERN_PREFIX);
+  }
+
   /**
    * Test for ouput path file-count increase, current files untouched and new
    * correct partition number.
    *
    * @throws IOException
    */
-  public void runAppendTest(ArrayList args, Path outputPath)
+  public void runAppendTest(ArrayList args, Path outputPath, String prefix)
       throws IOException {
 
     try {
@@ -205,7 +213,7 @@ public class TestAppendUtils extends ImportJobTestCase {
       runUncleanImport(argv);
 
       // get current file count
-      FileStatus[] fileStatuses = listFiles(fs, outputPath);
+      FileStatus[] fileStatuses = listFiles(fs, outputPath, prefix);
       Arrays.sort(fileStatuses, new StatusPathComparator());
       int previousFileCount = fileStatuses.length;
 
@@ -223,7 +231,7 @@ public class TestAppendUtils extends ImportJobTestCase {
       runUncleanImport(argv);
 
       // check directory file increase
-      fileStatuses = listFiles(fs, outputPath);
+      fileStatuses = listFiles(fs, outputPath, prefix);
       Arrays.sort(fileStatuses, new StatusPathComparator());
       int currentFileCount = fileStatuses.length;
       assertTrue("Output directory didn't got increased in file count ",
@@ -311,5 +319,25 @@ public class TestAppendUtils extends ImportJobTestCase {
     utils.append();
   }
 
+  /**
+   * Test that when we pass in -Dmapreduce.output.basename=prefix, file should also got appended
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testAppendWithMapreduceOutputBasename() throws IOException {
+    String prefix = "prefix-test";
+
+    ArrayList<String> args = new ArrayList<>();
+    args.add("-D");
+    args.add("mapreduce.output.basename=" + prefix);
+    args.addAll(getOutputlessArgv(false, true, HsqldbTestServer.getFieldNames(), getConf()));
+    String targetDir = getWarehouseDir() + "/tempTargetDirOutputBaseNameTest";
+    args.add("--target-dir");
+    args.add(targetDir);
+
+    Path output = new Path(targetDir);
+    runAppendTest(args, output, prefix);
+  }
 }
 
