@@ -79,6 +79,11 @@ public class KiteParquetImportJobConfigurator implements ParquetImportJobConfigu
     return DatasetKeyOutputFormat.class;
   }
 
+  @Override
+  public boolean isHiveImportNeeded() {
+    return false;
+  }
+
   private String getKiteUri(Configuration conf, SqoopOptions options, String tableName, Path destination) throws IOException {
     if (options.doHiveImport()) {
       String hiveDatabase = options.getHiveDatabaseName() == null ? "default" :

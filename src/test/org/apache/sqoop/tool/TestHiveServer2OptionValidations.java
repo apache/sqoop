@@ -137,16 +137,4 @@ public class TestHiveServer2OptionValidations {
     sqoopTool.validateOptions(sqoopOptions);
   }
 
-  @Test
-  public void testValidateOptionsFailsWhenHs2UrlIsUsedWithParquetFormat() throws Exception {
-    expectedException.expect(SqoopOptions.InvalidOptionsException.class);
-    expectedException.expectMessage("The hs2-url option cannot be used with the as-parquetfile option.");
-
-    when(sqoopOptions.doHiveImport()).thenReturn(true);
-    when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
-    when(sqoopOptions.getFileLayout()).thenReturn(ParquetFile);
-
-    sqoopTool.validateOptions(sqoopOptions);
-  }
-
 }

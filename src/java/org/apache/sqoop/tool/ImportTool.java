@@ -46,6 +46,7 @@ import org.apache.sqoop.hive.HiveClient;
 import org.apache.sqoop.hive.HiveClientFactory;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.mapreduce.MergeJob;
+import org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorFactory;
 import org.apache.sqoop.mapreduce.parquet.ParquetMergeJobConfigurator;
 import org.apache.sqoop.metastore.JobData;
 import org.apache.sqoop.metastore.JobStorage;
@@ -541,13 +542,9 @@ public class ImportTool extends BaseSqoopTool {
     }
 
     // If the user wants this table to be in Hive, perform that post-load.
-    if (options.doHiveImport()) {
-      // For Parquet file, the import action will create hive table directly via
-      // kite. So there is no need to do hive import as a post step again.
-      if (options.getFileLayout() != SqoopOptions.FileLayout.ParquetFile) {
-        HiveClient hiveClient = hiveClientFactory.createHiveClient(options, manager);
-        hiveClient.importTable();
-      }
+    if (isHiveImportNeeded(options)) {
+      HiveClient hiveClient = hiveClientFactory.createHiveClient(options, manager);
+      hiveClient.importTable();
     }
 
     saveIncrementalState(options);
@@ -1191,6 +1188,19 @@ public class ImportTool extends BaseSqoopTool {
     validateHiveOptions(options);
     validateHCatalogOptions(options);
     validateAccumuloOptions(options);
+  }
+
+  private boolean isHiveImportNeeded(SqoopOptions options) {
+    if (!options.doHiveImport()) {
+      return false;
+    }
+
+    if (options.getFileLayout() != SqoopOptions.FileLayout.ParquetFile) {
+      return true;
+    }
+
+    ParquetJobConfiguratorFactory parquetJobConfigurator = getParquetJobConfigurator(options);
+    return parquetJobConfigurator.createParquetImportJobConfigurator().isHiveImportNeeded();
   }
 }
 

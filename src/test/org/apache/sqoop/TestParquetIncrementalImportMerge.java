@@ -26,8 +26,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import parquet.hadoop.metadata.CompressionCodecName;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -156,14 +154,5 @@ public class TestParquetIncrementalImportMerge extends ImportJobTestCase {
         .withOption("check-column", checkColumn)
         .withOption("merge-key", mergeKey)
         .withOption("last-value", lastValue);
-  }
-
-  private static long timeFromString(String timeStampString) {
-    try {
-      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-      return format.parse(timeStampString).getTime();
-    } catch (ParseException e) {
-      throw new RuntimeException(e);
-    }
   }
 }
