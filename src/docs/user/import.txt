@@ -51,46 +51,47 @@ include::validation-args.txt[]
 
 .Import control arguments:
 [grid="all"]
-`---------------------------------`--------------------------------------
-Argument                          Description
+`-------------------------------------------`----------------------------
+Argument                                    Description
 -------------------------------------------------------------------------
-+\--append+                       Append data to an existing dataset\
-                                  in HDFS
-+\--as-avrodatafile+              Imports data to Avro Data Files
-+\--as-sequencefile+              Imports data to SequenceFiles
-+\--as-textfile+                  Imports data as plain text (default)
-+\--as-parquetfile+               Imports data to Parquet Files
-+\--boundary-query <statement>+   Boundary query to use for creating splits
-+\--columns <col,col,col...>+     Columns to import from table
-+\--delete-target-dir+            Delete the import target directory\
-                                  if it exists
-+\--direct+                       Use direct connector if exists for the database
-+\--fetch-size <n>+               Number of entries to read from database\
-                                  at once.
-+\--inline-lob-limit <n>+         Set the maximum size for an inline LOB
-+-m,\--num-mappers <n>+           Use 'n' map tasks to import in parallel
-+-e,\--query <statement>+         Import the results of '+statement+'.
-+\--split-by <column-name>+       Column of the table used to split work\
-                                  units.  Cannot be used with\
-                                  +--autoreset-to-one-mapper+ option.
-+\--split-limit <n>+              Upper Limit for each split size.\
-                                  This only applies to Integer and Date columns.\
-                                  For date or timestamp fields it is calculated in seconds.
-+\--autoreset-to-one-mapper+      Import should use one mapper if a table\
-                                  has no primary key and no split-by column\
-                                  is provided.  Cannot be used with\
-                                  +--split-by <col>+ option.
-+\--table <table-name>+           Table to read
-+\--target-dir <dir>+             HDFS destination dir
-+\--temporary-rootdir <dir>+      HDFS directory for temporary files created during import (overrides default "_sqoop")
-+\--warehouse-dir <dir>+          HDFS parent for table destination
-+\--where <where clause>+         WHERE clause to use during import
-+-z,\--compress+                  Enable compression
-+\--compression-codec <c>+        Use Hadoop codec (default gzip)
-+--null-string <null-string>+     The string to be written for a null\
-                                  value for string columns
-+--null-non-string <null-string>+ The string to be written for a null\
-                                  value for non-string columns
++\--append+                                 Append data to an existing dataset\
+                                            in HDFS
++\--as-avrodatafile+                        Imports data to Avro Data Files
++\--as-sequencefile+                        Imports data to SequenceFiles
++\--as-textfile+                            Imports data as plain text (default)
++\--as-parquetfile+                         Imports data to Parquet Files
++\--parquet-configurator-implementation+    Sets the implementation used during Parquet import. Supported values: kite, hadoop.
++\--boundary-query <statement>+             Boundary query to use for creating splits
++\--columns <col,col,col...>+               Columns to import from table
++\--delete-target-dir+                      Delete the import target directory\
+                                            if it exists
++\--direct+                                 Use direct connector if exists for the database
++\--fetch-size <n>+                         Number of entries to read from database\
+                                            at once.
++\--inline-lob-limit <n>+                   Set the maximum size for an inline LOB
++-m,\--num-mappers <n>+                     Use 'n' map tasks to import in parallel
++-e,\--query <statement>+                   Import the results of '+statement+'.
++\--split-by <column-name>+                 Column of the table used to split work\
+                                            units.  Cannot be used with\
+                                            +--autoreset-to-one-mapper+ option.
++\--split-limit <n>+                        Upper Limit for each split size.\
+                                            This only applies to Integer and Date columns.\
+                                            For date or timestamp fields it is calculated in seconds.
++\--autoreset-to-one-mapper+                Import should use one mapper if a table\
+                                            has no primary key and no split-by column\
+                                            is provided.  Cannot be used with\
+                                            +--split-by <col>+ option.
++\--table <table-name>+                     Table to read
++\--target-dir <dir>+                       HDFS destination dir
++\--temporary-rootdir <dir>+                HDFS directory for temporary files created during import (overrides default "_sqoop")
++\--warehouse-dir <dir>+                    HDFS parent for table destination
++\--where <where clause>+                   WHERE clause to use during import
++-z,\--compress+                            Enable compression
++\--compression-codec <c>+                  Use Hadoop codec (default gzip)
++--null-string <null-string>+               The string to be written for a null\
+                                            value for string columns
++--null-non-string <null-string>+           The string to be written for a null\
+                                            value for non-string columns
 -------------------------------------------------------------------------
 
 The +\--null-string+ and +\--null-non-string+ arguments are optional.\
@@ -402,8 +403,8 @@ saved jobs later in this document for more information.
 File Formats
 ^^^^^^^^^^^^
 
-You can import data in one of two file formats: delimited text or
-SequenceFiles.
+You can import data in one of these file formats: delimited text,
+SequenceFiles, Avro and Parquet.
 
 Delimited text is the default import format. You can also specify it
 explicitly by using the +\--as-textfile+ argument. This argument will write
@@ -443,6 +444,48 @@ using the deflate (gzip) algorithm with the +-z+ or +\--compress+
 argument, or specify any Hadoop compression codec using the
 +\--compression-codec+ argument. This applies to SequenceFile, text,
 and Avro files.
+
+Parquet support
++++++++++++++++
+
+Sqoop has two different implementations for importing data in Parquet format:
+
+- Kite Dataset API based implementation (default, legacy)
+- Parquet Hadoop API based implementation (recommended)
+
+The users can specify the desired implementation with the +\--parquet-configurator-implementation+ option:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES --as-parquetfile --parquet-configurator-implementation kite
+----
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES --as-parquetfile --parquet-configurator-implementation hadoop
+----
+
+If the +\--parquet-configurator-implementation+ option is not present then Sqoop will check the value of +parquetjob.configurator.implementation+
+property (which can be specified using -D in the Sqoop command or in the site.xml). If that value is also absent Sqoop will
+default to Kite Dataset API based implementation.
+
+The Kite Dataset API based implementation executes the import command on a different code
+path than the text import: it creates the Hive table based on the generated Avro schema by connecting to the Hive metastore.
+This can be a disadvantage since sometimes moving from the text file format to the Parquet file format can lead to many
+unexpected behavioral changes. Kite checks the Hive table schema before importing the data into it so if the user wants
+to import some data which has a schema incompatible with the Hive table's schema Sqoop will throw an error. This implementation
+uses snappy codec for compression by default and apart from this it supports the bzip codec too.
+
+The Parquet Hadoop API based implementation builds the Hive CREATE TABLE statement and executes the
+LOAD DATA INPATH command just like the text import does. Unlike Kite it also supports connecting to HiveServer2 (using the +\--hs2-url+ option)
+so it provides better security features. This implementation does not check the Hive table's schema before importing so
+it is possible that the user can successfully import data into Hive but they get an error during a Hive read operation later.
+It does not use any compression by default but supports snappy and bzip codecs.
+
+The below example demonstrates how to use Sqoop to import into Hive in Parquet format using HiveServer2 and snappy codec:
+
+----
+$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES --as-parquetfile --compression-codec snappy \
+--parquet-configurator-implementation hadoop --hs2-url "jdbc:hive2://hs2.foo.com:10000" --hs2-keytab "/path/to/keytab"
+----
 
 Enabling Logical Types in Avro and Parquet import for numbers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

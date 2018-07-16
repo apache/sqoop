@@ -32,7 +32,7 @@ informing you of the loss of precision.
 Parquet Support in Hive
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-In order to contact the Hive MetaStore from a MapReduce job, a delegation token will
-be fetched and passed. HIVE_CONF_DIR and HIVE_HOME must be set appropriately to add
+When using the Kite Dataset API based Parquet implementation in order to contact the Hive MetaStore
+from a MapReduce job, a delegation token will be fetched and passed. HIVE_CONF_DIR and HIVE_HOME must be set appropriately to add
 Hive to the runtime classpath. Otherwise, importing/exporting into Hive in Parquet
 format may not work.
