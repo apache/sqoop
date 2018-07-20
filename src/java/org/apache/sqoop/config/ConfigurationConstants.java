@@ -55,23 +55,14 @@ public final class ConfigurationConstants {
                                 "mapred.reduce.tasks.speculative.execution";
 
   /**
-   * The Configuration property identifying the job tracker address.
-   */
-  public static final String PROP_MAPRED_JOB_TRACKER_ADDRESS =
-                                "mapred.job.tracker";
-
-   /**
-   * The Configuration property identifying the job tracker address (new).
-   */
-  public static final String PROP_MAPREDUCE_JOB_TRACKER_ADDRESS =
-    "mapreduce.jobtracker.address";
-
-  /**
    * The Configuration property identifying the framework name. If set to YARN
    * then we will not be in local mode.
    */
   public static final String PROP_MAPREDUCE_FRAMEWORK_NAME =
     "mapreduce.framework.name";
+
+  public static final String MAPREDUCE_FRAMEWORK_LOCAL = "local";
+
   /**
    * The group name of task counters.
    */

@@ -31,6 +31,9 @@ import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
 import org.apache.hadoop.util.ReflectionUtils;
 
+import static org.apache.sqoop.config.ConfigurationConstants.MAPREDUCE_FRAMEWORK_LOCAL;
+import static org.apache.sqoop.config.ConfigurationConstants.PROP_MAPREDUCE_FRAMEWORK_NAME;
+
 /**
  * This class provides static helper methods that allow access and manipulation
  * of job configuration. It is convenient to keep such access in one place in
@@ -118,13 +121,6 @@ public final class ConfigurationHelper {
     job.getConfiguration().setBoolean(
         ConfigurationConstants.PROP_MAPRED_REDUCE_TASKS_SPECULATIVE_EXEC,
         isEnabled);
-  }
-
-  /**
-   * Sets the Jobtracker address to use for a job.
-   */
-  public static void setJobtrackerAddr(Configuration conf, String addr) {
-    conf.set(ConfigurationConstants.PROP_MAPRED_JOB_TRACKER_ADDRESS, addr);
   }
 
   /**
@@ -233,17 +229,8 @@ public final class ConfigurationHelper {
       return config.getInt(ConfigurationConstants.PROP_SPLIT_LIMIT, -1);
   }
   public static boolean isLocalJobTracker(Configuration conf) {
-    // If framework is set to YARN, then we can't be running in local mode
-    if ("yarn".equalsIgnoreCase(conf
-      .get(ConfigurationConstants.PROP_MAPREDUCE_FRAMEWORK_NAME))) {
-      return false;
-    }
-    String jtAddr = conf
-      .get(ConfigurationConstants.PROP_MAPRED_JOB_TRACKER_ADDRESS);
-    String jtAddr2 = conf
-      .get(ConfigurationConstants.PROP_MAPREDUCE_JOB_TRACKER_ADDRESS);
-    return (jtAddr != null && jtAddr.equals("local"))
-      || (jtAddr2 != null && jtAddr2.equals("local"));
+    String frameworkName = conf.get(PROP_MAPREDUCE_FRAMEWORK_NAME);
+    return MAPREDUCE_FRAMEWORK_LOCAL.equals(frameworkName);
   }
 
   private ConfigurationHelper() {

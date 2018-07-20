@@ -272,9 +272,7 @@ public class JobBase {
   protected void loadJars(Configuration conf, String ormJarFile,
       String tableClassName) throws IOException {
 
-    boolean isLocal = "local".equals(conf.get("mapreduce.jobtracker.address"))
-        || "local".equals(conf.get("mapred.job.tracker"));
-    if (isLocal) {
+    if (ConfigurationHelper.isLocalJobTracker(conf)) {
       // If we're using the LocalJobRunner, then instead of using the compiled
       // jar file as the job source, we're running in the current thread. Push
       // on another classloader that loads from that jar in addition to

@@ -858,6 +858,7 @@ public class TestSqoopOptions {
   @Test
   public void testSqoopOptionsCloneIsEqual() throws Exception {
     SqoopOptions options = createSqoopOptionsFilledWithRandomData();
+    options.getConf().setAllowNullValueProperties(false); // always false in cloned conf
     SqoopOptions clonedOptions = (SqoopOptions) options.clone();
     assertThat(options).isEqualToComparingFieldByFieldRecursively(clonedOptions);
   }

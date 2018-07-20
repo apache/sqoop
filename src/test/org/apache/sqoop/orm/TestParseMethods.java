@@ -135,8 +135,6 @@ public class TestParseMethods extends ImportJobTestCase {
       // Tell the job what class we're testing.
       job.set(ReparseMapper.USER_TYPE_NAME_KEY, tableClassName);
 
-      // use local mode in the same JVM.
-      ConfigurationHelper.setJobtrackerAddr(job, "local");
       if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
         job.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
       }
@@ -263,8 +261,6 @@ public class TestParseMethods extends ImportJobTestCase {
       job.set(ExplicitSetMapper.SET_COL_KEY, BASE_COL_NAME + "0");
       job.set(ExplicitSetMapper.SET_VAL_KEY, "this-is-a-test");
 
-      // use local mode in the same JVM.
-      ConfigurationHelper.setJobtrackerAddr(job, "local");
       if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
         job.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
       }
