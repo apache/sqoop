@@ -76,6 +76,7 @@ public class TestHsqldbAvroPadding extends ImportJobTestCase {
     builder.withProperty("sqoop.avro.decimal_padding.enable", "true");
     String[] args = builder.build();
     runImport(args);
+    AvroTestUtils.registerDecimalConversionUsageForVerification();
     AvroTestUtils.verify(AvroTestUtils.getExpectedResults(), getConf(), getTablePath());
   }
 }

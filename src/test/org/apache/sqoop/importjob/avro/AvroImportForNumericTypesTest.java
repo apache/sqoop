@@ -204,6 +204,7 @@ public class AvroImportForNumericTypesTest extends ImportJobTestCase {
   }
 
   private void verify() {
+    AvroTestUtils.registerDecimalConversionUsageForVerification();
     AvroTestUtils.verify(configuration.getExpectedResults(), getConf(), getTablePath());
   }
 }
