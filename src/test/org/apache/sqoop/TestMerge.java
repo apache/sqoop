@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.manager.ConnManager;
@@ -54,8 +53,6 @@ import org.apache.sqoop.util.ParquetReader;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.HADOOP;
-import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.KITE;
 import static org.junit.Assert.fail;
 
 /**
@@ -83,8 +80,6 @@ public class TestMerge extends BaseSqoopTestCase {
       Arrays.asList(new Integer(0), new Integer(0)),
       Arrays.asList(new Integer(1), new Integer(43)),
       Arrays.asList(new Integer(3), new Integer(313)));
-
-  private ParquetJobConfiguratorImplementation parquetJobConfiguratorImplementation = KITE;
 
   @Before
   public void setUp() {
@@ -118,7 +113,6 @@ public class TestMerge extends BaseSqoopTestCase {
   public SqoopOptions getSqoopOptions(Configuration conf) {
     SqoopOptions options = new SqoopOptions(conf);
     options.setConnectString(HsqldbTestServer.getDbUrl());
-    options.setParquetConfiguratorImplementation(parquetJobConfiguratorImplementation);
 
     return options;
   }
@@ -164,14 +158,7 @@ public class TestMerge extends BaseSqoopTestCase {
   }
 
   @Test
-  public void testParquetFileMergeHadoop() throws Exception {
-    parquetJobConfiguratorImplementation = HADOOP;
-    runMergeTest(SqoopOptions.FileLayout.ParquetFile);
-  }
-
-  @Test
-  public void testParquetFileMergeKite() throws Exception {
-    parquetJobConfiguratorImplementation = KITE;
+  public void testParquetFileMerge() throws Exception {
     runMergeTest(SqoopOptions.FileLayout.ParquetFile);
   }
 

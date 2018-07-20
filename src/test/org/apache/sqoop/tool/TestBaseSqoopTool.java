@@ -28,7 +28,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.HADOOP;
-import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.KITE;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -124,7 +123,7 @@ public class TestBaseSqoopTool {
   public void testApplyCommonOptionsThrowsWhenInvalidParquetJobConfigurationImplementationIsSet() throws Exception {
     when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn("this_is_definitely_not_valid");
 
-    exception.expectMessage("Invalid Parquet job configurator implementation is set: this_is_definitely_not_valid. Supported values are: [KITE, HADOOP]");
+    exception.expectMessage("Invalid Parquet job configurator implementation is set: this_is_definitely_not_valid. Supported values are: [HADOOP]");
     testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
   }
 
@@ -132,6 +131,6 @@ public class TestBaseSqoopTool {
   public void testApplyCommonOptionsDoesNotChangeDefaultParquetJobConfigurationImplementationWhenNothingIsSet() throws Exception {
     testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
-    assertEquals(KITE, testSqoopOptions.getParquetConfiguratorImplementation());
+    assertEquals(HADOOP, testSqoopOptions.getParquetConfiguratorImplementation());
   }
 }

@@ -23,20 +23,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.sqoop.Sqoop;
-
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.sqoop.avro.AvroSchemaMismatchException;
-import org.apache.sqoop.mapreduce.parquet.kite.KiteParquetUtils;
-import org.apache.sqoop.util.ParquetReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,7 +46,6 @@ import org.apache.sqoop.tool.SqoopTool;
 import org.apache.commons.cli.ParseException;
 import org.junit.rules.ExpectedException;
 
-import static java.util.Collections.sort;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -284,54 +275,6 @@ public class TestHiveImport extends ImportJobTestCase {
         getArgv(false, null), new ImportTool());
   }
 
-  /** Test that strings and ints are handled in the normal fashion as parquet
-   * file. */
-  @Test
-  public void testNormalHiveImportAsParquet() throws IOException {
-    final String TABLE_NAME = "normal_hive_import_as_parquet";
-    setCurTableName(TABLE_NAME);
-    setNumCols(3);
-    String [] types = getTypes();
-    String [] vals = { "'test'", "42", "'somestring'" };
-    String [] extraArgs = {"--as-parquetfile"};
-
-    runImportTest(TABLE_NAME, types, vals, "", getArgv(false, extraArgs),
-        new ImportTool());
-    verifyHiveDataset(new Object[][]{{"test", 42, "somestring"}});
-  }
-
-  private void verifyHiveDataset(Object[][] valsArray) {
-    List<String> expected = getExpectedLines(valsArray);
-    List<String> result = new ParquetReader(getTablePath()).readAllInCsv();
-
-    sort(expected);
-    sort(result);
-
-    assertEquals(expected, result);
-  }
-
-  private List<String> getExpectedLines(Object[][] valsArray) {
-    List<String> expectations = new ArrayList<>();
-    if (valsArray != null) {
-      for (Object[] vals : valsArray) {
-        expectations.add(toCsv(vals));
-      }
-    }
-    return expectations;
-  }
-
-  private String toCsv(Object[] vals) {
-    StringBuilder result = new StringBuilder();
-
-    for (Object val : vals) {
-      result.append(val).append(",");
-    }
-
-    result.deleteCharAt(result.length() - 1);
-
-    return result.toString();
-  }
-
   /** Test that table is created in hive with no data import. */
   @Test
   public void testCreateOnlyHiveImport() throws IOException {
@@ -364,108 +307,6 @@ public class TestHiveImport extends ImportJobTestCase {
         "createOverwriteImport.q", getCreateHiveTableArgs(extraArgs),
         new CreateHiveTableTool());
   }
-
-  /**
-   * Test that table is created in hive and replaces the existing table if
-   * any.
-   */
-  @Test
-  public void testCreateOverwriteHiveImportAsParquet() throws IOException {
-    final String TABLE_NAME = "create_overwrite_hive_import_as_parquet";
-    setCurTableName(TABLE_NAME);
-    setNumCols(3);
-    String [] types = getTypes();
-    String [] vals = { "'test'", "42", "'somestring'" };
-    String [] extraArgs = {"--as-parquetfile"};
-    ImportTool tool = new ImportTool();
-
-    runImportTest(TABLE_NAME, types, vals, "", getArgv(false, extraArgs), tool);
-    verifyHiveDataset(new Object[][]{{"test", 42, "somestring"}});
-
-    String [] valsToOverwrite = { "'test2'", "24", "'somestring2'" };
-    String [] extraArgsForOverwrite = {"--as-parquetfile", "--hive-overwrite"};
-    runImportTest(TABLE_NAME, types, valsToOverwrite, "",
-        getArgv(false, extraArgsForOverwrite), tool);
-    verifyHiveDataset(new Object[][] {{"test2", 24, "somestring2"}});
-  }
-
-  @Test
-  public void testHiveImportAsParquetWhenTableExistsWithIncompatibleSchema() throws Exception {
-    final String TABLE_NAME = "HIVE_IMPORT_AS_PARQUET_EXISTING_TABLE";
-    setCurTableName(TABLE_NAME);
-    setNumCols(3);
-
-    String [] types = { "VARCHAR(32)", "INTEGER", "DATE" };
-    String [] vals = { "'test'", "42", "'2009-12-31'" };
-    String [] extraArgs = {"--as-parquetfile"};
-
-    createHiveDataSet(TABLE_NAME);
-
-    createTableWithColTypes(types, vals);
-
-    thrown.expect(AvroSchemaMismatchException.class);
-    thrown.expectMessage(KiteParquetUtils.INCOMPATIBLE_AVRO_SCHEMA_MSG + KiteParquetUtils.HIVE_INCOMPATIBLE_AVRO_SCHEMA_MSG);
-
-    SqoopOptions sqoopOptions = getSqoopOptions(getConf());
-    sqoopOptions.setThrowOnError(true);
-    Sqoop sqoop = new Sqoop(new ImportTool(), getConf(), sqoopOptions);
-    sqoop.run(getArgv(false, extraArgs));
-
-  }
-
-  private void createHiveDataSet(String tableName) {
-    Schema dataSetSchema = SchemaBuilder
-        .record(tableName)
-            .fields()
-            .name(getColName(0)).type().nullable().stringType().noDefault()
-            .name(getColName(1)).type().nullable().stringType().noDefault()
-            .name(getColName(2)).type().nullable().stringType().noDefault()
-            .endRecord();
-    String dataSetUri = "dataset:hive:/default/" + tableName;
-    KiteParquetUtils.createDataset(dataSetSchema, KiteParquetUtils.getCompressionType(new Configuration()), dataSetUri);
-  }
-
-  /**
-   * Test that records are appended to an existing table.
-   */
-  @Test
-  public void testAppendHiveImportAsParquet() throws IOException {
-    final String TABLE_NAME = "append_hive_import_as_parquet";
-    setCurTableName(TABLE_NAME);
-    setNumCols(3);
-    String [] types = getTypes();
-    String [] vals = { "'test'", "42", "'somestring'" };
-    String [] extraArgs = {"--as-parquetfile"};
-    String [] args = getArgv(false, extraArgs);
-    ImportTool tool = new ImportTool();
-
-    runImportTest(TABLE_NAME, types, vals, "", args, tool);
-    verifyHiveDataset(new Object[][]{{"test", 42, "somestring"}});
-
-    String [] valsToAppend = { "'test2'", "4242", "'somestring2'" };
-    runImportTest(TABLE_NAME, types, valsToAppend, "", args, tool);
-    verifyHiveDataset(new Object[][] {
-        {"test2", 4242, "somestring2"}, {"test", 42, "somestring"}});
-  }
-
-  /**
-   * Test hive create and --as-parquetfile options validation.
-   */
-  @Test
-  public void testCreateHiveImportAsParquet() throws ParseException, InvalidOptionsException {
-    final String TABLE_NAME = "CREATE_HIVE_IMPORT_AS_PARQUET";
-    setCurTableName(TABLE_NAME);
-    setNumCols(3);
-    String [] extraArgs = {"--as-parquetfile", "--create-hive-table"};
-    ImportTool tool = new ImportTool();
-
-    thrown.expect(InvalidOptionsException.class);
-    thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException during Hive table creation with " +
-        "--as-parquetfile");
-    tool.validateOptions(tool.parseArguments(getArgv(false, extraArgs), null,
-        null, true));
-  }
-
 
   /** Test that dates are coerced properly to strings. */
   @Test

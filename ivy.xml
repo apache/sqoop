@@ -114,15 +114,7 @@ under the License.
       conf="common->default;redist->default"/>
     <dependency org="org.apache.commons" name="commons-lang3" rev="${commons-lang3.version}"
       conf="common->default;redist->default"/>
-    <dependency org="org.kitesdk" name="kite-data-mapreduce" rev="${kite-data.version}"
-      conf="common->default;redist->default">
-      <exclude org="org.apache.avro" module="avro" />
-      </dependency>
-    <dependency org="org.kitesdk" name="kite-data-hive" rev="${kite-data.version}"
-      conf="common->default;redist->default">
-      <exclude org="com.twitter" module="parquet-hive-bundle"/>
-      <exclude org="org.apache.avro" module="avro" />
-    </dependency>
+    <dependency org="com.twitter" name="parquet-avro" rev="${parquet.version}" conf="common->default;redist->default"/>
 
     <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="${jackson-databind.version}"
           conf="common->default;redist->default" />

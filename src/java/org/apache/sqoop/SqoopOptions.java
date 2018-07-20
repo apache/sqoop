@@ -53,7 +53,7 @@ import org.apache.sqoop.util.RandomHash;
 import org.apache.sqoop.util.StoredAsProperty;
 
 import static org.apache.sqoop.Sqoop.SQOOP_RETHROW_PROPERTY;
-import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.KITE;
+import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.HADOOP;
 import static org.apache.sqoop.orm.ClassWriter.toJavaIdentifier;
 
 /**
@@ -1161,7 +1161,7 @@ public class SqoopOptions implements Cloneable {
     // set escape column mapping to true
     this.escapeColumnMappingEnabled = true;
 
-    this.parquetConfiguratorImplementation = KITE;
+    this.parquetConfiguratorImplementation = HADOOP;
   }
 
   /**

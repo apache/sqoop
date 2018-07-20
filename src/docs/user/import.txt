@@ -60,7 +60,7 @@ Argument                                    Description
 +\--as-sequencefile+                        Imports data to SequenceFiles
 +\--as-textfile+                            Imports data as plain text (default)
 +\--as-parquetfile+                         Imports data to Parquet Files
-+\--parquet-configurator-implementation+    Sets the implementation used during Parquet import. Supported values: kite, hadoop.
++\--parquet-configurator-implementation+    Sets the implementation used during Parquet import. Supported value: hadoop.
 +\--boundary-query <statement>+             Boundary query to use for creating splits
 +\--columns <col,col,col...>+               Columns to import from table
 +\--delete-target-dir+                      Delete the import target directory\
@@ -448,35 +448,14 @@ and Avro files.
 Parquet support
 +++++++++++++++
 
-Sqoop has two different implementations for importing data in Parquet format:
+Sqoop has only one implementation now for importing data in Parquet format which is based on the Parquet Hadoop API.
+Note that the legacy Kite Dataset API based implementation is removed so users have to make sure that both
++\--parquet-configurator-implementation+ option and +parquetjob.configurator.implementation+ property are unset or
+set to "hadoop".
 
-- Kite Dataset API based implementation (default, legacy)
-- Parquet Hadoop API based implementation (recommended)
-
-The users can specify the desired implementation with the +\--parquet-configurator-implementation+ option:
-
-----
-$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES --as-parquetfile --parquet-configurator-implementation kite
-----
-
-----
-$ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES --as-parquetfile --parquet-configurator-implementation hadoop
-----
-
-If the +\--parquet-configurator-implementation+ option is not present then Sqoop will check the value of +parquetjob.configurator.implementation+
-property (which can be specified using -D in the Sqoop command or in the site.xml). If that value is also absent Sqoop will
-default to Kite Dataset API based implementation.
-
-The Kite Dataset API based implementation executes the import command on a different code
-path than the text import: it creates the Hive table based on the generated Avro schema by connecting to the Hive metastore.
-This can be a disadvantage since sometimes moving from the text file format to the Parquet file format can lead to many
-unexpected behavioral changes. Kite checks the Hive table schema before importing the data into it so if the user wants
-to import some data which has a schema incompatible with the Hive table's schema Sqoop will throw an error. This implementation
-uses snappy codec for compression by default and apart from this it supports the bzip codec too.
-
-The Parquet Hadoop API based implementation builds the Hive CREATE TABLE statement and executes the
-LOAD DATA INPATH command just like the text import does. Unlike Kite it also supports connecting to HiveServer2 (using the +\--hs2-url+ option)
-so it provides better security features. This implementation does not check the Hive table's schema before importing so
+The default Parquet import implementation builds the Hive CREATE TABLE statement and executes the
+LOAD DATA INPATH command just like the text import does. It supports connecting to HiveServer2 (using the +\--hs2-url+ option)
+but it does not check the Hive table's schema before importing so
 it is possible that the user can successfully import data into Hive but they get an error during a Hive read operation later.
 It does not use any compression by default but supports snappy and bzip codecs.
 
@@ -486,6 +465,8 @@ The below example demonstrates how to use Sqoop to import into Hive in Parquet f
 $ sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES --as-parquetfile --compression-codec snappy \
 --parquet-configurator-implementation hadoop --hs2-url "jdbc:hive2://hs2.foo.com:10000" --hs2-keytab "/path/to/keytab"
 ----
+
+Note that +\--parquet-configurator-implementation hadoop+ is now optional.
 
 Enabling Logical Types in Avro and Parquet import for numbers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
