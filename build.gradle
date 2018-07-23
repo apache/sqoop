@@ -1,0 +1,400 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+plugins {
+    id "org.nosphere.apache.rat" version "0.3.0"
+}
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+apply plugin: 'findbugs'
+apply plugin: 'maven-publish'
+
+apply from: 'gradle/sqoop-version-gen.gradle'
+apply from: 'gradle/sqoop-package.gradle'
+
+group = 'org.apache.sqoopgradle'
+
+sourceCompatibility = javaSourceCompatibilityVersion
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'http://conjars.org/repo/'
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/java']
+        }
+        resources {
+            srcDirs = ['src/java']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test']
+            exclude 'aop/'
+        }
+        resources {
+            srcDirs = ['src/test', 'testdata/hcatalog/conf', 'conf']
+            exclude 'aop/'
+        }
+    }
+    aop {
+        java {
+            srcDirs = ['src/test/aop']
+        }
+        resources {
+            srcDirs = ['src/test/aop']
+        }
+    }
+}
+
+configurations {
+    common.extendsFrom(redist)
+    compile.extendsFrom(common)
+}
+
+compileJava.dependsOn(SqoopVersionFileGen)
+
+configurations.all {
+    resolutionStrategy {
+        force group: 'org.apache.avro', name: 'avro', version: avroVersion
+        force group: 'org.apache.avro', name: 'avro-mapred', version: avroVersion
+    }
+    exclude group: 'org.apache.hadoop', module: 'avro'
+}
+
+def sqoopThirdPartyLib = System.getProperty("sqoop.thirdparty.lib.dir")
+
+dependencies {
+    if (sqoopThirdPartyLib != null) runtime fileTree(dir: sqoopThirdPartyLib, include: '*.jar')
+    compile group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoopVersion
+    compile group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoopVersion
+    compile group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-common', version: hadoopVersion
+    compile group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoopVersion
+    compile group: 'org.apache.hbase', name: 'hbase-hadoop-compat', version: hbaseVersion
+
+    aopCompile group: 'org.aspectj', name: 'aspectjtools', version: aspectjVersion
+    aopCompile group: 'org.aspectj', name: 'aspectjrt', version: aspectjVersion
+    aopCompile group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoopVersion
+
+    common group: 'org.apache.accumulo', name: 'accumulo-core', version: accumuloVersion
+    common group: 'org.apache.accumulo', name: 'accumulo-minicluster', version: accumuloVersion
+    common group: 'org.apache.hbase', name: 'hbase-hadoop2-compat', version: hbaseVersion
+    common group: 'org.apache.hbase', name: 'hbase-server', version: hbaseVersion
+    common group: 'org.apache.hbase', name: 'hbase-client', version: hbaseVersion
+    common group: 'org.apache.hbase', name: 'hbase-common', version: hbaseVersion
+    common (group: 'org.apache.hive.hcatalog', name: 'hive-hcatalog-core', version: hcatalogVersion) {
+        exclude  group: 'org.apache.avro', module: 'avro'
+    }
+    common (group: 'org.apache.hive', name: 'hive-jdbc', version: hcatalogVersion) {
+        exclude  group: 'org.apache.avro', module: 'avro'
+    }
+    common group: 'commons-cli', name: 'commons-cli', version: commonscliVersion
+    common group: 'commons-logging', name: 'commons-logging', version: commonsloggingVersion
+    common group: 'commons-net', name: 'commons-net', version: commonsnetVersion
+    common group: 'log4j', name: 'log4j', version: log4jVersion
+    common group: 'org.postgresql', name: 'postgresql', version: postgresqlVersion
+
+    testCompile group: 'com.h2database', name: 'h2', version: h2Version
+    testCompile group: 'org.apache.hbase', name: 'hbase-server', version: hbaseVersion, classifier: 'tests'
+    testCompile group: 'org.apache.hbase', name: 'hbase-hadoop2-compat', version: hbaseVersion, classifier: 'tests'
+    testCompile group: 'org.apache.hbase', name: 'hbase-hadoop-compat', version: hbaseVersion, classifier: 'tests'
+    testCompile( group: 'org.apache.hadoop', name: 'hadoop-minikdc', version: hadoopVersion) {
+     exclude  group: 'org.apache.directory.api', module: 'api-ldap-schema-data'
+    }
+    testCompile group: 'junit', name: 'junit', version: junitVersion
+    testCompile group: 'org.assertj', name: 'assertj-core', version: assertjVersion
+    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoallVersion
+    testCompile group: 'org.apache.zookeeper', name: 'zookeeper', version: zookeeperVersion, ext: 'jar'
+}
+
+test {
+    include '**/Test*.*'
+}
+
+task thirdPartyTest(type: Test) {
+    description 'Run ThirdParty tests - you need to specify -Dsqoop.thirdparty.lib.dir where the Third party driver jars reside (relative to the project directory)'
+    exclude '**/*ManualTest.*'
+    exclude '**/Test*.*'
+    include '**/*Test*.*'
+    systemProperty "ms.datatype.test.data.file.export" ,"DatatypeTestData-export-lite.txt"
+    systemProperty "ms.datatype.test.data.file.import" ,"DatatypeTestData-import-lite.txt"
+    systemProperty "ms.datatype.test.data.file.delim" ,","
+    systemProperty "ms.datatype.test.hdfsprefix" ,"file:///"
+}
+
+task manualTest(type: Test) {
+    description 'Run manual tests'
+    include '**/*ManualTest.*'
+}
+
+def testBuildDir = "$buildDir/test/"
+def testBuildDirData ="$testBuildDir/data/"
+
+task buildFolder {
+    project.mkdir(testBuildDirData)
+}
+
+tasks.withType(Test) {
+    testLogging {
+        events 'started', 'passed', 'skipped'
+    }
+    workingDir = testBuildDirData
+    project.mkdir(workingDir)
+    systemProperties(System.getProperties())
+    systemProperty "test.data.dir", "$projectDir/testdata"
+    systemProperty 'test.build.data', "$testBuildDir/data"
+    systemProperty "hadoop.root.logger", "DEBUG,console"
+    systemProperty "user.dir", workingDir
+    systemProperty "sqoop.src.dir", "$testBuildDir/data"
+    systemProperty "hadoop.tmp.dir", "$testBuildDir/hadoop"
+    systemProperty "fs.default.name", ""
+    systemProperty "hadoop.log.dir", "$testBuildDir/logs"
+    systemProperty "hive.home", "$projectDir/testdata/hive"
+    systemProperty "sqoop.throwOnError", ""
+
+    minHeapSize = "512m"
+    maxHeapSize = "5120m"
+    jvmArgs '-Xmx5012m', '-XX:PermSize=256m', '-XX:MaxPermSize=512m', "-da:org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge"
+    forkEvery 1
+
+    dependsOn buildFolder
+
+    jacoco{
+        excludes = ["**/SqoopVersion*"]
+    }
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled false
+        html.enabled true
+        html.stylesheet resources.text.fromFile('config/checkstyle/checkstyle-noframes.xsl')
+    }
+    ignoreFailures = true
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+    ignoreFailures = false
+}
+
+findbugs {
+    sourceSets = []
+}
+
+checkstyle {
+    sourceSets = []
+    toolVersion checkstyleVersion
+}
+
+jacocoTestReport {
+    description "Generates a coverage report of the unit test results under $buildDir/jacocoHtml/test/index.html"
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "$buildDir/jacocoHtml/test"
+    }
+}
+
+task jacocoThirdPartyReport(type: JacocoReport){
+    description "Generates a coverage report of the thirdparty test results under $buildDir/jacocoHtml/3rd/index.html"
+    sourceSets sourceSets.main
+    executionData thirdPartyTest
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "$buildDir/jacocoHtml/3rd"
+    }
+}
+
+task jacocoCompositeReport(type: JacocoReport){
+    description "Generates a composite coverage report of test and thirdparty test results under $buildDir/jacocoHtml/index.html"
+    sourceSets sourceSets.main
+    executionData test, thirdPartyTest
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "$buildDir/jacocoHtml/"
+    }
+}
+
+javadoc {
+    source = sourceSets.main.allJava
+    include 'com/cloudera/sqoop/lib/**'
+    include 'org/apache/sqoop/lib/**'
+    destinationDir = reporting.file("${project.docsDir}/api")
+}
+
+task faultInjectionJar(type: Jar) {
+    description 'Create the test jar'
+    appendix = 'test'
+    from sourceSets.aop.output
+}
+
+def archiveName = jar.baseName + "-" + jar.version
+def binArtifactName = archiveName + ".bin__hadoop-" + hadoopVersion
+def distDir = "$buildDir/$binArtifactName"
+
+rat {
+    inputDir = distDir
+    reportDir = project.file(buildDir)
+    excludes = ['**/docs/**', '**/testdata/**', '**/.idea/**', '**/test-dir/**', '**/.settings/**', '**/.gradle/**','**/gradle/**' ,'**/gradle/build/**', '*.iml', '*.iws', '*.ipr', 'derby.log', '**/gradlew**' ]
+    failOnError = true
+    xmlOutput = false
+    htmlOutput = true
+    plainOutput = false
+}
+rat.dependsOn('packageDist')
+
+def scripts = ['export', 'list-databases', 'metastore', 'create-hive-table', 'help',
+               'import-mainframe', 'list-tables', 'version',
+               'eval', 'import', 'job', 'merge',
+               'import-all-tables', 'codegen']
+
+
+task runSqoopHelp(type: JavaExec, dependsOn: 'classes') {
+    main = 'org.apache.sqoop.Sqoop'
+    jvmArgs = ['-Dhadoop.security.log.file=./build/security-audit.log']
+    classpath = sourceSets.main.runtimeClasspath + configurations.runtime
+    args = ['help']
+    standardOutput = new ByteArrayOutputStream()
+    ext.helpOut = {
+        standardOutput.toString()
+    }
+
+}
+
+task createAllStartScripts(dependsOn: 'runSqoopHelp' ) doLast{
+    // Placeholder task with validation
+    // We call Sqoop help to verify that all tasks that we create scripts for are present in Sqoop help and vice-versa
+    // We currently depend on the format of the help output to parse the relevant information out
+    def matcher = (tasks.runSqoopHelp.helpOut() =~/(?m)^\s\s([a-z-]+)\s+\w+/)
+    def matches = new String[matcher.getCount()]
+    for (def i=0; i < matcher.getCount(); i++) {
+        matches[i] = matcher[i][1]
+    }
+    if (matches.sort() != scripts.sort())
+        throw new GradleException('Error: script list in gradle build script and result of Sqoop help are not the same, but should be')
+}
+
+scripts.each() { scriptName ->
+    def t = tasks.create(name: scriptName + 'StartScript', type: CreateStartScripts) {
+        unixStartScriptGenerator.template = resources.text.fromFile('gradle/customUnixStartScript.txt')
+        windowsStartScriptGenerator.template = resources.text.fromFile('gradle/customWindowsStartScript.txt')
+        outputDir = file("$buildDir/bin")
+        applicationName = scriptName
+        mainClassName = 'com.cloudera.sqoop.Sqoop'
+        classpath = project.configurations.runtime
+        doLast {
+            file("$buildDir/bin/"+ scriptName).renameTo(file("$buildDir/bin/"+"sqoop-"+scriptName))
+            file("$buildDir/bin/"+ scriptName +".bat").renameTo(file("$buildDir/bin/"+"sqoop-"+scriptName+".bat"))
+        }
+    }
+    t.dependsOn('compileJava')
+    createAllStartScripts.dependsOn(t)
+}
+
+task checkVersion doLast {
+    if (version.contains('SNAPSHOT'))
+        throw new GradleException('Error: cannot release a snapshot. Set -Pversion')
+}
+
+task release(dependsOn: ['checkVersion', 'tar', 'rat']) {
+    doLast {
+        println 'Release complete'
+        println "Binary tar: $buildDir/$binArtifactName-${version}.tar.gz"
+        println "Documentation: $buildDir/docs"
+        println "Release notes: $buildDir/docs/sqoop-$version" + ".releasenotes.html"
+        println "Release audit report: $buildDir/index.html"
+    }
+}
+
+task relnotes(type: Exec)  {
+    workingDir 'src/scripts'
+    if (!version.contains('SNAPSHOT')) {
+        commandLine "python", "relnotes.py", "$buildDir/docs", "$projectDir", "$oldHash\\..HEAD", "$version", "$oldVersion"
+    } else {
+        commandLine "true" //noop
+        println "Will not run releasenotes for SNAPSHOT version."
+    }
+}
+
+task realDocs(type: Exec, dependsOn: ['relnotes', 'javadoc']) {
+    workingDir projectDir
+    commandLine "make", "-C", "$projectDir/src/docs", "BUILDROOT=$buildDir", "VERSION=$version"
+}
+
+task docs(dependsOn: ['realDocs', 'relnotes', 'javadoc']) {
+    //placeholder
+}
+def $mvnRepo = System.getProperty("mvnRepo", "snapshots")
+
+publishing {
+    repositories {
+        maven {
+            name "cloudera." + $mvnRepo + ".repo"
+            url "https://repository.cloudera.com/content/repositories/"+$mvnRepo
+            credentials {
+                username 'username'
+                password 'password'
+            }
+        }
+    }
+}
+publishing {
+    publications {
+        sqoop(MavenPublication) {
+            groupId group
+            version  version
+            from components.java
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+        sqoopTest(MavenPublication) {
+            groupId group
+            version  version
+            artifactId 'sqoop-test'
+            artifact testJar
+            artifact sourceTestJar
+            pom.withXml {
+                def dependencies = asNode().appendNode('dependencies')
+                configurations.testRuntime.getResolvedConfiguration().getFirstLevelModuleDependencies().each {
+                    def dependency = dependencies.appendNode('dependency')
+                    dependency.appendNode('groupId', it.moduleGroup)
+                    dependency.appendNode('artifactId', it.moduleName)
+                    dependency.appendNode('version', it.moduleVersion)
+                }
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.5.1'
+}

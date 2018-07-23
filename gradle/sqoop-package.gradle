@@ -1,0 +1,209 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+configurations {
+    redist
+}
+
+dependencies {
+    redist group: 'commons-io', name: 'commons-io', version: commonsioVersion
+    redist(group: 'org.apache.avro', name: 'avro', version: avroVersion) {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.mortbay.jetty', module: 'jetty'
+        exclude group: 'org.mortbay.jetty', module: 'jetty-util'
+        exclude group: 'org.mortbay.jetty', module: 'servlet-api'
+        exclude module: 'netty'
+        exclude group: 'org.apache.velocity', module: 'velocity'
+    }
+    redist(group: 'org.apache.avro', name: 'avro-mapred', version: avroVersion, classifier: 'hadoop2') {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.mortbay.jetty', module: 'jetty'
+        exclude group: 'org.mortbay.jetty', module: 'jetty-util'
+        exclude group: 'org.mortbay.jetty', module: 'servlet-api'
+        exclude module: 'netty'
+        exclude group: 'org.apache.velocity', module: 'velocity'
+    }
+    redist group: 'hsqldb', name: 'hsqldb', version: hsqldbVersion
+    redist group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3Version
+    redist group: 'org.kitesdk', name: 'kite-data-mapreduce', version: kitedataVersion
+    redist group: 'org.kitesdk', name: 'kite-data-hive', version: kitedataVersion
+}
+
+//Jar tasks
+jar {
+    baseName = rootProject.name.toLowerCase()
+    destinationDir = buildDir
+}
+
+task testJar(type: Jar) {
+    baseName = rootProject.name.toLowerCase()
+    destinationDir = buildDir
+    description 'Create the test jar'
+    appendix = 'test'
+    from sourceSets.test.output
+}
+
+task jarAll(dependsOn: ['testJar', 'jar'])
+
+def buildSrcJarDir = "$buildDir/srcjars"
+
+task sourceJar(type: Jar) {
+    description 'Create source jars'
+    classifier = 'sources'
+    from sourceSets.main.allSource
+    into buildSrcJarDir
+}
+
+task sourceTestJar(type: Jar) {
+    description 'Create source jars'
+    classifier = 'sources'
+    appendix = 'test'
+    from sourceSets.test.allSource
+    into buildSrcJarDir
+}
+
+task sourceJars(dependsOn: ['jarAll', 'sourceJar', 'sourceTestJar'])
+
+//tar tasks
+def srcArchiveName =jar.baseName.toLowerCase() + "-" + jar.version
+def srcDirstDir = "$buildDir/$srcArchiveName"
+def binArtifactName = srcArchiveName + ".bin__hadoop-" + hadoopVersion
+def distDir = "$buildDir/$binArtifactName"
+
+task copyToSrcDistDir(type: Copy) {
+    from(projectDir) {
+        include "**/*"
+        exclude "build/**", ".git/**", "tags", ".project", ".classpath", "conf/managers.d/**", "conf/tools.d/**", ".gradle/**"
+    }
+    into srcDirstDir
+    includeEmptyDirs = false
+}
+
+task filepermissionForSrcDist(type: Exec) {
+    commandLine 'chmod', 'ugo+x', "$srcDirstDir/bin"
+    commandLine 'chmod', 'ugo+x', "$srcDirstDir/testdata/hive/bin"
+    fileTree("$srcDirstDir").matching { include "**/*.sh" }.each { aFile ->
+        exec {
+            commandLine 'chmod'
+            args 'ugo+x', aFile.absolutePath
+        }
+    }
+}
+
+task srcPackageDist(dependsOn: ['copyToSrcDistDir', 'filepermissionForSrcDist'])
+
+task srctar(type: Tar, dependsOn: srcPackageDist) {
+    from("$srcDirstDir") {
+        include "**"
+        exclude "**/*.sh", "testdata/hive/bin/*", "bin/*"
+        fileMode 0644
+    }
+    from("$srcDirstDir") {
+        include "**/*.sh", "testdata/hive/bin/*", "bin/*", "testdata/hcatalog/conf/*"
+        fileMode 0755
+    }
+    baseName = srcArchiveName
+    destinationDir = file("$buildDir")
+    extension = 'tar.gz'
+    compression = Compression.GZIP
+}
+
+task copyToDistDir(type: Copy, dependsOn: ['jarAll', 'docs', 'createAllStartScripts']) {
+    from jar
+    from testJar
+    from(projectDir) {
+        include "**/*"
+        exclude "build/**", "lib/**", ".git/**", "tags", ".project", ".classpath", "conf/managers.d/**", "conf/tools.d/**", ".gradle/**"
+    }
+    into distDir
+    includeEmptyDirs = false
+}
+
+task copyToDistLibDir(type: Copy, dependsOn: [configurations.redist, copyToDistDir]) {
+    from configurations.redist
+    from("$projectDir/lib") {
+        include "**/*"
+        exclude "ivy*"
+    }
+    into "$distDir/lib"
+    includeEmptyDirs = false
+}
+
+task copyToDistDirDocs(type: Copy, dependsOn: ['docs', 'copyToDistLibDir']) {
+    from("$buildDir/docs") {
+        include "**/*.html", "**/*.css", "images/**"
+    }
+    into "$distDir/docs"
+    includeEmptyDirs = false
+}
+
+task copyToDistDirDocsMan(type: Copy, dependsOn: ['docs', 'copyToDistDirDocs']) {
+    from("$buildDir/docs") {
+        include "**/*.gz"
+    }
+    into "$distDir/docs/man"
+    includeEmptyDirs = false
+}
+
+task copyToDistBinDir(type: Copy, dependsOn: ['copyToDistDirDocsMan']) {
+    from("$buildDir/bin") {
+        include "*"
+    }
+    into "$distDir/bin"
+    includeEmptyDirs = false
+}
+
+task filepermissionForDist(type: Exec, dependsOn: ['copyToDistBinDir']) {
+    commandLine 'chmod', 'ugo+x', "$distDir/bin"
+    commandLine 'chmod', 'ugo+x', "$distDir/testdata/hive/bin"
+    fileTree("$distDir").matching { include "**/*.sh" }.each { aFile ->
+        exec {
+            commandLine 'chmod'
+            args 'ugo+x', aFile.absolutePath
+        }
+    }
+}
+
+def contentSpec = copySpec {
+    from("$distDir/conf") {
+        include "sqoop-site-template.xml"
+    }
+    rename('sqoop-site-template.xml', 'sqoop-site.xml')
+}
+
+task copyAndOverwriteSqoopSiteXML(type: Copy, dependsOn: filepermissionForDist) {
+    into "$distDir/conf"
+    with contentSpec
+}
+
+task packageDist(dependsOn: ['copyToDistDir', 'copyToDistLibDir', 'copyToDistDirDocs', 'copyToDistDirDocsMan', 'copyToDistBinDir', 'filepermissionForDist', 'copyAndOverwriteSqoopSiteXML'])
+
+task tar(type: Tar, dependsOn: packageDist) {
+    from("$buildDir") {
+        include "$binArtifactName/**"
+        exclude "$binArtifactName/**/*.sh", "$binArtifactName/testdata/hive/bin/*", "$binArtifactName/bin/*"
+        fileMode 0644
+    }
+    from("$buildDir") {
+        include "$binArtifactName/**/*.sh", "$binArtifactName/testdata/hive/bin/*", "$binArtifactName/bin/*", "$binArtifactName/testdata/hcatalog/conf/*"
+        fileMode 0755
+    }
+    baseName = binArtifactName
+    destinationDir = file("$buildDir")
+    extension = 'tar.gz'
+    compression = Compression.GZIP
+}

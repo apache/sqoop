@@ -34,7 +34,7 @@
   </property>
   <property>
     <name>javax.jdo.option.ConnectionURL</name>
-    <value>jdbc:derby:;databaseName=${test.build.data}/sqoop/metastore_db;create=true</value>
+    <value>jdbc:derby:memory:metastore_db;create=true</value>
   </property>
   <property>
     <name>javax.jdo.option.ConnectionDriverName</name>

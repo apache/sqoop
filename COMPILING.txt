@@ -27,7 +27,7 @@ under the License.
 
 Compiling Sqoop requires the following tools:
 
-* Apache ant (1.7.1)
+* Apache ant (1.7.1) or Gradle (3.5.1)
 * Java JDK 1.6
 
 Additionally, building the documentation requires these tools:
@@ -52,7 +52,7 @@ Sqoop is compiled with ant. Type +ant -p+ to see the list of available targets.
 Type +ant+ to compile all java sources. You can then run Sqoop with +bin/sqoop+.
 
 If you want to build everything (including the documentation), type
-+ant package+. This will appear in the
++ant package+ or +./gradlew package+. This will appear in the
 +build/sqoop-(version)/+ directory.
 
 This version of Sqoop is built against Hadoop 0.23 available from Apache
@@ -61,7 +61,7 @@ downloads the necessary binaries.
 
 == Testing Sqoop
 
-Sqoop has several unit tests which can be run with +ant test+. This command
+Sqoop has several unit tests which can be run with +ant test+ or +./gradlew test+. This command
 will run all the "basic" checks against an in-memory database, HSQLDB.
 
 Sqoop also has compatibility tests that check its ability to work with
@@ -203,6 +203,7 @@ After the third-party databases are installed and configured, run:
 
 ++++
 ant test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
+./gradlew -Dsqoop.thirdparty.lib.dir=/relative/path/to/jdbc/drivers/ thirdPartyTest
 ++++
 
 This command will run all thirdparty tests except some DB2 tests.
@@ -211,6 +212,7 @@ as follows:
 
 ++++
 ant test -Dmanual=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
+./gradlew -Dsqoop.thirdparty.lib.dir=/relative/path/to/jdbc/drivers/ manualTest
 ++++
 
 Note that +sqoop.thirdparty.lib.dir+ can also be specified in
@@ -308,13 +310,15 @@ run:
 
 ++++
 ant findbugs -Dfindbugs.home=/path/to/findbugs/
+or
+./gradlew findbugsMain
 ++++
 
 A report will be generated in +build/findbugs/+
 
-=== Cobertura
+=== Code Coverage reports
 
-Cobertura runs code coverage checks. It instruments the build and
+For ant Cobertura runs code coverage checks. It instruments the build and
 checks that each line and conditional expression is evaluated along
 all possible paths.
 
@@ -325,6 +329,19 @@ ant clean
 ant cobertura -Dcobertura.home=/path/to/cobertura
 ant cobertura -Dcobertura.home=/path/to/cobertura \
     -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/thirdparty
+
+For Gradle we run Jacoco for code coverage checks. You can create single reports or composite reports,
+where you can check the combined coverage of unit and thirdparty tests.
+
+./gradlew clean
+./gradlew test
+./gradlew jacocoTestReport
+
+./gradlew -Dsqoop.thirdparty.lib.dir=<path_to_thirdparty_lib_directory> thirdPartyTest
+./gradlew jacocoThirdPartyReport
+
+or generate the composite report after running test and thirdPartyTest
+./gradlew jacocoCompositeReport
 ++++
 
 (You'll need to run the cobertura target twice; once against the regular
@@ -350,6 +367,7 @@ To run checkstyle, execute:
 
 ++++
 ant checkstyle
+./gradlew checkStyleMain
 ++++
 
 A report will be generated as +build/checkstyle-errors.html+
@@ -364,6 +382,7 @@ To install Sqoop in your local +.m2+ cache, run:
 
 ++++
 ant mvn-install
+./gradlew publishToMavenLocal
 ++++
 
 This will install a pom and the Sqoop jar.
@@ -372,6 +391,8 @@ To deploy Sqoop to a public repository, use:
 
 ++++
 ant mvn-deploy
+./gradlew publishSqoopPublicationToCloudera.snapshot.repoRepository
+./gradlew -DmvnRepo=x publishSqoopPublicationToCloudera.x.repoRepository
 ++++
 
 By default, this deploys to repository.cloudera.com. You can choose
@@ -387,7 +408,7 @@ This will build a binary release tarball and the web-based documentation
 as well as run a release audit which flags any source files which may
 be missing license headers.
 
-(The release audit can be run standalone with the +ant releaseaudit+
+(The release audit can be run standalone with the +ant releaseaudit+ (+./gradlew rat+)
 target.)
 
 You must set the +version+ property explicitly; you cannot release a
@@ -402,16 +423,6 @@ will allow you to edit Sqoop sources in Eclipse with all the library
 dependencies correctly resolved. To compile the jars, you should still
 use ant.
 
-
-== Using a specific version of Hadoop
-
-Now Sqoop defaults to use Hadoop 0.23 available from Apache maven repository.
-To switch back to the previous version of Hadoop 0.20, for example, run:
-
-++++
-ant test -Dhadoopversion=20
-++++
-
 == Building the documentation
 
 Building the documentation requires that you have toxml installed.
@@ -421,3 +432,17 @@ Also, one needs to set the XML_CATALOG_FILES environment variable.
 export XML_CATALOG_FILES=/usr/local/etc/xml/catalog
 ant docs
 ++++
+
+== Other important Gradle commands
+
++ Generate gradle wrapper (to ensure you are using the correct, compatible version of gradle) by running +./gradlew wrapper+
++ ./gradlew tasks to list all top-level gradle tasks or run ./gradlew tasks --all to show all tasks and subtasks
++ ./gradlew compileJava to compile the main Java source
++ ./gradlew -Dsqoop.thirdparty.lib.dir=<relative_path_to_thirdparty_lib_directory> -Dsqoop.test.mysql.connectstring.host_url=jdbc:mysql://127.0.0.1:3306/ -Dsqoop.test.mysql.databasename=sqoop -Dsqoop.test.mysql.password=Sqoop12345 -Dsqoop.test.mysql.username=sqoop -Dsqoop.test.oracle.connectstring=jdbc:oracle:thin:@//localhost:1521/sqoop -Dsqoop.test.oracle.username=SYSTEM -Dsqoop.test.oracle.password=Sqoop12345 -Dsqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://localhost/ -Dsqoop.test.postgresql.database=sqoop -Dsqoop.test.postgresql.username=sqoop -Dsqoop.test.postgresql.password=Sqoop12345 -Dsqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost:33000 -Dsqoop.test.cubrid.connectstring.username=sqoop -Dsqoop.test.cubrid.connectstring.database=sqoop -Dsqoop.test.cubrid.connectstring.password=Sqoop12345 -Dmapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom" -Dtest.timeout=10000000 -Dsqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://localhost:1433 -Dsqoop.test.sqlserver.database=master -Dms.sqlserver.username=sa -Dms.sqlserver.password=Sqoop12345 -Dsqoop.test.db2.connectstring.host_url=jdbc:db2://localhost:50000 -Dsqoop.test.db2.connectstring.database=SQOOP -Dsqoop.test.db2.connectstring.username=DB2INST1 -Dsqoop.test.db2.connectstring.password=Sqoop12345 thirdPartyTest
++ ./gradlew test --debug-jvm : to run remote debug on port 5005
++ ./gradlew -Dtest.single=ClassName*Test test or ./gradlew tests --tests
++ To refresh dependencies for a build ./gradlew build --refresh-dependencies
++ For skipping a single test or a set of tests ./gradle build -x test
++ To run a single test class use --tests ClassName*Test or -DtestType.single=ClassName*Test (use with test, thirdPartyTest or manualTest)
++ To get a dependency tree: ./gradlew dependencyInsight --configuration optionalConfiguration --dependency searchedForDependency
++ For a list of the dependencies of the selected project, broken down by configuration run: ./gradlew dependencies

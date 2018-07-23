@@ -47,7 +47,11 @@ sed -i -e "s|${basedir}||" ${auditlog}
 # Anything in /testdata is a file that is supposed to represent exact output.
 grep '!?????' ${auditlog} \
     | grep -v ' \/docs\/' \
+    | grep -v ' \/target\/' \
     | grep -v ' \/testdata\/' \
+    | grep -v ' \/gradle\/' \
+    | grep -v ' \/gradlew' \
+    | grep -v ' \/gradlew.bat' \
     > ${filtered}
 
 # Check: did we find any violations after filtering?
