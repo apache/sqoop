@@ -115,8 +115,8 @@
   <property name="src.tar.file" location="${build.dir}/${src.artifact.name}.tar.gz" />
 
   <!-- compilation -->
-  <property name="targetJavaVersion" value="1.7" />
-  <property name="sourceJavaVersion" value="1.7" />
+  <property name="targetJavaVersion" value="1.8" />
+  <property name="sourceJavaVersion" value="1.8" />
   <property name="javac.deprecation" value="off"/>
   <property name="javac.debug" value="on"/>
   <property name="build.encoding" value="ISO-8859-1"/>

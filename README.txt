@@ -20,8 +20,8 @@ available in the +docs/+ directory.
 
 Compiling Sqoop requires the following tools:
 
-* Apache ant (1.7.1)
-* Java JDK 1.6
+* Apache ant (1.9.7)
+* Java JDK 1.8
 
 Additionally, building the documentation requires these tools:
 

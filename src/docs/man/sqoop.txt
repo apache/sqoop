@@ -41,8 +41,8 @@ JAVA_HOME::
   As part of its import process, Sqoop generates and compiles Java code
   by invoking the Java compiler *javac*(1). As a result, JAVA_HOME must
   be set to the location of your JDK (note: This cannot just be a JRE).
-  e.g., +/usr/java/default+. Hadoop (and Sqoop) requires Sun Java 1.6 which
-  can be downloaded from http://java.sun.com.
+  e.g., +/usr/java/default+. Hadoop (and Sqoop) requires Oracle Java 1.8 which
+  can be downloaded from http://www.oracle.com/technetwork/java/index.html.
 
 HADOOP_COMMON_HOME::
   The location of the Hadoop Common files (specifically the bin/hadoop executable).
