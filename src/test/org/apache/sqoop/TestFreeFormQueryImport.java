@@ -90,7 +90,7 @@ public class TestFreeFormQueryImport extends ImportJobTestCase {
     args.add("--connect");
     args.add(getConnectString());
     args.add("--target-dir");
-    args.add(getWarehouseDir());
+    args.add(getTablePath().toString());
     args.add("--split-by");
     args.add(splitByCol);
     args.add("--num-mappers");
@@ -134,8 +134,7 @@ public class TestFreeFormQueryImport extends ImportJobTestCase {
 
     runImport(getArgv(tableName1 + "." + getColName(0), query));
 
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path filePath = new Path(warehousePath, "part-m-00000");
+    Path filePath = new Path(getTablePath(), "part-m-00000");
     String expectedVal = "1,foo";
 
     BufferedReader reader = null;

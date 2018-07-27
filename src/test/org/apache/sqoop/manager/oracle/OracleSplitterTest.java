@@ -91,7 +91,7 @@ public class OracleSplitterTest extends ImportJobTestCase {
     args.add("--connect");
     args.add(getConnectString());
     args.add("--target-dir");
-    args.add(getWarehouseDir());
+    args.add(getTablePath().toString());
     args.add("--num-mappers");
     args.add("2");
     args.add("--split-by");
@@ -127,13 +127,13 @@ public class OracleSplitterTest extends ImportJobTestCase {
     List<String> lines;
 
     // First row should be in the first file
-    file = new File(this.getWarehouseDir(), "part-m-00000");
+    file = new File(getTablePath().toString(), "part-m-00000");
     lines = FileUtils.readLines(file, "UTF-8");
     assertEquals(1, lines.size());
     assertEquals("1,old_data,1999-01-01 11:11:11.0", lines.get(0));
 
     // With second line in the second file
-    file = new File(this.getWarehouseDir(), "part-m-00001");
+    file = new File(getTablePath().toString(), "part-m-00001");
     lines = FileUtils.readLines(file, "UTF-8");
     assertEquals(1, lines.size());
     assertEquals("2,new_data,2000-11-11 23:23:23.0", lines.get(0));

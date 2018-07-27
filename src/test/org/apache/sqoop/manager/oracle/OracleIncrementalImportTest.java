@@ -109,7 +109,7 @@ public class OracleIncrementalImportTest extends ImportJobTestCase {
     args.add("--connect");
     args.add(getConnectString());
     args.add("--target-dir");
-    args.add(getWarehouseDir());
+    args.add(getTablePath().toString());
     args.add("--num-mappers");
     args.add("1");
     args.add("--split-by");
@@ -153,8 +153,7 @@ public class OracleIncrementalImportTest extends ImportJobTestCase {
     String[] args = getArgv(tableName, connPropsFileName, getColName(2));
     runImport(args);
 
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path filePath = new Path(warehousePath, "part-m-00000");
+    Path filePath = new Path(getTablePath().toString(), "part-m-00000");
     String output = readLineFromPath(filePath);
     String expectedVal = "2,new_data,2000-11-11";
     assertEquals("Incremental import result expected a different string",
@@ -181,8 +180,7 @@ public class OracleIncrementalImportTest extends ImportJobTestCase {
     String[] args = getArgv(tableName, connPropsFileName, getColName(2));
     runImport(args);
 
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path filePath = new Path(warehousePath, "part-m-00000");
+    Path filePath = new Path(getTablePath(), "part-m-00000");
     String output = readLineFromPath(filePath);
     String expectedVal = "2,new_data,2000-11-11 23:23:23.0";
     assertEquals("Incremental import result expected a different string",

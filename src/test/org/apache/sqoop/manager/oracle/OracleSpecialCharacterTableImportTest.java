@@ -98,7 +98,7 @@ public class OracleSpecialCharacterTableImportTest extends ImportJobTestCase {
     args.add("--password");
     args.add(OracleUtils.ORACLE_USER_PASS);
     args.add("--target-dir");
-    args.add(getWarehouseDir());
+    args.add(getTablePath().toString());
     args.add("--num-mappers");
     args.add("1");
     args.add("--table");
@@ -120,8 +120,7 @@ public class OracleSpecialCharacterTableImportTest extends ImportJobTestCase {
     String[] args = getArgv();
     runImport(args);
 
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path filePath = new Path(warehousePath, "part-m-00000");
+    Path filePath = new Path(getTablePath(), "part-m-00000");
     String output = Files.toString(new File(filePath.toString()), Charsets.UTF_8);
 
     assertEquals("hello, world!", output.trim());
