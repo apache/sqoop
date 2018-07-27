@@ -329,7 +329,7 @@ public class ImportTool extends BaseSqoopTool {
       }
       break;
     case DateLastModified:
-      if (options.getMergeKeyCol() == null && !options.isAppendMode()) {
+      if (shouldCheckExistingOutputDirectory(options)) {
         Path outputPath = getOutputPath(options, context.getTableName(), false);
         FileSystem fs = outputPath.getFileSystem(options.getConf());
         if (fs.exists(outputPath)) {
@@ -1187,6 +1187,14 @@ public class ImportTool extends BaseSqoopTool {
     validateHiveOptions(options);
     validateHCatalogOptions(options);
     validateAccumuloOptions(options);
+  }
+
+  boolean shouldCheckExistingOutputDirectory(SqoopOptions options) {
+    return options.getMergeKeyCol() == null && !options.isAppendMode() && !isHBaseImport(options);
+  }
+
+  private boolean isHBaseImport(SqoopOptions options) {
+    return options.getHBaseTable() != null;
   }
 
   private boolean isHiveImportNeeded(SqoopOptions options) {

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -275,18 +276,33 @@ public class TestIncrementalImport  {
     }
   }
 
+  private Path getTablePath(String tableName) {
+    Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+    return new Path(warehouse, tableName);
+  }
+
+  private FileSystem getLocalFileSystem() throws IOException {
+    return FileSystem.getLocal(new Configuration());
+  }
+
   /**
    * Delete all files in a directory for a table.
    */
   public void clearDir(String tableName) {
     try {
-      FileSystem fs = FileSystem.getLocal(new Configuration());
-      Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
-      Path tableDir = new Path(warehouse, tableName);
+      FileSystem fs = getLocalFileSystem();
+      Path tableDir = getTablePath(tableName);
       fs.delete(tableDir, true);
     } catch (Exception e) {
       fail("Got unexpected exception: " + StringUtils.stringifyException(e));
     }
+  }
+
+  public void createDir(String tableName) throws IOException {
+    FileSystem fs = FileSystem.getLocal(new Configuration());
+    Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+    Path tableDir = new Path(warehouse, tableName);
+    fs.mkdirs(tableDir);
   }
 
   /**
@@ -837,6 +853,25 @@ public class TestIncrementalImport  {
     runImport(options, args);
 
     assertDirOfNumbers(TABLE_NAME, 10);
+  }
+
+  @Test
+  public void testLastModifiedImportWithExistingOutputDirectoryFails() throws Exception {
+    final String TABLE_NAME = "failWithExistingOutputDirectory";
+
+    createDir(TABLE_NAME);
+
+    Timestamp thePast = new Timestamp(System.currentTimeMillis() - 100);
+    createTimestampTable(TABLE_NAME, 10, thePast);
+
+    List<String> args = getArgListForTable(TABLE_NAME, true, false);
+
+    SqoopOptions options = new SqoopOptions(newConf());
+    options.setThrowOnError(true);
+
+    thrown.expectMessage("--merge-key or --append is required when using --incremental lastmodified and the output directory exists.");
+    Sqoop sqoop = new Sqoop(new ImportTool(), options.getConf(), options);
+    ToolRunner.run(sqoop.getConf(), sqoop, args.toArray(new String[0]));
   }
 
   @Test
