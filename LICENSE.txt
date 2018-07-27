@@ -299,22 +299,6 @@ For lib/jackson-mapper-asl-<version>.jar:
 
   The Apache License, Version 2.0
 
-For lib/kite-data-core-<version>.jar:
-
-  The Apache License, Version 2.0
-
-For lib/kite-data-hive-<version>.jar:
-
-  The Apache License, Version 2.0
-
-For lib/kite-data-mapreduce-<version>.jar:
-
-  The Apache License, Version 2.0
-
-For lib/kite-hadoop-compatibility-<version>.jar:
-
-  The Apache License, Version 2.0
-
 For lib/opencsv-<version>.jar:
 
   The Apache License, Version 2.0

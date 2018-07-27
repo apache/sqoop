@@ -39,8 +39,7 @@ dependencies {
     }
     redist group: 'hsqldb', name: 'hsqldb', version: hsqldbVersion
     redist group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3Version
-    redist group: 'org.kitesdk', name: 'kite-data-mapreduce', version: kitedataVersion
-    redist group: 'org.kitesdk', name: 'kite-data-hive', version: kitedataVersion
+    redist group: 'com.twitter', name: 'parquet-avro', version: parquetVersion
 }
 
 //Jar tasks
