@@ -23,6 +23,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.sqoop.manager.MainframeManager;
 import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 
 import org.apache.sqoop.SqoopOptions;
@@ -148,7 +149,7 @@ public class MainframeImportTool extends ImportTool {
 
     if (!in.hasOption(CONN_MANAGER_CLASS_NAME)) {
        // set default ConnManager
-      out.setConnManagerClassName("org.apache.sqoop.manager.MainframeManager");
+      out.setConnManagerClassName(MainframeManager.class.getName());
     }
     if (in.hasOption(DS_ARG)) {
       out.setMainframeInputDatasetName(in.getOptionValue(DS_ARG));
