@@ -91,7 +91,8 @@ public class Sqoop extends Configured implements Tool {
    * @param opts the SqoopOptions which control the tool's parameters.
    */
   public Sqoop(SqoopTool tool, Configuration conf, SqoopOptions opts) {
-    LOG.info("Running Sqoop version: " + new SqoopVersion().VERSION);
+    LOG.info("Running Sqoop version: " + SqoopVersion.VERSION);
+    LOG.debug("Git hash: " + SqoopVersion.GIT_HASH);
 
     if (null != conf) {
       setConf(conf);
