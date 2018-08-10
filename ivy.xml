@@ -76,6 +76,8 @@ under the License.
       rev="${hadoop.version}" conf="common->default"/>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core"
       rev="${hadoop.version}" conf="common->default"/>
+    <dependency org="org.apache.hadoop" name="hadoop-aws"
+                rev="${hadoop.version}" conf="common->default"/>
     <dependency org="org.aspectj" name="aspectjtools" rev="${aspectj.version}"
       conf="common->default"/>
     <dependency org="org.aspectj" name="aspectjrt" rev="${aspectj.version}"

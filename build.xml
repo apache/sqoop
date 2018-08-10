@@ -254,6 +254,9 @@
   <property name="sqoop.test.mainframe.ftp.dataset.gdg.filename" value="G0001V43" />
   <property name="sqoop.test.mainframe.ftp.dataset.gdg.md5" value="f0d0d171fdb8a03dbc1266ed179d7093" />
 
+  <property name="s3.bucket.url" value="" />
+  <property name="s3.generator.command" value="" />
+
   <condition property="windows">
     <os family="windows" />
   </condition>
@@ -887,6 +890,9 @@
       <sysproperty key="sqoop.test.mainframe.ftp.dataset.gdg" value="${sqoop.test.mainframe.ftp.dataset.gdg}" />
       <sysproperty key="sqoop.test.mainframe.ftp.dataset.gdg.filename" value="${sqoop.test.mainframe.ftp.dataset.gdg.filename}" />
       <sysproperty key="sqoop.test.mainframe.ftp.dataset.gdg.md5" value="${sqoop.test.mainframe.ftp.dataset.gdg.md5}" />
+
+      <sysproperty key="s3.bucket.url" value="${s3.bucket.url}" />
+      <sysproperty key="s3.generator.command" value="${s3.generator.command}" />
 
       <!-- Location of Hive logs -->
       <!--<sysproperty key="hive.log.dir"

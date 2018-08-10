@@ -89,6 +89,7 @@ def sqoopThirdPartyLib = System.getProperty("sqoop.thirdparty.lib.dir")
 
 dependencies {
     if (sqoopThirdPartyLib != null) runtime fileTree(dir: sqoopThirdPartyLib, include: '*.jar')
+    compile group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoopVersion
     compile group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoopVersion
     compile group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoopVersion
     compile group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-common', version: hadoopVersion
