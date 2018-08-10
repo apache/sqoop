@@ -204,7 +204,12 @@ under the License.
       rev="${hcatalog.version}" conf="common->default">
       <artifact name="hive-hcatalog-core" type="jar"/>
       <exclude org="org.apache.avro" module="avro" />
+      <exclude org="org.apache.hive" module="hive-exec" />
     </dependency>
+
+    <dependency org="org.apache.hive" name="hive-exec" rev="${hcatalog.version}" conf="common->default" m:classifier="core" />
+    <!-- Kryo is a dependency of hive-exec:core -->
+    <dependency org="com.esotericsoftware.kryo" name="kryo" rev="${kryo.version}" conf="common->default" />
 
     <dependency org="org.postgresql" name="postgresql"
       rev="${postgresql.version}" conf="common->default" />
