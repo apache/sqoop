@@ -90,4 +90,13 @@ public class OraOopOracleDataChunkExtent extends OraOopOracleDataChunk {
     }
   }
 
+  public String toString(){
+    StringBuilder result = new StringBuilder();
+    result.append("\n\t\t id = ").append(getId());
+    result.append("\n\t\t oracleDataObjectId = ").append(oracleDataObjectId);
+    result.append("\n\t\t relativeDatafileNumber = ").append(relativeDatafileNumber);
+    result.append("\n\t\t startBlockNumber = ").append(startBlockNumber);
+    result.append("\n\t\t finishBlockNumber = ").append(finishBlockNumber);
+    return result.toString();
+  }
 }
