@@ -223,7 +223,7 @@ jacocoTestReport {
     reports {
         xml.enabled true
         csv.enabled false
-        html.destination "$buildDir/jacocoHtml/test"
+        html.destination file("$buildDir/jacocoHtml/test")
     }
 }
 
@@ -234,7 +234,7 @@ task jacocoThirdPartyReport(type: JacocoReport){
     reports {
         xml.enabled true
         csv.enabled false
-        html.destination "$buildDir/jacocoHtml/3rd"
+        html.destination file("$buildDir/jacocoHtml/3rd")
     }
 }
 
@@ -245,7 +245,7 @@ task jacocoCompositeReport(type: JacocoReport){
     reports {
         xml.enabled true
         csv.enabled false
-        html.destination "$buildDir/jacocoHtml/"
+        html.destination file("$buildDir/jacocoHtml/")
     }
 }
 
@@ -401,6 +401,6 @@ publishing {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.5.1'
+wrapper {
+    gradleVersion = '4.9'
 }

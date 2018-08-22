@@ -19,6 +19,7 @@
 package org.apache.sqoop.hbase;
 
 import static org.apache.hadoop.hbase.HConstants.MASTER_INFO_PORT;
+import static org.apache.hadoop.hbase.HConstants.REGIONSERVER_INFO_PORT;
 import static org.apache.hadoop.hbase.HConstants.ZOOKEEPER_CLIENT_PORT;
 import static org.apache.hadoop.hbase.coprocessor.CoprocessorHost.REGION_COPROCESSOR_CONF_KEY;
 import static org.apache.hadoop.hbase.security.HBaseKerberosUtils.KRB_PRINCIPAL;
@@ -77,7 +78,7 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
       HBaseTestCase.class.getName());
-  private static final String MASTER_INFO_PORT_DISABLE_WEB_UI = "-1";
+  private static final String INFO_PORT_DISABLE_WEB_UI = "-1";
   private static final String DEFAULT_DFS_HTTPS_ADDRESS = "localhost:0";
 
   private final KerberosConfigurationProvider kerberosConfigurationProvider;
@@ -177,8 +178,10 @@ public abstract class HBaseTestCase extends ImportJobTestCase {
   public void setUp() {
     try {
       hbaseTestUtil = new HBaseTestingUtility();
-      // We set the port for the hbase master web UI to -1 because we do not want the info server to run.
-      hbaseTestUtil.getConfiguration().set(MASTER_INFO_PORT, MASTER_INFO_PORT_DISABLE_WEB_UI);
+      // We set the port for the hbase master and regionserver web UI to -1 because we do not want the info server to run.
+      hbaseTestUtil.getConfiguration().set(MASTER_INFO_PORT, INFO_PORT_DISABLE_WEB_UI);
+      hbaseTestUtil.getConfiguration().set(REGIONSERVER_INFO_PORT, INFO_PORT_DISABLE_WEB_UI);
+
       setupKerberos();
 
       hbaseTestUtil.startMiniCluster();

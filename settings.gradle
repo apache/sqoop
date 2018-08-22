@@ -16,3 +16,4 @@
  * limitations under the License.
  */
 rootProject.name ='Sqoop'
+enableFeaturePreview('STABLE_PUBLISHING')
