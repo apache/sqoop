@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -38,47 +37,15 @@ import org.apache.hadoop.util.*;
  */
 public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
 
-  /**
-   * RecordWriter to write to plain text files.
-   */
-  public static class RawKeyRecordWriter<K, V> extends RecordWriter<K, V> {
-
-    private static final String UTF8 = "UTF-8";
-
-    protected DataOutputStream out;
-
-    public RawKeyRecordWriter(DataOutputStream out) {
-      this.out = out;
-    }
-
-    /**
-     * Write the object to the byte stream, handling Text as a special
-     * case.
-     * @param o the object to print
-     * @throws IOException if the write throws, we pass it on
-     */
-    private void writeObject(Object o) throws IOException {
-      if (o instanceof Text) {
-        Text to = (Text) o;
-        out.write(to.getBytes(), 0, to.getLength());
-      } else {
-        out.write(o.toString().getBytes(UTF8));
-      }
-    }
-
-    public synchronized void write(K key, V value) throws IOException {
-      writeObject(key);
-    }
-
-    public synchronized void close(TaskAttemptContext context)
-        throws IOException {
-      out.close();
-    }
-
+  protected FSDataOutputStream getFSDataOutputStream(TaskAttemptContext context, String ext) throws IOException {
+    Configuration conf = context.getConfiguration();
+    Path file = getDefaultWorkFile(context, ext);
+    FileSystem fs = file.getFileSystem(conf);
+    FSDataOutputStream fileOut = fs.create(file, false);
+    return fileOut;
   }
 
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-      throws IOException {
+  protected DataOutputStream getOutputStream(TaskAttemptContext context) throws IOException {
     boolean isCompressed = getCompressOutput(context);
     Configuration conf = context.getConfiguration();
     String ext = "";
@@ -93,17 +60,18 @@ public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
       ext = codec.getDefaultExtension();
     }
 
-    Path file = getDefaultWorkFile(context, ext);
-    FileSystem fs = file.getFileSystem(conf);
-    FSDataOutputStream fileOut = fs.create(file, false);
+    FSDataOutputStream fileOut = getFSDataOutputStream(context,ext);
     DataOutputStream ostream = fileOut;
 
     if (isCompressed) {
       ostream = new DataOutputStream(codec.createOutputStream(fileOut));
     }
-
-    return new RawKeyRecordWriter<K, V>(ostream);
+    return ostream;
   }
 
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+      throws IOException {
+    DataOutputStream ostream = getOutputStream(context);
+    return new KeyRecordWriters.RawKeyRecordWriter<K, V>(ostream);
+  }
 }
-

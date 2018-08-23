@@ -33,4 +33,15 @@ public class MainframeConfiguration
   public static final String MAINFRAME_INPUT_DATASET_TAPE = "mainframe.input.dataset.tape";
 
   public static final String MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME = "org.apache.sqoop.mapreduce.mainframe.MainframeFTPFileEntryParser";
+
+  public static final String MAINFRAME_FTP_TRANSFER_MODE = "mainframe.ftp.transfermode";
+
+  public static final String MAINFRAME_FTP_TRANSFER_MODE_ASCII = "ascii";
+
+  public static final String MAINFRAME_FTP_TRANSFER_MODE_BINARY = "binary";
+
+  // this is the default buffer size used when doing binary ftp transfers from mainframe
+  public static final Integer MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE = 32760;
+
+  public static final String MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE = "mainframe.ftp.buffersize";
 }

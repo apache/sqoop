@@ -18,19 +18,20 @@
 
 package org.apache.sqoop.mapreduce.mainframe;
 
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.lib.SqoopRecord;
 
 /**
- * Mapper that writes mainframe dataset records in Text format to multiple files
+ * Mapper that writes mainframe dataset records in binary format to multiple files
  * based on the key, which is the index of the datasets in the input split.
  */
-public class MainframeDatasetImportMapper extends AbstractMainframeDatasetImportMapper<Text> {
+public class MainframeDatasetBinaryImportMapper extends AbstractMainframeDatasetImportMapper<BytesWritable> {
 
   @Override
-  protected Text createOutKey(SqoopRecord sqoopRecord) {
-    Text result = new Text();
-    result.set(sqoopRecord.toString());
+  protected BytesWritable createOutKey(SqoopRecord sqoopRecord) {
+    BytesWritable result = new BytesWritable();
+    byte[] bytes = (byte[]) sqoopRecord.getFieldMap().entrySet().iterator().next().getValue();
+    result.set(bytes,0, bytes.length);
     return result;
   }
 }

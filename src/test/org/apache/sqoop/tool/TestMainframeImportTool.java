@@ -22,18 +22,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.ToolOptions;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
+import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,15 +43,16 @@ import static org.junit.Assert.assertTrue;
 
 public class TestMainframeImportTool extends BaseSqoopTestCase {
 
-  private static final Log LOG = LogFactory.getLog(TestMainframeImportTool.class
-      .getName());
-
   private MainframeImportTool mfImportTool;
+  private ToolOptions toolOptions;
+  private SqoopOptions sqoopOption;
 
   @Before
   public void setUp() {
 
     mfImportTool = new MainframeImportTool();
+    toolOptions = new ToolOptions();
+    sqoopOption = new SqoopOptions();
   }
 
   @After
@@ -182,5 +183,59 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
 	  mfImportTool.validateImportOptions(sqoopOption);
 	  Boolean isTape = sqoopOption.getMainframeInputDatasetTape();
 	  assert(isTape != null && isTape.toString().equals("false"));
+  }
+
+  @Test
+  public void testFtpTransferModeAscii() throws ParseException, InvalidOptionsException {
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-textfile" };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.TextFile,sqoopOption.getFileLayout());
+  }
+  @Test
+  public void testFtpTransferModeDefaultsToAscii() throws ParseException, InvalidOptionsException {
+    String[] args = new String[] { "--dataset", "mydatasetname" };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.TextFile,sqoopOption.getFileLayout());
+  }
+
+  @Test
+  public void testAsBinaryFileSetsCorrectFileLayoutAndDefaultBufferSize() throws ParseException, InvalidOptionsException {
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile" };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
+    assertEquals(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE, sqoopOption.getBufferSize());
+  }
+
+  @Test
+  public void testSetBufferSize() throws ParseException, InvalidOptionsException {
+    final Integer EXPECTED_BUFFER = 1024;
+    String[] args = new String[] { "--dataset", "mydatasetname", "--as-binaryfile", "--buffersize", EXPECTED_BUFFER.toString() };
+    configureAndValidateOptions(args);
+    assertEquals(SqoopOptions.FileLayout.BinaryFile,sqoopOption.getFileLayout());
+    assertEquals(EXPECTED_BUFFER, sqoopOption.getBufferSize());
+  }
+
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
+  @Test
+  public void testBufferSizeWithoutBinaryThrowsException() throws ParseException, InvalidOptionsException {
+    final Integer EXPECTED_BUFFER = 1024;
+    String[] args = new String[] { "--buffersize", EXPECTED_BUFFER.toString() };
+    exception.expect(InvalidOptionsException.class);
+    configureAndValidateOptions(args);
+  }
+
+  @Test
+  public void testInvalidBufferSizeThrowsNumberFormatException() throws ParseException, InvalidOptionsException {
+    String[] args = new String[] { "--buffersize", "invalidinteger" };
+    exception.expect(NumberFormatException.class);
+    configureAndValidateOptions(args);
+  }
+
+  private void configureAndValidateOptions(String[] args) throws ParseException, InvalidOptionsException {
+    mfImportTool.configureOptions(toolOptions);
+    sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+    mfImportTool.validateImportOptions(sqoopOption);
   }
 }

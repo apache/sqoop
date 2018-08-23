@@ -16,21 +16,27 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.mapreduce.mainframe;
+package org.apache.sqoop.mapreduce;
 
-import org.apache.hadoop.io.Text;
-import org.apache.sqoop.lib.SqoopRecord;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
- * Mapper that writes mainframe dataset records in Text format to multiple files
- * based on the key, which is the index of the datasets in the input split.
+ * An {@link OutputFormat} that writes binary files.
+ * Only writes the key. Does not write any delimiter/newline after the key.
  */
-public class MainframeDatasetImportMapper extends AbstractMainframeDatasetImportMapper<Text> {
+public class ByteKeyOutputFormat<K, V> extends RawKeyTextOutputFormat<K, V> {
 
-  @Override
-  protected Text createOutKey(SqoopRecord sqoopRecord) {
-    Text result = new Text();
-    result.set(sqoopRecord.toString());
-    return result;
+  // currently don't support compression
+  private static final String FILE_EXTENSION = "";
+
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+      throws IOException {
+    DataOutputStream ostream = getFSDataOutputStream(context,FILE_EXTENSION);
+    return new KeyRecordWriters.BinaryKeyRecordWriter<K,V>(ostream);
   }
+
 }

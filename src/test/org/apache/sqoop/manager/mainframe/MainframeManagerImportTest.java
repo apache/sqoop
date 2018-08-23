@@ -113,6 +113,42 @@ public class MainframeManagerImportTest extends ImportJobTestCase {
     doImportAndVerify(MainframeTestUtil.GDG_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG, files);
   }
 
+  @Test
+  public void testImportGdgBinary() throws IOException {
+    HashMap<String,String> files = new HashMap<String,String>();
+    files.put(MainframeTestUtil.GDG_BINARY_DATASET_FILENAME, MainframeTestUtil.EXPECTED_GDG_BINARY_DATASET_MD5);
+    doImportAndVerify(MainframeTestUtil.GDG_BINARY_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG, files, "--as-binaryfile");
+  }
+
+  @Test
+  public void testImportGdgBinaryWithBufferSize() throws IOException {
+    HashMap<String,String> files = new HashMap<String,String>();
+    files.put(MainframeTestUtil.GDG_BINARY_DATASET_FILENAME, MainframeTestUtil.EXPECTED_GDG_BINARY_DATASET_MD5);
+    doImportAndVerify(MainframeTestUtil.GDG_BINARY_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG, files, "--as-binaryfile", "--buffersize", "64000");
+  }
+
+  @Test
+  public void testImportSequential() throws IOException {
+    // can reuse the same dataset as binary as the dataset is plain text
+    HashMap<String,String> files = new HashMap<String,String>();
+    files.put(MainframeTestUtil.SEQ_DATASET_FILENAME, MainframeTestUtil.EXPECTED_SEQ_DATASET_MD5);
+    doImportAndVerify(MainframeTestUtil.SEQ_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files);
+  }
+
+  @Test
+  public void testImportSequentialBinary() throws IOException {
+    HashMap<String,String> files = new HashMap<String,String>();
+    files.put(MainframeTestUtil.SEQ_BINARY_DATASET_FILENAME, MainframeTestUtil.EXPECTED_SEQ_BINARY_DATASET_MD5);
+    doImportAndVerify(MainframeTestUtil.SEQ_BINARY_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files, "--as-binaryfile");
+  }
+
+  @Test
+  public void testImportSequentialBinaryWithBufferSize() throws IOException {
+    HashMap<String,String> files = new HashMap<String,String>();
+    files.put(MainframeTestUtil.SEQ_BINARY_DATASET_FILENAME, MainframeTestUtil.EXPECTED_SEQ_BINARY_DATASET_MD5);
+    doImportAndVerify(MainframeTestUtil.SEQ_BINARY_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files, "--as-binaryfile", "--buffersize", "64000");
+  }
+
   private String [] getArgv(String datasetName, String datasetType, String ... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 
@@ -130,7 +166,6 @@ public class MainframeManagerImportTest extends ImportJobTestCase {
     args.add(datasetType);
 
     if (extraArgs.length > 0) {
-      args.add("--");
       for (String arg : extraArgs) {
         args.add(arg);
       }
