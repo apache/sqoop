@@ -86,6 +86,7 @@ public class TestIncrementalImport  {
 
   public static void resetSourceDataSchema() throws SQLException {
     SqoopOptions options = new SqoopOptions();
+    SqoopOptions.clearNonceDir();
     options.setConnectString(SOURCE_DB_URL);
     options.setUsername(AUTO_STORAGE_USERNAME);
     options.setPassword(AUTO_STORAGE_PASSWORD);

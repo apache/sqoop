@@ -55,11 +55,6 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
     sqoopOption = new SqoopOptions();
   }
 
-  @After
-  public void tearDown() {
-    System.setOut(null);
-  }
-
   @SuppressWarnings("deprecation")
   @Test
   public void testGetImportOptions() throws SecurityException,
