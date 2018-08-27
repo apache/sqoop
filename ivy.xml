@@ -210,8 +210,9 @@ under the License.
     </dependency>
 
     <dependency org="org.apache.hive" name="hive-exec" rev="${hcatalog.version}" conf="common->default" m:classifier="core" />
-    <!-- Kryo is a dependency of hive-exec:core -->
+    <!-- Kryo and calcite are dependencies of hive-exec:core -->
     <dependency org="com.esotericsoftware.kryo" name="kryo" rev="${kryo.version}" conf="common->default" />
+    <dependency org="org.apache.calcite" name="calcite-core" rev="${calcite.version}" conf="common->default" />
 
     <dependency org="org.postgresql" name="postgresql"
       rev="${postgresql.version}" conf="common->default" />

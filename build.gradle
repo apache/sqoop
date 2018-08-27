@@ -111,8 +111,9 @@ dependencies {
         exclude  group: 'org.apache.hive', module: 'hive-exec'
     }
     common group: 'org.apache.hive', name: 'hive-exec', version: hcatalogVersion, classifier: 'core'
-    // Kryo is a dependency of hive-exec:core
+    // Kryo and calcite are dependencies of hive-exec:core
     common group: 'com.esotericsoftware.kryo', name: 'kryo', version: kryoVersion
+    common group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
     common (group: 'org.apache.hive', name: 'hive-jdbc', version: hcatalogVersion) {
         exclude  group: 'org.apache.avro', module: 'avro'
     }
