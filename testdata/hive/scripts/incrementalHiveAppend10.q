@@ -14,4 +14,4 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 CREATE TABLE IF NOT EXISTS `incrementalHiveAppendEmptyThenFullhive` ( `ID` INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\001' LINES TERMINATED BY '\012' STORED AS TEXTFILE;
-LOAD DATA INPATH 'file:BASEPATH/sqoop/warehouse/incrementalHiveAppendEmptyThenFull' INTO TABLE `incrementalHiveAppendEmptyThenFullhive`;
+LOAD DATA INPATH 'file:BASEPATH/incrementalHiveAppendEmptyThenFull' INTO TABLE `incrementalHiveAppendEmptyThenFullhive`;

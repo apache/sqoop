@@ -212,8 +212,7 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
     String returnVal = new String(buf.array());
     String expectedStart = "externalLob(lf,_lob/large_obj";
-    String expectedEnd = getTableNum() + "_m_0000000.lob,68,"
-      + data.length() + ")";
+    String expectedEnd = "_m_0000000.lob,68," + data.length() + ")";
 
     assertNotNull(returnVal);
     assertTrue("ExpectedStart: " + expectedStart + ", value: " + returnVal, returnVal.startsWith(expectedStart));
@@ -303,8 +302,7 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
     String returnVal = new String(buf.array());
     String expectedStart = "externalLob(lf,_lob/large_obj";
-    String expectedEnd = getTableNum() + "_m_0000000.lob,68,"
-      + data.length() + ")";
+    String expectedEnd = "_m_0000000.lob,68," + data.length() + ")";
 
     assertNotNull(returnVal);
     assertTrue("ExpectedStart: " + expectedStart + ", value: " + returnVal, returnVal.startsWith(expectedStart));

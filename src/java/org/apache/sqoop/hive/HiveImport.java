@@ -42,6 +42,8 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.util.ExitSecurityException;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /**
  * Utility to import a table into the Hive metastore. Manages the connection
  * to Hive itself as well as orchestrating the use of the other classes in this
@@ -159,7 +161,8 @@ public class HiveImport implements HiveClient {
     boolean debugMode = expectedScript != null;
     if (debugMode) {
       env.add("EXPECTED_SCRIPT=" + expectedScript);
-      env.add("TMPDIR=" + options.getTempDir());
+      String tmpDir = defaultString(options.getWarehouseDir(), "/tmp");
+      env.add("TMPDIR=" + tmpDir);
     }
 
     // generate the HQL statements to run.

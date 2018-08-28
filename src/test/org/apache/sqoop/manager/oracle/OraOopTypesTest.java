@@ -31,6 +31,7 @@ public class OraOopTypesTest extends OraOopTestCase {
   public void ensureTypesAfterExportMappedAsExpected() throws Exception {
     try {
       setSqoopTargetDirectory(getSqoopTargetDirectory() + "types_test");
+      setSqoopGenClassName(OraOopTypesTest.class.getSimpleName());
       String tempTableName = "ORACLE_DATATYPES_TEMPLATE";
       String tableName = "ORACLE_DATATYPES";
       createTableFromSQL("create table " + tempTableName + " ("

@@ -45,6 +45,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.junit.Assert.fail;
@@ -217,6 +218,7 @@ public abstract class BaseSqoopTestCase {
   public void setUp() {
     // The assumption is that correct HADOOP configuration will have it set to
     // hdfs://namenode
+    resetDefaultTimeZone();
     setOnPhysicalCluster(
         !CommonArgs.LOCAL_FS.equals(System.getProperty(
             CommonArgs.FS_DEFAULT_NAME)));
@@ -710,5 +712,11 @@ public abstract class BaseSqoopTestCase {
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  protected void resetDefaultTimeZone() {
+    String timeZoneId = System.getProperty("user.timezone");
+    TimeZone defaultTimeZone = TimeZone.getTimeZone(timeZoneId);
+    TimeZone.setDefault(defaultTimeZone);
   }
 }

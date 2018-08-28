@@ -86,6 +86,7 @@ public class SystemImportTest extends OraOopTestCase {
     // Generate test data in oracle
     setSqoopTargetDirectory(getSqoopTargetDirectory()
         + OracleUtils.SYSTEMTEST_TABLE_NAME);
+    setSqoopGenClassName(SystemImportTest.class.getSimpleName());
     int numRows = OracleUtils.SYSTEMTEST_NUM_ROWS;
     Connection conn = getTestEnvConnection();
     OraOopOracleQueries.setConnectionTimeZone(conn, "GMT");
