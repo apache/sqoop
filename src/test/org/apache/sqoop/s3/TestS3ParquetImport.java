@@ -26,7 +26,7 @@ import org.apache.sqoop.testutil.DefaultS3CredentialGenerator;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.S3CredentialGenerator;
 import org.apache.sqoop.testutil.S3TestUtils;
-import org.apache.sqoop.testutil.TextFileTestUtils;
+import org.apache.sqoop.util.ParquetReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -35,11 +35,14 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
+import java.util.List;
 
-public class TestS3TextImport extends ImportJobTestCase {
+import static org.junit.Assert.assertEquals;
+
+public class TestS3ParquetImport extends ImportJobTestCase {
 
     public static final Log LOG = LogFactory.getLog(
-            TestS3TextImport.class.getName());
+            TestS3ParquetImport.class.getName());
 
     private static S3CredentialGenerator s3CredentialGenerator;
 
@@ -71,71 +74,43 @@ public class TestS3TextImport extends ImportJobTestCase {
     }
 
     @Test
-    public void testImportWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist() throws IOException {
-        String[] args = getArgs(false);
+    public void testS3ImportAsParquetFileWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist() throws Exception {
+        String[] args = getArgsWithAsParquetFileOption();
         runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
+
+        List<String> result = new ParquetReader(S3TestUtils.getTargetDirPath(), s3Client.getConf()).readAllInCsvSorted();
+        assertEquals(S3TestUtils.getExpectedParquetOutput(), result);
     }
 
     @Test
-    public void testImportWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
-        String[] args = getArgs(false);
+    public void testS3ImportAsParquetFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws Exception {
+        String[] args = getArgsWithAsParquetFileOption();
         runImport(args);
 
-        args = getArgsWithDeleteTargetOption(false);
+        args = getArgsWithAsParquetFileAndDeleteTargetDirOption();
         runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
+
+        List<String> result = new ParquetReader(S3TestUtils.getTargetDirPath(), s3Client.getConf()).readAllInCsvSorted();
+        assertEquals(S3TestUtils.getExpectedParquetOutput(), result);
     }
 
     @Test
-    public void testImportWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
-        String[] args = getArgs(false);
+    public void testS3ImportAsParquetFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws Exception {
+        String[] args = getArgsWithAsParquetFileOption();
         runImport(args);
 
         thrown.expect(IOException.class);
         runImport(args);
     }
 
-    @Test
-    public void testS3ImportAsTextFile() throws IOException {
-        String[] args = getArgs(true);
-        runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
+    private String[] getArgsWithAsParquetFileOption() {
+        return S3TestUtils.getArgsForS3UnitTestsWithFileFormatOption(this, s3CredentialGenerator, "as-parquetfile");
     }
 
-    @Test
-    public void testS3ImportAsTextFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
-        String[] args = getArgs(true);
-        runImport(args);
-
-        args = getArgsWithDeleteTargetOption(true);
-        runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
-    }
-
-    @Test
-    public void testS3ImportAsTextFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
-        String[] args = getArgs(true);
-        runImport(args);
-
-        thrown.expect(IOException.class);
-        runImport(args);
-    }
-
-    private String[] getArgs(boolean withAsTextFileOption) {
-        ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTests(this, s3CredentialGenerator);
-        if (withAsTextFileOption) {
-            builder.withOption("as-textfile");
-        }
-        return builder.build();
-    }
-
-    private String[] getArgsWithDeleteTargetOption(boolean withAsTextFileOption) {
-        ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTests(this, s3CredentialGenerator);
+    private String[] getArgsWithAsParquetFileAndDeleteTargetDirOption() {
+        ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTestsWithFileFormatOption(this,
+                s3CredentialGenerator,"as-parquetfile");
         builder.withOption("delete-target-dir");
-        if (withAsTextFileOption) {
-            builder.withOption("as-textfile");
-        }
         return builder.build();
     }
 }

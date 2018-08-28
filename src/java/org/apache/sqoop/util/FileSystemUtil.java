@@ -62,4 +62,15 @@ public final class FileSystemUtil {
     }
     return result;
   }
+
+  public static List<Path> findFilesWithPathContainingPattern(Path path, Configuration conf, String pattern) throws IOException {
+    List<Path> result = new ArrayList<>();
+    List<Path> filePaths = listFiles(path, conf);
+    for (Path filePath : filePaths) {
+      if (filePath.toString().contains(pattern)) {
+        result.add(filePath);
+      }
+    }
+    return result;
+  }
 }

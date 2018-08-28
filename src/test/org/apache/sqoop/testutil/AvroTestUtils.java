@@ -76,16 +76,27 @@ public class AvroTestUtils {
 
   public static void verify(String[] expectedResults, Configuration conf, Path tablePath) {
     Path outputFile = new Path(tablePath, OUTPUT_FILE_NAME);
+    readAndVerify(expectedResults, conf, outputFile);
+  }
 
+  public static void verify(String[] expectedResults, Configuration conf, Path tablePath, String outputFileName) {
+    Path outputFile = new Path(tablePath, outputFileName + ".avro");
+    readAndVerify(expectedResults, conf, outputFile);
+  }
+
+  private static void readAndVerify(String[] expectedResults, Configuration conf, Path outputFile) {
     try (DataFileReader<GenericRecord> reader = read(outputFile, conf)) {
       GenericRecord record;
       if (!reader.hasNext() && expectedResults != null && expectedResults.length > 0) {
-        fail("empty file was not expected");
+        fail("Empty file was not expected");
       }
       int i = 0;
       while (reader.hasNext()){
         record = reader.next();
         assertEquals(expectedResults[i++], record.toString());
+      }
+      if (expectedResults != null && expectedResults.length > i) {
+        fail("More output data was expected");
       }
     }
     catch (IOException ioe) {

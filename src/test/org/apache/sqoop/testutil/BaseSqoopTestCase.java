@@ -81,6 +81,9 @@ public abstract class BaseSqoopTestCase {
 
   private static boolean onPhysicalCluster = false;
 
+  public static final String MAP_OUTPUT_FILE_00001 = "part-m-00001";
+  public static final String REDUCE_OUTPUT_FILE_00000 = "part-r-00000";
+
   /** Base directory for all temporary data. */
   public static final String TEMP_BASE_DIR;
 
@@ -447,6 +450,12 @@ public abstract class BaseSqoopTestCase {
     }
   }
 
+  protected void insertRecordsIntoTableWithColTypesAndNames(String[] columns, String[] colTypes, List<List<Object>> records) {
+    for (List<Object> record : records) {
+      insertIntoTable(columns, colTypes, record);
+    }
+  }
+
   protected void insertIntoTable(String[] columns, String[] colTypes, List<Object> record) {
     insertIntoTable(columns, colTypes, toStringArray(record));
   }
@@ -607,6 +616,13 @@ public abstract class BaseSqoopTestCase {
     createTableWithColTypes(colTypes, records.get(0));
     for (int i = 1; i < records.size(); i++) {
       insertIntoTable(colTypes, records.get(i));
+    }
+  }
+
+  protected void createTableWithRecordsWithColTypesAndNames(String [] columns, String [] colTypes, List<List<Object>> records) {
+    createTableWithColTypesAndNames(columns, colTypes, records.get(0));
+    for (int i = 1; i < records.size(); i++) {
+      insertIntoTable(columns, colTypes, records.get(i));
     }
   }
 

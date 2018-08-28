@@ -36,10 +36,12 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 
-public class TestS3TextImport extends ImportJobTestCase {
+import static org.apache.sqoop.util.AppendUtils.MAPREDUCE_OUTPUT_BASENAME_PROPERTY;
+
+public class TestS3IncrementalAppendTextImport extends ImportJobTestCase {
 
     public static final Log LOG = LogFactory.getLog(
-            TestS3TextImport.class.getName());
+            TestS3IncrementalAppendTextImport.class.getName());
 
     private static S3CredentialGenerator s3CredentialGenerator;
 
@@ -65,76 +67,61 @@ public class TestS3TextImport extends ImportJobTestCase {
     }
 
     @After
-    public void cleanUpTargetDir() {
-        S3TestUtils.tearDownS3ImportTestCase(s3Client);
+    public void cleanUpOutputDirectories() {
+        S3TestUtils.tearDownS3IncrementalImportTestCase(s3Client);
         super.tearDown();
     }
 
     @Test
-    public void testImportWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist() throws IOException {
-        String[] args = getArgs(false);
-        runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
-    }
-
-    @Test
-    public void testImportWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
+    public void testS3IncrementalAppendAsTextFileWhenNoNewRowIsImported() throws IOException {
         String[] args = getArgs(false);
         runImport(args);
 
-        args = getArgsWithDeleteTargetOption(false);
+        args = getIncrementalAppendArgs(false);
         runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
+
+        S3TestUtils.failIfOutputFilePathContainingPatternExists(s3Client, MAP_OUTPUT_FILE_00001);
     }
 
     @Test
-    public void testImportWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
+    public void testS3IncrementalAppendAsTextFile() throws IOException {
         String[] args = getArgs(false);
         runImport(args);
 
-        thrown.expect(IOException.class);
+        S3TestUtils.insertInputDataIntoTable(this, S3TestUtils.getExtraInputData());
+
+        args = getIncrementalAppendArgs(false);
         runImport(args);
+
+        TextFileTestUtils.verify(S3TestUtils.getExpectedExtraTextOutput(), s3Client, S3TestUtils.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
     }
 
     @Test
-    public void testS3ImportAsTextFile() throws IOException {
-        String[] args = getArgs(true);
-        runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
-    }
-
-    @Test
-    public void testS3ImportAsTextFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
+    public void testS3IncrementalAppendAsTextFileWithMapreduceOutputBasenameProperty() throws IOException {
         String[] args = getArgs(true);
         runImport(args);
 
-        args = getArgsWithDeleteTargetOption(true);
+        S3TestUtils.insertInputDataIntoTable(this, S3TestUtils.getExtraInputData());
+
+        args = getIncrementalAppendArgs(true);
         runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
+
+        TextFileTestUtils.verify(S3TestUtils.getExpectedExtraTextOutput(), s3Client, S3TestUtils.getTargetDirPath(), S3TestUtils.CUSTOM_MAP_OUTPUT_FILE_00001);
     }
 
-    @Test
-    public void testS3ImportAsTextFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
-        String[] args = getArgs(true);
-        runImport(args);
-
-        thrown.expect(IOException.class);
-        runImport(args);
-    }
-
-    private String[] getArgs(boolean withAsTextFileOption) {
+    private String[] getArgs(boolean withMapreduceOutputBasenameProperty) {
         ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTests(this, s3CredentialGenerator);
-        if (withAsTextFileOption) {
-            builder.withOption("as-textfile");
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, S3TestUtils.MAPREDUCE_OUTPUT_BASENAME);
         }
         return builder.build();
     }
 
-    private String[] getArgsWithDeleteTargetOption(boolean withAsTextFileOption) {
+    private String[] getIncrementalAppendArgs(boolean withMapreduceOutputBasenameProperty) {
         ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTests(this, s3CredentialGenerator);
-        builder.withOption("delete-target-dir");
-        if (withAsTextFileOption) {
-            builder.withOption("as-textfile");
+        builder = S3TestUtils.addIncrementalAppendImportArgs(builder);
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, S3TestUtils.MAPREDUCE_OUTPUT_BASENAME);
         }
         return builder.build();
     }

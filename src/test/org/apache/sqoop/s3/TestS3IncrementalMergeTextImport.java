@@ -36,10 +36,12 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 
-public class TestS3TextImport extends ImportJobTestCase {
+import static org.apache.sqoop.util.AppendUtils.MAPREDUCE_OUTPUT_BASENAME_PROPERTY;
+
+public class TestS3IncrementalMergeTextImport extends ImportJobTestCase {
 
     public static final Log LOG = LogFactory.getLog(
-            TestS3TextImport.class.getName());
+            TestS3IncrementalMergeTextImport.class.getName());
 
     private static S3CredentialGenerator s3CredentialGenerator;
 
@@ -60,81 +62,72 @@ public class TestS3TextImport extends ImportJobTestCase {
     public void setup() throws IOException {
         S3TestUtils.runTestCaseOnlyIfS3CredentialsAreSet(s3CredentialGenerator);
         super.setUp();
-        S3TestUtils.createTestTableFromInputData(this);
+        S3TestUtils.createTestTableFromInitialInputDataForMerge(this);
         s3Client = S3TestUtils.setupS3ImportTestCase(s3CredentialGenerator);
     }
 
     @After
-    public void cleanUpTargetDir() {
-        S3TestUtils.tearDownS3ImportTestCase(s3Client);
+    public void cleanUpOutputDirectories() {
+        S3TestUtils.tearDownS3IncrementalImportTestCase(s3Client);
         super.tearDown();
     }
 
     @Test
-    public void testImportWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist() throws IOException {
-        String[] args = getArgs(false);
-        runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
-    }
-
-    @Test
-    public void testImportWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
+    public void testS3IncrementalMergeAsTextFileWhenNoNewRowIsImported() throws Exception {
         String[] args = getArgs(false);
         runImport(args);
 
-        args = getArgsWithDeleteTargetOption(false);
+        clearTable(getTableName());
+
+        args = getIncrementalMergeArgs(false);
         runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
+
+        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutputBeforeMerge(), s3Client, S3TestUtils.getTargetDirPath(), REDUCE_OUTPUT_FILE_00000);
     }
 
     @Test
-    public void testImportWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
+    public void testS3IncrementalMergeAsTextFile() throws Exception {
         String[] args = getArgs(false);
         runImport(args);
 
-        thrown.expect(IOException.class);
+        clearTable(getTableName());
+
+        S3TestUtils.insertInputDataIntoTableForMerge(this, S3TestUtils.getNewInputDataForMerge());
+
+        args = getIncrementalMergeArgs(false);
         runImport(args);
+
+        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutputAfterMerge(), s3Client, S3TestUtils.getTargetDirPath(), REDUCE_OUTPUT_FILE_00000);
     }
 
     @Test
-    public void testS3ImportAsTextFile() throws IOException {
-        String[] args = getArgs(true);
-        runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
-    }
-
-    @Test
-    public void testS3ImportAsTextFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
+    public void testS3IncrementalMergeAsTextFileWithMapreduceOutputBasenameProperty() throws Exception {
         String[] args = getArgs(true);
         runImport(args);
 
-        args = getArgsWithDeleteTargetOption(true);
+        clearTable(getTableName());
+
+        S3TestUtils.insertInputDataIntoTableForMerge(this, S3TestUtils.getNewInputDataForMerge());
+
+        args = getIncrementalMergeArgs(true);
         runImport(args);
-        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutput(), s3Client, S3TestUtils.getTargetDirPath());
+
+        TextFileTestUtils.verify(S3TestUtils.getExpectedTextOutputAfterMerge(), s3Client, S3TestUtils.getTargetDirPath(), S3TestUtils.CUSTOM_REDUCE_OUTPUT_FILE_00000);
     }
 
-    @Test
-    public void testS3ImportAsTextFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
-        String[] args = getArgs(true);
-        runImport(args);
-
-        thrown.expect(IOException.class);
-        runImport(args);
-    }
-
-    private String[] getArgs(boolean withAsTextFileOption) {
+    private String[] getArgs(boolean withMapreduceOutputBasenameProperty) {
         ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTests(this, s3CredentialGenerator);
-        if (withAsTextFileOption) {
-            builder.withOption("as-textfile");
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, S3TestUtils.MAPREDUCE_OUTPUT_BASENAME);
         }
         return builder.build();
     }
 
-    private String[] getArgsWithDeleteTargetOption(boolean withAsTextFileOption) {
+    private String[] getIncrementalMergeArgs(boolean withMapreduceOutputBasenameProperty) {
         ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTests(this, s3CredentialGenerator);
-        builder.withOption("delete-target-dir");
-        if (withAsTextFileOption) {
-            builder.withOption("as-textfile");
+        builder = S3TestUtils.addIncrementalMergeImportArgs(builder);
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, S3TestUtils.MAPREDUCE_OUTPUT_BASENAME);
         }
         return builder.build();
     }

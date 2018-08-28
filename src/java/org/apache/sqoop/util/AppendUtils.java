@@ -44,6 +44,7 @@ public class AppendUtils {
   private static final String FILEEXT_SEPARATOR = ".";
 
   public static final String DATA_PART_PATTERN_PREFIX = "part";
+  public static final String MAPREDUCE_OUTPUT_BASENAME_PROPERTY = "mapreduce.output.basename";
 
   private ImportJobContext context = null;
 
@@ -285,7 +286,7 @@ public class AppendUtils {
    * @return Pattern
    */
   private Pattern getDataFileNamePattern() {
-    String prefix = context.getOptions().getConf().get("mapreduce.output.basename");
+    String prefix = context.getOptions().getConf().get(MAPREDUCE_OUTPUT_BASENAME_PROPERTY);
 
     if(null == prefix || prefix.length() == 0) {
       prefix = DATA_PART_PATTERN_PREFIX;

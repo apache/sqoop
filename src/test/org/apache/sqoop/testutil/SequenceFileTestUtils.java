@@ -50,6 +50,23 @@ public class SequenceFileTestUtils {
      */
     public static void verify(BaseSqoopTestCase testCase, String[] expectedResults, FileSystem fileSystem, Path tablePath) throws Exception{
         String outputFilePathString = tablePath.toString() + OUTPUT_FILE_NAME;
+        readAndVerify(testCase, expectedResults, fileSystem, outputFilePathString);
+    }
+
+    /**
+     * Verify results at the given tablePath.
+     * @param testCase current instance of BaseSqoopTestCase
+     * @param expectedResults string array of expected results
+     * @param fileSystem current fileSystem
+     * @param tablePath path of the output table
+     * @param outputFileName MapReduce output filename
+     */
+    public static void verify(BaseSqoopTestCase testCase, String[] expectedResults, FileSystem fileSystem, Path tablePath,  String outputFileName) throws Exception{
+        String outputFilePathString = tablePath.toString() + "/" + outputFileName;
+        readAndVerify(testCase, expectedResults, fileSystem, outputFilePathString);
+    }
+
+    private static void readAndVerify(BaseSqoopTestCase testCase, String[] expectedResults, FileSystem fileSystem, String outputFilePathString) throws Exception {
         Path outputFilePath = new Path(outputFilePathString);
 
         Configuration conf = fileSystem.getConf();
@@ -74,6 +91,10 @@ public class SequenceFileTestUtils {
             while (hasNextRecord) {
                 assertEquals(expectedResults[i++], value.toString());
                 hasNextRecord = reader.next(key, value);
+            }
+
+            if (expectedResults != null && expectedResults.length > i) {
+                fail("More output data was expected");
             }
         } catch (IOException ioe) {
             LOG.error("Issue with verifying the output", ioe);

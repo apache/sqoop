@@ -43,6 +43,7 @@ import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.AppendUtils;
 import org.junit.Test;
 
+import static org.apache.sqoop.util.AppendUtils.MAPREDUCE_OUTPUT_BASENAME_PROPERTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -330,7 +331,7 @@ public class TestAppendUtils extends ImportJobTestCase {
 
     ArrayList<String> args = new ArrayList<>();
     args.add("-D");
-    args.add("mapreduce.output.basename=" + prefix);
+    args.add(MAPREDUCE_OUTPUT_BASENAME_PROPERTY + "=" + prefix);
     args.addAll(getOutputlessArgv(false, true, HsqldbTestServer.getFieldNames(), getConf()));
     String targetDir = getWarehouseDir() + "/tempTargetDirOutputBaseNameTest";
     args.add("--target-dir");

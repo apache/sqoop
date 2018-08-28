@@ -22,11 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
-import org.apache.sqoop.testutil.AvroTestUtils;
 import org.apache.sqoop.testutil.DefaultS3CredentialGenerator;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.S3CredentialGenerator;
 import org.apache.sqoop.testutil.S3TestUtils;
+import org.apache.sqoop.testutil.SequenceFileTestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,10 +36,12 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 
-public class TestS3AvroImport extends ImportJobTestCase {
+import static org.apache.sqoop.util.AppendUtils.MAPREDUCE_OUTPUT_BASENAME_PROPERTY;
+
+public class TestS3IncrementalAppendSequenceFileImport extends ImportJobTestCase {
 
     public static final Log LOG = LogFactory.getLog(
-            TestS3AvroImport.class.getName());
+            TestS3IncrementalAppendSequenceFileImport.class.getName());
 
     private static S3CredentialGenerator s3CredentialGenerator;
 
@@ -65,45 +67,64 @@ public class TestS3AvroImport extends ImportJobTestCase {
     }
 
     @After
-    public void cleanUpTargetDir() {
-        S3TestUtils.tearDownS3ImportTestCase(s3Client);
+    public void cleanUpOutputDirectories() {
+        S3TestUtils.tearDownS3IncrementalImportTestCase(s3Client);
         super.tearDown();
     }
 
     @Test
-    public void testS3ImportAsAvroDataFileWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist() throws IOException {
-        String[] args = getArgsWithAsAvroDataFileOption();
+    public void testS3IncrementalAppendAsSequenceFileWhenNoNewRowIsImported() throws Exception {
+        String[] args = getArgsWithAsSequenceFileOption(false);
         runImport(args);
-        AvroTestUtils.verify(S3TestUtils.getExpectedAvroOutput(), s3Client.getConf(), S3TestUtils.getTargetDirPath());
+
+        args = getIncrementalAppendArgsWithAsSequenceFileOption(false);
+        runImport(args);
+
+        S3TestUtils.failIfOutputFilePathContainingPatternExists(s3Client, MAP_OUTPUT_FILE_00001);
     }
 
     @Test
-    public void testS3ImportAsAvroDataFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
-        String[] args = getArgsWithAsAvroDataFileOption();
+    public void testS3IncrementalAppendAsSequenceFile() throws Exception {
+        String[] args = getArgsWithAsSequenceFileOption(false);
         runImport(args);
 
-        args = getArgsWithAsAvroDataFileAndDeleteTargetDirOption();
+        S3TestUtils.insertInputDataIntoTable(this, S3TestUtils.getExtraInputData());
+
+        args = getIncrementalAppendArgsWithAsSequenceFileOption(false);
         runImport(args);
-        AvroTestUtils.verify(S3TestUtils.getExpectedAvroOutput(), s3Client.getConf(), S3TestUtils.getTargetDirPath());
+
+        SequenceFileTestUtils.verify(this, S3TestUtils.getExpectedExtraSequenceFileOutput(), s3Client, S3TestUtils.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
     }
 
     @Test
-    public void testS3ImportAsAvroDataFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws IOException {
-        String[] args = getArgsWithAsAvroDataFileOption();
+    public void testS3IncrementalAppendAsSequenceFileWithMapreduceOutputBasenameProperty() throws Exception {
+        String[] args = getArgsWithAsSequenceFileOption(true);
         runImport(args);
 
-        thrown.expect(IOException.class);
+        S3TestUtils.insertInputDataIntoTable(this, S3TestUtils.getExtraInputData());
+
+        args = getIncrementalAppendArgsWithAsSequenceFileOption(true);
         runImport(args);
+
+        SequenceFileTestUtils.verify(this, S3TestUtils.getExpectedExtraSequenceFileOutput(), s3Client, S3TestUtils.getTargetDirPath(), S3TestUtils.CUSTOM_MAP_OUTPUT_FILE_00001);
     }
 
-    private String[] getArgsWithAsAvroDataFileOption() {
-        return S3TestUtils.getArgsForS3UnitTestsWithFileFormatOption(this, s3CredentialGenerator, "as-avrodatafile");
-    }
-
-    private String[] getArgsWithAsAvroDataFileAndDeleteTargetDirOption() {
+    private String[] getArgsWithAsSequenceFileOption(boolean withMapreduceOutputBasenameProperty) {
         ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTestsWithFileFormatOption(this,
-                s3CredentialGenerator,"as-avrodatafile");
-        builder.withOption("delete-target-dir");
+                s3CredentialGenerator,"as-sequencefile");
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, S3TestUtils.MAPREDUCE_OUTPUT_BASENAME);
+        }
+        return builder.build();
+    }
+
+    private String[] getIncrementalAppendArgsWithAsSequenceFileOption(boolean withMapreduceOutputBasenameProperty) {
+        ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForS3UnitTestsWithFileFormatOption(this,
+                s3CredentialGenerator,"as-sequencefile");
+        builder = S3TestUtils.addIncrementalAppendImportArgs(builder);
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, S3TestUtils.MAPREDUCE_OUTPUT_BASENAME);
+        }
         return builder.build();
     }
 }
