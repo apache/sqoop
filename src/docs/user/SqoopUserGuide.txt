@@ -75,6 +75,8 @@ include::version.txt[]
 
 include::hcatalog.txt[]
 
+include::s3.txt[]
+
 include::compatibility.txt[]
 
 include::connectors.txt[]
