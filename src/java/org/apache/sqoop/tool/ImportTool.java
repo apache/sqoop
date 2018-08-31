@@ -59,6 +59,7 @@ import org.apache.sqoop.util.ClassLoaderStack;
 import org.apache.sqoop.util.ImportException;
 
 import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 /**
  * Tool that performs database imports to HDFS.
@@ -83,6 +84,8 @@ public class ImportTool extends BaseSqoopTool {
   private ClassLoader prevClassLoader = null;
 
   private final HiveClientFactory hiveClientFactory;
+
+  private final String S3_URI_SCHEME = "s3a://";
 
   public ImportTool() {
     this("import", false);
@@ -1166,6 +1169,18 @@ public class ImportTool extends BaseSqoopTool {
           + INCREMENT_TYPE_ARG + " lastmodified cannot be used in conjunction with --"
           + FMT_AVRODATAFILE_ARG + "." + HELP_STR);
     }
+
+    if (isIncrementalModeAppendOrLastmodified(options)
+            && startsWith(options.getTargetDir(), S3_URI_SCHEME)
+            && !startsWith(options.getTempRootDir(), S3_URI_SCHEME)) {
+      throw new InvalidOptionsException("For an " + INCREMENT_TYPE_ARG + " import into an S3 bucket --"
+              + TEMP_ROOTDIR_ARG  + " option must be always set to a location in S3.");
+    }
+  }
+
+  private boolean isIncrementalModeAppendOrLastmodified(SqoopOptions options) {
+    return options.getIncrementalMode() == SqoopOptions.IncrementalMode.AppendRows
+            || options.getIncrementalMode() == SqoopOptions.IncrementalMode.DateLastModified;
   }
 
   @Override
