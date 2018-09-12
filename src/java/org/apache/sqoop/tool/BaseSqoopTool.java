@@ -547,6 +547,11 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
         .hasArg()
         .withArgName("boolean")
         .create());
+    commonOpts.addOption(OptionBuilder
+        .hasArg()
+        .withDescription("The implementation used during Parquet reading/writing")
+        .withLongOpt(PARQUET_CONFIGURATOR_IMPLEMENTATION)
+        .create());
 
     return commonOpts;
   }

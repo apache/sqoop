@@ -19,7 +19,9 @@
 package org.apache.sqoop.tool;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation;
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,10 +32,13 @@ import org.mockito.Mockito;
 import static org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation.HADOOP;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TestBaseSqoopTool {
+
+  private static final String PARQUET_CONFIGURATOR_IMPLEMENTATION = "parquet-configurator-implementation";
 
   @Rule
   public ExpectedException exception = ExpectedException.none();
@@ -80,7 +85,7 @@ public class TestBaseSqoopTool {
   public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromCommandLine() throws Exception {
     ParquetJobConfiguratorImplementation expectedValue = HADOOP;
 
-    when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn(expectedValue.toString());
+    when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(expectedValue.toString());
 
     testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
@@ -91,7 +96,7 @@ public class TestBaseSqoopTool {
   public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromCommandLineCaseInsensitively() throws Exception {
     String hadoopImplementationLowercase = "haDooP";
 
-    when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn(hadoopImplementationLowercase);
+    when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(hadoopImplementationLowercase);
 
     testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
@@ -112,7 +117,7 @@ public class TestBaseSqoopTool {
   public void testApplyCommonOptionsPrefersParquetJobConfigurationImplementationFromCommandLine() throws Exception {
     ParquetJobConfiguratorImplementation expectedValue = HADOOP;
     testSqoopOptions.getConf().set("parquetjob.configurator.implementation", "kite");
-    when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn(expectedValue.toString());
+    when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(expectedValue.toString());
 
     testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
@@ -121,7 +126,7 @@ public class TestBaseSqoopTool {
 
   @Test
   public void testApplyCommonOptionsThrowsWhenInvalidParquetJobConfigurationImplementationIsSet() throws Exception {
-    when(mockCommandLine.getOptionValue("parquet-configurator-implementation")).thenReturn("this_is_definitely_not_valid");
+    when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn("this_is_definitely_not_valid");
 
     exception.expectMessage("Invalid Parquet job configurator implementation is set: this_is_definitely_not_valid. Supported values are: [HADOOP]");
     testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
@@ -132,5 +137,20 @@ public class TestBaseSqoopTool {
     testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
     assertEquals(HADOOP, testSqoopOptions.getParquetConfiguratorImplementation());
+  }
+
+  @Test
+  public void testGetCommonOptionsAddsParquetJobConfigurationImplementation() {
+    RelatedOptions commonOptions = testBaseSqoopTool.getCommonOptions();
+
+    assertTrue(commonOptions.hasOption(PARQUET_CONFIGURATOR_IMPLEMENTATION));
+  }
+
+  @Test
+  public void testParquetJobConfigurationImplementationOptionHasAnArg() {
+    RelatedOptions commonOptions = testBaseSqoopTool.getCommonOptions();
+
+    Option implementationOption = commonOptions.getOption(PARQUET_CONFIGURATOR_IMPLEMENTATION);
+    assertTrue(implementationOption.hasArg());
   }
 }
