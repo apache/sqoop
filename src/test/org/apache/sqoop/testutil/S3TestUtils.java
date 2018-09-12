@@ -132,6 +132,11 @@ public class S3TestUtils {
             hadoopConf.set(Constants.SESSION_TOKEN, s3CredentialGenerator.getS3SessionToken());
             hadoopConf.set(Constants.AWS_CREDENTIALS_PROVIDER, TEMPORARY_CREDENTIALS_PROVIDER_CLASS);
         }
+
+        // FileSystem has a static cache that should be disabled during tests to make sure
+        // Sqoop relies on the S3 credentials set via the -D system properties.
+        // For details please see SQOOP-3383
+        hadoopConf.setBoolean("fs.s3a.impl.disable.cache", true);
     }
 
     public static ArgumentArrayBuilder getArgumentArrayBuilderForS3UnitTests(BaseSqoopTestCase testCase,
