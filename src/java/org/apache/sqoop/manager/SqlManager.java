@@ -649,6 +649,7 @@ public abstract class SqlManager
 
       try {
         // only fetch result for first hit
+        results.next();
         tableRemark = results.getString("TABLE_NAME");
         LOG.debug("Remark returned for table '" + tableName + "' = '" + tableRemark + "'");
         return tableRemark;
