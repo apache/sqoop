@@ -269,6 +269,44 @@ public abstract class SqlManager
   }
 
   @Override
+  public Map<String, String> getColumnRemarks(String tableName) {
+    Map<String, String> ret = new TreeMap<String, String>();
+    try {
+      DatabaseMetaData metaData = this.getConnection().getMetaData();
+      ResultSet results = metaData.getColumns(null, null, tableName, null);
+      if (null == results) {
+        return null;
+      }
+
+      try {
+        while (results.next()) {
+          int index = results.getInt("ORDINAL_POSITION");
+          if (index < 0) {
+            continue; // actually the return type
+          }
+          // we don't care if we get several rows for the
+          // same ORDINAL_POSITION (e.g. like H2 gives us)
+          // as we'll just overwrite the entry in the map:
+          ret.put(
+            results.getString("COLUMN_NAME"),
+            results.getString("REMARKS")
+          );
+        }
+        LOG.debug("Columns returned = " + StringUtils.join(ret.keySet(), ","));
+        LOG.debug("Types returned = " + StringUtils.join(ret.values(), ","));
+        return ret;
+      } finally {
+        results.close();
+        getConnection().commit();
+      }
+    } catch (SQLException sqlException) {
+      LoggingUtils.logAll(LOG, "Error reading primary key metadata: "
+        + sqlException.toString(), sqlException);
+      return null;
+    }
+  }
+
+  @Override
   public Map<String, List<Integer>> getColumnInfo(String tableName) {
     String stmt = getColNamesQuery(tableName);
     return getColumnInfoForRawQuery(stmt);

@@ -74,6 +74,7 @@ public class OraOopConnManager extends GenericJdbcManager {
       .getLog(OraOopConnManager.class.getName());
   private List<String> columnNamesInOracleTable = null;
   private Map<String, Integer> columnTypesInOracleTable = null;
+  private Map<String, String> columnRemarksInOracleTable = null;
   private final String timestampJavaType;
 
   public OraOopConnManager(final SqoopOptions sqoopOptions) {
@@ -530,6 +531,37 @@ public class OraOopConnManager extends GenericJdbcManager {
     }
 
     return this.columnTypesInOracleTable;
+  }
+
+  @Override
+  public Map<String, String> getColumnRemarks(String tableName) {
+
+    if (this.columnRemarksInOracleTable == null) {
+
+      Map<String, String> columnRemarks = super.getColumnRemarks(tableName);
+      this.columnRemarksInOracleTable = new HashMap<String, String>();
+
+      List<String> colNames = getColumnNamesInOracleTable(tableName);
+
+      for (int idx = 0; idx < colNames.size(); idx++) {
+
+        String columnNameInTable = colNames.get(idx);
+        if (columnRemarks.containsKey(columnNameInTable)) {
+
+          // Unescape the column names being returned...
+          String colRemark = columnRemarks.get(columnNameInTable);
+          String key = OracleUtils.unescapeIdentifier(columnNameInTable); // <- See
+                                                                    // notes at
+                                                                    // top about
+                                                                    // escaped
+                                                                    // column
+                                                                    // names
+          this.columnRemarksInOracleTable.put(key, colRemark);
+        }
+      }
+    }
+
+    return this.columnRemarksInOracleTable;
   }
 
   @Override

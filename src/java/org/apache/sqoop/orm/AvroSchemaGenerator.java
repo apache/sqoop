@@ -84,6 +84,7 @@ public class AvroSchemaGenerator {
         tableName, null);
     Map<String, List<Integer>> columnInfo = classWriter.getColumnInfo();
     Map<String, Integer> columnTypes = classWriter.getColumnTypes();
+    Map<String, String> columnRemarks = classWriter.getColumnRemarks();
     String[] columnNames = classWriter.getColumnNames(columnTypes);
 
     List<Field> fields = new ArrayList<Field>();
@@ -94,7 +95,8 @@ public class AvroSchemaGenerator {
       Integer precision = columnInfoList.get(1);
       Integer scale = columnInfoList.get(2);
       Schema avroSchema = toAvroSchema(sqlType, columnName, precision, scale);
-      Field field = new Field(cleanedCol, avroSchema, null,  NullNode.getInstance());
+      String columnRemark = columnRemarks.get(columnName);
+      Field field = new Field(cleanedCol, avroSchema, columnRemark, NullNode.getInstance());
       field.addProp("columnName", columnName);
       field.addProp("sqlType", Integer.toString(sqlType));
       fields.add(field);
