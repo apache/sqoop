@@ -565,6 +565,12 @@ public class OraOopConnManager extends GenericJdbcManager {
   }
 
   @Override
+  public String getTableRemark(String tableName) {
+    String tableRemark = super.getTableRemark(tableName);
+    return tableRemark;
+  }
+
+  @Override
   public String escapeColName(String colName) {
     return OracleUtils.escapeIdentifier(colName, options.isOracleEscapingDisabled()); // <- See notes at top about escaped
                                                                                 // column names

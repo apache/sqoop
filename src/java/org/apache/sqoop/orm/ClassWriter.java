@@ -1894,6 +1894,10 @@ public class ClassWriter {
     return connManager.getColumnRemarks(tableName);
   }
 
+  protected String getTableRemark() throws IOException {
+    return connManager.getTableRemark(tableName);
+  } 
+
   /**
    * Generate the ORM code for a table object containing the named columns.
    * @param columnTypes - mapping from column names to sql types

@@ -637,6 +637,31 @@ public abstract class SqlManager
     }
   }
 
+  @Override
+  public String getTableRemark(String tableName) {
+    String tableRemark = null;
+    try {
+      DatabaseMetaData metaData = this.getConnection().getMetaData();
+      ResultSet results = metaData.getTables(null, null, tableName, null);
+      if (null == results) {
+        return null;
+      }
+
+      try {
+        // only fetch result for first hit
+        tableRemark = results.getString("TABLE_NAME");
+        LOG.debug("Remark returned for table '" + tableName + "' = '" + tableRemark + "'");
+        return tableRemark;
+      } finally {
+        results.close();
+        getConnection().commit();
+      }
+    } catch (SQLException sqlException) {
+      LoggingUtils.logAll(LOG, "Error reading metadata: " + sqlException.toString(), sqlException);
+      return null;
+    }
+  }
+
   /**
    * Retrieve the actual connection from the outer ConnManager.
    */

@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -345,6 +346,15 @@ public abstract class ConnManager {
   }
 
   /**
+   * Return an unordered mapping from colname to remarks for
+   * all columns in a table.
+   */
+  public Map<String, String> getColumnRemarks(String tableName) {
+    Map<String, String> columnRemarks = new TreeMap<String, String>();
+    return columnRemarks;
+  }
+
+  /**
    * Return an unordered mapping from colname to sqltype, precision and scale
    * for all columns in a table.
    *
@@ -479,6 +489,16 @@ public abstract class ConnManager {
       columnTypeNames = getColumnTypeNamesForQuery(query);
     }
     return columnTypeNames;
+  }
+
+  /**
+   * Provides the remark/ comment set to a table.
+   *
+   * @param tableName Name of the table to retrieve the remark for
+   * @return Table remark/ comment
+   */
+  public String getTableRemark(String tableName) {
+    return null;
   }
 
   /**
