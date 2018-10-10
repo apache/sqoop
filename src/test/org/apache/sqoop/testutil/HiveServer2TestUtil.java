@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.testutil;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sqoop.hive.HiveServer2ConnectionFactory;
 
 import java.sql.Connection;
@@ -28,6 +29,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 public class HiveServer2TestUtil {
 
@@ -73,6 +76,12 @@ public class HiveServer2TestUtil {
     }
 
     return result;
+  }
+
+  public List<String> loadCsvRowsFromTable(String tableName) {
+    return loadRawRowsFromTable(tableName).stream()
+            .map(list -> StringUtils.join(list, ","))
+            .collect(toList());
   }
 
 }

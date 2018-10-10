@@ -24,6 +24,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.s3a.Constants;
+import org.apache.sqoop.hive.minicluster.HiveMiniCluster;
+import org.apache.sqoop.hive.minicluster.NoAuthenticationConfiguration;
 import org.apache.sqoop.util.FileSystemUtil;
 
 import java.io.IOException;
@@ -44,11 +46,15 @@ public class S3TestUtils {
 
     private static final String TEMPORARY_CREDENTIALS_PROVIDER_CLASS = "org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider";
 
-    private static final String BUCKET_TEMP_TEST_DIR = "/tmp/sqooptest/";
+    private static final String BUCKET_TEMP_DIR = "/tmp/";
+
+    private static final String EXTERNAL_TABLE_DIR = "/externaldir";
 
     private static final String TARGET_DIR_NAME_PREFIX = "/testdir";
 
     private static final String TEMPORARY_ROOTDIR_SUFFIX = "_temprootdir";
+
+    public static final String HIVE_EXTERNAL_TABLE_NAME = "test_external_table";
 
     private static String targetDirName = TARGET_DIR_NAME_PREFIX;
 
@@ -95,13 +101,18 @@ public class S3TestUtils {
     }
 
     public static Path getTargetDirPath() {
-        String targetPathString = getBucketTempTestDirPath() + getTargetDirName();
+        String targetPathString = getBucketTempDirPath() + getTargetDirName();
         return new Path(targetPathString);
     }
 
-    private static Path getBucketTempTestDirPath() {
-        String targetPathString = getPropertyBucketUrl() + BUCKET_TEMP_TEST_DIR;
+    private static Path getBucketTempDirPath() {
+        String targetPathString = getPropertyBucketUrl() + BUCKET_TEMP_DIR;
         return new Path(targetPathString);
+    }
+
+    public static Path getExternalTableDirPath() {
+        String externalTableDir = getBucketTempDirPath() + EXTERNAL_TABLE_DIR;
+        return new Path(externalTableDir);
     }
 
     public static void runTestCaseOnlyIfS3CredentialsAreSet(S3CredentialGenerator s3CredentialGenerator) {
@@ -112,7 +123,9 @@ public class S3TestUtils {
 
     public static FileSystem setupS3ImportTestCase(S3CredentialGenerator s3CredentialGenerator) throws IOException {
         Configuration hadoopConf = new Configuration();
-        S3TestUtils.setS3CredentialsInHadoopConf(hadoopConf, s3CredentialGenerator);
+        setS3CredentialsInConf(hadoopConf, s3CredentialGenerator);
+        setHadoopConfigParametersForS3UnitTests(hadoopConf);
+
         FileSystem s3Client = FileSystem.get(hadoopConf);
 
         setUniqueTargetDirName();
@@ -122,21 +135,33 @@ public class S3TestUtils {
         return s3Client;
     }
 
-    private static void setS3CredentialsInHadoopConf(Configuration hadoopConf,
-                                                     S3CredentialGenerator s3CredentialGenerator) {
-        hadoopConf.set("fs.defaultFS", getPropertyBucketUrl());
-        hadoopConf.set(Constants.ACCESS_KEY, s3CredentialGenerator.getS3AccessKey());
-        hadoopConf.set(Constants.SECRET_KEY, s3CredentialGenerator.getS3SecretKey());
+    public static void setS3CredentialsInConf(Configuration conf,
+                                              S3CredentialGenerator s3CredentialGenerator) {
+        conf.set(Constants.ACCESS_KEY, s3CredentialGenerator.getS3AccessKey());
+        conf.set(Constants.SECRET_KEY, s3CredentialGenerator.getS3SecretKey());
 
         if (s3CredentialGenerator.getS3SessionToken() != null) {
-            hadoopConf.set(Constants.SESSION_TOKEN, s3CredentialGenerator.getS3SessionToken());
-            hadoopConf.set(Constants.AWS_CREDENTIALS_PROVIDER, TEMPORARY_CREDENTIALS_PROVIDER_CLASS);
+            conf.set(Constants.SESSION_TOKEN, s3CredentialGenerator.getS3SessionToken());
+            conf.set(Constants.AWS_CREDENTIALS_PROVIDER, TEMPORARY_CREDENTIALS_PROVIDER_CLASS);
         }
+    }
+
+    private static void setHadoopConfigParametersForS3UnitTests(Configuration hadoopConf) {
+        // Default filesystem needs to be set to S3 for the output verification phase
+        hadoopConf.set("fs.defaultFS", getPropertyBucketUrl());
 
         // FileSystem has a static cache that should be disabled during tests to make sure
         // Sqoop relies on the S3 credentials set via the -D system properties.
         // For details please see SQOOP-3383
         hadoopConf.setBoolean("fs.s3a.impl.disable.cache", true);
+    }
+
+    public static HiveMiniCluster setupS3ExternalHiveTableImportTestCase(S3CredentialGenerator s3CredentialGenerator) {
+        HiveMiniCluster hiveMiniCluster = new HiveMiniCluster(new NoAuthenticationConfiguration());
+        hiveMiniCluster.start();
+        S3TestUtils.setS3CredentialsInConf(hiveMiniCluster.getConfig(), s3CredentialGenerator);
+
+        return hiveMiniCluster;
     }
 
     public static ArgumentArrayBuilder getArgumentArrayBuilderForS3UnitTests(BaseSqoopTestCase testCase,
@@ -167,6 +192,20 @@ public class S3TestUtils {
         ArgumentArrayBuilder builder = getArgumentArrayBuilderForS3UnitTests(testCase, s3CredentialGenerator);
         builder.withOption(fileFormat);
         return builder.build();
+    }
+
+    public static ArgumentArrayBuilder addExternalHiveTableImportArgs(ArgumentArrayBuilder builder,
+                                                                      String hs2Url) {
+        return builder
+                .withOption("hive-import")
+                .withOption("hs2-url", hs2Url)
+                .withOption("external-table-dir", getExternalTableDirPath().toString());
+    }
+
+    public static ArgumentArrayBuilder addCreateHiveTableArgs(ArgumentArrayBuilder builder) {
+        return builder
+                .withOption("create-hive-table")
+                .withOption("hive-table", HIVE_EXTERNAL_TABLE_NAME);
     }
 
     private static Path getTemporaryRootDirPath() {
@@ -242,6 +281,10 @@ public class S3TestUtils {
                 "3,Batman,DC,1939",
                 "4,Hulk,Marvel,1962"
         };
+    }
+
+    public static List<String> getExpectedTextOutputAsList() {
+        return Arrays.asList(getExpectedTextOutput());
     }
 
     public static String[] getExpectedExtraTextOutput() {
@@ -352,15 +395,23 @@ public class S3TestUtils {
         }
     }
 
-    public static void tearDownS3ImportTestCase(FileSystem s3Client) {
+    private static void cleanUpTargetDir(FileSystem s3Client) {
         cleanUpDirectory(s3Client, getTargetDirPath());
         resetTargetDirName();
     }
 
+    public static void tearDownS3ImportTestCase(FileSystem s3Client) {
+        cleanUpTargetDir(s3Client);
+    }
+
     public static void tearDownS3IncrementalImportTestCase(FileSystem s3Client) {
-        cleanUpDirectory(s3Client, getTargetDirPath());
+        cleanUpTargetDir(s3Client);
         cleanUpDirectory(s3Client, getTemporaryRootDirPath());
-        resetTargetDirName();
         System.clearProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY);
+    }
+
+    public static void tearDownS3ExternalHiveTableImportTestCase(FileSystem s3Client) {
+        cleanUpTargetDir(s3Client);
+        cleanUpDirectory(s3Client, getExternalTableDirPath());
     }
 }
