@@ -68,4 +68,13 @@ public class MainframeTestUtil {
   public static final String EXPECTED_SEQ_BINARY_DATASET_MD5 = System.getProperty(
       "sqoop.test.mainframe.ftp.binary.dataset.seq.md5",
       "1591c0fcc718fda7e9c1f3561d232b2b");
+  public static final String MIXED_BINARY_DATASET_NAME = System.getProperty(
+      "sqoop.test.mainframe.ftp.binary.dataset.mixed",
+      "TSODIQ1.MIXED");
+  public static final String MIXED_BINARY_DATASET_FILENAME = System.getProperty(
+      "sqoop.test.mainframe.ftp.binary.dataset.mixed.filename",
+      "G0039V00");
+  public static final String EXPECTED_MIXED_BINARY_DATASET_MD5 = System.getProperty(
+      "sqoop.test.mainframe.ftp.binary.dataset.mixed.md5",
+      "5e7f4ec7cbeae8e0e0b4d88346eb9349");
 }

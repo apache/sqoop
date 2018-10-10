@@ -31,7 +31,7 @@ public class MainframeConfiguration
   public static final String MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED
 	= "p";
   public static final String MAINFRAME_INPUT_DATASET_TAPE = "mainframe.input.dataset.tape";
-
+  public static final String MAINFRAME_FTP_FILE_GDG_ENTRY_PARSER_CLASSNAME = MainframeFTPFileGdgEntryParser.class.getName();
   public static final String MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME = "org.apache.sqoop.mapreduce.mainframe.MainframeFTPFileEntryParser";
 
   public static final String MAINFRAME_FTP_TRANSFER_MODE = "mainframe.ftp.transfermode";

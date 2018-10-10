@@ -262,7 +262,9 @@
   <property name="sqoop.test.mainframe.ftp.binary.dataset.seq" value="TSODIQ1.FOLDER.FOLDERTXT" />
   <property name="sqoop.test.mainframe.ftp.binary.dataset.seq.filename" value="FOLDERTXT" />
   <property name="sqoop.test.mainframe.ftp.binary.dataset.seq.md5" value="1591c0fcc718fda7e9c1f3561d232b2b" />
-
+  <property name="sqoop.test.mainframe.ftp.binary.dataset.mixed" value="TSODIQ1.MIXED" />
+  <property name="sqoop.test.mainframe.ftp.binary.dataset.mixed.filename" value="G0039V00" />
+  <property name="sqoop.test.mainframe.ftp.binary.dataset.mixed.md5" value="5e7f4ec7cbeae8e0e0b4d88346eb9349" />
   <property name="s3.bucket.url" value="" />
   <property name="s3.generator.command" value="" />
 
@@ -912,6 +914,9 @@
       <sysproperty key="sqoop.test.mainframe.ftp.binary.dataset.seq" value="${sqoop.test.mainframe.ftp.binary.dataset.seq}" />
       <sysproperty key="sqoop.test.mainframe.ftp.binary.dataset.seq.filename" value="${sqoop.test.mainframe.ftp.binary.dataset.seq.filename}" />
       <sysproperty key="sqoop.test.mainframe.ftp.binary.dataset.seq.md5" value="${sqoop.test.mainframe.ftp.binary.dataset.seq.md5}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.binary.dataset.mixed" value="${sqoop.test.mainframe.ftp.binary.dataset.mixed}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.binary.dataset.mixed.filename" value="${sqoop.test.mainframe.ftp.binary.dataset.mixed.filename}" />
+      <sysproperty key="sqoop.test.mainframe.ftp.binary.dataset.mixed.md5" value="${sqoop.test.mainframe.ftp.binary.dataset.mixed.md5}" />
       <!-- Location of Hive logs -->
       <!--<sysproperty key="hive.log.dir"
                    value="${test.build.data}/sqoop/logs"/> -->

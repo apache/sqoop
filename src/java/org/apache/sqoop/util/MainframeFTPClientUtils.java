@@ -86,8 +86,14 @@ public final class MainframeFTPClientUtils {
         ftp.changeWorkingDirectory("'" + pdsName + "'");
         FTPFile[] ftpFiles = null;
         if (!MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED.equals(dsType)) {
-          // excepting partitioned datasets, use the MainframeFTPFileEntryParser, default doesn't match larger datasets
-        	FTPListParseEngine parser = ftp.initiateListParsing(MainframeConfiguration.MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME, "");
+          FTPListParseEngine parser = null;
+          if (MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG.equals(dsType)) {
+            // use GDG specific parser to filter out non GDG datasets
+            parser = ftp.initiateListParsing(MainframeConfiguration.MAINFRAME_FTP_FILE_GDG_ENTRY_PARSER_CLASSNAME, "");
+          } else {
+            // excepting partitioned datasets, use the MainframeFTPFileEntryParser, default doesn't match larger datasets
+            parser = ftp.initiateListParsing(MainframeConfiguration.MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME, "");
+          }
         	List<FTPFile> listing = new ArrayList<FTPFile>();
         	while(parser.hasNext()) {
         		FTPFile[] files = parser.getNext(25);

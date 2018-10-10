@@ -149,6 +149,13 @@ public class MainframeManagerImportTest extends ImportJobTestCase {
     doImportAndVerify(MainframeTestUtil.SEQ_BINARY_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files, "--as-binaryfile", "--buffersize", "64000");
   }
 
+  @Test
+  public void testImportMixedBinaryWithBufferSize() throws IOException {
+    HashMap<String,String> files = new HashMap<String,String>();
+    files.put(MainframeTestUtil.MIXED_BINARY_DATASET_FILENAME, MainframeTestUtil.EXPECTED_MIXED_BINARY_DATASET_MD5);
+    doImportAndVerify(MainframeTestUtil.MIXED_BINARY_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG, files, "--as-binaryfile", "--buffersize", "64000");
+  }
+
   private String [] getArgv(String datasetName, String datasetType, String ... extraArgs) {
     ArrayList<String> args = new ArrayList<String>();
 
