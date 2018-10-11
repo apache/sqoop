@@ -21,6 +21,7 @@ package org.apache.sqoop.mapreduce.db.netezza;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +39,7 @@ public class NetezzaJDBCStatementRunner extends Thread {
   private Connection con;
   private Exception exception;
   private PreparedStatement ps;
-  private Thread parent;
+  private AtomicBoolean failed;
 
   public boolean hasExceptions() {
     return exception != null;
@@ -58,9 +59,16 @@ public class NetezzaJDBCStatementRunner extends Thread {
     return exception;
   }
 
-  public NetezzaJDBCStatementRunner(Thread parent, Connection con,
-      String sqlStatement) throws SQLException {
-    this.parent = parent;
+  /**
+   * Execute Netezza SQL statement on given connection.
+   * @param failed Set this to true if the operation fails.
+   * @param con connection
+   * @param sqlStatement statement to execute
+   * @throws SQLException
+   */
+  public NetezzaJDBCStatementRunner(AtomicBoolean failed, Connection con,
+                                    String sqlStatement) throws SQLException {
+    this.failed = failed;
     this.con = con;
     this.ps = con.prepareStatement(sqlStatement);
     this.exception = null;
@@ -89,7 +97,7 @@ public class NetezzaJDBCStatementRunner extends Thread {
       con = null;
     }
     if (interruptParent) {
-      this.parent.interrupt();
+      failed.set(true);
     }
   }
 }

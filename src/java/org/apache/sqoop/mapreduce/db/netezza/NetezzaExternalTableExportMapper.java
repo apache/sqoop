@@ -18,26 +18,14 @@
 
 package org.apache.sqoop.mapreduce.db.netezza;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.apache.commons.io.IOUtils;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.sqoop.io.NamedFifo;
+import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.mapreduce.SqoopMapper;
@@ -46,7 +34,14 @@ import org.apache.sqoop.util.FileUploader;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.util.TaskId;
 
-import org.apache.sqoop.lib.DelimiterSet;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Netezza export mapper using external tables.
@@ -59,8 +54,10 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
    */
 
   private Configuration conf;
-  private DBConfiguration dbc;
-  private File fifoFile;
+  @VisibleForTesting
+  DBConfiguration dbc;
+  @VisibleForTesting
+  File fifoFile;
   private Connection con;
   private OutputStream recordWriter;
   public static final Log LOG = LogFactory
@@ -69,8 +66,12 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
   private PerfCounters counter;
   private DelimiterSet outputDelimiters;
   private String localLogDir = null;
-  private String logDir = null;
-  private File taskAttemptDir = null;
+  @VisibleForTesting
+  String logDir = null;
+  @VisibleForTesting
+  File taskAttemptDir = null;
+
+  private AtomicBoolean jdbcFailed = new AtomicBoolean(false);
 
   private String getSqlStatement(DelimiterSet delimiters) throws IOException {
 
@@ -168,9 +169,13 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     taskAttemptDir = TaskId.getLocalWorkPath(conf);
     localLogDir =
         DirectNetezzaManager.getLocalLogDir(context.getTaskAttemptID());
-    logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
+    if (logDir == null) { // need to be able to set in tests
+      logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
+    }
 
-    dbc = new DBConfiguration(conf);
+    if (dbc == null) { // need to be able to mock in tests
+      dbc = new DBConfiguration(conf);
+    }
     File taskAttemptDir = TaskId.getLocalWorkPath(conf);
 
     char fd = (char) conf.getInt(DelimiterSet.INPUT_FIELD_DELIM_KEY, ',');
@@ -196,7 +201,7 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
     boolean cleanup = false;
     try {
       con = dbc.getConnection();
-      extTableThread = new NetezzaJDBCStatementRunner(Thread.currentThread(),
+      extTableThread = new NetezzaJDBCStatementRunner(jdbcFailed,
         con, sqlStmt);
     } catch (SQLException sqle) {
       cleanup = true;
@@ -226,49 +231,43 @@ public abstract class NetezzaExternalTableExportMapper<K, V> extends
   public void run(Context context) throws IOException, InterruptedException {
     setup(context);
     initNetezzaExternalTableExport(context);
-    if (extTableThread.isAlive()) {
-      try {
-        while (context.nextKeyValue()) {
-          if (Thread.interrupted()) {
-            if (!extTableThread.isAlive()) {
-              break;
-            }
-          }
-          map(context.getCurrentKey(), context.getCurrentValue(), context);
+    try {
+      while (context.nextKeyValue()) {
+        // Fail fast if there was an error during JDBC operation
+        if (jdbcFailed.get()) {
+          break;
         }
-        cleanup(context);
-      } finally {
-        try {
-          recordWriter.close();
-          extTableThread.join();
-        } catch (Exception e) {
-          LOG.debug("Exception cleaning up mapper operation : " + e.getMessage());
-        }
-        counter.stopClock();
-        LOG.info("Transferred " + counter.toString());
-        FileUploader.uploadFilesToDFS(taskAttemptDir.getAbsolutePath(),
-          localLogDir, logDir, context.getJobID().toString(),
-          conf);
-
-        if (extTableThread.hasExceptions()) {
-          extTableThread.printException();
-          throw new IOException(extTableThread.getException());
-        }
+        map(context.getCurrentKey(), context.getCurrentValue(), context);
       }
+      cleanup(context);
+    } finally {
+      try {
+        recordWriter.close();
+        extTableThread.join();
+      } catch (Exception e) {
+        LOG.debug("Exception cleaning up mapper operation : " + e.getMessage());
+      }
+      counter.stopClock();
+      LOG.info("Transferred " + counter.toString());
+      FileUploader.uploadFilesToDFS(taskAttemptDir.getAbsolutePath(),
+        localLogDir, logDir, context.getJobID().toString(),
+        conf);
 
+      if (extTableThread.hasExceptions()) {
+        extTableThread.printException();
+        throw new IOException(extTableThread.getException());
+      }
     }
   }
 
-  protected void writeTextRecord(Text record) throws IOException,
-    InterruptedException {
+  protected void writeTextRecord(Text record) throws IOException {
     String outputStr = record.toString() + "\n";
     byte[] outputBytes = outputStr.getBytes("UTF-8");
     counter.addBytes(outputBytes.length);
     recordWriter.write(outputBytes, 0, outputBytes.length);
   }
 
-  protected void writeSqoopRecord(SqoopRecord sqr) throws IOException,
-    InterruptedException {
+  protected void writeSqoopRecord(SqoopRecord sqr) throws IOException {
     String outputStr = sqr.toString(this.outputDelimiters);
     byte[] outputBytes = outputStr.getBytes("UTF-8");
     counter.addBytes(outputBytes.length);

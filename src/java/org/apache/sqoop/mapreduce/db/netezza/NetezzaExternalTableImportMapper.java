@@ -18,22 +18,10 @@
 
 package org.apache.sqoop.mapreduce.db.netezza;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.apache.commons.io.IOUtils;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.sqoop.config.ConfigurationHelper;
@@ -42,9 +30,17 @@ import org.apache.sqoop.lib.DelimiterSet;
 import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.mapreduce.AutoProgressMapper;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
-import org.apache.sqoop.util.FileUploader;
 import org.apache.sqoop.util.PerfCounters;
 import org.apache.sqoop.util.TaskId;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Netezza import mapper using external tables.
@@ -57,8 +53,10 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
    */
 
   private Configuration conf;
-  private DBConfiguration dbc;
-  private File fifoFile;
+  @VisibleForTesting
+  DBConfiguration dbc;
+  @VisibleForTesting
+  File fifoFile;
   private int numMappers;
   private Connection con;
   private BufferedReader recordReader;
@@ -66,7 +64,11 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     .getLog(NetezzaExternalTableImportMapper.class.getName());
   private NetezzaJDBCStatementRunner extTableThread;
   private PerfCounters counter;
-  private File taskAttemptDir = null;
+  @VisibleForTesting
+  File taskAttemptDir = null;
+
+  private AtomicBoolean jdbcFailed = new AtomicBoolean(false);
+
   private String getSqlStatement(int myId) throws IOException {
 
     char fd = (char) conf.getInt(DelimiterSet.OUTPUT_FIELD_DELIM_KEY, ',');
@@ -143,8 +145,9 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
 
   private void initNetezzaExternalTableImport(int myId) throws IOException {
 
-    taskAttemptDir = TaskId.getLocalWorkPath(conf);
-
+    if (taskAttemptDir == null) {
+      taskAttemptDir = TaskId.getLocalWorkPath(conf);
+    }
     this.fifoFile = new File(taskAttemptDir, ("nzexttable-" + myId + ".txt"));
     String filename = fifoFile.toString();
     NamedFifo nf;
@@ -163,7 +166,7 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     boolean cleanup = false;
     try {
       con = dbc.getConnection();
-      extTableThread = new NetezzaJDBCStatementRunner(Thread.currentThread(),
+      extTableThread = new NetezzaJDBCStatementRunner(jdbcFailed,
         con, sqlStmt);
     } catch (SQLException sqle) {
       cleanup = true;
@@ -197,39 +200,38 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     conf = context.getConfiguration();
 
 
-    dbc = new DBConfiguration(conf);
+    if (dbc == null) { // need to be able to mock in tests
+      dbc = new DBConfiguration(conf);
+    }
     numMappers = ConfigurationHelper.getConfNumMaps(conf);
     char rd = (char) conf.getInt(DelimiterSet.OUTPUT_RECORD_DELIM_KEY, '\n');
     initNetezzaExternalTableImport(dataSliceId);
     counter = new PerfCounters();
     counter.startClock();
     Text outputRecord = new Text();
-    if (extTableThread.isAlive()) {
-      try {
-        String inputRecord = recordReader.readLine();
-        while (inputRecord != null) {
-          if (Thread.interrupted()) {
-            if (!extTableThread.isAlive()) {
-              break;
-            }
-          }
-          outputRecord.set(inputRecord + rd);
-          // May be we should set the output to be String for faster performance
-          // There is no real benefit in changing it to Text and then
-          // converting it back in our case
-          writeRecord(outputRecord, context);
-          counter.addBytes(1 + inputRecord.length());
-          inputRecord = recordReader.readLine();
+    try {
+      String inputRecord = recordReader.readLine();
+      while (inputRecord != null) {
+        // Fail fast if there was an error during JDBC operation
+        if (jdbcFailed.get()) {
+          break;
         }
-      } finally {
-        recordReader.close();
-        extTableThread.join();
-        counter.stopClock();
-        LOG.info("Transferred " + counter.toString());
-        if (extTableThread.hasExceptions()) {
-          extTableThread.printException();
-          throw new IOException(extTableThread.getException());
-        }
+        outputRecord.set(inputRecord + rd);
+        // May be we should set the output to be String for faster performance
+        // There is no real benefit in changing it to Text and then
+        // converting it back in our case
+        writeRecord(outputRecord, context);
+        counter.addBytes(1 + inputRecord.length());
+        inputRecord = recordReader.readLine();
+      }
+    } finally {
+      recordReader.close();
+      extTableThread.join();
+      counter.stopClock();
+      LOG.info("Transferred " + counter.toString());
+      if (extTableThread.hasExceptions()) {
+        extTableThread.printException();
+        throw new IOException(extTableThread.getException());
       }
     }
   }
