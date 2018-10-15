@@ -118,3 +118,47 @@ $ sqoop import \
 ----
 
 Data from RDBMS can be imported into S3 in incremental +lastmodified+ mode as Parquet file format too.
+
+Import Into External Hive Table Backed By S3
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To import data from RDBMS into an external Hive table backed by S3 the AWS credentials have to be set in the Hive
+configuration file (+hive-site.xml+) too. For learning more about Hive on Amazon Web Services please see the Hive
+documentation at https://cwiki.apache.org/confluence/display/Hive/HiveAws.
+
+The current implementation of Sqoop requires that both +target-dir+ and +external-table-dir+ options are set
+where +external-table-dir+ has to point to the Hive table location in the S3 bucket.
+
+Import into an external Hive table backed by S3 for example:
+
+----
+$ sqoop import \
+  -Dfs.s3a.access.key=$AWS_ACCES_KEY \
+  -Dfs.s3a.secret.key=$AWS_SECRET_KEY \
+  --connect $CONN \
+  --username $USER \
+  --password $PWD \
+  --table $TABLE_NAME \
+  --hive-import \
+  --target-dir s3a://example-bucket/target-directory \
+  --external-table-dir s3a://example-bucket/external-directory
+----
+
+Create an external Hive table backed by S3 for example:
+
+----
+$ sqoop import \
+  -Dfs.s3a.access.key=$AWS_ACCES_KEY \
+  -Dfs.s3a.secret.key=$AWS_SECRET_KEY \
+  --connect $CONN \
+  --username $USER \
+  --password $PWD \
+  --table $TABLE_NAME \
+  --hive-import \
+  --create-hive-table \
+  --hive-table $HIVE_TABLE_NAME \
+  --target-dir s3a://example-bucket/target-directory \
+  --external-table-dir s3a://example-bucket/external-directory
+----
+
+Data from RDBMS can be imported into an external Hive table backed by S3 as Parquet file format too.
