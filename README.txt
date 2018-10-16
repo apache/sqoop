@@ -43,4 +43,5 @@ See the COMPILING.txt document for for information.
 
 * Try running +asciidoc README.txt+
 * For more information about asciidoc, see http://www.methods.co.nz/asciidoc/
+*for more help visit youtube
 
