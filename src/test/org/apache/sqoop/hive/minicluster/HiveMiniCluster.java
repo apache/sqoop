@@ -81,6 +81,8 @@ public class HiveMiniCluster {
     config.set(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_BIND_HOST.varname, getHostName());
     config.setInt(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_PORT.varname, getPort());
     config.set(HiveConf.ConfVars.METASTORECONNECTURLKEY.varname, getMetastoreConnectUrl());
+    // setting port to -1 to turn the webui off
+    config.setInt(HiveConf.ConfVars.HIVE_SERVER2_WEBUI_PORT.varname, -1);
 
     for (Map.Entry<String, String> authConfig : authenticationConfiguration.getAuthenticationConfig().entrySet()) {
       config.set(authConfig.getKey(), authConfig.getValue());

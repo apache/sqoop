@@ -29,7 +29,7 @@ import org.junit.Rule;
 
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import parquet.avro.AvroParquetWriter;
+import org.apache.parquet.avro.AvroParquetWriter;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -44,9 +44,9 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static parquet.hadoop.ParquetWriter.DEFAULT_BLOCK_SIZE;
-import static parquet.hadoop.ParquetWriter.DEFAULT_PAGE_SIZE;
-import static parquet.hadoop.metadata.CompressionCodecName.SNAPPY;
+import static org.apache.parquet.hadoop.ParquetWriter.DEFAULT_BLOCK_SIZE;
+import static org.apache.parquet.hadoop.ParquetWriter.DEFAULT_PAGE_SIZE;
+import static org.apache.parquet.hadoop.metadata.CompressionCodecName.SNAPPY;
 
 
 /**

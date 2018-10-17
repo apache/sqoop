@@ -23,7 +23,7 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
-import parquet.avro.AvroParquetInputFormat;
+import org.apache.parquet.avro.AvroParquetInputFormat;
 
 import java.io.IOException;
 

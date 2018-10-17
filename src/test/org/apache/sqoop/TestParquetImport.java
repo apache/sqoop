@@ -18,6 +18,7 @@
 
 package org.apache.sqoop;
 
+import org.apache.avro.util.Utf8;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.testutil.ImportJobTestCase;
@@ -165,7 +166,7 @@ public class TestParquetImport extends ImportJobTestCase {
     assertEquals("DATA_COL2", 200L, record1.get("DATA_COL2"));
     assertEquals("DATA_COL3", 1.0f, record1.get("DATA_COL3"));
     assertEquals("DATA_COL4", 2.0, record1.get("DATA_COL4"));
-    assertEquals("DATA_COL5", "s", record1.get("DATA_COL5"));
+    assertEquals("DATA_COL5", new Utf8("s"), record1.get("DATA_COL5"));
     Object object = record1.get("DATA_COL6");
     assertTrue(object instanceof ByteBuffer);
     ByteBuffer b = ((ByteBuffer) object);
@@ -191,7 +192,7 @@ public class TestParquetImport extends ImportJobTestCase {
 
     List<GenericRecord> genericRecords = new ParquetReader(getTablePath()).readAll();
     GenericRecord record1 = genericRecords.get(0);
-    assertEquals("DATA_COL0", "10", record1.get("DATA_COL0"));
+    assertEquals("DATA_COL0", new Utf8("10"), record1.get("DATA_COL0"));
     assertEquals(1, genericRecords.size());
   }
 

@@ -81,6 +81,7 @@ configurations.all {
         force group: 'org.apache.avro', name: 'avro', version: avroVersion
         force group: 'org.apache.avro', name: 'avro-mapred', version: avroVersion
         force group: 'com.google.guava', name: 'guava', version: guavaVersion
+        force group: 'com.google.protobuf', name: 'protobuf-java', version: hiveProtobufVersion
     }
     exclude group: 'org.apache.hadoop', module: 'avro'
 }
@@ -102,33 +103,40 @@ dependencies {
 
     common group: 'org.apache.accumulo', name: 'accumulo-core', version: accumuloVersion
     common group: 'org.apache.accumulo', name: 'accumulo-minicluster', version: accumuloVersion
+
+    common group: 'org.eclipse.jetty', name: 'jetty-runner', version: jettyVersion
+
     common group: 'org.apache.hbase', name: 'hbase-hadoop2-compat', version: hbaseVersion
     common group: 'org.apache.hbase', name: 'hbase-server', version: hbaseVersion
     common group: 'org.apache.hbase', name: 'hbase-client', version: hbaseVersion
     common group: 'org.apache.hbase', name: 'hbase-common', version: hbaseVersion
-    common (group: 'org.apache.hive.hcatalog', name: 'hive-hcatalog-core', version: hcatalogVersion) {
-        exclude  group: 'org.apache.avro', module: 'avro'
-        exclude  group: 'org.apache.hive', module: 'hive-exec'
+    common(group: 'org.apache.hive.hcatalog', name: 'hive-hcatalog-core', version: hcatalogVersion) {
+        exclude group: 'org.apache.avro', module: 'avro'
+        exclude group: 'org.apache.hive', module: 'hive-exec'
     }
-    common group: 'org.apache.hive', name: 'hive-exec', version: hcatalogVersion, classifier: 'core'
+    common(group: 'org.apache.hive', name: 'hive-exec', version: hcatalogVersion, classifier: 'core') {
+        exclude group :  'org.apache.calcite', module :'calcite-core'
+    }
     // Kryo and calcite are dependencies of hive-exec:core
-    common group: 'com.esotericsoftware.kryo', name: 'kryo', version: kryoVersion
+    common group: 'com.esotericsoftware', name: 'kryo', version: kryoVersion
     common group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
-    common (group: 'org.apache.hive', name: 'hive-jdbc', version: hcatalogVersion) {
-        exclude  group: 'org.apache.avro', module: 'avro'
+    common(group: 'org.apache.hive', name: 'hive-jdbc', version: hcatalogVersion) {
+        exclude group: 'org.apache.avro', module: 'avro'
+        exclude group: 'asm', module: 'asm'
     }
     common group: 'commons-cli', name: 'commons-cli', version: commonscliVersion
     common group: 'commons-logging', name: 'commons-logging', version: commonsloggingVersion
     common group: 'commons-net', name: 'commons-net', version: commonsnetVersion
     common group: 'log4j', name: 'log4j', version: log4jVersion
     common group: 'org.postgresql', name: 'postgresql', version: postgresqlVersion
+    common group: 'org.apache.parquet', name: 'parquet-hadoop-bundle', version: parquetVersion
 
     testCompile group: 'com.h2database', name: 'h2', version: h2Version
     testCompile group: 'org.apache.hbase', name: 'hbase-server', version: hbaseVersion, classifier: 'tests'
     testCompile group: 'org.apache.hbase', name: 'hbase-hadoop2-compat', version: hbaseVersion, classifier: 'tests'
     testCompile group: 'org.apache.hbase', name: 'hbase-hadoop-compat', version: hbaseVersion, classifier: 'tests'
-    testCompile( group: 'org.apache.hadoop', name: 'hadoop-minikdc', version: hadoopVersion) {
-     exclude  group: 'org.apache.directory.api', module: 'api-ldap-schema-data'
+    testCompile (group: 'org.apache.hadoop', name: 'hadoop-minikdc', version: hadoopVersion) {
+        exclude group: 'org.apache.directory.api', module: 'api-ldap-schema-data'
     }
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.assertj', name: 'assertj-core', version: assertjVersion

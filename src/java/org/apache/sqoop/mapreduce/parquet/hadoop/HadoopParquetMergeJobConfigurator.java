@@ -30,7 +30,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.sqoop.mapreduce.MergeParquetMapper;
 import org.apache.sqoop.mapreduce.parquet.ParquetMergeJobConfigurator;
-import parquet.avro.AvroParquetInputFormat;
+import org.apache.parquet.avro.AvroParquetInputFormat;
 
 import java.io.IOException;
 

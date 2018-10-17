@@ -61,7 +61,7 @@ under the License.
     <artifact conf="master"/>
   </publications>
   <dependencies>
-    <!-- Dependencies for Hadoop 2.6.0 -->
+    <!-- Dependencies for Hadoop -->
     <dependency org="org.apache.hadoop" name="hadoop-common"
       rev="${hadoop.version}" conf="common->default">
       <artifact name="hadoop-common" type="jar" />
@@ -116,7 +116,7 @@ under the License.
       conf="common->default;redist->default"/>
     <dependency org="org.apache.commons" name="commons-lang3" rev="${commons-lang3.version}"
       conf="common->default;redist->default"/>
-    <dependency org="com.twitter" name="parquet-avro" rev="${parquet.version}" conf="common->default;redist->default"/>
+    <dependency org="org.apache.parquet" name="parquet-avro" rev="${parquet.version}" conf="common->default;redist->default"/>
 
     <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="${jackson-databind.version}"
           conf="common->default;redist->default" />
@@ -135,7 +135,6 @@ under the License.
     <dependency org="commons-collections" name="commons-collections"
       rev="${commons-collections.version}" conf="releaseaudit->default"/>
 
-    <!-- Accumulo 1.5.0 -->
     <dependency org="org.apache.accumulo" name="accumulo-core" rev="${accumulo.version}"
                 conf="common->default">
     </dependency>
@@ -143,7 +142,6 @@ under the License.
                 conf="common->default">
     </dependency>
 
-    <!-- HBase 0.95 -->
     <dependency org="org.apache.hbase" name="hbase-client" rev="${hbase.version}" conf="common->default">
       <artifact name="hbase-client" type="jar"/>
       <artifact name="hbase-client" type="test-jar" ext="jar" m:classifier="tests"/>
@@ -200,19 +198,33 @@ under the License.
       <exclude org="org.apache.avro" module="avro" />
     </dependency>
 
-    <dependency org="org.apache.hive" name="hive-jdbc" rev="${hcatalog.version}" conf="common->default" />
+    <dependency org="org.apache.hive" name="hive-jdbc" rev="${hcatalog.version}" conf="common->default" >
+      <exclude org="com.twitter" module="parquet-hadoop-bundle"/>
+    </dependency>
 
     <dependency org="org.apache.hive.hcatalog" name="hive-hcatalog-core"
       rev="${hcatalog.version}" conf="common->default">
       <artifact name="hive-hcatalog-core" type="jar"/>
       <exclude org="org.apache.avro" module="avro" />
       <exclude org="org.apache.hive" module="hive-exec" />
+      <exclude org="com.twitter" module="parquet-hadoop-bundle"/>
     </dependency>
 
-    <dependency org="org.apache.hive" name="hive-exec" rev="${hcatalog.version}" conf="common->default" m:classifier="core" />
+    <dependency org="org.apache.hive" name="hive-exec" rev="${hcatalog.version}" conf="common->default" m:classifier="core" >
+      <exclude org="com.twitter" module="parquet-hadoop-bundle"/>
+    </dependency>
+
     <!-- Kryo and calcite are dependencies of hive-exec:core -->
-    <dependency org="com.esotericsoftware.kryo" name="kryo" rev="${kryo.version}" conf="common->default" />
+    <dependency org="com.esotericsoftware" name="kryo" rev="${kryo.version}" conf="common->default" />
     <dependency org="org.apache.calcite" name="calcite-core" rev="${calcite.version}" conf="common->default" />
+    <dependency org="com.google.protobuf" name="protobuf-java" rev="${hive.protobuf.version}" force="true" conf="common->default" />
+    <dependency org="org.eclipse.jetty" name="jetty-runner" rev="${jetty.version}" conf="common->default"/>
+    <!-- HCatalog test cases need log4j-api 2 and log4j-core 2 dependencies -->
+    <dependency org="org.apache.logging.log4j" name="log4j-api" rev="${log4j-2.version}" conf="common->default" />
+    <dependency org="org.apache.logging.log4j" name="log4j-core" rev="${log4j-2.version}" conf="common->default" />
+    <dependency org="com.sun.jersey" name="jersey-server" rev="${jersey.version}" conf="common->default" />
+    <dependency org="com.sun.jersey" name="jersey-core" rev="${jersey.version}" conf="common->default" />
+    <dependency org="com.sun.jersey" name="jersey-servlet" rev="${jersey.version}" conf="common->default" />
 
     <dependency org="org.postgresql" name="postgresql"
       rev="${postgresql.version}" conf="common->default" />

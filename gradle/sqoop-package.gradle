@@ -39,7 +39,7 @@ dependencies {
     }
     redist group: 'hsqldb', name: 'hsqldb', version: hsqldbVersion
     redist group: 'org.apache.commons', name: 'commons-lang3', version: commonslang3Version
-    redist group: 'com.twitter', name: 'parquet-avro', version: parquetVersion
+    redist group: 'org.apache.parquet', name: 'parquet-avro', version: parquetVersion
 }
 
 //Jar tasks

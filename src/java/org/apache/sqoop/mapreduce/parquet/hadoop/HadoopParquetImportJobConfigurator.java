@@ -27,9 +27,9 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
-import parquet.avro.AvroParquetOutputFormat;
-import parquet.hadoop.ParquetOutputFormat;
-import parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.parquet.avro.AvroParquetOutputFormat;
+import org.apache.parquet.hadoop.ParquetOutputFormat;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 
 import java.io.IOException;
 

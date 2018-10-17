@@ -23,13 +23,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import parquet.avro.AvroParquetReader;
-import parquet.hadoop.Footer;
-import parquet.hadoop.ParquetFileReader;
-import parquet.hadoop.metadata.BlockMetaData;
-import parquet.hadoop.metadata.ColumnChunkMetaData;
-import parquet.hadoop.metadata.CompressionCodecName;
-import parquet.hadoop.util.HiddenFileFilter;
+import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.hadoop.Footer;
+import org.apache.parquet.hadoop.ParquetFileReader;
+import org.apache.parquet.hadoop.metadata.BlockMetaData;
+import org.apache.parquet.hadoop.metadata.ColumnChunkMetaData;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.parquet.hadoop.util.HiddenFileFilter;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -52,7 +52,7 @@ public class ParquetReader implements AutoCloseable {
 
   private final Deque<Path> filesToRead;
 
-  private parquet.hadoop.ParquetReader<GenericRecord> reader;
+  private org.apache.parquet.hadoop.ParquetReader<GenericRecord> reader;
 
   public ParquetReader(Path pathToRead, Configuration configuration) {
     this.pathToRead = pathToRead;

@@ -24,14 +24,14 @@ import org.apache.sqoop.util.ParquetReader;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
-import static parquet.hadoop.metadata.CompressionCodecName.GZIP;
+import static org.apache.parquet.hadoop.metadata.CompressionCodecName.GZIP;
 
 public class TestParquetIncrementalImportMerge extends ImportJobTestCase {
 
