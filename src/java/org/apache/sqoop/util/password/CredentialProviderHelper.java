@@ -85,6 +85,8 @@ public class CredentialProviderHelper {
   // Should track what is in CredentialProvider class.
   public static final String CREDENTIAL_PROVIDER_PATH =
     "hadoop.security.credential.provider.path";
+  public static final String CREDENTIAL_PROVIDER_PASSWORD_FILE =
+          "hadoop.security.credstore.java-keystore-provider.password-file";
 
   public static boolean isProviderAvailable() {
 

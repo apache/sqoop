@@ -178,6 +178,18 @@ public class S3TestUtils {
                 .withOption("target-dir", getTargetDirPath().toString());
     }
 
+    public static ArgumentArrayBuilder getArgumentArrayBuilderForHadoopCredProviderS3UnitTests(BaseSqoopTestCase testCase) {
+
+        ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+        return builder.withCommonHadoopFlags()
+                .withProperty("fs.s3a.impl.disable.cache", "true")
+                .withProperty(Constants.AWS_CREDENTIALS_PROVIDER, getTemporaryCredentialsProviderClass())
+                .withOption("connect", testCase.getConnectString())
+                .withOption("num-mappers", "1")
+                .withOption("table", testCase.getTableName())
+                .withOption("target-dir", getTargetDirPath().toString());
+    }
+
     public static ArgumentArrayBuilder getArgumentArrayBuilderForS3UnitTestsWithFileFormatOption(BaseSqoopTestCase testCase,
                                                                                                  S3CredentialGenerator s3CredentialGenerator,
                                                                                                  String fileFormat) {

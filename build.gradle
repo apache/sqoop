@@ -141,6 +141,7 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.assertj', name: 'assertj-core', version: assertjVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoallVersion
+    testCompile group: 'com.github.stefanbirkner', name: 'system-rules', version: systemRulesVersion
     testCompile group: 'org.apache.zookeeper', name: 'zookeeper', version: zookeeperVersion, ext: 'jar'
 }
 

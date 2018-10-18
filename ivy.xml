@@ -105,6 +105,8 @@ under the License.
       conf="test->default"/>
     <dependency org="org.mockito" name="mockito-all"
       rev="${mockito-all.version}" conf="test->default"/>
+    <dependency org="com.github.stefanbirkner" name="system-rules"
+                rev="${system-rules.version}" conf="test->default"/>
     <!-- We're only using H2 for tests as it supports stored
          procedures; once we move to HSQLDB 2.x we can drop
          this -->

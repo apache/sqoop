@@ -745,6 +745,10 @@
     <copy todir="${test.build.extraconf}/oraoop">
       <fileset dir="${test.dir}/oraoop"/>
     </copy>
+    <copy file="${basedir}/conf/password-file.txt"
+          todir="${test.build.extraconf}" />
+    <copy file="${basedir}/conf/wrong-password-file.txt"
+          todir="${test.build.extraconf}" />
     <junit
       printsummary="yes" showoutput="${test.output}"
       haltonfailure="no" fork="yes" maxmemory="5120m"
