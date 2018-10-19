@@ -48,15 +48,15 @@ public class S3TestUtils {
 
     private static final String BUCKET_TEMP_DIR = "/tmp/";
 
-    private static final String EXTERNAL_TABLE_DIR = "/externaldir";
-
     private static final String TARGET_DIR_NAME_PREFIX = "/testdir";
+    private static final String HIVE_EXTERNAL_DIR_NAME_PREFIX = "/externaldir";
 
     private static final String TEMPORARY_ROOTDIR_SUFFIX = "_temprootdir";
 
     public static final String HIVE_EXTERNAL_TABLE_NAME = "test_external_table";
 
-    private static String targetDirName = TARGET_DIR_NAME_PREFIX;
+    private static String targetDirName;
+    private static String hiveExternalTableDirName;
 
     private static final String[] COLUMN_NAMES = {"ID",  "SUPERHERO", "COMICS", "DEBUT"};
     private static final String[] COLUMN_TYPES = { "INT", "VARCHAR(25)", "VARCHAR(25)", "INT"};
@@ -87,17 +87,25 @@ public class S3TestUtils {
         return TEMPORARY_CREDENTIALS_PROVIDER_CLASS;
     }
 
-    private static void setUniqueTargetDirName() {
+    private static String generateUniqueDirName(String dirPrefix) {
         String uuid = UUID.randomUUID().toString();
-        targetDirName = targetDirName + "-" + uuid;
+        return dirPrefix + "-" + uuid;
     }
 
     private static void resetTargetDirName() {
-        targetDirName = TARGET_DIR_NAME_PREFIX;
+        targetDirName = null;
+    }
+
+    private static void resetHiveExternalDirName() {
+        hiveExternalTableDirName = null;
     }
 
     private static String getTargetDirName() {
         return targetDirName;
+    }
+
+    private static String getHiveExternalTableDirName() {
+        return hiveExternalTableDirName;
     }
 
     public static Path getTargetDirPath() {
@@ -111,7 +119,7 @@ public class S3TestUtils {
     }
 
     public static Path getExternalTableDirPath() {
-        String externalTableDir = getBucketTempDirPath() + EXTERNAL_TABLE_DIR;
+        String externalTableDir = getBucketTempDirPath() + getHiveExternalTableDirName();
         return new Path(externalTableDir);
     }
 
@@ -128,7 +136,7 @@ public class S3TestUtils {
 
         FileSystem s3Client = FileSystem.get(hadoopConf);
 
-        setUniqueTargetDirName();
+        targetDirName = generateUniqueDirName(TARGET_DIR_NAME_PREFIX);
 
         cleanUpDirectory(s3Client, getTargetDirPath());
 
@@ -157,6 +165,7 @@ public class S3TestUtils {
     }
 
     public static HiveMiniCluster setupS3ExternalHiveTableImportTestCase(S3CredentialGenerator s3CredentialGenerator) {
+        hiveExternalTableDirName = generateUniqueDirName(HIVE_EXTERNAL_DIR_NAME_PREFIX);
         HiveMiniCluster hiveMiniCluster = new HiveMiniCluster(new NoAuthenticationConfiguration());
         hiveMiniCluster.start();
         S3TestUtils.setS3CredentialsInConf(hiveMiniCluster.getConfig(), s3CredentialGenerator);
@@ -425,5 +434,6 @@ public class S3TestUtils {
     public static void tearDownS3ExternalHiveTableImportTestCase(FileSystem s3Client) {
         cleanUpTargetDir(s3Client);
         cleanUpDirectory(s3Client, getExternalTableDirPath());
+        resetHiveExternalDirName();
     }
 }
