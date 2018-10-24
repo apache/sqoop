@@ -91,10 +91,18 @@ def sqoopThirdPartyLib = System.getProperty("sqoop.thirdparty.lib.dir")
 dependencies {
     if (sqoopThirdPartyLib != null) runtime fileTree(dir: sqoopThirdPartyLib, include: '*.jar')
     compile group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoopVersion
-    compile group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoopVersion
-    compile group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoopVersion
-    compile group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-common', version: hadoopVersion
-    compile group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoopVersion
+    compile (group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoopVersion) {
+        exclude group: "asm", module: "asm"
+    }
+    compile (group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoopVersion) {
+        exclude group: "asm", module: "asm"
+    }
+    compile (group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-common', version: hadoopVersion) {
+        exclude group: "asm", module: "asm"
+    }
+    compile (group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoopVersion) {
+        exclude group: "asm", module: "asm"
+    }
     compile group: 'org.apache.hbase', name: 'hbase-hadoop-compat', version: hbaseVersion
 
     aopCompile group: 'org.aspectj', name: 'aspectjtools', version: aspectjVersion

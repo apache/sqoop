@@ -66,16 +66,22 @@ under the License.
       rev="${hadoop.version}" conf="common->default">
       <artifact name="hadoop-common" type="jar" />
       <artifact name="hadoop-common" type="jar" m:classifier="tests"/>
+      <exclude org="asm" module="asm" />
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
       rev="${hadoop.version}" conf="common->default">
       <artifact name="hadoop-hdfs" type="jar" />
       <artifact name="hadoop-hdfs" type="jar" m:classifier="tests"/>
+      <exclude org="asm" module="asm" />
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-common"
-      rev="${hadoop.version}" conf="common->default"/>
+      rev="${hadoop.version}" conf="common->default">
+      <exclude org="asm" module="asm" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core"
-      rev="${hadoop.version}" conf="common->default"/>
+      rev="${hadoop.version}" conf="common->default">
+      <exclude org="asm" module="asm" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-aws"
                 rev="${hadoop.version}" conf="common->default"/>
     <dependency org="org.aspectj" name="aspectjtools" rev="${aspectj.version}"
@@ -202,6 +208,7 @@ under the License.
 
     <dependency org="org.apache.hive" name="hive-jdbc" rev="${hcatalog.version}" conf="common->default" >
       <exclude org="com.twitter" module="parquet-hadoop-bundle"/>
+      <exclude org="asm" module="asm" />
     </dependency>
 
     <dependency org="org.apache.hive.hcatalog" name="hive-hcatalog-core"
