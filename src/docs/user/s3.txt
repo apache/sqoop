@@ -162,3 +162,33 @@ $ sqoop import \
 ----
 
 Data from RDBMS can be imported into an external Hive table backed by S3 as Parquet file format too.
+
+Hadoop S3Guard usage with Sqoop
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Amazon S3 offers eventual consistency for PUTS and DELETES in all regions which means the visibility of the files
+are not guaranteed in a specific time after creation. Due to this behavior it can happen that right after a
+sqoop import the data will not be visible immediately. For learning more about the core concepts of Amazon S3
+please see the official documentation at https://docs.aws.amazon.com/AmazonS3/latest/dev/Introduction.html#CoreConcepts.
+
+S3Guard is an experimental feature for the S3A client in Hadoop which can use a database as a store of metadata about
+objects in an S3 bucket. For learning more about S3Guard please see the Hadoop documentation at
+https://hadoop.apache.org/docs/r3.0.3/hadoop-aws/tools/hadoop-aws/s3guard.html.
+
+S3Guard can be enabled during sqoop imports via setting properties described in the linked documentation.
+
+Example usage with setting S3Guard:
+
+----
+$ sqoop import \
+  -Dfs.s3a.access.key=$AWS_ACCESS_KEY \
+  -Dfs.s3a.secret.key=$AWS_SECRET_KEY \
+  -Dfs.s3a.metadatastore.impl=org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore \
+  -Dfs.s3a.s3guard.ddb.region=$BUCKET_REGION \
+  -Dfs.s3a.s3guard.ddb.table.create=true \
+  --connect $CONN \
+  --username $USER \
+  --password $PWD \
+  --table $TABLENAME \
+  --target-dir s3a://example-bucket/target-directory
+----
