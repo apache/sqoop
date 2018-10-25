@@ -78,11 +78,11 @@ public class TestS3ImportWithHadoopCredProvider extends ImportJobTestCase {
         String generatorCommand = S3TestUtils.getGeneratorCommand();
         if (generatorCommand != null) {
             s3CredentialGenerator = new DefaultS3CredentialGenerator(generatorCommand);
+            generateTempProviderFileNames();
+            fillCredentialProviderDefault();
+            fillCredentialProviderPwdFile();
+            fillCredentialProviderEnv();
         }
-        generateTempProviderFileNames();
-        fillCredentialProviderDefault();
-        fillCredentialProviderPwdFile();
-        fillCredentialProviderEnv();
     }
 
     @Before
@@ -102,9 +102,9 @@ public class TestS3ImportWithHadoopCredProvider extends ImportJobTestCase {
 
     @AfterClass
     public static void deleteTemporaryCredFiles() {
-        providerFileDefault.deleteOnExit();
-        providerFileEnvPwd.deleteOnExit();
-        providerFilePwdFile.deleteOnExit();
+        deleteFileOnExit(providerFileDefault);
+        deleteFileOnExit(providerFileEnvPwd);
+        deleteFileOnExit(providerFilePwdFile);
     }
 
     @Test
@@ -209,5 +209,11 @@ public class TestS3ImportWithHadoopCredProvider extends ImportJobTestCase {
 
     private static void setHadoopCredStorePwdEnvVar() {
         environmentVariables.set(HADOOP_CREDSTORE_PASSWORD_ENV_NAME, "credProviderPwd");
+    }
+
+    private static void deleteFileOnExit(File file) {
+        if (file != null) {
+            file.deleteOnExit();
+        }
     }
 }
