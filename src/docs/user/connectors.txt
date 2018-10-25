@@ -20,6 +20,27 @@
 Notes for specific connectors
 -----------------------------
 
+DB2 JDBC Connector
+~~~~~~~~~~~~~~~~~~
+
+This section contains information specific to DB2 JDBC Connector.
+
+Schema support
+^^^^^^^^^^^^^^
+
+When connecting to DB2 and using the import-all-tables or the list-tables tools,
+one can use the +\--schema+ tool option to specify the schema to use.  If the option
+is not present, then the schema of the current user (specified with the +\--username+ option) will be used as a default.
+Please note that this option doesn't work for any other tools at the moment,
+(such as the import tool or the export tool).
+
+Examples:
+
+----
+$ sqoop list-tables --connect $CONN  --username $USER --password $PASS -- --schema DB2INST2
+$ sqoop import-all-tables --connect $CONN  --username $USER --password $PASS -- --schema DB2INST2
+----
+
 MySQL JDBC Connector
 ~~~~~~~~~~~~~~~~~~~~
 
