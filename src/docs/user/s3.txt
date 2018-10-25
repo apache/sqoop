@@ -163,6 +163,54 @@ $ sqoop import \
 
 Data from RDBMS can be imported into an external Hive table backed by S3 as Parquet file format too.
 
+Storing AWS credentials in Hadoop Credential Provider
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The recommended way to protect the AWS credentials from prying eyes is to use Hadoop Credential Provider to securely
+store and access them through configuration. For learning more about how to use the Credential Provider framework
+please see the corresponding chapter in the Hadoop AWS documentation at
+https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html#Protecting_the_AWS_Credentials.
+For a guide to the Hadoop Credential Provider API please see the Hadoop documentation at
+https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/CredentialProviderAPI.html.
+
+After creating a credential file with the credential entries the URL to the provider can be set via the
++hadoop.security.credential.provider.path+ property.
+
+Hadoop Credential Provider is often protected by password supporting three options:
+
+* Default password: hardcoded password is the default
+* Environment variable: +HADOOP_CREDSTORE_PASSWORD+ environment variable is set to a custom password
+* Password file: location of the password file storing a custom password is set via the
++hadoop.security.credstore.java-keystore-provider.password-file+ property
+
+Example usage in case of a default password or a custom password set in +HADOOP_CREDSTORE_PASSWORD+ environment variable:
+
+----
+$ sqoop import \
+  -Dhadoop.security.credential.provider.path=$CREDENTIAL_PROVIDER_URL \
+  --connect $CONN \
+  --username $USER \
+  --password $PWD \
+  --table $TABLENAME \
+  --target-dir s3a://example-bucket/target-directory
+----
+
+Example usage in case of a custom password stored in a password file:
+
+----
+$ sqoop import \
+  -Dhadoop.security.credential.provider.path=$CREDENTIAL_PROVIDER_URL \
+  -Dhadoop.security.credstore.java-keystore-provider.password-file=$PASSWORD_FILE_LOCATION \
+  --connect $CONN \
+  --username $USER \
+  --password $PWD \
+  --table $TABLENAME \
+  --target-dir s3a://example-bucket/target-directory
+----
+
+Regarding the exact mechanics of using the environment variable or a password file please see the Hadoop documentation at
+https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/CredentialProviderAPI.html#Mechanics.
+
 Hadoop S3Guard usage with Sqoop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
