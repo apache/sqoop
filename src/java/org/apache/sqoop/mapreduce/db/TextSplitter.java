@@ -167,22 +167,33 @@ public class TextSplitter extends BigDecimalSplitter {
 
     // Convert the BigDecimal splitPoints into their string representations.
     for (BigDecimal bd : splitPoints) {
-      splitStrings.add(commonPrefix + bigDecimalToString(bd));
+      splitStrings.add(escapeSingleQuotesInSql(commonPrefix + bigDecimalToString(bd)));
     }
 
     // Make sure that our user-specified boundaries are the first and last
     // entries in the array.
     if (splitStrings.size() == 0
         || !splitStrings.get(0).equals(commonPrefix + minString)) {
-      splitStrings.add(0, commonPrefix + minString);
+      splitStrings.add(0, escapeSingleQuotesInSql(commonPrefix + minString));
     }
     if (splitStrings.size() == 1
         || !splitStrings.get(splitStrings.size() - 1).equals(
         commonPrefix + maxString)) {
-      splitStrings.add(commonPrefix + maxString);
+      splitStrings.add(escapeSingleQuotesInSql(commonPrefix + maxString));
     }
 
     return splitStrings;
+  }
+
+  /**
+   * Return string after escaping single quotes
+   */
+  private String escapeSingleQuotesInSql (String val) {
+    if (val == null) {
+	  return null;
+    }
+
+    return val.replaceAll("'", "''");
   }
 
   private static final BigDecimal ONE_PLACE = new BigDecimal(65536);
