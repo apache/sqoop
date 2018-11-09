@@ -981,6 +981,14 @@ limitations under the License.
       </roles>
     </developer>
     <developer>
+      <id>fero</id>
+      <name>Fero Szabo</name>
+      <organization>Cloudera</organization>
+      <roles>
+        <role>committer</role>
+      </roles>
+    </developer>
+    <developer>
       <id>cheolsoo</id>
       <name>Cheolsoo Park</name>
       <organization>StreamSets</organization>
