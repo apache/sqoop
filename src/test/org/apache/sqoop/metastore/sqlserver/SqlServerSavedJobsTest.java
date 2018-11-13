@@ -21,6 +21,8 @@ package org.apache.sqoop.metastore.sqlserver;
 import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
+import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test of GenericJobStorage compatibility with SQLServer
@@ -41,7 +43,7 @@ import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
  *   -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database,
  *   -Dms.sqlserver.username and -Dms.sqlserver.password respectively
  */
-
+@Category(SqlServerTest.class)
 public class SqlServerSavedJobsTest extends SavedJobsTestBase {
 
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();

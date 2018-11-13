@@ -20,10 +20,13 @@ package org.apache.sqoop.mapreduce.db;
 
 import java.math.BigDecimal;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 
+@Category(UnitTest.class)
 public class TestBigDecimalSplitter {
 
   /* Test if the decimal split sizes are generated as expected */

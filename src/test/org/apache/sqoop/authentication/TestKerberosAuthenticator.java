@@ -22,9 +22,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.infrastructure.kerberos.MiniKdcInfrastructureRule;
+import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
+import org.apache.sqoop.testcategories.KerberizedTest;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import static org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod.KERBEROS;
@@ -32,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
+@Category({KerberizedTest.class, IntegrationTest.class})
 public class TestKerberosAuthenticator {
 
   private static final String KERBEROS_RULE_TEMPLATE = "RULE:[2:$1@$0](.*@%s)s/@%s//";

@@ -34,8 +34,10 @@ import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.lib.RecordParser;
 import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
 import org.apache.sqoop.tool.CodeGenTool;
 import org.apache.sqoop.util.ClassLoaderStack;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -63,6 +65,7 @@ import static org.junit.Assert.assertTrue;
  *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
  *   -Dms.sqlserver.password
  */
+@Category(SqlServerTest.class)
 public class SQLServerDatatypeExportSequenceFileTest
     extends ManagerCompatExport {
 

@@ -25,14 +25,17 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.Mockito;
 
 import java.sql.*;
 import java.util.HashMap;
 import java.io.IOException;
 
+@Category(UnitTest.class)
 public class TestTableDefWriterForExternalTable {
   static String inputTableName = "genres";
   static String outputTableName = "genres";

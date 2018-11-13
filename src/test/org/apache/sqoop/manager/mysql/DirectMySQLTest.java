@@ -30,6 +30,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +44,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.FileListing;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -69,6 +71,7 @@ import static org.junit.Assert.fail;
  * flush privileges;
  *
  */
+@Category(MysqlTest.class)
 public class DirectMySQLTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(

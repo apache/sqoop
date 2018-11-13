@@ -36,6 +36,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.CubridManager;
+import org.apache.sqoop.testcategories.thirdpartytest.CubridTest;
 import org.apache.sqoop.util.FileListing;
 
 import org.junit.After;
@@ -45,6 +46,7 @@ import org.junit.Test;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -75,6 +77,7 @@ import static org.junit.Assert.fail;
  *   $csql -u dba SQOOPCUBRIDTEST
  *   csql>CREATE USER SQOOPUSER password 'PASSWORD';
  */
+@Category(CubridTest.class)
 public class CubridManagerImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(

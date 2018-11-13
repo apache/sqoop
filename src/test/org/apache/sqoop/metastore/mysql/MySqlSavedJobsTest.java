@@ -21,6 +21,8 @@ package org.apache.sqoop.metastore.mysql;
 import org.apache.sqoop.manager.mysql.MySQLTestUtils;
 import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test of GenericJobStorage compatibility with MySql
@@ -41,7 +43,7 @@ import org.apache.sqoop.manager.JdbcDrivers;
  *   -Dsqoop.test.mysql.connectstring.host_url, -Dsqoop.test.mysql.databasename,
  *   -Dsqoop.test.mysql.username and -Dsqoop.test.mysql.password respectively
  */
-
+@Category(MysqlTest.class)
 public class MySqlSavedJobsTest extends SavedJobsTestBase {
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();

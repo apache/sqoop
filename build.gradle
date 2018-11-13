@@ -153,15 +153,30 @@ dependencies {
     testCompile group: 'org.apache.zookeeper', name: 'zookeeper', version: zookeeperVersion, ext: 'jar'
 }
 
-test {
-    include '**/Test*.*'
+task unitTest (type: Test) {
+    description 'Run unit tests'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.sqooptest.UnitTest'
+        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
+        excludeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
+    }
 }
 
-task thirdPartyTest(type: Test) {
-    description 'Run ThirdParty tests - you need to specify -Dsqoop.thirdparty.lib.dir where the Third party driver jars reside (relative to the project directory)'
-    exclude '**/*ManualTest.*'
-    exclude '**/Test*.*'
-    include '**/*Test*.*'
+task allIntegrationTest (type: Test){
+    description 'Run all  integration tests'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.sqooptest.IntegrationTest'
+    }
+}
+
+task thirdPartyTest (type: Test) {
+    description 'Run Third-party Tests - you need to specify -Dsqoop.thirdparty.lib.dir where the Third party driver ' +
+            'jars reside (relative to the project directory)'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
+        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
+        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
+    }
     systemProperty "ms.datatype.test.data.file.export" ,"DatatypeTestData-export-lite.txt"
     systemProperty "ms.datatype.test.data.file.import" ,"DatatypeTestData-import-lite.txt"
     systemProperty "ms.datatype.test.data.file.delim" ,","
@@ -170,8 +185,47 @@ task thirdPartyTest(type: Test) {
 
 task manualTest(type: Test) {
     description 'Run manual tests'
-    include '**/*ManualTest.*'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
+    }
 }
+
+task integrationPlainTest(type: Test) {
+    description 'Run integration tests which do not need a docker container or an external database'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.sqooptest.IntegrationTest'
+        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
+        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
+        excludeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
+    }
+}
+
+task kerberizedTest (type: Test){
+    description 'Run Kerberized Test'
+    // A Gradle test task with forkEvery 1 and includeCategories performs poorly because it starts a new JVM even for the filtered tests.
+    // To work around this performance problem we need to add every kerberized test in a separate include field here.
+    include '**/TestKerberosAuthenticator*'
+    include '**/HBaseKerberizedConnectivityTest*'
+    include '**/TestHiveMiniCluster*'
+    include '**/TestHiveServer2TextImport*'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
+    }
+    forkEvery 1
+}
+
+test {
+    description 'Run tests that do not need exteral JDBC driver and/or a docker container. ' +
+            'This includes integration plain tests and unit tests'
+    include ''
+}
+test.finalizedBy(integrationPlainTest, unitTest, kerberizedTest)
+
+task sqoopTest (type: Test){
+    description 'Run all Sqoop tests'
+    include ''
+}
+sqoopTest.finalizedBy(test, kerberizedTest, thirdPartyTest)
 
 def testBuildDir = "$buildDir/test/"
 def testBuildDirData ="$testBuildDir/data/"
@@ -201,7 +255,6 @@ tasks.withType(Test) {
     minHeapSize = "512m"
     maxHeapSize = "5120m"
     jvmArgs '-Xmx5012m', "-da:org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge"
-    forkEvery 1
 
     dependsOn buildFolder
 

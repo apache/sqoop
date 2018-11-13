@@ -36,6 +36,7 @@ import org.apache.hadoop.crypto.JceAesCtrCryptoCodec;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 
 import org.junit.Test;
@@ -51,11 +52,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.withSettings;
 
 import org.junit.Rule;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 /**
  * Test the LobFile reader/writer implementation.
  */
+@Category(UnitTest.class)
 public class TestLobFile {
 
   public static final Log LOG = LogFactory.getLog(

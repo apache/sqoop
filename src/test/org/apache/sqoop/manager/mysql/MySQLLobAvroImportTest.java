@@ -25,11 +25,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.apache.sqoop.testutil.LobAvroImportTestCase;
+import org.junit.experimental.categories.Category;
 
 /**
  * Tests BLOB/CLOB import for Avro with MySQL Db.
  */
+@Category(MysqlTest.class)
 public class MySQLLobAvroImportTest extends LobAvroImportTestCase {
 
   public static final Log LOG = LogFactory.getLog(

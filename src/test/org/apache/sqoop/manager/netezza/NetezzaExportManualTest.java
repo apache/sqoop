@@ -31,12 +31,15 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.manager.DirectNetezzaManager;
 import org.apache.sqoop.manager.NetezzaManager;
+import org.apache.sqoop.testcategories.sqooptest.ManualTest;
+import org.apache.sqoop.testcategories.thirdpartytest.NetezzaTest;
 import org.junit.Before;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestExport;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.testutil.CommonArgs;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.fail;
 
@@ -51,6 +54,7 @@ import static org.junit.Assert.fail;
  * this manually with -Dtestcase=NetezzaExportManualTest.
  *
  */
+@Category({ManualTest.class, NetezzaTest.class})
 public class NetezzaExportManualTest extends TestExport {
   public static final Log LOG = LogFactory.getLog(NetezzaExportManualTest.class
     .getName());

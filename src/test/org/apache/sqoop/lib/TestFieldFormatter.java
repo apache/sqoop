@@ -18,7 +18,9 @@
 
 package org.apache.sqoop.lib;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -27,6 +29,7 @@ import static org.junit.Assert.assertNull;
 /**
  * Test that the field formatter works in a variety of configurations.
  */
+@Category(UnitTest.class)
 public class TestFieldFormatter {
 
   @Test

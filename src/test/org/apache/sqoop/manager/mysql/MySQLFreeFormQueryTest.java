@@ -29,10 +29,13 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestFreeFormQueryImport;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test free form query import with the MySQL db.
  */
+@Category(MysqlTest.class)
 public class MySQLFreeFormQueryTest extends TestFreeFormQueryImport {
 
   public static final Log LOG = LogFactory.getLog(

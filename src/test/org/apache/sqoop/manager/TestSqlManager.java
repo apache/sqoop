@@ -29,11 +29,13 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.apache.sqoop.testutil.HsqldbTestServer;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -44,6 +46,7 @@ import static org.junit.Assert.assertArrayEquals;
 /**
  * Test methods of the generic SqlManager implementation.
  */
+@Category(IntegrationTest.class)
 public class TestSqlManager {
 
   public static final Log LOG = LogFactory.getLog(TestSqlManager.class.getName());

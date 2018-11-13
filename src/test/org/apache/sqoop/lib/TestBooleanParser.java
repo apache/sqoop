@@ -19,7 +19,9 @@
 package org.apache.sqoop.lib;
 
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -27,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test the boolean parser.
  */
+@Category(UnitTest.class)
 public class TestBooleanParser {
 
   @Test

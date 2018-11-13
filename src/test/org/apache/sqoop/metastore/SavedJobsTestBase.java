@@ -28,6 +28,7 @@ import static org.junit.Assert.assertThat;
 
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
 import org.apache.sqoop.tool.VersionTool;
 
 import org.apache.hadoop.conf.Configuration;
@@ -40,6 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
@@ -56,6 +58,7 @@ import java.util.TreeMap;
  * Test the metastore and job-handling features,
  * implemented for specific database services in sub-classes.
  */
+@Category(IntegrationTest.class)
 public abstract class SavedJobsTestBase {
 
   public static final String TEST_JOB = "testJob";

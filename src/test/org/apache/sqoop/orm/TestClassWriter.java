@@ -34,6 +34,7 @@ import java.util.jar.JarInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.Shell;
+import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,6 +48,7 @@ import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
@@ -61,6 +63,7 @@ import static org.junit.Assert.fail;
  * Test that the ClassWriter generates Java classes based on the given table,
  * which compile.
  */
+@Category(IntegrationTest.class)
 public class TestClassWriter {
 
   public static final Log LOG =

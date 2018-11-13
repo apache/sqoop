@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.validation.ValidationException;
 import org.junit.Test;
 
@@ -28,12 +29,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Rule;
 
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 
 /**
  * Test that the TextSplitter implementation creates a sane set of splits.
  */
+@Category(UnitTest.class)
 public class TestTextSplitter {
 
   @Rule

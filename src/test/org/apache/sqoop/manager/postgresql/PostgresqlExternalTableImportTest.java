@@ -38,6 +38,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.PostgresqlManager;
+import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +47,9 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.FileListing;
+import org.junit.experimental.categories.Category;
 
+@Category(PostgresqlTest.class)
 public class PostgresqlExternalTableImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory

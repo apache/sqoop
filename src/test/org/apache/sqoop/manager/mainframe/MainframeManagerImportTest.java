@@ -30,12 +30,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
+import org.apache.sqoop.testcategories.thirdpartytest.MainFrameTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.MainframeImportTool;
 import org.apache.sqoop.util.FileListing;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertTrue;
 
@@ -56,7 +58,7 @@ import static org.junit.Assert.assertTrue;
  * <property name="sqoop.test.mainframe.ftp.dataset.gdg.filename" value="G0001V43" />
  * <property name="sqoop.test.mainframe.ftp.dataset.gdg.md5" value="43eefbe34e466dd3f65a3e867a60809a" />
  */
-
+@Category(MainFrameTest.class)
 public class MainframeManagerImportTest extends ImportJobTestCase {
   private static final Log LOG = LogFactory.getLog(
       MainframeManagerImportTest.class.getName());

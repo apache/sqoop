@@ -18,9 +18,11 @@
 
 package org.apache.sqoop.metastore;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
@@ -31,6 +33,7 @@ import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@Category(UnitTest.class)
 public class TestGenericJobStorage {
 
   @Rule

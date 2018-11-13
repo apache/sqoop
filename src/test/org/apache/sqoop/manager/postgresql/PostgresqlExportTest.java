@@ -18,6 +18,7 @@
 package org.apache.sqoop.manager.postgresql;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.apache.commons.logging.Log;
@@ -26,6 +27,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.PostgresqlManager;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,6 +47,7 @@ import static org.junit.Assert.fail;
 /**
  *
  */
+@Category(PostgresqlTest.class)
 public class PostgresqlExportTest extends ExportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
       PostgresqlExportTest.class.getName());

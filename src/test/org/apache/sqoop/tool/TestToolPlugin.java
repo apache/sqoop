@@ -38,7 +38,9 @@ import org.apache.sqoop.cli.ToolOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -46,6 +48,7 @@ import static org.junit.Assert.fail;
 /**
  * Test that tool plugins work.
  */
+@Category(UnitTest.class)
 public class TestToolPlugin {
 
   public static final Log LOG = LogFactory

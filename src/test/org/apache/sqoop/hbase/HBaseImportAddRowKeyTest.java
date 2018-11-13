@@ -19,6 +19,7 @@
 package org.apache.sqoop.hbase;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +34,7 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.lang.StringUtils.join;
 
 @RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class HBaseImportAddRowKeyTest extends HBaseTestCase {
 
   @Parameterized.Parameters(name = "bulkLoad = {0}")

@@ -35,8 +35,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Shell;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -44,6 +46,7 @@ import static org.junit.Assert.assertNull;
 /**
  * Test the named fifo utility.
  */
+@Category(UnitTest.class)
 public class TestNamedFifo {
 
   public static final Log LOG = LogFactory.getLog(

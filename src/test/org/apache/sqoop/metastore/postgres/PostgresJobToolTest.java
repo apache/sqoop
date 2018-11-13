@@ -19,6 +19,8 @@
 package org.apache.sqoop.metastore.postgres;
 
 import org.apache.sqoop.metastore.JobToolTestBase;
+import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test that the Job Tool works in PostgreSQL
@@ -35,7 +37,7 @@ import org.apache.sqoop.metastore.JobToolTestBase;
  *   -Dsqoop.test.postgresql.connectstring.host_url, -Dsqoop.test.postgresql.database,
  *   -Dsqoop.test.postgresql.username and -Dsqoop.test.postgresql.password respectively
  */
-
+@Category(PostgresqlTest.class)
 public class PostgresJobToolTest extends JobToolTestBase {
 
     private static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",

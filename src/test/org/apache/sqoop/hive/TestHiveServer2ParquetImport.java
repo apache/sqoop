@@ -23,15 +23,18 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.hive.minicluster.HiveMiniCluster;
 import org.apache.sqoop.hive.minicluster.NoAuthenticationConfiguration;
+import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.HiveServer2TestUtil;
 import org.apache.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.apache.sqoop.util.ParquetReader;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
@@ -52,6 +55,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Enclosed.class)
+@Category(IntegrationTest.class)
 public class TestHiveServer2ParquetImport {
 
   private static final String[] TEST_COLUMN_NAMES = {"C1_VARCHAR", "C2#INTEGER", "3C_CHAR"};
@@ -75,6 +79,7 @@ public class TestHiveServer2ParquetImport {
   private static HiveServer2TestUtil hiveServer2TestUtil;
 
   @RunWith(Parameterized.class)
+  @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
   public static class ParquetCompressionCodecTestCase extends ImportJobTestCase {
 
     @Parameters(name = "compressionCodec = {0}")

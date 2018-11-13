@@ -28,13 +28,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.apache.sqoop.testutil.LobAvroImportTestCase;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.fail;
 
 /**
  * Tests BLOB/CLOB import for Avro with Oracle Db.
  */
+@Category(OracleTest.class)
 public class OracleLobAvroImportTest extends LobAvroImportTestCase {
 
   public static final Log LOG = LogFactory.getLog(

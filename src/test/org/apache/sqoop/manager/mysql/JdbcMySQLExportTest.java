@@ -27,12 +27,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.manager.MySQLManager;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.junit.After;
 import org.junit.Before;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestExport;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.fail;
 
@@ -41,6 +43,7 @@ import static org.junit.Assert.fail;
  * This does a better test of ExportOutputFormat than TestExport does,
  * because it supports multi-row INSERT statements.
  */
+@Category(MysqlTest.class)
 public class JdbcMySQLExportTest extends TestExport {
 
   public static final Log LOG = LogFactory.getLog(

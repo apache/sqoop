@@ -39,6 +39,7 @@ import java.text.SimpleDateFormat;
 import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,6 +53,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.FileListing;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -101,6 +103,7 @@ import static org.junit.Assert.fail;
  * ALTER SYSTEM SET processes=200 scope=spfile;
  * ... then restart your database.
  */
+@Category(OracleTest.class)
 public class OracleManagerTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(

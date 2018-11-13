@@ -20,6 +20,8 @@ package org.apache.sqoop.metastore.mysql;
 
 import org.apache.sqoop.manager.mysql.MySQLTestUtils;
 import org.apache.sqoop.metastore.JobToolTestBase;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test that the Job Tool works in MySql
@@ -40,7 +42,7 @@ import org.apache.sqoop.metastore.JobToolTestBase;
  *   -Dsqoop.test.mysql.connectstring.host_url, -Dsqoop.test.mysql.databasename,
  *   -Dsqoop.test.mysql.username and -Dsqoop.test.mysql.password respectively
  */
-
+@Category(MysqlTest.class)
 public class MySqlJobToolTest extends JobToolTestBase {
 
     private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();

@@ -35,10 +35,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.GzipCodec;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,6 +52,7 @@ import static org.junit.Assert.fail;
 /**
  * Test that the splittable buffered writer system works.
  */
+@Category(UnitTest.class)
 public class TestSplittableBufferedWriter {
 
   public static final Log LOG = LogFactory.getLog(

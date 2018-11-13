@@ -28,10 +28,13 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.sqoop.testcategories.sqooptest.ManualTest;
+import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
 import org.junit.Test;
 
 import org.apache.sqoop.TestExport;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.junit.experimental.categories.Category;
 
 
 /**
@@ -62,6 +65,7 @@ import org.apache.sqoop.mapreduce.db.DBConfiguration;
  * sqooptest=# \q
  *
  */
+@Category({ManualTest.class, PostgresqlTest.class})
 public class PGBulkloadManagerManualTest extends TestExport {
 
   public static final Log LOG =

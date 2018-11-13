@@ -17,14 +17,17 @@
  */
 package org.apache.sqoop.util;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.SubstitutionUtils;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  *
  */
+@Category(UnitTest.class)
 public class TestSubstitutionUtils {
 
   @Test

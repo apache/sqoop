@@ -21,8 +21,10 @@ package org.apache.sqoop.lib;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.fail;
@@ -31,6 +33,7 @@ import static org.junit.Assert.fail;
 /**
  * Test that the record parser works in a variety of configurations.
  */
+@Category(UnitTest.class)
 public class TestRecordParser {
 
   @Rule

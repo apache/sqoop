@@ -45,6 +45,7 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.HsqldbManager;
 import org.apache.sqoop.manager.ManagerFactory;
 import org.apache.sqoop.metastore.JobData;
+import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.tool.ImportTool;
@@ -53,6 +54,7 @@ import org.apache.sqoop.metastore.AutoGenericJobStorage;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 
@@ -65,7 +67,7 @@ import static org.junit.Assert.*;
  * The metastore URL is configured to be in-memory, and drop all
  * state between individual tests.
  */
-
+@Category(IntegrationTest.class)
 public class TestIncrementalImport  {
 
   public static final Log LOG = LogFactory.getLog(

@@ -27,8 +27,10 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -51,6 +53,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+@Category(UnitTest.class)
 public class TestSQLServerDBRecordReader {
 
   private static final String SPLIT_BY_COLUMN = "myCol";

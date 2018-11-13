@@ -23,10 +23,14 @@ import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RawLocalFileSystem;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
 import org.junit.Before;
+import org.junit.experimental.categories.Category;
+
 import static org.junit.Assert.*;
 
+@Category(UnitTest.class)
 public class TestFileSystemUtil {
   private Configuration conf;
 

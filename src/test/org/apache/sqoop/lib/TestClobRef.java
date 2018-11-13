@@ -20,6 +20,7 @@ package org.apache.sqoop.lib;
 
 import java.io.*;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.testutil.CommonArgs;
 
@@ -28,6 +29,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.io.LobFile;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,6 +39,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test parsing of ClobRef objects.
  */
+@Category(UnitTest.class)
 public class TestClobRef {
 
   @Test

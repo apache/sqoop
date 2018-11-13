@@ -23,9 +23,11 @@ import org.apache.commons.cli.Option;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.cli.RelatedOptions;
 import org.apache.sqoop.mapreduce.parquet.ParquetJobConfiguratorImplementation;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
@@ -36,6 +38,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@Category(UnitTest.class)
 public class TestBaseSqoopTool {
 
   private static final String PARQUET_CONFIGURATOR_IMPLEMENTATION = "parquet-configurator-implementation";

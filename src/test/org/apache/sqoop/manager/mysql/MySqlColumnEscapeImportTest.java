@@ -19,6 +19,7 @@
 package org.apache.sqoop.manager.mysql;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import com.google.common.base.Charsets;
@@ -29,6 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
+@Category(MysqlTest.class)
 public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(

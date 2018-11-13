@@ -29,8 +29,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.TestExport;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.testcategories.sqooptest.ManualTest;
+import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 
 /**
@@ -53,6 +56,7 @@ import org.junit.Test;
  * $ psql -U sqooptest sqooptest
  *
  */
+@Category({ManualTest.class, PostgresqlTest.class})
 public class DirectPostgreSQLExportManualTest extends TestExport {
 
   public static final Log LOG =

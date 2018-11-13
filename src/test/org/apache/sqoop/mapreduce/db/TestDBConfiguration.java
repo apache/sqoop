@@ -20,13 +20,16 @@ package org.apache.sqoop.mapreduce.db;
 
 import java.util.Properties;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Test aspects of DBConfiguration.
  */
+@Category(UnitTest.class)
 public class TestDBConfiguration {
 
   @Test

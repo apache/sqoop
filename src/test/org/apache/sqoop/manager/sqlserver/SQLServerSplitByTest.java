@@ -34,6 +34,7 @@ import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
+import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.SeqFileReader;
@@ -42,6 +43,7 @@ import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -68,6 +70,7 @@ import static org.junit.Assert.fail;
  *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
  *   -Dms.sqlserver.password
  */
+@Category(SqlServerTest.class)
 public class SQLServerSplitByTest extends ImportJobTestCase {
 
   @Before

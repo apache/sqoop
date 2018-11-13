@@ -33,6 +33,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.manager.DirectMySQLManager;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.junit.After;
 import org.junit.Before;
 
@@ -41,6 +42,7 @@ import org.apache.sqoop.TestExport;
 import org.apache.sqoop.mapreduce.MySQLExportMapper;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -49,6 +51,7 @@ import static org.junit.Assert.fail;
 /**
  * Test the DirectMySQLManager implementation's exportJob() functionality.
  */
+@Category( MysqlTest.class)
 public class DirectMySQLExportTest extends TestExport {
 
   public static final Log LOG = LogFactory.getLog(

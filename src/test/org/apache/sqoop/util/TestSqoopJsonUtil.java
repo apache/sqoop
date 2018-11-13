@@ -23,9 +23,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category(UnitTest.class)
 public class TestSqoopJsonUtil {
 
   private static Map<String, String> paramMap;

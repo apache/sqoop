@@ -27,10 +27,13 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestFreeFormQueryImport;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test free form query import with the Oracle db.
  */
+@Category(OracleTest.class)
 public class OracleFreeFormQueryTest extends TestFreeFormQueryImport {
 
   public static final Log LOG = LogFactory.getLog(

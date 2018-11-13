@@ -18,10 +18,13 @@
 
 package org.apache.sqoop.testutil;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertArrayEquals;
 
+@Category(UnitTest.class)
 public class TestArgumentArrayBuilder {
 
   @Test

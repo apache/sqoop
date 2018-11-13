@@ -27,10 +27,13 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestAllTables;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test the --all-tables functionality with MySQL.
  */
+@Category(MysqlTest.class)
 public class MySQLAllTablesTest extends TestAllTables {
 
   private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();

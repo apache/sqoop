@@ -23,11 +23,13 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.apache.sqoop.testutil.HsqldbTestServer;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,6 +39,7 @@ import static org.junit.Assert.fail;
  * Test HsqldbManager-specific functionality that overrides SqlManager
  * behavior.
  */
+@Category(IntegrationTest.class)
 public class TestHsqldbManager {
 
   public static final Log LOG = LogFactory.getLog(

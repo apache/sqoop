@@ -22,10 +22,13 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.DataOutputBuffer;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category(UnitTest.class)
 public class TestMainframeDatasetInputSplit {
 
   private MainframeDatasetInputSplit mfDatasetInputSplit;

@@ -24,8 +24,11 @@ import static org.junit.Assert.assertNotNull;
 import java.text.ParseException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category(UnitTest.class)
 public class TestMainframeDatasetPath {
 
 	@Test

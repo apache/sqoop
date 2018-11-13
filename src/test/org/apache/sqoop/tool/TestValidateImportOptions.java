@@ -22,7 +22,9 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.SupportedManagers;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@Category(UnitTest.class)
 public class TestValidateImportOptions {
 
     ImportTool importTool = new ImportTool();

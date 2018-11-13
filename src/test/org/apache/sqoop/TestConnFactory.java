@@ -32,19 +32,21 @@ import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.manager.ManagerFactory;
 import org.apache.sqoop.metastore.JobData;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.tool.ImportTool;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 /**
  * Test the ConnFactory implementation and its ability to delegate to multiple
  * different ManagerFactory implementations using reflection.
  */
-
+@Category(UnitTest.class)
 public class TestConnFactory {
 
   @Rule

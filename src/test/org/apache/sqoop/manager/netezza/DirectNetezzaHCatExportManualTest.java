@@ -31,14 +31,18 @@ import org.apache.sqoop.hcat.HCatalogTestUtils;
 import org.apache.sqoop.hcat.HCatalogTestUtils.ColumnGenerator;
 import org.apache.sqoop.hcat.HCatalogTestUtils.KeyType;
 import org.apache.sqoop.manager.NetezzaManager;
+import org.apache.sqoop.testcategories.sqooptest.ManualTest;
+import org.apache.sqoop.testcategories.thirdpartytest.NetezzaTest;
 import org.junit.Before;
 
 import org.apache.sqoop.SqoopOptions;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test the DirectNetezzaManager implementation's hcatalog export functionality.
  */
+@Category({ManualTest.class, NetezzaTest.class})
 public class DirectNetezzaHCatExportManualTest extends HCatalogExportTest {
   // instance variables populated during setUp, used during tests
   private NetezzaManager manager;

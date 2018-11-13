@@ -22,6 +22,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.sqoop.hive.minicluster.HiveMiniCluster;
 import org.apache.sqoop.hive.minicluster.KerberosAuthenticationConfiguration;
 import org.apache.sqoop.infrastructure.kerberos.MiniKdcInfrastructureRule;
+import org.apache.sqoop.testcategories.KerberizedTest;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.HiveServer2TestUtil;
 import org.apache.sqoop.testutil.ImportJobTestCase;
@@ -29,12 +30,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@Category(KerberizedTest.class)
 public class TestHiveServer2TextImport extends ImportJobTestCase {
 
   @ClassRule

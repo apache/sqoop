@@ -22,15 +22,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.OptionsFileUtil;
 import org.junit.Assert;
 
 import org.apache.sqoop.Sqoop;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * Tests various options file loading scenarios.
  */
+@Category(UnitTest.class)
 public class TestOptionsFileExpansion {
 
   /**

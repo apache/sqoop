@@ -23,6 +23,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
+import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
+import org.junit.experimental.categories.Category;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -50,6 +52,7 @@ import java.io.BufferedWriter;
  *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
  *   -Dms.sqlserver.password
  */
+@Category(SqlServerTest.class)
 public class SQLServerDatatypeExportDelimitedFileTest
     extends ManagerCompatExport {
 

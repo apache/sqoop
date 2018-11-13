@@ -22,7 +22,9 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.metastore.JobData;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -32,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-
+@Category(UnitTest.class)
 public class TestDefaultManagerFactory {
 
     DefaultManagerFactory mf = new DefaultManagerFactory();

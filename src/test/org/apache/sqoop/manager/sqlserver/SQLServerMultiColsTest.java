@@ -25,8 +25,10 @@ import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestMultiCols;
+import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test multiple columns in SQL Server.
@@ -50,6 +52,7 @@ import org.junit.Test;
  *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
  *   -Dms.sqlserver.password
  */
+@Category(SqlServerTest.class)
 public class SQLServerMultiColsTest extends TestMultiCols {
 
   protected boolean useHsqldbTestServer() {

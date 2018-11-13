@@ -34,6 +34,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.Db2Manager;
+import org.apache.sqoop.testcategories.thirdpartytest.Db2Test;
+import org.apache.sqoop.testcategories.sqooptest.ManualTest;
 import org.apache.sqoop.tool.ImportAllTablesTool;
 import org.apache.sqoop.Sqoop;
 import org.junit.After;
@@ -47,6 +49,7 @@ import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.SqoopTool;
 import org.apache.sqoop.util.FileListing;
 import org.apache.sqoop.util.LoggingUtils;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -72,6 +75,7 @@ import static org.junit.Assert.fail;
  *   Create a login SQOOP with password PASSWORD and grant all
  *   access for database SQOOP to user SQOOP.
  */
+@Category({ManualTest.class, Db2Test.class})
 public class DB2ImportAllTableWithSchemaManualTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(

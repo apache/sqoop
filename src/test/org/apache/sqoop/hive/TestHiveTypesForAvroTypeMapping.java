@@ -19,7 +19,10 @@
 package org.apache.sqoop.hive;
 
 import org.apache.avro.Schema;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -29,7 +32,9 @@ import java.util.Arrays;
 import static org.apache.sqoop.hive.HiveTypes.toHiveType;
 import static org.junit.Assert.*;
 
+@Category(UnitTest.class)
 @RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestHiveTypesForAvroTypeMapping {
 
   private final String hiveType;

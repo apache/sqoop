@@ -17,7 +17,9 @@
  */
 package org.apache.sqoop.metastore;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +28,7 @@ import static org.apache.sqoop.SqoopOptions.DB_PASSWORD_KEY;
 import static org.apache.sqoop.metastore.PasswordRedactor.REDACTED_PASSWORD_STRING;
 import static org.junit.Assert.assertEquals;
 
+@Category(UnitTest.class)
 public class PasswordRedactorTest {
 
     @Test

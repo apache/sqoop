@@ -20,6 +20,8 @@ package org.apache.sqoop.metastore.postgres;
 
 import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
+import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test of GenericJobStorage compatibility with PostgreSQL
@@ -36,7 +38,7 @@ import org.apache.sqoop.manager.JdbcDrivers;
  *   -Dsqoop.test.postgresql.connectstring.host_url, -Dsqoop.test.postgresql.database,
  *   -Dsqoop.test.postgresql.username and -Dsqoop.test.postgresql.password respectively
  */
-
+@Category(PostgresqlTest.class)
 public class PostgresSavedJobsTest extends SavedJobsTestBase {
 
     private static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",

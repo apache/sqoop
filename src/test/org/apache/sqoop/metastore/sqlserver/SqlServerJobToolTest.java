@@ -20,6 +20,8 @@ package org.apache.sqoop.metastore.sqlserver;
 
 import org.apache.sqoop.metastore.JobToolTestBase;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
+import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test that the Job Tool works in SQLServer
@@ -40,7 +42,7 @@ import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
  *   -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database,
  *   -Dms.sqlserver.username and -Dms.sqlserver.password respectively
  */
-
+@Category(SqlServerTest.class)
 public class SqlServerJobToolTest extends JobToolTestBase {
 
     private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();

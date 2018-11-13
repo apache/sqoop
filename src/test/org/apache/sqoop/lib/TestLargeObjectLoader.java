@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.testutil.CommonArgs;
 
@@ -33,6 +34,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.testutil.MockResultSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,6 +44,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test deserialization of ClobRef and BlobRef fields.
  */
+@Category(UnitTest.class)
 public class TestLargeObjectLoader {
 
   protected Configuration conf;

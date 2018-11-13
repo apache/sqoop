@@ -35,15 +35,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test free form query import with the MySQL db.
  */
+@Category(MysqlTest.class)
 public class MySqlCallExportTest extends ExportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(

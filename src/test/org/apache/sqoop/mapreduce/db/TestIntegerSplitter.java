@@ -20,7 +20,9 @@ package org.apache.sqoop.mapreduce.db;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -28,6 +30,7 @@ import static org.junit.Assert.fail;
 /**
  * Test that the IntegerSplitter generates sane splits.
  */
+@Category(UnitTest.class)
 public class TestIntegerSplitter {
   private long [] toLongArray(List<Long> in) {
     long [] out = new long[in.size()];

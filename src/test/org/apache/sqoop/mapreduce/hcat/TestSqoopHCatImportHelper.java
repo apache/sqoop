@@ -19,13 +19,16 @@
 package org.apache.sqoop.mapreduce.hcat;
 
 import org.apache.hadoop.hive.common.type.HiveDecimal;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.math.BigDecimal;
 
 import static org.junit.Assert.assertEquals;
 
+@Category(UnitTest.class)
 public class TestSqoopHCatImportHelper {
 
   private SqoopHCatImportHelper importHelper;

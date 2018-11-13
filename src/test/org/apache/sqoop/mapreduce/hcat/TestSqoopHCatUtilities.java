@@ -23,9 +23,12 @@ import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category(UnitTest.class)
 public class TestSqoopHCatUtilities {
 
   private static final String[] VALID_HCAT_ARGS = new String[] {"-h"};

@@ -19,11 +19,14 @@
 package org.apache.sqoop.hbase;
 
 import org.apache.sqoop.infrastructure.kerberos.MiniKdcInfrastructureRule;
+import org.apache.sqoop.testcategories.KerberizedTest;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 
+@Category(KerberizedTest.class)
 public class HBaseKerberizedConnectivityTest extends HBaseTestCase {
 
   private static final String HBASE_TABLE_NAME = "KerberosTest";

@@ -28,10 +28,12 @@ import org.apache.hadoop.util.StringUtils;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.hive.TestHiveImport;
+import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.tool.SqoopTool;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.fail;
 
@@ -57,6 +59,7 @@ import static org.junit.Assert.fail;
  *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
  *   -Dms.sqlserver.password
  */
+@Category(SqlServerTest.class)
 public class SQLServerHiveImportTest extends TestHiveImport {
 
   @Before

@@ -20,6 +20,7 @@ package org.apache.sqoop.manager.oracle;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.commons.logging.Log;
@@ -31,6 +32,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -49,6 +51,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test free form query import with the Oracle db.
  */
+@Category(OracleTest.class)
 public class OracleIncrementalImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(

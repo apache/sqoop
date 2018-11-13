@@ -23,16 +23,19 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.validation.ValidationException;
 
 import org.apache.sqoop.testutil.MockResultSet;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertFalse;
 
+@Category(UnitTest.class)
 public class TextSplitterHadoopConfIntegrationTest {
   private static final String TEXT_COL_NAME = "text_col_name";
 

@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +40,7 @@ import org.apache.sqoop.manager.DirectMySQLManager;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -77,6 +79,7 @@ import static org.junit.Assert.fail;
  * -Dtestcase=MySQLAuthTest
  *
  */
+@Category(MysqlTest.class)
 public class MySQLAuthTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(

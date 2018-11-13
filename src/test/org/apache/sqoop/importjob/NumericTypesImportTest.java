@@ -31,6 +31,7 @@ import org.apache.sqoop.importjob.configuration.MySQLImportJobTestConfiguration;
 import org.apache.sqoop.importjob.configuration.OracleImportJobTestConfiguration;
 import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
 import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationForNumeric;
+import org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.AvroTestUtils;
 import org.apache.sqoop.testutil.ImportJobTestCase;
@@ -42,10 +43,12 @@ import org.apache.sqoop.testutil.adapter.PostgresDatabaseAdapter;
 import org.apache.sqoop.importjob.configuration.OracleImportJobTestConfigurationForNumber;
 import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationPaddingShouldSucceed;
 import org.apache.sqoop.util.ParquetReader;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -61,6 +64,8 @@ import static org.apache.sqoop.SqoopOptions.FileLayout.AvroDataFile;
 import static org.apache.sqoop.SqoopOptions.FileLayout.ParquetFile;
 
 @RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
+@Category(ThirdPartyTest.class)
 /**
  * This test covers the behavior of the Avro import for fixed point decimal types, i.e. NUMBER, NUMERIC
  * and DECIMAL.

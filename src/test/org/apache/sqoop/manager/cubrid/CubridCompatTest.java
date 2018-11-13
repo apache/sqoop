@@ -28,7 +28,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.thirdpartytest.CubridTest;
 import org.apache.sqoop.testutil.ManagerCompatTestCase;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test the basic Cubrid connection manager with the various column types.
@@ -53,6 +55,7 @@ import org.apache.sqoop.testutil.ManagerCompatTestCase;
  *   $csql -u dba SQOOPCUBRIDTEST
  *   csql>CREATE USER SQOOPUSER password 'PASSWORD';
  */
+@Category(CubridTest.class)
 public class CubridCompatTest extends ManagerCompatTestCase {
 
   public static final Log LOG = LogFactory.getLog(CubridCompatTest.class

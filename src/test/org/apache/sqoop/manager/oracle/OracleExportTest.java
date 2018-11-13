@@ -27,12 +27,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.sqoop.manager.OracleManager;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.junit.After;
 import org.junit.Before;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestExport;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.fail;
 
@@ -41,6 +43,7 @@ import static org.junit.Assert.fail;
  * This tests the OracleExportOutputFormat (which subclasses
  * ExportOutputFormat with Oracle-specific SQL statements).
  */
+@Category(OracleTest.class)
 public class OracleExportTest extends TestExport {
 
   public static final Log LOG = LogFactory.getLog(

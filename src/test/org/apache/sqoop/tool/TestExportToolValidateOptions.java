@@ -21,7 +21,9 @@ package org.apache.sqoop.tool;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.SupportedManagers;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -44,6 +46,7 @@ import static org.mockito.Mockito.when;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@Category(UnitTest.class)
 public class TestExportToolValidateOptions {
   ExportTool exportTool = new ExportTool();
 

@@ -30,6 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
+import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +42,7 @@ import org.apache.sqoop.metastore.JobData;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.tool.SqoopTool;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -68,6 +71,7 @@ import static org.junit.Assert.fail;
  *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
  *   -Dms.sqlserver.password
  */
+@Category({IntegrationTest.class, SqlServerTest.class})
 public class SQLServerManagerTest {
 
   public static final Log LOG = LogFactory.getLog(

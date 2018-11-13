@@ -19,8 +19,10 @@
 package org.apache.sqoop.metastore;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +31,7 @@ import static org.apache.sqoop.metastore.AutoGenericJobStorage.AUTO_STORAGE_IS_A
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@Category(UnitTest.class)
 public class TestAutoGenericJobStorage {
 
   private AutoGenericJobStorage jobStorage;

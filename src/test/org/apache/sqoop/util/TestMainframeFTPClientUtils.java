@@ -34,11 +34,14 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.sqoop.mapreduce.JobBase;
 import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.mapreduce.mainframe.MainframeConfiguration;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category(UnitTest.class)
 public class TestMainframeFTPClientUtils {
 
   private JobConf conf;

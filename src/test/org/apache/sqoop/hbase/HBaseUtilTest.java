@@ -18,7 +18,9 @@
 
 package org.apache.sqoop.hbase;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -28,6 +30,7 @@ import static org.junit.Assert.assertTrue;
  * This tests to verify that HBase is present (default when running test cases)
  * and that when in fake not present mode, the method return false.
  */
+@Category(UnitTest.class)
 public class HBaseUtilTest {
 
   @Test

@@ -19,9 +19,12 @@
 package org.apache.sqoop.tool;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,7 +33,6 @@ import org.junit.runners.Parameterized.Parameters;
 import java.util.Arrays;
 import java.util.Properties;
 
-import static org.apache.sqoop.SqoopOptions.FileLayout.ParquetFile;
 import static org.apache.sqoop.SqoopOptions.IncrementalMode.None;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -39,6 +41,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
+@Category(UnitTest.class)
+@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestHiveServer2OptionValidations {
 
   @Parameters(name = "sqoopTool = {0}")

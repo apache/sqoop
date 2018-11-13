@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.SqlTypeMap;
 
 import org.apache.sqoop.SqoopOptions;
@@ -32,6 +33,7 @@ import org.apache.sqoop.testutil.HsqldbTestServer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import java.sql.Types;
@@ -51,6 +53,7 @@ import static org.mockito.Mockito.when;
 /**
  * Test Hive DDL statement generation.
  */
+@Category(UnitTest.class)
 public class TestTableDefWriter {
 
   private static final String TEST_AVRO_SCHEMA = "{\"type\":\"record\",\"name\":\"IMPORT_TABLE_1\",\"fields\":[{\"name\":\"C1_VARCHAR\",\"type\":[\"null\",\"string\"]},{\"name\":\"C2_INTEGER\",\"type\":[\"null\",\"int\"]},{\"name\":\"_3C_CHAR\",\"type\":[\"null\",\"string\"]}]}";

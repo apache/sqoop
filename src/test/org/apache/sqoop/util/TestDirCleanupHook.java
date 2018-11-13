@@ -18,13 +18,16 @@
 
 package org.apache.sqoop.util;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
 
 import static org.junit.Assert.assertFalse;
 
+@Category(UnitTest.class)
 public class TestDirCleanupHook {
   @Rule
   public TemporaryFolder tmpFolder = new TemporaryFolder();

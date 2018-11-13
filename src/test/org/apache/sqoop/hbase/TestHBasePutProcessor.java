@@ -24,10 +24,12 @@ import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.ExpectedLogMessage;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@Category(UnitTest.class)
 public class TestHBasePutProcessor {
 
   @Rule

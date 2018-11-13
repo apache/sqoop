@@ -38,17 +38,20 @@ import org.apache.avro.Schema;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.avro.AvroSchemaMismatchException;
 import org.apache.sqoop.hive.HiveClientFactory;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.ExpectedLogMessage;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 @RunWith(Theories.class)
+@Category(UnitTest.class)
 public class TestImportTool {
   @DataPoints
   public static final Object[][] TRANSACTION_ISOLATION_LEVEL_NAMES_AND_VALUES = {

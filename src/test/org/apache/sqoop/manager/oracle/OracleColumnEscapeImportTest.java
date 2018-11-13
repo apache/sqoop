@@ -20,6 +20,7 @@ package org.apache.sqoop.manager.oracle;
 
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import com.google.common.base.Charsets;
@@ -30,6 +31,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +40,7 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
+@Category(OracleTest.class)
 public class OracleColumnEscapeImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
