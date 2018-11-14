@@ -18,6 +18,9 @@
 
 package org.apache.sqoop.mapreduce;
 
+import org.apache.avro.Conversions;
+import org.apache.avro.generic.GenericData;
+import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.lib.LargeObjectLoader;
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.avro.Schema;
@@ -39,6 +42,7 @@ public abstract class ParquetImportMapper<KEYOUT, VALOUT>
   private Schema schema = null;
   private boolean bigDecimalFormatString = true;
   private LargeObjectLoader lobLoader = null;
+  private boolean bigDecimalPadding;
 
   @Override
   protected void setup(Context context)
@@ -49,6 +53,8 @@ public abstract class ParquetImportMapper<KEYOUT, VALOUT>
         ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
         ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
     lobLoader = createLobLoader(context);
+    GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
+    bigDecimalPadding = conf.getBoolean(ConfigurationConstants.PROP_ENABLE_AVRO_DECIMAL_PADDING, false);
   }
 
   @Override
@@ -62,7 +68,7 @@ public abstract class ParquetImportMapper<KEYOUT, VALOUT>
     }
 
     GenericRecord record = AvroUtil.toGenericRecord(val.getFieldMap(), schema,
-        bigDecimalFormatString);
+        bigDecimalFormatString, bigDecimalPadding);
     write(context, record);
   }
 

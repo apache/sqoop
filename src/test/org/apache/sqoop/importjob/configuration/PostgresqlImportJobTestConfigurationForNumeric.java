@@ -16,43 +16,48 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob.avro.configuration;
-
-import org.apache.sqoop.importjob.ImportJobTestConfiguration;
+package org.apache.sqoop.importjob.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This test configuration covers NUMBER without a defined precision and scale.
- * This is the type that is probably the most commonly used to store numbers and also the most problematic,
- * as Sqoop sees this type with a 0 precision and -127 scale, both invalid values.
- * Therefore, NUMBER requires special treatment.
- * The user has to specify precision and scale when importing into avro.
+ * This test configuration covers the case when postgres returns invalid values
+ * for precision and scale for NUMERIC. Also, important, that the accompanying columns
+ *  - NUMERIC(20) and NUMERIC(20, 5) don't get modified.
  */
-public class OracleImportJobTestConfigurationForNumber implements ImportJobTestConfiguration {
-
+public class PostgresqlImportJobTestConfigurationForNumeric implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
 
   @Override
   public String[] getTypes() {
-    return new String[]{"INT", "NUMBER", "NUMBER(20)", "NUMBER(20,5)"};
+    String[] columnTypes = {"INT", "NUMERIC", "NUMERIC(20)", "NUMERIC(20, 5)"};
+    return columnTypes;
   }
 
   @Override
   public String[] getNames() {
-    return new String[]{"ID", "N1", "N2", "N3"};
+    String[] columnNames = {"ID", "N1", "N2", "N3"};
+    return columnNames;
   }
 
   @Override
   public List<String[]> getSampleData() {
-    List<String[]> data = new ArrayList<>();
-    data.add(new String[]{"1", "100.01", "100.01", "100.03"});
-    return data;
+    List<String[]> inputData = new ArrayList<>();
+    inputData.add(new String[]{"1", "100.01", "100.01", "100.01"});
+    return inputData;
   }
 
   @Override
-  public String[] getExpectedResults() {
-    String expectedRecord = "{\"ID\": 1, \"N1\": 100.010, \"N2\": 100, \"N3\": 100.03000}";
+  public String[] getExpectedResultsForAvro() {
+    String expectedRecord = "{\"ID\": 1, \"N1\": 100.010, \"N2\": 100, \"N3\": 100.01000}";
+    String[] expectedResult = new String[1];
+    expectedResult[0] = expectedRecord;
+    return expectedResult;
+  }
+
+  @Override
+  public String[] getExpectedResultsForParquet() {
+    String expectedRecord = "1,100.010,100,100.01000";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;

@@ -19,7 +19,6 @@
 package org.apache.sqoop.importjob.configuration;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sqoop.importjob.ImportJobTestConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ import java.util.List;
  * This test configuration intends to cover the fact that oracle stores these types without padding them with 0s,
  * therefore when importing into avro, one has to use the padding feature.
  */
-public class GenericImportJobSplitByTestConfiguration implements ImportJobTestConfiguration {
+public class GenericImportJobSplitByTestConfiguration implements ImportJobTestConfiguration, ParquetTestConfiguration {
 
   public static final String NAME_COLUMN = "NAME";
   public static final char SEPARATOR = ',';
@@ -65,7 +64,7 @@ public class GenericImportJobSplitByTestConfiguration implements ImportJobTestCo
   }
 
   @Override
-  public String[] getExpectedResults() {
+  public String[] getExpectedResultsForParquet() {
     return data.stream()
         .map(element -> StringUtils.join(element, SEPARATOR))
         .toArray(String[]::new);

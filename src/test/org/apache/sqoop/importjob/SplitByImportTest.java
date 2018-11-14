@@ -24,6 +24,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.importjob.configuration.GenericImportJobSplitByTestConfiguration;
+import org.apache.sqoop.importjob.configuration.ImportJobTestConfiguration;
+import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.adapter.DatabaseAdapter;
@@ -55,7 +57,7 @@ public class SplitByImportTest extends ImportJobTestCase {
 
   private Configuration conf = new Configuration();
 
-  private final ImportJobTestConfiguration configuration;
+  private final ParquetTestConfiguration configuration;
   private final DatabaseAdapter adapter;
 
   @Parameters(name = "Adapter: {0}| Config: {1}")
@@ -69,7 +71,7 @@ public class SplitByImportTest extends ImportJobTestCase {
     );
   }
 
-  public SplitByImportTest(DatabaseAdapter adapter, ImportJobTestConfiguration configuration) {
+  public SplitByImportTest(DatabaseAdapter adapter, ParquetTestConfiguration configuration) {
     this.adapter = adapter;
     this.configuration = configuration;
   }
@@ -148,6 +150,6 @@ public class SplitByImportTest extends ImportJobTestCase {
 
   private void verifyParquetFile() {
     ParquetReader reader = new ParquetReader(new Path(getWarehouseDir() + "/" + getTableName()), getConf());
-    assertEquals(asList(configuration.getExpectedResults()), reader.readAllInCsvSorted());
+    assertEquals(asList(configuration.getExpectedResultsForParquet()), reader.readAllInCsvSorted());
   }
 }

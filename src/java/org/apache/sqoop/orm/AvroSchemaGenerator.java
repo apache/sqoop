@@ -39,6 +39,9 @@ import org.apache.sqoop.avro.AvroUtil;
 import org.apache.sqoop.config.ConfigurationConstants;
 import org.codehaus.jackson.node.NullNode;
 
+import static org.apache.sqoop.SqoopOptions.FileLayout.AvroDataFile;
+import static org.apache.sqoop.SqoopOptions.FileLayout.ParquetFile;
+
 /**
  * Creates an Avro schema to represent a table from a database.
  */
@@ -126,8 +129,7 @@ public class AvroSchemaGenerator {
   public Schema toAvroSchema(int sqlType, String columnName, Integer precision, Integer scale) {
     List<Schema> childSchemas = new ArrayList<Schema>();
     childSchemas.add(Schema.create(Schema.Type.NULL));
-    if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL, false)
-        && isLogicalType(sqlType)) {
+    if (isLogicalTypeConversionEnabled() && isLogicalType(sqlType)) {
       childSchemas.add(
           toAvroLogicalType(columnName, sqlType, precision, scale)
               .addToSchema(Schema.create(Type.BYTES))
@@ -136,6 +138,20 @@ public class AvroSchemaGenerator {
       childSchemas.add(Schema.create(toAvroType(columnName, sqlType)));
     }
     return Schema.createUnion(childSchemas);
+  }
+
+  /**
+   * @return True if this is a parquet import and parquet logical types are enabled,
+   * or if this is an avro import and avro logical types are enabled. False otherwise.
+   */
+  private boolean isLogicalTypeConversionEnabled() {
+    if (ParquetFile.equals(options.getFileLayout())) {
+      return options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false);
+    }
+    else if (AvroDataFile.equals(options.getFileLayout())) {
+      return options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL, false);
+    }
+    return false;
   }
 
   public Schema toAvroSchema(int sqlType) {

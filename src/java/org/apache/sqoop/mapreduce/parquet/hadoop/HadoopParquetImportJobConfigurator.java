@@ -25,7 +25,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.parquet.avro.GenericDataSupplier;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
 import org.apache.parquet.avro.AvroParquetOutputFormat;
 import org.apache.parquet.hadoop.ParquetOutputFormat;
@@ -46,6 +48,18 @@ public class HadoopParquetImportJobConfigurator implements ParquetImportJobConfi
   public void configureMapper(Job job, Schema schema, SqoopOptions options, String tableName, Path destination) throws IOException {
     configureAvroSchema(job, schema);
     configureOutputCodec(job);
+    configureLogicalTypeSupport(job, options);
+  }
+
+  /**
+   * Configurations needed for logical types, i.e. decimal in parquet.
+   * @param job
+   * @param options
+   */
+  private void configureLogicalTypeSupport(Job job, SqoopOptions options) {
+    if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false)) {
+      AvroParquetOutputFormat.setAvroDataSupplier(job, GenericDataSupplier.class);
+    }
   }
 
   @Override

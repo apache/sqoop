@@ -16,17 +16,9 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob;
+package org.apache.sqoop.importjob.configuration;
 
-import java.util.List;
+public interface AvroTestConfiguration extends ImportJobTestConfiguration {
 
-public interface ImportJobTestConfiguration {
-
-  String[] getTypes();
-
-  String[] getNames();
-
-  List<String[]> getSampleData();
-
-  String[] getExpectedResults();
+  String[] getExpectedResultsForAvro();
 }

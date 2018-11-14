@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.util;
 
+import org.apache.avro.Conversions;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -29,7 +31,9 @@ import org.apache.parquet.hadoop.ParquetFileReader;
 import org.apache.parquet.hadoop.metadata.BlockMetaData;
 import org.apache.parquet.hadoop.metadata.ColumnChunkMetaData;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.parquet.hadoop.metadata.ParquetMetadata;
 import org.apache.parquet.hadoop.util.HiddenFileFilter;
+import org.apache.parquet.schema.MessageType;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -65,7 +69,7 @@ public class ParquetReader implements AutoCloseable {
     this(pathToRead, new Configuration());
   }
 
-  public GenericRecord next() throws IOException {
+  private GenericRecord next() throws IOException {
     GenericRecord result = reader.read();
     if (result != null) {
       return result;
@@ -113,27 +117,36 @@ public class ParquetReader implements AutoCloseable {
   }
 
   public CompressionCodecName getCodec() {
-    List<Footer> footers = getFooters();
+    ParquetMetadata parquetMetadata = getParquetMetadata();
 
-    Iterator<Footer> footersIterator = footers.iterator();
-    if (footersIterator.hasNext()) {
-      Footer footer = footersIterator.next();
+    Iterator<BlockMetaData> blockMetaDataIterator = parquetMetadata.getBlocks().iterator();
+    if (blockMetaDataIterator.hasNext()) {
+      BlockMetaData blockMetaData = blockMetaDataIterator.next();
 
-      Iterator<BlockMetaData> blockMetaDataIterator = footer.getParquetMetadata().getBlocks().iterator();
-      if (blockMetaDataIterator.hasNext()) {
-        BlockMetaData blockMetaData = blockMetaDataIterator.next();
+      Iterator<ColumnChunkMetaData> columnChunkMetaDataIterator = blockMetaData.getColumns().iterator();
 
-        Iterator<ColumnChunkMetaData> columnChunkMetaDataIterator = blockMetaData.getColumns().iterator();
+      if (columnChunkMetaDataIterator.hasNext()) {
+        ColumnChunkMetaData columnChunkMetaData = columnChunkMetaDataIterator.next();
 
-        if (columnChunkMetaDataIterator.hasNext()) {
-          ColumnChunkMetaData columnChunkMetaData = columnChunkMetaDataIterator.next();
-
-          return columnChunkMetaData.getCodec();
-        }
+        return columnChunkMetaData.getCodec();
       }
     }
 
     return null;
+  }
+
+  public MessageType readParquetSchema() {
+    try {
+      ParquetMetadata parquetMetadata = getParquetMetadata();
+
+      return parquetMetadata.getFileMetaData().getSchema();
+    } finally {
+      close();
+    }
+  }
+
+  private ParquetMetadata getParquetMetadata() {
+    return getFooters().stream().findFirst().get().getParquetMetadata();
   }
 
   private List<Footer> getFooters() {
@@ -163,7 +176,8 @@ public class ParquetReader implements AutoCloseable {
       if (reader != null) {
         reader.close();
       }
-      this.reader = AvroParquetReader.<GenericRecord>builder(file).build();
+      GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
+      this.reader = AvroParquetReader.<GenericRecord>builder(file).withDataModel(GenericData.get()).build();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

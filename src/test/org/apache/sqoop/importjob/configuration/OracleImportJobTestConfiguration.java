@@ -16,9 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob.avro.configuration;
-
-import org.apache.sqoop.importjob.ImportJobTestConfiguration;
+package org.apache.sqoop.importjob.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +25,7 @@ import java.util.List;
  * This test configuration intends to cover the fact that oracle stores these types without padding them with 0s,
  * therefore when importing into avro, one has to use the padding feature.
  */
-public class OracleImportJobTestConfiguration implements ImportJobTestConfiguration {
+public class OracleImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
 
   @Override
   public String[] getTypes() {
@@ -49,9 +47,17 @@ public class OracleImportJobTestConfiguration implements ImportJobTestConfigurat
   }
 
   @Override
-  public String[] getExpectedResults() {
+  public String[] getExpectedResultsForAvro() {
     String expectedRecord = "{\"ID\": 1, \"N2\": 1000000, \"N3\": 1000000.05000, \"N4\": 1000000, \"N5\": 1000000.05000, " +
         "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 1000000.05000}";
+    String[] expectedResult = new String[1];
+    expectedResult[0] = expectedRecord;
+    return expectedResult;
+  }
+
+  @Override
+  public String[] getExpectedResultsForParquet() {
+    String expectedRecord = "1,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,1000000.05000";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;

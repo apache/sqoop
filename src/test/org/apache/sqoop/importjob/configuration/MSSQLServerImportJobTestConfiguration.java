@@ -16,42 +16,46 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob.avro.configuration;
-
-import org.apache.sqoop.importjob.ImportJobTestConfiguration;
+package org.apache.sqoop.importjob.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This test configuration covers the case when postgres returns invalid values
- * for precision and scale for NUMERIC. Also, important, that the accompanying columns
- *  - NUMERIC(20) and NUMERIC(20, 5) don't get modified.
- */
-public class PostgresqlImportJobTestConfigurationForNumeric implements ImportJobTestConfiguration {
+public class MSSQLServerImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
 
   @Override
   public String[] getTypes() {
-    String[] columnTypes = {"INT", "NUMERIC", "NUMERIC(20)", "NUMERIC(20, 5)"};
+    String[] columnTypes = {"INT", "NUMERIC", "NUMERIC(20)", "NUMERIC(20,5)", "NUMERIC(20,0)", "NUMERIC(38,5)",
+        "DECIMAL", "DECIMAL(20)", "DECIMAL(20,5)", "DECIMAL(20,0)", "DECIMAL(38,5)"};
     return columnTypes;
   }
 
   @Override
   public String[] getNames() {
-    String[] columnNames = {"ID", "N1", "N2", "N3"};
+    String[] columnNames = {"ID", "N1", "N2", "N3", "N4", "N5", "D1", "D2", "D3", "D4", "D5"};
     return columnNames;
   }
 
   @Override
   public List<String[]> getSampleData() {
     List<String[]> inputData = new ArrayList<>();
-    inputData.add(new String[]{"1", "100.01", "100.01", "100.01"});
+    inputData.add(new String[]{"1", "100.050", "1000000.05", "1000000.05", "1000000.05", "1000000.05",
+        "100.060", "1000000.05", "1000000.05", "1000000.05", "1000000.05"});
     return inputData;
   }
 
   @Override
-  public String[] getExpectedResults() {
-    String expectedRecord = "{\"ID\": 1, \"N1\": 100.010, \"N2\": 100, \"N3\": 100.01000}";
+  public String[] getExpectedResultsForAvro() {
+    String expectedRecord = "{\"ID\": 1, \"N1\": 100, \"N2\": 1000000, \"N3\": 1000000.05000, \"N4\": 1000000, \"N5\": 1000000.05000, " +
+        "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 1000000.05000}";
+    String[] expectedResult = new String[1];
+    expectedResult[0] = expectedRecord;
+    return expectedResult;
+  }
+
+  @Override
+  public String[] getExpectedResultsForParquet() {
+    String expectedRecord = "1,100,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,1000000.05000";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;
