@@ -18,8 +18,10 @@
 
 package org.apache.sqoop.manager.oracle;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +29,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@Category(UnitTest.class)
 public class TestOraOopDBInputSplitGetDebugDetails {
     private OraOopDBInputSplit firstSplit;
     private OraOopDBInputSplit secondSplit;

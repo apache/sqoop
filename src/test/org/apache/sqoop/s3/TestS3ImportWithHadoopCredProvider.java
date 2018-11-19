@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.s3a.Constants;
 import org.apache.hadoop.security.alias.CredentialShell;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.sqoop.testcategories.thirdpartytest.S3Test;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.DefaultS3CredentialGenerator;
 import org.apache.sqoop.testutil.ImportJobTestCase;
@@ -40,6 +41,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import java.io.File;
@@ -48,6 +50,7 @@ import java.nio.file.Files;
 
 import static junit.framework.TestCase.fail;
 
+@Category(S3Test.class)
 public class TestS3ImportWithHadoopCredProvider extends ImportJobTestCase {
     public static final Log LOG = LogFactory.getLog(
             TestS3ImportWithHadoopCredProvider.class.getName());

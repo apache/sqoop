@@ -119,6 +119,7 @@ public class TestMainframeManager extends BaseSqoopTestCase {
     } catch (IOException e) {
       fail("No IOException should be thrown!");
     } finally {
+      HBaseUtil.setAlwaysNoHBaseJarMode(false);
       opts.setHBaseTable(null);
     }
   }

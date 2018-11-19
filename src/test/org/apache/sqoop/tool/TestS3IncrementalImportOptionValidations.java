@@ -19,9 +19,12 @@
 package org.apache.sqoop.tool;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -36,7 +39,9 @@ import static org.apache.sqoop.tool.BaseSqoopTool.TEMP_ROOTDIR_ARG;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@Category(UnitTest.class)
 @RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestS3IncrementalImportOptionValidations {
 
     @Parameterized.Parameters(name = "incrementalMode = {0}")

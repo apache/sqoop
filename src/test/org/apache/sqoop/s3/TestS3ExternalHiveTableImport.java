@@ -22,16 +22,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.sqoop.hive.minicluster.HiveMiniCluster;
+import org.apache.sqoop.testcategories.thirdpartytest.S3Test;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.DefaultS3CredentialGenerator;
 import org.apache.sqoop.testutil.HiveServer2TestUtil;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.S3CredentialGenerator;
 import org.apache.sqoop.testutil.S3TestUtils;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -43,7 +46,9 @@ import static org.apache.sqoop.tool.BaseSqoopTool.FMT_PARQUETFILE_ARG;
 import static org.apache.sqoop.tool.BaseSqoopTool.FMT_TEXTFILE_ARG;
 import static org.junit.Assert.assertEquals;
 
+@Category(S3Test.class)
 @RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestS3ExternalHiveTableImport extends ImportJobTestCase {
 
     @Parameterized.Parameters(name = "fileFormatArg = {0}, expectedResult = {1}")

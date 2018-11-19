@@ -24,6 +24,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.importjob.configuration.GenericImportJobSplitByTestConfiguration;
+import org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest;
 import org.apache.sqoop.importjob.configuration.ImportJobTestConfiguration;
 import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
@@ -33,11 +34,13 @@ import org.apache.sqoop.testutil.adapter.MSSQLServerDatabaseAdapter;
 import org.apache.sqoop.testutil.adapter.MySqlDatabaseAdapter;
 import org.apache.sqoop.testutil.adapter.OracleDatabaseAdapter;
 import org.apache.sqoop.testutil.adapter.PostgresDatabaseAdapter;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.apache.sqoop.util.ParquetReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -51,6 +54,8 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
+@Category(ThirdPartyTest.class)
+@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class SplitByImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(SplitByImportTest.class.getName());

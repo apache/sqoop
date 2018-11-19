@@ -154,44 +154,15 @@ dependencies {
 }
 
 task unitTest (type: Test) {
-    description 'Run unit tests'
+    description 'Run unit tests which do not need proprietary JDBC driver'
     useJUnit {
         includeCategories 'org.apache.sqoop.testcategories.sqooptest.UnitTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
         excludeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
     }
 }
 
-task allIntegrationTest (type: Test){
-    description 'Run all  integration tests'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.sqooptest.IntegrationTest'
-    }
-}
-
-task thirdPartyTest (type: Test) {
-    description 'Run Third-party Tests - you need to specify -Dsqoop.thirdparty.lib.dir where the Third party driver ' +
-            'jars reside (relative to the project directory)'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-    systemProperty "ms.datatype.test.data.file.export" ,"DatatypeTestData-export-lite.txt"
-    systemProperty "ms.datatype.test.data.file.import" ,"DatatypeTestData-import-lite.txt"
-    systemProperty "ms.datatype.test.data.file.delim" ,","
-    systemProperty "ms.datatype.test.hdfsprefix" ,"file:///"
-}
-
-task manualTest(type: Test) {
-    description 'Run manual tests'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-    }
-}
-
-task integrationPlainTest(type: Test) {
-    description 'Run integration tests which do not need a docker container or an external database'
+task integrationTest(type: Test) {
+    description 'Run integration tests which do not need a docker container or an external database/service'
     useJUnit {
         includeCategories 'org.apache.sqoop.testcategories.sqooptest.IntegrationTest'
         excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
@@ -214,18 +185,51 @@ task kerberizedTest (type: Test){
     forkEvery 1
 }
 
-test {
-    description 'Run tests that do not need exteral JDBC driver and/or a docker container. ' +
-            'This includes integration plain tests and unit tests'
-    include ''
+task thirdPartyTest (type: Test) {
+    description 'Run Third-party Tests - you need to specify -Dsqoop.thirdparty.lib.dir where the Third party driver ' +
+            'jars reside (relative to the project directory)'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
+        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
+        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
+    }
+    systemProperty "ms.datatype.test.data.file.export" ,"DatatypeTestData-export-lite.txt"
+    systemProperty "ms.datatype.test.data.file.import" ,"DatatypeTestData-import-lite.txt"
+    systemProperty "ms.datatype.test.data.file.delim" ,","
+    systemProperty "ms.datatype.test.hdfsprefix" ,"file:///"
 }
-test.finalizedBy(integrationPlainTest, unitTest, kerberizedTest)
 
-task sqoopTest (type: Test){
-    description 'Run all Sqoop tests'
-    include ''
+test {
+    description 'Run tests that do not need external JDBC driver and/or a docker container. ' +
+            'This is the same as running unitTest, integrationTest and kerberizedTest.'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.sqooptest.UnitTest'
+        includeCategories 'org.apache.sqoop.testcategories.sqooptest.IntegrationTest'
+        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
+        excludeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
+        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
+    }
 }
-sqoopTest.finalizedBy(test, kerberizedTest, thirdPartyTest)
+test.finalizedBy(kerberizedTest)
+
+task s3Test(type: Test) {
+    description 'Run S3 tests'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.S3Test'
+    }
+}
+
+task allTest (type: Test){
+    description 'Run all Sqoop tests'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.sqooptest.UnitTest'
+        includeCategories 'org.apache.sqoop.testcategories.sqooptest.IntegrationTest'
+        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
+        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
+        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
+    }
+}
+allTest.finalizedBy(kerberizedTest)
 
 def testBuildDir = "$buildDir/test/"
 def testBuildDirData ="$testBuildDir/data/"
@@ -236,7 +240,7 @@ task buildFolder {
 
 tasks.withType(Test) {
     testLogging {
-        events 'started', 'passed', 'skipped'
+        events 'passed', 'skipped'
     }
     workingDir = testBuildDirData
     project.mkdir(workingDir)
@@ -253,8 +257,8 @@ tasks.withType(Test) {
     systemProperty "sqoop.throwOnError", ""
 
     minHeapSize = "512m"
-    maxHeapSize = "5120m"
-    jvmArgs '-Xmx5012m', "-da:org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge"
+    maxHeapSize = "8G"
+    jvmArgs "-da:org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge"
 
     dependsOn buildFolder
 
@@ -291,6 +295,7 @@ checkstyle {
 
 jacocoTestReport {
     description "Generates a coverage report of the unit test results under $buildDir/jacocoHtml/test/index.html"
+    executionData test, kerberizedTest
     reports {
         xml.enabled true
         csv.enabled false
@@ -312,7 +317,7 @@ task jacocoThirdPartyReport(type: JacocoReport){
 task jacocoCompositeReport(type: JacocoReport){
     description "Generates a composite coverage report of test and thirdparty test results under $buildDir/jacocoHtml/index.html"
     sourceSets sourceSets.main
-    executionData test, thirdPartyTest
+    executionData test, kerberizedTest, thirdPartyTest
     reports {
         xml.enabled true
         csv.enabled false

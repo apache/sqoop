@@ -22,9 +22,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -38,6 +40,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.doReturn;
 
+@Category(UnitTest.class)
 public class TestMainframeDatasetBinaryRecord {
 
   private MainframeDatasetFTPRecordReader ftpRecordReader;

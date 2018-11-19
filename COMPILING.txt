@@ -1,7 +1,7 @@
 
 = Compiling
 
-This document explains how to compile Sqoop.
+This document explains how to compile and test Sqoop.
 
 ////
 Licensed to the Apache Software Foundation (ASF) under one
@@ -27,7 +27,7 @@ under the License.
 
 Compiling Sqoop requires the following tools:
 
-* Apache ant (1.9.7) or Gradle (3.5.1)
+* Apache ant (1.9.7) or Gradle (4.9)
 * Java JDK 1.8
 
 Additionally, building the documentation requires these tools:
@@ -47,21 +47,22 @@ Furthermore, Sqoop's build can be instrumented with the following:
 
 == The Basics
 
-Sqoop is compiled with ant. Type +ant -p+ to see the list of available targets.
+Sqoop can be compiled and tested with both Ant and Gradle. Type +ant -p+ or +./gradlew tasks --all+ to see the list of available targets/tasks.
 
-Type +ant+ to compile all java sources. You can then run Sqoop with +bin/sqoop+.
+Type +ant+ or +./gradlew jar+ to compile all java sources. You can then run Sqoop with +bin/sqoop+.
 
 If you want to build everything (including the documentation), type
 +ant package+ or +./gradlew package+. This will appear in the
 +build/sqoop-(version)/+ directory.
 
-This version of Sqoop is built against Hadoop 0.23 available from Apache
-maven repository by default. These dependencies are obtained via IVY which
-downloads the necessary binaries.
-
 == Testing Sqoop
 
-Sqoop has three main test categories: unit, third party and Amazon S3 tests.
+Sqoop supports both Ant and Gradle but the test tasks are a bit different in each build tools.
+
+=== Testing with Ant
+The Ant build defines two main test categories: unit and third party tests.
+
+Classes with the +Test+ prefix are unit tests and classes with the +Test+ postfix are third party tests.
 
 Sqoop unit tests can be run with +ant test+. This command
 will run all the "basic" checks against an in-memory database, HSQLDB.
@@ -70,8 +71,83 @@ Sqoop's third party tests are compatibility tests that check its ability to work
 several third-party databases. To enable these tests, you will need to install
 and configure the databases or run them in Docker containers, and download the JDBC drivers for each one.
 
-Sqoop's Amazon S3 test suite tests the "RDBMS to Amazon S3" use case with an in-memory database, HSQLDB.
+For more information about how to run this suite see the 'Third party tests' section.
+
+Note that the unit test suite contains several Amazon S3 test classes too which test the "RDBMS to Amazon S3" use case with an in-memory database, HSQLDB.
 To enable these tests, you will need to have either permanent or temporary Amazon S3 security credentials.
+
+For more information about how to run this suite see the 'Amazon S3 tests' section.
+
+=== Testing with Gradle
+
+The Gradle build supports JUnit's +@Category+ annotation so we have access to much more fine grained test categories here.
+The test categories are defined as marker interfaces under +org.apache.sqoop.testcategories+ package.
+
+The following table shows the currently supported test categories and their hierarchy:
+
+.Available test categories
+[width="40%",frame="topbot",options="header"]
+|======================
+|Category              |Subcategory
+.3+|+SqoopTest+        |+UnitTest+
+                       |+IntegrationTest+
+                       |+ManualTest+
+.9+|+ThirdPartyTest+   |+CubridTest+
+                       |+Db2Test+
+                       |+MainFrameTest+
+                       |+MysqlTest+
+                       |+NetezzaTest+
+                       |+OracleTest+
+                       |+PostgresqlTest+
+                       |+SqlServerTest+
+                       |+S3Test+
+|+KerberizedTest+      |
+|======================
+
+==== SqoopTest
+A general category including UnitTest, IntegrationTest and ManualTest.
+
+==== UnitTest
+A unit test shall test one class at a time having it's dependencies mocked.
+A unit test shall not start a mini cluster nor an embedded database and it shall not use a JDBC driver.
+
+==== IntegrationTest
+An integration test shall test if independently developed classes work together correctly.
+An integration test checks a whole scenario and thus may start mini clusters or embedded databases and may connect to
+external resources like RDBMS instances.
+
+==== ManualTest
+Deprecated category, shall not be used nor extended.
+
+==== ThirdPartyTest
+A third party test shall test a scenario where a third party side is required such as a JDBC driver or an external RDBMS instance.
+The subcategories define what kind of third party dependency is needed by the test.
+
+==== KerberizedTest
+A kerberized test shall run in kerberized environment thus it starts mini KDC server.
+
+==== Categorizing tests
+Note that if you add a new test you have to make sure that it is categorized otherwise Gradle will not execute it.
+
+The categorizing steps are the following:
+
+* Decide if the test is a unit or an integration test, mark the test class with the +@Category+ annotation and add the
+corresponding marker interface to it.
+* If the test needs a JDBC driver or an external service then add +ThirdPartyTest+ or one of its subinterfaces to the
++@Category+ annotation. Try to use the most specific interface.
+* If the test starts a Mini KDC then add the +KerberizedTest+ interface to the +@Category+ annotation.
+
+==== Available test targets
+
+* +unitTest+: Runs unit tests which do not need proprietary JDBC driver.
+* +integrationTest+: Runs integration tests which do not need a docker container or an external database/service.
+* +kerberizedTest+: Runs kerberized tests.
+* +thirdPartyTest+: Runs third-party tests. For more information see the 'Third party tests' section.
+* +test+: Runs tests that do not need external JDBC driver and/or a docker container.
+This the same as running unitTest, integrationTest and kerberizedTest.
+* +s3Test+: Runs S3 tests. For more information see the 'Amazon S3 tests' section.
+* +allTest+: Runs all Sqoop tests.
+
 
 === Third party tests
 
@@ -291,10 +367,72 @@ You can stop and remove the Docker containers using the following command:
 
 ===== Running the third party tests using docker containers
 
-You can execute the third party tests against the DBs running in Docker containers using the following command (replace <path_to_thirdparty_lib_directory> with the path you have the necessary JDBC drivers):
+You can execute the third party tests against the DBs running in Docker containers using the following command (replace <path_to_thirdparty_lib_directory> with the path you have the necessary JDBC drivers,
+<your-bucket-url> and <your-credential-generator-command> with the values described in the 'Amazon S3 tests' section):
 
 ----
-ant clean test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=<path_to_thirdparty_lib_directory> -Dsqoop.test.mysql.connectstring.host_url=jdbc:mysql://127.0.0.1:3306/ -Dsqoop.test.mysql.databasename=sqoop -Dsqoop.test.mysql.password=Sqoop12345 -Dsqoop.test.mysql.username=sqoop -Dsqoop.test.oracle.connectstring=jdbc:oracle:thin:@//localhost:1521/sqoop -Dsqoop.test.oracle.username=SYSTEM -Dsqoop.test.oracle.password=Sqoop12345 -Dsqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://localhost/ -Dsqoop.test.postgresql.database=sqoop -Dsqoop.test.postgresql.username=sqoop -Dsqoop.test.postgresql.password=Sqoop12345 -Dsqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost:33000 -Dsqoop.test.cubrid.connectstring.username=sqoop -Dsqoop.test.cubrid.connectstring.database=sqoop -Dsqoop.test.cubrid.connectstring.password=Sqoop12345 -Dmapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom" -Dtest.timeout=10000000 -Dsqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://localhost:1433 -Dsqoop.test.sqlserver.database=master -Dms.sqlserver.username=sa -Dms.sqlserver.password=Sqoop12345 -Dsqoop.test.db2.connectstring.host_url=jdbc:db2://localhost:50000 -Dsqoop.test.db2.connectstring.database=SQOOP -Dsqoop.test.db2.connectstring.username=DB2INST1 -Dsqoop.test.db2.connectstring.password=Sqoop12345
+ant clean test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=<path_to_thirdparty_lib_directory> \
+    -Dsqoop.test.mysql.connectstring.host_url=jdbc:mysql://127.0.0.1:3306/ \
+    -Dsqoop.test.mysql.databasename=sqoop \
+    -Dsqoop.test.mysql.password=Sqoop12345 \
+    -Dsqoop.test.mysql.username=sqoop \
+    -Dsqoop.test.oracle.connectstring=jdbc:oracle:thin:@//localhost:1521/sqoop \
+    -Dsqoop.test.oracle.username=SYSTEM \
+    -Dsqoop.test.oracle.password=Sqoop12345 \
+    -Dsqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://localhost/ \
+    -Dsqoop.test.postgresql.database=sqoop \
+    -Dsqoop.test.postgresql.username=sqoop \
+    -Dsqoop.test.postgresql.password=Sqoop12345 \
+    -Dsqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost:33000 \
+    -Dsqoop.test.cubrid.connectstring.username=sqoop \
+    -Dsqoop.test.cubrid.connectstring.database=sqoop \
+    -Dsqoop.test.cubrid.connectstring.password=Sqoop12345 \
+    -Dmapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom" \
+    -Dtest.timeout=10000000 \
+    -Dsqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://localhost:1433 \
+    -Dsqoop.test.sqlserver.database=master \
+    -Dms.sqlserver.username=sa \
+    -Dms.sqlserver.password=Sqoop12345 \
+    -Dsqoop.test.db2.connectstring.host_url=jdbc:db2://localhost:50000 \
+    -Dsqoop.test.db2.connectstring.database=SQOOP \
+    -Dsqoop.test.db2.connectstring.username=DB2INST1 \
+    -Dsqoop.test.db2.connectstring.password=Sqoop12345 \
+    -Ds3.bucket.url=<your-bucket-url> \
+    -Ds3.generator.command=<your-credential-generator-command>
+----
+
+or
+
+----
+./gradlew -Dsqoop.thirdparty.lib.dir=<path_to_thirdparty_lib_directory> \
+    -Dsqoop.test.mysql.connectstring.host_url=jdbc:mysql://127.0.0.1:3306/ \
+    -Dsqoop.test.mysql.databasename=sqoop \
+    -Dsqoop.test.mysql.password=Sqoop12345 \
+    -Dsqoop.test.mysql.username=sqoop \
+    -Dsqoop.test.oracle.connectstring=jdbc:oracle:thin:@//localhost:1521/sqoop \
+    -Dsqoop.test.oracle.username=SYSTEM \
+    -Dsqoop.test.oracle.password=Sqoop12345 \
+    -Dsqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://localhost/ \
+    -Dsqoop.test.postgresql.database=sqoop \
+    -Dsqoop.test.postgresql.username=sqoop \
+    -Dsqoop.test.postgresql.password=Sqoop12345 \
+    -Dsqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost:33000 \
+    -Dsqoop.test.cubrid.connectstring.username=sqoop \
+    -Dsqoop.test.cubrid.connectstring.database=sqoop \
+    -Dsqoop.test.cubrid.connectstring.password=Sqoop12345 \
+    -Dmapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom" \
+    -Dtest.timeout=10000000 \
+    -Dsqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://localhost:1433 \
+    -Dsqoop.test.sqlserver.database=master \
+    -Dms.sqlserver.username=sa \
+    -Dms.sqlserver.password=Sqoop12345 \
+    -Dsqoop.test.db2.connectstring.host_url=jdbc:db2://localhost:50000 \
+    -Dsqoop.test.db2.connectstring.database=SQOOP \
+    -Dsqoop.test.db2.connectstring.username=DB2INST1 \
+    -Dsqoop.test.db2.connectstring.password=Sqoop12345 \
+    -Ds3.bucket.url=<your-bucket-url> \
+    -Ds3.generator.command=<your-credential-generator-command> \
+    thirdPartyTest
 ----
 
 Please note that even if you do not need to install RDBMSs to run Sqoop third party tests against the Docker containers you still need to install the following tools:
@@ -312,11 +450,15 @@ of temporary credentials) having them separated by spaces.
 
 You can then pass the bucket URL and the generator command to the tests via system properties as follows:
 
-++++
+----
 ant clean test -Ds3.bucket.url=<your-bucket-url> -Ds3.generator.command=<your-credential-generator-command>
+----
+
 or
-./gradlew test -Ds3.bucket.url=<your-bucket-url> -Ds3.generator.command=<your-credential-generator-command>
-++++
+
+----
+./gradlew s3Test -Ds3.bucket.url=<your-bucket-url> -Ds3.generator.command=<your-credential-generator-command>
+----
 
 
 == Code Quality Analysis
@@ -331,11 +473,15 @@ trigger additional warnings in Findbugs.
 Install findbugs (1.3.9) according to its instructions. To use it,
 run:
 
-++++
+----
 ant findbugs -Dfindbugs.home=/path/to/findbugs/
+----
+
 or
+
+----
 ./gradlew findbugsMain
-++++
+----
 
 A report will be generated in +build/findbugs/+
 
@@ -347,25 +493,30 @@ all possible paths.
 
 Install Cobertura according to its instructions. Then run a test with:
 
-++++
+----
 ant clean
 ant cobertura -Dcobertura.home=/path/to/cobertura
 ant cobertura -Dcobertura.home=/path/to/cobertura \
     -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/thirdparty
+----
 
 For Gradle we run Jacoco for code coverage checks. You can create single reports or composite reports,
 where you can check the combined coverage of unit and thirdparty tests.
 
+----
 ./gradlew clean
 ./gradlew test
 ./gradlew jacocoTestReport
 
 ./gradlew -Dsqoop.thirdparty.lib.dir=<path_to_thirdparty_lib_directory> thirdPartyTest
 ./gradlew jacocoThirdPartyReport
+----
 
 or generate the composite report after running test and thirdPartyTest
+
+----
 ./gradlew jacocoCompositeReport
-++++
+----
 
 (You'll need to run the cobertura target twice; once against the regular
 test targets, and once against the thirdparty targets.)
@@ -388,10 +539,15 @@ Ivy when necessary.
 
 To run checkstyle, execute:
 
-++++
+----
 ant checkstyle
+----
+
+or
+
+----
 ./gradlew checkStyleMain
-++++
+----
 
 A report will be generated as +build/checkstyle-errors.html+
 
@@ -403,22 +559,32 @@ dependency management system through Maven.
 
 To install Sqoop in your local +.m2+ cache, run:
 
-++++
+----
 ant mvn-install
+----
+
+or
+
+----
 ./gradlew publishToMavenLocal
-++++
+----
 
 This will install a pom and the Sqoop jar.
 
 To deploy Sqoop to a public repository, use:
 
-++++
+----
 ant mvn-deploy
+----
+
+or
+
+----
 ./gradlew publishSqoopPublicationToCloudera.snapshot.repoRepository
 ./gradlew -DmvnRepo=x publishSqoopPublicationToCloudera.x.repoRepository
-++++
+----
 
-By default, this deploys to repository.cloudera.com. You can choose
+By default, this deploys to +repository.cloudera.com+. You can choose
 the complete URL to deploy to with the +mvn.deploy.url+ property.
 By default, this deploys to the "snapshots" repository. To deploy to
 "staging" or "releases" on repository.cloudera.com, set the
@@ -444,28 +610,33 @@ the +mvn-install+ or +mvn-deploy+ targets as well.
 Running +ant eclipse+ will generate +.project+ and +.classpath+ files that
 will allow you to edit Sqoop sources in Eclipse with all the library
 dependencies correctly resolved. To compile the jars, you should still
-use ant.
+use Ant or Gradle.
 
 == Building the documentation
 
 Building the documentation requires that you have toxml installed.
 Also, one needs to set the XML_CATALOG_FILES environment variable.
 
-++++
+----
 export XML_CATALOG_FILES=/usr/local/etc/xml/catalog
 ant docs
-++++
+----
+
+or
+
+----
+export XML_CATALOG_FILES=/usr/local/etc/xml/catalog
+./gradlew docs
+----
 
 == Other important Gradle commands
 
-+ Generate gradle wrapper (to ensure you are using the correct, compatible version of gradle) by running +./gradlew wrapper+
-+ ./gradlew tasks to list all top-level gradle tasks or run ./gradlew tasks --all to show all tasks and subtasks
-+ ./gradlew compileJava to compile the main Java source
-+ ./gradlew -Dsqoop.thirdparty.lib.dir=<relative_path_to_thirdparty_lib_directory> -Dsqoop.test.mysql.connectstring.host_url=jdbc:mysql://127.0.0.1:3306/ -Dsqoop.test.mysql.databasename=sqoop -Dsqoop.test.mysql.password=Sqoop12345 -Dsqoop.test.mysql.username=sqoop -Dsqoop.test.oracle.connectstring=jdbc:oracle:thin:@//localhost:1521/sqoop -Dsqoop.test.oracle.username=SYSTEM -Dsqoop.test.oracle.password=Sqoop12345 -Dsqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://localhost/ -Dsqoop.test.postgresql.database=sqoop -Dsqoop.test.postgresql.username=sqoop -Dsqoop.test.postgresql.password=Sqoop12345 -Dsqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost:33000 -Dsqoop.test.cubrid.connectstring.username=sqoop -Dsqoop.test.cubrid.connectstring.database=sqoop -Dsqoop.test.cubrid.connectstring.password=Sqoop12345 -Dmapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom" -Dtest.timeout=10000000 -Dsqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://localhost:1433 -Dsqoop.test.sqlserver.database=master -Dms.sqlserver.username=sa -Dms.sqlserver.password=Sqoop12345 -Dsqoop.test.db2.connectstring.host_url=jdbc:db2://localhost:50000 -Dsqoop.test.db2.connectstring.database=SQOOP -Dsqoop.test.db2.connectstring.username=DB2INST1 -Dsqoop.test.db2.connectstring.password=Sqoop12345 thirdPartyTest
-+ ./gradlew test --debug-jvm : to run remote debug on port 5005
-+ ./gradlew -Dtest.single=ClassName*Test test or ./gradlew tests --tests
-+ To refresh dependencies for a build ./gradlew build --refresh-dependencies
-+ For skipping a single test or a set of tests ./gradle build -x test
-+ To run a single test class use --tests ClassName*Test or -DtestType.single=ClassName*Test (use with test, thirdPartyTest or manualTest)
-+ To get a dependency tree: ./gradlew dependencyInsight --configuration optionalConfiguration --dependency searchedForDependency
-+ For a list of the dependencies of the selected project, broken down by configuration run: ./gradlew dependencies
+* +./gradlew wrapper+ to generate gradle wrapper (to ensure you are using the correct, compatible version of gradle)
+* +./gradlew tasks+ to list all top-level gradle tasks or run +./gradlew tasks --all+ to show all tasks and subtasks
+* +./gradlew compileJava+ to compile the main Java source
+* +./gradlew test --debug-jvm+ to run remote debug on port 5005
+* +./gradlew test --tests TestSqoopOptions+, +./gradlew thirdPartyTest --tests TestS3*+ to run one or more tests matching a pattern (use with test or thirdPartyTest)
+* +./gradlew build --refresh-dependencies+ to refresh dependencies for a build
+* +./gradle build -x test+ for skipping a single test or a set of tests
+* +./gradlew dependencyInsight --configuration optionalConfiguration --dependency searchedForDependency+ to get a dependency tree
+* +./gradlew dependencies+ to get the list of the dependencies of the selected project, broken down by configuration

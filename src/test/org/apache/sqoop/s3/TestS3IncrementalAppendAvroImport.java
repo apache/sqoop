@@ -21,6 +21,7 @@ package org.apache.sqoop.s3;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.sqoop.testcategories.thirdpartytest.S3Test;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.AvroTestUtils;
 import org.apache.sqoop.testutil.DefaultS3CredentialGenerator;
@@ -32,12 +33,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 
 import static org.apache.sqoop.util.AppendUtils.MAPREDUCE_OUTPUT_BASENAME_PROPERTY;
 
+@Category(S3Test.class)
 public class TestS3IncrementalAppendAvroImport extends ImportJobTestCase {
 
     public static final Log LOG = LogFactory.getLog(

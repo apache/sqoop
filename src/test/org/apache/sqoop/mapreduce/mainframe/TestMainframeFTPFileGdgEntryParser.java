@@ -23,11 +23,15 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.net.ftp.FTPFile;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@Category(UnitTest.class)
 public class TestMainframeFTPFileGdgEntryParser {
   /* Sample FTP listing
   Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname
