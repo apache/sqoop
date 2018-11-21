@@ -946,7 +946,10 @@
       <batchtest todir="${build.test}" unless="testcase">
         <fileset dir="${test.dir}"
                  includes="**/${test.pattern}.java"
-                 excludes="**/${test.exclude}.java" />
+                 excludes="**/${test.exclude}.java,**/KerberizedTest.java,**/IntegrationTest.java,**/SqoopTest.java,
+                 **/UnitTest.java,**/CubridTest.java,**/Db2Test.java,**/MainFrameTest.java,**/MysqlTest.java,
+                 **/NetezzaTest.java,**/OracleTest.java,**/PostgresqlTest.java,**/S3Test.java,**/SqlServerTest.java,
+                 **/ThirdPartyTest.java"/>
       </batchtest>
       <batchtest todir="${build.test}" if="testcase">
         <fileset dir="${test.dir}" includes="**/${testcase}.java"/>
