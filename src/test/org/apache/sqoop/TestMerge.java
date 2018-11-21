@@ -204,7 +204,7 @@ public class TestMerge extends BaseSqoopTestCase {
 
     // Now merge the results!
     ClassLoaderStack.addJarFile(jarFileName, MERGE_CLASS_NAME);
-    Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+    Path warehouse = new Path(getWarehouseDir());
     options = getSqoopOptions(newConf());
     options.setMergeOldPath(new Path(warehouse, OLD_PATH).toString());
     options.setMergeNewPath(new Path(warehouse, NEW_PATH).toString());
@@ -243,7 +243,7 @@ public class TestMerge extends BaseSqoopTestCase {
     options.setFileLayout(fileLayout);
     options.setDeleteMode(true);
 
-    Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+    Path warehouse = new Path(getWarehouseDir());
     options.setTargetDir(new Path(warehouse, targetDir).toString());
 
     ImportTool importTool = new ImportTool();
@@ -331,7 +331,7 @@ public class TestMerge extends BaseSqoopTestCase {
   protected boolean recordStartsWith(List<Integer> record, String dirName,
       SqoopOptions.FileLayout fileLayout)
       throws Exception {
-    Path warehousePath = new Path(LOCAL_WAREHOUSE_DIR);
+    Path warehousePath = new Path(getWarehouseDir());
     Path targetPath = new Path(warehousePath, dirName);
 
     FileSystem fs = FileSystem.getLocal(new Configuration());

@@ -19,6 +19,7 @@
 package org.apache.sqoop.hbase;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,8 +68,8 @@ public class HBaseImportAddRowKeyTest extends HBaseTestCase {
     columnValues = new String[] { "0", "1" };
     hbaseTableName = "addRowKeyTable";
     hbaseColumnFamily = "addRowKeyFamily";
-    hbaseTmpDir = TEMP_BASE_DIR + "hbaseTmpDir";
-    hbaseBulkLoadDir = TEMP_BASE_DIR + "hbaseBulkLoadDir";
+    hbaseTmpDir = BaseSqoopTestCase.getTempBaseDir() + "hbaseTmpDir";
+    hbaseBulkLoadDir = BaseSqoopTestCase.getTempBaseDir() + "hbaseBulkLoadDir";
     createTableWithColTypes(columnTypes, columnValues);
   }
 

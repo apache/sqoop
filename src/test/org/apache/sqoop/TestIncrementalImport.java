@@ -280,7 +280,7 @@ public class TestIncrementalImport  {
   }
 
   private Path getTablePath(String tableName) {
-    Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+    Path warehouse = new Path(BaseSqoopTestCase.getLocalWarehouseDir());
     return new Path(warehouse, tableName);
   }
 
@@ -303,7 +303,7 @@ public class TestIncrementalImport  {
 
   public void createDir(String tableName) throws IOException {
     FileSystem fs = FileSystem.getLocal(new Configuration());
-    Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+    Path warehouse = new Path(BaseSqoopTestCase.getLocalWarehouseDir());
     Path tableDir = new Path(warehouse, tableName);
     fs.mkdirs(tableDir);
   }
@@ -316,7 +316,7 @@ public class TestIncrementalImport  {
   public void assertDirOfNumbers(String tableName, int expectedNums) {
     try {
       FileSystem fs = FileSystem.getLocal(new Configuration());
-      Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+      Path warehouse = new Path(BaseSqoopTestCase.getLocalWarehouseDir());
       Path tableDir = new Path(warehouse, tableName);
       FileStatus [] stats = fs.listStatus(tableDir);
       String [] fileNames = new String[stats.length];
@@ -368,7 +368,7 @@ public class TestIncrementalImport  {
   public void assertDirOfNumbersAndTimestamps(String tableName, int expectedNums) {
     try {
       FileSystem fs = FileSystem.getLocal(new Configuration());
-      Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+      Path warehouse = new Path(BaseSqoopTestCase.getLocalWarehouseDir());
       Path tableDir = new Path(warehouse, tableName);
       FileStatus [] stats = fs.listStatus(tableDir);
       String [] fileNames = new String[stats.length];
@@ -419,7 +419,7 @@ public class TestIncrementalImport  {
   public void assertFirstSpecificNumber(String tableName, int val) {
     try {
       FileSystem fs = FileSystem.getLocal(new Configuration());
-      Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+      Path warehouse = new Path(BaseSqoopTestCase.getLocalWarehouseDir());
       Path tableDir = new Path(warehouse, tableName);
       FileStatus [] stats = fs.listStatus(tableDir);
       String [] filePaths = new String[stats.length];
@@ -472,7 +472,7 @@ public class TestIncrementalImport  {
   public void assertSpecificNumber(String tableName, int val) {
     try {
       FileSystem fs = FileSystem.getLocal(new Configuration());
-      Path warehouse = new Path(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+      Path warehouse = new Path(BaseSqoopTestCase.getLocalWarehouseDir());
       Path tableDir = new Path(warehouse, tableName);
       FileStatus [] stats = fs.listStatus(tableDir);
       String [] filePaths = new String[stats.length];
@@ -546,7 +546,7 @@ public class TestIncrementalImport  {
     args.add("--table");
     args.add(tableName);
     args.add("--warehouse-dir");
-    args.add(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+    args.add(BaseSqoopTestCase.getLocalWarehouseDir());
     if (isAppend) {
       args.add("--incremental");
       args.add("append");
@@ -592,7 +592,7 @@ public class TestIncrementalImport  {
     args.add("--class-name");
     args.add(className);
     args.add("--target-dir");
-    args.add(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR
+    args.add(BaseSqoopTestCase.getLocalWarehouseDir()
       + System.getProperty("file.separator") + directoryName);
     if (isAppend) {
       args.add("--incremental");
@@ -1322,7 +1322,7 @@ public class TestIncrementalImport  {
 		args.add("--table");
 		args.add(TABLE_NAME);
 		args.add("--warehouse-dir");
-		args.add(BaseSqoopTestCase.LOCAL_WAREHOUSE_DIR);
+		args.add(BaseSqoopTestCase.getLocalWarehouseDir());
 		args.add("--hive-import");
 		args.add("--hive-table");
 		args.add(TABLE_NAME + "hive");

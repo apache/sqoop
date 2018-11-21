@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.Shell;
 import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,7 +46,6 @@ import org.apache.sqoop.TestConnFactory.DummyManager;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.testutil.DirUtil;
 import org.apache.sqoop.testutil.HsqldbTestServer;
-import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.tool.ImportTool;
 import org.apache.sqoop.util.ClassLoaderStack;
 import org.junit.experimental.categories.Category;
@@ -100,9 +100,9 @@ public class TestClassWriter {
 
     // sanity check: make sure we're in a tmp dir before we blow anything away.
     assertTrue("Test generates code in non-tmp dir!",
-        CODE_GEN_DIR.startsWith(ImportJobTestCase.TEMP_BASE_DIR));
+        CODE_GEN_DIR.startsWith(BaseSqoopTestCase.getTempBaseDir()));
     assertTrue("Test generates jars in non-tmp dir!",
-        JAR_GEN_DIR.startsWith(ImportJobTestCase.TEMP_BASE_DIR));
+        JAR_GEN_DIR.startsWith(BaseSqoopTestCase.getTempBaseDir()));
 
     // start out by removing these directories ahead of time
     // to ensure that this is truly generating the code.
@@ -134,9 +134,9 @@ public class TestClassWriter {
     }
   }
 
-  static final String CODE_GEN_DIR = ImportJobTestCase.TEMP_BASE_DIR
+  static final String CODE_GEN_DIR = BaseSqoopTestCase.getTempBaseDir()
       + "sqoop/test/codegen";
-  static final String JAR_GEN_DIR = ImportJobTestCase.TEMP_BASE_DIR
+  static final String JAR_GEN_DIR = BaseSqoopTestCase.getTempBaseDir()
       + "sqoop/test/jargen";
 
   private File runGenerationTest(String[] argv, String classNameToCheck) {

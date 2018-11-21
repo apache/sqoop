@@ -28,6 +28,7 @@ import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.SQLServerManager;
 import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.apache.sqoop.util.ExpectedLogMessage;
@@ -326,7 +327,7 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
   private static ArgumentArrayBuilder getArgsBuilderForTableImport() {
     ArgumentArrayBuilder builder = getArgsBuilder();
     return builder.withCommonHadoopFlags(true)
-        .withOption("warehouse-dir", LOCAL_WAREHOUSE_DIR)
+        .withOption("warehouse-dir", BaseSqoopTestCase.getLocalWarehouseDir())
         .withOption("table", DBO_TABLE_NAME);
   }
 
@@ -334,13 +335,13 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
     ArgumentArrayBuilder builder = getArgsBuilder();
     return builder.withCommonHadoopFlags(true)
         .withOption("query", "SELECT * FROM EMPLOYEES_MSSQL WHERE $CONDITIONS")
-        .withOption("target-dir", LOCAL_WAREHOUSE_DIR + "/" + DBO_TABLE_NAME);
+        .withOption("target-dir", BaseSqoopTestCase.getLocalWarehouseDir() + "/" + DBO_TABLE_NAME);
   }
 
   private static ArgumentArrayBuilder getArgsBuilderForDifferentSchemaTableImport() {
     ArgumentArrayBuilder builder = getArgsBuilder();
     return builder.withCommonHadoopFlags(true)
-        .withOption("warehouse-dir", LOCAL_WAREHOUSE_DIR)
+        .withOption("warehouse-dir", BaseSqoopTestCase.getLocalWarehouseDir())
         .withOption("table", SCH_TABLE_NAME)
         .withToolOption("schema", SCHEMA_SCH);
   }

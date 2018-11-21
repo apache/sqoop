@@ -74,7 +74,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
 
   @Test
   public void testPasswordFilePathInOptionIsEnabled() throws Exception {
-    String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+    String passwordFilePath = BaseSqoopTestCase.getTempBaseDir() + ".pwd";
     createTempFile(passwordFilePath);
 
     try {
@@ -98,7 +98,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     try {
       ArrayList<String> extraArgs = new ArrayList<String>();
       extraArgs.add("--password-file");
-      extraArgs.add(TEMP_BASE_DIR + "unknown");
+      extraArgs.add(BaseSqoopTestCase.getTempBaseDir() + "unknown");
       String[] argv = getCommonArgs(false, extraArgs);
 
       Configuration conf = getConf();
@@ -117,7 +117,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     try {
       ArrayList<String> extraArgs = new ArrayList<String>();
       extraArgs.add("--password-file");
-      extraArgs.add(TEMP_BASE_DIR);
+      extraArgs.add(BaseSqoopTestCase.getTempBaseDir());
       String[] argv = getCommonArgs(false, extraArgs);
 
       Configuration conf = getConf();
@@ -133,7 +133,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
 
   @Test
   public void testBothPasswordOptions() throws Exception {
-    String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+    String passwordFilePath = BaseSqoopTestCase.getTempBaseDir() + ".pwd";
     createTempFile(passwordFilePath);
 
     try {
@@ -162,7 +162,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
 
   @Test
   public void testPasswordFilePath() throws Exception {
-    String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+    String passwordFilePath = BaseSqoopTestCase.getTempBaseDir() + ".pwd";
     createTempFile(passwordFilePath);
     writeToFile(passwordFilePath, "password");
 
@@ -218,7 +218,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
   @Test
   public void testPasswordInMetastoreWithRecordEnabledAndSecureOption()
     throws Exception {
-    String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+    String passwordFilePath = BaseSqoopTestCase.getTempBaseDir() + ".pwd";
     createTempFile(passwordFilePath);
 
     ArrayList<String> extraArgs = new ArrayList<String>();
@@ -255,7 +255,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
   @Test
   public void testPasswordInMetastoreWithRecordDisabledAndSecureOption()
     throws Exception {
-    String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+    String passwordFilePath = BaseSqoopTestCase.getTempBaseDir() + ".pwd";
     createTempFile(passwordFilePath);
 
     ArrayList<String> extraArgs = new ArrayList<String>();
@@ -386,7 +386,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
       String alias = "super.secret.alias";
       String pw = "super.secret.password";
 
-      String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+      String passwordFilePath = BaseSqoopTestCase.getTempBaseDir() + ".pwd";
       String jksFile = "creds.jks";
       createTempFile(passwordFilePath);
       writeToFile(passwordFilePath, alias.getBytes());
@@ -460,7 +460,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
 
   public void executeCipherTest(String password, String passphrase, String cipher, int keySize) throws Exception {
     LOG.info("Using cipher: " + cipher + " with keySize " + keySize + " and passphrase " + passphrase );
-    String passwordFilePath = TEMP_BASE_DIR + ".pwd";
+    String passwordFilePath = BaseSqoopTestCase.getTempBaseDir() + ".pwd";
     createTempFile(passwordFilePath);
     writeToFile(passwordFilePath, encryptPassword(password, passphrase, cipher, 10000, keySize));
     LOG.info("Generated encrypted password file in: " + passwordFilePath);

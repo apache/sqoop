@@ -88,23 +88,6 @@ public abstract class BaseSqoopTestCase {
   public static final String MAP_OUTPUT_FILE_00001 = "part-m-00001";
   public static final String REDUCE_OUTPUT_FILE_00000 = "part-r-00000";
 
-  /** Base directory for all temporary data. */
-  public static final String TEMP_BASE_DIR;
-
-  /** Where to import table data to in the local filesystem for testing. */
-  public static final String LOCAL_WAREHOUSE_DIR;
-
-  // Initializer for the above
-  static {
-    String tmpDir = System.getProperty("test.build.data", "/tmp/");
-    if (!tmpDir.endsWith(File.separator)) {
-      tmpDir = tmpDir + File.separator;
-    }
-
-    TEMP_BASE_DIR = tmpDir;
-    LOCAL_WAREHOUSE_DIR = TEMP_BASE_DIR + "sqoop/warehouse";
-  }
-
   // Used if a test manually sets the table name to be used.
   private String curTableName;
 
@@ -136,7 +119,7 @@ public abstract class BaseSqoopTestCase {
   }
 
   protected String getWarehouseDir() {
-    return LOCAL_WAREHOUSE_DIR;
+    return getLocalWarehouseDir();
   }
 
   private String [] colNames;
@@ -721,5 +704,20 @@ public abstract class BaseSqoopTestCase {
     String timeZoneId = System.getProperty("user.timezone");
     TimeZone defaultTimeZone = TimeZone.getTimeZone(timeZoneId);
     TimeZone.setDefault(defaultTimeZone);
+  }
+
+  /** Base directory for all temporary data. */
+  public static String getTempBaseDir() {
+    String tmpDir = System.getProperty("test.build.data", "/tmp/");
+    if (!tmpDir.endsWith(File.separator)) {
+      tmpDir = tmpDir + File.separator;
+    }
+
+    return tmpDir;
+  }
+
+  /** Where to import table data to in the local filesystem for testing. */
+  public static String getLocalWarehouseDir() {
+    return getTempBaseDir() + "sqoop/warehouse";
   }
 }

@@ -36,7 +36,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.GzipCodec;
 
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
-import org.apache.sqoop.testutil.ImportJobTestCase;
+import org.apache.sqoop.testutil.BaseSqoopTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,12 +59,12 @@ public class TestSplittableBufferedWriter {
       TestSplittableBufferedWriter.class.getName());
 
   private String getWriteDir() {
-    return new File(ImportJobTestCase.TEMP_BASE_DIR,
+    return new File(BaseSqoopTestCase.getTempBaseDir(),
         "bufferedWriterTest").toString();
   }
 
   private Path getWritePath() {
-    return new Path(ImportJobTestCase.TEMP_BASE_DIR, "bufferedWriterTest");
+    return new Path(BaseSqoopTestCase.getTempBaseDir(), "bufferedWriterTest");
   }
 
   /** Create the directory where we'll write our test files to; and
