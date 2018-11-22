@@ -149,6 +149,18 @@ This the same as running unitTest, integrationTest and kerberizedTest.
 * +allTest+: Runs all Sqoop tests.
 
 
+The https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:forkEvery[forkEvery]
+parameter of most of the Gradle test tasks is set to +0+ which means that all of the tests run in a single JVM.
+The only exception is the +kerberizedTest+ task which requires a new JVM for every test class.
+The benefit of this setup is that the test tasks finish much faster since the JVM creation is a slow operation however
+the Sqoop test framework seems to consume/leak too much memory which can lead to an +OutOfMemoryError+ during the build.
+To prevent the JVM running out of memory you can use the +-DforkEvery.default+ property to set the forkEvery
+parameter for all the test tasks except +kerberizedTest+:
+
+----
+./gradlew -DforkEvery.default=30 test
+----
+
 === Third party tests
 
 ==== Installing the necessary databases

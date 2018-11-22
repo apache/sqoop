@@ -87,6 +87,7 @@ configurations.all {
 }
 
 def sqoopThirdPartyLib = System.getProperty("sqoop.thirdparty.lib.dir")
+def forkEveryDefault = Integer.valueOf(System.getProperty("forkEvery.default", "0"))
 
 dependencies {
     if (sqoopThirdPartyLib != null) runtime fileTree(dir: sqoopThirdPartyLib, include: '*.jar')
@@ -171,20 +172,6 @@ task integrationTest(type: Test) {
     }
 }
 
-task kerberizedTest (type: Test){
-    description 'Run Kerberized Test'
-    // A Gradle test task with forkEvery 1 and includeCategories performs poorly because it starts a new JVM even for the filtered tests.
-    // To work around this performance problem we need to add every kerberized test in a separate include field here.
-    include '**/TestKerberosAuthenticator*'
-    include '**/HBaseKerberizedConnectivityTest*'
-    include '**/TestHiveMiniCluster*'
-    include '**/TestHiveServer2TextImport*'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-    forkEvery 1
-}
-
 task thirdPartyTest (type: Test) {
     description 'Run Third-party Tests - you need to specify -Dsqoop.thirdparty.lib.dir where the Third party driver ' +
             'jars reside (relative to the project directory)'
@@ -210,7 +197,6 @@ test {
         excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
     }
 }
-test.finalizedBy(kerberizedTest)
 
 task s3Test(type: Test) {
     description 'Run S3 tests'
@@ -229,7 +215,6 @@ task allTest (type: Test){
         excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
     }
 }
-allTest.finalizedBy(kerberizedTest)
 
 def testBuildDir = "$buildDir/test/"
 def testBuildDirData ="$testBuildDir/data/"
@@ -265,7 +250,26 @@ tasks.withType(Test) {
     jacoco{
         excludes = ["**/SqoopVersion*"]
     }
+
+    forkEvery forkEveryDefault
 }
+
+task kerberizedTest (type: Test){
+    description 'Run Kerberized Test'
+    // A Gradle test task with forkEvery 1 and includeCategories performs poorly because it starts a new JVM even for the filtered tests.
+    // To work around this performance problem we need to add every kerberized test in a separate include field here.
+    include '**/TestKerberosAuthenticator*'
+    include '**/HBaseKerberizedConnectivityTest*'
+    include '**/TestHiveMiniCluster*'
+    include '**/TestHiveServer2TextImport*'
+    useJUnit {
+        includeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
+    }
+    forkEvery 1
+}
+
+test.finalizedBy(kerberizedTest)
+allTest.finalizedBy(kerberizedTest)
 
 tasks.withType(Checkstyle) {
     reports {
