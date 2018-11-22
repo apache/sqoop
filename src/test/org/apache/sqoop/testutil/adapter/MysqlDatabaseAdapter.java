@@ -24,7 +24,7 @@ import org.apache.sqoop.manager.mysql.MySQLTestUtils;
 
 import java.sql.SQLException;
 
-public class MySqlDatabaseAdapter implements DatabaseAdapter {
+public class MysqlDatabaseAdapter implements DatabaseAdapter {
   private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
   public SqoopOptions injectConnectionParameters(SqoopOptions options) {

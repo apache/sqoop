@@ -21,12 +21,12 @@ package org.apache.sqoop.importjob.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MSSQLServerImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
+public class MysqlImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
 
   @Override
   public String[] getTypes() {
-    String[] columnTypes = {"INT", "NUMERIC", "NUMERIC(20)", "NUMERIC(20,5)", "NUMERIC(20,0)", "NUMERIC(38,5)",
-        "DECIMAL", "DECIMAL(20)", "DECIMAL(20,5)", "DECIMAL(20,0)", "DECIMAL(38,5)"};
+    String[] columnTypes = {"INT", "NUMERIC", "NUMERIC(20)", "NUMERIC(20,5)", "NUMERIC(20,0)", "NUMERIC(65,5)",
+        "DECIMAL", "DECIMAL(20)", "DECIMAL(20,5)", "DECIMAL(20,0)", "DECIMAL(65,5)"};
     return columnTypes;
   }
 
@@ -39,8 +39,8 @@ public class MSSQLServerImportJobTestConfiguration implements ImportJobTestConfi
   @Override
   public List<String[]> getSampleData() {
     List<String[]> inputData = new ArrayList<>();
-    inputData.add(new String[]{"1", "100.050", "1000000.05", "1000000.05", "1000000.05", "1000000.05",
-        "100.060", "1000000.05", "1000000.05", "1000000.05", "1000000.05"});
+    inputData.add(new String[]{"1", "100.030", "1000000.05", "1000000.05", "1000000.05", "1000000.05",
+        "100.040", "1000000.05", "1000000.05", "1000000.05", "1000000.05"});
     return inputData;
   }
 

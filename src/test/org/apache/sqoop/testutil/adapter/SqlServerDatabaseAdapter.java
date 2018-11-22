@@ -24,7 +24,7 @@ import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
 import java.sql.SQLException;
 
-public class MSSQLServerDatabaseAdapter implements DatabaseAdapter {
+public class SqlServerDatabaseAdapter implements DatabaseAdapter {
 
   @Override
   public String getConnectionString() {

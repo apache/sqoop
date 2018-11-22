@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob;
+package org.apache.sqoop.importjob.numerictypes;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,46 +25,31 @@ import org.apache.hadoop.fs.Path;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.OriginalType;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.importjob.DatabaseAdapterFactory;
 import org.apache.sqoop.importjob.configuration.AvroTestConfiguration;
-import org.apache.sqoop.importjob.configuration.MSSQLServerImportJobTestConfiguration;
-import org.apache.sqoop.importjob.configuration.MySQLImportJobTestConfiguration;
-import org.apache.sqoop.importjob.configuration.OracleImportJobTestConfiguration;
 import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
-import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationForNumeric;
 import org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.AvroTestUtils;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.adapter.DatabaseAdapter;
-import org.apache.sqoop.testutil.adapter.MSSQLServerDatabaseAdapter;
-import org.apache.sqoop.testutil.adapter.MySqlDatabaseAdapter;
-import org.apache.sqoop.testutil.adapter.OracleDatabaseAdapter;
-import org.apache.sqoop.testutil.adapter.PostgresDatabaseAdapter;
-import org.apache.sqoop.importjob.configuration.OracleImportJobTestConfigurationForNumber;
-import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationPaddingShouldSucceed;
 import org.apache.sqoop.util.ParquetReader;
-import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.apache.sqoop.SqoopOptions.FileLayout.AvroDataFile;
 import static org.apache.sqoop.SqoopOptions.FileLayout.ParquetFile;
+import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
-@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 @Category(ThirdPartyTest.class)
 /**
  * This test covers the behavior of the Avro import for fixed point decimal types, i.e. NUMBER, NUMERIC
@@ -80,9 +65,9 @@ import static org.apache.sqoop.SqoopOptions.FileLayout.ParquetFile;
  * 2. Decimal padding during avro or parquet import
  * In case of Oracle and Postgres, Sqoop has to pad the values with 0s to avoid errors.
  */
-public class NumericTypesImportTest<T extends AvroTestConfiguration & ParquetTestConfiguration> extends ImportJobTestCase {
+public abstract class NumericTypesImportTestBase<T extends AvroTestConfiguration & ParquetTestConfiguration> extends ImportJobTestCase implements DatabaseAdapterFactory {
 
-  public static final Log LOG = LogFactory.getLog(NumericTypesImportTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(NumericTypesImportTestBase.class.getName());
 
   private Configuration conf = new Configuration();
 
@@ -93,30 +78,17 @@ public class NumericTypesImportTest<T extends AvroTestConfiguration & ParquetTes
 
   // Constants for the basic test case, that doesn't use extra arguments
   // that are required to avoid errors, i.e. padding and default precision and scale.
-  private final static boolean SUCCEED_WITHOUT_EXTRA_ARGS = false;
-  private final static boolean FAIL_WITHOUT_EXTRA_ARGS = true;
+  protected final static boolean SUCCEED_WITHOUT_EXTRA_ARGS = false;
+  protected final static boolean FAIL_WITHOUT_EXTRA_ARGS = true;
 
   // Constants for the test case that has padding specified but not default precision and scale.
-  private final static boolean SUCCEED_WITH_PADDING_ONLY = false;
-  private final static boolean FAIL_WITH_PADDING_ONLY = true;
+  protected final static boolean SUCCEED_WITH_PADDING_ONLY = false;
+  protected final static boolean FAIL_WITH_PADDING_ONLY = true;
+
   private Path tableDirPath;
 
-  @Parameters(name = "Adapter: {0}| Config: {1}| failWithoutExtraArgs: {2}| failWithPadding: {3}")
-  public static Iterable<? extends Object> testConfigurations() {
-    DatabaseAdapter postgresAdapter = new PostgresDatabaseAdapter();
-    OracleDatabaseAdapter oracleDatabaseAdapter = new OracleDatabaseAdapter();
-    return Arrays.asList(
-        new Object[] {oracleDatabaseAdapter, new OracleImportJobTestConfigurationForNumber(), FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
-        new Object[] {oracleDatabaseAdapter, new OracleImportJobTestConfiguration(), FAIL_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY},
-        new Object[] { new MySqlDatabaseAdapter(), new MySQLImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY},
-        new Object[] { new MSSQLServerDatabaseAdapter(), new MSSQLServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY},
-        new Object[] { postgresAdapter, new PostgresqlImportJobTestConfigurationForNumeric(), FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
-        new Object[] { postgresAdapter, new PostgresqlImportJobTestConfigurationPaddingShouldSucceed(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY}
-    );
-  }
-
-  public NumericTypesImportTest(DatabaseAdapter adapter, T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
-    this.adapter = adapter;
+  public NumericTypesImportTestBase(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
+    this.adapter = createAdapter();
     this.configuration = configuration;
     this.failWithoutExtraArgs = failWithoutExtraArgs;
     this.failWithPadding = failWithPaddingOnly;

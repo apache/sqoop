@@ -16,35 +16,25 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob;
+package org.apache.sqoop.importjob.splitby;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.importjob.DatabaseAdapterFactory;
 import org.apache.sqoop.importjob.configuration.GenericImportJobSplitByTestConfiguration;
-import org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest;
-import org.apache.sqoop.importjob.configuration.ImportJobTestConfiguration;
 import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.adapter.DatabaseAdapter;
-import org.apache.sqoop.testutil.adapter.MSSQLServerDatabaseAdapter;
-import org.apache.sqoop.testutil.adapter.MySqlDatabaseAdapter;
-import org.apache.sqoop.testutil.adapter.OracleDatabaseAdapter;
-import org.apache.sqoop.testutil.adapter.PostgresDatabaseAdapter;
-import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.apache.sqoop.util.ParquetReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -53,32 +43,18 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
-@Category(ThirdPartyTest.class)
-@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-public class SplitByImportTest extends ImportJobTestCase {
+public abstract class SplitByImportTestBase extends ImportJobTestCase implements DatabaseAdapterFactory {
 
-  public static final Log LOG = LogFactory.getLog(SplitByImportTest.class.getName());
+  public static final Log LOG = LogFactory.getLog(SplitByImportTestBase.class.getName());
 
   private Configuration conf = new Configuration();
 
   private final ParquetTestConfiguration configuration;
   private final DatabaseAdapter adapter;
 
-  @Parameters(name = "Adapter: {0}| Config: {1}")
-  public static Iterable<? extends Object> testConfigurations() {
-    GenericImportJobSplitByTestConfiguration testConfiguration = new GenericImportJobSplitByTestConfiguration();
-    return asList(
-        new Object[] {new OracleDatabaseAdapter(), testConfiguration},
-        new Object[] {new PostgresDatabaseAdapter(), testConfiguration},
-        new Object[] {new MSSQLServerDatabaseAdapter(), testConfiguration},
-        new Object[] {new MySqlDatabaseAdapter(), testConfiguration}
-    );
-  }
-
-  public SplitByImportTest(DatabaseAdapter adapter, ParquetTestConfiguration configuration) {
-    this.adapter = adapter;
-    this.configuration = configuration;
+  public SplitByImportTestBase() {
+    this.adapter = createAdapter();
+    this.configuration =  new GenericImportJobSplitByTestConfiguration();
   }
 
   @Rule
