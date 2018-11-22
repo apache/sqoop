@@ -426,8 +426,8 @@ public class S3TestUtils {
     }
 
     public static void tearDownS3IncrementalImportTestCase(FileSystem s3Client) {
-        cleanUpTargetDir(s3Client);
         cleanUpDirectory(s3Client, getTemporaryRootDirPath());
+        cleanUpTargetDir(s3Client);
         System.clearProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY);
     }
 
