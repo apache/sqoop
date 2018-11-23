@@ -68,11 +68,24 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
     @Before
     public void setUp() {
         super.setUp();
+        try {
+            initMetastoreConnection();
+            resetTable();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        resetMetastoreSchema();
     }
 
     @After
     public void tearDown() {
         super.tearDown();
+        resetMetastoreSchema();
+        try {
+            cm.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected String[] getIncrementalJob(String metaConnectString, String metaUser, String metaPass) {
@@ -123,12 +136,6 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
 
     @Test
     public void testIncrementalJob() throws SQLException {
-        resetTable();
-
-        initMetastoreConnection();
-
-        resetMetastoreSchema();
-
         //creates Job
         createJob();
 
@@ -148,8 +155,6 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
 
         //Ensures the last incremental value is updated correctly.
         checkIncrementalState(2);
-
-        cm.close();
     }
 
     private void checkIncrementalState(int expected) throws SQLException {
