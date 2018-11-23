@@ -87,22 +87,22 @@ The following table shows the currently supported test categories and their hier
 
 .Available test categories
 [width="40%",frame="topbot",options="header"]
-|======================
-|Category              |Subcategory
-.3+|+SqoopTest+        |+UnitTest+
-                       |+IntegrationTest+
-                       |+ManualTest+
-.9+|+ThirdPartyTest+   |+CubridTest+
-                       |+Db2Test+
-                       |+MainFrameTest+
-                       |+MysqlTest+
-                       |+NetezzaTest+
-                       |+OracleTest+
-                       |+PostgresqlTest+
-                       |+SqlServerTest+
-                       |+S3Test+
-|+KerberizedTest+      |
-|======================
+|===============================================================
+|Category              |Subcategories       |
+.3+|+SqoopTest+        |+UnitTest+          |
+                       |+IntegrationTest+   |
+                       |+ManualTest+        |
+.9+|+ThirdPartyTest+   |+CubridTest+        |
+                       |+Db2Test+           |
+                       |+MainFrameTest+     |
+                       |+MysqlTest+         |
+                       |+NetezzaTest+       |
+                       |+OracleTest+        |+OracleEeTest+
+                       |+PostgresqlTest+    |
+                       |+SqlServerTest+     |
+                       |+S3Test+            |
+|+KerberizedTest+      |                    |
+|===============================================================
 
 ==== SqoopTest
 A general category including UnitTest, IntegrationTest and ManualTest.
@@ -143,6 +143,14 @@ corresponding marker interface to it.
 * +integrationTest+: Runs integration tests which do not need a docker container or an external database/service.
 * +kerberizedTest+: Runs kerberized tests.
 * +thirdPartyTest+: Runs third-party tests. For more information see the 'Third party tests' section.
+* +postgreSqlTest+: Runs PostgreSql third-party tests.
+* +mySqlTest+: Runs MySql third-party tests.
+* +cubridTest+: Runs Cubrid third-party tests.
+* +db2Test+: Runs DB2 third-party tests.
+* +oracleTest+: Runs Oracle third-party tests.
+* +oracleXeTest+: Run Oracle third party tests which can be run with Oracle Express Edition too.
+* +oracleEeTest+: Run Oracle third party tests which require Oracle Enterprise Edition.
+* +sqlServerTest+: Runs SqlServer third-party tests.
 * +test+: Runs tests that do not need external JDBC driver and/or a docker container.
 This the same as running unitTest, integrationTest and kerberizedTest.
 * +s3Test+: Runs S3 tests. For more information see the 'Amazon S3 tests' section.
@@ -172,36 +180,41 @@ JDBC. Instructions for configuring the MySQL database are in MySQLAuthTest
 and DirectMySQLTest.
 
 Use the following system properties to configure connection to the MySQL host used for testing:
-sqoop.test.mysql.connectstring.host_url, sqoop.test.mysql.databasename, sqoop.test.mysql.username and
-sqoop.test.mysql.password.
++sqoop.test.mysql.connectstring.host_url+, +sqoop.test.mysql.databasename+, +sqoop.test.mysql.username+ and
++sqoop.test.mysql.password+.
 Specify these properties on the command line or via the build.properties file. For example:
 
-sqoop.test.mysql.connectstring.host_url=jdbc:mysql://host.example.com/
-sqoop.test.mysql.databasename=MYDB
-sqoop.test.mysql.username=MYUSR
-sqoop.test.mysql.password=MYPWD
++sqoop.test.mysql.connectstring.host_url=jdbc:mysql://host.example.com/+
++sqoop.test.mysql.databasename=MYDB+
++sqoop.test.mysql.username=MYUSR+
++sqoop.test.mysql.password=MYPWD+
 
 If not specified, the default value used for this property is:
-jdbc:mysql://localhost/
++jdbc:mysql://127.0.0.1:13306/+
 
 ===== Oracle
 
 Install Oracle Enterprise Edition 10.2.0+. Instructions for configuring the
-database are in OracleManagerTest. Download the ojdbc6_g jar.
+database are in +OracleManagerTest+. Download the ojdbc6_g jar.
 
 If running the tests against Oracle XE (Express Edition) - a lot of them will
 fail as it does not include the partitioning feature.
 
-Use the following system properties to configure connection to the Oracle host used for testing:
-sqoop.test.oracle.connectstring, sqoop.test.oracle.username and  sqoop.test.oracle.password.
+Use the following system properties to configure connection to the Oracle XE host used for testing:
++sqoop.test.oracle.connectstring+, +sqoop.test.oracle.username+ and +sqoop.test.oracle.password+.
+You can configure the connection properties separately for tests requiring Oracle EE:
++sqoop.test.oracle-ee.connectstring+, +sqoop.test.oracle-ee.username+ and +sqoop.test.oracle-ee.password+.
 Specify these properties on the command line or via the build.properties file. For example:
 
-sqoop.test.oracle.connectstring=jdbc:oracle:thin:@//host.example.com/xe
-sqoop.test.oracle.username=MYUSR
-sqoop.test.oracle.password=MYPWD
++sqoop.test.oracle.connectstring=jdbc:oracle:thin:@//host.example.com/xe+
++sqoop.test.oracle.username=MYUSR+
++sqoop.test.oracle.password=MYPWD+
 
-If not specified, the default value used for this property is:
-jdbc:oracle:thin:@//localhost/xe
+If not specified, the default value used for +sqoop.test.oracle.connectstring+ property is:
++jdbc:oracle:thin:@//localhost:1521/xe+
+
+The default value used for +sqoop.test.oracle-ee.connectstring+ property is:
++jdbc:oracle:thin:@//localhost:1522/sqoop+
 
 Users sqooptest and sqooptest2 should be created prior to running the tests.
 SQL script is available in src/test/oraoop/create_users.sql
@@ -209,106 +222,104 @@ SQL script is available in src/test/oraoop/create_users.sql
 ===== PostgreSQL
 
 Install PostgreSQL 8.3.9. Download the postgresql 8.4 jdbc driver. Instructions
-for configuring the database are in PostgresqlTest.
+for configuring the database are in +PostgresqlTest+.
 
 Use the following system properties to configure connection to the PostgreSQL host used for testing:
-sqoop.test.postgresql.connectstring.host_url, sqoop.test.postgresql.database, sqoop.test.postgresql.username and
-sqoop.test.postgresql.password.
++sqoop.test.postgresql.connectstring.host_url+, +sqoop.test.postgresql.database+, +sqoop.test.postgresql.username+ and
++sqoop.test.postgresql.password+.
 Specify this property on the
 command line or via the build.properties file. For example:
 
-sqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://sqoop-dbs.sf.cloudera.com/
-sqoop.test.postgresql.database=MYDB
-sqoop.test.postgresql.username=MYUSR
-sqoop.test.postgresql.password=MYPWD
++sqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://sqoop-dbs.sf.cloudera.com/+
++sqoop.test.postgresql.database=MYDB+
++sqoop.test.postgresql.username=MYUSR+
++sqoop.test.postgresql.password=MYPWD+
 
 If not specified, the default value used for this property is:
-jdbc:postgresql://localhost/
++jdbc:postgresql://localhost:15432/+
 
 ===== SQL Server
 
 Install SQL Server Express 2012 and create a database instance and
 download the appropriate JDBC driver. Instructions for configuring the
-database can be found in SQLServerManagerImportManualTest.
+database can be found in +SQLServerManagerImportManualTest+.
 
 Use the following system properties to configure connection to the SQL Server host used for testing:
-sqoop.test.sqlserver.connectstring.host_url, sqoop.test.sqlserver.database, sqoop.test.sqlserver.username and
-sqoop.test.sqlserver.password.
++sqoop.test.sqlserver.connectstring.host_url+, +sqoop.test.sqlserver.database+, +ms.sqlserver.username+ and
++ms.sqlserver.password+.
 the URL for the SQL Server host used for testing. Specify this property on the
 command line or via the build.properties file. For example:
 
-sqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://sqlserverhost:1433
-sqoop.test.sqlserver.database=MYDB
-ms.sqlserver.username=MYUSR
-ms.sqlserver.password=MYPWD
++sqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://sqlserverhost:1433+
++sqoop.test.sqlserver.database=MYDB+
++ms.sqlserver.username=MYUSR+
++ms.sqlserver.password=MYPWD+
 
 If not specified, the default value used for this property is:
-jdbc:sqlserver://sqlserverhost:1433
-
-This can be useful if you have the hostname sqlserverhost mapped to the IP
-address of the SQL Server instance.
++jdbc:sqlserver://localhost:1433+
 
 ===== Cubrid
 
 Install Cubrid 9.2.2.0003 and create a database instance and download the
 appropriate JDBC driver. Instructions for configuring the database are in
-CubridAuthTest, CubridCompatTest, CubridManagerImportTest
-and CubridManagerExportTest.
++CubridAuthTest+, +CubridCompatTest+, +CubridManagerImportTest+
+and +CubridManagerExportTest+.
 
 Use the following system properties to configure connection to the Cubrid host used for testing:
-sqoop.test.cubrid.connectstring.host_url, sqoop.test.cubrid.connectstring.database,
-sqoop.test.cubrid.connectstring.username and sqoop.test.cubrid.connectstring.password.
++sqoop.test.cubrid.connectstring.host_url+, +sqoop.test.cubrid.connectstring.database+,
++sqoop.test.cubrid.connectstring.username+ and +sqoop.test.cubrid.connectstring.password+.
 Specify this property on the command
 line or via the build.properties file. For example:
 
-sqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost
-sqoop.test.cubrid.connectstring.database=MYDB
-sqoop.test.cubrid.connectstring.username=MYUSR
-sqoop.test.cubrid.connectstring.password=MYPWD
++sqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost+
++sqoop.test.cubrid.connectstring.database=MYDB+
++sqoop.test.cubrid.connectstring.username=MYUSR+
++sqoop.test.cubrid.connectstring.password=MYPWD+
 
 If not specified, the default value used for this property is:
-jdbc:cubrid:localhost
++jdbc:cubrid:localhost:33000+
 
 ===== DB2
 
 Install DB2 9.74 Express C and download the appropriate JDBC driver.
 Instructions for configuring the server can be found in
-DB2ManagerImportManualTest.
++DB2ManagerImportManualTest+.
 
 Use the following system properties to configure connection to the DB2 host used for testing:
-sqoop.test.db2.connectstring.host_url, sqoop.test.db2.connectstring.database, sqoop.test.db2.connectstring.username and
-sqoop.test.db2.connectstring.password.
++sqoop.test.db2.connectstring.host_url+, +sqoop.test.db2.connectstring.database+, +sqoop.test.db2.connectstring.username+ and
++sqoop.test.db2.connectstring.password+.
 Specify this property on
 the command line or via build.properties file. For example:
 
-sqoop.test.db2.connectstring.host_url=jdbc:db2://db2host:50000
-sqoop.test.db2.connectstring.database=MYDB
-sqoop.test.db2.connectstring.username=MYUSR
-sqoop.test.db2.connectstring.password=MYPWD
++sqoop.test.db2.connectstring.host_url=jdbc:db2://db2host:50000+
++sqoop.test.db2.connectstring.database=MYDB+
++sqoop.test.db2.connectstring.username=MYUSR+
++sqoop.test.db2.connectstring.password=MYPWD+
 
 If not specified, the default value used for this property is:
-jdbc:db2://db2host:50000
-
-This can be useful if you have the hostname db2host mapped to the IP
-address of the DB2 Server instance.
++jdbc:db2://localhost:50000+
 
 ==== Running the Third-party Tests on native database servers
 
 After the third-party databases are installed and configured, run:
 
-++++
-ant test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
-./gradlew -Dsqoop.thirdparty.lib.dir=/relative/path/to/jdbc/drivers/ thirdPartyTest
-++++
+----
+ant test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/ [-DconnectionProperty1=propertyValue1
+-DconnectionProperty2=propertyValue ...]
+./gradlew -Dsqoop.thirdparty.lib.dir=/relative/path/to/jdbc/drivers/ thirdPartyTest [-DconnectionProperty1=propertyValue1
+-DconnectionProperty2=propertyValue ...]
+----
 
 This command will run all thirdparty tests except some DB2 tests.
 To run these DB2 test, specify the property "manual" instead of "thirdparty"
 as follows:
 
-++++
-ant test -Dmanual=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/
-./gradlew -Dsqoop.thirdparty.lib.dir=/relative/path/to/jdbc/drivers/ manualTest
-++++
+----
+ant test -Dmanual=true -Dsqoop.thirdparty.lib.dir=/path/to/jdbc/drivers/ [-DconnectionProperty1=propertyValue1
+-DconnectionProperty2=propertyValue ...]
+./gradlew -Dsqoop.thirdparty.lib.dir=/relative/path/to/jdbc/drivers/ manualTest [-DconnectionProperty1=propertyValue1
+-DconnectionProperty2=propertyValue ...]
+----
 
 Note that +sqoop.thirdparty.lib.dir+ can also be specified in
 +build.properties+.
@@ -326,11 +337,11 @@ https://docs.docker.com/compose/install/
 
 ===== Downloading docker images
 
-MySQL, PostgreSQL, MSSQL, DB2 and Cubrid images are freely available on Docker Hub so they will be pulled automatically by the startup command specified below however the Oracle EE image has to be built manually. Please refer to the README.md file on the below Github project for building instructions:
+MySQL, PostgreSQL, MSSQL, DB2, Oracle XE and Cubrid images are freely available on Docker Hub so they will be pulled automatically by the startup command specified below however the Oracle EE image has to be built manually. Please refer to the README.md file on the below Github project for building instructions:
 
 https://github.com/oracle/docker-images/tree/master/OracleDatabase
 
-Please note that Sqoop third party tests require Oracle Enterprise Edition and the startup command assumes version 12.2.0.1.
+Please note that some Sqoop third party tests require Oracle Enterprise Edition and the startup command assumes version 12.2.0.1.
 
 ===== Starting the Docker containers
 
@@ -350,7 +361,8 @@ If it is executed without parameters it starts the following services:
 |+postgresql+    |PostgreSQL 9.6.4
 |+mssql+         |MSSQL 14.0.1000.169 Developer Edition
 |+cubrid+        |Cubrid 10.0
-|+oracle+        |Oracle EE 12.2.0.1
+|+oracle-ee+     |Oracle EE 12.2.0.1
+|+oracle+        |Oracle XE 11g Release 2
 |+db2+           |DB2 Express Edition 10.5.0.5-3.10.0
 |======================
 
@@ -367,7 +379,8 @@ After the startup script is executed the containers need some time to initialize
 158e5421d134        ibmcom/db2express-c:10.5.0.5-3.10.0   "/home/db2inst1/db..."   43 seconds ago      Up 40 seconds (health: starting)   22/tcp, 0.0.0.0:50000->50000/tcp   sqoop_db2_container
 ----
 
-Most of the containers need less than 1 minute to start up but DB2 needs ~5 minutes and Oracle needs ~15 minutes. The Docker images need ~17GB free disk space and Docker requires ~5GB of memory to start all of them at the same time.
+Most of the containers need less than 1 minute to start up but DB2 needs \~5 minutes and Oracle EE needs \~15 minutes.
+The Docker images need \~17GB free disk space and Docker requires ~5GB of memory to start all of them at the same time.
 
 ===== Stopping the Docker containers
 
@@ -384,31 +397,6 @@ You can execute the third party tests against the DBs running in Docker containe
 
 ----
 ant clean test -Dthirdparty=true -Dsqoop.thirdparty.lib.dir=<path_to_thirdparty_lib_directory> \
-    -Dsqoop.test.mysql.connectstring.host_url=jdbc:mysql://127.0.0.1:3306/ \
-    -Dsqoop.test.mysql.databasename=sqoop \
-    -Dsqoop.test.mysql.password=Sqoop12345 \
-    -Dsqoop.test.mysql.username=sqoop \
-    -Dsqoop.test.oracle.connectstring=jdbc:oracle:thin:@//localhost:1521/sqoop \
-    -Dsqoop.test.oracle.username=SYSTEM \
-    -Dsqoop.test.oracle.password=Sqoop12345 \
-    -Dsqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://localhost/ \
-    -Dsqoop.test.postgresql.database=sqoop \
-    -Dsqoop.test.postgresql.username=sqoop \
-    -Dsqoop.test.postgresql.password=Sqoop12345 \
-    -Dsqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost:33000 \
-    -Dsqoop.test.cubrid.connectstring.username=sqoop \
-    -Dsqoop.test.cubrid.connectstring.database=sqoop \
-    -Dsqoop.test.cubrid.connectstring.password=Sqoop12345 \
-    -Dmapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom" \
-    -Dtest.timeout=10000000 \
-    -Dsqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://localhost:1433 \
-    -Dsqoop.test.sqlserver.database=master \
-    -Dms.sqlserver.username=sa \
-    -Dms.sqlserver.password=Sqoop12345 \
-    -Dsqoop.test.db2.connectstring.host_url=jdbc:db2://localhost:50000 \
-    -Dsqoop.test.db2.connectstring.database=SQOOP \
-    -Dsqoop.test.db2.connectstring.username=DB2INST1 \
-    -Dsqoop.test.db2.connectstring.password=Sqoop12345 \
     -Ds3.bucket.url=<your-bucket-url> \
     -Ds3.generator.command=<your-credential-generator-command>
 ----
@@ -417,35 +405,13 @@ or
 
 ----
 ./gradlew -Dsqoop.thirdparty.lib.dir=<path_to_thirdparty_lib_directory> \
-    -Dsqoop.test.mysql.connectstring.host_url=jdbc:mysql://127.0.0.1:3306/ \
-    -Dsqoop.test.mysql.databasename=sqoop \
-    -Dsqoop.test.mysql.password=Sqoop12345 \
-    -Dsqoop.test.mysql.username=sqoop \
-    -Dsqoop.test.oracle.connectstring=jdbc:oracle:thin:@//localhost:1521/sqoop \
-    -Dsqoop.test.oracle.username=SYSTEM \
-    -Dsqoop.test.oracle.password=Sqoop12345 \
-    -Dsqoop.test.postgresql.connectstring.host_url=jdbc:postgresql://localhost/ \
-    -Dsqoop.test.postgresql.database=sqoop \
-    -Dsqoop.test.postgresql.username=sqoop \
-    -Dsqoop.test.postgresql.password=Sqoop12345 \
-    -Dsqoop.test.cubrid.connectstring.host_url=jdbc:cubrid:localhost:33000 \
-    -Dsqoop.test.cubrid.connectstring.username=sqoop \
-    -Dsqoop.test.cubrid.connectstring.database=sqoop \
-    -Dsqoop.test.cubrid.connectstring.password=Sqoop12345 \
-    -Dmapred.child.java.opts="\-Djava.security.egd=file:/dev/../dev/urandom" \
-    -Dtest.timeout=10000000 \
-    -Dsqoop.test.sqlserver.connectstring.host_url=jdbc:sqlserver://localhost:1433 \
-    -Dsqoop.test.sqlserver.database=master \
-    -Dms.sqlserver.username=sa \
-    -Dms.sqlserver.password=Sqoop12345 \
-    -Dsqoop.test.db2.connectstring.host_url=jdbc:db2://localhost:50000 \
-    -Dsqoop.test.db2.connectstring.database=SQOOP \
-    -Dsqoop.test.db2.connectstring.username=DB2INST1 \
-    -Dsqoop.test.db2.connectstring.password=Sqoop12345 \
     -Ds3.bucket.url=<your-bucket-url> \
     -Ds3.generator.command=<your-credential-generator-command> \
     thirdPartyTest
 ----
+
+Gradle is able download all of the necessary drivers except the Oracle one but the Ant build has to be provided
+with the drivers for all the databases.
 
 Please note that even if you do not need to install RDBMSs to run Sqoop third party tests against the Docker containers you still need to install the following tools:
 
@@ -652,3 +618,19 @@ export XML_CATALOG_FILES=/usr/local/etc/xml/catalog
 * +./gradle build -x test+ for skipping a single test or a set of tests
 * +./gradlew dependencyInsight --configuration optionalConfiguration --dependency searchedForDependency+ to get a dependency tree
 * +./gradlew dependencies+ to get the list of the dependencies of the selected project, broken down by configuration
+
+== Setting up Travis CI
+You can now set up a Travis CI job for your own Sqoop fork so you can easily test your patches before uploading them for review.
+The steps for setting up the CI job are the following:
+
+- Go to https://github.com/apache/sqoop and fork the project if it is not already forked for your GitHub account.
+- Go to https://travis-ci.com and Sign up with GitHub.
+- Accept the Authorization of Travis CI. You’ll be redirected to GitHub.
+- Click the green Activate button, and select the Sqoop repository.
+
+The Travis CI job uses Gradle to build and test the project and it is able to execute all of the tests except the
+ones requiring an Oracle EE database.
+Note that by default the Oracle XE tests are also disabled because the necessary +ojdbc6.jar+ is not publicly available.
+Contributors have to upload +ojdbc6.jar+ to a public drive and make it available to the CI job by setting
+the +ORACLE_DRIVER_URL+ environment variable in Travis (for more information see Travis
+https://docs.travis-ci.com/user/environment-variables/#defining-variables-in-repository-settings[documentation]).

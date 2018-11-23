@@ -25,7 +25,7 @@ services:
       MYSQL_PASSWORD: Sqoop12345
       MYSQL_DATABASE: sqoop
     ports:
-      - 3306:3306
+      - 13306:3306
     command:
       mysqld --sql_mode="ANSI_QUOTES"
     healthcheck:
@@ -42,7 +42,7 @@ services:
       POSTGRES_USER: sqoop
       POSTGRES_PASSWORD: Sqoop12345
     ports:
-      - 5432:5432
+      - 15432:5432
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 30s
@@ -77,22 +77,37 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-  oracle:
+  oracle-ee:
     image: oracle/database:12.2.0.1-ee
-    container_name: sqoop_oracle_container
+    container_name: sqoop_oracle-ee_container
     environment:
       COMPOSE_HTTP_TIMEOUT: 200
       ORACLE_SID: sqoop
       ORACLE_PWD: Sqoop12345
     ports:
-      - 1521:1521
+      - 1522:1521
     volumes:
       - ./oraclescripts:/opt/oracle/scripts
     healthcheck:
-      test: ["CMD", "/opt/oracle/scripts/healthcheck.sh"]
+      test: ["CMD", "/opt/oracle/scripts/ee-healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 60
+  oracle:
+      image: sath89/oracle-xe-11g
+      container_name: sqoop_oracle_container
+      environment:
+        COMPOSE_HTTP_TIMEOUT: 200
+      ports:
+        - 1521:1521
+      volumes:
+        - ./oraclescripts:/opt/oracle/scripts
+        - ./oraclescripts/startup:/docker-entrypoint-initdb.d
+      healthcheck:
+        test: ["CMD", "/opt/oracle/scripts/healthcheck.sh"]
+        interval: 5s
+        timeout: 5s
+        retries: 50
   db2:
     image: ibmcom/db2express-c:10.5.0.5-3.10.0
     container_name: sqoop_db2_container

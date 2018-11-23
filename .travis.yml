@@ -1,0 +1,82 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+dist: trusty
+sudo: true
+language: java
+jdk:
+- oraclejdk8
+services:
+- docker
+env:
+- TEST_TASK=test
+- TEST_TASK=oracleXeTest
+- TEST_TASK=sqlServerTest
+- TEST_TASK=mySqlTest
+- TEST_TASK=postgreSqlTest
+- TEST_TASK=db2Test
+- TEST_TASK=cubridTest
+- TEST_TASK=mainFrameTest
+before_install:
+- if [ "$TEST_TASK" = "postgreSqlTest" ];
+  then
+    ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh postgresql;
+    sleep 60;
+  elif [ "$TEST_TASK" = "mySqlTest" ];
+  then
+    ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh mysql;
+    sleep 60;
+  elif [ "$TEST_TASK" = "cubridTest" ];
+  then
+    ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh cubrid;
+    sleep 60;
+  elif [ "$TEST_TASK" = "sqlServerTest" ];
+  then
+    ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh mssql;
+    sleep 60;
+  elif [ "$TEST_TASK" = "db2Test" ];
+  then
+    ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh db2;
+    sleep 60;
+  elif [ "$TEST_TASK" = "mainFrameTest" ];
+  then
+    ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh mainframe;
+    sleep 60;
+  elif [ "$TEST_TASK" = "oracleXeTest" ];
+  then
+  if [ -n "$ORACLE_DRIVER_URL" ];
+    then
+      mkdir -p drivers;
+      wget -q $ORACLE_DRIVER_URL --output-document ./drivers/oracledriver.jar;
+      ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh oracle;
+      sleep 90;
+    fi
+  fi
+script:
+- if [ "$TEST_TASK" != "oracleXeTest" ] || [ -n "$ORACLE_DRIVER_URL" ];
+  then
+    ./gradlew -Dsqoop.thirdparty.lib.dir=./drivers $TEST_TASK;
+  else
+    echo 'Skipping Oracle XE test execution because ORACLE_DRIVER_URL is not set.';
+  fi
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/

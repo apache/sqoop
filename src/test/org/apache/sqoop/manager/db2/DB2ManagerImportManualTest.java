@@ -44,6 +44,9 @@ import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.FileListing;
 import org.junit.experimental.categories.Category;
 
+import static org.apache.sqoop.manager.db2.DB2TestUtils.CONNECT_STRING;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.DATABASE_PASSWORD;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.DATABASE_USER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -74,24 +77,8 @@ public class DB2ManagerImportManualTest extends ImportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
         DB2ManagerImportManualTest.class.getName());
 
-  static final String HOST_URL = System.getProperty(
-          "sqoop.test.db2.connectstring.host_url",
-          "jdbc:db2://db2host:50000");
-
-  static final String DATABASE_NAME = System.getProperty(
-          "sqoop.test.db2.connectstring.database",
-          "SQOOP");
-  static final String DATABASE_USER = System.getProperty(
-          "sqoop.test.db2.connectstring.username",
-          "SQOOP");
-  static final String DATABASE_PASSWORD = System.getProperty(
-          "sqoop.test.db2.connectstring.password",
-          "SQOOP");
   static final String TABLE_NAME = "EMPLOYEES_DB2";
   static final String QUALIFIED_TABLE_NAME = DATABASE_USER + ".EMPLOYEES_DB2";
-  static final String CONNECT_STRING = HOST_URL
-              + "/" + DATABASE_NAME
-              + ":currentSchema=" + DATABASE_USER +";";
 
   static {
     LOG.info("Using DB2 CONNECT_STRING: " + CONNECT_STRING);

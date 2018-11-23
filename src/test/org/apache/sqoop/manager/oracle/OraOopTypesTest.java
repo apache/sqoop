@@ -24,8 +24,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleEeTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category(OracleEeTest.class)
 public class OraOopTypesTest extends OraOopTestCase {
   @Test
   public void ensureTypesAfterExportMappedAsExpected() throws Exception {
@@ -156,5 +160,17 @@ public class OraOopTypesTest extends OraOopTestCase {
       cleanupFolders();
       closeTestEnvConnection();
     }
+  }
+
+  protected String getConnectString() {
+    return OracleUtils.EE_CONNECT_STRING;
+  }
+
+  protected String getUsername() {
+    return OracleUtils.ORACLE_EE_USER_NAME;
+  }
+
+  protected String getPassword() {
+    return OracleUtils.ORACLE_EE_USER_PASS;
   }
 }

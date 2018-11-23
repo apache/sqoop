@@ -36,12 +36,13 @@ public final class OracleUtils {
 
   public static final Log LOG = LogFactory.getLog(OracleUtils.class.getName());
 
-  // Express edition hardcoded name.
-  public static final String ORACLE_DATABASE_NAME = "xe";
+  public static final String CONNECT_STRING = System.getProperty("sqoop.test.oracle.connectstring", "jdbc:oracle:thin:@//localhost:1521/xe");
+  public static final String ORACLE_USER_NAME = System.getProperty("sqoop.test.oracle.username", "SYSTEM");
+  public static final String ORACLE_USER_PASS = System.getProperty("sqoop.test.oracle.password", "oracle");
 
-  public static final String CONNECT_STRING = System.getProperty("sqoop.test.oracle.connectstring", "jdbc:oracle:thin:@//localhost/" + ORACLE_DATABASE_NAME);
-  public static final String ORACLE_USER_NAME = System.getProperty("sqoop.test.oracle.username", "SQOOPTEST");
-  public static final String ORACLE_USER_PASS = System.getProperty("sqoop.test.oracle.password", "12345");
+  public static final String EE_CONNECT_STRING = System.getProperty("sqoop.test.oracle-ee.connectstring", "jdbc:oracle:thin:@//localhost:1522/sqoop");
+  public static final String ORACLE_EE_USER_NAME = System.getProperty("sqoop.test.oracle-ee.username", "SYSTEM");
+  public static final String ORACLE_EE_USER_PASS = System.getProperty("sqoop.test.oracle-ee.password", "Sqoop12345");
 
   public static final String ORACLE_SECONDARY_USER_NAME = "SQOOPTEST2";
   public static final String ORACLE_SECONDARY_USER_PASS = "ABCDEF";

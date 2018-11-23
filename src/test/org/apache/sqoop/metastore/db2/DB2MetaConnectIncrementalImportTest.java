@@ -18,6 +18,10 @@
 
 package org.apache.sqoop.metastore.db2;
 
+import static org.apache.sqoop.manager.db2.DB2TestUtils.CONNECT_STRING;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.DATABASE_PASSWORD;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.DATABASE_USER;
+
 import org.apache.sqoop.metastore.MetaConnectIncrementalImportTestBase;
 import org.apache.sqoop.testcategories.thirdpartytest.Db2Test;
 import org.junit.experimental.categories.Category;
@@ -43,23 +47,6 @@ import org.junit.experimental.categories.Category;
  */
 @Category(Db2Test.class)
 public class DB2MetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
-
-    private static final String HOST_URL = System.getProperty(
-        "sqoop.test.db2.connectstring.host_url",
-        "jdbc:db2://db2host:50000");
-
-    private static final String DATABASE_NAME = System.getProperty(
-        "sqoop.test.db2.connectstring.database",
-        "SQOOP");
-    private static final String DATABASE_USER = System.getProperty(
-        "sqoop.test.db2.connectstring.username",
-        "SQOOP");
-    private static final String DATABASE_PASSWORD = System.getProperty(
-        "sqoop.test.db2.connectstring.password",
-        "SQOOP");
-    private static final String CONNECT_STRING = HOST_URL
-        + "/" + DATABASE_NAME
-        + ":currentSchema=" + DATABASE_USER +";";
 
     public DB2MetaConnectIncrementalImportTest() {
         super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);

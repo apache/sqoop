@@ -43,18 +43,18 @@ public final class MySQLTestUtils {
   private String userName;
   private String userPass;
 
-  private String mysqlDbNAme;
+  private String mysqlDbName;
   private String mySqlConnectString;
 
   public MySQLTestUtils() {
     hostUrl = System.getProperty(
         "sqoop.test.mysql.connectstring.host_url",
-        "jdbc:mysql://localhost/");
-    userName = System.getProperty("sqoop.test.mysql.username", getCurrentUser());
-    userPass = System.getProperty("sqoop.test.mysql.password");
+        "jdbc:mysql://127.0.0.1:13306/");
+    userName = System.getProperty("sqoop.test.mysql.username", "sqoop");
+    userPass = System.getProperty("sqoop.test.mysql.password", "Sqoop12345");
 
-    mysqlDbNAme = System.getProperty("sqoop.test.mysql.databasename", "sqooptestdb");
-    mySqlConnectString = getHostUrl() + getMysqlDbNAme();
+    mysqlDbName = System.getProperty("sqoop.test.mysql.databasename", "sqoop");
+    mySqlConnectString = getHostUrl() + getMysqlDbName();
   }
 
   public String getHostUrl() {
@@ -69,8 +69,8 @@ public final class MySQLTestUtils {
     return userPass;
   }
 
-  public String getMysqlDbNAme() {
-    return mysqlDbNAme;
+  public String getMysqlDbName() {
+    return mysqlDbName;
   }
 
 
