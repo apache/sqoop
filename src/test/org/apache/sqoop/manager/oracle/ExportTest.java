@@ -18,15 +18,19 @@
 
 package org.apache.sqoop.manager.oracle;
 
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleEeTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Test exporting data into Oracle.
  */
+@Category(OracleEeTest.class)
 public class ExportTest extends OraOopTestCase {
 
   private static final ExportTest TEST_CASE = new ExportTest();
@@ -67,4 +71,15 @@ public class ExportTest extends OraOopTestCase {
     TEST_CASE.closeTestEnvConnection();
   }
 
+  protected String getConnectString() {
+    return org.apache.sqoop.manager.oracle.util.OracleUtils.EE_CONNECT_STRING;
+  }
+
+  protected String getUsername() {
+    return org.apache.sqoop.manager.oracle.util.OracleUtils.ORACLE_EE_USER_NAME;
+  }
+
+  protected String getPassword() {
+    return OracleUtils.ORACLE_EE_USER_PASS;
+  }
 }

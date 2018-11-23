@@ -51,6 +51,10 @@ import org.apache.sqoop.util.FileListing;
 import org.apache.sqoop.util.LoggingUtils;
 import org.junit.experimental.categories.Category;
 
+import static org.apache.sqoop.manager.db2.DB2TestUtils.CONNECT_STRING;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.DATABASE_PASSWORD;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.DATABASE_USER;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.HOST_URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -81,24 +85,8 @@ public class DB2ImportAllTableWithSchemaManualTest extends ImportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
 		  DB2ImportAllTableWithSchemaManualTest.class.getName());
 
-  static final String HOST_URL = System.getProperty(
-          "sqoop.test.db2.connectstring.host_url",
-          "jdbc:db2://9.30.245.234:60000");
-
-  static final String DATABASE_NAME = System.getProperty(
-          "sqoop.test.db2.connectstring.database",
-          "TESTDB");
-  static final String DATABASE_USER = System.getProperty(
-          "sqoop.test.db2.connectstring.username",
-          "DB2FENC1");
-  static final String DATABASE_PASSWORD = System.getProperty(
-          "sqoop.test.db2.connectstring.password",
-          "DB2FENC1");
-
   static final String TABLE_NAME = "TEST.COMPANY";
   static final String TABLE_SCHEMA = "TEST";
-  static final String CONNECT_STRING = HOST_URL
-              + "/" + DATABASE_NAME;
   static String ExpectedResults =
       "1,doc1";
 

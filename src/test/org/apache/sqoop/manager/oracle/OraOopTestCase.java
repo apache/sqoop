@@ -108,9 +108,7 @@ public abstract class OraOopTestCase {
 
   protected Connection getTestEnvConnection() throws SQLException {
     if (this.conn == null) {
-      this.conn =
-          DriverManager.getConnection(OracleUtils.CONNECT_STRING,
-              OracleUtils.ORACLE_USER_NAME, OracleUtils.ORACLE_USER_PASS);
+      this.conn = DriverManager.getConnection(getConnectString(), getUsername(), getPassword());
       this.conn.setAutoCommit(false);
     }
     return this.conn;
@@ -231,13 +229,13 @@ public abstract class OraOopTestCase {
     }
 
     sqoopArgs.add("--connect");
-    sqoopArgs.add(OracleUtils.CONNECT_STRING);
+    sqoopArgs.add(getConnectString());
 
     sqoopArgs.add("--username");
-    sqoopArgs.add(OracleUtils.ORACLE_USER_NAME);
+    sqoopArgs.add(getUsername());
 
     sqoopArgs.add("--password");
-    sqoopArgs.add(OracleUtils.ORACLE_USER_PASS);
+    sqoopArgs.add(getPassword());
 
     sqoopArgs.add("--table");
     sqoopArgs.add(tableName);
@@ -309,13 +307,13 @@ public abstract class OraOopTestCase {
     sqoopArgs.add("--direct");
 
     sqoopArgs.add("--connect");
-    sqoopArgs.add(OracleUtils.CONNECT_STRING);
+    sqoopArgs.add(getConnectString());
 
     sqoopArgs.add("--username");
-    sqoopArgs.add(OracleUtils.ORACLE_USER_NAME);
+    sqoopArgs.add(getUsername());
 
     sqoopArgs.add("--password");
-    sqoopArgs.add(OracleUtils.ORACLE_USER_PASS);
+    sqoopArgs.add(getPassword());
 
     sqoopArgs.add("--table");
     sqoopArgs.add(tableName);
@@ -376,4 +374,15 @@ public abstract class OraOopTestCase {
     HadoopFiles.delete(new Path(getSqoopGenLibDirectory()), true);
   }
 
+  protected String getConnectString() {
+    return OracleUtils.CONNECT_STRING;
+  }
+
+  protected String getUsername() {
+    return OracleUtils.ORACLE_USER_NAME;
+  }
+
+  protected String getPassword() {
+    return OracleUtils.ORACLE_USER_PASS;
+  }
 }

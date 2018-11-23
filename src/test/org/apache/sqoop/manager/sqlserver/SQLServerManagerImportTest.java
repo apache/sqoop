@@ -52,6 +52,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
+import static org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.DATABASE_NAME;
+import static org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.DATABASE_USER;
+import static org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.DATABASE_PASSWORD;
+import static org.apache.sqoop.manager.sqlserver.MSSQLTestUtils.HOST_URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -85,19 +89,6 @@ public class SQLServerManagerImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
           SQLServerManagerImportTest.class.getName());
-
-  static final String HOST_URL = System.getProperty(
-          "sqoop.test.sqlserver.connectstring.host_url",
-          "jdbc:sqlserver://sqlserverhost:1433");
-  static final String DATABASE_NAME = System.getProperty(
-      "sqoop.test.sqlserver.database",
-      "sqooptest");
-  static final String DATABASE_USER = System.getProperty(
-      "ms.sqlserver.username",
-      "sqoopuser");
-  static final String DATABASE_PASSWORD = System.getProperty(
-      "ms.sqlserver.password",
-      "password");
 
   static final String SCHEMA_DBO = "dbo";
   static final String DBO_TABLE_NAME = "EMPLOYEES_MSSQL";

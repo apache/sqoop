@@ -21,13 +21,17 @@ package org.apache.sqoop.manager.oracle;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.oracle.OraOopConstants.
            OraOopOracleDataChunkMethod;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleEeTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Test import data from Oracle.
  */
+@Category(OracleEeTest.class)
 public class ImportTest extends OraOopTestCase {
 
   private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
@@ -275,4 +279,15 @@ public class ImportTest extends OraOopTestCase {
     }
   }
 
+  protected String getConnectString() {
+    return OracleUtils.EE_CONNECT_STRING;
+  }
+
+  protected String getUsername() {
+    return OracleUtils.ORACLE_EE_USER_NAME;
+  }
+
+  protected String getPassword() {
+    return OracleUtils.ORACLE_EE_USER_PASS;
+  }
 }

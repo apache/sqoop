@@ -18,6 +18,10 @@
 
 package org.apache.sqoop.manager.postgresql;
 
+import static org.apache.sqoop.manager.postgresql.PostgresqlTestUtil.CONNECT_STRING;
+import static org.apache.sqoop.manager.postgresql.PostgresqlTestUtil.DATABASE_USER;
+import static org.apache.sqoop.manager.postgresql.PostgresqlTestUtil.PASSWORD;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -63,17 +67,6 @@ public class DirectPostgreSQLExportManualTest extends TestExport {
       LogFactory.getLog(DirectPostgreSQLExportManualTest.class.getName());
   private DBConfiguration dbConf;
 
-  static final String HOST_URL =
-    System.getProperty("sqoop.test.postgresql.connectstring.host_url",
-                       "jdbc:postgresql://localhost/");
-  static final String DATABASE =
-    System.getProperty("sqoop.test.postgresql.database", "sqooptest");
-  static final String USERNAME =
-    System.getProperty("sqoop.test.postgresql.username", "sqooptest");
-  static final String PASSWORD = System.getProperty(
-      "sqoop.test.postgresql.password");
-  static final String CONNECT_STRING = HOST_URL + DATABASE;
-
   public DirectPostgreSQLExportManualTest() {
     JobConf conf = new JobConf(getConf());
     DBConfiguration.configureDB(conf,
@@ -95,7 +88,7 @@ public class DirectPostgreSQLExportManualTest extends TestExport {
   }
 
   protected String getUserName() {
-    return USERNAME;
+    return DATABASE_USER;
   }
 
   @Override

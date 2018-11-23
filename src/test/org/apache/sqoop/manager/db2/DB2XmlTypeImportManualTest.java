@@ -44,6 +44,10 @@ import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.FileListing;
 import org.junit.experimental.categories.Category;
 
+import static org.apache.sqoop.manager.db2.DB2TestUtils.CONNECT_STRING;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.DATABASE_PASSWORD;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.DATABASE_USER;
+import static org.apache.sqoop.manager.db2.DB2TestUtils.HOST_URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -74,23 +78,7 @@ public class DB2XmlTypeImportManualTest extends ImportJobTestCase {
   public static final Log LOG = LogFactory.getLog(
 		  DB2XmlTypeImportManualTest.class.getName());
 
-  static final String HOST_URL = System.getProperty(
-          "sqoop.test.db2.connectstring.host_url",
-          "jdbc:db2://db2host:60000");
-
-  static final String DATABASE_NAME = System.getProperty(
-          "sqoop.test.db2.connectstring.database",
-          "SQOOP");
-  static final String DATABASE_USER = System.getProperty(
-          "sqoop.test.db2.connectstring.username",
-          "SQOOP");
-  static final String DATABASE_PASSWORD = System.getProperty(
-          "sqoop.test.db2.connectstring.password",
-          "SQOOP");
-
   static final String TABLE_NAME = "COMPANY";
-  static final String CONNECT_STRING = HOST_URL
-              + "/" + DATABASE_NAME;
   static final String HIVE_TABLE_NAME = "HCOMPANY";
   static String ExpectedResults =
       "1,doc1,<company name=\"Company1\"><emp id=\"31201\" salary=\"60000\" gender=\"Female\"><name><first>Laura </first><last>Brown</last></name><dept id=\"M25\">Finance</dept></emp></company>";

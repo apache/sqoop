@@ -105,8 +105,8 @@ public class OracleConnectionFactoryTest extends OraOopTestCase {
                 + "statement being used to check the JDBC fetch size.");
       }
 
-      if (rowsPerFetch < jdbcFetchSize * 0.95
-          || rowsPerFetch > jdbcFetchSize * 1.05) {
+      if (rowsPerFetch < jdbcFetchSize * 0.925
+          || rowsPerFetch > jdbcFetchSize * 1.075) {
         Assert
             .fail(String
                 .format(

@@ -19,7 +19,10 @@
 package org.apache.sqoop.manager.oracle;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.apache.sqoop.testcategories.thirdpartytest.OracleEeTest;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,6 +31,7 @@ import static org.junit.Assert.assertEquals;
  * requires the tests to be run in a different process. Maven needs to be setup
  * to fork per test class.
  */
+@Category(OracleEeTest.class)
 public class TimestampDataTest extends OraOopTestCase {
 
   private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
@@ -50,4 +54,15 @@ public class TimestampDataTest extends OraOopTestCase {
     }
   }
 
+  protected String getConnectString() {
+    return org.apache.sqoop.manager.oracle.util.OracleUtils.EE_CONNECT_STRING;
+  }
+
+  protected String getUsername() {
+    return org.apache.sqoop.manager.oracle.util.OracleUtils.ORACLE_EE_USER_NAME;
+  }
+
+  protected String getPassword() {
+    return OracleUtils.ORACLE_EE_USER_PASS;
+  }
 }

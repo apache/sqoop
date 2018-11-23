@@ -17,6 +17,9 @@
  */
 package org.apache.sqoop.manager.postgresql;
 
+import static org.apache.sqoop.manager.postgresql.PostgresqlTestUtil.CONNECT_STRING;
+import static org.apache.sqoop.manager.postgresql.PostgresqlTestUtil.DATABASE_USER;
+import static org.apache.sqoop.manager.postgresql.PostgresqlTestUtil.PASSWORD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -54,13 +57,6 @@ public class PostgresqlExternalTableImportTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory
       .getLog(PostgresqlExternalTableImportTest.class.getName());
-  static final String HOST_URL = System.getProperty("sqoop.test.postgresql.connectstring.host_url",
-      "jdbc:postgresql://localhost/");
-  static final String DATABASE_USER = System.getProperty(
-      "sqoop.test.postgresql.username", "sqooptest");
-  static final String DATABASE_NAME = System.getProperty(
-      "sqoop.test.postgresql.database", "sqooptest");
-  static final String PASSWORD = System.getProperty("sqoop.test.postgresql.password");
 
   static final String TABLE_NAME = "EMPLOYEES_PG";
   static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_PG";
@@ -68,7 +64,6 @@ public class PostgresqlExternalTableImportTest extends ImportJobTestCase {
   static final String DIFFERENT_TABLE_NAME = "DIFFERENT_TABLE";
   static final String SCHEMA_PUBLIC = "public";
   static final String SCHEMA_SPECIAL = "special";
-  static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
   static final String EXTERNAL_TABLE_DIR = "/tmp/external/employees_pg";
   protected Connection connection;
 
