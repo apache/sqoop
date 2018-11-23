@@ -195,9 +195,13 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
             metastoreStatement.execute("DROP TABLE " + cm.escapeTableName("SQOOP_ROOT"));
             metastoreStatement.execute("DROP TABLE " + cm.escapeTableName("SQOOP_SESSIONS"));
             connMeta.commit();
-        }
-        catch (Exception e) {
-            LOG.error( e.getLocalizedMessage() );
+        } catch (Exception e) {
+            LOG.error(e.getLocalizedMessage());
+            try {
+                connMeta.rollback();
+            } catch (SQLException e1) {
+                LOG.error(e1.getLocalizedMessage());
+            }
         }
     }
 
