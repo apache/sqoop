@@ -173,8 +173,10 @@ https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html#Pr
 For a guide to the Hadoop Credential Provider API please see the Hadoop documentation at
 https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/CredentialProviderAPI.html.
 
-After creating a credential file with the credential entries the URL to the provider can be set via the
-+hadoop.security.credential.provider.path+ property.
+After creating a credential file with the credential entries the URL to the provider can be set via either the
++hadoop.security.credential.provider.path+ or the +fs.s3a.security.credential.provider.path+ property. For learning
+more about the precedence of these please see the Hadoop AWS documentation at
+https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html#Configure_the_hadoop.security.credential.provider.path_property.
 
 Hadoop Credential Provider is often protected by password supporting three options:
 

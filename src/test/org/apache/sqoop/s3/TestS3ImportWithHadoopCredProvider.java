@@ -32,6 +32,7 @@ import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.testutil.S3CredentialGenerator;
 import org.apache.sqoop.testutil.S3TestUtils;
 import org.apache.sqoop.testutil.TextFileTestUtils;
+import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.apache.sqoop.util.password.CredentialProviderHelper;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -43,17 +44,35 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 
 import static junit.framework.TestCase.fail;
 
 @Category(S3Test.class)
+@RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestS3ImportWithHadoopCredProvider extends ImportJobTestCase {
+
+    @Parameterized.Parameters(name = "credentialProviderPathProperty = {0}")
+    public static Iterable<? extends Object> parameters() {
+        return Arrays.asList(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
+            CredentialProviderHelper.S3A_CREDENTIAL_PROVIDER_PATH);
+    }
+
     public static final Log LOG = LogFactory.getLog(
             TestS3ImportWithHadoopCredProvider.class.getName());
+
+    private String credentialProviderPathProperty;
+
+    public TestS3ImportWithHadoopCredProvider(String credentialProviderPathProperty) {
+        this.credentialProviderPathProperty = credentialProviderPathProperty;
+    }
 
     private static S3CredentialGenerator s3CredentialGenerator;
 
@@ -156,7 +175,7 @@ public class TestS3ImportWithHadoopCredProvider extends ImportJobTestCase {
     private String[] getArgs(String providerPath, boolean withPwdFile, String pwdFile) {
         ArgumentArrayBuilder builder = S3TestUtils.getArgumentArrayBuilderForHadoopCredProviderS3UnitTests(this);
 
-        builder.withProperty(CredentialProviderHelper.CREDENTIAL_PROVIDER_PATH, providerPath);
+        builder.withProperty(credentialProviderPathProperty, providerPath);
         if (withPwdFile) {
             builder.withProperty(CredentialProviderHelper.CREDENTIAL_PROVIDER_PASSWORD_FILE, pwdFile);
         }

@@ -397,7 +397,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
         "://file/" + credDir.getAbsolutePath() + "/" + jksFile;
       File file = new File(credDir, jksFile);
       file.delete();
-      conf.set(CredentialProviderHelper.CREDENTIAL_PROVIDER_PATH,
+      conf.set(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
         ourUrl);
       CredentialProviderHelper.createCredentialEntry(conf, alias, pw);
 
@@ -439,7 +439,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
         "://file/" + credDir.getAbsolutePath() + "/" + jksFile;
       File file = new File(credDir, jksFile);
       file.delete();
-      conf.set(CredentialProviderHelper.CREDENTIAL_PROVIDER_PATH,
+      conf.set(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
         ourUrl);
       CredentialProviderHelper.createCredentialEntry(conf, alias, pw);
 

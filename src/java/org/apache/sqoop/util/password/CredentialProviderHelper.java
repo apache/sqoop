@@ -83,8 +83,10 @@ public class CredentialProviderHelper {
   // Should track what is specified in JavaKeyStoreProvider class.
   public static final String SCHEME_NAME = "jceks";
   // Should track what is in CredentialProvider class.
-  public static final String CREDENTIAL_PROVIDER_PATH =
+  public static final String HADOOP_CREDENTIAL_PROVIDER_PATH =
     "hadoop.security.credential.provider.path";
+  public static final String S3A_CREDENTIAL_PROVIDER_PATH =
+          "fs.s3a.security.credential.provider.path";
   public static final String CREDENTIAL_PROVIDER_PASSWORD_FILE =
           "hadoop.security.credstore.java-keystore-provider.password-file";
 
@@ -103,7 +105,7 @@ public class CredentialProviderHelper {
   public static String resolveAlias(Configuration conf, String alias)
     throws IOException {
     LOG.debug("Resolving alias with credential provider path set to "
-      + conf.get(CREDENTIAL_PROVIDER_PATH));
+      + conf.get(HADOOP_CREDENTIAL_PROVIDER_PATH));
     try {
       char[] cred = (char[])
         methGetPassword.invoke(conf, new Object[] { alias });
