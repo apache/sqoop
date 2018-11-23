@@ -51,17 +51,17 @@ public class CubridTestUtils {
 
   public static final String HOST_URL = System
       .getProperty("sqoop.test.cubrid.connectstring.host_url",
-      "jdbc:cubrid:localhost:33000");
+      "jdbc:cubrid:localhost:30000");
 
   static final String TEST_DATABASE = System
       .getProperty("sqoop.test.cubrid.connectstring.database",
-      "sqoop");
+      "SQOOPCUBRIDTEST");
   static final String TEST_USER = System
       .getProperty("sqoop.test.cubrid.connectstring.username",
-      "sqoop");
+      "SQOOPUSER");
   static final String TEST_PASS = System
       .getProperty("sqoop.test.cubrid.connectstring.password",
-      "Sqoop12345");
+      "PASSWORD");
   static final String TABLE_NAME = "EMPLOYEES_CUBRID";
   static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_CUBRID";
   static final String CONNECT_STRING = HOST_URL + ":"

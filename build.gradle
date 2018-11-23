@@ -38,14 +38,6 @@ repositories {
     maven {
         url 'http://conjars.org/repo/'
     }
-    maven {
-        url 'http://maven.cubrid.org/'
-    }
-
-    // DB2 driver repository
-    maven {
-        url 'https://artifacts.alfresco.com/nexus/content/repositories/public/'
-    }
 }
 
 sourceSets {
@@ -160,12 +152,6 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoallVersion
     testCompile group: 'com.github.stefanbirkner', name: 'system-rules', version: systemRulesVersion
     testCompile group: 'org.apache.zookeeper', name: 'zookeeper', version: zookeeperVersion, ext: 'jar'
-
-    // JDBC drivers
-    testCompile group: 'mysql', name: 'mysql-connector-java', version: mySqlConnectorVersion
-    testCompile group: 'cubrid', name: 'cubrid-jdbc', version: cubridJdbcDriverVersion
-    testCompile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: msSqlJdbcDriverVersion
-    testCompile group: 'com.ibm.db2.jcc', name: 'db2jcc4', version: db2JdbcDriverVersion
 }
 
 task unitTest (type: Test) {
@@ -191,92 +177,6 @@ task thirdPartyTest (type: Test) {
             'jars reside (relative to the project directory)'
     useJUnit {
         includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.ThirdPartyTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-    systemProperty "ms.datatype.test.data.file.export" ,"DatatypeTestData-export-lite.txt"
-    systemProperty "ms.datatype.test.data.file.import" ,"DatatypeTestData-import-lite.txt"
-    systemProperty "ms.datatype.test.data.file.delim" ,","
-    systemProperty "ms.datatype.test.hdfsprefix" ,"file:///"
-}
-
-task postgreSqlTest (type: Test) {
-    description 'Run Postgresql third party tests.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-}
-
-task mySqlTest (type: Test) {
-    description 'Run MySql third party tests.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.MysqlTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-}
-
-task cubridTest (type: Test) {
-    description 'Run Cubrid third party tests.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.CubridTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-}
-
-task db2Test (type: Test) {
-    description 'Run DB2 third party tests.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.Db2Test'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-}
-
-task mainFrameTest (type: Test) {
-    description 'Run Mainframe third party tests.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.MainFrameTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-}
-
-task oracleTest (type: Test) {
-    description 'Run Oracle third party tests.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.OracleTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-}
-
-task oracleXeTest (type: Test) {
-    description 'Run Oracle third party tests which can be run with Oracle Express Edition too.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.OracleTest'
-        excludeCategories 'org.apache.sqoop.testcategories.thirdpartytest.OracleEeTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-}
-
-task oracleEeTest (type: Test) {
-    description 'Run Oracle third party tests which require Oracle Enterprise Edition.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.OracleEeTest'
-        excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
-        excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
-    }
-}
-
-task sqlServerTest (type: Test) {
-    description 'Run MS SqlServer third party tests.'
-    useJUnit {
-        includeCategories 'org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest'
         excludeCategories 'org.apache.sqoop.testcategories.sqooptest.ManualTest'
         excludeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
     }

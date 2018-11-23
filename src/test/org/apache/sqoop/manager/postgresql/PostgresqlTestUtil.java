@@ -22,20 +22,20 @@ public class PostgresqlTestUtil {
 
   public static final String HOST_URL = System.getProperty(
       "sqoop.test.postgresql.connectstring.host_url",
-      "jdbc:postgresql://localhost:15432/");
+      "jdbc:postgresql://localhost/");
 
   public static final String DATABASE_USER = System.getProperty(
       "sqoop.test.postgresql.username",
-      "sqoop");
+      "sqooptest");
 
   public static final String DATABASE_NAME = System.getProperty(
       "sqoop.test.postgresql.database",
-      "sqoop");
+      "sqooptest");
 
   public static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
   public static final String PASSWORD = System.getProperty(
-      "sqoop.test.postgresql.password", "Sqoop12345");
+      "sqoop.test.postgresql.password");
 
   static final String TABLE_NAME = "EMPLOYEES_PG";
 

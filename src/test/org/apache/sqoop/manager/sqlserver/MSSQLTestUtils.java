@@ -38,15 +38,15 @@ public class MSSQLTestUtils {
       MSSQLTestUtils.class.getName());
 
   public static final String DATABASE_USER = System.getProperty(
-          "ms.sqlserver.username", "sa");
+          "ms.sqlserver.username", "SQOOPUSER");
   public static final String DATABASE_PASSWORD = System.getProperty(
-          "ms.sqlserver.password", "Sqoop12345");
+          "ms.sqlserver.password", "PASSWORD");
   public static final String DATABASE_NAME = System.getProperty(
       "sqoop.test.sqlserver.database",
-      "master");
+      "sqooptest");
   public static final String HOST_URL = System.getProperty(
           "sqoop.test.sqlserver.connectstring.host_url",
-          "jdbc:sqlserver://localhost:1433");
+          "jdbc:sqlserver://sqlserverhost:1433");
 
   public static final String CONNECT_STRING = HOST_URL + ";database=" + DATABASE_NAME;
 
