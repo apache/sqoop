@@ -204,8 +204,8 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
             LOG.error(e.getLocalizedMessage());
             try {
                 connMeta.rollback();
-            } catch (SQLException e1) {
-                LOG.error(e1.getLocalizedMessage());
+            } catch (SQLException innerException) {
+                LOG.error(innerException.getLocalizedMessage());
             }
         }
     }
