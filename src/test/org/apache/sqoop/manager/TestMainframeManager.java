@@ -140,6 +140,7 @@ public class TestMainframeManager extends BaseSqoopTestCase {
     } catch (IOException e) {
       fail("No IOException should be thrown!");
     } finally {
+      AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
       opts.setAccumuloTable(null);
     }
   }
