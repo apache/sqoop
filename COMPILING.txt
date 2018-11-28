@@ -169,6 +169,16 @@ parameter for all the test tasks except +kerberizedTest+:
 ./gradlew -DforkEvery.default=30 test
 ----
 
+The https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html#org.gradle.api.tasks.testing.Test:ignoreFailures[ignoreFailures]
+parameter of the Gradle test tasks is set to +false+ which means that if a Gradle test task fails the gradle
+process returns with non-zero. In some CI tools (e.g. Jenkins) this will make the status of the job red and not yellow
+which usually means some more serious issue than a test failure. To change this behavior you can use the
++-DignoreTestFailures+ property to set the +ignoreFailures+ parameter for all the test tasks:
+
+----
+./gradlew -DignoreTestFailures=true test
+----
+
 === Third party tests
 
 ==== Installing the necessary databases

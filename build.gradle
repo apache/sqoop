@@ -96,6 +96,7 @@ configurations.all {
 
 def sqoopThirdPartyLib = System.getProperty("sqoop.thirdparty.lib.dir")
 def forkEveryDefault = Integer.valueOf(System.getProperty("forkEvery.default", "0"))
+def ignoreTestFailures = Boolean.getBoolean("ignoreTestFailures")
 
 dependencies {
     if (sqoopThirdPartyLib != null) runtime fileTree(dir: sqoopThirdPartyLib, include: '*.jar')
@@ -352,6 +353,7 @@ tasks.withType(Test) {
     }
 
     forkEvery forkEveryDefault
+    ignoreFailures ignoreTestFailures
 }
 
 task kerberizedTest (type: Test){
@@ -366,6 +368,7 @@ task kerberizedTest (type: Test){
         includeCategories 'org.apache.sqoop.testcategories.KerberizedTest'
     }
     forkEvery 1
+    ignoreFailures ignoreTestFailures
 }
 
 test.finalizedBy(kerberizedTest)
