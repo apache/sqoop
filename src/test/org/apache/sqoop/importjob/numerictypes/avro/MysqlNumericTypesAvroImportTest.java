@@ -16,23 +16,25 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob.numerictypes;
+package org.apache.sqoop.importjob.numerictypes.avro;
 
 import org.apache.sqoop.importjob.configuration.MysqlImportJobTestConfiguration;
+import org.apache.sqoop.importjob.numerictypes.NumericTypesAvroImportTestBase;
 import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
+import org.apache.sqoop.testutil.NumericTypesTestUtils;
 import org.apache.sqoop.testutil.adapter.DatabaseAdapter;
 import org.apache.sqoop.testutil.adapter.MysqlDatabaseAdapter;
 import org.junit.experimental.categories.Category;
 
 @Category(MysqlTest.class)
-public class MysqlNumericTypesImportTest extends NumericTypesImportTestBase {
+public class MysqlNumericTypesAvroImportTest extends NumericTypesAvroImportTestBase {
 
   @Override
   public DatabaseAdapter createAdapter() {
     return new MysqlDatabaseAdapter();
   }
 
-  public MysqlNumericTypesImportTest() {
-    super(new MysqlImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY);
+  public MysqlNumericTypesAvroImportTest() {
+    super(new MysqlImportJobTestConfiguration(), NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS, NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY);
   }
 }

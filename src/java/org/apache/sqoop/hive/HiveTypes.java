@@ -23,6 +23,11 @@ import java.sql.Types;
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.hive.common.type.HiveDecimal;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.config.ConfigurationConstants;
+
+import static org.apache.avro.LogicalTypes.Decimal;
 
 /**
  * Defines conversion between SQL types and Hive types.
@@ -37,16 +42,28 @@ public final class HiveTypes {
   private static final String HIVE_TYPE_STRING = "STRING";
   private static final String HIVE_TYPE_BOOLEAN = "BOOLEAN";
   private static final String HIVE_TYPE_BINARY = "BINARY";
+  private static final String HIVE_TYPE_DECIMAL = "DECIMAL";
 
   public static final Log LOG = LogFactory.getLog(HiveTypes.class.getName());
 
   private HiveTypes() { }
 
+
+  public static String toHiveType(int sqlType, SqoopOptions options) {
+
+    if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false)
+        && (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)){
+      return HIVE_TYPE_DECIMAL;
+    }
+    return toHiveType(sqlType);
+  }
+
+
   /**
    * Given JDBC SQL types coming from another database, what is the best
    * mapping to a Hive-specific type?
    */
-  public static String toHiveType(int sqlType) {
+  private static String toHiveType(int sqlType) {
 
       switch (sqlType) {
           case Types.INTEGER:
@@ -81,6 +98,28 @@ public final class HiveTypes {
         // BLOB, ARRAY, STRUCT, REF, JAVA_OBJECT.
         return null;
       }
+  }
+
+
+  public static String toHiveType(Schema schema) {
+    if (schema.getType() != Schema.Type.UNION) {
+      return toHiveType(schema.getType());
+    }
+    for (Schema subSchema : schema.getTypes()) {
+      if (subSchema.getLogicalType() != null && subSchema.getLogicalType() instanceof Decimal) {
+        Decimal decimal = (Decimal) subSchema.getLogicalType();
+
+        // trimming precision and scale to Hive's maximum values.
+        int precision = Math.min(HiveDecimal.MAX_PRECISION, decimal.getPrecision());
+        int scale = Math.min(HiveDecimal.MAX_SCALE, decimal.getScale());
+        return String.format("%s (%d, %d)", HIVE_TYPE_DECIMAL, precision, scale);
+      }
+      else if (subSchema.getType() != Schema.Type.NULL) {
+        return toHiveType(subSchema.getType());
+      }
+    }
+
+    return null;
   }
 
   public static String toHiveType(Schema.Type avroType) {

@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.importjob.configuration;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,7 @@ import java.util.List;
  * Therefore, NUMBER requires special treatment.
  * The user has to specify precision and scale when importing into avro.
  */
-public class OracleImportJobTestConfigurationForNumber implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
-
+public class OracleImportJobTestConfigurationForNumber implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 
   @Override
   public String[] getTypes() {
@@ -67,5 +67,15 @@ public class OracleImportJobTestConfigurationForNumber implements ImportJobTestC
   @Override
   public String toString() {
     return getClass().getSimpleName();
+  }
+
+  @Override
+  public Object[] getExpectedResultsForHive() {
+    return new Object[]{
+        new BigDecimal("1"),
+        new BigDecimal("100.010"),
+        new BigDecimal("100"),
+        new BigDecimal("100.03000")
+    };
   }
 }

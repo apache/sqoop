@@ -167,7 +167,7 @@ public abstract class ConnManager {
    * @return            hive type
    */
   public String toHiveType(int sqlType) {
-    return HiveTypes.toHiveType(sqlType);
+    return HiveTypes.toHiveType(sqlType, options);
   }
 
    /**
