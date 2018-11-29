@@ -16,12 +16,13 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob.numerictypes;
+package org.apache.sqoop.importjob.numerictypes.avro;
 
 import org.apache.sqoop.importjob.configuration.AvroTestConfiguration;
 import org.apache.sqoop.importjob.configuration.OracleImportJobTestConfiguration;
 import org.apache.sqoop.importjob.configuration.OracleImportJobTestConfigurationForNumber;
 import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
+import org.apache.sqoop.importjob.numerictypes.NumericTypesAvroImportTestBase;
 import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.apache.sqoop.testutil.adapter.DatabaseAdapter;
 import org.apache.sqoop.testutil.adapter.OracleDatabaseAdapter;
@@ -32,10 +33,14 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.FAIL_WITHOUT_EXTRA_ARGS;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.FAIL_WITH_PADDING_ONLY;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY;
+
 @Category(OracleTest.class)
 @RunWith(Parameterized.class)
 @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-public class OracleNumericTypesImportTest<T extends AvroTestConfiguration & ParquetTestConfiguration> extends NumericTypesImportTestBase<T> {
+public class OracleNumericTypesAvroImportTest<T extends AvroTestConfiguration & ParquetTestConfiguration> extends NumericTypesAvroImportTestBase<T> {
 
   @Override
   public DatabaseAdapter createAdapter() {
@@ -50,7 +55,7 @@ public class OracleNumericTypesImportTest<T extends AvroTestConfiguration & Parq
     );
   }
 
-  public OracleNumericTypesImportTest(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
+  public OracleNumericTypesAvroImportTest(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
     super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
   }
 }

@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.importjob.configuration;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +26,7 @@ import java.util.List;
  * This test configuration intends to cover the fact that oracle stores these types without padding them with 0s,
  * therefore when importing into avro, one has to use the padding feature.
  */
-public class OracleImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
+public class OracleImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 
   @Override
   public String[] getTypes() {
@@ -66,5 +67,21 @@ public class OracleImportJobTestConfiguration implements ImportJobTestConfigurat
   @Override
   public String toString() {
     return getClass().getSimpleName();
+  }
+
+  @Override
+  public Object[] getExpectedResultsForHive() {
+    return new Object[]{
+        new BigDecimal("1"),
+        new BigDecimal("1000000"),
+        new BigDecimal("1000000.05000"),
+        new BigDecimal("1000000"),
+        new BigDecimal("1000000.05000"),
+        new BigDecimal("100"),
+        new BigDecimal("1000000"),
+        new BigDecimal("1000000.05000"),
+        new BigDecimal("1000000"),
+        new BigDecimal("1000000.05000")
+    };
   }
 }

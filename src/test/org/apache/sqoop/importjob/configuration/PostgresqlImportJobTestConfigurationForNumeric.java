@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.importjob.configuration;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,7 @@ import java.util.List;
  * for precision and scale for NUMERIC. Also, important, that the accompanying columns
  *  - NUMERIC(20) and NUMERIC(20, 5) don't get modified.
  */
-public class PostgresqlImportJobTestConfigurationForNumeric implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
+public class PostgresqlImportJobTestConfigurationForNumeric implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 
   @Override
   public String[] getTypes() {
@@ -66,5 +67,15 @@ public class PostgresqlImportJobTestConfigurationForNumeric implements ImportJob
   @Override
   public String toString() {
     return getClass().getSimpleName();
+  }
+
+  @Override
+  public Object[] getExpectedResultsForHive() {
+    return new Object[]{
+        new Integer(1),
+        new BigDecimal("100.010"),
+        new BigDecimal("100"),
+        new BigDecimal("100.01000")
+    };
   }
 }
