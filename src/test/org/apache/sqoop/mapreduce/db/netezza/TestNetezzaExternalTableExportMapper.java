@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -200,6 +201,7 @@ public class TestNetezzaExternalTableExportMapper {
     Mapper.Context context = mock(Mapper.Context.class);
 
     Configuration conf = new Configuration();
+    conf.set("mapreduce.task.id", UUID.randomUUID().toString());
     when(context.getConfiguration()).thenReturn(conf);
 
     TaskAttemptID taskAttemptID = new TaskAttemptID();
