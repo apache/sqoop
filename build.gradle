@@ -331,6 +331,11 @@ def testBuildDir = "$buildDir/test/"
 def testBuildDirData ="$testBuildDir/data/"
 
 tasks.withType(Test) {
+    doFirst {
+        project.mkdir(testBuildDir)
+        project.mkdir(testBuildDirData)
+    }
+
     testLogging {
         events 'passed', 'skipped'
     }
@@ -357,15 +362,6 @@ tasks.withType(Test) {
 
     forkEvery forkEveryDefault
     ignoreFailures ignoreTestFailures
-}
-
-project.tasks.each {
-  if ( it.name.toLowerCase().endsWith('test') ) {
-    it.doFirst({
-      project.mkdir(testBuildDir)
-      project.mkdir(testBuildDirData)
-    })
-  }
 }
 
 task kerberizedTest (type: Test){
