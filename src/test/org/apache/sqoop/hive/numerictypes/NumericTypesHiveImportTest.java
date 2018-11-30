@@ -27,7 +27,6 @@ import org.apache.sqoop.importjob.configuration.OracleImportJobTestConfiguration
 import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationForNumeric;
 import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationPaddingShouldSucceed;
 import org.apache.sqoop.importjob.configuration.SqlServerImportJobTestConfiguration;
-import org.apache.sqoop.testcategories.sqooptest.IntegrationTest;
 import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;

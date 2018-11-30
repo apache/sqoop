@@ -26,8 +26,8 @@ public class PostgresqlImportJobTestConfigurationPaddingShouldSucceed implements
 
   @Override
   public String[] getTypes() {
-    String[] columnTypes = {"INT", "NUMERIC(20)", "NUMERIC(20,5)", "NUMERIC(20,0)", "NUMERIC(1000,5)",
-        "DECIMAL(20)", "DECIMAL(20)", "DECIMAL(20,5)", "DECIMAL(20,0)", "DECIMAL(1000,5)"};
+    String[] columnTypes = {"INT", "NUMERIC(20)", "NUMERIC(20,5)", "NUMERIC(20,0)", "NUMERIC(1000,50)",
+        "DECIMAL(20)", "DECIMAL(20)", "DECIMAL(20,5)", "DECIMAL(20,0)", "DECIMAL(1000,50)"};
     return columnTypes;
   }
 
@@ -41,14 +41,14 @@ public class PostgresqlImportJobTestConfigurationPaddingShouldSucceed implements
   public List<String[]> getSampleData() {
     List<String[]> inputData = new ArrayList<>();
     inputData.add(new String[]{"1", "1000000.05", "1000000.05", "1000000.05", "1000000.05",
-        "100.02", "1000000.05", "1000000.05", "1000000.05", "1000000.05"});
+        "100.02", "1000000.05", "1000000.05", "1000000.05", "11111111112222222222333333333344444444445555555555.111111111122222222223333333333444444444455555"});
     return inputData;
   }
 
   @Override
   public String[] getExpectedResultsForAvro() {
-    String expectedRecord = "{\"ID\": 1, \"N2\": 1000000, \"N3\": 1000000.05000, \"N4\": 1000000, \"N5\": 1000000.05000, " +
-        "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 1000000.05000}";
+    String expectedRecord = "{\"ID\": 1, \"N2\": 1000000, \"N3\": 1000000.05000, \"N4\": 1000000, \"N5\": 1000000.05000000000000000000000000000000000000000000000000, " +
+        "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 11111111112222222222333333333344444444445555555555.11111111112222222222333333333344444444445555500000}";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;
@@ -56,7 +56,8 @@ public class PostgresqlImportJobTestConfigurationPaddingShouldSucceed implements
 
   @Override
   public String[] getExpectedResultsForParquet() {
-    String expectedRecord = "1,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,1000000.05000";
+    String expectedRecord = "1,1000000,1000000.05000,1000000,1000000.05000000000000000000000000000000000000000000000000," +
+        "100,1000000,1000000.05000,1000000,11111111112222222222333333333344444444445555555555.11111111112222222222333333333344444444445555500000";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;
@@ -67,6 +68,12 @@ public class PostgresqlImportJobTestConfigurationPaddingShouldSucceed implements
     return getClass().getSimpleName();
   }
 
+  /**
+   * Special cases for numbers with a precision or scale higher than 38, i.e. the maximum precision and scale in Hive:
+   * - parquet import will be successful, so data will be present on storage
+   * - but Hive won't be able to read it, and returns null instead of objects.
+   * @return
+   */
   @Override
   public Object[] getExpectedResultsForHive() {
     return new Object[]{
@@ -74,12 +81,12 @@ public class PostgresqlImportJobTestConfigurationPaddingShouldSucceed implements
         new BigDecimal("1000000"),
         new BigDecimal("1000000.05000"),
         new BigDecimal("1000000"),
-        new BigDecimal("1000000.05000"),
+        null,
         new BigDecimal("100"),
         new BigDecimal("1000000"),
         new BigDecimal("1000000.05000"),
         new BigDecimal("1000000"),
-        new BigDecimal("1000000.05000")
+        null
     };
   }
 }
