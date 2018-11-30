@@ -99,7 +99,8 @@ def forkEveryDefault = Integer.valueOf(System.getProperty("forkEvery.default", "
 def ignoreTestFailures = Boolean.getBoolean("ignoreTestFailures")
 
 dependencies {
-    if (sqoopThirdPartyLib != null) runtime fileTree(dir: sqoopThirdPartyLib, include: '*.jar')
+    if (sqoopThirdPartyLib == null) sqoopThirdPartyLib="/var/lib/sqoop"
+    runtime fileTree(dir: sqoopThirdPartyLib, include: '*.jar')
     compile group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoopVersion
     compile (group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoopVersion) {
         exclude group: "asm", module: "asm"
