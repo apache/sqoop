@@ -85,7 +85,7 @@ public final class HiveTypes {
           default:
         // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT,
         // BLOB, ARRAY, STRUCT, REF, JAVA_OBJECT.
-            throw new RuntimeException(String.format("There is no Hive type mapping defined for the SQL type of: %s ", sqlType));
+            return null;
       }
   }
 
