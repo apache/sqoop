@@ -57,7 +57,6 @@ import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITHOUT_EX
 import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY;
 
 @RunWith(Enclosed.class)
-@Category(IntegrationTest.class)
 public class NumericTypesHiveImportTest {
 
   @Rule
@@ -91,22 +90,13 @@ public class NumericTypesHiveImportTest {
   public static class MysqlNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
 
     public MysqlNumericTypesHiveImportTest() {
-      super(new MysqlImportJobTestConfiguration(), NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS, NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY);
+      super(new MysqlImportJobTestConfiguration(), NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS, NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY,
+          hiveMiniCluster, hiveServer2TestUtil);
     }
 
     @Override
     public DatabaseAdapter createAdapter() {
       return new MysqlDatabaseAdapter();
-    }
-
-    @Override
-    protected HiveMiniCluster getHiveMiniCluster() {
-      return hiveMiniCluster;
-    }
-
-    @Override
-    protected HiveServer2TestUtil getHiveServer2TestUtil() {
-      return hiveServer2TestUtil;
     }
   }
 
@@ -129,17 +119,7 @@ public class NumericTypesHiveImportTest {
     }
 
     public OracleNumericTypesHiveImportTest(HiveTestConfiguration configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
-      super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
-    }
-
-    @Override
-    protected HiveMiniCluster getHiveMiniCluster() {
-      return hiveMiniCluster;
-    }
-
-    @Override
-    protected HiveServer2TestUtil getHiveServer2TestUtil() {
-      return hiveServer2TestUtil;
+      super(configuration, failWithoutExtraArgs, failWithPaddingOnly, hiveMiniCluster, hiveServer2TestUtil);
     }
   }
 
@@ -162,17 +142,7 @@ public class NumericTypesHiveImportTest {
     }
 
     public PostgresNumericTypesHiveImportTest(HiveTestConfiguration configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
-      super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
-    }
-
-    @Override
-    protected HiveMiniCluster getHiveMiniCluster() {
-      return hiveMiniCluster;
-    }
-
-    @Override
-    protected HiveServer2TestUtil getHiveServer2TestUtil() {
-      return hiveServer2TestUtil;
+      super(configuration, failWithoutExtraArgs, failWithPaddingOnly, hiveMiniCluster, hiveServer2TestUtil);
     }
   }
 
@@ -180,22 +150,13 @@ public class NumericTypesHiveImportTest {
   public static class SqlServerNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
 
     public SqlServerNumericTypesHiveImportTest() {
-      super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY);
+      super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY,
+          hiveMiniCluster, hiveServer2TestUtil);
     }
 
     @Override
     public DatabaseAdapter createAdapter() {
       return new SqlServerDatabaseAdapter();
-    }
-
-    @Override
-    protected HiveMiniCluster getHiveMiniCluster() {
-      return hiveMiniCluster;
-    }
-
-    @Override
-    protected HiveServer2TestUtil getHiveServer2TestUtil() {
-      return hiveServer2TestUtil;
     }
   }
 

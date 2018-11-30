@@ -41,14 +41,14 @@ public class MysqlImportJobTestConfiguration implements ImportJobTestConfigurati
   public List<String[]> getSampleData() {
     List<String[]> inputData = new ArrayList<>();
     inputData.add(new String[]{"1", "100.030", "1000000.05", "1000000.05", "1000000.05", "1000000.05",
-        "100.040", "1000000.05", "1000000.05", "1000000.05", "1000000.05"});
+        "100.040", "1000000.05", "1000000.05", "1000000.05", "11111111112222222222333333333344444444445555555555.05"});
     return inputData;
   }
 
   @Override
   public String[] getExpectedResultsForAvro() {
     String expectedRecord = "{\"ID\": 1, \"N1\": 100, \"N2\": 1000000, \"N3\": 1000000.05000, \"N4\": 1000000, \"N5\": 1000000.05000, " +
-        "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 1000000.05000}";
+        "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 11111111112222222222333333333344444444445555555555.05000}";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;
@@ -56,7 +56,7 @@ public class MysqlImportJobTestConfiguration implements ImportJobTestConfigurati
 
   @Override
   public String[] getExpectedResultsForParquet() {
-    String expectedRecord = "1,100,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,1000000.05000";
+    String expectedRecord = "1,100,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,11111111112222222222333333333344444444445555555555.05000";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;
@@ -67,6 +67,12 @@ public class MysqlImportJobTestConfiguration implements ImportJobTestConfigurati
     return getClass().getSimpleName();
   }
 
+  /**
+   * Special case for numbers with a precision higher than 38, i.e. the maximum precision in Hive:
+   * - parquet import will be succesful, so data will be present on storage
+   * - but Hive won't be able to read it, and returns null.
+   * @return
+   */
   @Override
   public Object[] getExpectedResultsForHive() {
     return new Object[]{
@@ -80,7 +86,7 @@ public class MysqlImportJobTestConfiguration implements ImportJobTestConfigurati
         new BigDecimal("1000000"),
         new BigDecimal("1000000.05000"),
         new BigDecimal("1000000"),
-        new BigDecimal("1000000.05000")
+        null
     };
   }
 }

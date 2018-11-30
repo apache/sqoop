@@ -30,9 +30,16 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class NumericTypesHiveImportTestBase<T extends HiveTestConfiguration> extends NumericTypesImportTestBase<T> {
 
-  public NumericTypesHiveImportTestBase(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
+  public NumericTypesHiveImportTestBase(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly,
+                                        HiveMiniCluster hiveMiniCluster, HiveServer2TestUtil hiveServer2TestUtil) {
     super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
+    this.hiveServer2TestUtil = hiveServer2TestUtil;
+    this.hiveMiniCluster = hiveMiniCluster;
   }
+
+  private final HiveMiniCluster hiveMiniCluster;
+
+  private final HiveServer2TestUtil hiveServer2TestUtil;
 
   @Override
   public ArgumentArrayBuilder getArgsBuilder() {
@@ -42,7 +49,7 @@ public abstract class NumericTypesHiveImportTestBase<T extends HiveTestConfigura
         .withOption("connect", getAdapter().getConnectionString())
         .withOption("table", getTableName())
         .withOption("hive-import")
-        .withOption("hs2-url", getHiveMiniCluster().getUrl())
+        .withOption("hs2-url", hiveMiniCluster.getUrl())
         .withOption("num-mappers", "1")
         .withOption("as-parquetfile")
         .withOption("delete-target-dir");
@@ -50,14 +57,10 @@ public abstract class NumericTypesHiveImportTestBase<T extends HiveTestConfigura
     return builder;
   }
 
-  protected abstract HiveMiniCluster getHiveMiniCluster();
-
-  protected abstract HiveServer2TestUtil getHiveServer2TestUtil();
-
   @Override
   public void verify() {
     // The result contains a byte[] so we have to use Arrays.deepEquals() to assert.
-    Object[] firstRow = getHiveServer2TestUtil().loadRawRowsFromTable(getTableName()).iterator().next().toArray();
+    Object[] firstRow = hiveServer2TestUtil.loadRawRowsFromTable(getTableName()).iterator().next().toArray();
     Object[] expectedResultsForHive = getConfiguration().getExpectedResultsForHive();
     assertTrue(deepEquals(expectedResultsForHive, firstRow));
   }

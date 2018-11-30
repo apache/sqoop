@@ -48,23 +48,11 @@ public final class HiveTypes {
 
   private HiveTypes() { }
 
-
-  public static String toHiveType(int sqlType, SqoopOptions options) {
-
-    if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false)
-        && (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)){
-      return HIVE_TYPE_DECIMAL;
-    }
-    return toHiveType(sqlType);
-  }
-
-
   /**
    * Given JDBC SQL types coming from another database, what is the best
    * mapping to a Hive-specific type?
    */
-  private static String toHiveType(int sqlType) {
-
+  public static String toHiveType(int sqlType, SqoopOptions options) {
       switch (sqlType) {
           case Types.INTEGER:
           case Types.SMALLINT:
@@ -82,6 +70,7 @@ public final class HiveTypes {
               return HIVE_TYPE_STRING;
           case Types.NUMERIC:
           case Types.DECIMAL:
+              return mapDecimalsToHiveType(sqlType, options);
           case Types.FLOAT:
           case Types.DOUBLE:
           case Types.REAL:
@@ -96,30 +85,42 @@ public final class HiveTypes {
           default:
         // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT,
         // BLOB, ARRAY, STRUCT, REF, JAVA_OBJECT.
-        return null;
+            throw new RuntimeException(String.format("There is no Hive type mapping defined for the SQL type of: %s ", sqlType));
       }
+  }
+
+  private static String mapDecimalsToHiveType(int sqlType, SqoopOptions options) {
+    if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false)
+        && (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)){
+      return HIVE_TYPE_DECIMAL;
+    }
+    return HIVE_TYPE_DOUBLE;
   }
 
 
   public static String toHiveType(Schema schema) {
-    if (schema.getType() != Schema.Type.UNION) {
-      return toHiveType(schema.getType());
-    }
-    for (Schema subSchema : schema.getTypes()) {
-      if (subSchema.getLogicalType() != null && subSchema.getLogicalType() instanceof Decimal) {
-        Decimal decimal = (Decimal) subSchema.getLogicalType();
+    if (schema.getType() == Schema.Type.UNION) {
+      for (Schema subSchema : schema.getTypes()) {
+        if (subSchema.getLogicalType() != null && subSchema.getLogicalType() instanceof Decimal) {
+          Decimal decimal = (Decimal) subSchema.getLogicalType();
 
-        // trimming precision and scale to Hive's maximum values.
-        int precision = Math.min(HiveDecimal.MAX_PRECISION, decimal.getPrecision());
-        int scale = Math.min(HiveDecimal.MAX_SCALE, decimal.getScale());
-        return String.format("%s (%d, %d)", HIVE_TYPE_DECIMAL, precision, scale);
-      }
-      else if (subSchema.getType() != Schema.Type.NULL) {
-        return toHiveType(subSchema.getType());
+          // trimming precision and scale to Hive's maximum values.
+          int precision = Math.min(HiveDecimal.MAX_PRECISION, decimal.getPrecision());
+          if (precision < decimal.getPrecision()) {
+            LOG.warn("Warning! Precision in the Hive table definition will be smaller than the actual precision of the column on storage! Hive may not be able to read data from this column.");
+          }
+          int scale = Math.min(HiveDecimal.MAX_SCALE, decimal.getScale());
+          if (scale < decimal.getScale()) {
+            LOG.warn("Warning! Scale in the Hive table definition will be smaller than the actual scale of the column on storage! Hive may not be able to read data from this column.");
+          }
+          return String.format("%s (%d, %d)", HIVE_TYPE_DECIMAL, precision, scale);
+        }
+        else if (subSchema.getType() != Schema.Type.NULL) {
+          return toHiveType(subSchema.getType());
+        }
       }
     }
-
-    return null;
+    return toHiveType(schema.getType());
   }
 
   public static String toHiveType(Schema.Type avroType) {
@@ -141,7 +142,7 @@ public final class HiveTypes {
         case FIXED:
           return HIVE_TYPE_BINARY;
         default:
-          return null;
+          throw new RuntimeException(String.format("There is no Hive type mapping defined for the Avro type of: %s ", avroType.getName()));
       }
   }
 
