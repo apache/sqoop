@@ -84,6 +84,16 @@ configurations {
 
 compileJava.dependsOn(SqoopVersionFileGen)
 
+compileJava {
+    options.compilerArgs += '-proc:none'
+    options.compilerArgs += '-Xlint:all'
+}
+
+compileTestJava {
+    options.compilerArgs += '-proc:none'
+    options.compilerArgs += '-Xlint:all'
+}
+
 configurations.all {
     resolutionStrategy {
         force group: 'org.apache.avro', name: 'avro', version: avroVersion
@@ -320,16 +330,16 @@ task allTest (type: Test){
 def testBuildDir = "$buildDir/test/"
 def testBuildDirData ="$testBuildDir/data/"
 
-task buildFolder {
-    project.mkdir(testBuildDirData)
-}
-
 tasks.withType(Test) {
+    doFirst {
+        project.mkdir(testBuildDir)
+        project.mkdir(testBuildDirData)
+    }
+
     testLogging {
         events 'passed', 'skipped'
     }
     workingDir = testBuildDirData
-    project.mkdir(workingDir)
     systemProperties(System.getProperties())
     systemProperty "test.data.dir", "$projectDir/testdata"
     systemProperty 'test.build.data', "$testBuildDir/data"
@@ -345,8 +355,6 @@ tasks.withType(Test) {
     minHeapSize = "512m"
     maxHeapSize = "8G"
     jvmArgs "-da:org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge"
-
-    dependsOn buildFolder
 
     jacoco{
         excludes = ["**/SqoopVersion*"]
