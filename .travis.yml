@@ -58,21 +58,11 @@ before_install:
     sleep 60;
   elif [ "$TEST_TASK" = "oracleXeTest" ];
   then
-  if [ -n "$ORACLE_DRIVER_URL" ];
-    then
-      mkdir -p drivers;
-      wget -q $ORACLE_DRIVER_URL --output-document ./drivers/oracledriver.jar;
-      ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh oracle;
-      sleep 90;
-    fi
+    ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh oracle;
+    sleep 90;
   fi
 script:
-- if [ "$TEST_TASK" != "oracleXeTest" ] || [ -n "$ORACLE_DRIVER_URL" ];
-  then
-    ./gradlew -Dsqoop.thirdparty.lib.dir=./drivers $TEST_TASK;
-  else
-    echo 'Skipping Oracle XE test execution because ORACLE_DRIVER_URL is not set.';
-  fi
+- ./gradlew $TEST_TASK;
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
 - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
