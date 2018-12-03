@@ -52,7 +52,8 @@ public final class HiveTypes {
    * Given JDBC SQL types coming from another database, what is the best
    * mapping to a Hive-specific type?
    */
-  public static String toHiveType(int sqlType, SqoopOptions options) {
+  public static String toHiveType(int sqlType) {
+
       switch (sqlType) {
           case Types.INTEGER:
           case Types.SMALLINT:
@@ -70,7 +71,6 @@ public final class HiveTypes {
               return HIVE_TYPE_STRING;
           case Types.NUMERIC:
           case Types.DECIMAL:
-              return mapDecimalsToHiveType(sqlType, options);
           case Types.FLOAT:
           case Types.DOUBLE:
           case Types.REAL:
@@ -85,65 +85,62 @@ public final class HiveTypes {
           default:
         // TODO(aaron): Support BINARY, VARBINARY, LONGVARBINARY, DISTINCT,
         // BLOB, ARRAY, STRUCT, REF, JAVA_OBJECT.
-            return null;
+        return null;
       }
   }
 
-  private static String mapDecimalsToHiveType(int sqlType, SqoopOptions options) {
-    if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false)
-        && (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)){
-      return HIVE_TYPE_DECIMAL;
-    }
-    return HIVE_TYPE_DOUBLE;
-  }
-
-
-  public static String toHiveType(Schema schema) {
+  public static String toHiveType(Schema schema, SqoopOptions options) {
     if (schema.getType() == Schema.Type.UNION) {
       for (Schema subSchema : schema.getTypes()) {
-        if (subSchema.getLogicalType() != null && subSchema.getLogicalType() instanceof Decimal) {
-          Decimal decimal = (Decimal) subSchema.getLogicalType();
-
-          // trimming precision and scale to Hive's maximum values.
-          int precision = Math.min(HiveDecimal.MAX_PRECISION, decimal.getPrecision());
-          if (precision < decimal.getPrecision()) {
-            LOG.warn("Warning! Precision in the Hive table definition will be smaller than the actual precision of the column on storage! Hive may not be able to read data from this column.");
-          }
-          int scale = Math.min(HiveDecimal.MAX_SCALE, decimal.getScale());
-          if (scale < decimal.getScale()) {
-            LOG.warn("Warning! Scale in the Hive table definition will be smaller than the actual scale of the column on storage! Hive may not be able to read data from this column.");
-          }
-          return String.format("%s (%d, %d)", HIVE_TYPE_DECIMAL, precision, scale);
-        }
-        else if (subSchema.getType() != Schema.Type.NULL) {
-          return toHiveType(subSchema.getType());
+        if (subSchema.getType() != Schema.Type.NULL) {
+          return toHiveType(subSchema, options);
         }
       }
     }
-    return toHiveType(schema.getType());
+
+    Schema.Type avroType = schema.getType();
+    switch (avroType) {
+      case BOOLEAN:
+        return HIVE_TYPE_BOOLEAN;
+      case INT:
+        return HIVE_TYPE_INT;
+      case LONG:
+        return HIVE_TYPE_BIGINT;
+      case FLOAT:
+        return HIVE_TYPE_FLOAT;
+      case DOUBLE:
+        return HIVE_TYPE_DOUBLE;
+      case STRING:
+      case ENUM:
+        return HIVE_TYPE_STRING;
+      case BYTES:
+        return mapToDecimalOrBinary(schema, options);
+      case FIXED:
+        return HIVE_TYPE_BINARY;
+      default:
+        throw new RuntimeException(String.format("There is no Hive type mapping defined for the Avro type of: %s ", avroType.getName()));
+    }
   }
 
-  public static String toHiveType(Schema.Type avroType) {
-      switch (avroType) {
-        case BOOLEAN:
-          return HIVE_TYPE_BOOLEAN;
-        case INT:
-          return HIVE_TYPE_INT;
-        case LONG:
-          return HIVE_TYPE_BIGINT;
-        case FLOAT:
-          return HIVE_TYPE_FLOAT;
-        case DOUBLE:
-          return HIVE_TYPE_DOUBLE;
-        case STRING:
-        case ENUM:
-          return HIVE_TYPE_STRING;
-        case BYTES:
-        case FIXED:
-          return HIVE_TYPE_BINARY;
-        default:
-          throw new RuntimeException(String.format("There is no Hive type mapping defined for the Avro type of: %s ", avroType.getName()));
+  private static String mapToDecimalOrBinary(Schema schema, SqoopOptions options) {
+    boolean logicalTypesEnabled = options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false);
+    if (logicalTypesEnabled && schema.getLogicalType() != null && schema.getLogicalType() instanceof Decimal) {
+      Decimal decimal = (Decimal) schema.getLogicalType();
+
+      // trimming precision and scale to Hive's maximum values.
+      int precision = Math.min(HiveDecimal.MAX_PRECISION, decimal.getPrecision());
+      if (precision < decimal.getPrecision()) {
+        LOG.warn("Warning! Precision in the Hive table definition will be smaller than the actual precision of the column on storage! Hive may not be able to read data from this column.");
       }
+      int scale = Math.min(HiveDecimal.MAX_SCALE, decimal.getScale());
+      if (scale < decimal.getScale()) {
+        LOG.warn("Warning! Scale in the Hive table definition will be smaller than the actual scale of the column on storage! Hive may not be able to read data from this column.");
+      }
+      return String.format("%s (%d, %d)", HIVE_TYPE_DECIMAL, precision, scale);
+    }
+    else {
+      return HIVE_TYPE_BINARY;
+    }
   }
 
   /**

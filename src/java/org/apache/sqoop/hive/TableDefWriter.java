@@ -185,7 +185,7 @@ public class TableDefWriter {
         Integer colType = columnTypes.get(col);
         hiveColType = getHiveColumnTypeForTextTable(userMapping, col, colType);
       } else if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-        hiveColType = HiveTypes.toHiveType(columnNameToAvroFieldSchema.get(col));
+        hiveColType = HiveTypes.toHiveType(columnNameToAvroFieldSchema.get(col), options);
       } else {
         throw new RuntimeException("File format is not supported for Hive tables.");
       }

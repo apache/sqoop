@@ -19,6 +19,7 @@
 package org.apache.sqoop.hive;
 
 import org.apache.avro.Schema;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.apache.sqoop.hive.HiveTypes.toHiveType;
@@ -38,29 +40,30 @@ import static org.junit.Assert.*;
 public class TestHiveTypesForAvroTypeMapping {
 
   private final String hiveType;
-  private final Schema.Type avroType;
+  private final Schema schema;
 
-  @Parameters(name = "hiveType = {0}, avroType = {1}")
+  @Parameters(name = "hiveType = {0}, schema = {1}")
   public static Iterable<? extends Object> parameters() {
     return Arrays.asList(
-        new Object[] {"BOOLEAN", Schema.Type.BOOLEAN},
-        new Object[] {"INT", Schema.Type.INT},
-        new Object[] {"BIGINT", Schema.Type.LONG},
-        new Object[] {"FLOAT", Schema.Type.FLOAT},
-        new Object[] {"DOUBLE", Schema.Type.DOUBLE},
-        new Object[] {"STRING", Schema.Type.ENUM},
-        new Object[] {"STRING", Schema.Type.STRING},
-        new Object[] {"BINARY", Schema.Type.BYTES},
-        new Object[] {"BINARY", Schema.Type.FIXED});
+        new Object[]{"BOOLEAN", Schema.create(Schema.Type.BOOLEAN)},
+        new Object[]{"INT", Schema.create(Schema.Type.INT)},
+        new Object[]{"BIGINT", Schema.create(Schema.Type.LONG)},
+        new Object[]{"FLOAT", Schema.create(Schema.Type.FLOAT)},
+        new Object[]{"DOUBLE", Schema.create(Schema.Type.DOUBLE)},
+        new Object[]{"STRING", Schema.createEnum("ENUM", "doc", "namespce", new ArrayList<>())}, // Schema.Type.ENUM
+        new Object[]{"STRING", Schema.create(Schema.Type.STRING)},
+        new Object[]{"BINARY", Schema.create(Schema.Type.BYTES)},
+        new Object[]{"BINARY", Schema.createFixed("Fixed", "doc", "space", 1) }
+        );
   }
 
-  public TestHiveTypesForAvroTypeMapping(String hiveType, Schema.Type avroType) {
+  public TestHiveTypesForAvroTypeMapping(String hiveType, Schema schema) {
     this.hiveType = hiveType;
-    this.avroType = avroType;
+    this.schema = schema;
   }
 
   @Test
   public void testAvroTypeToHiveTypeMapping() throws Exception {
-    assertEquals(hiveType, toHiveType(avroType));
+    assertEquals(hiveType, toHiveType(schema, new SqoopOptions()));
   }
 }

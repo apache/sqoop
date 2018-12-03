@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * This test configuration intends to cover the fact that oracle stores these types without padding them with 0s,
- * therefore when importing into avro, one has to use the padding feature.
+ * therefore when importing into avro and parquet, one has to use the padding feature.
  */
 public class OracleImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 

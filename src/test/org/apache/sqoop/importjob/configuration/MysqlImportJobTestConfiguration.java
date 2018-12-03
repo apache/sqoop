@@ -22,6 +22,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A note on the expected values here:
+ *
+ * With padding turned on, all of the numbers are expected to be padded with 0s, so that the total number of digits
+ * after the decimal point will be equal to their scale.
+ */
 public class MysqlImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 
   @Override
@@ -68,10 +74,9 @@ public class MysqlImportJobTestConfiguration implements ImportJobTestConfigurati
   }
 
   /**
-   * Special case for numbers with a precision higher than 38, i.e. the maximum precision in Hive:
-   * - parquet import will be succesful, so data will be present on storage
+   * Since Mysql permits a precision that is higher than 65, there is a special test case here for the last column:
+   * - parquet and avro import will be successful, so data will be present on storage
    * - but Hive won't be able to read it, and returns null.
-   * @return
    */
   @Override
   public Object[] getExpectedResultsForHive() {

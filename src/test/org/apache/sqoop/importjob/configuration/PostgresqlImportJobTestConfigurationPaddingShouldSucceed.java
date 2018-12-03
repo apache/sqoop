@@ -22,6 +22,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Numbers with a scale and precision greater that 38 are expected to work in Parquet and Avro import properly.
+ *
+ * With padding turned on, all of the numbers are expected to be padded with 0s, so that the total number of digits
+ * after the decimal point will be equal to their scale.
+ */
 public class PostgresqlImportJobTestConfigurationPaddingShouldSucceed implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 
   @Override
@@ -72,7 +78,8 @@ public class PostgresqlImportJobTestConfigurationPaddingShouldSucceed implements
    * Special cases for numbers with a precision or scale higher than 38, i.e. the maximum precision and scale in Hive:
    * - parquet import will be successful, so data will be present on storage
    * - but Hive won't be able to read it, and returns null instead of objects.
-   * @return
+   *
+   * Because: Hive has an upper limit of 38 for both precision and scale and won't be able to read the numbers (returns null) above the limit.
    */
   @Override
   public Object[] getExpectedResultsForHive() {
