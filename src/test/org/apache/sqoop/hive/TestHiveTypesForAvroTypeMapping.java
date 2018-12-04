@@ -18,8 +18,10 @@
 
 package org.apache.sqoop.hive;
 
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.Test;
@@ -30,6 +32,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.apache.sqoop.hive.HiveTypes.toHiveType;
 import static org.junit.Assert.*;
@@ -41,30 +44,49 @@ public class TestHiveTypesForAvroTypeMapping {
 
   private final String hiveType;
   private final Schema schema;
+  private final SqoopOptions options;
 
-  @Parameters(name = "hiveType = {0}, schema = {1}")
+  @Parameters(name = "hiveType = {0}, schema = {1}, options = {2}")
   public static Iterable<? extends Object> parameters() {
     return Arrays.asList(
-        new Object[]{"BOOLEAN", Schema.create(Schema.Type.BOOLEAN)},
-        new Object[]{"INT", Schema.create(Schema.Type.INT)},
-        new Object[]{"BIGINT", Schema.create(Schema.Type.LONG)},
-        new Object[]{"FLOAT", Schema.create(Schema.Type.FLOAT)},
-        new Object[]{"DOUBLE", Schema.create(Schema.Type.DOUBLE)},
-        new Object[]{"STRING", Schema.createEnum("ENUM", "doc", "namespce", new ArrayList<>())}, // Schema.Type.ENUM
-        new Object[]{"STRING", Schema.create(Schema.Type.STRING)},
-        new Object[]{"BINARY", Schema.create(Schema.Type.BYTES)},
-        new Object[]{"BINARY", Schema.createFixed("Fixed", "doc", "space", 1) }
-        //, new Object[]{"DECIMAL", Schema.create(Schema.Type.UNION).}
+        new Object[]{"BOOLEAN", Schema.create(Schema.Type.BOOLEAN), new SqoopOptions()},
+        new Object[]{"INT", Schema.create(Schema.Type.INT), new SqoopOptions()},
+        new Object[]{"BIGINT", Schema.create(Schema.Type.LONG), new SqoopOptions()},
+        new Object[]{"FLOAT", Schema.create(Schema.Type.FLOAT), new SqoopOptions()},
+        new Object[]{"DOUBLE", Schema.create(Schema.Type.DOUBLE), new SqoopOptions()},
+        new Object[]{"STRING", Schema.createEnum("ENUM", "doc", "namespce", new ArrayList<>()), new SqoopOptions()}, // Schema.Type.ENUM
+        new Object[]{"STRING", Schema.create(Schema.Type.STRING), new SqoopOptions()},
+        new Object[]{"BINARY", Schema.create(Schema.Type.BYTES), new SqoopOptions()},
+        new Object[]{"BINARY", Schema.createFixed("Fixed", "doc", "space", 1), new SqoopOptions()},
+        new Object[]{"BINARY", createDecimal(20, 10), new SqoopOptions()},
+        new Object[]{"DECIMAL (20, 10)", createDecimal(20, 10), createSqoopOptionsWithLogicalTypesEnabled()}
         );
   }
 
-  public TestHiveTypesForAvroTypeMapping(String hiveType, Schema schema) {
+  private static SqoopOptions createSqoopOptionsWithLogicalTypesEnabled() {
+    SqoopOptions sqoopOptions = new SqoopOptions();
+    sqoopOptions.getConf().setBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, true);
+    return sqoopOptions;
+  }
+
+  private static Schema createDecimal(int precision, int scale) {
+    List<Schema> childSchemas = new ArrayList<>();
+    childSchemas.add(Schema.create(Schema.Type.NULL));
+    childSchemas.add(
+        LogicalTypes.decimal(precision, scale)
+            .addToSchema(Schema.create(Schema.Type.BYTES))
+    );
+    return Schema.createUnion(childSchemas);
+  }
+
+  public TestHiveTypesForAvroTypeMapping(String hiveType, Schema schema, SqoopOptions options) {
     this.hiveType = hiveType;
     this.schema = schema;
+    this.options = options;
   }
 
   @Test
-  public void testAvroTypeToHiveTypeMapping() throws Exception {
-    assertEquals(hiveType, toHiveType(schema, new SqoopOptions()));
+  public void testAvroTypeToHiveTypeMapping() {
+    assertEquals(hiveType, toHiveType(schema, options));
   }
 }
