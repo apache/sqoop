@@ -20,12 +20,10 @@ package org.apache.sqoop.importjob.numerictypes;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.importjob.configuration.AvroTestConfiguration;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.AvroTestUtils;
 import org.apache.sqoop.testutil.NumericTypesTestUtils;
-import org.junit.Before;
 
 public abstract class NumericTypesAvroImportTestBase<T extends AvroTestConfiguration> extends NumericTypesImportTestBase<T>  {
 
@@ -33,12 +31,6 @@ public abstract class NumericTypesAvroImportTestBase<T extends AvroTestConfigura
 
   public NumericTypesAvroImportTestBase(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
     super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
-  }
-
-  @Before
-  public void setUp() {
-    super.setUp();
-    tableDirPath = new Path(getWarehouseDir() + "/" + getTableName());
   }
 
   @Override

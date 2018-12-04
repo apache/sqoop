@@ -65,7 +65,7 @@ public abstract class NumericTypesImportTestBase<T extends ImportJobTestConfigur
     tableDirPath = new Path(getWarehouseDir() + "/" + getTableName());
   }
 
-  public Path tableDirPath;
+  protected Path tableDirPath;
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -85,8 +85,6 @@ public abstract class NumericTypesImportTestBase<T extends ImportJobTestConfigur
   @Test
   public void testImportWithoutPadding() throws IOException {
     if(failWithoutExtraArgs){
-      thrown.expect(IOException.class);
-      thrown.expectMessage("Failure during job; return status 1");
       NumericTypesTestUtils.configureJunitToExpectFailure(thrown);
     }
     ArgumentArrayBuilder builder = getArgsBuilder();
@@ -100,8 +98,6 @@ public abstract class NumericTypesImportTestBase<T extends ImportJobTestConfigur
   @Test
   public void testImportWithPadding() throws IOException {
     if(failWithPadding){
-      thrown.expect(IOException.class);
-      thrown.expectMessage("Failure during job; return status 1");
       NumericTypesTestUtils.configureJunitToExpectFailure(thrown);
     }
     ArgumentArrayBuilder builder = getArgsBuilder();

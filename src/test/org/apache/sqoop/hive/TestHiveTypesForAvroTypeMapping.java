@@ -54,6 +54,7 @@ public class TestHiveTypesForAvroTypeMapping {
         new Object[]{"STRING", Schema.create(Schema.Type.STRING)},
         new Object[]{"BINARY", Schema.create(Schema.Type.BYTES)},
         new Object[]{"BINARY", Schema.createFixed("Fixed", "doc", "space", 1) }
+        //, new Object[]{"DECIMAL", Schema.create(Schema.Type.UNION).}
         );
   }
 

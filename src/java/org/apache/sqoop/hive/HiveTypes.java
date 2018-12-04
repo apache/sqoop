@@ -124,7 +124,7 @@ public final class HiveTypes {
 
   private static String mapToDecimalOrBinary(Schema schema, SqoopOptions options) {
     boolean logicalTypesEnabled = options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false);
-    if (logicalTypesEnabled && schema.getLogicalType() != null && schema.getLogicalType() instanceof Decimal) {
+    if (logicalTypesEnabled && schema.getLogicalType() instanceof Decimal) {
       Decimal decimal = (Decimal) schema.getLogicalType();
 
       // trimming precision and scale to Hive's maximum values.

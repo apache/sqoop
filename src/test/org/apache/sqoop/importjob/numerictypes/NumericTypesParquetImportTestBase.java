@@ -41,12 +41,6 @@ public abstract class NumericTypesParquetImportTestBase<T extends ParquetTestCon
     super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
   }
 
-  @Before
-  public void setUp() {
-    super.setUp();
-    tableDirPath = new Path(getWarehouseDir() + "/" + getTableName());
-  }
-
   @Override
   public ArgumentArrayBuilder getArgsBuilder() {
     ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
