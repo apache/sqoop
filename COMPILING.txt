@@ -420,7 +420,7 @@ or
     thirdPartyTest
 ----
 
-Gradle is able download all of the necessary drivers except the Oracle one but the Ant build has to be provided
+Gradle is able download all of the necessary drivers but the Ant build has to be provided
 with the drivers for all the databases.
 
 Please note that even if you do not need to install RDBMSs to run Sqoop third party tests against the Docker containers you still need to install the following tools:
@@ -640,7 +640,3 @@ The steps for setting up the CI job are the following:
 
 The Travis CI job uses Gradle to build and test the project and it is able to execute all of the tests except the
 ones requiring an Oracle EE database.
-Note that by default the Oracle XE tests are also disabled because the necessary +ojdbc6.jar+ is not publicly available.
-Contributors have to upload +ojdbc6.jar+ to a public drive and make it available to the CI job by setting
-the +ORACLE_DRIVER_URL+ environment variable in Travis (for more information see Travis
-https://docs.travis-ci.com/user/environment-variables/#defining-variables-in-repository-settings[documentation]).
