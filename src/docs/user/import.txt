@@ -476,32 +476,42 @@ i.e. used during both avro and parquet imports, one has to use the
 sqoop.avro.logical_types.decimal.enable flag. This is necessary if one
 wants to store values as decimals in the avro file format.
 
-Padding number types in avro import
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Padding number types in avro and parquet import
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Certain databases, such as Oracle and Postgres store number and decimal
 values without padding. For example 1.5 in a column declared
-as NUMBER (20,5) is stored as is in Oracle, while the equivalent
+as NUMBER (20, 5) is stored as is in Oracle, while the equivalent
 DECIMAL (20, 5) is stored as 1.50000 in an SQL server instance.
 This leads to a scale mismatch during avro import.
 
 To avoid this error, one can use the sqoop.avro.decimal_padding.enable flag
-to turn on padding with 0s. This flag has to be used together with the
-sqoop.avro.logical_types.decimal.enable flag set to true.
+to turn on padding with 0s during. One also has to enable logical types with the
+sqoop.avro.logical_types.decimal.enable property set to true during an avro import,
+or with the sqoop.parquet.logical_types.decimal.enable property during a parquet import.
 
-Default precision and scale in avro import
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Default precision and scale in avro and parquet import
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All of the databases allow users to specify numeric columns without
 a precision or scale. While MS SQL and MySQL translate these into
 a valid precision and scale values, Oracle and Postgres don't.
 
-Therefore, when a table contains NUMBER in a table in Oracle or
+When a table contains NUMBER in a table in Oracle or
 NUMERIC/DECIMAL in Postgres, one can specify a default precision and scale
 to be used in the avro schema by using the +sqoop.avro.logical_types.decimal.default.precision+
-and +sqoop.avro.logical_types.decimal.default.scale+ flags.
+and +sqoop.avro.logical_types.decimal.default.scale+ properties.
 Avro padding also has to be enabled, if the values are shorter than
 the specified default scale.
+
+Even though their name contains 'avro', the very same properties
+(+sqoop.avro.logical_types.decimal.default.precision+ and +sqoop.avro.logical_types.decimal.default.scale+)
+can be used to specify defaults during a parquet import as well.
+But please not that the padding has to be enabled with the parquet specific property.
+
+The implementation of the padding logic is database independent.
+Our tests only cover only Oracle, Postgres, MS Sql server and MySQL databases,
+therefore these are the supported ones.
 
 Large Objects
 ^^^^^^^^^^^^^
@@ -853,5 +863,15 @@ $ sqoop import -Dsqoop.avro.decimal_padding.enable=true -Dsqoop.avro.logical_typ
     -Dsqoop.avro.logical_types.decimal.default.precision=38 -Dsqoop.avro.logical_types.decimal.default.scale=10
     --connect $CON --username $USER --password $PASS --query "select * from table_name where \$CONDITIONS"
     --target-dir hdfs://nameservice1//etl/target_path --as-avrodatafile --verbose -m 1
+
+----
+
+The same in a parquet import:
+
+----
+$ sqoop import -Dsqoop.parquet.decimal_padding.enable=true -Dsqoop.avro.logical_types.decimal.enable=true
+    -Dsqoop.avro.logical_types.decimal.default.precision=38 -Dsqoop.avro.logical_types.decimal.default.scale=10
+    --connect $CON --username $USER --password $PASS --query "select * from table_name where \$CONDITIONS"
+    --target-dir hdfs://nameservice1//etl/target_path --as-parquetfile --verbose -m 1
 
 ----

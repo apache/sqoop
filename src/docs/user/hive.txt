@@ -112,10 +112,14 @@ configuring a new Hive table with the correct InputFormat. This feature
 currently requires that all partitions of a table be compressed with the lzop
 codec.
 
-The user can specify the +\--external-table-dir+ option in the sqoop command to
+External table import
++++++++++++++++++++++
+
+You can specify the +\--external-table-dir+ option in the sqoop command to
 work with an external Hive table (instead of a managed table, i.e. the default behavior).
 To import data into an external table, one has to specify +\--hive-import+ in the command
-line arguments. Table creation is also supported with the use of +\--create-hive-table+.
+line arguments. Table creation is also supported with the use of +\--create-hive-table+
+option.
 
 Importing into an external Hive table:
 ----
@@ -125,4 +129,36 @@ $ sqoop import --hive-import --connect $CONN --table $TABLENAME --username $USER
 Create an external Hive table:
 ----
 $ sqoop import --hive-import --create-hive-table --connect $CONN --table $TABLENAME --username $USER --password $PASS --external-table-dir /tmp/foobar_example --hive-table foobar
+----
+
+Type Mapping in a Hive import using parquet files
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+As mentioned above, a hive import is a two-step process in Sqoop:
+- Sqoop imports the data with the import tool onto HDFS first.
+- Then, Sqoop generates a Hive statement and executes it, effectively creating a table in Hive.
+
+Since Sqoop is using an avro schema to write parquet files, the SQL types of the source table's column are first
+converted into avro types and an avro schema is created. This schema is then used in a regular Parquet import.
+After the data was imported onto HDFS successfully, in the second step, Sqoop uses the Avro
+schema generated for the parquet import to create the Hive query and maps the Avro types to Hive
+types.
+
+Decimals are converted to String in a parquet import per default, so Decimal columns appear as String
+columns in Hive per default. You can change this behavior and use logical types instead, so that Decimals
+will be mapped to the Hive type Decimal as well. This has to be enabled with the
++sqoop.parquet.decimal_padding.enable+ property. As noted in the section discussing
+'Padding number types in avro and parquet import', you should also specify the default precision and scale and
+enable decimal padding.
+
+A limitation of Hive is that the maximum precision and scale is 38. When converting SQL types to the Hive Decimal
+type, precision and scale will be modified to meet this limitation, automatically. The data itself however, will
+only have to adhere to the limitations of the Parquet import, thus values with a precision and scale bigger than
+38 will be present on storage on HDFS, but they won't be visible in Hive, (since Hive is a schema-on-read tool).
+
+Enable padding and specifying a default precision and scale in a Hive Import:
+----
+$ sqoop import -Dsqoop.parquet.decimal_padding.enable=true -Dsqoop.parquet.logical_types.decimal.enable=true
+            -Dsqoop.avro.logical_types.decimal.default.precision=38 -Dsqoop.avro.logical_types.decimal.default.scale=10
+            --hive-import --connect $CONN --table $TABLENAME --username $USER --password $PASS --as-parquetfile
 ----
