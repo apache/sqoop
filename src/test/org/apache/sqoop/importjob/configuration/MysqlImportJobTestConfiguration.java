@@ -18,10 +18,17 @@
 
 package org.apache.sqoop.importjob.configuration;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MysqlImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration {
+/**
+ * A note on the expected values here:
+ *
+ * With padding turned on, all of the numbers are expected to be padded with 0s, so that the total number of digits
+ * after the decimal point will be equal to their scale.
+ */
+public class MysqlImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 
   @Override
   public String[] getTypes() {
@@ -40,14 +47,14 @@ public class MysqlImportJobTestConfiguration implements ImportJobTestConfigurati
   public List<String[]> getSampleData() {
     List<String[]> inputData = new ArrayList<>();
     inputData.add(new String[]{"1", "100.030", "1000000.05", "1000000.05", "1000000.05", "1000000.05",
-        "100.040", "1000000.05", "1000000.05", "1000000.05", "1000000.05"});
+        "100.040", "1000000.05", "1000000.05", "1000000.05", "11111111112222222222333333333344444444445555555555.05"});
     return inputData;
   }
 
   @Override
   public String[] getExpectedResultsForAvro() {
     String expectedRecord = "{\"ID\": 1, \"N1\": 100, \"N2\": 1000000, \"N3\": 1000000.05000, \"N4\": 1000000, \"N5\": 1000000.05000, " +
-        "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 1000000.05000}";
+        "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 11111111112222222222333333333344444444445555555555.05000}";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;
@@ -55,7 +62,7 @@ public class MysqlImportJobTestConfiguration implements ImportJobTestConfigurati
 
   @Override
   public String[] getExpectedResultsForParquet() {
-    String expectedRecord = "1,100,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,1000000.05000";
+    String expectedRecord = "1,100,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,11111111112222222222333333333344444444445555555555.05000";
     String[] expectedResult = new String[1];
     expectedResult[0] = expectedRecord;
     return expectedResult;
@@ -64,5 +71,27 @@ public class MysqlImportJobTestConfiguration implements ImportJobTestConfigurati
   @Override
   public String toString() {
     return getClass().getSimpleName();
+  }
+
+  /**
+   * Since Mysql permits a precision that is higher than 65, there is a special test case here for the last column:
+   * - parquet and avro import will be successful, so data will be present on storage
+   * - but Hive won't be able to read it, and returns null.
+   */
+  @Override
+  public Object[] getExpectedResultsForHive() {
+    return new Object[]{
+        new Integer(1),
+        new BigDecimal("100"),
+        new BigDecimal("1000000"),
+        new BigDecimal("1000000.05000"),
+        new BigDecimal("1000000"),
+        new BigDecimal("1000000.05000"),
+        new BigDecimal("100"),
+        new BigDecimal("1000000"),
+        new BigDecimal("1000000.05000"),
+        new BigDecimal("1000000"),
+        null
+    };
   }
 }

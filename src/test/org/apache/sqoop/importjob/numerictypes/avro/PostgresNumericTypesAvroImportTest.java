@@ -16,12 +16,13 @@
  * limitations under the License.
  */
 
-package org.apache.sqoop.importjob.numerictypes;
+package org.apache.sqoop.importjob.numerictypes.avro;
 
 import org.apache.sqoop.importjob.configuration.AvroTestConfiguration;
 import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
 import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationForNumeric;
 import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationPaddingShouldSucceed;
+import org.apache.sqoop.importjob.numerictypes.NumericTypesAvroImportTestBase;
 import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
 import org.apache.sqoop.testutil.adapter.DatabaseAdapter;
 import org.apache.sqoop.testutil.adapter.PostgresDatabaseAdapter;
@@ -32,10 +33,15 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.FAIL_WITHOUT_EXTRA_ARGS;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.FAIL_WITH_PADDING_ONLY;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY;
+
 @Category(PostgresqlTest.class)
 @RunWith(Parameterized.class)
 @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-public class PostgresNumericTypesImportTest<T extends AvroTestConfiguration & ParquetTestConfiguration> extends NumericTypesImportTestBase<T> {
+public class PostgresNumericTypesAvroImportTest<T extends AvroTestConfiguration & ParquetTestConfiguration> extends NumericTypesAvroImportTestBase<T> {
 
   @Override
   public DatabaseAdapter createAdapter() {
@@ -50,7 +56,7 @@ public class PostgresNumericTypesImportTest<T extends AvroTestConfiguration & Pa
     );
   }
 
-  public PostgresNumericTypesImportTest(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
+  public PostgresNumericTypesAvroImportTest(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
     super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
   }
 }

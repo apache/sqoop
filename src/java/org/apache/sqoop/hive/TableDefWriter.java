@@ -129,7 +129,7 @@ public class TableDefWriter {
     }
 
     String [] colNames = getColumnNames();
-    Map<String, Schema.Type> columnNameToAvroType = getColumnNameToAvroTypeMapping();
+    Map<String, Schema> columnNameToAvroFieldSchema = getColumnNameToAvroTypeMapping();
     StringBuilder sb = new StringBuilder();
     if (options.doFailIfHiveTableExists()) {
       if (isHiveExternalTableSet) {
@@ -185,7 +185,7 @@ public class TableDefWriter {
         Integer colType = columnTypes.get(col);
         hiveColType = getHiveColumnTypeForTextTable(userMapping, col, colType);
       } else if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-        hiveColType = HiveTypes.toHiveType(columnNameToAvroType.get(col));
+        hiveColType = HiveTypes.toHiveType(columnNameToAvroFieldSchema.get(col), options);
       } else {
         throw new RuntimeException("File format is not supported for Hive tables.");
       }
@@ -236,31 +236,17 @@ public class TableDefWriter {
     return sb.toString();
   }
 
-  private Map<String, Schema.Type> getColumnNameToAvroTypeMapping() {
+  private Map<String, Schema> getColumnNameToAvroTypeMapping() {
     if (options.getFileLayout() != SqoopOptions.FileLayout.ParquetFile) {
       return Collections.emptyMap();
     }
-    Map<String, Schema.Type> result = new HashMap<>();
+    Map<String, Schema> result = new HashMap<>();
     Schema avroSchema = getAvroSchema();
     for (Schema.Field field : avroSchema.getFields()) {
-      result.put(field.name(), getNonNullAvroType(field.schema()));
+      result.put(field.name(), field.schema());
     }
 
     return result;
-  }
-
-  private Schema.Type getNonNullAvroType(Schema schema) {
-    if (schema.getType() != Schema.Type.UNION) {
-      return schema.getType();
-    }
-
-    for (Schema subSchema : schema.getTypes()) {
-      if (subSchema.getType() != Schema.Type.NULL) {
-        return subSchema.getType();
-      }
-    }
-
-    return null;
   }
 
   private String getHiveColumnTypeForTextTable(Properties userMapping, String columnName, Integer columnType) throws IOException {
