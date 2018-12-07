@@ -20,14 +20,12 @@ package org.apache.sqoop.importjob.numerictypes;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.Path;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.OriginalType;
 import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.NumericTypesTestUtils;
 import org.apache.sqoop.util.ParquetReader;
-import org.junit.Before;
 
 import java.util.Arrays;
 
