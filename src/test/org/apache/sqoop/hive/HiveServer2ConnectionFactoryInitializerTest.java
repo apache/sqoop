@@ -42,6 +42,8 @@ public class HiveServer2ConnectionFactoryInitializerTest {
 
   private static final String TEST_HS2_USER = "testuser";
 
+  private static final String TEST_HS2_PASSWORD = "testPass@123";
+
   private static final String TEST_HS2_KEYTAB = "testkeytab";
 
   private HiveServer2ConnectionFactoryInitializer connectionFactoryInitializer;
@@ -83,6 +85,7 @@ public class HiveServer2ConnectionFactoryInitializerTest {
     HiveServer2ConnectionFactory connectionFactory = (HiveServer2ConnectionFactory) connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions);
 
     assertEquals(TEST_HS2_USER, connectionFactory.getUsername());
+    assertEquals(null, connectionFactory.getPassword());
   }
 
   @Test
@@ -115,6 +118,15 @@ public class HiveServer2ConnectionFactoryInitializerTest {
     softly.assertThat(connectionFactory.getAuthenticator().getKeytabLocation()).isEqualTo(TEST_HS2_KEYTAB);
 
     softly.assertAll();
+  }
+
+  @Test
+  public void testConnectionFactoryWhenHivePasswordIsProvided() {
+    when(sqoopOptions.getHs2Password()).thenReturn(TEST_HS2_PASSWORD);
+
+    HiveServer2ConnectionFactory connectionFactory = (HiveServer2ConnectionFactory) connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions);
+
+    assertEquals(TEST_HS2_PASSWORD, connectionFactory.getPassword());
   }
 
 }
