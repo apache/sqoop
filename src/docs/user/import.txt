@@ -489,8 +489,8 @@ DECIMAL (20, 5) is stored as 1.50000 in an SQL server instance.
 This leads to a scale mismatch during the import.
 
 To avoid this error, one can use the +sqoop.avro.decimal_padding.enable+
-property to turn on padding with 0s during. Naturally, this property is used
-together with logical types enabled, either in avro or in parquet import.
+property to turn on padding with 0s during import. Naturally, this property is
+used together with logical types enabled, either in avro or in parquet import.
 
 Default precision and scale in avro and parquet import
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -868,7 +868,7 @@ $ sqoop import -Dsqoop.avro.decimal_padding.enable=true -Dsqoop.avro.logical_typ
 
 Enabling logical types in parquet import and also turning on padding with 0s, while specifying default precision and scale as well:
 ----
-$ sqoop import -Dsqoop.parquet.decimal_padding.enable=true -Dsqoop.avro.logical_types.decimal.enable=true
+$ sqoop import -Dsqoop.parquet.logical_types.decimal.enable=true -Dsqoop.avro.decimal_padding.enable=true
     -Dsqoop.avro.logical_types.decimal.default.precision=38 -Dsqoop.avro.logical_types.decimal.default.scale=10
     --connect $MYCONN --username $MYUSER --password $MYPASS --query "select * from table_name where \$CONDITIONS"
     --target-dir hdfs://nameservice1//etl/target_path --as-parquetfile --verbose -m 1
