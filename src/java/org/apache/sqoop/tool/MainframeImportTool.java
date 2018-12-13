@@ -42,6 +42,7 @@ public class MainframeImportTool extends ImportTool {
   public static final String DS_TYPE_ARG = "datasettype";
   public static final String DS_TAPE_ARG = "tape";
   public static final String BUFFERSIZE_ARG = "buffersize";
+  public static final String FTP_COMMANDS = "ftp-commands";
 
   public MainframeImportTool() {
     super("import-mainframe", false);
@@ -91,6 +92,10 @@ public class MainframeImportTool extends ImportTool {
     importOpts.addOption(OptionBuilder
       .hasArg().withDescription("Sets buffer size for binary import in bytes (default=32kB)")
       .withLongOpt(BUFFERSIZE_ARG)
+      .create());
+    importOpts.addOption(OptionBuilder.withArgName("Comma separated FTP commands issued before FTP transfer")
+      .hasArg().withDescription("Additional FTP commands issued before transfer")
+      .withLongOpt(FTP_COMMANDS)
       .create());
     importOpts.addOption(OptionBuilder.withArgName("n")
         .hasArg().withDescription("Use 'n' map tasks to import in parallel")
@@ -199,6 +204,9 @@ public class MainframeImportTool extends ImportTool {
     } else {
       // set the default buffer size to 32kB
       out.setBufferSize(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE);
+    }
+    if (in.hasOption(FTP_COMMANDS)) {
+      out.setFtpCommands(in.getOptionValue(FTP_COMMANDS));
     }
   }
 

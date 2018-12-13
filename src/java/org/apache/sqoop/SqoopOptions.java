@@ -369,6 +369,9 @@ public class SqoopOptions implements Cloneable {
   // Buffer size to use when using binary FTP transfer mode
   @StoredAsProperty("mainframe.ftp.buffersize")
   private Integer bufferSize;
+  // custom FTP commands to be sent to mainframe
+  @StoredAsProperty("mainframe.ftp.commands")
+  private String customFtpCommands;
   // Accumulo home directory
   private String accumuloHome; // not serialized to metastore.
   // Zookeeper home directory
@@ -2526,6 +2529,16 @@ public class SqoopOptions implements Cloneable {
   // sets the binary transfer buffer size, defaults to MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE
   public void setBufferSize(int buf) {
     bufferSize = buf;
+  }
+
+  // sets the custom FTP commands
+  public void setFtpCommands(String ftpCmds) {
+    customFtpCommands = ftpCmds;
+  }
+
+  // gets the custom FTP commands issued
+  public String getFtpCommands() {
+    return customFtpCommands;
   }
 
   public static String getAccumuloHomeDefault() {

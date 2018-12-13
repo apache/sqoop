@@ -20,6 +20,7 @@ package org.apache.sqoop.mapreduce.mainframe;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -74,6 +75,11 @@ public class MainframeImportJob extends DataDrivenImportJob {
     job.getConfiguration().set(
             MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE,
             options.getMainframeInputDatasetTape().toString());
+    if (!StringUtils.isBlank(options.getFtpCommands())) {
+      job.getConfiguration().set(
+      MainframeConfiguration.MAINFRAME_FTP_CUSTOM_COMMANDS,
+      options.getFtpCommands());
+    }
     if (SqoopOptions.FileLayout.BinaryFile == options.getFileLayout()) {
       job.getConfiguration().set(
         MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,

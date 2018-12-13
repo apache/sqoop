@@ -21,6 +21,7 @@ package org.apache.sqoop.util;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -226,6 +227,7 @@ public final class MainframeFTPClientUtils {
         LOG.info("Defaulting FTP transfer mode to ascii");
         ftp.setFileTransferMode(FTP.ASCII_FILE_TYPE);
       }
+      applyFtpCmds(ftp,conf);
       // Use passive mode as default.
       ftp.enterLocalPassiveMode();
       LOG.info("System type detected: " + ftp.getSystemType());
@@ -271,4 +273,28 @@ public final class MainframeFTPClientUtils {
     mockFTPClient = FTPClient;
   }
 
+  public static List<String> applyFtpCmds(FTPClient ftp, Configuration conf) throws IOException {
+    String ftpCmds = conf.get(MainframeConfiguration.MAINFRAME_FTP_CUSTOM_COMMANDS);
+    String[] ftpCmdList = parseFtpCommands(ftpCmds);
+    List<String> results = new ArrayList<String>();
+    for (String ftpCommand : ftpCmdList) {
+      LOG.info("Issuing command: "+ftpCommand);
+      int res = ftp.sendCommand(ftpCommand);
+      String result = ftp.getReplyString();
+      results.add(result);
+      LOG.info("ReplyCode: "+res + " ReplyString: "+result);
+    }
+    return results;
+  }
+
+  // splits out the concatenated FTP commands
+  public static String[] parseFtpCommands(String ftpCmds) {
+    if (StringUtils.isBlank(ftpCmds)) {
+      return new String[] {};
+    }
+    return Arrays.stream(ftpCmds.split(","))
+      .map(String::trim)
+      .filter(StringUtils::isNotEmpty)
+      .toArray(String[]::new);
+  }
 }

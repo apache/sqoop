@@ -214,6 +214,20 @@ buffer size specified in bytes. By default, --buffersize is set to 32760 bytes. 
 will alter the number of records Sqoop reports to have imported. This is because it reads the
 binary dataset in chunks specified by buffersize. Larger buffer size means lower number of records.
 
+Use the +\--ftp-commands+ with a comma separated list of commands to send custom FTP commands prior to
+file retrieval. This is useful for letting the mainframe know to embed data into the binary files
+like Record Descriptor Words for variable length records so downstream processes can separate each
+record. The mainframe will otherwise discard this metadata in the file transmission.
+
+NOTE: The responses from the mainframe of these commands are logged ONLY. It is up to the user to check
+for errors responses from the mainframe.
+
+----
+$ sqoop import-mainframe -D hadoop.security.credential.provider.path=jceks://file/my/folder/mainframe.jceks \
+  --connect <host> --username user1 --password-alias alias1 --dataset SomeDS --tape true \
+  --as-binaryfile --datasettype g --ftp-commands "SITE RDW,SITE RDW READTAPEFORMAT=V"
+----
+
 Additional Import Configuration Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 There are some additional properties which can be configured by modifying

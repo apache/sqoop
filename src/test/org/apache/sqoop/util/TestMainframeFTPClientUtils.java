@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 
 import java.util.List;
+
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPListParseEngine;
@@ -48,6 +51,8 @@ public class TestMainframeFTPClientUtils {
 
   private FTPClient mockFTPClient;
   private FTPListParseEngine mockFTPListParseEngine;
+  private static final String DEFAULT_FTP_USERNAME="user";
+  private static final String DEFAULT_FTP_PASSWORD="pssword";
 
   @Before
   public void setUp() {
@@ -119,9 +124,8 @@ public class TestMainframeFTPClientUtils {
     }
 
     FTPClient ftp = null;
-    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
-    conf.set(DBConfiguration.USERNAME_PROPERTY, "userr");
-    conf.set(DBConfiguration.PASSWORD_PROPERTY, "pssword");
+    setupDefaultConfiguration();
+    conf.set(DBConfiguration.USERNAME_PROPERTY, "invalidusername");
     // set the password in the secure credentials object
     Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
     conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY,
@@ -148,13 +152,8 @@ public class TestMainframeFTPClientUtils {
       fail("No IOException should be thrown!");
     }
 
-    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
-    conf.set(DBConfiguration.USERNAME_PROPERTY, "userr");
-    conf.set(DBConfiguration.PASSWORD_PROPERTY, "pssword");
-    // set the password in the secure credentials object
-    Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
-    conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY,
-        "pssword".getBytes());
+    setupDefaultConfiguration();
+    conf.set(DBConfiguration.USERNAME_PROPERTY, "invalidusername");
 
     try {
       MainframeFTPClientUtils.listSequentialDatasets("pdsName", conf);
@@ -187,15 +186,9 @@ public class TestMainframeFTPClientUtils {
       fail("No IOException should be thrown!");
     }
 
-    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
-    conf.set(DBConfiguration.USERNAME_PROPERTY, "user");
-    conf.set(DBConfiguration.PASSWORD_PROPERTY, "pssword");
+    setupDefaultConfiguration();
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,"s");
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.blah1");
-    // set the password in the secure credentials object
-    Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
-    conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY,
-            "pssword".getBytes());
 
     try {
       List<String> files = MainframeFTPClientUtils.listSequentialDatasets("a.b.c.blah1", conf);
@@ -226,15 +219,9 @@ public class TestMainframeFTPClientUtils {
       fail("No IOException should be thrown!");
     }
 
-    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
-    conf.set(DBConfiguration.USERNAME_PROPERTY, "user");
-    conf.set(DBConfiguration.PASSWORD_PROPERTY, "pssword");
+    setupDefaultConfiguration();
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,"s");
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.blah1");
-    // set the password in the secure credentials object
-    Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
-    conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY,
-            "pssword".getBytes());
 
     try {
 		String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
@@ -266,15 +253,9 @@ public class TestMainframeFTPClientUtils {
       fail("No IOException should be thrown!");
     }
 
-    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
-    conf.set(DBConfiguration.USERNAME_PROPERTY, "user");
-    conf.set(DBConfiguration.PASSWORD_PROPERTY, "pssword");
+    setupDefaultConfiguration();
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,"s");
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.blah1.");
-    // set the password in the secure credentials object
-    Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
-    conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY,
-            "pssword".getBytes());
 
     try {
 		String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
@@ -307,15 +288,9 @@ public class TestMainframeFTPClientUtils {
 	      fail("No IOException should be thrown!");
 	    }
 
-	    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
-	    conf.set(DBConfiguration.USERNAME_PROPERTY, "user");
-	    conf.set(DBConfiguration.PASSWORD_PROPERTY, "pssword");
+	    setupDefaultConfiguration();
 	    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,"g");
 	    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.d");
-	    // set the password in the secure credentials object
-	    Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
-	    conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY,
-	            "pssword".getBytes());
 
 	    try {
 			String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
@@ -347,14 +322,9 @@ public class TestMainframeFTPClientUtils {
     } catch (IOException e) {
       fail("No IOException should be thrown!");
     }
-    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
-    conf.set(DBConfiguration.USERNAME_PROPERTY, "user");
-    conf.set(DBConfiguration.PASSWORD_PROPERTY, "pssword");
+    setupDefaultConfiguration();
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,"p");
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.blah1");
-    // set the password in the secure credentials object
-    Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
-    conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY, "pssword".getBytes());
     try {
       String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
       List<String> files = MainframeFTPClientUtils.listSequentialDatasets(dsName, conf);
@@ -364,5 +334,80 @@ public class TestMainframeFTPClientUtils {
       String ioeString = ioe.getMessage();
       Assert.fail(ioeString);
     }
+  }
+
+  @Test
+  public void testFtpCommandExecutes() throws IOException {
+    final String EXPECTED_RESPONSE = "200 OK";
+    final int EXPECTED_RESPONSE_CODE = 200;
+    String ftpcmds = "quote SITE RDW,quote SITE RDW READTAPEFORMAT=V";
+    when(mockFTPClient.login("user", "pssword")).thenReturn(true);
+    when(mockFTPClient.logout()).thenReturn(true);
+    when(mockFTPClient.isConnected()).thenReturn(false);
+    when(mockFTPClient.getReplyCode()).thenReturn(EXPECTED_RESPONSE_CODE);
+    when(mockFTPClient.getReplyString()).thenReturn(EXPECTED_RESPONSE);
+    setupDefaultConfiguration();
+    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,"g");
+    conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.d");
+    conf.set(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
+    conf.set(MainframeConfiguration.MAINFRAME_FTP_CUSTOM_COMMANDS, ftpcmds);
+    MainframeFTPClientUtils.setMockFTPClient(mockFTPClient);
+    FTPClient ftp = MainframeFTPClientUtils.getFTPConnection(conf);
+    verify(mockFTPClient).sendCommand("quote SITE RDW");
+    verify(mockFTPClient).sendCommand("quote SITE RDW READTAPEFORMAT=V");
+  }
+
+  @Test
+  public void testFtpCommandsOneCommand() {
+    String inputString = "quote SITE RDW READTAPEFORMAT=V";
+    String [] expected = new String [] {"quote SITE RDW READTAPEFORMAT=V"};
+    String [] cmds = MainframeFTPClientUtils.parseFtpCommands(inputString);
+    assertArrayEquals(cmds,expected);
+  }
+
+  @Test
+  public void testFtpCommandsOneCommandWithComma() {
+    String inputString = ",quote SITE RDW READTAPEFORMAT=V";
+    String [] expected = new String [] {"quote SITE RDW READTAPEFORMAT=V"};
+    String [] cmds = MainframeFTPClientUtils.parseFtpCommands(inputString);
+    assertArrayEquals(cmds,expected);
+  }
+
+  @Test
+  public void testFtpCommandsOneCommandWithCommas() {
+    String inputString = ",quote SITE RDW READTAPEFORMAT=V,";
+    String [] expected = new String [] {"quote SITE RDW READTAPEFORMAT=V"};
+    String [] cmds = MainframeFTPClientUtils.parseFtpCommands(inputString);
+    assertArrayEquals(cmds,expected);
+  }
+
+  @Test
+  public void testFtpCommandsTwoCommandWithComma() {
+    String inputString = "quote SITE RDW,quote SITE RDW READTAPEFORMAT=V";
+    String [] expected = new String [] {"quote SITE RDW","quote SITE RDW READTAPEFORMAT=V"};
+    String [] cmds = MainframeFTPClientUtils.parseFtpCommands(inputString);
+    assertArrayEquals(cmds,expected);
+  }
+
+  @Test
+  public void testFtpCommandsNullCommand() {
+    String inputString = null;
+    String [] cmds = MainframeFTPClientUtils.parseFtpCommands(inputString);
+    assertEquals(0, cmds.length);
+  }
+
+  @Test
+  public void testFtpCommandsEmptyCommands() {
+    String inputString = ",,,";
+    String [] cmds = MainframeFTPClientUtils.parseFtpCommands(inputString);
+    assertEquals(0, cmds.length);
+  }
+
+  private void setupDefaultConfiguration() {
+    conf.set(DBConfiguration.URL_PROPERTY, "localhost:11111");
+    conf.set(DBConfiguration.USERNAME_PROPERTY, DEFAULT_FTP_USERNAME);
+    Text PASSWORD_SECRET_KEY = new Text(DBConfiguration.PASSWORD_PROPERTY);
+    conf.getCredentials().addSecretKey(PASSWORD_SECRET_KEY,
+      DEFAULT_FTP_PASSWORD.getBytes());
   }
 }
