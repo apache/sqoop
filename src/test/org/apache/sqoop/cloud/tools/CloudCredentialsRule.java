@@ -33,6 +33,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The task of this rule is to execute the credential generator command for the given cloud storage
+ * and store its output for later use.
+ * If the credential generator command is not provided the tests using this rule will be skipped.
+ *
+ * The subclasses of this rule have to define:
+ *  <ul>
+ *    <li>what is the credential generator command</li>
+ *    <li>how to use its output to create the credentials map</li>
+ *    <li>how apply the credentials to the Hadoop configurations and Sqoop arguments for the tests</li>
+ *  </ul>
+ */
 public abstract class CloudCredentialsRule implements TestRule {
 
   protected final Map<String, String> credentialsMap;
