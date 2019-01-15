@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.cloud.s3;
 
-import org.apache.sqoop.cloud.TestExternalHiveTableImport;
+import org.apache.sqoop.cloud.AbstractTestExternalHiveTableImport;
 import org.apache.sqoop.testcategories.thirdpartytest.S3Test;
 import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.ClassRule;
@@ -31,7 +31,7 @@ import java.util.List;
 @Category(S3Test.class)
 @RunWith(Parameterized.class)
 @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-public class TestS3ExternalHiveTableImport extends TestExternalHiveTableImport {
+public class TestS3ExternalHiveTableImport extends AbstractTestExternalHiveTableImport {
 
   @ClassRule
   public static S3CredentialsRule credentialsRule = new S3CredentialsRule();

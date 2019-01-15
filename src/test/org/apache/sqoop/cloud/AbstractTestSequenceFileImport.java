@@ -29,14 +29,14 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 
-public abstract class TestSequenceFileImport extends CloudImportJobTestCase {
+public abstract class AbstractTestSequenceFileImport extends CloudImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestSequenceFileImport.class.getName());
+  public static final Log LOG = LogFactory.getLog(AbstractTestSequenceFileImport.class.getName());
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  protected TestSequenceFileImport(CloudCredentialsRule credentialsRule) {
+  protected AbstractTestSequenceFileImport(CloudCredentialsRule credentialsRule) {
     super(credentialsRule);
   }
 

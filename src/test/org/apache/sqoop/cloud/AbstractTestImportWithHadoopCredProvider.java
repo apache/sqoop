@@ -40,9 +40,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public abstract class TestImportWithHadoopCredProvider extends CloudImportJobTestCase {
+public abstract class AbstractTestImportWithHadoopCredProvider extends CloudImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestImportWithHadoopCredProvider.class.getName());
+  public static final Log LOG = LogFactory.getLog(AbstractTestImportWithHadoopCredProvider.class.getName());
 
   private static String providerPathDefault;
   private static String providerPathEnv;
@@ -72,11 +72,11 @@ public abstract class TestImportWithHadoopCredProvider extends CloudImportJobTes
     fillCredentialProviderEnv();
   }
 
-  public TestImportWithHadoopCredProvider() {
+  public AbstractTestImportWithHadoopCredProvider() {
     this(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH);
   }
 
-  public TestImportWithHadoopCredProvider(String credentialProviderPathProperty) {
+  public AbstractTestImportWithHadoopCredProvider(String credentialProviderPathProperty) {
     super(credentialsRule);
     this.credentialProviderPathProperty = credentialProviderPathProperty;
   }

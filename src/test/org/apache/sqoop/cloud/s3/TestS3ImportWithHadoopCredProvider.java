@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.cloud.s3;
 
-import org.apache.sqoop.cloud.TestImportWithHadoopCredProvider;
+import org.apache.sqoop.cloud.AbstractTestImportWithHadoopCredProvider;
 import org.apache.sqoop.testcategories.thirdpartytest.S3Test;
 import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.apache.sqoop.util.password.CredentialProviderHelper;
@@ -32,7 +32,7 @@ import java.util.Arrays;
 @Category(S3Test.class)
 @RunWith(Parameterized.class)
 @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-public class TestS3ImportWithHadoopCredProvider extends TestImportWithHadoopCredProvider {
+public class TestS3ImportWithHadoopCredProvider extends AbstractTestImportWithHadoopCredProvider {
 
   @Parameterized.Parameters(name = "credentialProviderPathProperty = {0}")
   public static Iterable<? extends Object> parameters() {
@@ -44,7 +44,7 @@ public class TestS3ImportWithHadoopCredProvider extends TestImportWithHadoopCred
   public static S3CredentialsRule s3CredentialsRule = new S3CredentialsRule();
 
   static {
-    TestImportWithHadoopCredProvider.credentialsRule = s3CredentialsRule;
+    AbstractTestImportWithHadoopCredProvider.credentialsRule = s3CredentialsRule;
   }
 
   public TestS3ImportWithHadoopCredProvider(String credentialProviderPathProperty) {

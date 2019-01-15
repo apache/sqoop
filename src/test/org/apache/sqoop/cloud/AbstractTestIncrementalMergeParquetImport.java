@@ -33,9 +33,9 @@ import org.junit.rules.ExpectedException;
 
 import java.util.List;
 
-public abstract class TestIncrementalMergeParquetImport extends CloudImportJobTestCase {
+public abstract class AbstractTestIncrementalMergeParquetImport extends CloudImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestIncrementalMergeParquetImport.class.getName());
+  public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalMergeParquetImport.class.getName());
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
@@ -47,7 +47,7 @@ public abstract class TestIncrementalMergeParquetImport extends CloudImportJobTe
     createTestTableFromInitialInputDataForMerge();
   }
 
-  protected TestIncrementalMergeParquetImport(CloudCredentialsRule credentialsRule) {
+  protected AbstractTestIncrementalMergeParquetImport(CloudCredentialsRule credentialsRule) {
     super(credentialsRule);
   }
 

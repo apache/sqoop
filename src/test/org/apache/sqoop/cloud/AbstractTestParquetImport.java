@@ -32,14 +32,14 @@ import org.junit.rules.ExpectedException;
 import java.io.IOException;
 import java.util.List;
 
-public abstract class TestParquetImport extends CloudImportJobTestCase {
+public abstract class AbstractTestParquetImport extends CloudImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(TestParquetImport.class.getName());
+  public static final Log LOG = LogFactory.getLog(AbstractTestParquetImport.class.getName());
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  protected TestParquetImport(CloudCredentialsRule credentialsRule) {
+  protected AbstractTestParquetImport(CloudCredentialsRule credentialsRule) {
     super(credentialsRule);
   }
 

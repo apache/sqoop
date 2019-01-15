@@ -18,13 +18,13 @@
 
 package org.apache.sqoop.cloud.s3;
 
-import org.apache.sqoop.cloud.TestSequenceFileImport;
+import org.apache.sqoop.cloud.AbstractTestSequenceFileImport;
 import org.apache.sqoop.testcategories.thirdpartytest.S3Test;
 import org.junit.ClassRule;
 import org.junit.experimental.categories.Category;
 
 @Category(S3Test.class)
-public class TestS3SequenceFileImport extends TestSequenceFileImport {
+public class TestS3SequenceFileImport extends AbstractTestSequenceFileImport {
 
   @ClassRule
   public static S3CredentialsRule credentialsRule = new S3CredentialsRule();

@@ -18,13 +18,13 @@
 
 package org.apache.sqoop.cloud.s3;
 
-import org.apache.sqoop.cloud.TestIncrementalMergeParquetImport;
+import org.apache.sqoop.cloud.AbstractTestIncrementalMergeParquetImport;
 import org.apache.sqoop.testcategories.thirdpartytest.S3Test;
 import org.junit.ClassRule;
 import org.junit.experimental.categories.Category;
 
 @Category(S3Test.class)
-public class TestS3IncrementalMergeParquetImport extends TestIncrementalMergeParquetImport {
+public class TestS3IncrementalMergeParquetImport extends AbstractTestIncrementalMergeParquetImport {
 
   @ClassRule
   public static S3CredentialsRule credentialsRule = new S3CredentialsRule();

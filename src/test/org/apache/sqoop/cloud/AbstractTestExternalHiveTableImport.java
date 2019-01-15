@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class TestExternalHiveTableImport extends CloudImportJobTestCase {
+public abstract class AbstractTestExternalHiveTableImport extends CloudImportJobTestCase {
 
   private static CloudTestDataSet dataSet = new CloudTestDataSet();
 
@@ -48,13 +48,13 @@ public abstract class TestExternalHiveTableImport extends CloudImportJobTestCase
         new Object[]{FMT_PARQUETFILE_ARG, dataSet.getExpectedParquetOutput()});
   }
 
-  public static final Log LOG = LogFactory.getLog(TestExternalHiveTableImport.class.getName());
+  public static final Log LOG = LogFactory.getLog(AbstractTestExternalHiveTableImport.class.getName());
 
   private String fileFormatArg;
 
   private List<String> expectedResult;
 
-  protected TestExternalHiveTableImport(CloudCredentialsRule credentialsRule, String fileFormatArg, List<String> expectedResult) {
+  protected AbstractTestExternalHiveTableImport(CloudCredentialsRule credentialsRule, String fileFormatArg, List<String> expectedResult) {
     super(credentialsRule);
     this.fileFormatArg = fileFormatArg;
     this.expectedResult = expectedResult;

@@ -25,58 +25,70 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.cloud.tools.CloudCredentialsRule;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.TextFileTestUtils;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
+public abstract class AbstractTestIncrementalMergeTextImport extends CloudImportJobTestCase {
 
-public abstract class TestIncrementalAppendTextImport extends CloudImportJobTestCase {
-
-  public static final Log LOG = LogFactory.getLog(TestIncrementalAppendTextImport.class.getName());
+  public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalMergeTextImport.class.getName());
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  protected TestIncrementalAppendTextImport(CloudCredentialsRule credentialsRule) {
+  @Override
+  @Before
+  public void setUp() {
+    super.setUp();
+    createTestTableFromInitialInputDataForMerge();
+  }
+
+  protected AbstractTestIncrementalMergeTextImport(CloudCredentialsRule credentialsRule) {
     super(credentialsRule);
   }
 
   @Test
-  public void testIncrementalAppendAsTextFileWhenNoNewRowIsImported() throws IOException {
+  public void testIncrementalMergeAsTextFileWhenNoNewRowIsImported() throws Exception {
     String[] args = getArgs(false);
     runImport(args);
 
-    args = getIncrementalAppendArgs(false);
+    clearTable(getTableName());
+
+    args = getIncrementalMergeArgs(false);
     runImport(args);
 
-    failIfOutputFilePathContainingPatternExists(fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
+    TextFileTestUtils.verify(getDataSet().getExpectedTextOutputBeforeMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), REDUCE_OUTPUT_FILE_00000);
   }
 
   @Test
-  public void testIncrementalAppendAsTextFile() throws IOException {
+  public void testIncrementalMergeAsTextFile() throws Exception {
     String[] args = getArgs(false);
     runImport(args);
 
-    insertInputDataIntoTable(getDataSet().getExtraInputData());
+    clearTable(getTableName());
 
-    args = getIncrementalAppendArgs(false);
+    insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
+
+    args = getIncrementalMergeArgs(false);
     runImport(args);
 
-    TextFileTestUtils.verify(getDataSet().getExpectedExtraTextOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
+    TextFileTestUtils.verify(getDataSet().getExpectedTextOutputAfterMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), REDUCE_OUTPUT_FILE_00000);
   }
 
   @Test
-  public void testIncrementalAppendAsTextFileWithMapreduceOutputBasenameProperty() throws IOException {
+  public void testIncrementalMergeAsTextFileWithMapreduceOutputBasenameProperty() throws Exception {
     String[] args = getArgs(true);
     runImport(args);
 
-    insertInputDataIntoTable(getDataSet().getExtraInputData());
+    clearTable(getTableName());
 
-    args = getIncrementalAppendArgs(true);
+    insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
+
+    args = getIncrementalMergeArgs(true);
     runImport(args);
 
-    TextFileTestUtils.verify(getDataSet().getExpectedExtraTextOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), CUSTOM_MAP_OUTPUT_FILE_00001);
+    TextFileTestUtils.verify(getDataSet().getExpectedTextOutputAfterMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), CUSTOM_REDUCE_OUTPUT_FILE_00000);
   }
 
   private String[] getArgs(boolean withMapreduceOutputBasenameProperty) {
@@ -87,9 +99,9 @@ public abstract class TestIncrementalAppendTextImport extends CloudImportJobTest
     return builder.build();
   }
 
-  private String[] getIncrementalAppendArgs(boolean withMapreduceOutputBasenameProperty) {
+  private String[] getIncrementalMergeArgs(boolean withMapreduceOutputBasenameProperty) {
     ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
-    builder = addIncrementalAppendImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
+    builder = addIncrementalMergeImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
     if (withMapreduceOutputBasenameProperty) {
       builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
     }

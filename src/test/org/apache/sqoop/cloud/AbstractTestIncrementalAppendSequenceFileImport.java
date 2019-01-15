@@ -24,71 +24,69 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.cloud.tools.CloudCredentialsRule;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
-import org.apache.sqoop.testutil.AvroTestUtils;
+import org.apache.sqoop.testutil.SequenceFileTestUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
+public abstract class AbstractTestIncrementalAppendSequenceFileImport extends CloudImportJobTestCase {
 
-public abstract class TestIncrementalAppendAvroImport extends CloudImportJobTestCase {
-
-  public static final Log LOG = LogFactory.getLog(TestIncrementalAppendAvroImport.class.getName());
+  public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalAppendSequenceFileImport.class.getName());
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  protected TestIncrementalAppendAvroImport(CloudCredentialsRule credentialsRule) {
+  protected AbstractTestIncrementalAppendSequenceFileImport(CloudCredentialsRule credentialsRule) {
     super(credentialsRule);
   }
 
   @Test
-  public void testIncrementalAppendAsAvroDataFileWhenNoNewRowIsImported() throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption(false);
+  public void testIncrementalAppendAsSequenceFileWhenNoNewRowIsImported() throws Exception {
+    String[] args = getArgsWithAsSequenceFileOption(false);
     runImport(args);
 
-    args = getIncrementalAppendArgsWithAsAvroDataFileOption(false);
+    args = getIncrementalAppendArgsWithAsSequenceFileOption(false);
     runImport(args);
 
     failIfOutputFilePathContainingPatternExists(fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
   }
 
   @Test
-  public void testIncrementalAppendAsAvroDataFile() throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption(false);
+  public void testIncrementalAppendAsSequenceFile() throws Exception {
+    String[] args = getArgsWithAsSequenceFileOption(false);
     runImport(args);
 
     insertInputDataIntoTable(getDataSet().getExtraInputData());
 
-    args = getIncrementalAppendArgsWithAsAvroDataFileOption(false);
+    args = getIncrementalAppendArgsWithAsSequenceFileOption(false);
     runImport(args);
 
-    AvroTestUtils.verify(getDataSet().getExpectedExtraAvroOutput(), fileSystemRule.getCloudFileSystem().getConf(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
+    SequenceFileTestUtils.verify(this, getDataSet().getExpectedExtraSequenceFileOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
   }
 
   @Test
-  public void testIncrementalAppendAsAvroDataFileWithMapreduceOutputBasenameProperty() throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption(true);
+  public void testIncrementalAppendAsSequenceFileWithMapreduceOutputBasenameProperty() throws Exception {
+    String[] args = getArgsWithAsSequenceFileOption(true);
     runImport(args);
 
     insertInputDataIntoTable(getDataSet().getExtraInputData());
 
-    args = getIncrementalAppendArgsWithAsAvroDataFileOption(true);
+    args = getIncrementalAppendArgsWithAsSequenceFileOption(true);
     runImport(args);
 
-    AvroTestUtils.verify(getDataSet().getExpectedExtraAvroOutput(), fileSystemRule.getCloudFileSystem().getConf(), fileSystemRule.getTargetDirPath(), CUSTOM_MAP_OUTPUT_FILE_00001);
+    SequenceFileTestUtils.verify(this, getDataSet().getExpectedExtraSequenceFileOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), CUSTOM_MAP_OUTPUT_FILE_00001);
   }
 
-  private String[] getArgsWithAsAvroDataFileOption(boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
+  private String[] getArgsWithAsSequenceFileOption(boolean withMapreduceOutputBasenameProperty) {
+    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-sequencefile");
     if (withMapreduceOutputBasenameProperty) {
       builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
     }
     return builder.build();
   }
 
-  private String[] getIncrementalAppendArgsWithAsAvroDataFileOption(boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
+  private String[] getIncrementalAppendArgsWithAsSequenceFileOption(boolean withMapreduceOutputBasenameProperty) {
+    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-sequencefile");
     builder = addIncrementalAppendImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
     if (withMapreduceOutputBasenameProperty) {
       builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);

@@ -24,69 +24,71 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.cloud.tools.CloudCredentialsRule;
 import org.apache.sqoop.testutil.ArgumentArrayBuilder;
-import org.apache.sqoop.testutil.SequenceFileTestUtils;
+import org.apache.sqoop.testutil.TextFileTestUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public abstract class TestIncrementalAppendSequenceFileImport extends CloudImportJobTestCase {
+import java.io.IOException;
 
-  public static final Log LOG = LogFactory.getLog(TestIncrementalAppendSequenceFileImport.class.getName());
+public abstract class AbstractTestIncrementalAppendTextImport extends CloudImportJobTestCase {
+
+  public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalAppendTextImport.class.getName());
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  protected TestIncrementalAppendSequenceFileImport(CloudCredentialsRule credentialsRule) {
+  protected AbstractTestIncrementalAppendTextImport(CloudCredentialsRule credentialsRule) {
     super(credentialsRule);
   }
 
   @Test
-  public void testIncrementalAppendAsSequenceFileWhenNoNewRowIsImported() throws Exception {
-    String[] args = getArgsWithAsSequenceFileOption(false);
+  public void testIncrementalAppendAsTextFileWhenNoNewRowIsImported() throws IOException {
+    String[] args = getArgs(false);
     runImport(args);
 
-    args = getIncrementalAppendArgsWithAsSequenceFileOption(false);
+    args = getIncrementalAppendArgs(false);
     runImport(args);
 
     failIfOutputFilePathContainingPatternExists(fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
   }
 
   @Test
-  public void testIncrementalAppendAsSequenceFile() throws Exception {
-    String[] args = getArgsWithAsSequenceFileOption(false);
+  public void testIncrementalAppendAsTextFile() throws IOException {
+    String[] args = getArgs(false);
     runImport(args);
 
     insertInputDataIntoTable(getDataSet().getExtraInputData());
 
-    args = getIncrementalAppendArgsWithAsSequenceFileOption(false);
+    args = getIncrementalAppendArgs(false);
     runImport(args);
 
-    SequenceFileTestUtils.verify(this, getDataSet().getExpectedExtraSequenceFileOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
+    TextFileTestUtils.verify(getDataSet().getExpectedExtraTextOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
   }
 
   @Test
-  public void testIncrementalAppendAsSequenceFileWithMapreduceOutputBasenameProperty() throws Exception {
-    String[] args = getArgsWithAsSequenceFileOption(true);
+  public void testIncrementalAppendAsTextFileWithMapreduceOutputBasenameProperty() throws IOException {
+    String[] args = getArgs(true);
     runImport(args);
 
     insertInputDataIntoTable(getDataSet().getExtraInputData());
 
-    args = getIncrementalAppendArgsWithAsSequenceFileOption(true);
+    args = getIncrementalAppendArgs(true);
     runImport(args);
 
-    SequenceFileTestUtils.verify(this, getDataSet().getExpectedExtraSequenceFileOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), CUSTOM_MAP_OUTPUT_FILE_00001);
+    TextFileTestUtils.verify(getDataSet().getExpectedExtraTextOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), CUSTOM_MAP_OUTPUT_FILE_00001);
   }
 
-  private String[] getArgsWithAsSequenceFileOption(boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-sequencefile");
+  private String[] getArgs(boolean withMapreduceOutputBasenameProperty) {
+    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
     if (withMapreduceOutputBasenameProperty) {
       builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
     }
     return builder.build();
   }
 
-  private String[] getIncrementalAppendArgsWithAsSequenceFileOption(boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-sequencefile");
+  private String[] getIncrementalAppendArgs(boolean withMapreduceOutputBasenameProperty) {
+    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
     builder = addIncrementalAppendImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
     if (withMapreduceOutputBasenameProperty) {
       builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
