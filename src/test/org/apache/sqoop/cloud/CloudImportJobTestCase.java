@@ -170,17 +170,17 @@ public abstract class CloudImportJobTestCase extends ImportJobTestCase {
     insertRecordsIntoTableWithColTypesAndNames(dataSet.getColumnNamesForMerge(), dataSet.getColumnTypesForMerge(), inputData);
   }
 
-  protected void failIfOutputFilePathContainingPatternExists(FileSystem s3Client, Path targetDirPath, String pattern) throws IOException {
+  protected void failIfOutputFilePathContainingPatternExists(FileSystem cloudFileSystem, Path targetDirPath, String pattern) throws IOException {
     List<Path> outputFilesWithPathContainingPattern = FileSystemUtil.findFilesWithPathContainingPattern(targetDirPath,
-        s3Client.getConf(), pattern);
+        cloudFileSystem.getConf(), pattern);
     if (outputFilesWithPathContainingPattern.size() != 0) {
       fail("No output file was expected with pattern" + pattern);
     }
   }
 
-  protected void failIfOutputFilePathContainingPatternDoesNotExists(FileSystem s3Client, Path targetDirPath, String pattern) throws IOException {
+  protected void failIfOutputFilePathContainingPatternDoesNotExists(FileSystem cloudFileSystem, Path targetDirPath, String pattern) throws IOException {
     List<Path> outputFilesWithPathContainingPattern = FileSystemUtil.findFilesWithPathContainingPattern(targetDirPath,
-        s3Client.getConf(), pattern);
+        cloudFileSystem.getConf(), pattern);
     if (outputFilesWithPathContainingPattern.size() == 0) {
       fail("No output file was found with pattern" + pattern);
     }
