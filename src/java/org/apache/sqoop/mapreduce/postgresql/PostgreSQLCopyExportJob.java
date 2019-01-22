@@ -97,7 +97,7 @@ public class PostgreSQLCopyExportJob extends JdbcExportJob {
     Configuration conf = job.getConfiguration();
 
     /* empty string needs to be passed as a flag */
-    if (opts.getNullStringValue().equals("")) {
+    if ("".equals(opts.getNullStringValue())) {
        conf.set("postgresql.null.emptystring","true");
     }
 
