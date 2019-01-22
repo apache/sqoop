@@ -36,7 +36,7 @@ import org.apache.sqoop.util.LoggingUtils;
 import org.postgresql.PGConnection;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.copy.CopyIn;
-import org.apache.sqoop.util.LineBuffer;
+//import org.apache.sqoop.util.LineBuffer;
 
 
 /**
@@ -65,6 +65,36 @@ public class PostgreSQLCopyExportMapper
   private DelimiterSet delimiters =
     new DelimiterSet(',', '\n',
                      DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR, false);
+
+/* Buffer up lines of text until buffer is full.
+ * This helper class is just to support a test to
+ * see if the copyIn mapper for postgres is unbuffered
+ *
+ * */
+static class LineBuffer{
+    public static final Log LOG = LogFactory.getLog(LineBuffer.class.getName());
+
+    private StringBuilder sb=new StringBuilder();
+    private static int MAXLEN=100000000;
+    //private static int MAXLEN=50000000;
+
+    public void clear(){ sb.setLength(0); }
+    public int length(){return sb.length();}
+    public boolean append(String s){
+//      LOG.debug(s);
+        if (sb.length()+s.length()+1>MAXLEN){return false;}
+        sb.append(s);
+        sb.append("\n");
+        return true;
+    }
+    public String toString(){return sb.toString();}
+    public byte[] getBytes() {
+        try {
+        //LOG.debug("returning "+new String(sb.toString().getBytes("UTF-8")));
+        return sb.toString().getBytes("UTF-8");
+        }catch(Exception e){e.printStackTrace();return null;}
+    }
+}
 
   public PostgreSQLCopyExportMapper() {
   }
@@ -155,7 +185,7 @@ public class PostgreSQLCopyExportMapper
        sql.append(", FORMAT csv ");
        sql.append(", DELIMITER ");
        sql.append("'");
-       sql.append(conf.get("postgresql.input.field.delim", ","));
+       sql.append(delim);
        sql.append("'");
        sql.append(", QUOTE ");
        sql.append("'");
@@ -165,11 +195,16 @@ public class PostgreSQLCopyExportMapper
        sql.append("'");
        sql.append(conf.get("postgresql.input.escapedby", "\""));
        sql.append("'");
-       if (conf.get("postgresql.null.string") != null) {
-         sql.append(", NULL ");
-         sql.append("'");
-         sql.append(conf.get("postgresql.null.string"));
-         sql.append("'");
+  /* Hadoop config does not permit empty string so we use special switch to designate that */
+       if (conf.get("postgresql.null.emptystring")!=null){
+         sql.append(", NULL ''");
+       }else {
+         if (conf.get("postgresql.null.string") != null) {
+           sql.append(", NULL ");
+           sql.append("'");
+           sql.append(conf.get("postgresql.null.string"));
+           sql.append("'");
+         }
        }
        sql.append(")");
      }
