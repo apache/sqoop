@@ -252,7 +252,7 @@ public class CompilationManager {
          *even if the .java file can not be renamed
          *or can not be moved a "dest" directory for
          *any reason.*/
-        LOG.error("Could not rename " + orig + " to " + dest + ". Error: " + e.getMessage());
+        LOG.warn("Could not rename " + orig + " to " + dest + ". Error: " + e.getMessage());
       }
     }
   }
