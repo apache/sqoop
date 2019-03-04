@@ -490,13 +490,11 @@ public abstract class ManagerCompatTestCase extends ImportJobTestCase {
    *        different than what ResultSet.getString() returns, which is used
    *        by returnVal.
    */
-  protected void verifyType(String colType, String insertVal,
-      String seqFileVal) {
+  protected void verifyType(String colType, String insertVal, String seqFileVal) {
     verifyType(colType, insertVal, seqFileVal, false);
   }
 
-  protected void verifyType(String colType, String insertVal, String seqFileVal,
-      boolean useIntPrimaryKey) {
+  protected void verifyType(String colType, String insertVal, String seqFileVal, boolean useIntPrimaryKey) {
 
     String readbackPrepend = "";
 

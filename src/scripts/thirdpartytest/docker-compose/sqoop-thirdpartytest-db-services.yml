@@ -98,6 +98,7 @@ services:
       container_name: sqoop_oracle_container
       environment:
         COMPOSE_HTTP_TIMEOUT: 200
+        DEFAULT_SYS_PASS: oracle
       ports:
         - 1521:1521
       volumes:

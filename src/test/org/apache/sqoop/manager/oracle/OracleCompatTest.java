@@ -192,11 +192,11 @@ public class OracleCompatTest extends ManagerCompatTestCase {
   }
 
   protected String getBinaryFloatInsertStr(float f) {
-    return "TO_BINARY_FLOAT('" + f + "')";
+    return "TO_BINARY_FLOAT(" + f + "F)";
   }
 
   protected String getBinaryDoubleInsertStr(double d) {
-    return "TO_BINARY_DOUBLE('" + d + "')";
+    return "TO_BINARY_DOUBLE(" + d + "D)";
   }
 
   // Disable this test since Oracle isn't ANSI compliant.
@@ -249,24 +249,20 @@ public class OracleCompatTest extends ManagerCompatTestCase {
     verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(+6.34f), "6.34");
 
     // Max and min are from Oracle DB SQL reference for 10g release 2
-    float max = 3.40282E+38F;
-    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(max), "3.40282E38");
-    float min = 1.17549E-38F;
-    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(min), "1.17549E-38");
+    // https://stackoverflow.com/questions/3884793/why-is-double-min-value-in-not-negative
+    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(Float.MAX_VALUE), "3.4028235E38");
+    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(-Float.MAX_VALUE), "-3.4028235E38");
   }
 
   @Test
   public void testBinaryDouble() {
-    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(0.5d), "0.5");
-    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-1d), "-1.0");
+    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(0.5), "0.5");
+    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-1), "-1.0");
 
     // Max and min are from Oracle DB SQL reference for 10g release 2
-    double max = 1.79769313486231E+308;
-    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(max),
-        "1.79769313486231E308");
-    double min = 2.22507485850720E-308;
-    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(min),
-        "2.2250748585072E-308");
+    // https://stackoverflow.com/questions/3884793/why-is-double-min-value-in-not-negative
+    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(Double.MAX_VALUE), "1.7976931348623157E308");
+    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-Double.MAX_VALUE), "-1.7976931348623157E308");
   }
 }
 

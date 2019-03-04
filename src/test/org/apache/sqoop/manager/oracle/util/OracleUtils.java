@@ -53,9 +53,6 @@ public final class OracleUtils {
   public static final int INTEGRATIONTEST_NUM_ROWS = 10000;
   // Number of mappers if wanting to override default setting
   public static final int NUM_MAPPERS = 0;
-  // Oracle degree of parallelism to use when creating table.
-  // If 0 we will calculate a recommended value
-  public static final int ORACLE_PARALLEL_DEGREE = 0;
 
   private OracleUtils() { }
 
