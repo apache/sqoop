@@ -1,11 +1,11 @@
+[![Build Status](https://travis-ci.org/apache/sqoop.svg?branch=trunk)](https://travis-ci.org/apache/sqoop)
 
-= Welcome to Sqoop!
+# Welcome to Sqoop!
 
 This is the Sqoop (SQL-to-Hadoop) tool. Sqoop allows easy imports and
 exports of data sets between databases and HDFS.
 
-
-== More Documentation
+## More Documentation
 
 Sqoop ships with additional documentation: a user guide and a manual page.
 
@@ -15,8 +15,7 @@ the documentation. It will be created in +build/docs/+.
 If you got Sqoop in release form, documentation will already be built and
 available in the +docs/+ directory.
 
-
-== Compiling Sqoop
+## Compiling Sqoop
 
 Compiling Sqoop requires the following tools:
 
@@ -33,14 +32,13 @@ Additionally, building the documentation requires these tools:
 * gzip
 
 To compile Sqoop, run +ant package+. There will be a fully self-hosted build
-provided in the +build/sqoop-(version)/+ directory. 
+provided in the +build/sqoop-(version)/+ directory.
 
 You can build just the jar by running +ant jar+.
 
 See the COMPILING.txt document for more information.
 
-== This is also an Asciidoc file!
+## This is also an Asciidoc file!
 
 * Try running +asciidoc README.txt+
 * For more information about asciidoc, see http://www.methods.co.nz/asciidoc/
-
