@@ -94,10 +94,11 @@ services:
       timeout: 10s
       retries: 60
   oracle:
-      image: sath89/oracle-xe-11g
+      image: acktsw/oracle-xe-11g
       container_name: sqoop_oracle_container
       environment:
         COMPOSE_HTTP_TIMEOUT: 200
+        DEFAULT_SYS_PASS: oracle
       ports:
         - 1521:1521
       volumes:

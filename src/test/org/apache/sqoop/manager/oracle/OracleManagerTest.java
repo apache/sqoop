@@ -130,16 +130,16 @@ public class OracleManagerTest extends ImportJobTestCase {
               + "PRIMARY KEY (id))",
       "INSERT INTO " + TABLE_NAME + " VALUES("
               + "1,'Aaron',to_date('2009-05-14','yyyy-mm-dd'),"
-              + "1000000.00,'engineering','29-DEC-09 12.00.00.000000000 PM',"
-              + "'29-DEC-09 12.00.00.000000000 PM')",
+              + "1000000.00,'engineering',TO_TIMESTAMP('29-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
+              + "TO_TIMESTAMP('29-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
       "INSERT INTO " + TABLE_NAME + " VALUES("
               + "2,'Bob',to_date('2009-04-20','yyyy-mm-dd'),"
-              + "400.00,'sales','30-DEC-09 12.00.00.000000000 PM',"
-              + "'30-DEC-09 12.00.00.000000000 PM')",
+              + "400.00,'sales',TO_TIMESTAMP('30-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
+              + "TO_TIMESTAMP('30-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
       "INSERT INTO " + TABLE_NAME + " VALUES("
               + "3,'Fred',to_date('2009-01-23','yyyy-mm-dd'),15.00,"
-              + "'marketing','31-DEC-09 12.00.00.000000000 PM',"
-              + "'31-DEC-09 12.00.00.000000000 PM')",
+              + "'marketing', TO_TIMESTAMP('31-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
+              + "TO_TIMESTAMP('31-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
   };
 
   /*
@@ -258,7 +258,9 @@ public class OracleManagerTest extends ImportJobTestCase {
   public void tearDown() {
     super.tearDown();
     try {
-      manager.close();
+      if(manager != null) {
+        manager.close();
+      }
     } catch (SQLException sqlE) {
       LOG.error("Got SQLException: " + sqlE.toString());
       fail("Got SQLException: " + sqlE.toString());
