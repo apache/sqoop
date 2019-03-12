@@ -21,6 +21,7 @@ package org.apache.sqoop.hive;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -167,12 +168,12 @@ public class TableDefWriter {
     }
 
     boolean first = true;
-    String partitionKey = options.getHivePartitionKey();
-    for (String col : colNames) {
-      if (col.equals(partitionKey)) {
-        throw new IllegalArgumentException("Partition key " + col + " cannot "
-            + "be a column to import.");
-      }
+    final String partitionKey = options.getHivePartitionKey();
+    if (Arrays.asList(colNames).contains(partitionKey)) {
+      throw new IllegalArgumentException(
+          "Partition key " + partitionKey + " cannot be a column to import.");
+    }
+    for (final String col : colNames) {
 
       if (!first) {
         sb.append(", ");
@@ -180,14 +181,23 @@ public class TableDefWriter {
 
       first = false;
 
-      String hiveColType;
-      if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
+      final String hiveColType;
+      switch (options.getFileLayout()) {
+      case TextFile:
+      case AvroDataFile:
         Integer colType = columnTypes.get(col);
         hiveColType = getHiveColumnTypeForTextTable(userMapping, col, colType);
-      } else if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-        hiveColType = HiveTypes.toHiveType(columnNameToAvroFieldSchema.get(col), options);
-      } else {
-        throw new RuntimeException("File format is not supported for Hive tables.");
+        break;
+      case ParquetFile:
+        hiveColType =
+            HiveTypes.toHiveType(columnNameToAvroFieldSchema.get(col), options);
+        break;
+      case BinaryFile:
+      case SequenceFile:
+      default:
+        throw new RuntimeException(
+            "File format is not supported for Hive tables: "
+                + options.getFileLayout());
       }
 
       sb.append('`').append(col).append("` ").append(hiveColType);
@@ -208,9 +218,14 @@ public class TableDefWriter {
         .append(" STRING) ");
      }
 
-    if (SqoopOptions.FileLayout.ParquetFile.equals(options.getFileLayout())) {
+    switch(options.getFileLayout()) {
+    case ParquetFile:
       sb.append("STORED AS PARQUET");
-    } else {
+      break;
+    case AvroDataFile:
+      sb.append("STORED AS AVRO");
+      break;
+    case TextFile: {
       sb.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '");
       sb.append(getHiveOctalCharCode((int) options.getOutputFieldDelim()));
       sb.append("' LINES TERMINATED BY '");
@@ -226,14 +241,21 @@ public class TableDefWriter {
         sb.append("' STORED AS TEXTFILE");
       }
     }
+      break;
+    default:
+      throw new RuntimeException(
+          "File format is not supported for Hive tables: "
+              + options.getFileLayout());
+    }
 
     if (isHiveExternalTableSet) {
       // add location
       sb.append(" LOCATION '"+options.getHiveExternalTableDir()+"'");
     }
 
-    LOG.debug("Create statement: " + sb.toString());
-    return sb.toString();
+    final String tableCreateStatement = sb.toString();
+    LOG.debug("Create statement: " + tableCreateStatement);
+    return tableCreateStatement;
   }
 
   private Map<String, Schema> getColumnNameToAvroTypeMapping() {
