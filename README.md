@@ -15,4 +15,4 @@ the documentation. It will be created in `build/docs/`.
 If you got Sqoop in release form, documentation will already be built and
 available in the `docs/` directory.
 
-For more information on compiling see  [COMPILING.adoc](COMPILING.adoc)
+For more information on compiling see  [COMPILING.adoc](COMPILING.adoc).
