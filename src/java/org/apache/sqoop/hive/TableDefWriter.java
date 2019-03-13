@@ -21,14 +21,17 @@ package org.apache.sqoop.hive;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
@@ -151,19 +154,15 @@ public class TableDefWriter {
     sb.append(outputTableName).append("` ( ");
 
     // Check that all explicitly mapped columns are present in result set
-    for(Object column : userMapping.keySet()) {
-      boolean found = false;
-      for(String c : colNames) {
-        if (c.equals(column)) {
-          found = true;
-          break;
-        }
-      }
+    final Set<Object> userMappingKeys = new LinkedHashSet<>(userMapping.keySet());
+    final List<String> colNamesSet = Arrays.asList(colNames);
 
-      if (!found) {
-        throw new IllegalArgumentException("No column by the name " + column
-                + "found while importing data");
-      }
+    userMappingKeys.removeAll(colNamesSet);
+
+    if (!userMappingKeys.isEmpty()) {
+      throw new IllegalArgumentException(
+          "No user mappings found for columns " + userMappingKeys
+              + " while importing data");
     }
 
     boolean first = true;
