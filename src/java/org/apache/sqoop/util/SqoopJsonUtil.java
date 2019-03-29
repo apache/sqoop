@@ -40,7 +40,8 @@ public class SqoopJsonUtil {
   }
 
   public static String getJsonStringforMap(Map<String, String> map) {
-    JSONObject pathPartMap = new JSONObject(map);
+    Map<String, String> mapToUse = (map == null) ? Collections.emptyMap() : map;
+    JSONObject pathPartMap = new JSONObject(mapToUse);
     return pathPartMap.toString();
   }
 
