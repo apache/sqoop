@@ -104,7 +104,7 @@ public class AvroSchemaGenerator {
     }
 
     TableClassName tableClassName = new TableClassName(options);
-    String shortClassName = tableName == null ? DEFAULT_SCHEMA_NAME : tableClassName.getShortClassForTable(tableName);
+    String shortClassName = (tableName == null && options.getClassName() == null) ? DEFAULT_SCHEMA_NAME : tableClassName.getShortClassForTable(tableName);
     String avroTableName = (tableName == null ? TableClassName.QUERY_RESULT : tableName);
     String avroName = schemaNameOverride != null ? schemaNameOverride :
         (shortClassName == null ? avroTableName : shortClassName);
