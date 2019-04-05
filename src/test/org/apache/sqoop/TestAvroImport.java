@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
+import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.AvroTestUtils;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.HsqldbTestServer;
@@ -92,6 +93,25 @@ public class TestAvroImport extends ImportJobTestCase {
   public void testAvroImport() throws IOException {
     this.setCurTableName("Avro_Import_Test");
     avroImportTestHelper(null, null);
+  }
+
+  @Test
+  public void testAvroFileNameWithQueryImport() throws IOException {
+    setCurTableName("AVRO_FILE_NAME_QUERY_IMPORT");
+    createTableWithColTypes(new String[] {"int"}, new String[] {"1"});
+    ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+    String[] args = builder
+        .withOption("connect", HsqldbTestServer.getUrl())
+        .withOption("query", "select * from AVRO_FILE_NAME_QUERY_IMPORT where $CONDITIONS")
+        .withOption("as-avrodatafile")
+        .withOption("m", "1")
+        .withOption("target-dir", getWarehouseDir() + "/AVRO_FILE_NAME_QUERY_IMPORT")
+        .withOption("class-name", "customAvroFile")
+        .build();
+
+    runImport(args);
+
+    verifySchemaFileName("customAvroFile.avsc");
   }
 
   @Test
@@ -366,8 +386,13 @@ public class TestAvroImport extends ImportJobTestCase {
   }
 
   protected void checkSchemaFile(final Schema schema) throws IOException {
-    final File schemaFile = new File(schema.getName() + ".avsc");
+    String schemaFileName = schema.getName() + ".avsc";
+    verifySchemaFileName(schemaFileName);
+    assertEquals(schema, new Schema.Parser().parse(new File(schemaFileName)));
+  }
+
+  protected void verifySchemaFileName(String expectedFileName) {
+    final File schemaFile = new File(expectedFileName);
     assertTrue(schemaFile.exists());
-    assertEquals(schema, new Schema.Parser().parse(schemaFile));
   }
 }
