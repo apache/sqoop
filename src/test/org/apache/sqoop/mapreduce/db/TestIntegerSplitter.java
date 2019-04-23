@@ -18,9 +18,13 @@
 package org.apache.sqoop.mapreduce.db;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.cloudera.sqoop.config.ConfigurationHelper;
+import com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import com.cloudera.sqoop.mapreduce.db.IntegerSplitter;
+import org.apache.hadoop.mapreduce.InputSplit;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -143,6 +147,7 @@ public class TestIntegerSplitter {
   @Test
   public void testOddSplitsWithLimit() throws SQLException {
     List<Long> splits = new IntegerSplitter().split(5, 10, 0, 95);
+    System.out.println(splits);
     long [] expected = { 0, 10, 20, 30, 40, 50, 59, 68, 77, 86, 95};
     assertLongArrayEquals(expected, toLongArray(splits));
   }
@@ -150,6 +155,7 @@ public class TestIntegerSplitter {
   @Test
   public void testSplitWithBiggerLimit() throws SQLException {
     List<Long> splits = new IntegerSplitter().split(10, 15, 0, 100);
+    System.out.println(splits);
     long [] expected = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
     assertLongArrayEquals(expected, toLongArray(splits));
   }
@@ -157,7 +163,56 @@ public class TestIntegerSplitter {
   @Test
   public void testFractionalSplitWithLimit() throws SQLException {
     List<Long> splits = new IntegerSplitter().split(5, 1, 1, 10);
+    System.out.println(splits);
     long [] expected = {1,2, 3, 4, 5, 6, 7, 8, 9, 10, 10};
     assertLongArrayEquals(expected, toLongArray(splits));
+  }
+
+  @Test
+  public void testSplit() throws Exception {
+    org.apache.sqoop.mapreduce.db.IntegerSplitter integerSplitter = new org.apache.sqoop.mapreduce.db.IntegerSplitter();
+    String colName = "cnt";
+    long minVal = 1;
+    long maxVal = 100;
+
+    String lowClausePrefix = colName + " >= ";
+    String highClausePrefix = colName + " < ";
+
+    int numSplits = 3;
+    if (numSplits < 1) {
+      numSplits = 1;
+    }
+
+    long splitLimit = -1;
+
+    // Get all the split points together.
+    List<Long> splitPoints = integerSplitter.split(numSplits, splitLimit, minVal, maxVal);
+    System.out.println(String.format("Splits: [%,28d to %,28d] into %d parts",
+            minVal, maxVal, numSplits));
+    for (int i = 0; i < splitPoints.size(); i++) {
+      System.out.println(String.format("%,28d", splitPoints.get(i)));
+    }
+    List<InputSplit> splits = new ArrayList<InputSplit>();
+
+    // Turn the split points into a set of intervals.
+    long start = splitPoints.get(0);
+    for (int i = 1; i < splitPoints.size(); i++) {
+      long end = splitPoints.get(i);
+
+      if (i == splitPoints.size() - 1) {
+        // This is the last one; use a closed interval.
+        splits.add(new com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat.DataDrivenDBInputSplit(
+                lowClausePrefix + Long.toString(start),
+                colName + " <= " + Long.toString(end)));
+      } else {
+        // Normal open-interval case.
+        splits.add(new com.cloudera.sqoop.mapreduce.db.DataDrivenDBInputFormat.DataDrivenDBInputSplit(
+                lowClausePrefix + Long.toString(start),
+                highClausePrefix + Long.toString(end)));
+      }
+
+      start = end;
+    }
+    System.out.println(splits);
   }
 }

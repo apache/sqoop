@@ -186,5 +186,10 @@ under the License.
     </description>
   </property>
   -->
+  <property>
+    <name>com.newland.component.FujianBI.service.list</name>
+    <value>com.newland.component.FujianBI.service.impl.KerberosLoginService</value>
+    <description>service list</description>
+  </property>
 
 </configuration>

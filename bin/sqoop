@@ -98,4 +98,25 @@ bin=`dirname ${prgm}`
 bin=`cd ${bin} && pwd`
 
 source ${bin}/configure-sqoop "${bin}"
+#exec ${HADOOP_COMMON_HOME}/bin/hadoop org.apache.sqoop.Sqoop "$@"
+if [ "--config" = "$1" ]
+then
+shift
+if [[ $1 =~ "--" ]]
+then
+echo "you need input hadoop-config values."
+exit -1
+elif [[ $1 = "codegen" ]] || [[ $1 = "create-hive-table" ]] || [[ $1 = "eval" ]] || [[ $1 = "export" ]] || [[ $1 = "help" ]] || [[ $1 = "import" ]] || [[ $1 = "import-all-tables" ]] || [[ $1 = "import-mainframe" ]] || [[ $1 = "job" ]] || [[ $1 = "list-databases" ]] || [[ $1 = "list-tables" ]] || [[ $1 = "merge" ]] || [[ $1 = "metastore" ]] || [[ $1 = "version" ]]
+then
+echo "you need input hadoop-config values."
+exit -1
+else
+hadoopconfig=$1
+shift
+fi
+fi
+if [ ! -n "$hadoopconfig" ] ;then
 exec ${HADOOP_COMMON_HOME}/bin/hadoop org.apache.sqoop.Sqoop "$@"
+else
+exec ${HADOOP_COMMON_HOME}/bin/hadoop --config "$hadoopconfig" org.apache.sqoop.Sqoop "$@"
+fi

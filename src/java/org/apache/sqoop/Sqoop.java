@@ -20,6 +20,7 @@ package org.apache.sqoop;
 
 import java.util.Arrays;
 
+import com.newland.component.FujianBI.service.ServiceTool;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -221,6 +222,14 @@ public class Sqoop extends Configured implements Tool {
     }
 
     String toolName = expandedArgs[0];
+
+    // Only import and export add service tool processing
+    if (!isWindow() && (toolName.equals("import") || toolName.equals("export"))) {
+        ServiceTool serviceTool = ServiceTool.builder(conf, args);
+        serviceTool.initServices();
+        serviceTool.startServices();
+    }
+
     Configuration pluginConf = SqoopTool.loadPlugins(conf);
     SqoopTool tool = SqoopTool.getTool(toolName);
     if (null == tool) {
@@ -241,6 +250,20 @@ public class Sqoop extends Configured implements Tool {
    */
   public static int runTool(String [] args) {
     return runTool(args, new Configuration());
+  }
+
+  /**
+   * 是否是本地测试
+   *
+   * @return
+   */
+  public static boolean isWindow() {
+    String systemType = System.getProperty("os.name");
+    if (systemType.toUpperCase().startsWith("WINDOWS")) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public static void main(String [] args) {
