@@ -48,7 +48,7 @@ Sqoop will use +$HIVE_HOME/bin/hive+ from here.
  will not be transferred via the JDBC connection it is written directly to HDFS
  just like in case of the default hive import. As HiveServer2 provides proper
  authorization and auditing features it is recommended to use this instead of
- the default. Currently only Kerberos authentication and text file format is
+ the default. Currently only Kerberos and LDAP authentication and text file format is
  supported with this option.
 
 NOTE: This function is incompatible with +\--as-avrodatafile+ and
