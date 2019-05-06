@@ -142,6 +142,7 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
   public static final String HCATALOG_HOME_ARG = "hcatalog-home";
   public static final String HS2_URL_ARG = "hs2-url";
   public static final String HS2_USER_ARG = "hs2-user";
+  public static final String HS2_PASSWORD_ARG = "hs2-password";
   public static final String HS2_KEYTAB_ARG = "hs2-keytab";
   public static final String MAPREDUCE_JOB_NAME = "mapreduce-job-name";
   public static final String NUM_MAPPERS_ARG = "num-mappers";
@@ -636,6 +637,10 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
         .hasArg()
         .withDescription("The user/principal for HiveServer2.")
         .withLongOpt(HS2_USER_ARG)
+        .create());
+    hiveOpts.addOption(OptionBuilder.hasArg()
+        .withDescription("The LDAP password for HiveServer2.")
+        .withLongOpt(HS2_PASSWORD_ARG)
         .create());
     hiveOpts.addOption(OptionBuilder
         .hasArg()
@@ -1283,6 +1288,9 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
    if (in.hasOption(HS2_USER_ARG)) {
       out.setHs2User(in.getOptionValue(HS2_USER_ARG));
    }
+    if (in.hasOption(HS2_PASSWORD_ARG)) {
+      out.setHs2Password(in.getOptionValue(HS2_PASSWORD_ARG));
+    }
    if (in.hasOption(HS2_KEYTAB_ARG)) {
       out.setHs2Keytab(in.getOptionValue(HS2_KEYTAB_ARG));
    }

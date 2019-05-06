@@ -34,8 +34,12 @@ public class HiveServer2ConnectionFactoryInitializer {
 
   public JdbcConnectionFactory createJdbcConnectionFactory(SqoopOptions sqoopOptions) {
     String connectionUsername = determineConnectionUsername(sqoopOptions);
-    JdbcConnectionFactory connectionFactory = new HiveServer2ConnectionFactory(sqoopOptions.getHs2Url(), connectionUsername);
-    if (useKerberizedConnection(sqoopOptions)) {
+    String connectionPassword = sqoopOptions.getHs2Password();
+    JdbcConnectionFactory connectionFactory = new HiveServer2ConnectionFactory(
+            sqoopOptions.getHs2Url(),
+            connectionUsername,
+            connectionPassword);
+    if (connectionPassword == null && useKerberizedConnection(sqoopOptions)) {
       KerberosAuthenticator authenticator = createKerberosAuthenticator(sqoopOptions);
       connectionFactory = new KerberizedConnectionFactoryDecorator(connectionFactory, authenticator);
     }
