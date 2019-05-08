@@ -61,6 +61,10 @@ The presence of the +--hcatalog-table+ option signifies that the import
 or export job is done using HCatalog tables, and it is a required option for
 HCatalog jobs.
 
++--hcatalog-external-table+::
+Set this flag if you need to create external Hive table for example to store
+data in form of ORC files.
+
 +--hcatalog-home+::
 The home directory for the HCatalog installation. The directory is
 expected to have a +lib+ subdirectory and a +share/hcatalog+ subdirectory

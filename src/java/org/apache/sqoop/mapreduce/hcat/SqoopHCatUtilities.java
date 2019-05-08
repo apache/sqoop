@@ -377,11 +377,11 @@ public final class SqoopHCatUtilities {
     if (options.doCreateHCatalogTable()) {
       LOG.info("Creating HCatalog table " + hCatQualifiedTableName
         + " for import");
-      createHCatTable(false);
+      createHCatTable(false, options.isHCatTableExternal());
     } else if (options.doDropAndCreateHCatalogTable()) {
       LOG.info("Dropping and Creating HCatalog table "
         + hCatQualifiedTableName + " for import");
-      createHCatTable(true);
+      createHCatTable(true, options.isHCatTableExternal());
     }
     // For serializing the schema to conf
     HCatInputFormat hif = HCatInputFormat.setInput(hCatJob, hCatDatabaseName,
@@ -599,14 +599,18 @@ public final class SqoopHCatUtilities {
     return sb;
   }
 
-  private void createHCatTable(boolean dropIfExists) throws IOException {
+  private void createHCatTable(boolean dropIfExists, boolean isExternal) throws IOException {
     StringBuilder sb = new StringBuilder();
     if (dropIfExists) {
       sb.append("drop table ").
               append(escHCatObj(hCatDatabaseName)).append('.').
               append(escHCatObj(hCatTableName)).append(";\n");
     }
-    sb.append("create table ").
+    sb.append("create ");
+    if(isExternal) {
+      sb.append("external ");
+    }
+    sb.append("table ").
       append(escHCatObj(hCatDatabaseName)).append('.');
     sb.append(escHCatObj(hCatTableName)).append(" (\n\t");
     boolean first = true;

@@ -240,6 +240,8 @@ public class SqoopOptions implements Cloneable {
   @StoredAsProperty("hive.partition.value") private String hivePartitionValue;
   @StoredAsProperty("hcatalog.table.name")
   private String hCatTableName;
+  @StoredAsProperty("hcatalog.external.table")
+  private boolean isExternalHCatTable = false;
   @StoredAsProperty("hcatalog.database.name")
   private String hCatDatabaseName;
   @StoredAsProperty("hcatalog.create.table")
@@ -1652,6 +1654,14 @@ public class SqoopOptions implements Cloneable {
 
   public String getHCatTableName() {
     return this.hCatTableName;
+  }
+
+  public void useExternalHCatTable(boolean value) {
+    this.isExternalHCatTable = value;
+  }
+
+  public boolean isHCatTableExternal() {
+    return this.isExternalHCatTable;
   }
 
   public void setHCatDatabaseName(String hd) {
