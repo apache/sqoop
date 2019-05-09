@@ -771,6 +771,29 @@ public class HCatalogImportTest extends ImportJobTestCase {
   }
 
   @Test
+  public void testExternalTableCreation() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
+    };
+    List<String> addlArgsArray = new ArrayList<String>();
+    addlArgsArray.add("--create-hcatalog-table");
+    addlArgsArray.add("--hcatalog-external-table");
+    addlArgsArray.add("--hcatalog-storage-stanza");
+    addlArgsArray.add("\"stored as orc tblproperties (\"transactional\"=\"false\")\"");
+    setExtraArgs(addlArgsArray);
+    utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+            null, true, false);
+  }
+
+  @Test
   public void testTableCreationWithPartition() throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
