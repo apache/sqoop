@@ -1308,7 +1308,7 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
     }
 
     if (in.hasOption(HCATALOG_EXTERNAL_TABLE_ARG)) {
-      out.useExternalHCatTable(true);
+      out.setExternalHCatTable(true);
     }
 
     if (in.hasOption(HCATALOG_DATABASE_ARG)) {
@@ -1595,6 +1595,13 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
       throw new InvalidOptionsException("The " + HCATALOG_TABLE_ARG
         + " option conflicts with the " + HIVE_IMPORT_ARG
         + " option." + HELP_STR);
+    }
+
+    if(options.isHCatTableExternal() &&
+            !(options.doCreateHCatalogTable() || options.doDropAndCreateHCatalogTable())) {
+      throw new InvalidOptionsException(String.format(
+              "Using --%s only takes effect when --%s or --%s is present",
+              HCATALOG_EXTERNAL_TABLE_ARG, CREATE_HCATALOG_TABLE_ARG, DROP_AND_CREATE_HCATALOG_TABLE));
     }
 
     if (options.doHiveImport()

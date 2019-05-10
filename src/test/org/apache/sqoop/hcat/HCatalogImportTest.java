@@ -50,6 +50,7 @@ import org.apache.sqoop.hcat.HCatalogTestUtils.ColumnGenerator;
 import org.apache.sqoop.hcat.HCatalogTestUtils.CreateMode;
 import org.apache.sqoop.hcat.HCatalogTestUtils.KeyType;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
+import org.junit.Assert;
 import org.junit.Before;
 
 import org.apache.sqoop.Sqoop;
@@ -791,6 +792,57 @@ public class HCatalogImportTest extends ImportJobTestCase {
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
             null, true, false);
+  }
+
+  @Test
+  public void testExternalTableDropAndCreation() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
+    };
+    List<String> addlArgsArray = new ArrayList<String>();
+    addlArgsArray.add("--drop-and-create-hcatalog-table");
+    addlArgsArray.add("--hcatalog-external-table");
+    addlArgsArray.add("--hcatalog-storage-stanza");
+    addlArgsArray.add("\"stored as orc tblproperties (\"transactional\"=\"false\")\"");
+    setExtraArgs(addlArgsArray);
+    utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+            null, true, false);
+  }
+
+  @Test
+  public void testExternalTableCreationFailsIfNoCreateOrDropTablePresent() throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
+    };
+    List<String> addlArgsArray = new ArrayList<String>();
+    addlArgsArray.add("--hcatalog-external-table");
+    addlArgsArray.add("--hcatalog-storage-stanza");
+    addlArgsArray.add("\"stored as orc tblproperties (\"transactional\"=\"false\")\"");
+    setExtraArgs(addlArgsArray);
+    utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
+    try {
+      runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+              null, true, false);
+      Assert.fail("--hcatalog-external-table cannot be used without signing creation of hcatalog table.");
+    } catch (Exception e) {
+      LOG.debug("Caught expected exception while running "
+              + " hcatalog-external-table without signing create or drop-and-create test", e);
+    }
   }
 
   @Test

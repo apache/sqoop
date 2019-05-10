@@ -1656,7 +1656,7 @@ public class SqoopOptions implements Cloneable {
     return this.hCatTableName;
   }
 
-  public void useExternalHCatTable(boolean value) {
+  public void setExternalHCatTable(boolean value) {
     this.isExternalHCatTable = value;
   }
 
