@@ -50,7 +50,6 @@ import org.apache.sqoop.hcat.HCatalogTestUtils.ColumnGenerator;
 import org.apache.sqoop.hcat.HCatalogTestUtils.CreateMode;
 import org.apache.sqoop.hcat.HCatalogTestUtils.KeyType;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
-import org.junit.Assert;
 import org.junit.Before;
 
 import org.apache.sqoop.Sqoop;
@@ -73,6 +72,12 @@ import static org.junit.Assert.fail;
 public class HCatalogImportTest extends ImportJobTestCase {
   private static final Log LOG =
     LogFactory.getLog(HCatalogImportTest.class);
+  public static final String CREATE_HCATALOG_TABLE = "--create-hcatalog-table";
+  public static final String HCATALOG_EXTERNAL_TABLE = "--hcatalog-external-table";
+  public static final String DROP_AND_CREATE_HCATALOG_TABLE ="--drop-and-create-hcatalog-table";
+  public static final String HCATALOG_STORAGE_STANZA = "--hcatalog-storage-stanza";
+  public static final String TABLEPROPERTIES_ORC_NONTRANSACTIONAL =
+          "\"stored as orc tblproperties (\"transactional\"=\"false\")\"";
   private final HCatalogTestUtils utils = HCatalogTestUtils.instance();
   private List<String> extraTestArgs = null;
   private List<String> configParams = null;
@@ -764,7 +769,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
         new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
     };
     List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--create-hcatalog-table");
+    addlArgsArray.add(CREATE_HCATALOG_TABLE);
     setExtraArgs(addlArgsArray);
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
@@ -773,52 +778,42 @@ public class HCatalogImportTest extends ImportJobTestCase {
 
   @Test
   public void testExternalTableCreation() throws Exception {
-    final int TOTAL_RECORDS = 1 * 10;
-    String table = getTableName().toUpperCase();
-    ColumnGenerator[] cols = new ColumnGenerator[] {
-            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
-                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
-                    new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
-            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
-                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
-                    new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
-    };
-    List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--create-hcatalog-table");
-    addlArgsArray.add("--hcatalog-external-table");
-    addlArgsArray.add("--hcatalog-storage-stanza");
-    addlArgsArray.add("\"stored as orc tblproperties (\"transactional\"=\"false\")\"");
-    setExtraArgs(addlArgsArray);
-    utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
-    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
-            null, true, false);
+    externalTableCreationCoreTest(true,
+            CREATE_HCATALOG_TABLE,
+            HCATALOG_EXTERNAL_TABLE,
+            HCATALOG_STORAGE_STANZA,
+            TABLEPROPERTIES_ORC_NONTRANSACTIONAL);
   }
 
   @Test
-  public void testExternalTableDropAndCreation() throws Exception {
-    final int TOTAL_RECORDS = 1 * 10;
-    String table = getTableName().toUpperCase();
-    ColumnGenerator[] cols = new ColumnGenerator[] {
-            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
-                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
-                    new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
-            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
-                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
-                    new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
-    };
-    List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--drop-and-create-hcatalog-table");
-    addlArgsArray.add("--hcatalog-external-table");
-    addlArgsArray.add("--hcatalog-storage-stanza");
-    addlArgsArray.add("\"stored as orc tblproperties (\"transactional\"=\"false\")\"");
-    setExtraArgs(addlArgsArray);
-    utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
-    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
-            null, true, false);
+  public void testExternalTableDropAndCreationWithExistingTargetTable() throws Exception {
+    utils.createHCatTable(CreateMode.CREATE, 10, getTableName().toUpperCase());
+    externalTableCreationCoreTest(false,
+            DROP_AND_CREATE_HCATALOG_TABLE,
+            HCATALOG_EXTERNAL_TABLE,
+            HCATALOG_STORAGE_STANZA,
+            TABLEPROPERTIES_ORC_NONTRANSACTIONAL);
   }
 
-  @Test
+  @Test (expected = Exception.class)
+  public void testExternalTableCreationWithExistingTargetTable() throws Exception {
+    utils.createHCatTable(CreateMode.CREATE, 10, getTableName().toUpperCase());
+    externalTableCreationCoreTest(false,
+            CREATE_HCATALOG_TABLE,
+            HCATALOG_EXTERNAL_TABLE,
+            HCATALOG_STORAGE_STANZA,
+            TABLEPROPERTIES_ORC_NONTRANSACTIONAL);
+  }
+
+  @Test(expected = Exception.class)
   public void testExternalTableCreationFailsIfNoCreateOrDropTablePresent() throws Exception {
+    externalTableCreationCoreTest(true,
+            HCATALOG_EXTERNAL_TABLE,
+            HCATALOG_STORAGE_STANZA,
+            TABLEPROPERTIES_ORC_NONTRANSACTIONAL);
+  }
+
+  private void externalTableCreationCoreTest(boolean dropHCatTableIfExists, String... lArgs) throws Exception {
     final int TOTAL_RECORDS = 1 * 10;
     String table = getTableName().toUpperCase();
     ColumnGenerator[] cols = new ColumnGenerator[] {
@@ -829,20 +824,13 @@ public class HCatalogImportTest extends ImportJobTestCase {
                     "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
                     new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
     };
-    List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--hcatalog-external-table");
-    addlArgsArray.add("--hcatalog-storage-stanza");
-    addlArgsArray.add("\"stored as orc tblproperties (\"transactional\"=\"false\")\"");
+    List<String> addlArgsArray = new ArrayList(Arrays.asList(lArgs));
     setExtraArgs(addlArgsArray);
-    utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
-    try {
-      runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
-              null, true, false);
-      Assert.fail("--hcatalog-external-table cannot be used without signing creation of hcatalog table.");
-    } catch (Exception e) {
-      LOG.debug("Caught expected exception while running "
-              + " hcatalog-external-table without signing create or drop-and-create test", e);
+    if (dropHCatTableIfExists) {
+      utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     }
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+            null, true, false);
   }
 
   @Test
@@ -862,7 +850,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
     addlArgsArray.add("col1");
     addlArgsArray.add("--hive-partition-value");
     addlArgsArray.add("2");
-    addlArgsArray.add("--create-hcatalog-table");
+    addlArgsArray.add(CREATE_HCATALOG_TABLE);
     setExtraArgs(addlArgsArray);
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true, false);
@@ -885,7 +873,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
     addlArgsArray.add("col0,col1");
     addlArgsArray.add("--hcatalog-partition-values");
     addlArgsArray.add("1,2");
-    addlArgsArray.add("--create-hcatalog-table");
+    addlArgsArray.add(CREATE_HCATALOG_TABLE);
     setExtraArgs(addlArgsArray);
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true, false);
@@ -908,8 +896,8 @@ public class HCatalogImportTest extends ImportJobTestCase {
     addlArgsArray.add("col1");
     addlArgsArray.add("--hive-partition-value");
     addlArgsArray.add("2");
-    addlArgsArray.add("--create-hcatalog-table");
-    addlArgsArray.add("--hcatalog-storage-stanza");
+    addlArgsArray.add(CREATE_HCATALOG_TABLE);
+    addlArgsArray.add(HCATALOG_STORAGE_STANZA);
     addlArgsArray.add(HCatalogTestUtils.STORED_AS_TEXT);
     setExtraArgs(addlArgsArray);
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
@@ -999,7 +987,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
         "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.VARCHAR, 20, 0,
         new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY), };
     List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--create-hcatalog-table");
+    addlArgsArray.add(CREATE_HCATALOG_TABLE);
     setExtraArgs(addlArgsArray);
     try {
       // Precreate table
@@ -1026,7 +1014,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
         "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
         new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY), };
     List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--drop-and-create-hcatalog-table");
+    addlArgsArray.add(DROP_AND_CREATE_HCATALOG_TABLE);
     setExtraArgs(addlArgsArray);
     // Precreate table
     utils.createHCatTable(CreateMode.CREATE, TOTAL_RECORDS, table, cols);
@@ -1047,7 +1035,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
         new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
     };
     List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--drop-and-create-hcatalog-table");
+    addlArgsArray.add(DROP_AND_CREATE_HCATALOG_TABLE);
     setExtraArgs(addlArgsArray);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
       null, true, false);
@@ -1077,7 +1065,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
         10, KeyType.NOT_A_KEY),
     };
     List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--create-hcatalog-table");
+    addlArgsArray.add(CREATE_HCATALOG_TABLE);
     setExtraArgs(addlArgsArray);
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
@@ -1123,7 +1111,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
     cfgParams.add(ConfigurationConstants.DATA_PUBLISH_CLASS + "=" + DummyDataPublisher.class.getName());
     setConfigParams(cfgParams);
     List<String> addlArgsArray = new ArrayList<String>();
-    addlArgsArray.add("--create-hcatalog-table");
+    addlArgsArray.add(CREATE_HCATALOG_TABLE);
     setExtraArgs(addlArgsArray);
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols, null, true, false);
