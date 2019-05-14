@@ -752,6 +752,25 @@ public final class HCatalogTestUtils {
     return hCatFullSchema;
   }
 
+  HCatSchema createHCatExternalTable(String table, ColumnGenerator... extraCols)
+          throws Exception {
+    HCatSchema hCatTblSchema = generateHCatTableSchema(extraCols);
+    HCatSchema hCatPartSchema = generateHCatPartitionSchema(extraCols);
+    HCatSchema hCatFullSchema = new HCatSchema(hCatTblSchema.getFields());
+    for (HCatFieldSchema hfs : hCatPartSchema.getFields()) {
+      hCatFullSchema.append(hfs);
+    }
+    String databaseName = SqoopHCatUtilities.DEFHCATDB;
+    String createCmd = getHCatCreateTableCmd(databaseName, table,
+            hCatTblSchema.getFields(), hCatPartSchema.getFields())
+            .replaceFirst(
+                    "create table",
+                    "create external table");
+    utils.launchHCatCli(createCmd);
+    LOG.info("Created HCatalog table " + databaseName + "." + table);
+    return hCatFullSchema;
+  }
+
   private void loadHCatTable(HCatSchema hCatSchema, String table,
     int count, ColumnGenerator... extraCols)
     throws Exception {
