@@ -23,9 +23,10 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLClassLoader;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -184,22 +185,25 @@ public abstract class AccumuloTestCase extends ImportJobTestCase {
 
     StringBuilder classpathBuilder = new StringBuilder(64);
     classpathBuilder.append(confDir.getAbsolutePath());
+    for (URL u : getUrlsFromClassPath()) {
+      append(classpathBuilder, u);
+    }
+    return classpathBuilder.toString();
+  }
 
-    // assume 0 is the system classloader and skip it
-    for (int i = 1; i < classloaders.size(); i++) {
-      ClassLoader classLoader = classloaders.get(i);
-
-      if (classLoader instanceof URLClassLoader) {
-
-        for (URL u : ((URLClassLoader) classLoader).getURLs()) {
-          append(classpathBuilder, u);
-        }
-      } else {
-        throw new IllegalArgumentException("Unknown classloader type : " + classLoader.getClass().getName());
+  public static URL[] getUrlsFromClassPath() {
+    String classpath = System.getProperty("java.class.path");
+    String[] entries = classpath.split(File.pathSeparator);
+    URL[] result = new URL[entries.length];
+    for(int i = 0; i < entries.length; i++) {
+      try {
+        result[i] = Paths.get(entries[i]).toAbsolutePath().toUri().toURL();
+      }
+      catch (MalformedURLException ex) {
+        throw new RuntimeException(ex);
       }
     }
-
-    return classpathBuilder.toString();
+    return result;
   }
 
   private static void append(StringBuilder classpathBuilder, URL url) throws URISyntaxException {
