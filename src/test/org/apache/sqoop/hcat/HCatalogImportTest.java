@@ -62,6 +62,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static org.apache.sqoop.tool.BaseSqoopTool.CREATE_HCATALOG_TABLE_ARG;
+import static org.apache.sqoop.tool.BaseSqoopTool.DROP_AND_CREATE_HCATALOG_TABLE;
+import static org.apache.sqoop.tool.BaseSqoopTool.HCATALOG_EXTERNAL_TABLE_ARG;
+import static org.apache.sqoop.tool.BaseSqoopTool.HCATALOG_STORAGE_STANZA_ARG;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -72,6 +76,8 @@ import static org.junit.Assert.fail;
 public class HCatalogImportTest extends ImportJobTestCase {
   private static final Log LOG =
     LogFactory.getLog(HCatalogImportTest.class);
+  public static final String TABLEPROPERTIES_ORC_NONTRANSACTIONAL =
+          "\"stored as orc tblproperties (\"transactional\"=\"false\")\"";
   private final HCatalogTestUtils utils = HCatalogTestUtils.instance();
   private List<String> extraTestArgs = null;
   private List<String> configParams = null;
@@ -768,6 +774,63 @@ public class HCatalogImportTest extends ImportJobTestCase {
     utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
     runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
       null, true, false);
+  }
+
+  @Test
+  public void testExternalTableCreation() throws Exception {
+    externalTableCreationCoreTest(true,
+            "--" + CREATE_HCATALOG_TABLE_ARG,
+            "--" + HCATALOG_EXTERNAL_TABLE_ARG,
+            "--" + HCATALOG_STORAGE_STANZA_ARG,
+            TABLEPROPERTIES_ORC_NONTRANSACTIONAL);
+  }
+
+  @Test
+  public void testExternalTableDropAndCreationWithExistingTargetTable() throws Exception {
+    utils.createHCatExternalTable(getTableName().toUpperCase());
+    externalTableCreationCoreTest(false,
+            "--" + DROP_AND_CREATE_HCATALOG_TABLE,
+            "--" + HCATALOG_EXTERNAL_TABLE_ARG,
+            "--" + HCATALOG_STORAGE_STANZA_ARG,
+            TABLEPROPERTIES_ORC_NONTRANSACTIONAL);
+  }
+
+  @Test (expected = IOException.class)
+  public void testExternalTableCreationFailsDueToExistingTable() throws Exception {
+    utils.createHCatExternalTable(getTableName().toUpperCase());
+    externalTableCreationCoreTest(false,
+            "--" + CREATE_HCATALOG_TABLE_ARG,
+            "--" + HCATALOG_EXTERNAL_TABLE_ARG,
+            "--" + HCATALOG_STORAGE_STANZA_ARG,
+            TABLEPROPERTIES_ORC_NONTRANSACTIONAL);
+  }
+
+  @Test(expected = IOException.class)
+  public void testExternalTableCreationFailsIfNoCreateOrDropTablePresent() throws Exception {
+    externalTableCreationCoreTest(true,
+            "--" + HCATALOG_EXTERNAL_TABLE_ARG,
+            "--" + HCATALOG_STORAGE_STANZA_ARG,
+            TABLEPROPERTIES_ORC_NONTRANSACTIONAL);
+  }
+
+  private void externalTableCreationCoreTest(boolean dropHCatTableIfExists, String... lArgs) throws Exception {
+    final int TOTAL_RECORDS = 1 * 10;
+    String table = getTableName().toUpperCase();
+    ColumnGenerator[] cols = new ColumnGenerator[] {
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(0),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    new HiveVarchar("1", 20), "1", KeyType.STATIC_KEY),
+            HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(1),
+                    "varchar(20)", Types.VARCHAR, HCatFieldSchema.Type.STRING, 0, 0,
+                    new HiveVarchar("2", 20), "2", KeyType.DYNAMIC_KEY),
+    };
+    List<String> addlArgsArray = new ArrayList(Arrays.asList(lArgs));
+    setExtraArgs(addlArgsArray);
+    if (dropHCatTableIfExists) {
+      utils.dropHCatTableIfExists(table, SqoopHCatUtilities.DEFHCATDB);
+    }
+    runHCatImport(addlArgsArray, TOTAL_RECORDS, table, cols,
+            null, true, false);
   }
 
   @Test
