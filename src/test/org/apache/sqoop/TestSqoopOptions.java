@@ -26,10 +26,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.sqoop.manager.oracle.OracleUtils;
@@ -918,7 +920,7 @@ public class TestSqoopOptions {
   }
 
   private <T> T createAndFill(Class<T> clazz) throws Exception {
-    T instance = clazz.newInstance();
+    T instance = clazz.getConstructor().newInstance();
     for(Field field: clazz.getDeclaredFields()) {
       if (field.getType().equals(clazz)
               || field.getType().equals(ClassLoader.class)
@@ -976,6 +978,9 @@ public class TestSqoopOptions {
     else if (type.isArray()) {
       int length = random.nextInt(9) + 1;
       return Array.newInstance(type.getComponentType(), length);
+    }
+    else if (type.equals(ConcurrentHashMap.class)) {
+      return type.getConstructor().newInstance();
     }
     else if (Number.class.isAssignableFrom(type)) {
       return random.nextInt(Byte.MAX_VALUE) + 1;

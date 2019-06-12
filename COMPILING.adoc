@@ -27,7 +27,7 @@ under the License.
 
 Compiling Sqoop requires the following tools:
 
-* Apache ant (1.9.7) or Gradle (4.9)
+* Apache ant (1.9.7) or Gradle (5.4.1)
 * Java JDK 1.8
 
 Additionally, building the documentation requires these tools:
