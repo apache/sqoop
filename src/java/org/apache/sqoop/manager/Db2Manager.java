@@ -53,7 +53,8 @@ public class Db2Manager
   public static final Log LOG = LogFactory.getLog(
       Db2Manager.class.getName());
 
-  private static final String XML_TO_JAVA_DATA_TYPE = "String";
+  private static final int XML_TO_JAVA_DATA_TYPE = 2009;
+  private static final int DECFLOAT_TO_JAVA_DATA_TYPE = 1111;
 
   private Map<String, String> columnTypeNames;
 
@@ -266,40 +267,17 @@ public class Db2Manager
    */
   @Override
   public String toHiveType(String tableName, String columnName, int sqlType) {
-    String hiveType = super.toHiveType(tableName, columnName, sqlType);
-    if (hiveType == null) {
-      hiveType = toDbSpecificHiveType(tableName, columnName);
+    String hiveType;
+    if (sqlType == XML_TO_JAVA_DATA_TYPE) {
+      hiveType = "String";
+    }
+    else if (sqlType == DECFLOAT_TO_JAVA_DATA_TYPE) {
+      hiveType = "String";
+    }
+    else {
+      hiveType = super.toHiveType(tableName, columnName, sqlType);
     }
     return hiveType;
-  }
-
-  /**
-   * Resolve a database-specific type to the Hive type that should contain it.
-   *
-   * @param tableName
-   *            table name
-   * @param colName
-   *            column name
-   * @return the name of a Hive type to hold the sql datatype, or null if
-   *         none.
-   */
-  private String toDbSpecificHiveType(String tableName, String colName) {
-    if (columnTypeNames == null) {
-      columnTypeNames = getColumnTypeNames(tableName, options.getCall(),
-                        options.getSqlQuery());
-    }
-    LOG.debug("database-specific Column Types and names returned = ("
-              + StringUtils.join(columnTypeNames.keySet(), ",") + ")=>("
-              + StringUtils.join(columnTypeNames.values(), ",") + ")");
-
-    String colTypeName = columnTypeNames.get(colName);
-
-    if (colTypeName != null) {
-      if (colTypeName.toUpperCase().startsWith("XML")) {
-        return XML_TO_JAVA_DATA_TYPE;
-      }
-    }
-    return null;
   }
 
   /**
@@ -315,35 +293,17 @@ public class Db2Manager
    */
   @Override
   public String toJavaType(String tableName, String columnName, int sqlType) {
-    String javaType = super.toJavaType(tableName, columnName, sqlType);
-    if (javaType == null) {
-      javaType = toDbSpecificJavaType(tableName, columnName);
+    String javaType;
+    if (sqlType == XML_TO_JAVA_DATA_TYPE) {
+      javaType = "String";
+    }
+    else if (sqlType == DECFLOAT_TO_JAVA_DATA_TYPE) {
+      javaType = "String";
+    }
+    else {
+      javaType = super.toJavaType(tableName, columnName, sqlType);
     }
     return javaType;
-  }
-
-  /**
-   * Resolve a database-specific type to the Java type that should contain it.
-   *
-   * @param tableName
-   *            table name
-   * @param colName
-   *            column name
-   * @return the name of a Java type to hold the sql datatype, or null if
-   *         none.
-   */
-  private String toDbSpecificJavaType(String tableName, String colName) {
-    if (columnTypeNames == null) {
-      columnTypeNames = getColumnTypeNames(tableName, options.getCall(),
-			 options.getSqlQuery());
-    }
-    String colTypeName = columnTypeNames.get(colName);
-    if (colTypeName != null) {
-      if (colTypeName.equalsIgnoreCase("XML")) {
-	return XML_TO_JAVA_DATA_TYPE;
-      }
-    }
-    return null;
   }
 
  /**
