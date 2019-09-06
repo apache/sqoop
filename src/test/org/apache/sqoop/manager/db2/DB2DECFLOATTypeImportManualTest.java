@@ -92,7 +92,7 @@ public class DB2DECFLOATTypeImportManualTest extends ImportJobTestCase {
             + "/" + DATABASE_NAME;
     static final String HIVE_TABLE_NAME = "DECFLOATTESTHIVE";
     static String ExpectedResults =
-            "10.123";
+            "1,10.123";
 
 
     static {
