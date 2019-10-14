@@ -70,9 +70,7 @@ public abstract class JobToolTestBase extends BaseSqoopTestCase {
 
         SqoopOptions options = getSqoopOptions();
 
-        Connection conn = getConnection(options);
-
-        try {
+        try(Connection conn = getConnection(options)) {
             Statement statement = conn.createStatement();
             statement.execute("DROP TABLE " + cm.escapeTableName("SQOOP_ROOT"));
             statement.execute("DROP TABLE " + cm.escapeTableName("SQOOP_SESSIONS"));

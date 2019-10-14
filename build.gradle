@@ -179,9 +179,8 @@ dependencies {
     testCompile group: 'mysql', name: 'mysql-connector-java', version: mySqlConnectorVersion
     testCompile group: 'cubrid', name: 'cubrid-jdbc', version: cubridJdbcDriverVersion
     testCompile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: msSqlJdbcDriverVersion
-    testCompile group: 'com.ibm.db2.jcc', name: 'db2jcc4', version: db2JdbcDriverVersion
+    testCompile group: 'com.ibm.db2', name: 'jcc', version: db2JdbcDriverVersion
     testCompile group: 'oracle', name: 'ojdbc6', version: oracleJdbcDriverVersion
-
 }
 
 task unitTest (type: Test) {
