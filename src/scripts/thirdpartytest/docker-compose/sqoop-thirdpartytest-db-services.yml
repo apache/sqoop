@@ -110,18 +110,16 @@ services:
         timeout: 5s
         retries: 50
   db2:
-    image: ibmcom/db2express-c:10.5.0.5-3.10.0
+    image: ibmcom/db2:11.5.0.0a
     container_name: sqoop_db2_container
+    privileged: true
     environment:
       COMPOSE_HTTP_TIMEOUT: 200
       DB2INST1_PASSWORD: Sqoop12345
+      DBNAME: SQOOP
       LICENSE: accept
     ports:
       - 50000:50000
-    volumes:
-      - ./db2scripts:/home/db2inst1/db2scripts
-    entrypoint:
-        /home/db2inst1/db2scripts/db2entrypoint.sh
     healthcheck:
       test: ["CMD", "/home/db2inst1/sqllib/bin/db2", "CONNECT", "TO", "SQOOP"]
       interval: 30s
