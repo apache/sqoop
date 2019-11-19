@@ -208,6 +208,23 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
     toolOptions.addUniqueOptions(codeGenOpts);
     toolOptions.addUniqueOptions(getHCatalogOptions());
+
+    toolOptions.addUniqueOptions(getFileencodingOptions());
+  }
+
+  /**
+   * 文件编码
+   *
+   * @return
+   */
+  protected RelatedOptions getFileencodingOptions() {
+    RelatedOptions fileencodingOptions = new RelatedOptions("fileencoding arguments");
+    fileencodingOptions.addOption(OptionBuilder
+            .hasArg()
+            .withDescription("fileencoding")
+            .withLongOpt("fileencoding")
+            .create());
+    return fileencodingOptions;
   }
 
   @Override
@@ -277,6 +294,11 @@ public class ExportTool extends com.cloudera.sqoop.tool.BaseSqoopTool {
 
       if (in.hasOption(CALL_ARG)) {
           out.setCall(in.getOptionValue(CALL_ARG));
+      }
+
+      //设置文件编码
+      if (in.hasOption(FILE_ENCODING)) {
+          out.getConf().set(ENCODE, in.getOptionValue(FILE_ENCODING));
       }
 
       applyValidationOptions(in, out);

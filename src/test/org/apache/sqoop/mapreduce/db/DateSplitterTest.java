@@ -24,13 +24,13 @@ public class DateSplitterTest {
         long maxVal;
 
         int sqlDataType = Types.TIMESTAMP;
-        minVal = df.parse("2019-04-22 11:28:30").getTime();
-        maxVal = df.parse("2019-04-22 16:28:30").getTime();
+        minVal = df.parse("2019-04-22 00:00:00").getTime();
+        maxVal = df.parse("2019-04-22 23:59:59").getTime();
 
         String lowClausePrefix = colName + " >= ";
         String highClausePrefix = colName + " < ";
 
-        int numSplits = 2;
+        int numSplits = 1440;
         if (numSplits < 1) {
             numSplits = 1;
         }
@@ -45,7 +45,7 @@ public class DateSplitterTest {
         }
 
         // For split size we are using seconds. So we need to convert to milliseconds.
-        long splitLimit = 3600 * MS_IN_SEC;
+        long splitLimit = -1 * MS_IN_SEC;
 
         // Gather the split point integers
         List<Long> splitPoints = dateSplitter.split(numSplits, splitLimit, minVal, maxVal);
