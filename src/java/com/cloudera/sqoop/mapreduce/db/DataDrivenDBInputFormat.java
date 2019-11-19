@@ -46,7 +46,7 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
    *
    * @deprecated use org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.
    *   DataDrivenDBInputSplit instead.
-   * @see org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.
+   * @see org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat
    *      DataDrivenDBInputSplit
    */
   public static class DataDrivenDBInputSplit extends

@@ -31,6 +31,8 @@ import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import static org.apache.sqoop.tool.BaseSqoopTool.ENCODE;
+
 /**
  * Converts an input record from a string representation to a parsed Sqoop
  * record and emits that DBWritable to the OutputFormat for writeback to the
@@ -44,6 +46,7 @@ public class TextExportMapper
   public static final Log LOG =
     LogFactory.getLog(TextExportMapper.class.getName());
 
+  private String encoding;
   private SqoopRecord recordImpl;
 
   boolean enableDataDumpOnError;
@@ -80,13 +83,21 @@ public class TextExportMapper
     }
 
     enableDataDumpOnError = conf.getBoolean(DUMP_DATA_ON_ERROR_KEY, false);
+
+    encoding = conf.get(ENCODE);
   }
 
 
   public void map(LongWritable key, Text val, Context context)
       throws IOException, InterruptedException {
     try {
-      recordImpl.parse(val);
+      // 据说转码比较消耗性能
+      if (encoding != null) {
+        String newValue = new String(val.getBytes(), 0, val.getLength(), encoding);
+        recordImpl.parse(newValue);
+      } else {
+        recordImpl.parse(val);
+      }
       context.write(recordImpl, NullWritable.get());
     } catch (Exception e) {
       // Something bad has happened

@@ -174,6 +174,8 @@ public abstract class BaseSqoopTool extends com.cloudera.sqoop.tool.SqoopTool {
   public static final String THROW_ON_ERROR_ARG = "throw-on-error";
   public static final String ORACLE_ESCAPING_DISABLED = "oracle-escaping-disabled";
   public static final String ESCAPE_MAPPING_COLUMN_NAMES_ENABLED = "escape-mapping-column-names";
+  public static final String FILE_ENCODING = "fileencoding";//文件编码
+  public static final String ENCODE = "sqoop.mapreduce.export.encode";
 
   // Arguments for validation.
   public static final String VALIDATE_ARG = "validate";
