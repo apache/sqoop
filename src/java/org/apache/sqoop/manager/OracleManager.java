@@ -456,7 +456,7 @@ public class OracleManager
   }
 
   @Override
-  public void importQuery(com.cloudera.sqoop.manager.ImportJobContext context)
+  public void importQuery(org.apache.sqoop.manager.ImportJobContext context)
       throws IOException, ImportException {
     context.setConnManager(this);
     // Specify the Oracle-specific DBInputFormat for import.
