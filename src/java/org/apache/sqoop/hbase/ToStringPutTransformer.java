@@ -201,7 +201,6 @@ public class ToStringPutTransformer extends PutTransformer {
 	          put.addColumn(colFamilyBytes, getFieldNameBytes(colName),
 	              Bytes.toBytes(toHBaseString(val)));
           }
-          mutationList.add(put);
         } else {
           switch (nullMode) {
           case Delete:
