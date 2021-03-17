@@ -235,7 +235,7 @@ public class TestHiveServer2ParquetImport {
           .build();
 
       expectedException.expect(IllegalArgumentException.class);
-      expectedException.expectMessage("No column by the name C2#INTEGERfound while importing data");
+      expectedException.expectMessage("No user mappings found for columns [C2#INTEGER] while importing data");
 
       runImportThrowingException(args);
     }
