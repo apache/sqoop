@@ -352,12 +352,26 @@ public class PostgresqlExportTest extends ExportJobTestCase {
       "3,Fred,2009-01-23,15,marketing",
     });
 
+    String[] extra = new String[] {"--direct","--batch"};
+
+    runExport(getArgv(true, extra));
+
+    assertRowCount(2, quoteTableOrSchemaName(TABLE_NAME), connection);
+  }
+ @Test
+  public void testExportDirectBatch() throws IOException, SQLException {
+    createTestFile("inputFile", new String[] {
+      "2,Bob,2009-04-20,400,sales",
+      "3,Fred,2009-01-23,15,marketing",
+    });
+
     String[] extra = new String[] {"--direct"};
 
     runExport(getArgv(true, extra));
 
     assertRowCount(2, quoteTableOrSchemaName(TABLE_NAME), connection);
   }
+
 
   @Test
   public void testExportCustomSchema() throws IOException, SQLException {

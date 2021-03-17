@@ -79,16 +79,46 @@ public class PostgreSQLCopyExportJob extends JdbcExportJob {
     job.setMapOutputKeyClass(NullWritable.class);
     job.setMapOutputValueClass(NullWritable.class);
   }
+/* list of chars that cannot be passed via jobconf */
+  final static String badXmlString = "\u0000\u0001\u0002\u0003\u0004\u0005" +
+    "\u0006\u0007\u0008\u000B\u000C\u000E\u000F\u0010\u0011\u0012" +
+    "\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001A\u001B\u001C" +
+    "\u001D\u001E\u001F\uFFFE\uFFFF";
+
+/* true if the char is ok to pass via Configuration */
+  public static boolean validXml(char s){
+    return (badXmlString.indexOf(s)<0);
+  }
+
 
   protected void propagateOptionsToJob(Job job) {
     super.propagateOptionsToJob(job);
     SqoopOptions opts = context.getOptions();
     Configuration conf = job.getConfiguration();
-    if (opts.getNullStringValue() != null) {
-      conf.set("postgresql.null.string", opts.getNullStringValue());
+
+    /* empty string needs to be passed as a flag */
+    if ("".equals(opts.getNullStringValue())) {
+       conf.set("postgresql.null.emptystring","true");
     }
-    setDelimiter("postgresql.input.field.delim",
-                 opts.getInputFieldDelim(), conf);
+
+    /* valid delimiters may not be valid xml chars, so the hadoop conf will fail.
+     * but we still want to support them so we base64 encode it in that case
+     * */
+    char  delim= opts.getInputFieldDelim();
+    String delimString=Character.toString(delim);
+    if(validXml(delim)){ 
+      setDelimiter("postgresql.input.field.delim",delim,conf);
+    }else{
+      conf.set("postgresql.input.field.delim.base64",
+          java.util.Base64.getEncoder().encodeToString(delimString.getBytes()));
+    }
+
+   /* use the --batch switch to enable line buffering */
+   if (opts.isBatchMode()){
+       conf.set("postgresql.export.batchmode","true");
+   }
+
+/* todo: there may still be some case where user wants an invalid xml char for record delim */
     setDelimiter("postgresql.input.record.delim",
                  opts.getInputRecordDelim(), conf);
     setDelimiter("postgresql.input.enclosedby",
