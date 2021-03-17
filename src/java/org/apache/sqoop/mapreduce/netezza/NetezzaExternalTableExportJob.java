@@ -125,7 +125,7 @@ public class NetezzaExternalTableExportJob extends ExportJobBase {
 
       String [] colNames = options.getColumns();
       if (null == colNames) {
-        colNames = mgr.getColumnNames(tableName);
+        colNames = mgr.getColumnNames(tableName.substring(tableName.lastIndexOf('.')+1));
       }
 
       if (mgr.escapeTableNameOnExport()) {
