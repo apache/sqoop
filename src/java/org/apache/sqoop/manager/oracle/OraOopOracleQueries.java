@@ -302,6 +302,7 @@ public final class OraOopOracleQueries {
         + "         AND s.owner=t.owner "
         + "         AND s.segment_name=t.table_name) "
         + "    ) "
+        + "AND s.segment_type!='INDEX PARTITION'"
         + "AND s.partition_name=pl.partition_name";
 
     PreparedStatement statement = connection.prepareStatement(sql);
