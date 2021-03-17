@@ -455,6 +455,15 @@ public class OracleManager
     super.importTable(context);
   }
 
+  @Override
+  public void importQuery(org.apache.sqoop.manager.ImportJobContext context)
+      throws IOException, ImportException {
+    context.setConnManager(this);
+    // Specify the Oracle-specific DBInputFormat for import.
+    context.setInputFormat(OracleDataDrivenDBInputFormat.class);
+    super.importQuery(context);
+  }
+
   /**
    * Export data stored in HDFS into a table in a database.
    */
