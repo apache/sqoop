@@ -28,6 +28,7 @@ import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.SqlTypeMap;
 
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.SqoopOptions.FileLayout;
 import org.apache.sqoop.testutil.HsqldbTestServer;
 
 import org.junit.Before;
@@ -266,11 +267,29 @@ public class TestTableDefWriter {
   }
 
   @Test
-  public void testGetCreateTableStmtWithAvroSchema() throws Exception {
+  public void testGetCreateParquetTableStmtWithAvroSchema() throws Exception {
     options.setFileLayout(ParquetFile);
     options.getConf().set(SQOOP_PARQUET_AVRO_SCHEMA_KEY, TEST_AVRO_SCHEMA);
 
     assertEquals(EXPECTED_CREATE_PARQUET_TABLE_STMNT, writer.getCreateTableStmt());
+  }
+
+  @Test
+  public void testGetCreateAvroTableStmtWithAvroSchema() throws Exception {
+    final String EXPECTED_CREATE_AVRO_TABLE_STMNT =
+        "CREATE TABLE IF NOT EXISTS `outputTable` "
+            + "( `id` INT, `value` STRING) STORED AS AVRO";
+
+    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+    colTypes.put("id", Types.INTEGER);
+    colTypes.put("value", Types.VARCHAR);
+
+    setUpMockConnManager(this.inputTable, colTypes);
+
+    options.setMapColumnHive("id=INT,value=STRING");
+    options.setFileLayout(FileLayout.AvroDataFile);
+
+    assertEquals(EXPECTED_CREATE_AVRO_TABLE_STMNT, writer.getCreateTableStmt());
   }
 
   private void setUpMockConnManager(String tableName, Map<String, Integer> typeMap) {
