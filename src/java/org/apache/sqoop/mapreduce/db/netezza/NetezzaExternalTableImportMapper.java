@@ -76,8 +76,15 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
     char ec = (char) conf.getInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, 0);
 
     String nullValue = conf.get(DirectNetezzaManager.NETEZZA_NULL_VALUE);
+    String schema = conf.get(DirectNetezzaManager.NETEZZA_SCHEMA_OPT);
 
-
+    String tableName = dbc.getInputTableName();
+    if (schema!=null)
+    {
+    	tableName = schema +"."+tableName;
+    }
+    
+    
     int errorThreshold = conf.getInt(
       DirectNetezzaManager.NETEZZA_ERROR_THRESHOLD_OPT, 1);
     String logDir = conf.get(DirectNetezzaManager.NETEZZA_LOG_DIR_OPT);
@@ -130,7 +137,7 @@ public abstract class NetezzaExternalTableImportMapper<K, V> extends
         sqlStmt.append(',').append(cols[i]);
       }
     }
-    sqlStmt.append(" FROM ").append(dbc.getInputTableName()).append(' ');
+    sqlStmt.append(" FROM ").append(tableName).append(' ');
     sqlStmt.append("WHERE (DATASLICEID % ");
     sqlStmt.append(numMappers).append(") = ").append(myId);
     if (inputConds != null && inputConds.length() > 0) {
