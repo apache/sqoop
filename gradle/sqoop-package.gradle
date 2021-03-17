@@ -29,7 +29,7 @@ dependencies {
         exclude module: 'netty'
         exclude group: 'org.apache.velocity', module: 'velocity'
     }
-    redist(group: 'org.apache.avro', name: 'avro-mapred', version: avroVersion, classifier: 'hadoop2') {
+    redist(group: 'org.apache.avro', name: 'avro-mapred', version: avroVersion) {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.mortbay.jetty', module: 'jetty'
         exclude group: 'org.mortbay.jetty', module: 'jetty-util'
