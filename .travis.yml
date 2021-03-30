@@ -23,9 +23,9 @@ jdk:
 
 jobs:
   include:
-    - name: "Build and test on ARM64 CPU architecture"
+    - name: "Linux ARM64"
       arch: arm64
-      env: TEST_TASK=test
+      env: TEST_TASK=unitTest
 
         
     
