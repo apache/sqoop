@@ -20,6 +20,15 @@ sudo: true
 language: java
 jdk:
 - oraclejdk8
+
+jobs:
+  include:
+    - name: "Linux ARM64"
+      arch: arm64
+      env: TEST_TASK=unitTest
+
+        
+    
 services:
 - docker
 env:
@@ -61,6 +70,14 @@ before_install:
     ./src/scripts/thirdpartytest/start-thirdpartytest-db-containers.sh oracle;
     sleep 90;
   fi
+
+install:
+  - if [ "${TRAVIS_CPU_ARCH}" == "arm64" ]; then 
+      sudo apt-get -m install openjdk-8-jdk;
+      export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64;
+      export PATH=$JAVA_HOME/bin:$PATH; 
+    fi
+    
 script:
 - ./gradlew $TEST_TASK;
 before_cache:
