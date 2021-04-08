@@ -21,7 +21,7 @@ Developing Sqoop Plugins
 ------------------------
 Sqoop allows users to develop their own plugins. Users can develop their
 plugins as separate jars, deploy them in $SQOOP_LIB and register with
-sqoop. Infact, Sqoop architecture is a plugin based architecture and all
+sqoop. In fact, Sqoop architecture is a plugin based architecture and all
 the internal tools like import, export, merge etc are also supported as
 tool plugins. Users can also develop their own custom tool plugins. Once
 deployed and registered with sqoop, these plugins will work like any
@@ -31,7 +31,7 @@ other internal tool. They will also get listed in the tools when you run
 BaseSqoopTool - Base class for User defined Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 BaseSqoopTool is the base class for all Sqoop Tools. If you want to develop
-a cusom tool, you need to inherit your tool from BaseSqoopTool and override
+a custom tool, you need to inherit your tool from BaseSqoopTool and override
 the following methods:
 
 - +public int run(SqoopOptions options)+ : This is the main method for the
