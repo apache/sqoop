@@ -18,7 +18,7 @@
 This is the index of all accepted SIPs:
 
 * SIP-1 – Providing multiple entry-points into Sqoop
-* SIP-2 – Sqoop 1.0 release criteria and maintenence policy
+* SIP-2 – Sqoop 1.0 release criteria and maintenance policy
 * SIP-3 – File format for large object (LOB) storage
 * SIP-4 – Public API for Sqoop v1.0.0
 * SIP-6 – Reusable Jobs for Sqoop Operations
